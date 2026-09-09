@@ -43,6 +43,7 @@ showStatus('Loading website…');
       import('@/styles/desktop-polish-v2.css'),
       import('@/styles/navigation-structure-v2.css'),
       import('@/styles/navigation-cleanup.css'),
+      import('@/styles/compact-desktop-fixes.css'),
     ]);
 
     const React = ReactModule.default;
