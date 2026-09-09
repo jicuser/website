@@ -2,7 +2,7 @@
    IMPORTANT: intentionally excludes phone widths (<=640px) so the approved mobile layout stays unchanged. */
 @media (min-width:641px) and (max-width:1024px){
   /* Keep the PC/tablet header compact instead of stacking three oversized rows. */
-  .jic-header .max-w-[1500px]{padding-left:10px!important;padding-right:10px!important;}
+  .jic-header .max-w-\[1500px\]{padding-left:10px!important;padding-right:10px!important;}
   .jic-info-shell{
     display:grid!important;
     grid-template-columns:minmax(0,1fr) minmax(260px,.72fr)!important;
