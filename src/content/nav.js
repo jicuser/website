@@ -1,6 +1,7 @@
 /**
- * Primary navigation and section tabs.
- * Keep operational services separate from building/development projects.
+ * Primary navigation and section tabs grouped by visitor intent.
+ * Worship information lives under Prayer Times, operational services under Services,
+ * and building/fundraising work under Projects.
  */
 
 export const NAV_GROUPS = [
@@ -15,37 +16,6 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    name: 'Services', path: '/services', children: [
-      { name: 'Services Overview', path: '/services' },
-      { name: 'Daily Prayers', path: '/services/daily-prayers' },
-      { name: 'Jummah', path: '/services/jummah' },
-      { name: 'Quran Classes', path: '/services/quran-classes' },
-      { name: 'Community Services', path: '/services/community-services' },
-      { name: 'Nikah', path: '/services/nikah' },
-      { name: 'Hall Booking', path: '/services/hall-booking' },
-    ],
-  },
-  {
-    name: 'Funerals', path: '/funerals', children: [
-      { name: 'Funeral Services', path: '/funerals' },
-      { name: 'What to Do', path: '/funerals/what-to-do' },
-      { name: 'Contact & Support', path: '/funerals/contact-support' },
-    ],
-  },
-  {
-    name: 'Projects', path: '/projects', children: [
-      { name: 'Overview', path: '/projects' },
-      { name: 'Timeline', path: '/projects/timeline' },
-      { name: 'Masjid Extension', path: '/projects/masjid-extension' },
-      { name: 'Main Prayer Hall', path: '/projects/main-prayer-hall' },
-      { name: 'Community Hall', path: '/projects/community-hall' },
-      { name: 'Madrassah Building', path: '/projects/madrassah-building' },
-      { name: 'Current Appeals', path: '/projects/current-appeals' },
-      { name: 'Gallery', path: '/projects/gallery' },
-      { name: 'Support Projects', path: '/projects/how-to-support' },
-    ],
-  },
-  {
     name: 'Prayer Times', path: '/prayer-times', children: [
       { name: 'Today', path: '/prayer-times' },
       { name: 'Monthly Timetable', path: '/prayer-times/monthly' },
@@ -53,11 +23,33 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    name: 'Services', path: '/services', children: [
+      { name: 'Services Overview', path: '/services' },
+      { name: 'Funeral Services', path: '/funerals' },
+      { name: 'Nikah', path: '/services/nikah' },
+      { name: 'Hall Booking', path: '/services/hall-booking' },
+      { name: 'Community Support', path: '/services/community-services' },
+    ],
+  },
+  {
+    name: 'Projects', path: '/projects', children: [
+      { name: 'All Projects', path: '/projects' },
+      { name: 'Timeline', path: '/projects/timeline' },
+      { name: 'Masjid Extension', path: '/projects/masjid-extension' },
+      { name: 'Main Prayer Hall', path: '/projects/main-prayer-hall' },
+      { name: 'Wudu & Facilities', path: '/projects/wudu-area' },
+      { name: 'Community Hall', path: '/projects/community-hall' },
+      { name: 'Madrassah Building', path: '/projects/madrassah-building' },
+      { name: 'Current Appeals', path: '/projects/current-appeals' },
+      { name: 'Updates & Gallery', path: '/projects/gallery' },
+      { name: 'Support Projects', path: '/projects/how-to-support' },
+    ],
+  },
+  {
     name: 'Madrassah', path: '/madrassah', children: [
       { name: 'About Madrassah', path: '/madrassah' },
-      { name: 'Our Programs', path: '/madrassah/programs' },
+      { name: 'Programmes', path: '/madrassah/programs' },
       { name: 'Classes & Courses', path: '/madrassah/classes-courses' },
-      { name: 'Special Courses', path: '/madrassah/special-courses' },
       { name: 'Enrolment', path: '/madrassah/enrolment' },
       { name: 'Policies', path: '/madrassah/policies' },
       { name: 'Student Portal', path: '/madrassah/student-portal' },
@@ -66,7 +58,6 @@ export const NAV_GROUPS = [
   {
     name: 'Youth', path: '/youth', children: [
       { name: 'Youth Overview', path: '/youth' },
-      { name: 'Youth Projects', path: '/youth/projects' },
       { name: 'Activities', path: '/youth/activities' },
       { name: "I'tikaf Program", path: '/youth/itikaf' },
       { name: 'Trips & Events', path: '/youth/trips-events' },
