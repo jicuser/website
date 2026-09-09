@@ -1,7 +1,8 @@
 /** Primary navigation grouped by visitor intent. */
 
 export const MASJID_EXTENSION_TABS = [
-  { name: 'Overview', path: '/projects/masjid-extension' },
+  { name: 'Projects', path: '/projects' },
+  { name: 'Masjid Extension', path: '/projects/masjid-extension' },
   { name: 'Timeline', path: '/projects/masjid-extension/timeline' },
   { name: 'Main Prayer Hall', path: '/projects/main-prayer-hall' },
   { name: 'Wudu & Facilities', path: '/projects/wudu-area' },
