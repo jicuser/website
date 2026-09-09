@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import HeroSection from '@/components/sections/madrassah/HeroSection';
 import AboutSection from '@/components/sections/madrassah/AboutSection';
 import ProgramsSection from '@/components/sections/madrassah/ProgramsSection';
@@ -7,9 +8,27 @@ import TestimonialsSection from '@/components/sections/madrassah/TestimonialsSec
 import CallToActionSection from '@/components/sections/madrassah/CallToActionSection';
 import EnrollmentForm from '@/components/sections/madrassah/EnrollmentForm';
 
+const MADRASSAH_LINKS = [
+  { name: 'About Madrassah', to: '/madrassah' },
+  { name: 'Programmes', to: '/madrassah/programs' },
+  { name: 'Enrolment', to: '/madrassah/enrolment' },
+  { name: 'Policies', to: '/madrassah/policies' },
+];
+
 const MadrassahPage = () => {
   return (
     <div className="page-transition pt-24">
+      <nav className="mx-auto mb-4 flex max-w-5xl gap-2 overflow-x-auto px-4 pb-1" aria-label="Madrassah sections">
+        {MADRASSAH_LINKS.map(item => (
+          <Link
+            key={item.to}
+            to={item.to}
+            className="shrink-0 rounded-full border border-border bg-card/80 px-4 py-2 text-sm font-semibold text-card-foreground backdrop-blur-md transition hover:border-primary/40 hover:text-primary"
+          >
+            {item.name}
+          </Link>
+        ))}
+      </nav>
       <HeroSection />
       <AboutSection />
       <div id="classes" className="jic-anchor-target"><ProgramsSection /></div>
