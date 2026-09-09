@@ -57,9 +57,8 @@ export const NAV_GROUPS = [
   },
   {
     name: 'Youth', path: '/youth', children: [
-      { name: 'Youth Overview', path: '/youth' },
       { name: 'Activities', path: '/youth/activities' },
-      { name: "I'tikaf Program", path: '/youth/itikaf' },
+      { name: "I'tikaf Form", path: '/youth/itikaf' },
       { name: 'Trips & Events', path: '/youth/trips-events' },
       { name: 'Volunteering', path: '/youth/volunteering' },
       { name: 'Classes & Skills', path: '/youth/classes-skills' },
