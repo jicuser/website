@@ -1,0 +1,67 @@
+/* Navigation structure v2: compact contextual mega menu + visible desktop admin entry. */
+.jic-admin-entry{display:none!important;}
+
+@media (min-width:1025px){
+  .jic-mainnav{grid-template-columns:150px minmax(0,1fr) 136px!important;}
+  .jic-nav-actions{width:136px!important;gap:4px!important;}
+  .jic-admin-entry{display:grid!important;}
+
+  [data-surface="glass"] .jic-mega-menu.jic-mega-single,
+  .jic-mega-menu.jic-mega-single{
+    position:absolute!important;
+    top:calc(100% + 10px)!important;
+    left:50%!important;
+    right:auto!important;
+    width:min(620px,calc(100vw - 80px))!important;
+    max-width:620px!important;
+    max-height:none!important;
+    transform:translateX(-50%)!important;
+    display:grid!important;
+    grid-template-columns:180px minmax(0,1fr)!important;
+    gap:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    border-radius:20px!important;
+    z-index:140!important;
+  }
+  .jic-mega-single-head{
+    padding:20px!important;
+    border-right:1px solid rgba(255,255,255,.08)!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    min-height:150px!important;
+  }
+  .jic-mega-single-head .jic-mega-heading{margin:0 0 7px!important;font-size:17px!important;}
+  .jic-mega-single-head span{font-size:11px!important;color:rgba(235,240,247,.5)!important;}
+  .jic-mega-single-links{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    align-content:start!important;
+    gap:4px!important;
+    padding:16px!important;
+  }
+  .jic-mega-single-links a{
+    min-height:40px!important;
+    display:flex!important;
+    align-items:center!important;
+    padding:8px 10px!important;
+    border-radius:10px!important;
+    color:rgba(236,241,247,.76)!important;
+    font-size:12.5px!important;
+    line-height:1.25!important;
+  }
+  .jic-mega-single-links a:hover{background:rgba(255,255,255,.055)!important;color:#efc258!important;}
+  html:not(.dark) .jic-mega-single-head{border-right-color:rgba(20,35,50,.08)!important;}
+  html:not(.dark) .jic-mega-single-head span{color:#738095!important;}
+  html:not(.dark) .jic-mega-single-links a{color:#526174!important;}
+  html:not(.dark) .jic-mega-single-links a:hover{background:rgba(20,35,50,.05)!important;color:#8d6215!important;}
+}
+
+@media (min-width:1025px) and (max-width:1260px){
+  .jic-mainnav{grid-template-columns:126px minmax(0,1fr) 130px!important;}
+  .jic-nav-actions{width:130px!important;}
+  .nav-pill{padding-left:7px!important;padding-right:7px!important;font-size:11px!important;}
+  .jic-brand,.jic-brand .brand-lockup{width:124px!important;min-width:124px!important;}
+  .jic-brand .brand-lockup img{width:122px!important;max-width:122px!important;}
+}
