@@ -1,16 +1,17 @@
 /* JIC v6 — desktop information bar + reminder hierarchy + admin mobile */
 
 @media (min-width:1025px){
-  /* Keep the desktop header compact: Jummah reads as information, Radio stays the only pill. */
-  .jic-info-shell{grid-template-columns:minmax(260px,.95fr) minmax(560px,2.25fr) minmax(310px,.9fr)!important;}
+  /* Desktop header: reserve enough room for Jummah and Radio so they can never overlap. */
+  .jic-info-shell{grid-template-columns:minmax(250px,.85fr) minmax(500px,2fr) minmax(430px,1.25fr)!important;}
   .jic-address{padding:0 16px!important;gap:9px!important;}
   .jic-address .jic-top-phone{margin-left:auto!important;display:inline-flex!important;align-items:center!important;gap:6px!important;font-weight:700!important;white-space:nowrap!important;}
-  .jic-utility-row{display:grid!important;grid-template-columns:minmax(118px,.72fr) minmax(170px,1.28fr)!important;align-items:stretch!important;gap:0!important;padding:0!important;}
-  .jic-jummah-mini{height:auto!important;min-height:58px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0 14px!important;display:grid!important;grid-template-columns:auto 1fr!important;column-gap:9px!important;align-content:center!important;justify-content:start!important;text-align:left!important;}
-  .jic-jummah-mini>span{font-size:9px!important;letter-spacing:.16em!important;color:#d7a83f!important;}
-  .jic-jummah-mini strong{font-size:14px!important;line-height:1.1!important;}
-  .jic-jummah-mini strong::after{content:'1st Jamaat   ·   2nd Jamaat'!important;display:block!important;font-size:7px!important;margin-top:4px!important;opacity:.56!important;letter-spacing:.02em!important;}
-  .jic-radio{margin:6px 8px 6px 0!important;height:46px!important;min-height:46px!important;border-radius:999px!important;justify-content:center!important;align-self:center!important;border:1px solid rgba(255,255,255,.13)!important;}
+  .jic-utility-row{display:grid!important;grid-template-columns:minmax(210px,1fr) minmax(210px,1fr)!important;align-items:center!important;gap:10px!important;padding:0 10px!important;min-width:0!important;overflow:hidden!important;}
+  .jic-jummah-mini{width:100%!important;min-width:0!important;height:auto!important;min-height:58px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0 8px!important;display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;column-gap:10px!important;align-content:center!important;justify-content:start!important;text-align:left!important;overflow:hidden!important;}
+  .jic-jummah-mini>span{font-size:9px!important;letter-spacing:.13em!important;color:#d7a83f!important;white-space:nowrap!important;}
+  .jic-jummah-mini strong{font-size:14px!important;line-height:1.1!important;white-space:nowrap!important;min-width:0!important;}
+  .jic-jummah-mini strong::after{content:'1st Jamaat   ·   2nd Jamaat'!important;display:block!important;font-size:7px!important;margin-top:4px!important;opacity:.56!important;letter-spacing:.02em!important;white-space:nowrap!important;}
+  .jic-radio{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:240px!important;margin:0!important;height:46px!important;min-height:46px!important;border-radius:999px!important;justify-content:center!important;justify-self:end!important;align-self:center!important;border:1px solid rgba(255,255,255,.13)!important;overflow:hidden!important;white-space:nowrap!important;}
+  .jic-radio>*{min-width:0!important;}
 
   /* Scrolled reminder: date/type on top, quote underneath, wider and calmer. */
   .jic-header.is-scrolled .jic-scroll-reminder{max-width:720px!important;min-width:460px!important;min-height:48px!important;padding:7px 14px!important;grid-template-columns:1fr!important;grid-template-rows:auto auto!important;gap:4px!important;border-radius:18px!important;position:relative!important;}
