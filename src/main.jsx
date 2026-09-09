@@ -59,6 +59,7 @@ showStatus('Loading website…');
       import('@/styles/final-audit-v15.css'),
       import('@/styles/admin-sections-v16.css'),
       import('@/styles/mobile-shell-v17.css'),
+      import('@/styles/mobile-header-card-v18.css'),
     ]);
 
     const React = ReactModule.default;
