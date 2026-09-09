@@ -1,0 +1,96 @@
+/* JIC header final v8 — readability, prayer start/jamaat, reminder sizing, mobile admin access */
+
+:root{--jic-glass-alpha:.72;}
+
+/* Glass surfaces keep readable contrast at every transparency setting. */
+html[data-surface='glass'] .jic-glass,
+html[data-surface='glass'] .jic-info-shell,
+html[data-surface='glass'] .jic-mainnav,
+html[data-surface='glass'] .jic-subnav,
+html[data-surface='glass'] .jic-mobile-menu,
+html[data-surface='glass'] .jic-settings-panel,
+html[data-surface='glass'] .jic-reminder-detail{
+  background:rgb(10 18 28 / var(--jic-glass-alpha))!important;
+  border-color:rgba(255,255,255,.14)!important;
+  color:#f7f8fb!important;
+}
+html:not(.dark)[data-surface='glass'] .jic-glass,
+html:not(.dark)[data-surface='glass'] .jic-info-shell,
+html:not(.dark)[data-surface='glass'] .jic-mainnav,
+html:not(.dark)[data-surface='glass'] .jic-subnav,
+html:not(.dark)[data-surface='glass'] .jic-mobile-menu,
+html:not(.dark)[data-surface='glass'] .jic-settings-panel,
+html:not(.dark)[data-surface='glass'] .jic-reminder-detail{
+  background:rgb(249 246 236 / var(--jic-glass-alpha))!important;
+  border-color:rgba(20,35,50,.14)!important;
+  color:#111c29!important;
+}
+html:not(.dark)[data-surface='glass'] .jic-glass :is(span,small,p,a,button,strong,b,label){text-shadow:none;}
+
+.jic-top-email{display:none;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;opacity:.88;font-size:11px;}
+.jic-prayer-times{display:flex;align-items:baseline;justify-content:center;gap:5px;min-width:0;}
+.jic-prayer-times>strong{font-size:14px;line-height:1;white-space:nowrap;}
+.jic-prayer-times>small{display:inline-flex;align-items:center;gap:2px;font-size:9px;line-height:1;opacity:.7;white-space:nowrap;}
+.jic-prayer-times>small b{font-size:7px;letter-spacing:.06em;color:#d7a83f;}
+
+.jic-setting-slider{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:14px 16px;border-top:1px solid rgba(255,255,255,.09);}
+html:not(.dark) .jic-setting-slider{border-top-color:rgba(20,35,50,.1);}
+.jic-setting-slider>span{display:grid;gap:2px;}
+.jic-setting-slider strong{font-size:13px;}
+.jic-setting-slider small{font-size:10px;opacity:.62;}
+.jic-setting-slider>b{font-size:12px;color:#d7a83f;align-self:center;}
+.jic-setting-slider input{grid-column:1/-1;width:100%;accent-color:#d7a83f;}
+.jic-setting-slider.is-disabled{opacity:.45;}
+
+.jic-scroll-reminder{cursor:default!important;}
+.jic-scroll-reminder.is-expandable{cursor:pointer!important;}
+.jic-reminder-line em{font-style:normal;font-size:8px;opacity:.48;margin-left:auto;white-space:nowrap;}
+.jic-reminder-detail{max-width:min(520px,calc(100vw - 28px))!important;max-height:min(250px,42vh)!important;padding:16px 18px!important;overflow:auto!important;}
+.jic-reminder-detail p{font-size:18px!important;line-height:1.35!important;margin:8px 26px 8px 0!important;}
+.jic-reminder-detail small{font-size:10px!important;opacity:.62!important;}
+.jic-reminder-detail-meta{font-size:9px!important;opacity:.66!important;}
+
+.jic-menu-opacity{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);font-size:12px;}
+.jic-menu-opacity input{width:100%;accent-color:#d7a83f;}
+.jic-menu-opacity b{font-size:10px;color:#d7a83f;}
+
+@media (min-width:1025px){
+  .jic-info-shell{grid-template-columns:minmax(300px,1.15fr) minmax(610px,2.4fr) minmax(390px,1.2fr)!important;}
+  .jic-address{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:1fr 1fr;align-items:center!important;column-gap:8px!important;padding:5px 14px!important;}
+  .jic-address>svg{grid-row:1/3!important;align-self:center!important;}
+  .jic-address>span{grid-column:2!important;grid-row:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  .jic-top-phone{grid-column:2!important;grid-row:2!important;margin-left:0!important;justify-self:start!important;}
+  .jic-top-email{display:inline-flex!important;grid-column:3!important;grid-row:1/3!important;justify-self:end!important;}
+
+  .jic-prayer{padding:8px 7px!important;min-width:0!important;}
+  .jic-prayer>span{font-size:10px!important;margin-bottom:5px!important;}
+  .jic-prayer-times>strong{font-size:14px!important;}
+  .jic-prayer-times>small{font-size:8px!important;}
+
+  .jic-utility-row{align-items:center!important;padding-top:4px!important;padding-bottom:2px!important;}
+  .jic-jummah-mini{transform:translateY(3px)!important;align-self:center!important;}
+  .jic-radio{transform:translateY(1px)!important;}
+
+  .jic-header.is-scrolled .jic-scroll-reminder:not(.is-expandable)::after{content:''!important;display:none!important;}
+  .jic-header.is-scrolled .jic-scroll-reminder.is-expandable::after{content:'Read more'!important;}
+  .jic-header.is-scrolled .jic-scroll-reminder{padding-bottom:8px!important;}
+  .jic-header.is-scrolled .jic-scroll-reminder.is-expandable{padding-bottom:12px!important;}
+}
+
+@media (max-width:1024px){
+  .jic-top-email{display:none!important;}
+  .jic-prayer-times{flex-direction:column;gap:2px;align-items:center;}
+  .jic-prayer-times>small{font-size:7px;}
+}
+
+@media (max-width:640px){
+  .jic-prayer-times>strong{font-size:12px;}
+  .jic-prayer-times>small{font-size:7px;}
+  .jic-mobile-menu{display:flex!important;flex-direction:column!important;max-height:calc(100dvh - 118px)!important;overflow:hidden!important;}
+  .jic-menu-scroll{overflow-y:auto!important;overscroll-behavior:contain!important;padding-bottom:18px!important;}
+  .jic-menu-admin,.jic-menu-donate{display:flex!important;min-height:48px!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;position:relative!important;z-index:3!important;}
+  .jic-menu-admin{margin-top:12px!important;border:1px solid rgba(215,168,63,.4)!important;background:rgba(215,168,63,.1)!important;color:inherit!important;border-radius:14px!important;font-weight:700!important;}
+  .jic-reminder-detail{top:auto!important;left:14px!important;right:14px!important;bottom:18px!important;width:auto!important;max-height:220px!important;}
+  .jic-reminder-detail p{font-size:16px!important;}
+  .jic-setting-slider{padding:12px 14px;}
+}
