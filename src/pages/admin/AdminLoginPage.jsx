@@ -1,21 +1,43 @@
 import React, { useState } from 'react';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, LockKeyhole, LogIn, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, LockKeyhole, LogIn, ShieldCheck, UserRound } from 'lucide-react';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLoginPage(){
-  const{signIn,isAdmin,loading}=useAuth();const navigate=useNavigate();const[email,setEmail]=useState('');const[password,setPassword]=useState('');const[busy,setBusy]=useState(false);const[error,setError]=useState('');
+  const{signIn,isAdmin,loading}=useAuth();
+  const navigate=useNavigate();
+  const[name,setName]=useState('');
+  const[email,setEmail]=useState('');
+  const[password,setPassword]=useState('');
+  const[busy,setBusy]=useState(false);
+  const[error,setError]=useState('');
+
   if(!loading&&isAdmin)return <Navigate to="/admin" replace/>;
-  const submit=async(e)=>{e.preventDefault();setBusy(true);setError('');try{await signIn(email.trim(),password);navigate('/admin',{replace:true});}catch(err){setError(err?.message||'Unable to sign in.');}finally{setBusy(false);}};
+
+  const submit=async(e)=>{
+    e.preventDefault();
+    setBusy(true);
+    setError('');
+    try{
+      await signIn(email.trim(),password,name.trim());
+      navigate('/admin',{replace:true});
+    }catch(err){
+      setError(err?.message||'Unable to sign in.');
+    }finally{
+      setBusy(false);
+    }
+  };
 
   return <main className="admin-login-page">
     <div className="admin-login-orb admin-login-orb-one"/><div className="admin-login-orb admin-login-orb-two"/>
     <section className="admin-login-card jic-popup-surface" aria-labelledby="admin-login-title">
       <div className="admin-login-topline"><Link to="/" className="admin-login-back"><ArrowLeft size={16}/> Website</Link><span className="admin-login-secure"><ShieldCheck size={15}/> JIC staff</span></div>
       <div className="admin-login-brand"><Link to="/" className="admin-login-logo" aria-label="Return to Jamatia Islamic Centre website"><JamatiaLogo/></Link><div><p>JAMATIA ISLAMIC CENTRE</p><h1 id="admin-login-title">Administration</h1></div></div>
+      <p className="admin-login-note">Enter your name so changes can be shown clearly in the audit log.</p>
       {error&&<div className="admin-login-error">{error}</div>}
       <form onSubmit={submit} className="admin-login-form">
+        <label><span>Your name</span><div className="admin-login-password"><UserRound size={17}/><input type="text" required autoComplete="name" value={name} onChange={e=>setName(e.target.value)} placeholder="Your name"/></div></label>
         <label><span>Email address</span><input type="email" required inputMode="email" autoCapitalize="none" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address"/></label>
         <label><span>Password</span><div className="admin-login-password"><LockKeyhole size={17}/><input type="password" required autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password"/></div></label>
         <button disabled={busy||loading}><LogIn size={18}/>{busy?'Signing in…':'Sign in'}</button>
