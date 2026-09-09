@@ -5,6 +5,7 @@ import{supabase}from'@/lib/supabaseClient';
 import{useContent}from'@/context/ContentContext';
 import{EDITABLE_PAGES,pageDefaults,pageKey,overviewPaths}from'@/content/editablePages';
 import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
+import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 
 export default function PageEditor(){
  const[selected,setSelected]=useState('/'),[query,setQuery]=useState(''),[draft,setDraft]=useState({}),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState(''),[message,setMessage]=useState(''),[dirty,setDirty]=useState(false),[mobile,setMobile]=useState(true),[revision,setRevision]=useState(0);
@@ -18,6 +19,7 @@ export default function PageEditor(){
  const save=async()=>{setBusy(true);setError('');setMessage('');try{if(draft.image&&!/^https:\/\//i.test(draft.image))throw new Error('Use an HTTPS image URL or upload a picture.');await persist(draft);setMessage('Published. Your website now shows these changes.');}catch(e){setError(e.message)}finally{setBusy(false)}};
  const visible=EDITABLE_PAGES.filter(p=>`${p.name} ${p.group}`.toLowerCase().includes(query.toLowerCase()));
  return <div className="admin-workspace"><div className="admin-heading"><div><span className="admin-eyebrow">YOUR WEBSITE</span><h2>Pages & pictures</h2><p>Choose a page. Edit text, pictures, backgrounds and sections. Changes are saved in Supabase.</p></div><Link className="admin-button" to="/admin/home-tiles">Edit home tiles <ArrowUpRight size={16}/></Link></div>
+ <CommunityLinksEditor/>
  <div className="admin-page-layout"><aside className="admin-panel admin-page-picker"><label className="admin-search"><Search size={16}/><input aria-label="Find a page" placeholder="Find a page…" value={query} onChange={e=>setQuery(e.target.value)}/></label><nav>{[...new Set(visible.map(p=>p.group))].map(group=><div key={group}><h4>{group}</h4>{visible.filter(p=>p.group===group).map(p=><button disabled={busy} key={p.path} onClick={()=>choose(p.path)} className={selected===p.path?'selected':''}>{p.name}<span>›</span></button>)}</div>)}</nav><small><Lock size={12}/> Pages and menu links are fixed.</small></aside>
  <div className="admin-page-main"><section className="admin-panel"><div className="admin-heading"><div><h3>{page.name}</h3><p>{selected}</p></div><a href={selected} target="_blank" rel="noreferrer" className="admin-button">Open page <ExternalLink size={15}/></a></div>
  {overviewPaths.has(selected)&&<p className="admin-hint">Edit the main information panel here, then use Page sections & backgrounds below for extra blocks and images.</p>}
