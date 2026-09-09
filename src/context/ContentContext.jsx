@@ -6,6 +6,7 @@
  */
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { validateImage } from '@/lib/images';
 import { useAuth } from '@/context/AuthContext';
 
 const ContentContext = createContext(null);
@@ -38,29 +39,32 @@ export function ContentProvider({ children }) {
   }
 
   const saveContent = useCallback(async (key, value, type = 'text') => {
-    if (!can('content')) { setSaveMsg('Error saving'); return; }
+    if (!can('content')) throw new Error('You do not have permission to edit website content.');
     setSaving(true);
     setSaveMsg('');
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('page_content')
-        .upsert({ content_key: key, content_value: value, content_type: type }, { onConflict: 'content_key' });
+        .upsert({ content_key: key, content_value: value, content_type: type }, { onConflict: 'content_key' }).select('content_key');
       if (error) throw error;
+      if (data?.length !== 1) throw new Error('The change was not saved. Please try again.');
       setCache(prev => ({ ...prev, [key]: value }));
       setSaveMsg('Saved');
       setTimeout(() => setSaveMsg(''), 2000);
     } catch (err) {
       console.error('saveContent error:', err);
       setSaveMsg('Error saving');
+      throw err;
     } finally {
       setSaving(false);
     }
   }, [can]);
 
   async function uploadImage(key, file) {
-    const ext  = file.name.split('.').pop();
+    if (!can('content')) throw new Error('You do not have permission to replace pictures.');
+    const ext = validateImage(file);
     const path = `${key.replace(/\./g, '/')}-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from('site-images').upload(path, file, { upsert: true });
+    const { error: upErr } = await supabase.storage.from('site-images').upload(path, file, { upsert: false });
     if (upErr) throw upErr;
     const { data } = supabase.storage.from('site-images').getPublicUrl(path);
     await saveContent(key, data.publicUrl, 'image');

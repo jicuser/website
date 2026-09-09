@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 const AuthContext = createContext(null);
@@ -9,8 +9,10 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const profileRequest = useRef(0);
 
   const loadProfile = useCallback(async (authUser) => {
+    const request = ++profileRequest.current;
     if (!authUser) {
       setProfile(null);
       return null;
@@ -20,6 +22,7 @@ export function AuthProvider({ children }) {
       .select('id, display_name, role, is_active')
       .eq('id', authUser.id)
       .maybeSingle();
+    if (request !== profileRequest.current) return error ? null : data ?? null;
     if (error) {
       console.error('Unable to load admin profile:', error);
       setProfile(null);
@@ -31,23 +34,35 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    let authEventSeen = false;
+    let timer;
+    const applySession = (session) => {
       if (!mounted) return;
       const authUser = session?.user ?? null;
+      ++profileRequest.current;
       setUser(authUser);
-      await loadProfile(authUser);
-      if (mounted) setLoading(false);
+      setProfile(null);
+      setLoading(Boolean(authUser));
+      window.clearTimeout(timer);
+      // Supabase calls must run outside onAuthStateChange's auth lock.
+      if (authUser) timer = window.setTimeout(() => {
+        if (!mounted) return;
+        loadProfile(authUser).catch(() => setProfile(null)).finally(() => {
+          if (mounted) setLoading(false);
+        });
+      }, 0);
+    };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      authEventSeen = true;
+      applySession(session);
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const authUser = session?.user ?? null;
-      setUser(authUser);
-      await loadProfile(authUser);
-      if (mounted) setLoading(false);
-    });
-
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!authEventSeen) applySession(error ? null : data?.session);
+    }).catch(() => { if (!authEventSeen) applySession(null); });
     return () => {
       mounted = false;
+      ++profileRequest.current;
+      window.clearTimeout(timer);
       subscription.unsubscribe();
     };
   }, [loadProfile]);
@@ -69,7 +84,10 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    ++profileRequest.current;
+    setUser(null);
     setProfile(null);
   }
 
