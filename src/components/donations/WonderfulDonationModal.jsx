@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ExternalLink, Heart, Landmark, ShieldCheck, X } from 'lucide-react';
-
-const wonderfulUrl = import.meta.env.VITE_WONDERFUL_DONATE_URL || '';
+import { Heart, Landmark, X } from 'lucide-react';
 
 export default function WonderfulDonationModal({ open, onClose }) {
   useEffect(() => {
@@ -18,11 +16,6 @@ export default function WonderfulDonationModal({ open, onClose }) {
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [open, onClose]);
-
-  const openWonderful = () => {
-    if (!wonderfulUrl) return;
-    window.open(wonderfulUrl, '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <AnimatePresence>
@@ -63,47 +56,36 @@ export default function WonderfulDonationModal({ open, onClose }) {
             </div>
 
             <div className="px-5 py-5 sm:px-7 sm:py-6">
-              <div className="mb-5 grid gap-3 sm:grid-cols-2">
-                <div className="jic-popup-surface flex gap-3 rounded-2xl p-4">
+              <div className="jic-popup-surface rounded-2xl p-5 sm:p-6">
+                <div className="mb-4 flex items-start gap-3">
                   <Landmark className="mt-0.5 h-5 w-5 shrink-0" />
                   <div>
-                    <strong className="jic-popup-title block text-sm">Pay directly from your bank</strong>
-                    <span className="jic-popup-muted mt-1 block text-xs leading-5">Approve securely inside your own banking app.</span>
+                    <strong className="jic-popup-title block text-base">Bank transfer</strong>
+                    <span className="jic-popup-muted mt-1 block text-sm leading-6">Online donation options are being worked on. For now, you can donate directly to the mosque account below.</span>
                   </div>
                 </div>
-                <div className="jic-popup-surface flex gap-3 rounded-2xl p-4">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
-                  <div>
-                    <strong className="jic-popup-title block text-sm">Powered by Wonderful</strong>
-                    <span className="jic-popup-muted mt-1 block text-xs leading-5">JIC never sees or stores your online banking login details.</span>
-                  </div>
-                </div>
-              </div>
 
-              {wonderfulUrl ? (
-                <>
-                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/95">
-                    <iframe
-                      title="Donate to Jamatia Islamic Centre with Wonderful"
-                      src={wonderfulUrl}
-                      className="h-[58vh] min-h-[430px] w-full bg-white"
-                      loading="lazy"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                    />
+                <div className="grid gap-3 text-sm sm:grid-cols-2">
+                  <div className="rounded-xl border border-white/10 p-4">
+                    <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">Bank</span>
+                    <strong className="jic-popup-title mt-1 block text-base">Metro Bank</strong>
                   </div>
-                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="jic-popup-muted text-xs leading-5">If your bank blocks the embedded window, continue securely on Wonderful.</p>
-                    <button type="button" onClick={openWonderful} className="jic-popup-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition">
-                      Open secure donation <ExternalLink size={16} />
-                    </button>
+                  <div className="rounded-xl border border-white/10 p-4">
+                    <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">Account name</span>
+                    <strong className="jic-popup-title mt-1 block text-base">Jamatia Islamic Centre</strong>
                   </div>
-                </>
-              ) : (
-                <div className="jic-popup-surface rounded-2xl p-5 text-sm leading-6">
-                  <strong className="jic-popup-title block text-base">Wonderful is ready to connect.</strong>
-                  <span className="jic-popup-muted">Add JIC's Wonderful donation-page URL as <code>VITE_WONDERFUL_DONATE_URL</code> in the website environment settings.</span>
+                  <div className="rounded-xl border border-white/10 p-4">
+                    <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">Sort code</span>
+                    <strong className="jic-popup-title mt-1 block text-lg tracking-[0.08em]">23-05-80</strong>
+                  </div>
+                  <div className="rounded-xl border border-white/10 p-4">
+                    <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">Account number</span>
+                    <strong className="jic-popup-title mt-1 block text-lg tracking-[0.08em]">57434236</strong>
+                  </div>
                 </div>
-              )}
+
+                <p className="jic-popup-muted mt-4 text-xs leading-5">Please check the account name and details carefully in your banking app before confirming your transfer.</p>
+              </div>
             </div>
           </motion.section>
         </motion.div>
