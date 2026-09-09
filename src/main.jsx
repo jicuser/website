@@ -47,6 +47,7 @@ showStatus('Loading website…');
       import('@/styles/ux-refine-v4.css'),
       import('@/styles/stability-v5.css'),
       import('@/styles/desktop-admin-v6.css'),
+      import('@/styles/header-ux-v6.css'),
     ]);
 
     const React = ReactModule.default;
