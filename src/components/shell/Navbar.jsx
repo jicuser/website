@@ -120,7 +120,11 @@ export default function Navbar(){
               {megaGroups.map(group=><div className="jic-mega-column" key={group.name}><Link to={group.path} className="jic-mega-heading">{group.name}</Link>{group.children.filter(child=>child.path!==group.path).map(child=><Link key={`${group.name}-${child.name}`} to={child.path}>{child.name}</Link>)}</div>)}
             </motion.div>}</AnimatePresence>
           </div>
-          <div className="jic-nav-actions"><button type="button" onClick={openDonation} className="donate-button" aria-label="Donate to Jamatia Islamic Centre"><Heart size={18}/><span>Donate</span></button><button className="header-icon" onClick={()=>setMenuOpen(v=>!v)} aria-label="Menu">{menuOpen?<X size={23}/>:<Menu size={23}/>}</button></div>
+          <div className="jic-nav-actions">
+            <Link to="/admin/login" className="header-icon jic-admin-entry" aria-label="Admin login" title="Admin"><LogIn size={18}/></Link>
+            <button type="button" onClick={openDonation} className="donate-button" aria-label="Donate to Jamatia Islamic Centre"><Heart size={18}/><span>Donate</span></button>
+            <button className="header-icon" onClick={()=>setMenuOpen(v=>!v)} aria-label="Menu">{menuOpen?<X size={23}/>:<Menu size={23}/>}</button>
+          </div>
         </div>
 
         {activeGroup?.children?.length>0&&<nav className="jic-subnav" aria-label={`${activeGroup.name} sections`}>{activeGroup.children.map(item=>{const current=isCurrentSubtab(pathname,item.path);return <Link key={`${activeGroup.name}-${item.name}`} to={item.path} aria-current={current?'page':undefined} className={cn('jic-subnav-link',current&&'is-current')}>{item.name}</Link>;})}</nav>}
