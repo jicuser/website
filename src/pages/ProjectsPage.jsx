@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Building2, CalendarClock, CheckCircle2, CircleDot, Droplets, Hammer, Images, School, Users } from 'lucide-react';
+import { ArrowRight, Building2, CalendarClock, CheckCircle2, CircleDot, Droplets, Hammer, Image, School, Users } from 'lucide-react';
 
 const PROJECTS = [
   { title:'Masjid Extension', text:'The main expansion programme, including new capacity and supporting spaces.', to:'/projects/masjid-extension', icon:Hammer, status:'In progress' },
@@ -40,7 +40,7 @@ export default function ProjectsPage(){
 
     <section className="bg-background py-12 md:py-16"><div className="container mx-auto px-4"><div className="grid gap-4 md:grid-cols-3">
       <Link to="/projects/current-appeals" className="rounded-2xl border border-border bg-card p-6"><h3 className="font-bold text-card-foreground">Current appeals</h3><p className="mt-2 text-sm text-muted-foreground">Active fundraising and immediate project needs.</p></Link>
-      <Link to="/projects/gallery" className="rounded-2xl border border-border bg-card p-6"><Images className="mb-3 text-primary" size={22}/><h3 className="font-bold text-card-foreground">Updates & gallery</h3><p className="mt-2 text-sm text-muted-foreground">Photos, milestones and recent progress.</p></Link>
+      <Link to="/projects/gallery" className="rounded-2xl border border-border bg-card p-6"><Image className="mb-3 text-primary" size={22}/><h3 className="font-bold text-card-foreground">Updates & gallery</h3><p className="mt-2 text-sm text-muted-foreground">Photos, milestones and recent progress.</p></Link>
       <Link to="/projects/how-to-support" className="rounded-2xl border border-border bg-card p-6"><h3 className="font-bold text-card-foreground">Support the projects</h3><p className="mt-2 text-sm text-muted-foreground">Ways to contribute to JIC development.</p></Link>
     </div></div></section>
   </div>;
