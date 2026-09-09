@@ -46,6 +46,7 @@ showStatus('Loading website…');
       import('@/styles/compact-desktop-fixes.css'),
       import('@/styles/ux-refine-v4.css'),
       import('@/styles/stability-v5.css'),
+      import('@/styles/desktop-admin-v6.css'),
     ]);
 
     const React = ReactModule.default;
