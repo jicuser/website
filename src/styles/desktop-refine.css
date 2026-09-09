@@ -101,8 +101,6 @@
     white-space:nowrap!important;
   }
 
-  /* The old glass rule changed this menu to position:relative, which made it
-     expand inside the header and spill off the right side. Force a true popover. */
   [data-surface="glass"] .jic-mega-menu,
   .jic-mega-menu{
     position:absolute!important;
@@ -178,6 +176,61 @@
     font-size:clamp(58px,5vw,82px)!important;
     line-height:.98!important;
   }
+
+  /* Compact desktop footer: no stranded Contact link or giant empty gaps. */
+  .jic-site-footer-compact .container{
+    max-width:1440px!important;
+    padding-left:28px!important;
+    padding-right:28px!important;
+    padding-top:22px!important;
+    padding-bottom:18px!important;
+  }
+  .jic-footer-compact-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:22px!important;
+  }
+  .jic-footer-links-inline{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    align-items:center!important;
+    gap:10px 26px!important;
+    min-width:0!important;
+  }
+  .jic-footer-links-inline a{
+    font-size:14px!important;
+    line-height:1.2!important;
+    white-space:nowrap!important;
+  }
+  .jic-footer-actions-compact{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    flex-wrap:nowrap!important;
+    gap:18px!important;
+  }
+  .jic-footer-socials{
+    display:flex!important;
+    align-items:center!important;
+    gap:8px!important;
+  }
+  .jic-footer-socials a{
+    width:42px!important;
+    height:42px!important;
+    border-radius:14px!important;
+  }
+  .jic-footer-donate{
+    min-width:116px!important;
+    min-height:46px!important;
+    padding:0 22px!important;
+    border-radius:14px!important;
+  }
+  .jic-footer-bottom{
+    margin-top:18px!important;
+    padding-top:14px!important;
+    min-height:34px!important;
+  }
 }
 
 @media (min-width:1025px) and (max-width:1260px){
@@ -187,4 +240,6 @@
   .jic-brand .brand-lockup img{width:140px!important;max-width:140px!important;}
   .nav-pill{padding-inline:9px!important;font-size:12px!important;}
   .jic-mega-menu{width:calc(100vw - 48px)!important;}
+  .jic-footer-compact-grid{grid-template-columns:1fr!important;gap:16px!important;}
+  .jic-footer-actions-compact{justify-content:space-between!important;}
 }
