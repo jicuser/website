@@ -23,13 +23,12 @@ const formatMonthRecord = (pt) => {
   };
 };
 
-
 export const usePrayerTimes=()=>{
  const [currentDate,setCurrentDate]=useState(new Date()),[monthlyPrayerTimes,setMonth]=useState([]),[todaysTimes,setToday]=useState(null),[jummahTimes,setJummah]=useState([]),[isLoading,setLoading]=useState(true),[error,setError]=useState('');
  useEffect(()=>{
   let alive=true;
   const load=async()=>{
-   const today=londonDate(),[year,month,day]=today.split('-').map(Number);
+   const today=londonDate(),[year,month]=today.split('-').map(Number);
    const days=new Date(Date.UTC(year,month,0)).getUTCDate();
    const friday=new Date(today+'T12:00:00Z');friday.setUTCDate(friday.getUTCDate()+(5-friday.getUTCDay()+7)%7);
    try{
@@ -56,5 +55,5 @@ export const usePrayerTimes=()=>{
   return()=>{alive=false;clearInterval(timer);window.removeEventListener('focus',load);window.removeEventListener('jic-content-updated',load);};
  },[]);
  const options={timeZone:'Europe/London'};
- return {currentDate,formattedDate:currentDate.toLocaleDateString('en-GB',{...options,weekday:'long',year:'numeric',month:'long',day:'numeric'}),formattedTime:currentDate.toLocaleTimeString('en-GB',{...options,hour:'2-digit',minute:'2-digit'}),currentMonth:currentDate.toLocaleDateString('en-GB',{...options,month:'long'}),monthlyPrayerTimes,todaysTimes,jummahTimes,ramadanTimes:monthlyPrayerTimes.filter(d=>d.is_ramadan).map(d=>({day:d.day,date:d.d_date,suhoor:d.fajr_begins,iftar:d.maghrib_begins,taraweeh:null})),isLoadingPrayerTimes:isLoading,error};
+ return {currentDate,formattedDate:currentDate.toLocaleDateString('en-GB',{...options,weekday:'long',year:'numeric',month:'long',day:'numeric'}),formattedTime:currentDate.toLocaleTimeString('en-GB',{...options,hour:'numeric',minute:'2-digit',hour12:true}),currentMonth:currentDate.toLocaleDateString('en-GB',{...options,month:'long'}),monthlyPrayerTimes,todaysTimes,jummahTimes,ramadanTimes:monthlyPrayerTimes.filter(d=>d.is_ramadan).map(d=>({day:d.day,date:d.d_date,suhoor:d.fajr_begins,iftar:d.maghrib_begins,taraweeh:null})),isLoadingPrayerTimes:isLoading,error};
 };
