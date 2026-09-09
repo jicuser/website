@@ -1,0 +1,64 @@
+/* Mobile information hierarchy: compact top, actions at thumb reach */
+@media (max-width: 767px){
+  .jic-header>.mx-auto{padding-left:8px!important;padding-right:8px!important}
+  .jic-info-shell{border-radius:24px!important}
+  .jic-address{min-height:42px!important;padding:8px 12px!important;gap:8px!important;font-size:12px!important}
+  .jic-address>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .jic-top-email{display:none!important}
+  .jic-top-phone{margin-left:auto!important;font-size:12px!important;white-space:nowrap}
+  .jic-prayer-row{min-height:68px!important}
+  .jic-prayer{padding:7px 2px!important}
+  .jic-prayer>span{font-size:10px!important}
+  .jic-prayer-times strong{font-size:15px!important;line-height:1.05!important}
+  .jic-prayer-times small{font-size:8.5px!important;gap:2px!important}
+  .jic-utility-row{min-height:50px!important}
+  .jic-jummah-mini,.jic-radio{min-height:48px!important}
+  .jic-jummah-mini span{font-size:9px!important}
+  .jic-jummah-mini strong{font-size:14px!important}
+  .jic-radio span{font-size:13px!important}
+
+  /* Top navigation becomes logo/update only. Action icons live in bottom bar. */
+  .jic-mainnav{min-height:68px!important;padding:7px 9px!important;border-radius:22px!important}
+  .jic-brand{display:flex!important;max-width:118px!important}
+  .jic-brand .brand-lockup img{max-height:50px!important;max-width:112px!important}
+  .jic-nav-actions{
+    position:fixed!important;
+    left:12px!important;right:12px!important;
+    bottom:calc(10px + env(safe-area-inset-bottom))!important;
+    z-index:90!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,1fr)!important;
+    gap:7px!important;
+    padding:8px!important;
+    border:1px solid rgba(148,163,184,.26)!important;
+    border-radius:24px!important;
+    background:rgba(7,17,27,.90)!important;
+    -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+    backdrop-filter:blur(22px) saturate(145%)!important;
+    box-shadow:0 14px 40px rgba(0,0,0,.30)!important;
+  }
+  html:not(.dark) .jic-nav-actions{background:rgba(250,247,239,.94)!important;border-color:rgba(15,23,42,.12)!important}
+  .jic-nav-actions .header-icon,.jic-nav-actions .donate-button{width:100%!important;min-width:0!important;height:48px!important;min-height:48px!important;border-radius:16px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  .jic-nav-actions .donate-button span{display:none!important}
+  .jic-settings-wrap{display:contents!important}
+  .jic-settings-wrap>.header-icon{grid-column:auto!important}
+  .jic-settings-panel{position:fixed!important;left:12px!important;right:12px!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;top:auto!important;max-height:65vh!important;overflow:auto!important}
+
+  /* When scrolled, retain a small logo at the side and use a separate long update row. */
+  .jic-header.is-scrolled .jic-mainnav{display:block!important;position:relative!important;padding:8px 8px 8px 88px!important;min-height:68px!important}
+  .jic-header.is-scrolled .jic-mainnav::before{content:"";position:absolute;left:10px;top:10px;width:68px;height:48px;background:url('/brand-logo.svg') center/contain no-repeat;opacity:.96}
+  .jic-scroll-reminder{width:100%!important;min-width:0!important;max-width:none!important;height:52px!important;min-height:52px!important;border-radius:16px!important;padding:6px 10px!important;display:grid!important;grid-template-rows:auto 1fr!important;align-content:center!important;text-align:left!important;overflow:hidden!important}
+  .jic-reminder-meta{font-size:8.5px!important;line-height:1!important;gap:7px!important;white-space:nowrap!important;overflow:hidden!important}
+  .jic-reminder-line{min-width:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:4px 8px!important;align-items:end!important}
+  .jic-reminder-line strong{font-size:11.5px!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .jic-reminder-line small{font-size:8.5px!important;white-space:nowrap!important}
+  .jic-reminder-line em{font-size:8.5px!important;grid-column:2!important}
+  .jic-reminder-detail{left:10px!important;right:10px!important;width:auto!important;max-height:42vh!important;overflow:auto!important}
+
+  /* Page tabs stay below the global header and scroll horizontally. */
+  .jic-subnav{overflow-x:auto!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important}
+  .jic-subnav::-webkit-scrollbar{display:none!important}
+
+  /* Keep public content clear of the fixed action bar. */
+  body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+}
