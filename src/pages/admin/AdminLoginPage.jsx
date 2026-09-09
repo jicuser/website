@@ -13,7 +13,7 @@ export default function AdminLoginPage(){
     <div className="admin-login-orb admin-login-orb-one"/><div className="admin-login-orb admin-login-orb-two"/>
     <section className="admin-login-card jic-popup-surface" aria-labelledby="admin-login-title">
       <div className="admin-login-topline"><Link to="/" className="admin-login-back"><ArrowLeft size={16}/> Website</Link><span className="admin-login-secure"><ShieldCheck size={15}/> Secure admin</span></div>
-      <div className="admin-login-brand"><div className="admin-login-logo"><JamatiaLogo/></div><div><p>JAMATIA ISLAMIC CENTRE</p><h1 id="admin-login-title">Administration</h1></div></div>
+      <div className="admin-login-brand"><Link to="/" className="admin-login-logo" aria-label="Return to Jamatia Islamic Centre website"><JamatiaLogo/></Link><div><p>JAMATIA ISLAMIC CENTRE</p><h1 id="admin-login-title">Administration</h1></div></div>
       <p className="admin-login-intro">Sign in with the account authorised in JIC's Supabase admin system.</p>
       {error&&<div className="admin-login-error">{error}</div>}
       <form onSubmit={submit} className="admin-login-form">
