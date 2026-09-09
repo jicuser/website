@@ -1,0 +1,215 @@
+/* Mobile menu + theme control v13 */
+
+/* Dedicated theme toggle: obvious, one tap, independent of Settings. */
+.jic-theme-toggle {
+  position: relative;
+}
+.jic-theme-toggle svg {
+  transition: transform .2s ease, opacity .2s ease;
+}
+.jic-theme-toggle:active svg {
+  transform: scale(.88) rotate(8deg);
+}
+
+@media (max-width: 767px) {
+  /* Keep the header action row compact enough for iPhone widths. */
+  .jic-nav-actions {
+    gap: 7px !important;
+  }
+  .jic-nav-actions .header-icon,
+  .jic-nav-actions .donate-button {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .jic-nav-actions .donate-button span {
+    display: none !important;
+  }
+  .jic-theme-toggle {
+    display: inline-flex !important;
+  }
+
+  /* The full-screen burger menu must be a stable sheet, not a translucent page overlay. */
+  .jic-mobile-menu {
+    position: fixed !important;
+    top: max(10px, env(safe-area-inset-top)) !important;
+    right: 12px !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border-radius: 28px !important;
+    overflow: hidden !important;
+    z-index: 9999 !important;
+    box-shadow: 0 24px 70px rgba(0,0,0,.28) !important;
+    backdrop-filter: blur(30px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(135%) !important;
+  }
+  html:not(.dark) .jic-mobile-menu {
+    background: rgba(250,247,239,.97) !important;
+    border: 1px solid rgba(20,31,44,.12) !important;
+    color: #101820 !important;
+  }
+  html.dark .jic-mobile-menu {
+    background: rgba(8,17,27,.97) !important;
+    border: 1px solid rgba(255,255,255,.14) !important;
+    color: #f7f3e9 !important;
+  }
+
+  .jic-menu-head {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
+    min-height: 66px !important;
+    padding: 14px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-bottom: 1px solid currentColor !important;
+    border-bottom-color: rgba(127,127,127,.18) !important;
+  }
+  html:not(.dark) .jic-menu-head { background: rgba(250,247,239,.98) !important; }
+  html.dark .jic-menu-head { background: rgba(8,17,27,.98) !important; }
+
+  .jic-menu-title {
+    display: block !important;
+    font-size: 18px !important;
+    font-weight: 750 !important;
+    line-height: 1 !important;
+  }
+  .jic-menu-head button {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .jic-menu-scroll {
+    height: calc(100% - 66px) !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin !important;
+    padding: 10px 14px calc(24px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .jic-menu-group {
+    border-bottom: 1px solid rgba(127,127,127,.13) !important;
+  }
+  .jic-menu-row {
+    min-height: 58px !important;
+    padding: 2px 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) 46px !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .jic-menu-link {
+    min-width: 0 !important;
+    padding: 13px 10px !important;
+    border-radius: 14px !important;
+    font-size: 20px !important;
+    line-height: 1.15 !important;
+    font-weight: 650 !important;
+    white-space: nowrap !important;
+  }
+  .jic-menu-link.active {
+    color: #a97714 !important;
+    background: rgba(216,169,58,.11) !important;
+  }
+  .jic-menu-expand {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 1px solid rgba(127,127,127,.2) !important;
+  }
+  .jic-menu-children {
+    padding: 0 8px 10px 12px !important;
+  }
+  .jic-menu-children a {
+    display: block !important;
+    padding: 10px 12px !important;
+    font-size: 15px !important;
+    line-height: 1.25 !important;
+    border-radius: 11px !important;
+  }
+
+  .jic-menu-settings {
+    margin: 14px 0 10px !important;
+    padding: 15px !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(127,127,127,.16) !important;
+    background: rgba(127,127,127,.07) !important;
+  }
+  .jic-menu-settings > strong {
+    display: block !important;
+    margin: 0 0 7px !important;
+    font-size: 12px !important;
+    letter-spacing: .14em !important;
+    text-transform: uppercase !important;
+    opacity: .68 !important;
+  }
+  .jic-menu-settings button {
+    min-height: 50px !important;
+    font-size: 15px !important;
+  }
+  .jic-menu-opacity {
+    min-height: 48px !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(90px,1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 14px !important;
+  }
+  .jic-menu-opacity input { width: 100% !important; }
+
+  .jic-menu-admin,
+  .jic-menu-donate {
+    width: 100% !important;
+    min-height: 52px !important;
+    margin-top: 8px !important;
+    border-radius: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 9px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+  }
+  .jic-menu-admin {
+    border: 1px solid rgba(127,127,127,.22) !important;
+  }
+
+  /* Settings popover itself: stay completely inside the viewport. */
+  .jic-settings-panel {
+    position: fixed !important;
+    top: auto !important;
+    right: 12px !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(72dvh, 620px) !important;
+    overflow-y: auto !important;
+    border-radius: 26px !important;
+    z-index: 10000 !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .jic-theme-toggle {
+    display: inline-flex !important;
+  }
+}
