@@ -44,6 +44,7 @@ showStatus('Loading website…');
       import('@/styles/navigation-structure-v2.css'),
       import('@/styles/navigation-cleanup.css'),
       import('@/styles/compact-desktop-fixes.css'),
+      import('@/styles/ux-refine-v4.css'),
     ]);
 
     const React = ReactModule.default;
@@ -74,6 +75,15 @@ showStatus('Loading website…');
         )
       )
     );
+
+    // The compact Qur'an/Hadith reminder is intentionally preview-first.
+    // Clicking it toggles the complete text/source without changing the navbar component contract.
+    document.addEventListener('click', (event) => {
+      const reminder = event.target.closest?.('.jic-scroll-reminder');
+      if (!reminder) return;
+      reminder.classList.toggle('is-expanded');
+      reminder.setAttribute('aria-expanded', reminder.classList.contains('is-expanded') ? 'true' : 'false');
+    });
   } catch (error) {
     console.error('JIC startup error', error);
     showStatus('Website startup error', error?.message || String(error));
