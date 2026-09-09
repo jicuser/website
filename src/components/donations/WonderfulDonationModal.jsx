@@ -1,10 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Heart, Landmark, X } from 'lucide-react';
+import { Check, Copy, Heart, Landmark, X } from 'lucide-react';
+
+const BANK_DETAILS = {
+  bank: 'Metro Bank',
+  accountName: 'Jamatia Islamic Centre',
+  sortCode: '23-05-80',
+  accountNumber: '57434236',
+};
 
 export default function WonderfulDonationModal({ open, onClose }) {
+  const [copied, setCopied] = useState('');
+
   useEffect(() => {
     if (!open) return undefined;
+    setCopied('');
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const onKeyDown = (event) => {
@@ -16,6 +26,47 @@ export default function WonderfulDonationModal({ open, onClose }) {
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [open, onClose]);
+
+  const copyText = async (key, value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(key);
+      window.setTimeout(() => setCopied(current => current === key ? '' : current), 1800);
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = value;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand('copy');
+      document.body.removeChild(area);
+      setCopied(key);
+      window.setTimeout(() => setCopied(current => current === key ? '' : current), 1800);
+    }
+  };
+
+  const copyAll = () => copyText('all', `Bank: ${BANK_DETAILS.bank}\nAccount name: ${BANK_DETAILS.accountName}\nSort code: ${BANK_DETAILS.sortCode}\nAccount number: ${BANK_DETAILS.accountNumber}`);
+
+  const DetailCard = ({ label, value, copyKey, strongClass = 'text-base' }) => (
+    <div className="rounded-xl border border-white/10 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">{label}</span>
+          <strong className={`jic-popup-title mt-1 block ${strongClass}`}>{value}</strong>
+        </div>
+        <button
+          type="button"
+          onClick={() => copyText(copyKey, value)}
+          className="jic-popup-icon inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+          aria-label={`Copy ${label}`}
+          title={`Copy ${label}`}
+        >
+          {copied === copyKey ? <Check size={16} /> : <Copy size={16} />}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <AnimatePresence>
@@ -57,34 +108,32 @@ export default function WonderfulDonationModal({ open, onClose }) {
 
             <div className="px-5 py-5 sm:px-7 sm:py-6">
               <div className="jic-popup-surface rounded-2xl p-5 sm:p-6">
-                <div className="mb-4 flex items-start gap-3">
-                  <Landmark className="mt-0.5 h-5 w-5 shrink-0" />
-                  <div>
-                    <strong className="jic-popup-title block text-base">Bank transfer</strong>
-                    <span className="jic-popup-muted mt-1 block text-sm leading-6">Online donation options are being worked on. For now, you can donate directly to the mosque account below.</span>
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <Landmark className="mt-0.5 h-5 w-5 shrink-0" />
+                    <div>
+                      <strong className="jic-popup-title block text-base">Bank transfer</strong>
+                      <span className="jic-popup-muted mt-1 block text-sm leading-6">Online donation options are being worked on. For now, you can donate directly to the mosque account below.</span>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={copyAll}
+                    className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold"
+                  >
+                    {copied === 'all' ? <Check size={15} /> : <Copy size={15} />}
+                    {copied === 'all' ? 'Copied' : 'Copy all'}
+                  </button>
                 </div>
 
                 <div className="grid gap-3 text-sm sm:grid-cols-2">
-                  <div className="rounded-xl border border-white/10 p-4">
-                    <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">Bank</span>
-                    <strong className="jic-popup-title mt-1 block text-base">Metro Bank</strong>
-                  </div>
-                  <div className="rounded-xl border border-white/10 p-4">
-                    <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">Account name</span>
-                    <strong className="jic-popup-title mt-1 block text-base">Jamatia Islamic Centre</strong>
-                  </div>
-                  <div className="rounded-xl border border-white/10 p-4">
-                    <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">Sort code</span>
-                    <strong className="jic-popup-title mt-1 block text-lg tracking-[0.08em]">23-05-80</strong>
-                  </div>
-                  <div className="rounded-xl border border-white/10 p-4">
-                    <span className="jic-popup-muted block text-xs uppercase tracking-[0.12em]">Account number</span>
-                    <strong className="jic-popup-title mt-1 block text-lg tracking-[0.08em]">57434236</strong>
-                  </div>
+                  <DetailCard label="Bank" value={BANK_DETAILS.bank} copyKey="bank" />
+                  <DetailCard label="Account name" value={BANK_DETAILS.accountName} copyKey="accountName" />
+                  <DetailCard label="Sort code" value={BANK_DETAILS.sortCode} copyKey="sortCode" strongClass="text-lg tracking-[0.08em]" />
+                  <DetailCard label="Account number" value={BANK_DETAILS.accountNumber} copyKey="accountNumber" strongClass="text-lg tracking-[0.08em]" />
                 </div>
 
-                <p className="jic-popup-muted mt-4 text-xs leading-5">Please check the account name and details carefully in your banking app before confirming your transfer.</p>
+                <p className="jic-popup-muted mt-4 text-xs leading-5">Tap any copy icon to copy one detail, or use <strong>Copy all</strong> to copy the full bank details. Please check the account name and details carefully in your banking app before confirming your transfer.</p>
               </div>
             </div>
           </motion.section>
