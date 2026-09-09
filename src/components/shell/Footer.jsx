@@ -18,15 +18,16 @@ const TikTokIcon = (props) => (
 const QUICK_LINKS = [
   { label: 'About', to: '/about' },
   { label: 'Prayer Times', to: '/prayer-times' },
+  { label: 'Services', to: '/services' },
   { label: 'Projects', to: '/projects' },
   { label: 'Madrassah', to: '/madrassah' },
   { label: 'Youth', to: '/youth' },
-  { label: 'Gallery', to: '/projects/gallery' },
   { label: 'Contact', to: '/contact' },
 ];
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const openDonation = () => window.dispatchEvent(new CustomEvent('jic-open-donation'));
   return (
     <footer className="jic-site-footer jic-site-footer-compact">
       <div className="container mx-auto px-4 py-5 md:py-7">
@@ -34,7 +35,6 @@ export default function Footer() {
           <nav className="jic-footer-links-inline" aria-label="Footer links">
             {QUICK_LINKS.map(({ label, to }) => <Link key={to} to={to}>{label}</Link>)}
           </nav>
-
           <div className="jic-footer-actions-compact">
             <div className="jic-footer-socials flex gap-2">
               {SITE.socials.facebook && <a href={SITE.socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={18}/></a>}
@@ -43,10 +43,9 @@ export default function Footer() {
               {SITE.socials.youtube && <a href={SITE.socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube"><Youtube size={18}/></a>}
               {SITE.socials.tiktok && <a href={SITE.socials.tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok"><TikTokIcon className="h-[18px] w-[18px]"/></a>}
             </div>
-            <Link to="/projects#donate" className="jic-footer-donate inline-flex">Donate</Link>
+            <button type="button" onClick={openDonation} className="jic-footer-donate inline-flex">Donate</button>
           </div>
         </div>
-
         <div className="jic-footer-bottom mt-4 flex flex-col gap-2 pt-4 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} {SITE.name}</p>
           <div className="flex gap-4"><Link to="/privacy">Privacy</Link></div>
