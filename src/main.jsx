@@ -40,6 +40,7 @@ showStatus('Loading website…');
       import('@/styles/header-uniform.css'),
       import('@/styles/mobile-full-menu.css'),
       import('@/styles/desktop-refine.css'),
+      import('@/styles/desktop-polish-v2.css'),
     ]);
 
     const React = ReactModule.default;
