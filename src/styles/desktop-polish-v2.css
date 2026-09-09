@@ -1,4 +1,4 @@
-/* Desktop polish v2 — targeted fixes for header balance, overflow, and hero spacing. */
+/* Desktop polish v2 — targeted fixes for header balance, overflow, hero, and homepage spacing. */
 @media (min-width:1025px){
   :root{--jic-desktop-control:44px;--jic-desktop-radius:18px;}
 
@@ -46,21 +46,82 @@
 
   /* Hero: lift content, reduce dead space, and unify CTA geometry. */
   main{padding-top:146px!important;}
-  .jic-hero{min-height:560px!important;}
+  .jic-hero{min-height:540px!important;}
   .jic-hero-inner{
-    min-height:560px!important;
-    padding-top:78px!important;
-    padding-bottom:46px!important;
+    min-height:540px!important;
+    padding-top:68px!important;
+    padding-bottom:42px!important;
     padding-left:clamp(34px,3.2vw,56px)!important;
     padding-right:clamp(34px,3.2vw,56px)!important;
   }
   .jic-kicker{margin-bottom:14px!important;font-size:11px!important;letter-spacing:.28em!important;}
-  .jic-hero h1{max-width:720px!important;font-size:clamp(54px,4.5vw,74px)!important;line-height:.99!important;letter-spacing:-.04em!important;}
-  .jic-gold-rule{width:72px!important;height:3px!important;margin:20px 0!important;}
+  .jic-hero h1{max-width:700px!important;font-size:clamp(52px,4.35vw,72px)!important;line-height:.99!important;letter-spacing:-.04em!important;}
+  .jic-gold-rule{width:72px!important;height:3px!important;margin:18px 0!important;}
   .jic-hero-sub{font-size:18px!important;line-height:1.35!important;}
-  .jic-hero-buttons{margin-top:20px!important;gap:12px!important;}
+  .jic-hero-buttons{margin-top:18px!important;gap:12px!important;}
   .jic-primary-cta,.jic-secondary-cta{height:48px!important;min-height:48px!important;padding:0 22px!important;border-radius:16px!important;font-size:14px!important;}
   .jic-secondary-cta{border-color:rgba(255,255,255,.18)!important;background:rgba(255,255,255,.035)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;}
+
+  /* Homepage content: tighter rhythm, more deliberate card proportions. */
+  .jic-feature-grid{
+    max-width:1400px!important;
+    margin:0 auto!important;
+    padding:28px 28px 18px!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:16px!important;
+  }
+  .jic-feature-card{
+    min-height:210px!important;
+    padding:22px!important;
+    border-radius:20px!important;
+    box-shadow:0 16px 38px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.06)!important;
+  }
+  .jic-card-icon{width:30px!important;height:30px!important;}
+  .jic-card-copy h2{font-size:21px!important;line-height:1.1!important;margin-bottom:7px!important;}
+  .jic-card-copy p{font-size:13px!important;line-height:1.45!important;margin-bottom:14px!important;max-width:240px!important;}
+  .jic-card-copy span{font-size:13px!important;}
+
+  .jic-announcement{
+    max-width:1400px!important;
+    margin:18px auto 0!important;
+    border-radius:18px!important;
+    min-height:54px!important;
+    padding:12px 18px!important;
+  }
+
+  .jic-event-strip{
+    max-width:1400px!important;
+    margin:10px auto 22px!important;
+    min-height:58px!important;
+    padding:0 8px!important;
+    border-radius:18px!important;
+  }
+  .jic-event-label,.jic-event-main{padding:0 16px!important;}
+  .jic-event-main strong{font-size:13px!important;}
+  .jic-event-main span{font-size:11px!important;}
+  .jic-event-arrow{padding:0 14px!important;}
+
+  .jic-live-section{
+    max-width:1100px!important;
+    margin:26px auto!important;
+    padding:18px 24px!important;
+  }
+  .jic-live-heading{margin-bottom:12px!important;}
+  .jic-live-heading h2{font-size:26px!important;}
+  .jic-live-frame{border-radius:20px!important;}
+
+  .jic-home-footer-strip{
+    max-width:1400px!important;
+    min-height:70px!important;
+    margin:12px auto 24px!important;
+    padding:14px 22px!important;
+    border:1px solid rgba(255,255,255,.10)!important;
+    border-radius:18px!important;
+    background:rgba(255,255,255,.025)!important;
+  }
+  .jic-home-footer-strip strong{font-size:13px!important;}
+  .jic-home-footer-strip small{font-size:11px!important;}
+  .jic-socials{gap:14px!important;font-size:11px!important;}
 }
 
 @media (min-width:1025px) and (max-width:1260px){
@@ -71,4 +132,5 @@
   .jic-brand,.jic-brand .brand-lockup{width:130px!important;min-width:130px!important;}
   .jic-brand .brand-lockup img{width:128px!important;max-width:128px!important;}
   .nav-pill{padding-inline:8px!important;font-size:11.5px!important;}
+  .jic-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:1000px!important;}
 }
