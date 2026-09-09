@@ -1,94 +1,22 @@
 /* v18 mobile header: one information pill followed by a separate quote/announcement pill */
 @media (max-width:767px){
   .jic-header>.mx-auto{padding-top:6px!important}
-
-  /* One unified information pill: address/phone, salah, logo, radio + Jummah. */
-  .jic-info-shell{
-    position:relative!important;
-    display:grid!important;
-    grid-template-rows:auto auto auto!important;
-    border-radius:22px!important;
-    overflow:hidden!important;
-    background:rgba(8,19,31,.58)!important;
-    border:1px solid rgba(255,255,255,.13)!important;
-    -webkit-backdrop-filter:blur(28px) saturate(155%)!important;
-    backdrop-filter:blur(28px) saturate(155%)!important;
-    box-shadow:0 12px 32px rgba(0,0,0,.18)!important;
-  }
+  .jic-info-shell{position:relative!important;display:grid!important;grid-template-rows:auto auto auto!important;border-radius:22px!important;overflow:hidden!important;background:rgba(8,19,31,.58)!important;border:1px solid rgba(255,255,255,.13)!important;-webkit-backdrop-filter:blur(28px) saturate(155%)!important;backdrop-filter:blur(28px) saturate(155%)!important;box-shadow:0 12px 32px rgba(0,0,0,.18)!important}
   html:not(.dark) .jic-info-shell{background:rgba(250,247,239,.68)!important;border-color:rgba(15,23,42,.1)!important}
-
   .jic-address{min-height:32px!important;padding:6px 10px!important;border-bottom:1px solid rgba(255,255,255,.09)!important;font-size:10.5px!important}
-  .jic-address>span{font-size:10.5px!important}
-  .jic-top-phone{font-size:10.5px!important}
-
+  .jic-address>span,.jic-top-phone{font-size:10.5px!important}
   .jic-prayer-row{min-height:53px!important;border-bottom:1px solid rgba(255,255,255,.09)!important}
-  .jic-prayer{padding:5px 1px!important}
-  .jic-prayer>span{font-size:8.5px!important}
-  .jic-prayer-times strong{font-size:13px!important}
-  .jic-prayer-times small{font-size:7.5px!important}
-
-  /* Put the JIC logo into the same pill above the radio/Jummah strip. */
-  .jic-info-shell::after{
-    content:""!important;
-    display:block!important;
-    grid-row:3!important;
-    width:92px!important;
-    height:43px!important;
-    margin:5px auto 3px!important;
-    background:url('/brand-logo.svg') center/contain no-repeat!important;
-  }
-  .jic-utility-row{
-    grid-row:4!important;
-    min-height:39px!important;
-    display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    padding:0!important;
-    border-top:1px solid rgba(255,255,255,.09)!important;
-    background:transparent!important;
-  }
-  .jic-jummah-mini,.jic-radio{
-    min-height:39px!important;
-    height:39px!important;
-    margin:0!important;
-    border:0!important;
-    border-radius:0!important;
-    background:transparent!important;
-    box-shadow:none!important;
-  }
-  .jic-radio{border-right:1px solid rgba(255,255,255,.12)!important}
-  .jic-jummah-mini{border-left:0!important}
-  .jic-jummah-mini span{font-size:8px!important}
-  .jic-jummah-mini strong{font-size:12px!important}
-  .jic-radio span{font-size:11px!important}
-  .jic-radio small{font-size:8px!important}
-  html:not(.dark) .jic-address,html:not(.dark) .jic-prayer-row,html:not(.dark) .jic-utility-row{border-color:rgba(15,23,42,.09)!important}
-  html:not(.dark) .jic-radio{border-right-color:rgba(15,23,42,.11)!important}
-
-  /* The next pill is only the quote/announcement area + compact controls. */
-  .jic-mainnav{
-    min-height:57px!important;
-    margin-top:6px!important;
-    padding:6px 52px 6px 7px!important;
-    border-radius:18px!important;
-    background:rgba(8,19,31,.48)!important;
-    border:1px solid rgba(255,255,255,.12)!important;
-    -webkit-backdrop-filter:blur(25px) saturate(150%)!important;
-    backdrop-filter:blur(25px) saturate(150%)!important;
-  }
+  .jic-prayer{padding:5px 1px!important}.jic-prayer>span{font-size:8.5px!important}.jic-prayer-times strong{font-size:13px!important}.jic-prayer-times small{font-size:7.5px!important}
+  .jic-info-shell::after{content:""!important;display:block!important;grid-row:3!important;width:92px!important;height:43px!important;margin:5px auto 3px!important;background:url('/brand-logo.svg') center/contain no-repeat!important}
+  .jic-utility-row{grid-row:4!important;min-height:39px!important;display:grid!important;grid-template-columns:1fr 1fr!important;padding:0!important;border-top:1px solid rgba(255,255,255,.09)!important;background:transparent!important}
+  .jic-jummah-mini,.jic-radio{min-height:39px!important;height:39px!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+  .jic-radio{border-right:1px solid rgba(255,255,255,.12)!important}.jic-jummah-mini{border-left:0!important}.jic-jummah-mini span{font-size:8px!important}.jic-jummah-mini strong{font-size:12px!important}.jic-radio span{font-size:11px!important}.jic-radio small{font-size:8px!important}
+  html:not(.dark) .jic-address,html:not(.dark) .jic-prayer-row,html:not(.dark) .jic-utility-row{border-color:rgba(15,23,42,.09)!important}html:not(.dark) .jic-radio{border-right-color:rgba(15,23,42,.11)!important}
+  .jic-mainnav{min-height:57px!important;margin-top:6px!important;padding:6px 52px 6px 7px!important;border-radius:18px!important;background:rgba(8,19,31,.48)!important;border:1px solid rgba(255,255,255,.12)!important;-webkit-backdrop-filter:blur(25px) saturate(150%)!important;backdrop-filter:blur(25px) saturate(150%)!important}
   html:not(.dark) .jic-mainnav{background:rgba(250,247,239,.62)!important}
-
-  /* Logo no longer belongs in the second pill. */
-  .jic-mainnav>.jic-brand{display:none!important}
-  .jic-header.is-scrolled .jic-mainnav::before{display:none!important;content:none!important}
-  .jic-header.is-scrolled .jic-mainnav{padding:6px 52px 6px 7px!important;min-height:57px!important}
-
-  /* Always show the reminder/announcement visually as the second pill area when it exists. */
-  .jic-scroll-reminder{height:43px!important;min-height:43px!important;border-radius:13px!important;padding:5px 8px!important}
-  .jic-reminder-meta{font-size:7.5px!important}
-  .jic-reminder-line strong{font-size:10.5px!important}
-  .jic-reminder-line small,.jic-reminder-line em{font-size:7.5px!important}
-
-  /* Keep outside actions very compact so the quote card remains the focus. */
-  .jic-nav-actions{right:6px!important;top:5px!important;width:40px!important;gap:3px!important}
-  .jic-nav-actions .header-icon,.jic-nav-actions .donate-button{width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;border-radius:12px!important}
+  .jic-mainnav>.jic-brand{display:none!important}.jic-header.is-scrolled .jic-mainnav::before{display:none!important;content:none!important}.jic-header.is-scrolled .jic-mainnav{padding:6px 52px 6px 7px!important;min-height:57px!important}
+  .jic-scroll-reminder{height:43px!important;min-height:43px!important;border-radius:13px!important;padding:5px 8px!important}.jic-reminder-meta{font-size:7.5px!important}.jic-reminder-line strong{font-size:10.5px!important}.jic-reminder-line small,.jic-reminder-line em{font-size:7.5px!important}
+  .jic-nav-actions{right:6px!important;top:5px!important;width:40px!important;gap:3px!important}.jic-nav-actions .header-icon,.jic-nav-actions .donate-button{width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;border-radius:12px!important}
+  /* Admin/login is available from the burger menu only on mobile. */
+  .jic-nav-actions .jic-admin-entry,.jic-nav-actions a[href="/admin"],.jic-nav-actions a[href="/admin/login"]{display:none!important}
 }
