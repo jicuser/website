@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, CalendarDays, Play, Radio, Users, Building2, ArrowRight, Megaphone } from 'lucide-react';
+import { BookOpen, CalendarDays, Play, Radio, Users, Building2, ArrowRight, Megaphone, MessageCircle } from 'lucide-react';
 import MosqueIcon from '@/components/icons/MosqueIcon';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
-import { EVENTS_LIST } from '@/content/pages/home';
 import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useContent } from '@/context/ContentContext';
@@ -17,13 +16,14 @@ function youtubeEmbedUrl(raw){
 }
 
 function useHomeLiveContent(){
-  const [events,setEvents]=useState([]);const [announcement,setAnnouncement]=useState(null);const [livestream,setLivestream]=useState(null);
+  const [events,setEvents]=useState([]);const [announcement,setAnnouncement]=useState(null);const [livestream,setLivestream]=useState(null);const[whatsapp,setWhatsapp]=useState('');
   useEffect(()=>{const now=new Date().toISOString();const today=now.slice(0,10);Promise.all([
     supabase.from('events').select('*').eq('published',true).gte('event_date',today).order('event_date',{ascending:true}).limit(4),
     supabase.from('announcements').select('*').eq('published',true).lte('starts_at',now).order('created_at',{ascending:false}).limit(6),
     supabase.from('livestream_settings').select('*').eq('id',1).maybeSingle(),
-  ]).then(([e,a,l])=>{if(!e.error)setEvents(e.data||[]);if(!a.error)setAnnouncement((a.data||[]).find(x=>!x.expires_at||x.expires_at>now)||null);if(!l.error)setLivestream(l.data||null);});},[]);
-  return{events,announcement,livestream};
+    supabase.from('page_content').select('content_value').eq('content_key','whatsapp_community_url').maybeSingle(),
+  ]).then(([e,a,l,w])=>{if(!e.error)setEvents(e.data||[]);if(!a.error)setAnnouncement((a.data||[]).find(x=>!x.expires_at||x.expires_at>now)||null);if(!l.error)setLivestream(l.data||null);if(!w.error)setWhatsapp(w.data?.content_value||'');});},[]);
+  return{events,announcement,livestream,whatsapp};
 }
 
 const DEFAULT_CARDS=[
@@ -40,7 +40,7 @@ function useHomeTiles(){
 }
 
 export default function HomePage(){
-  const{events,announcement,livestream}=useHomeLiveContent();const cards=useHomeTiles();const{jummahTimes}=usePrayerTimes();const{getContent}=useContent();const siteImages=useSiteImages();
+  const{events,announcement,livestream,whatsapp}=useHomeLiveContent();const cards=useHomeTiles();const{jummahTimes}=usePrayerTimes();const{getContent}=useContent();const siteImages=useSiteImages();
   let hero={};try{hero=JSON.parse(getContent('page:/','{}'));}catch{}
   const heroImage=hero.image||siteImages.homeHero;
   const liveUrl=livestream?.stream_url||SITE.socials.youtube;const embedUrl=useMemo(()=>youtubeEmbedUrl(livestream?.stream_url),[livestream]);
@@ -54,7 +54,7 @@ export default function HomePage(){
         <h1 style={{whiteSpace:'pre-line'}}>{hero.title||'A place for faith.\nA home for community.'}</h1>
         <div className="jic-gold-rule"/>
         <p className="jic-hero-sub" style={{whiteSpace:'pre-line'}}>{hero.body||'Worship. Learn. Grow. Together.\nA stronger community for a brighter tomorrow.'}</p>
-        <div className="jic-hero-buttons"><Link to="/contact#location" className="jic-primary-cta">Visit the Centre <ArrowRight size={18}/></Link><a href={liveUrl} target="_blank" rel="noreferrer" className="jic-secondary-cta"><Play size={17} fill="currentColor"/> Watch Live</a></div>
+        <div className="jic-hero-buttons"><Link to="/contact" className="jic-primary-cta">Visit the Centre <ArrowRight size={18}/></Link><a href={liveUrl} target="_blank" rel="noreferrer" className="jic-secondary-cta"><Play size={17} fill="currentColor"/> Watch Live</a></div>
       </div>
     </section>
 
@@ -70,6 +70,6 @@ export default function HomePage(){
 
     {livestream?.enabled&&livestream.stream_url&&<section id="live" className="jic-live-section"><div className="jic-live-heading"><span><Radio size={15}/> Live</span><h2>{livestream.title||'JIC Live'}</h2></div>{embedUrl?<div className="jic-live-frame"><iframe src={embedUrl} title={livestream.title||'JIC Live'} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/></div>:<a className="jic-primary-cta" href={liveUrl} target="_blank" rel="noreferrer">Watch Live on YouTube</a>}</section>}
 
-    <section className="jic-home-footer-strip"><div><span className="jic-bell">●</span><div><strong>Stay Updated</strong><small>Get the latest news and events</small></div></div><div className="jic-socials"><a href={SITE.socials.youtube} target="_blank" rel="noreferrer">YouTube</a><a href={SITE.socials.facebook} target="_blank" rel="noreferrer">Facebook</a><a href={SITE.socials.instagram} target="_blank" rel="noreferrer">Instagram</a></div></section>
+    <section className="jic-home-footer-strip"><div>{whatsapp?<><MessageCircle size={18}/><div><strong>Join our WhatsApp Community</strong><small>Official JIC updates and announcements</small></div></>:<><span className="jic-bell">●</span><div><strong>Stay Updated</strong><small>WhatsApp Community link coming soon</small></div></>}</div><div className="jic-socials">{whatsapp&&<a href={whatsapp} target="_blank" rel="noreferrer">Join WhatsApp</a>}<a href={SITE.socials.youtube} target="_blank" rel="noreferrer">YouTube</a><a href={SITE.socials.facebook} target="_blank" rel="noreferrer">Facebook</a><a href={SITE.socials.instagram} target="_blank" rel="noreferrer">Instagram</a></div></section>
   </div>;
 }
