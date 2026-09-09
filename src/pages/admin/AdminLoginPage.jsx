@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, LockKeyhole, LogIn, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowLeft, LockKeyhole, LogIn, ShieldCheck, User } from 'lucide-react';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { useAuth } from '@/context/AuthContext';
 
@@ -37,7 +37,7 @@ export default function AdminLoginPage(){
       <p className="admin-login-note">Enter your name so changes can be shown clearly in the audit log.</p>
       {error&&<div className="admin-login-error">{error}</div>}
       <form onSubmit={submit} className="admin-login-form">
-        <label><span>Your name</span><div className="admin-login-password"><UserRound size={17}/><input type="text" required autoComplete="name" value={name} onChange={e=>setName(e.target.value)} placeholder="Your name"/></div></label>
+        <label><span>Your name</span><div className="admin-login-password"><User size={17}/><input type="text" required autoComplete="name" value={name} onChange={e=>setName(e.target.value)} placeholder="Your name"/></div></label>
         <label><span>Email address</span><input type="email" required inputMode="email" autoCapitalize="none" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address"/></label>
         <label><span>Password</span><div className="admin-login-password"><LockKeyhole size={17}/><input type="password" required autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password"/></div></label>
         <button disabled={busy||loading}><LogIn size={18}/>{busy?'Signing in…':'Sign in'}</button>
