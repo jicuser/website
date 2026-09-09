@@ -1,6 +1,6 @@
 /**
- * Primary navigation plus standalone child pages.
- * Headings/content can be filled in later without changing the URL structure.
+ * Primary navigation and section tabs.
+ * Keep operational services separate from building/development projects.
  */
 
 export const NAV_GROUPS = [
@@ -21,22 +21,28 @@ export const NAV_GROUPS = [
       { name: 'Jummah', path: '/services/jummah' },
       { name: 'Quran Classes', path: '/services/quran-classes' },
       { name: 'Community Services', path: '/services/community-services' },
-      { name: 'Funeral Services', path: '/services/funeral-services' },
       { name: 'Nikah', path: '/services/nikah' },
       { name: 'Hall Booking', path: '/services/hall-booking' },
     ],
   },
   {
+    name: 'Funerals', path: '/funerals', children: [
+      { name: 'Funeral Services', path: '/funerals' },
+      { name: 'What to Do', path: '/funerals/what-to-do' },
+      { name: 'Contact & Support', path: '/funerals/contact-support' },
+    ],
+  },
+  {
     name: 'Projects', path: '/projects', children: [
-      { name: 'Projects Overview', path: '/projects' },
+      { name: 'Overview', path: '/projects' },
+      { name: 'Timeline', path: '/projects/timeline' },
       { name: 'Masjid Extension', path: '/projects/masjid-extension' },
       { name: 'Main Prayer Hall', path: '/projects/main-prayer-hall' },
-      { name: 'Wudu Area', path: '/projects/wudu-area' },
       { name: 'Community Hall', path: '/projects/community-hall' },
       { name: 'Madrassah Building', path: '/projects/madrassah-building' },
       { name: 'Current Appeals', path: '/projects/current-appeals' },
       { name: 'Gallery', path: '/projects/gallery' },
-      { name: 'How to Support', path: '/projects/how-to-support' },
+      { name: 'Support Projects', path: '/projects/how-to-support' },
     ],
   },
   {
