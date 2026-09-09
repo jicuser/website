@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CalendarDays, HandHeart, MapPin, Menu, Moon, Pause, Play, Radio, Settings2, Sun, X } from 'lucide-react';
+import { CalendarDays, Heart, MapPin, Menu, Moon, Pause, Play, Radio, Settings2, Sun, X } from 'lucide-react';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { NAV_ITEMS } from '@/content/nav';
 import { SITE } from '@/content/site';
@@ -91,7 +91,7 @@ export default function Navbar() {
             {NAV_ITEMS.slice(0,7).map(({name,path}) => <NavLink key={path} to={path} className={({isActive}) => cn('nav-pill', isActive && 'active')}>{name}</NavLink>)}
           </nav>
           <div className="ml-auto lg:ml-3 flex items-center gap-2">
-            <Link to="/projects" className="donate-button" aria-label="Donate to JIC"><HandHeart size={19}/><span className="hidden sm:inline">Donate</span></Link>
+            <Link to="/projects" className="donate-button" aria-label="Donate to JIC"><Heart size={19}/><span className="hidden sm:inline">Donate</span></Link>
             <button className="header-icon hidden sm:grid" onClick={() => { setSettingsOpen(v=>!v); setMenuOpen(false); }} aria-label="Display settings"><Settings2 size={19}/></button>
             <button className="header-icon" onClick={() => { setMenuOpen(v=>!v); setSettingsOpen(false); }} aria-label="Menu">{menuOpen ? <X size={22}/> : <Menu size={22}/>}</button>
           </div>
