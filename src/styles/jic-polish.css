@@ -1,0 +1,134 @@
+/* JIC 2026 polish layer — loaded after the legacy styles. */
+:root{
+  --jic-gold:#d7a83f;
+  --jic-gold-soft:#f5d777;
+  --jic-navy:#071522;
+  --jic-cream:#f7f1e5;
+  --primary:41 66% 47%;
+  --primary-foreground:222 45% 8%;
+  --accent:42 55% 93%;
+  --accent-foreground:38 58% 30%;
+  --ring:41 66% 47%;
+}
+.dark{
+  --primary:42 78% 64%;
+  --primary-foreground:222 47% 7%;
+  --accent:42 25% 17%;
+  --accent-foreground:42 78% 72%;
+  --ring:42 78% 64%;
+}
+
+body{background:#07111b;}
+html:not(.dark) body{background:var(--jic-cream);color:#0b1930;}
+
+/* Logo: never crop the SVG. */
+.brand-lockup{height:auto!important;min-height:0!important;overflow:visible!important;display:flex!important;align-items:center!important;}
+.brand-lockup img{display:block!important;width:100%!important;height:auto!important;max-height:78px!important;object-fit:contain!important;object-position:left center!important;}
+.jic-brand{width:190px!important;overflow:visible!important;}
+.jic-brand .brand-lockup img{max-height:64px!important;}
+.jic-menu-logo{width:180px!important;max-width:62vw!important;overflow:visible!important;}
+.jic-menu-logo .brand-lockup img{max-height:82px!important;}
+.jic-hero-mobile-logo{width:180px!important;overflow:visible!important;}
+.jic-hero-mobile-logo .brand-lockup img{max-height:88px!important;}
+.jic-footer-logo{display:block;width:190px;max-width:72vw;overflow:visible;}
+.jic-footer-logo .brand-lockup img{max-height:82px!important;}
+
+/* Header alignment and contextual tabs. */
+.jic-mainnav{border-radius:18px;background:rgba(6,16,26,.56);border:1px solid rgba(255,255,255,.11);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:0 12px!important;}
+html:not(.dark) .jic-mainnav{background:rgba(255,252,246,.82);border-color:rgba(15,30,45,.11);box-shadow:0 10px 28px rgba(49,37,15,.08);}
+html:not(.dark) .jic-header{color:#0b1930;}
+html:not(.dark) .jic-address,html:not(.dark) .jic-prayer span,html:not(.dark) .jic-radio small{color:#485565;}
+html:not(.dark) .jic-prayer strong{color:#b57d13;}
+html:not(.dark) .jic-radio,html:not(.dark) .jic-display-controls>button{color:#0b1930;}
+html:not(.dark) .jic-info-shell{background:rgba(255,253,248,.91)!important;border-color:rgba(20,30,40,.12)!important;box-shadow:0 14px 36px rgba(71,55,22,.10)!important;}
+html:not(.dark) .jic-prayer,html:not(.dark) .jic-address{border-color:rgba(15,30,45,.09)!important;}
+html:not(.dark) .header-icon{background:rgba(255,255,255,.72);border-color:rgba(20,30,40,.13);color:#0b1930;}
+html:not(.dark) .jic-desktop-nav{background:rgba(255,255,255,.62);border-color:rgba(20,30,40,.10);}
+html:not(.dark) .nav-pill{color:#263547;}
+html:not(.dark) .nav-pill:hover,html:not(.dark) .nav-pill.active{color:#8f6211;background:rgba(215,168,63,.12);}
+
+.jic-subnav{display:flex;align-items:center;gap:6px;margin-top:7px;padding:6px;overflow-x:auto;scrollbar-width:none;border-radius:14px;border:1px solid rgba(255,255,255,.11);background:rgba(6,16,26,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 10px 26px rgba(0,0,0,.16);}
+.jic-subnav::-webkit-scrollbar{display:none;}
+.jic-subnav-link{flex:0 0 auto;padding:8px 12px;border-radius:9px;color:rgba(255,255,255,.78);font-size:12px;white-space:nowrap;transition:.2s;}
+.jic-subnav-link:hover{color:var(--jic-gold-soft);background:rgba(255,255,255,.06);}
+html:not(.dark) .jic-subnav{background:rgba(255,252,246,.91);border-color:rgba(20,30,40,.10);box-shadow:0 10px 28px rgba(71,55,22,.08);}
+html:not(.dark) .jic-subnav-link{color:#445166;}
+html:not(.dark) .jic-subnav-link:hover{color:#8f6211;background:rgba(215,168,63,.12);}
+
+/* Full-page light mode, not only the utility bar. */
+.jic-premium-home{background:#07111b;color:#fff;}
+html:not(.dark) .jic-premium-home{background:linear-gradient(180deg,#fbf7ef 0%,#f5eee2 100%);color:#0b1930;}
+html:not(.dark) .jic-hero-overlay{background:linear-gradient(90deg,rgba(250,247,239,.97) 0%,rgba(250,247,239,.86) 38%,rgba(250,247,239,.34) 66%,rgba(250,247,239,.08) 100%),linear-gradient(0deg,#f7f1e5 0%,rgba(247,241,229,.12) 36%);}
+html:not(.dark) .jic-hero h1{color:#071b35;text-shadow:0 2px 16px rgba(255,255,255,.42);}
+html:not(.dark) .jic-kicker{color:#9d6a0c;}
+html:not(.dark) .jic-hero-sub{color:#102139;}
+html:not(.dark) .jic-hero-sub span{color:#637083;}
+html:not(.dark) .jic-secondary-cta{color:#0b1930;background:rgba(255,255,255,.72);border-color:rgba(20,30,40,.18);}
+html:not(.dark) .jic-gold-rule{background:#d7a83f;}
+
+/* Feature cards use the same image in both themes with a theme-specific wash. */
+.jic-feature-card{position:relative;isolation:isolate;background-image:var(--card-image)!important;background-size:cover!important;background-position:center!important;color:#fff;}
+.jic-feature-card::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(5,12,20,.18),rgba(5,12,20,.94));}
+html:not(.dark) .jic-feature-card{color:#0b1930;border-color:rgba(15,30,45,.14);box-shadow:0 12px 32px rgba(63,49,20,.10);}
+html:not(.dark) .jic-feature-card::before{background:linear-gradient(90deg,rgba(255,253,248,.97) 0%,rgba(255,253,248,.89) 50%,rgba(255,253,248,.38) 100%);}
+html:not(.dark) .jic-card-copy p{color:#5d6979;}
+html:not(.dark) .jic-card-copy span,html:not(.dark) .jic-card-icon{color:#a66f0c;}
+
+html:not(.dark) .jic-event-strip{color:#0b1930;background:rgba(255,255,255,.76);border-color:rgba(15,30,45,.13);box-shadow:0 10px 28px rgba(63,49,20,.07);}
+html:not(.dark) .jic-event-main span{color:#6b7582;}
+html:not(.dark) .jic-event-label{color:#0b1930;border-color:rgba(15,30,45,.10);}
+html:not(.dark) .jic-event-arrow{color:#0b1930;}
+html:not(.dark) .jic-home-footer-strip{margin:0 20px 22px;padding:15px 18px;border-radius:18px;background:rgba(255,255,255,.72);border:1px solid rgba(15,30,45,.12);color:#0b1930;box-shadow:0 10px 28px rgba(63,49,20,.06);}
+html:not(.dark) .jic-home-footer-strip small,html:not(.dark) .jic-socials{color:#667283;}
+
+/* Footer follows the selected theme and contains no legacy green surfaces. */
+.jic-site-footer{background:#06111c;color:#fff;border-top:1px solid rgba(255,255,255,.10);}
+.jic-footer-heading{font-size:16px;font-weight:750;letter-spacing:.01em;color:#f4d47c;}
+.jic-footer-muted,.jic-footer-link,.jic-footer-contact{color:#aeb9c6;}
+.jic-footer-link:hover,.jic-footer-contact a:hover{color:#f4d47c;}
+.jic-footer-contact{display:flex;align-items:flex-start;gap:10px;}
+.jic-footer-contact svg{flex:0 0 auto;color:#d7a83f;margin-top:2px;}
+.jic-footer-socials a{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:#d8e0e8;}
+.jic-footer-socials a:hover{color:#f4d47c;border-color:rgba(215,168,63,.35);}
+.jic-footer-donate{padding:10px 16px;border-radius:999px;background:linear-gradient(135deg,#f4d47c,#d5a43c);color:#17120a;font-weight:750;}
+.jic-footer-bottom{border-top:1px solid rgba(255,255,255,.10);color:#8493a3;}
+.jic-footer-bottom a:hover{color:#f4d47c;}
+html:not(.dark) .jic-site-footer{background:#eee5d5;color:#0b1930;border-top-color:rgba(15,30,45,.10);}
+html:not(.dark) .jic-footer-heading{color:#8e6010;}
+html:not(.dark) .jic-footer-muted,html:not(.dark) .jic-footer-link,html:not(.dark) .jic-footer-contact{color:#546173;}
+html:not(.dark) .jic-footer-link:hover,html:not(.dark) .jic-footer-contact a:hover{color:#8e6010;}
+html:not(.dark) .jic-footer-socials a{background:rgba(255,255,255,.65);border-color:rgba(15,30,45,.11);color:#17283c;}
+html:not(.dark) .jic-footer-bottom{border-top-color:rgba(15,30,45,.10);color:#6c7785;}
+
+/* Mobile menu and layout refinement. */
+.jic-mobile-menu{overflow:hidden!important;}
+.jic-menu-head{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 12px;}
+.jic-menu-head>button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.12);}
+.jic-menu-scroll{max-height:min(68vh,620px);overflow-y:auto;padding-right:2px;}
+.jic-menu-children{display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px 10px;}
+.jic-menu-children a{font-size:11px;padding:7px 9px;border-radius:8px;color:rgba(255,255,255,.68);background:rgba(255,255,255,.045);}
+.jic-menu-admin{display:flex;align-items:center;gap:8px;margin-top:10px;padding:11px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.10);}
+html:not(.dark) .jic-mobile-menu{background:rgba(255,252,246,.98)!important;color:#0b1930;}
+html:not(.dark) .jic-menu-link{color:#0b1930;border-color:rgba(15,30,45,.08);}
+html:not(.dark) .jic-menu-link.active{color:#8f6211;background:rgba(215,168,63,.13);}
+html:not(.dark) .jic-menu-children a{color:#526073;background:rgba(15,30,45,.045);}
+html:not(.dark) .jic-menu-admin{border-color:rgba(15,30,45,.10);color:#0b1930;}
+
+@media(max-width:1024px){
+  .jic-brand{width:175px!important;}
+}
+@media(max-width:640px){
+  .jic-brand{display:block!important;width:145px!important;}
+  .jic-brand .brand-lockup img{max-height:54px!important;}
+  .jic-mainnav{min-height:60px!important;}
+  .jic-subnav{margin-left:0;margin-right:0;}
+  .jic-subnav-link{font-size:10px;padding:7px 9px;}
+  .jic-hero-mobile-logo{display:none!important;}
+  .jic-hero-inner{padding-left:20px!important;padding-right:20px!important;}
+  .jic-hero h1{font-size:clamp(44px,13.5vw,58px)!important;line-height:.98!important;}
+  html:not(.dark) .jic-home-footer-strip{margin-left:12px;margin-right:12px;}
+}
+
+/* Give contextual tab pages enough room under the fixed header. */
+@media(min-width:641px){html:has(.jic-subnav) main{padding-top:188px!important;}}
+@media(max-width:640px){html:has(.jic-subnav) main{padding-top:236px!important;}}

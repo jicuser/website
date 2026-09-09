@@ -1,0 +1,57 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Facebook, Instagram, Youtube } from 'lucide-react';
+import { SITE } from '@/content/site';
+
+const XIcon = (props) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.451-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z" />
+  </svg>
+);
+
+const TikTokIcon = (props) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.63-.28-1.2-.65-1.76-1.02-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.72-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.45 3.98-2.14 6.15-1.73.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07Z" />
+  </svg>
+);
+
+const QUICK_LINKS = [
+  { label: 'About', to: '/about' },
+  { label: 'Prayer Times', to: '/prayer-times' },
+  { label: 'Projects', to: '/projects' },
+  { label: 'Madrassah', to: '/madrassah' },
+  { label: 'Youth', to: '/youth' },
+  { label: 'Gallery', to: '/projects/gallery' },
+  { label: 'Contact', to: '/contact' },
+];
+
+export default function Footer() {
+  const year = new Date().getFullYear();
+  return (
+    <footer className="jic-site-footer jic-site-footer-compact">
+      <div className="container mx-auto px-4 py-5 md:py-7">
+        <div className="jic-footer-compact-grid">
+          <nav className="jic-footer-links-inline" aria-label="Footer links">
+            {QUICK_LINKS.map(({ label, to }) => <Link key={to} to={to}>{label}</Link>)}
+          </nav>
+
+          <div className="jic-footer-actions-compact">
+            <div className="jic-footer-socials flex gap-2">
+              {SITE.socials.facebook && <a href={SITE.socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={18}/></a>}
+              {SITE.socials.x && <a href={SITE.socials.x} target="_blank" rel="noopener noreferrer" aria-label="X"><XIcon className="h-[18px] w-[18px]"/></a>}
+              {SITE.socials.instagram && <a href={SITE.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={18}/></a>}
+              {SITE.socials.youtube && <a href={SITE.socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube"><Youtube size={18}/></a>}
+              {SITE.socials.tiktok && <a href={SITE.socials.tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok"><TikTokIcon className="h-[18px] w-[18px]"/></a>}
+            </div>
+            <Link to="/projects#donate" className="jic-footer-donate inline-flex">Donate</Link>
+          </div>
+        </div>
+
+        <div className="jic-footer-bottom mt-4 flex flex-col gap-2 pt-4 text-xs sm:flex-row sm:items-center sm:justify-between">
+          <p>© {year} {SITE.name}</p>
+          <div className="flex gap-4"><Link to="/privacy">Privacy</Link></div>
+        </div>
+      </div>
+    </footer>
+  );
+}
