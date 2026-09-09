@@ -52,13 +52,18 @@ export function AuthProvider({ children }) {
     };
   }, [loadProfile]);
 
-  async function signIn(email, password) {
+  async function signIn(email, password, auditName = '') {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     const p = await loadProfile(data.user);
     if (!p?.is_active || !ADMIN_ROLES.has(p?.role)) {
       await supabase.auth.signOut();
       throw new Error('This account does not have JIC administration access.');
+    }
+    const cleanName = auditName.trim();
+    if (cleanName) {
+      const { error: nameError } = await supabase.auth.updateUser({ data: { audit_name: cleanName } });
+      if (nameError) console.warn('Unable to save audit display name:', nameError);
     }
     return data;
   }
