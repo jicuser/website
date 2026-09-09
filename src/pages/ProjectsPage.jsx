@@ -1,110 +1,91 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { AlertCircle, Target, CheckCircle, Phone, Building2, BookOpen, Users } from 'lucide-react';
-import { IMAGES } from '@/content/images';
-import { PROJECTS_HERO, APPEAL_TARGET, EQUIPMENT_LIST, HOW_TO_DONATE, VISION_BULLETS } from '@/content/pages/projects';
+import { ArrowRight, Building2, CalendarClock, CheckCircle2, CircleDot, Hammer, Images, School, Users } from 'lucide-react';
+
+const timeline = [
+  { phase: 'Phase 1', title: 'Planning & consultation', text: 'Scope the work, confirm priorities, consult the community and prepare the required designs.', status: 'Complete' },
+  { phase: 'Phase 2', title: 'Approvals & preparation', text: 'Permissions, contractor planning, fundraising and site preparation.', status: 'In progress' },
+  { phase: 'Phase 3', title: 'Main works', text: 'Deliver the extension and key building improvements in planned stages.', status: 'Upcoming' },
+  { phase: 'Phase 4', title: 'Fit-out & completion', text: 'Final finishes, equipment, testing and opening of completed areas.', status: 'Upcoming' },
+];
 
 const projectAreas = [
-  { id: 'madrassah-project', title: 'Madrassah Project', text: 'Learning spaces and facilities for the next generation.', icon: BookOpen },
-  { id: 'community-hall', title: 'Community Hall', text: 'A flexible community space for classes, events and local initiatives.', icon: Users },
-  { id: 'main-prayer-hall', title: 'Main Prayer Hall', text: 'Updates and improvements to the main worship space.', icon: Building2 },
+  { title: 'Masjid Extension', text: 'Follow the main extension project and key milestones.', to: '/projects/masjid-extension', icon: Hammer },
+  { title: 'Main Prayer Hall', text: 'Improvements to the principal worship space.', to: '/projects/main-prayer-hall', icon: Building2 },
+  { title: 'Community Hall', text: 'A flexible space for community activities and events.', to: '/projects/community-hall', icon: Users },
+  { title: 'Madrassah Building', text: 'Learning spaces for children, classes and future programmes.', to: '/projects/madrassah-building', icon: School },
 ];
 
 export default function ProjectsPage() {
   return (
     <div className="page-transition pt-24">
-      <section id="masjid-extension" className="jic-anchor-target relative py-20 md:py-32 bg-gray-50 dark:bg-gray-800">
-        <div className="absolute inset-0 islamic-pattern opacity-5 z-0" />
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.26em] text-primary">JIC Projects</p>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white mb-4">{PROJECTS_HERO.heading}</h1>
-            <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">{PROJECTS_HERO.subheading}</p>
-          </motion.div>
-        </div>
-      </section>
-
-      <section id="funeral-service" className="jic-anchor-target py-16 md:py-24 bg-background">
+      <section className="border-b border-white/10 bg-background py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2">
-              <Card className="overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="text-3xl font-bold">Our Goal</CardTitle>
-                  <CardDescription>We are raising funds to acquire essential equipment for a community-focused funeral service.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-8">
-                    <div className="bg-primary/10 p-6 rounded-xl text-center">
-                      <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Appeal Target</p>
-                      <p className="text-4xl font-bold text-primary">£{APPEAL_TARGET.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Equipment Needed</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        {EQUIPMENT_LIST.map((item) => (
-                          <Card key={item.name} className="bg-gray-50 dark:bg-gray-800 h-full">
-                            <CardContent className="pt-6 flex items-start space-x-4">
-                              <AlertCircle className="w-6 h-6 text-primary shrink-0" />
-                              <div><p className="font-semibold text-lg text-gray-900 dark:text-white">{item.name}</p><p className="text-primary font-bold text-xl">£{item.cost.toLocaleString()}</p></div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="space-y-8">
-              <Card id="donate" className="jic-anchor-target bg-primary/10 border-primary/20">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Phone className="w-6 h-6 text-primary" />{HOW_TO_DONATE.heading}</CardTitle></CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 mb-4">{HOW_TO_DONATE.body}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{HOW_TO_DONATE.note}</p>
-                  <Button asChild className="w-full mt-6"><Link to={HOW_TO_DONATE.ctaTo}>{HOW_TO_DONATE.ctaLabel}</Link></Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader><CardTitle className="flex items-center gap-2"><Target className="w-6 h-6 text-primary" />Our Vision</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  {VISION_BULLETS.map((b) => <div key={b} className="flex items-start gap-3"><CheckCircle className="w-5 h-5 text-primary mt-1 shrink-0" /><p className="text-gray-700 dark:text-gray-300">{b}</p></div>)}
-                </CardContent>
-              </Card>
-            </div>
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.26em] text-primary">JIC Development</p>
+            <h1 className="text-4xl font-extrabold tracking-tight text-foreground md:text-6xl">Projects & development</h1>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">A clear view of what JIC is building, what stage each project is at and what comes next.</p>
           </div>
         </div>
       </section>
 
-      <section className="bg-background pb-16">
+      <section className="bg-background py-14 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Progress</p>
+              <h2 className="mt-2 text-3xl font-bold text-foreground">Project timeline</h2>
+            </div>
+            <Link to="/projects/timeline" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">View timeline details <ArrowRight size={16}/></Link>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-4">
+            {timeline.map((item, index) => {
+              const complete = item.status === 'Complete';
+              const active = item.status === 'In progress';
+              return (
+                <article key={item.phase} className="relative rounded-2xl border border-border bg-card p-5 shadow-sm">
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{item.phase}</span>
+                    {complete ? <CheckCircle2 size={20} className="text-emerald-500"/> : active ? <CircleDot size={20} className="text-amber-500"/> : <CalendarClock size={20} className="text-muted-foreground"/>}
+                  </div>
+                  <h3 className="text-lg font-bold text-card-foreground">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p>
+                  <div className="mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{item.status}</div>
+                  {index < timeline.length - 1 && <div className="absolute -right-3 top-1/2 hidden h-px w-6 bg-border lg:block"/>}
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-white/10 bg-muted/20 py-14 md:py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto mb-8 max-w-3xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">Project Areas</p>
-            <h2 className="mt-2 text-3xl font-bold text-foreground md:text-4xl">Building for worship, learning and community</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Project areas</p>
+            <h2 className="mt-2 text-3xl font-bold text-foreground">Explore each development</h2>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {projectAreas.map(({ id, title, text, icon: Icon }) => (
-              <article id={id} key={id} className="jic-anchor-target rounded-2xl border border-border bg-card p-6 shadow-sm">
-                <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={22}/></div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {projectAreas.map(({title,text,to,icon:Icon}) => (
+              <Link key={to} to={to} className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary/30">
+                <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={22}/></div>
                 <h3 className="text-xl font-bold text-card-foreground">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
-              </article>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary">View project <ArrowRight size={16}/></span>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="update-gallery" className="jic-anchor-target bg-background pb-16 md:pb-24">
+      <section className="bg-background py-14 md:py-20">
         <div className="container mx-auto px-4">
-          <div className="mb-6 text-center"><h2 className="text-2xl font-bold text-foreground">Project Updates</h2><p className="mt-2 text-sm text-muted-foreground">Latest appeal and project information from JIC.</p></div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="rounded-2xl overflow-hidden shadow-xl max-w-4xl mx-auto border border-border">
-            <img src={IMAGES.funeralAppeal} alt="Funeral Service Appeal Details Poster" className="w-full h-auto object-cover" />
-          </motion.div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Link to="/projects/current-appeals" className="rounded-2xl border border-border bg-card p-6"><h3 className="font-bold text-card-foreground">Current appeals</h3><p className="mt-2 text-sm text-muted-foreground">See active fundraising and project needs.</p></Link>
+            <Link to="/projects/gallery" className="rounded-2xl border border-border bg-card p-6"><Images className="mb-3 text-primary" size={22}/><h3 className="font-bold text-card-foreground">Updates & gallery</h3><p className="mt-2 text-sm text-muted-foreground">Photos and progress updates from ongoing work.</p></Link>
+            <Link to="/projects/how-to-support" className="rounded-2xl border border-border bg-card p-6"><h3 className="font-bold text-card-foreground">Support the projects</h3><p className="mt-2 text-sm text-muted-foreground">Find out how to contribute to JIC development.</p></Link>
+          </div>
         </div>
       </section>
     </div>
