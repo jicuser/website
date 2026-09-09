@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Jamatia Islamic Centre"><rect width="64" height="64" rx="16" fill="#0b0f14"/><path d="M14 46V28l18-12 18 12v18" fill="none" stroke="#e3b953" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 46V34h16v12" fill="none" stroke="#e3b953" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="24" r="3" fill="#e3b953"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Jamatia Islamic Centre">
+  <rect width="64" height="64" rx="15" fill="#07111b"/>
+  <path d="M10 27 19 18l7 5 6-10 6 10 7-5 9 9" fill="none" stroke="#e1b84f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M14 29v19h36V29" fill="none" stroke="#e1b84f" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M27 48V36h10v12" fill="none" stroke="#e1b84f" stroke-width="3"/>
+  <circle cx="32" cy="29" r="2.5" fill="#e1b84f"/>
+  <text x="32" y="58" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="7" font-weight="700" fill="#f7f1e5">JIC</text>
+</svg>
