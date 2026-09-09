@@ -52,6 +52,7 @@ showStatus('Loading website…');
       import('@/styles/header-final-v8.css'),
       import('@/styles/header-nav-v9.css'),
       import('@/styles/header-audit-v10.css'),
+      import('@/styles/desktop-home-alignment-v11.css'),
     ]);
 
     const React = ReactModule.default;
