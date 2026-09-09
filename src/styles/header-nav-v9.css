@@ -130,6 +130,13 @@
   }
   .jic-header.is-scrolled .jic-scroll-reminder::after{display:none!important;content:none!important;}
 
+  /* The update strip is absolute under the main nav. Reserve its height before subtabs so it never covers them. */
+  .jic-header.is-scrolled .jic-subnav{
+    margin-top:48px!important;
+    position:relative!important;
+    z-index:3!important;
+  }
+
   /* Give the new update strip its own vertical space before page content. */
   .jic-header.is-scrolled + *{scroll-margin-top:40px;}
 }
