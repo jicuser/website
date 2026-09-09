@@ -52,7 +52,6 @@ const standaloneSections = [
   ['madrassah/student-portal','Madrassah','Student Portal','/madrassah'],
   ['youth/projects','Youth','Youth Projects','/youth'],
   ['youth/activities','Youth','Activities','/youth'],
-  ['youth/itikaf','Youth',"I'tikaf Program",'/youth'],
   ['youth/trips-events','Youth','Trips & Events','/youth'],
   ['youth/volunteering','Youth','Volunteering','/youth'],
   ['youth/classes-skills','Youth','Classes & Skills','/youth'],
@@ -79,6 +78,7 @@ function App() {
           <Route path="services" element={<ServicesPage />} />
           <Route path="team" element={<TeamPage />} />
           <Route path="youth" element={<YouthPage />} />
+          <Route path="youth/itikaf" element={<YouthPage view="itikaf" />} />
           {standaloneSections.map(([path,eyebrow,title,backTo]) => (
             <Route key={path} path={path} element={<SectionPage eyebrow={eyebrow} title={title} backTo={backTo} backLabel={`Back to ${eyebrow}`} />} />
           ))}
