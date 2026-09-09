@@ -7,6 +7,7 @@ import { EVENTS_LIST } from '@/content/pages/home';
 import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useContent } from '@/context/ContentContext';
+import { useSiteImages } from '@/hooks/useSiteImages';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 
@@ -39,12 +40,13 @@ function useHomeTiles(){
 }
 
 export default function HomePage(){
-  const{events,announcement,livestream}=useHomeLiveContent();const cards=useHomeTiles();const{jummahTimes}=usePrayerTimes();const{getContent}=useContent();
+  const{events,announcement,livestream}=useHomeLiveContent();const cards=useHomeTiles();const{jummahTimes}=usePrayerTimes();const{getContent}=useContent();const siteImages=useSiteImages();
   let hero={};try{hero=JSON.parse(getContent('page:/','{}'));}catch{}
+  const heroImage=hero.image||siteImages.homeHero;
   const liveUrl=livestream?.stream_url||SITE.socials.youtube;const embedUrl=useMemo(()=>youtubeEmbedUrl(livestream?.stream_url),[livestream]);
 
   return <div className="jic-premium-home">
-    <section className="jic-hero jic-hero-no-image">
+    <section className="jic-hero" style={heroImage?{backgroundImage:`url("${heroImage}")`}:undefined}>
       <div className="jic-hero-overlay"/>
       <div className="jic-hero-inner">
         <div className="jic-hero-mobile-logo"><JamatiaLogo/></div>
