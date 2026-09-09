@@ -1,4 +1,4 @@
-/* Mobile information hierarchy: compact top, actions at thumb reach */
+/* Mobile information hierarchy: compact top, frosted logo/quote area and vertical controls */
 @media (max-width: 767px){
   .jic-header>.mx-auto{padding-left:8px!important;padding-right:8px!important}
   .jic-info-shell{border-radius:24px!important}
@@ -17,40 +17,66 @@
   .jic-jummah-mini strong{font-size:14px!important}
   .jic-radio span{font-size:13px!important}
 
-  /* Top navigation becomes logo/update only. Action icons live in bottom bar. */
-  .jic-mainnav{min-height:68px!important;padding:7px 9px!important;border-radius:22px!important}
-  .jic-brand{display:flex!important;max-width:118px!important}
-  .jic-brand .brand-lockup img{max-height:50px!important;max-width:112px!important}
-  .jic-nav-actions{
-    position:fixed!important;
-    left:12px!important;right:12px!important;
-    bottom:calc(10px + env(safe-area-inset-bottom))!important;
-    z-index:90!important;
-    display:grid!important;
-    grid-template-columns:repeat(5,1fr)!important;
-    gap:7px!important;
-    padding:8px!important;
-    border:1px solid rgba(148,163,184,.26)!important;
-    border-radius:24px!important;
-    background:rgba(7,17,27,.90)!important;
-    -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
-    backdrop-filter:blur(22px) saturate(145%)!important;
-    box-shadow:0 14px 40px rgba(0,0,0,.30)!important;
+  /* Frosted mobile logo/update surface. */
+  .jic-mainnav{
+    min-height:76px!important;
+    padding:8px 62px 8px 9px!important;
+    border-radius:22px!important;
+    position:relative!important;
+    overflow:visible!important;
+    background:rgba(8,19,31,.52)!important;
+    border:1px solid rgba(255,255,255,.14)!important;
+    -webkit-backdrop-filter:blur(26px) saturate(155%)!important;
+    backdrop-filter:blur(26px) saturate(155%)!important;
+    box-shadow:0 12px 34px rgba(0,0,0,.22)!important;
   }
-  html:not(.dark) .jic-nav-actions{background:rgba(250,247,239,.94)!important;border-color:rgba(15,23,42,.12)!important}
-  .jic-nav-actions .header-icon,.jic-nav-actions .donate-button{width:100%!important;min-width:0!important;height:48px!important;min-height:48px!important;border-radius:16px!important;display:flex!important;align-items:center!important;justify-content:center!important}
-  .jic-nav-actions .donate-button span{display:none!important}
-  .jic-settings-wrap{display:contents!important}
-  .jic-settings-wrap>.header-icon{grid-column:auto!important}
-  .jic-settings-panel{position:fixed!important;left:12px!important;right:12px!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;top:auto!important;max-height:65vh!important;overflow:auto!important}
+  html:not(.dark) .jic-mainnav{background:rgba(250,247,239,.58)!important;border-color:rgba(15,23,42,.11)!important}
+  .jic-brand{display:flex!important;max-width:120px!important;align-self:center!important}
+  .jic-brand .brand-lockup img{max-height:52px!important;max-width:114px!important}
 
-  /* When scrolled, retain a small logo at the side and use a separate long update row. */
-  .jic-header.is-scrolled .jic-mainnav{display:block!important;position:relative!important;padding:8px 8px 8px 88px!important;min-height:68px!important}
-  .jic-header.is-scrolled .jic-mainnav::before{content:"";position:absolute;left:10px;top:10px;width:68px;height:48px;background:url('/brand-logo.svg') center/contain no-repeat;opacity:.96}
-  .jic-scroll-reminder{width:100%!important;min-width:0!important;max-width:none!important;height:52px!important;min-height:52px!important;border-radius:16px!important;padding:6px 10px!important;display:grid!important;grid-template-rows:auto 1fr!important;align-content:center!important;text-align:left!important;overflow:hidden!important}
+  /* Only theme, Donate and Menu stay outside the burger drawer. */
+  .jic-nav-actions{
+    position:absolute!important;
+    right:8px!important;
+    top:7px!important;
+    bottom:auto!important;
+    left:auto!important;
+    width:46px!important;
+    z-index:6!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:5px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  .jic-nav-actions .jic-admin-entry,.jic-nav-actions .jic-settings-wrap{display:none!important}
+  .jic-nav-actions .header-icon,.jic-nav-actions .donate-button{
+    width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;
+    padding:0!important;border-radius:15px!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    background:rgba(9,22,36,.64)!important;border:1px solid rgba(255,255,255,.15)!important;
+    -webkit-backdrop-filter:blur(18px) saturate(150%)!important;backdrop-filter:blur(18px) saturate(150%)!important;
+  }
+  html:not(.dark) .jic-nav-actions .header-icon,html:not(.dark) .jic-nav-actions .donate-button{background:rgba(255,255,255,.68)!important;border-color:rgba(15,23,42,.12)!important}
+  .jic-nav-actions .donate-button{background:rgba(231,178,55,.93)!important;color:#07111b!important}
+  .jic-nav-actions .donate-button span{display:none!important}
+
+  /* Scrolled state: keep logo at left and use the centre for the rotating quote. */
+  .jic-header.is-scrolled .jic-mainnav{display:block!important;padding:8px 62px 8px 90px!important;min-height:76px!important}
+  .jic-header.is-scrolled .jic-mainnav::before{content:"";position:absolute;left:9px;top:11px;width:72px;height:52px;background:url('/brand-logo.svg') center/contain no-repeat;opacity:.98}
+  .jic-scroll-reminder{
+    width:100%!important;min-width:0!important;max-width:none!important;height:58px!important;min-height:58px!important;
+    border-radius:17px!important;padding:7px 10px!important;display:grid!important;grid-template-rows:auto 1fr!important;align-content:center!important;text-align:left!important;overflow:hidden!important;
+    background:rgba(8,19,31,.28)!important;border:1px solid rgba(255,255,255,.08)!important;
+    -webkit-backdrop-filter:blur(20px) saturate(145%)!important;backdrop-filter:blur(20px) saturate(145%)!important;
+  }
+  html:not(.dark) .jic-scroll-reminder{background:rgba(255,255,255,.38)!important;border-color:rgba(15,23,42,.08)!important}
   .jic-reminder-meta{font-size:8.5px!important;line-height:1!important;gap:7px!important;white-space:nowrap!important;overflow:hidden!important}
   .jic-reminder-line{min-width:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:4px 8px!important;align-items:end!important}
-  .jic-reminder-line strong{font-size:11.5px!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .jic-reminder-line strong{font-size:11.5px!important;line-height:1.18!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
   .jic-reminder-line small{font-size:8.5px!important;white-space:nowrap!important}
   .jic-reminder-line em{font-size:8.5px!important;grid-column:2!important}
   .jic-reminder-detail{left:10px!important;right:10px!important;width:auto!important;max-height:42vh!important;overflow:auto!important}
@@ -59,6 +85,6 @@
   .jic-subnav{overflow-x:auto!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important}
   .jic-subnav::-webkit-scrollbar{display:none!important}
 
-  /* Keep public content clear of the fixed action bar. */
-  body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+  /* No permanent bottom toolbar anymore. */
+  body{padding-bottom:0!important}
 }
