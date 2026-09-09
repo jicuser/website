@@ -1,0 +1,173 @@
+/* JIC v10 — desktop audit pass: contact layout, segmented utility bar, quote strip, settings stacking, and content spacing. */
+
+@media (min-width:1025px){
+  /* Keep the desktop top row balanced on ordinary laptop widths. */
+  .jic-info-shell{
+    grid-template-columns:minmax(270px,.92fr) minmax(540px,2.15fr) minmax(300px,.96fr)!important;
+    align-items:stretch!important;
+  }
+
+  /* Contact block: address on row one; phone + email together on row two. */
+  .jic-address{
+    display:grid!important;
+    grid-template-columns:auto auto minmax(0,1fr)!important;
+    grid-template-rows:1fr 1fr!important;
+    align-items:center!important;
+    column-gap:8px!important;
+    row-gap:0!important;
+    min-width:0!important;
+    padding:5px 13px!important;
+    overflow:hidden!important;
+  }
+  .jic-address>svg{
+    grid-column:1!important;
+    grid-row:1/3!important;
+    align-self:center!important;
+  }
+  .jic-address>span{
+    grid-column:2/4!important;
+    grid-row:1!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    font-size:11px!important;
+  }
+  .jic-top-phone{
+    grid-column:2!important;
+    grid-row:2!important;
+    margin:0!important;
+    justify-self:start!important;
+    font-size:10px!important;
+    white-space:nowrap!important;
+  }
+  .jic-top-email{
+    display:inline-flex!important;
+    grid-column:3!important;
+    grid-row:2!important;
+    justify-self:end!important;
+    min-width:0!important;
+    max-width:150px!important;
+    overflow:hidden!important;
+    font-size:9px!important;
+    white-space:nowrap!important;
+  }
+  .jic-top-email span{
+    min-width:0!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  /* Jummah + Radio should read like two clean segments of the top information bar, not nested pills. */
+  .jic-utility-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    align-items:stretch!important;
+    gap:0!important;
+    min-width:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+  .jic-jummah-mini,
+  .jic-radio{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    height:100%!important;
+    min-height:64px!important;
+    margin:0!important;
+    padding:7px 10px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    transform:none!important;
+  }
+  .jic-jummah-mini{
+    display:grid!important;
+    grid-template-columns:auto minmax(0,1fr)!important;
+    align-content:center!important;
+    column-gap:8px!important;
+  }
+  .jic-jummah-mini>span{font-size:8px!important;}
+  .jic-jummah-mini>strong{font-size:13px!important;}
+  .jic-radio{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:8px!important;
+    border-left:1px solid rgba(255,255,255,.12)!important;
+    white-space:nowrap!important;
+  }
+  html:not(.dark) .jic-radio{border-left-color:rgba(20,35,50,.12)!important;}
+  .jic-radio span{font-size:12px!important;}
+  .jic-radio small{font-size:9px!important;}
+
+  /* The quote strip had a third unused grid column, which created a blank gap on the right. */
+  .jic-header.is-scrolled .jic-scroll-reminder{
+    grid-template-columns:178px minmax(0,1fr)!important;
+  }
+  .jic-header.is-scrolled .jic-reminder-line{
+    grid-template-columns:minmax(0,1fr) auto auto!important;
+    gap:0!important;
+    padding:0 10px!important;
+  }
+  .jic-header.is-scrolled .jic-reminder-line small{
+    width:auto!important;
+    min-width:112px!important;
+    padding:0 10px!important;
+  }
+  .jic-header.is-scrolled .jic-reminder-line em{
+    position:static!important;
+    align-self:center!important;
+    margin-left:9px!important;
+    padding-left:9px!important;
+    border-left:1px solid rgba(255,255,255,.10)!important;
+    font-size:7px!important;
+    opacity:.48!important;
+    white-space:nowrap!important;
+  }
+  html:not(.dark) .jic-header.is-scrolled .jic-reminder-line em{border-left-color:rgba(20,35,50,.10)!important;}
+
+  /* Header overlays: Settings must sit above the reminder/subnav rather than being cut through by them. */
+  .jic-mainnav{overflow:visible!important;isolation:auto!important;}
+  .jic-nav-actions,.jic-settings-wrap{position:relative!important;z-index:520!important;}
+  .jic-settings-wrap>div{position:relative!important;z-index:521!important;}
+  .jic-settings-panel{
+    top:calc(100% + 10px)!important;
+    right:0!important;
+    z-index:10080!important;
+    width:320px!important;
+    max-height:min(520px,calc(100vh - 130px))!important;
+    overflow-y:auto!important;
+  }
+  .jic-header.has-overlay-open .jic-subnav,
+  .jic-header.has-overlay-open .jic-scroll-reminder{z-index:2!important;}
+
+  /* The old pages still add pt-24 on top of the desktop main offset, creating the large dead zone. */
+  .page-transition.pt-24{padding-top:0!important;}
+  html:has(.jic-subnav) main{padding-top:214px!important;}
+  .page-transition>section:first-child{padding-top:30px!important;padding-bottom:34px!important;}
+  .page-transition>section:first-child h1{margin-top:0!important;}
+
+  /* Prevent legacy hover rules from hiding the new always-visible desktop navigation. */
+  .jic-header.is-scrolled .jic-mainnav:hover .jic-scroll-reminder,
+  .jic-header.is-scrolled .jic-mainnav:focus-within .jic-scroll-reminder{
+    display:grid!important;
+  }
+  .jic-header.is-scrolled .jic-mainnav:hover::before,
+  .jic-header.is-scrolled .jic-mainnav:focus-within::before{
+    width:120px!important;
+    opacity:.95!important;
+  }
+}
+
+/* Compact PC/tablet: keep email from stealing width and remove extra nested gaps. */
+@media (min-width:641px) and (max-width:1024px){
+  .jic-top-email{display:none!important;}
+  .jic-utility-row{gap:0!important;padding:0!important;}
+  .jic-jummah-mini,.jic-radio{border-radius:0!important;margin:0!important;}
+  .jic-radio{border-left:1px solid rgba(255,255,255,.10)!important;}
+  html:not(.dark) .jic-radio{border-left-color:rgba(20,35,50,.10)!important;}
+}
