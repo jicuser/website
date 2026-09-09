@@ -72,7 +72,7 @@
 }
 
 @media(max-width:640px){
-  .jic-header .max-w-[1500px]{padding-left:8px;padding-right:8px}
+  .jic-header .max-w-\[1500px\]{padding-left:8px;padding-right:8px}
   .jic-info-shell{border-radius:18px}
   .jic-address{min-height:34px;font-size:11px;justify-content:center;padding:0 8px}
   .jic-prayer-row{display:grid;grid-template-columns:repeat(6,1fr);overflow:visible;width:100%}

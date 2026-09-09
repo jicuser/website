@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { BookOpen, Heart, Trophy } from 'lucide-react';
+import { SITE } from '@/content/site';
 import ItikaafRegistrationForm from '@/components/sections/youth/ItikaafRegistrationForm';
 
 const PAGE_TITLE = 'Youth Programs | Jamatia Islamic Centre';
@@ -42,7 +43,7 @@ function YouthActivitiesSection() {
 function YouthRegistrationSection() {
   return (
     <motion.section id="itikaf" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="jic-anchor-target py-8 md:py-12">
-      <div className="container mx-auto px-3 sm:px-4"><div className="mx-auto max-w-4xl"><div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5"><div className="mb-4 text-center md:text-left"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Youth · Registration</p><h1 className="mt-2 text-2xl font-bold text-card-foreground md:text-3xl">I'tikaf Registration Form</h1><p className="mt-2 text-sm text-muted-foreground">Complete the form below to register for the JIC youth I'tikaf programme.</p></div><ItikaafRegistrationForm /></div><div className="mt-4 text-center"><p className="text-sm text-muted-foreground">Need help? Visit <a href="/contact" className="text-primary hover:underline font-medium">Contact Us</a>.</p></div></div></div>
+      <div className="container mx-auto px-3 sm:px-4"><div className="mx-auto max-w-4xl"><div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5"><div className="mb-4 text-center md:text-left"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Youth · Registration</p><h1 className="mt-2 text-2xl font-bold text-card-foreground md:text-3xl">I'tikaf Registration Form</h1><p className="mt-2 text-sm text-muted-foreground">Complete the form below to register for the JIC youth I'tikaf programme.</p></div>{(import.meta.env.VITE_ITIKAAF_REGISTRATION_ENABLED === 'true' || import.meta.env.VITE_ITIKAAF_SHEETS_WEBHOOK_URL) ? <ItikaafRegistrationForm /> : <div role="status" className="rounded-xl border p-5"><h2 className="text-lg font-semibold">Online registration is not open</h2><p className="mt-2">Please contact the centre about I’tikaf registration.</p><a className="mt-3 inline-flex min-h-11 items-center underline" href={`mailto:${SITE.email}`}>{SITE.email}</a></div>}</div><div className="mt-4 text-center"><p className="text-sm text-muted-foreground">Need help? Visit <a href="/contact" className="text-primary hover:underline font-medium">Contact Us</a>.</p></div></div></div>
     </motion.section>
   );
 }

@@ -22,40 +22,7 @@ import AdminLoginPage from '@/pages/admin/AdminLoginPage';
 import TileContentAdminPage from '@/pages/admin/TileContentAdminPage';
 import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
 
-const standaloneSections = [
-  ['about/history','About','Our History','/about'],
-  ['services/daily-prayers','Services','Daily Prayers','/services'],
-  ['services/jummah','Services','Jummah','/services'],
-  ['services/quran-classes','Services','Quran Classes','/services'],
-  ['services/community-services','Services','Community Support','/services'],
-  ['services/nikah','Services','Nikah','/services'],
-  ['services/hall-booking','Services','Hall Booking','/services'],
-  ['funerals','Funerals','Funeral Services',null],
-  ['funerals/what-to-do','Funerals','What to Do When Someone Passes Away','/funerals'],
-  ['funerals/contact-support','Funerals','Funeral Contact & Support','/funerals'],
-  ['projects/masjid-extension','Masjid Extension','Masjid Extension','/projects'],
-  ['projects/masjid-extension/timeline','Masjid Extension','Extension Timeline','/projects/masjid-extension'],
-  ['projects/timeline','Masjid Extension','Extension Timeline','/projects/masjid-extension'],
-  ['projects/main-prayer-hall','Masjid Extension','Main Prayer Hall','/projects/masjid-extension'],
-  ['projects/wudu-area','Masjid Extension','Wudu & Facilities','/projects/masjid-extension'],
-  ['projects/community-hall','Masjid Extension','Community Hall','/projects/masjid-extension'],
-  ['projects/madrassah-floor','Masjid Extension','Madrassah Floor','/projects/masjid-extension'],
-  ['projects/madrassah-building','Masjid Extension','Madrassah Floor','/projects/masjid-extension'],
-  ['projects/current-appeals','Projects','Current Appeals','/projects'],
-  ['projects/gallery','Projects','Updates & Gallery','/projects'],
-  ['projects/how-to-support','Projects','Support Projects','/projects'],
-  ['madrassah/programs','Madrassah','Programmes','/madrassah'],
-  ['madrassah/classes-courses','Madrassah','Classes & Courses','/madrassah'],
-  ['madrassah/special-courses','Madrassah','Special Courses','/madrassah'],
-  ['madrassah/enrolment','Madrassah','Enrolment','/madrassah'],
-  ['madrassah/policies','Madrassah','Policies','/madrassah'],
-  ['madrassah/student-portal','Madrassah','Student Portal','/madrassah'],
-  ['youth/projects','Youth','Youth Projects','/youth'],
-  ['youth/activities','Youth','Activities','/youth'],
-  ['youth/trips-events','Youth','Trips & Events','/youth'],
-  ['youth/volunteering','Youth','Volunteering','/youth'],
-  ['youth/classes-skills','Youth','Classes & Skills','/youth'],
-];
+import { standaloneSections } from '@/content/sectionRoutes';
 
 function App() {
   return (
@@ -63,7 +30,7 @@ function App() {
       <Routes>
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={<ProtectedAdminRoute><AdminPage /></ProtectedAdminRoute>} />
-        <Route path="/admin/home-tiles" element={<ProtectedAdminRoute><TileContentAdminPage /></ProtectedAdminRoute>} />
+        <Route path="/admin/home-tiles" element={<ProtectedAdminRoute permission="content"><TileContentAdminPage /></ProtectedAdminRoute>} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
           <Route path="about" element={<AboutPage />} />

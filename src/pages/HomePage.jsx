@@ -8,16 +8,24 @@ import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLo
 import { useContent } from '@/context/ContentContext';
 import { useSiteImages } from '@/hooks/useSiteImages';
 import { supabase } from '@/lib/supabaseClient';
+import { londonDate } from '@/lib/timetable';
 import { cn } from '@/lib/utils';
 
-function youtubeEmbedUrl(raw){
-  if(!raw) return null;
-  try{const u=new URL(raw);if(u.hostname==='youtu.be')return`https://www.youtube.com/embed/${u.pathname.slice(1)}`;const id=u.searchParams.get('v')||(u.pathname.startsWith('/live/')?u.pathname.split('/')[2]:null);return id?`https://www.youtube.com/embed/${id}`:null;}catch{return null;}
+function safeWebUrl(raw) {
+  try { const url = new URL(raw); return url.protocol === 'https:' ? url.href : null; } catch { return null; }
+}
+function youtubeEmbedUrl(raw) {
+  try {
+    const u = new URL(raw);
+    if(u.protocol !== 'https:' || !['youtu.be','youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)) return null;
+    const id = u.hostname === 'youtu.be' ? u.pathname.slice(1) : u.searchParams.get('v') || (/^\/(?:live|embed)\//.test(u.pathname) ? u.pathname.split('/')[2] : null);
+    return /^[A-Za-z0-9_-]{11}$/.test(id || '') ? `https://www.youtube.com/embed/${id}` : null;
+  } catch { return null; }
 }
 
 function useHomeLiveContent(){
   const [events,setEvents]=useState([]);const [announcement,setAnnouncement]=useState(null);const [livestream,setLivestream]=useState(null);const[whatsapp,setWhatsapp]=useState('');
-  useEffect(()=>{const now=new Date().toISOString();const today=now.slice(0,10);Promise.all([
+  useEffect(()=>{const now=new Date().toISOString();const today=londonDate();Promise.all([
     supabase.from('events').select('*').eq('published',true).gte('event_date',today).order('event_date',{ascending:true}).limit(4),
     supabase.from('announcements').select('*').eq('published',true).lte('starts_at',now).order('created_at',{ascending:false}).limit(6),
     supabase.from('livestream_settings').select('*').eq('id',1).maybeSingle(),
@@ -43,7 +51,7 @@ export default function HomePage(){
   const{events,announcement,livestream,whatsapp}=useHomeLiveContent();const cards=useHomeTiles();const{jummahTimes}=usePrayerTimes();const{getContent}=useContent();const siteImages=useSiteImages();
   let hero={};try{hero=JSON.parse(getContent('page:/','{}'));}catch{}
   const heroImage=hero.image||siteImages.homeHero;
-  const liveUrl=livestream?.stream_url||SITE.socials.youtube;const embedUrl=useMemo(()=>youtubeEmbedUrl(livestream?.stream_url),[livestream]);
+  const liveUrl=safeWebUrl(livestream?.stream_url)||SITE.socials.youtube;const embedUrl=useMemo(()=>youtubeEmbedUrl(livestream?.stream_url),[livestream]);
 
   return <div className="jic-premium-home">
     <section className="jic-hero" style={heroImage?{backgroundImage:`url("${heroImage}")`}:undefined}>
@@ -54,7 +62,7 @@ export default function HomePage(){
         <h1 style={{whiteSpace:'pre-line'}}>{hero.title||'A place for faith.\nA home for community.'}</h1>
         <div className="jic-gold-rule"/>
         <p className="jic-hero-sub" style={{whiteSpace:'pre-line'}}>{hero.body||'Worship. Learn. Grow. Together.\nA stronger community for a brighter tomorrow.'}</p>
-        <div className="jic-hero-buttons"><Link to="/contact" className="jic-primary-cta">Visit the Centre <ArrowRight size={18}/></Link><a href={liveUrl} target="_blank" rel="noreferrer" className="jic-secondary-cta"><Play size={17} fill="currentColor"/> Watch Live</a></div>
+        <div className="jic-hero-buttons"><Link to="/contact#map" className="jic-primary-cta">Visit the Centre <ArrowRight size={18}/></Link><a href={liveUrl} target="_blank" rel="noreferrer" className="jic-secondary-cta"><Play size={17} fill="currentColor"/> Watch Live</a></div>
       </div>
     </section>
 
@@ -66,10 +74,22 @@ export default function HomePage(){
       </Link>)}
     </section>
 
+    {events.length > 0 && <section className="jic-upcoming-events" aria-labelledby="upcoming-events-title">
+      <h2 id="upcoming-events-title">Upcoming events</h2>
+      <div className="jic-event-cards">{events.map(event => <article key={event.id} className="jic-event-card">
+        {safeWebUrl(event.poster_url) && <img src={event.poster_url} alt={`${event.title} poster`} loading="lazy"/>}
+        <h3>{event.title}</h3>
+        <p><time dateTime={event.event_date}>{new Date(`${event.event_date}T12:00:00`).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</time>{event.start_time ? ` · ${event.start_time.slice(0,5)}` : ''}</p>
+        {event.location && <p>{event.location}</p>}
+        {event.description && <p>{event.description}</p>}
+        {safeWebUrl(event.registration_url) && <a href={safeWebUrl(event.registration_url)} target="_blank" rel="noreferrer">Event details & registration</a>}
+      </article>)}</div>
+    </section>}
+
     <section className="jic-event-strip"><div className="jic-event-label"><CalendarDays size={17}/><span>Friday Sermon</span></div><div className="jic-event-main"><strong>{jummahTimes.map((t,i)=>`${i===0?'1st':'2nd'} Jamaat ${t.prayer}`).join(' · ')}</strong><span>Every Friday</span></div><Link to="/prayer-times/jummah" className="jic-event-arrow">›</Link></section>
 
     {livestream?.enabled&&livestream.stream_url&&<section id="live" className="jic-live-section"><div className="jic-live-heading"><span><Radio size={15}/> Live</span><h2>{livestream.title||'JIC Live'}</h2></div>{embedUrl?<div className="jic-live-frame"><iframe src={embedUrl} title={livestream.title||'JIC Live'} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/></div>:<a className="jic-primary-cta" href={liveUrl} target="_blank" rel="noreferrer">Watch Live on YouTube</a>}</section>}
 
-    <section className="jic-home-footer-strip"><div>{whatsapp?<><MessageCircle size={18}/><div><strong>Join our WhatsApp Community</strong><small>Official JIC updates and announcements</small></div></>:<><span className="jic-bell">●</span><div><strong>Stay Updated</strong><small>WhatsApp Community link coming soon</small></div></>}</div><div className="jic-socials">{whatsapp&&<a href={whatsapp} target="_blank" rel="noreferrer">Join WhatsApp</a>}<a href={SITE.socials.youtube} target="_blank" rel="noreferrer">YouTube</a><a href={SITE.socials.facebook} target="_blank" rel="noreferrer">Facebook</a><a href={SITE.socials.instagram} target="_blank" rel="noreferrer">Instagram</a></div></section>
+    <section className="jic-home-footer-strip"><div>{whatsapp?<><MessageCircle size={18}/><div><strong>Join our WhatsApp Community</strong><small>Official JIC updates and announcements</small></div></>:<><span className="jic-bell">●</span><div><strong>Stay Updated</strong><small>WhatsApp Community link coming soon</small></div></>}</div><div className="jic-socials">{whatsapp&&<a href={safeWebUrl(whatsapp)||undefined} target="_blank" rel="noreferrer">Join WhatsApp</a>}<a href={SITE.socials.youtube} target="_blank" rel="noreferrer">YouTube</a><a href={SITE.socials.facebook} target="_blank" rel="noreferrer">Facebook</a><a href={SITE.socials.instagram} target="_blank" rel="noreferrer">Instagram</a></div></section>
   </div>;
 }

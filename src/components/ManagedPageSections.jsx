@@ -8,12 +8,13 @@ export default function ManagedPageSections(){
 
   useEffect(()=>{
     let active=true;
+    setSections([]);
     supabase.from('page_sections')
       .select('id,section_key,title,body,background_image_url,image_urls,sort_order,published')
       .eq('page_path',pathname)
       .eq('published',true)
       .order('sort_order',{ascending:true})
-      .then(({data,error})=>{if(active&&!error)setSections(data||[])});
+      .then(({data,error})=>{if(active)setSections(error?[]:data||[])});
     return()=>{active=false};
   },[pathname]);
 

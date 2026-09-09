@@ -20,21 +20,29 @@ export default function EditableText({ contentKey, fallback, multiline = false, 
   const { editMode, getContent, saveContent } = useContent();
   const [open, setOpen]              = useState(false);
   const [draft, setDraft]            = useState('');
+  const [error, setError] = useState('');
   const [busy, setBusy]              = useState(false);
 
   const value = getContent(contentKey, fallback);
   const showEditUI = isAdmin && editMode;
 
   function openEditor() {
+    setError('');
     setDraft(value);
     setOpen(true);
   }
 
   async function handleSave() {
     setBusy(true);
-    await saveContent(contentKey, draft);
-    setBusy(false);
-    setOpen(false);
+    setError('');
+    try {
+      await saveContent(contentKey, draft);
+      setOpen(false);
+    } catch (err) {
+      setError(err.message || 'Unable to save. Your text is still here; please retry.');
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (!showEditUI) {
@@ -55,11 +63,11 @@ export default function EditableText({ contentKey, fallback, multiline = false, 
         <button
           onClick={openEditor}
           className="absolute -top-2 -right-2 z-50 flex items-center justify-center
-                     w-5 h-5 rounded-full bg-teal-500 text-white shadow
-                     opacity-0 group-hover:opacity-100 transition-opacity"
+                     w-9 h-9 rounded-full bg-teal-500 text-white shadow
+                     opacity-100 transition-opacity"
           title="Edit this text"
         >
-          <Pencil size={10} />
+          <Pencil size={16} />
         </button>
       </span>
 
@@ -100,6 +108,7 @@ export default function EditableText({ contentKey, fallback, multiline = false, 
               />
             )}
 
+            {error && <p role="alert" className="mt-3 text-sm text-red-600">{error}</p>}
             <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={() => setOpen(false)}
