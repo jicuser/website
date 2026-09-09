@@ -55,6 +55,7 @@ showStatus('Loading website…');
       import('@/styles/desktop-home-alignment-v11.css'),
       import('@/styles/mobile-admin-quote-v12.css'),
       import('@/styles/mobile-menu-theme-v13.css'),
+      import('@/styles/mobile-quote-v14.css'),
     ]);
 
     const React = ReactModule.default;
