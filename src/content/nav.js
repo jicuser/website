@@ -1,8 +1,13 @@
-/**
- * Primary navigation and section tabs grouped by visitor intent.
- * Worship information lives under Prayer Times, operational services under Services,
- * and building/fundraising work under Projects.
- */
+/** Primary navigation grouped by visitor intent. */
+
+export const MASJID_EXTENSION_TABS = [
+  { name: 'Overview', path: '/projects/masjid-extension' },
+  { name: 'Timeline', path: '/projects/masjid-extension/timeline' },
+  { name: 'Main Prayer Hall', path: '/projects/main-prayer-hall' },
+  { name: 'Wudu & Facilities', path: '/projects/wudu-area' },
+  { name: 'Community Hall', path: '/projects/community-hall' },
+  { name: 'Madrassah Floor', path: '/projects/madrassah-floor' },
+];
 
 export const NAV_GROUPS = [
   { name: 'Home', path: '/', children: [] },
@@ -34,12 +39,7 @@ export const NAV_GROUPS = [
   {
     name: 'Projects', path: '/projects', children: [
       { name: 'All Projects', path: '/projects' },
-      { name: 'Timeline', path: '/projects/timeline' },
       { name: 'Masjid Extension', path: '/projects/masjid-extension' },
-      { name: 'Main Prayer Hall', path: '/projects/main-prayer-hall' },
-      { name: 'Wudu & Facilities', path: '/projects/wudu-area' },
-      { name: 'Community Hall', path: '/projects/community-hall' },
-      { name: 'Madrassah Building', path: '/projects/madrassah-building' },
       { name: 'Current Appeals', path: '/projects/current-appeals' },
       { name: 'Updates & Gallery', path: '/projects/gallery' },
       { name: 'Support Projects', path: '/projects/how-to-support' },
