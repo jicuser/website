@@ -39,6 +39,7 @@
 /* Theme and active page styles */
 @import "./theme.css";
 @import "./home.css";
+@import "./projects.css";
 @import "./hall-booking.css";
 @import "./worship.css";
 @import "./header.css";
