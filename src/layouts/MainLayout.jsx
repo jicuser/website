@@ -6,6 +6,7 @@ import ManagedPageSections from '@/components/ManagedPageSections';
 import {overviewPaths} from '@/content/editablePages';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
 import Footer from '@/components/shell/Footer';
+import CornerBrand from '@/components/shell/CornerBrand';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import AdminBar from '@/components/shell/AdminBar';
 import { useAuth } from '@/context/AuthContext';
@@ -31,6 +32,7 @@ export default function MainLayout() {
           <ManagedPageSections />
         </motion.div>
       </main>
+      {pathname !== '/' && <CornerBrand />}
       <Footer />
       <ScrollToTop />
       {isAdmin && !preview && <AdminBar />}
