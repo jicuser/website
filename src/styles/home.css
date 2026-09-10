@@ -1,9 +1,23 @@
-/* Canonical homepage feature-card geometry. */
+/* Homepage feature cards. */
 .jic-feature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:18px clamp(12px,3vw,36px)}
-.jic-feature-card{min-height:180px;padding:20px;border-radius:22px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
-.jic-feature-card .jic-card-icon{width:26px;height:26px}.jic-feature-card h2{font-size:1.15rem;line-height:1.1}.jic-feature-card p{font-size:.84rem;line-height:1.45}.jic-feature-card span{font-size:.8rem}
-/* Homepage feature tiles intentionally keep a dark photographic-card treatment in both themes. */
-html:not(.dark) .jic-feature-card{background:#0b1118!important;color:#f5f7fa!important;border-color:#263241!important;box-shadow:0 10px 28px rgba(11,20,32,.12)!important}
-html:not(.dark) .jic-feature-card h2{color:#f5f7fa!important}html:not(.dark) .jic-feature-card p{color:#a8b0bc!important}html:not(.dark) .jic-feature-card .jic-card-icon,html:not(.dark) .jic-feature-card span{color:#e3b43b!important}
-@media(max-width:767px){.jic-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 8px 14px}.jic-feature-card{min-height:118px;padding:13px;border-radius:17px}.jic-feature-card .jic-card-icon{width:21px;height:21px}.jic-feature-card h2{font-size:.96rem}.jic-feature-card p{font-size:.7rem;line-height:1.3;margin-top:4px}.jic-feature-card span{font-size:.68rem;margin-top:8px}}
-@media(max-width:430px){.jic-feature-card{min-height:108px;padding:12px}.jic-feature-card p{display:none}.jic-feature-card h2{font-size:.92rem}.jic-feature-card span{font-size:.65rem}}
+.jic-feature-card{min-height:180px;padding:20px;border:1px solid var(--jic-border);border-radius:22px;background:var(--jic-surface);color:var(--jic-text);display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;box-shadow:0 10px 28px rgba(11,20,32,.06)}
+.jic-feature-card .jic-card-icon{width:26px;height:26px;color:var(--jic-gold)}
+.jic-feature-card h2{font-size:1.15rem;line-height:1.1;color:var(--jic-text)}
+.jic-feature-card p{font-size:.84rem;line-height:1.45;color:var(--jic-text-secondary)}
+.jic-feature-card span{font-size:.8rem;color:var(--jic-gold)}
+
+@media(max-width:767px){
+  .jic-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 8px 14px}
+  .jic-feature-card{min-height:118px;padding:13px;border-radius:17px}
+  .jic-feature-card .jic-card-icon{width:21px;height:21px}
+  .jic-feature-card h2{font-size:.96rem}
+  .jic-feature-card p{font-size:.7rem;line-height:1.3;margin-top:4px}
+  .jic-feature-card span{font-size:.68rem;margin-top:8px}
+}
+
+@media(max-width:430px){
+  .jic-feature-card{min-height:108px;padding:12px}
+  .jic-feature-card p{display:none}
+  .jic-feature-card h2{font-size:.92rem}
+  .jic-feature-card span{font-size:.65rem}
+}
