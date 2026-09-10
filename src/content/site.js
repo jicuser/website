@@ -3,18 +3,22 @@ export const SITE = {
   tagline: 'A place of worship, learning, and community service dedicated to spreading the message of peace and harmony.',
 
   address: {
-    line1: '368–370 Coventry Road',
-    line2: 'Small Heath, Birmingham B10 0XE',
-    short: '368–370 Coventry Rd · Birmingham · B10 0XE',
-    full: '368–370 Coventry Road, Small Heath, Birmingham B10 0XE',
+    line1: '179–183 Woodlands Road',
+    line2: 'Sparkhill, Birmingham B11 4ER',
+    short: '179–183 Woodlands Rd · Birmingham · B11 4ER',
+    full: '179–183 Woodlands Road, Sparkhill, Birmingham B11 4ER',
   },
 
-  phone: '0121 772 6408',
-  email: 'info@jicmasjid.org',
+  phone: '0121 778 6612',
+  email: 'info@jicwoodlands.org.uk',
   hours: 'Open 24 hours',
 
   radio: {
     streamUrl: 'https://jicmosque.radioca.st/stream',
+  },
+
+  community: {
+    whatsapp: 'https://chat.whatsapp.com/EQFjZwFapIxEBWHPk6tfXB',
   },
 
   socials: {
