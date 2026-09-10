@@ -5,7 +5,6 @@ export const standaloneSections = [
   ['services/quran-classes','Services','Quran Classes','/services'],
   ['services/community-services','Services','Community Support','/services'],
   ['services/nikah','Services','Nikah','/services'],
-  ['services/hall-booking','Services','Hall Booking','/services'],
   ['funerals','Funerals','Funeral Services',null],
   ['funerals/what-to-do','Funerals','What to Do When Someone Passes Away','/funerals'],
   ['funerals/contact-support','Funerals','Funeral Contact & Support','/funerals'],
