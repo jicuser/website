@@ -1,4 +1,6 @@
--- Record the staff name supplied at admin sign-in with each audited change.
+-- Record the staff name supplied at admin sign-in with each audited content change.
+-- User/role management is audited explicitly inside the manage-user Edge Function
+-- because service-role database writes do not carry the caller JWT into triggers.
 -- Safe to run repeatedly.
 
 alter table public.audit_log add column if not exists actor_name text;
@@ -37,14 +39,16 @@ begin
 end;
 $$;
 
--- Managed content tables.
 do $$
 declare
   table_name text;
 begin
-  foreach table_name in array array['page_content','events','announcements','livestream_settings','team_members','prayer_times','profiles'] loop
+  foreach table_name in array array['page_content','events','announcements','livestream_settings','team_members','prayer_times'] loop
     execute format('drop trigger if exists audit_changes on public.%I', table_name);
     execute format('create trigger audit_changes after insert or update or delete on public.%I for each row execute function public.write_audit_log()', table_name);
   end loop;
+
+  -- Remove an older profile trigger if this migration was previously applied.
+  drop trigger if exists audit_changes on public.profiles;
 end
 $$;
