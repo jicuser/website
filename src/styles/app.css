@@ -36,10 +36,12 @@
 @import "./admin-sections-v16.css";
 @import "./admin-menu-stability-v25.css";
 
+/* Canonical theme */
+@import "./theme.css";
+
 /* Active feature sources */
 @import "./home.css";
 @import "./hall-booking.css";
 @import "./worship.css";
 @import "./header.css";
-@import "./theme.css";
 @import "./liquid-glass.css";
