@@ -13,8 +13,14 @@ export function AdminSaveProvider({ children }) {
     handlerRef.current = handler || null;
     setDirty(Boolean(options.dirty));
     setLabel(options.label || 'Save to database');
+    setStatus('');
+
     return () => {
-      if (handlerRef.current === handler) handlerRef.current = null;
+      if (handlerRef.current !== handler) return;
+      handlerRef.current = null;
+      setDirty(false);
+      setLabel('Save to database');
+      setStatus('');
     };
   }, []);
 
