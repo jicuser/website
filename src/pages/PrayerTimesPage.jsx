@@ -6,7 +6,7 @@ import PrayerGuidelinesSection from '@/components/sections/prayer-times/PrayerGu
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const PrayerTimesPage = ({ initialTab = 'today' }) => {
+export default function PrayerTimesPage({ initialTab = 'today' }) {
   const {
     currentDate,
     formattedDate,
@@ -18,9 +18,9 @@ const PrayerTimesPage = ({ initialTab = 'today' }) => {
   } = usePrayerTimes();
 
   if (isLoadingPrayerTimes) {
-    return <div className="page-transition pt-24 container mx-auto px-4">
-      <Skeleton className="h-24 w-full mb-6" />
-      <Skeleton className="h-72 w-full" />
+    return <div className="page-transition container mx-auto px-4 py-5">
+      <Skeleton className="mb-4 h-16 w-full" />
+      <Skeleton className="h-64 w-full" />
     </div>;
   }
 
@@ -30,7 +30,7 @@ const PrayerTimesPage = ({ initialTab = 'today' }) => {
       ? { title: 'Jummah Times', meta: `Friday prayer · ${formattedDate}` }
       : { title: "Today's Prayer Times", meta: formattedDate };
 
-  return <div className="page-transition pt-24">
+  return <div className="page-transition">
     <PrayerTimesHeroSection title={view.title} meta={view.meta} />
 
     {initialTab === 'today' && <>
@@ -38,18 +38,16 @@ const PrayerTimesPage = ({ initialTab = 'today' }) => {
       <PrayerGuidelinesSection />
     </>}
 
-    {initialTab === 'daily' && <section className="py-4 sm:py-6 bg-gray-50 dark:bg-gray-800">
-      <div className="container mx-auto px-4 max-w-6xl">
+    {initialTab === 'daily' && <section className="bg-gray-50 py-4 dark:bg-gray-800 sm:py-6">
+      <div className="container mx-auto max-w-6xl px-4">
         <MonthlyPrayerTable monthlyPrayerTimes={monthlyPrayerTimes} currentMonth={currentMonth} currentDate={currentDate} />
       </div>
     </section>}
 
-    {initialTab === 'jummah' && <section className="py-4 sm:py-6 bg-gray-50 dark:bg-gray-800">
-      <div className="container mx-auto px-4 max-w-4xl">
+    {initialTab === 'jummah' && <section className="bg-gray-50 py-4 dark:bg-gray-800 sm:py-6">
+      <div className="container mx-auto max-w-4xl px-4">
         <JummahTimesCard jummahTimes={jummahTimes} />
       </div>
     </section>}
   </div>;
-};
-
-export default PrayerTimesPage;
+}
