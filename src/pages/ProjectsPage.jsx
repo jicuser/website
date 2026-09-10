@@ -17,19 +17,11 @@ const EXTENSION_AREAS = [
 
 export default function ProjectsPage() {
   return <div className="page-transition">
-    <section className="border-b border-border bg-background py-6 md:py-9">
-      <div className="container mx-auto px-4"><div className="mx-auto max-w-4xl text-center">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary">JIC Development</p>
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Projects & development</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">Development work, current appeals, updates and ways to support JIC.</p>
-      </div></div>
-    </section>
-
     <section className="bg-background py-8 md:py-10"><div className="container mx-auto px-4">
-      <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Overview</p><h2 className="mt-2 text-2xl font-bold text-foreground">Current project areas</h2></div>
+      <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Overview</p><h1 className="mt-2 text-2xl font-bold text-foreground">Current project areas</h1></div>
       <div className="grid gap-4 md:grid-cols-3">{PROJECTS.map(({ title, text, to, icon: Icon, status }) => <Link key={to} to={to} className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/30">
         <div className="mb-4 flex items-start justify-between gap-4"><div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={21}/></div><span className="rounded-full border border-border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{status}</span></div>
-        <h3 className="text-lg font-bold text-card-foreground">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">Open <ArrowRight size={16}/></span>
+        <h2 className="text-lg font-bold text-card-foreground">{title}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">Open <ArrowRight size={16}/></span>
       </Link>)}</div>
     </div></section>
 
