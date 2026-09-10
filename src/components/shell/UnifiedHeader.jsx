@@ -196,8 +196,8 @@ export default function UnifiedHeader() {
             <Link to="/prayer-times/jummah" className="jic-jummah-summary">
               <span className="jic-summary-label">JUMMAH</span>
               <div className="jic-jummah-lines">
-                <small><b>1ST</b> Start {shortTime(firstJummah.khutbah)} · Jama‘ah {shortTime(firstJummah.prayer)}</small>
-                <small><b>2ND</b> Start {shortTime(secondJummah.khutbah)} · Jama‘ah {shortTime(secondJummah.prayer)}</small>
+                <small><b>1ST</b> Khutbah {shortTime(firstJummah.khutbah)} · Jama‘ah {shortTime(firstJummah.prayer)}</small>
+                <small><b>2ND</b> Khutbah {shortTime(secondJummah.khutbah)} · Jama‘ah {shortTime(secondJummah.prayer)}</small>
               </div>
             </Link>
 
