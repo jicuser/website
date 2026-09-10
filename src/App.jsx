@@ -20,6 +20,7 @@ import ProjectsPage from '@/pages/ProjectsPage';
 import SectionPage from '@/pages/SectionPage';
 import ServicesPage from '@/pages/ServicesPage';
 import TeamPage from '@/pages/TeamPage';
+import WorshipPage from '@/pages/WorshipPage';
 import YouthPage from '@/pages/YouthPage';
 
 import AdminLoginPage from '@/pages/admin/AdminLoginPage';
@@ -56,6 +57,14 @@ export default function App() {
           <Route path="prayer-times" element={<PrayerTimesPage key="today" initialTab="today" />} />
           <Route path="prayer-times/monthly" element={<PrayerTimesPage key="monthly" initialTab="daily" />} />
           <Route path="prayer-times/jummah" element={<PrayerTimesPage key="jummah" initialTab="jummah" />} />
+
+          <Route path="worship" element={<WorshipPage />} />
+          <Route path="worship/quran" element={<WorshipPage />} />
+          <Route path="worship/dalail-al-khayrat" element={<WorshipPage />} />
+          <Route path="worship/daily-duas" element={<WorshipPage />} />
+          <Route path="worship/prayer-guide" element={<WorshipPage />} />
+          <Route path="worship/janazah-guide" element={<WorshipPage />} />
+          <Route path="worship/daily-salah" element={<WorshipPage />} />
 
           <Route path="services" element={<ServicesPage />} />
           <Route path="services/hall-booking" element={<HallBookingPage />} />
