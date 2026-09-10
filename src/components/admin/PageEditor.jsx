@@ -4,9 +4,10 @@ import { Search, ExternalLink, Save, Upload, Smartphone, Monitor, ArrowUpRight, 
 import { supabase } from '@/lib/supabaseClient';
 import { useContent } from '@/context/ContentContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
-import { EDITABLE_PAGES, pageDefaults, pageKey, overviewPaths } from '@/content/editablePages';
+import { EDITABLE_PAGES, pageDefaults, pageKey } from '@/content/editablePages';
 import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
 import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
+import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 
 export default function PageEditor() {
   const [selected, setSelected] = useState('/');
@@ -158,6 +159,7 @@ export default function PageEditor() {
 
   return <div className="admin-workspace">
     <div className="admin-heading"><div><span className="admin-eyebrow">WEBSITE</span><h2>Pages & pictures</h2></div><Link className="admin-button" to="/admin/home-tiles">Home tiles <ArrowUpRight size={16}/></Link></div>
+    <HeaderContentEditor/>
     <CommunityLinksEditor/>
     <div className="admin-page-layout">
       <aside className="admin-panel admin-page-picker">
