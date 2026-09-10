@@ -31,16 +31,13 @@ export function AuthProvider({ children }) {
     });
 
     try {
-      const profileQuery = supabase
-        .from('profiles')
-        .select('id, display_name, role, is_active')
-        .eq('id', authUser.id)
-        .maybeSingle();
-
+      const profileQuery = supabase.rpc('get_my_profile');
       const { data, error } = await Promise.race([profileQuery, timeout]);
-      if (request !== profileRequest.current) return error ? null : data ?? null;
+
+      if (request !== profileRequest.current) return null;
       if (error) throw error;
-      const nextProfile = data ?? null;
+
+      const nextProfile = Array.isArray(data) ? data[0] ?? null : data ?? null;
       profileRef.current = nextProfile;
       setProfile(nextProfile);
       return nextProfile;
@@ -50,7 +47,7 @@ export function AuthProvider({ children }) {
         profileRef.current = null;
         setProfile(null);
       }
-      return null;
+      throw error;
     } finally {
       if (timeoutId) window.clearTimeout(timeoutId);
     }
@@ -80,8 +77,11 @@ export function AuthProvider({ children }) {
       currentUserId.current = authUser.id;
       setUser(authUser);
       setLoading(true);
-      await loadProfile(authUser);
-      if (mounted) setLoading(false);
+      try {
+        await loadProfile(authUser);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
 
     supabase.auth.getSession()
@@ -142,29 +142,26 @@ export function AuthProvider({ children }) {
     };
   }, [loadProfile]);
 
-  async function signIn(email, password, auditName = '') {
+  async function signIn(email, password) {
     signInInProgress.current = true;
     setLoading(true);
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
       currentUserId.current = data.user.id;
       setUser(data.user);
+
       const nextProfile = await loadProfile(data.user);
-      if (!nextProfile?.is_active || !ADMIN_ROLES.has(nextProfile?.role)) {
-        signInInProgress.current = false;
+      if (!nextProfile) {
         await supabase.auth.signOut();
-        throw new Error('This account does not have JIC administration access.');
+        throw new Error('Your JIC staff profile could not be loaded. Please try again.');
       }
 
-      const cleanName = auditName.trim();
-      if (cleanName) {
-        const { data: updated, error: nameError } = await supabase.auth.updateUser({
-          data: { audit_name: cleanName },
-        });
-        if (nameError) throw nameError;
-        if (updated?.user) setUser(updated.user);
+      if (!nextProfile.is_active || !ADMIN_ROLES.has(nextProfile.role)) {
+        await supabase.auth.signOut();
+        throw new Error('This account does not have JIC administration access.');
       }
 
       setLoading(false);
@@ -195,6 +192,7 @@ export function AuthProvider({ children }) {
   const can = useCallback((permission) => {
     if (!isAdmin) return false;
     if (role === 'super_admin') return true;
+
     const matrix = {
       dashboard: ['admin', 'content_editor', 'events_manager', 'teacher'],
       content: ['admin', 'content_editor'],
@@ -207,6 +205,7 @@ export function AuthProvider({ children }) {
       users: [],
       audit: ['admin'],
     };
+
     return matrix[permission]?.includes(role) ?? false;
   }, [isAdmin, role]);
 
