@@ -28,7 +28,7 @@ export const WORSHIP_TABS = [
   { name: 'Overview', path: '/worship' },
   { name: 'Read Qur’an', path: '/worship/quran' },
   { name: 'Dala’il al-Khayrat', path: '/worship/dalail-al-khayrat' },
-  { name: 'Daily Du‘as', path: '/worship/daily-duas' },
+  { name: 'Daily Prayers & Du‘as', path: '/worship/daily-duas' },
   { name: 'Prayer Guide', path: '/worship/prayer-guide' },
   { name: 'Janazah Guide', path: '/worship/janazah-guide' },
   { name: 'Daily Salah', path: '/worship/daily-salah' },
