@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, CalendarDays, Phone } from 'lucide-react';
-import ManagedPageContent from '@/components/ManagedPageContent';
 import { supabase } from '@/lib/supabaseClient';
 import { SITE } from '@/content/site';
 
@@ -39,9 +38,11 @@ export default function HallBookingPage() {
       setLoading(true);
       const first = new Date(month.getFullYear(), month.getMonth(), 1);
       const last = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+
       try {
         const { data, error } = await supabase.from('hall_bookings').select('*');
         if (!active) return;
+
         if (error) {
           setRecords([]);
           setLiveSchedule(false);
@@ -50,7 +51,9 @@ export default function HallBookingPage() {
             const raw = getRecordDate(row);
             if (!raw) return false;
             const date = new Date(raw);
-            return !Number.isNaN(date.getTime()) && date >= first && date <= new Date(last.getFullYear(), last.getMonth(), last.getDate(), 23, 59, 59);
+            return !Number.isNaN(date.getTime())
+              && date >= first
+              && date <= new Date(last.getFullYear(), last.getMonth(), last.getDate(), 23, 59, 59);
           });
           setRecords(monthRows);
           setLiveSchedule(true);
@@ -64,6 +67,7 @@ export default function HallBookingPage() {
         if (active) setLoading(false);
       }
     };
+
     load();
     return () => { active = false; };
   }, [month]);
@@ -75,6 +79,7 @@ export default function HallBookingPage() {
       if (!raw) return;
       const date = new Date(raw);
       if (Number.isNaN(date.getTime())) return;
+
       const key = isoDate(date);
       const status = normaliseStatus(row.status || row.booking_status || row.state);
       const existing = map.get(key);
@@ -98,16 +103,11 @@ export default function HallBookingPage() {
 
   return (
     <div className="jic-hall-page mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
-      <section className="jic-hall-intro rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur-3xl sm:p-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">Services · Hall Booking</p>
-        <ManagedPageContent fallbackTitle="Hall Booking" fallbackBody="Check the monthly hall schedule below, then contact the centre to confirm your date and requirements." />
-      </section>
-
-      <section className="jic-hall-calendar mt-4 rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-3xl sm:mt-6 sm:p-6" aria-labelledby="hall-calendar-title">
+      <section className="jic-hall-calendar rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-3xl sm:p-6" aria-labelledby="hall-calendar-title">
         <div className="jic-hall-calendar-head">
           <div>
             <p className="jic-hall-kicker"><CalendarDays size={15}/> Monthly schedule</p>
-            <h2 id="hall-calendar-title">{monthLabel(month)}</h2>
+            <h1 id="hall-calendar-title">{monthLabel(month)}</h1>
           </div>
           <div className="jic-hall-month-controls">
             <button type="button" onClick={() => changeMonth(-1)} aria-label="Previous month"><ChevronLeft size={20}/></button>
@@ -121,7 +121,7 @@ export default function HallBookingPage() {
         )}
 
         <div className="jic-hall-weekdays" aria-hidden="true">
-          {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => <span key={day}>{day}</span>)}
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => <span key={day}>{day}</span>)}
         </div>
         <div className="jic-hall-grid">
           {days.map((date, index) => {
@@ -140,14 +140,14 @@ export default function HallBookingPage() {
         </div>
 
         <div className="jic-hall-legend" aria-label="Availability key">
-          {Object.entries(STATUS_META).filter(([key]) => ['available','pending','booked','closed'].includes(key)).map(([key, meta]) => (
+          {Object.entries(STATUS_META).filter(([key]) => ['available', 'pending', 'booked', 'closed'].includes(key)).map(([key, meta]) => (
             <span key={key}><i className={meta.className}/>{meta.label}</span>
           ))}
         </div>
 
         <div className="jic-hall-contact">
           <div><strong>Interested in a date?</strong><span>Availability can change, so please confirm with the centre before making arrangements.</span></div>
-          <a href={`tel:${SITE.phone.replace(/\s/g,'')}`}><Phone size={17}/> Call {SITE.phone}</a>
+          <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}><Phone size={17}/> Call {SITE.phone}</a>
         </div>
       </section>
     </div>
