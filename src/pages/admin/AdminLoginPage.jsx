@@ -4,17 +4,10 @@ import { ArrowLeft, LockKeyhole, LogIn, ShieldCheck } from 'lucide-react';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { useAuth } from '@/context/AuthContext';
 
-/**
- * Admin sign-in screen.
- *
- * Important: navigation happens only after submit succeeds. We deliberately do
- * not also redirect reactively when auth state changes, because Supabase emits
- * an auth event during sign-in and two competing redirects caused visible
- * flashing on iOS Safari.
- */
 export default function AdminLoginPage(){
   const { signIn, loading } = useAuth();
   const navigate = useNavigate();
+  const [name,setName] = useState('');
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
   const [busy,setBusy] = useState(false);
@@ -26,7 +19,7 @@ export default function AdminLoginPage(){
     setBusy(true);
     setError('');
     try {
-      await signIn(email.trim(),password);
+      await signIn(email.trim(),password,name.trim());
       navigate('/admin',{replace:true});
     } catch (err) {
       setError(err?.message || 'Unable to sign in.');
@@ -48,6 +41,7 @@ export default function AdminLoginPage(){
       </div>
       {error && <div className="admin-login-error">{error}</div>}
       <form onSubmit={submit} className="admin-login-form">
+        <label><span>Name</span><input type="text" required autoComplete="name" value={name} onChange={e=>setName(e.target.value)} placeholder="Name"/></label>
         <label><span>Email address</span><input type="email" required inputMode="email" autoCapitalize="none" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address"/></label>
         <label><span>Password</span><div className="admin-login-password"><LockKeyhole size={17}/><input type="password" required autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password"/></div></label>
         <button disabled={busy||loading}><LogIn size={18}/>{busy?'Signing in…':'Sign in'}</button>
