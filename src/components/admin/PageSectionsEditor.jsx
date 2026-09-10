@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Plus, Save, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
@@ -114,11 +114,22 @@ function SectionRow({ row, busy, onSave, onDelete }) {
   const [pendingBackgroundPreview, setPendingBackgroundPreview] = useState('');
   const [pendingGallery, setPendingGallery] = useState([]);
   const [pendingGalleryPreviews, setPendingGalleryPreviews] = useState([]);
+  const previewUrlsRef = useRef(new Set());
 
+  const trackPreview = file => {
+    const url = URL.createObjectURL(file);
+    previewUrlsRef.current.add(url);
+    return url;
+  };
+  const revokePreview = url => {
+    if (!url || !previewUrlsRef.current.has(url)) return;
+    URL.revokeObjectURL(url);
+    previewUrlsRef.current.delete(url);
+  };
   const clearPreviews = useCallback(() => {
-    if (pendingBackgroundPreview) URL.revokeObjectURL(pendingBackgroundPreview);
-    pendingGalleryPreviews.forEach(url => URL.revokeObjectURL(url));
-  }, [pendingBackgroundPreview, pendingGalleryPreviews]);
+    previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    previewUrlsRef.current.clear();
+  }, []);
 
   useEffect(() => {
     setDraft(row);
@@ -140,9 +151,9 @@ function SectionRow({ row, busy, onSave, onDelete }) {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-    if (pendingBackgroundPreview) URL.revokeObjectURL(pendingBackgroundPreview);
+    revokePreview(pendingBackgroundPreview);
     setPendingBackground(file);
-    setPendingBackgroundPreview(URL.createObjectURL(file));
+    setPendingBackgroundPreview(trackPreview(file));
     setDirty(true);
   };
 
@@ -151,7 +162,7 @@ function SectionRow({ row, busy, onSave, onDelete }) {
     event.target.value = '';
     if (!files.length) return;
     setPendingGallery(current => [...current, ...files]);
-    setPendingGalleryPreviews(current => [...current, ...files.map(file => URL.createObjectURL(file))]);
+    setPendingGalleryPreviews(current => [...current, ...files.map(trackPreview)]);
     setDirty(true);
   };
 
@@ -176,8 +187,8 @@ function SectionRow({ row, busy, onSave, onDelete }) {
     <label>Heading<input value={draft.title || ''} onChange={event => change({ title: event.target.value })}/></label>
     <label>Information<textarea rows="4" value={draft.body || ''} onChange={event => change({ body: event.target.value })}/></label>
     <div className="admin-section-media">
-      <div><span>Background</span>{backgroundPreview ? <img src={backgroundPreview} alt="Section background preview"/> : <div className="admin-picture-empty"><ImageIcon/><small>No background</small></div>}<label className="admin-button"><Upload size={14}/>Choose background<input hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseBackground}/></label>{backgroundPreview && <button className="admin-button" type="button" onClick={() => { if (pendingBackgroundPreview) URL.revokeObjectURL(pendingBackgroundPreview); setPendingBackground(null); setPendingBackgroundPreview(''); change({ background_image_url: '' }); }}>Remove</button>}</div>
-      <div><span>Gallery pictures</span><div className="admin-section-thumbs">{images.map((src, index) => <div key={`${row.id}-${index}`}><img src={src} alt=""/><button type="button" onClick={() => change({ image_urls: images.filter((_, itemIndex) => itemIndex !== index) })}>×</button></div>)}{pendingGalleryPreviews.map((src, index) => <div key={`pending-${index}`}><img src={src} alt="New gallery preview"/><button type="button" onClick={() => { URL.revokeObjectURL(src); setPendingGallery(current => current.filter((_, itemIndex) => itemIndex !== index)); setPendingGalleryPreviews(current => current.filter((_, itemIndex) => itemIndex !== index)); setDirty(true); }}>×</button></div>)}</div><label className="admin-button"><Upload size={14}/>Choose pictures<input hidden multiple type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseGallery}/></label></div>
+      <div><span>Background</span>{backgroundPreview ? <img src={backgroundPreview} alt="Section background preview"/> : <div className="admin-picture-empty"><ImageIcon/><small>No background</small></div>}<label className="admin-button"><Upload size={14}/>Choose background<input hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseBackground}/></label>{backgroundPreview && <button className="admin-button" type="button" onClick={() => { revokePreview(pendingBackgroundPreview); setPendingBackground(null); setPendingBackgroundPreview(''); change({ background_image_url: '' }); }}>Remove</button>}</div>
+      <div><span>Gallery pictures</span><div className="admin-section-thumbs">{images.map((src, index) => <div key={`${row.id}-${index}`}><img src={src} alt=""/><button type="button" onClick={() => change({ image_urls: images.filter((_, itemIndex) => itemIndex !== index) })}>×</button></div>)}{pendingGalleryPreviews.map((src, index) => <div key={`pending-${index}`}><img src={src} alt="New gallery preview"/><button type="button" onClick={() => { revokePreview(src); setPendingGallery(current => current.filter((_, itemIndex) => itemIndex !== index)); setPendingGalleryPreviews(current => current.filter((_, itemIndex) => itemIndex !== index)); setDirty(true); }}>×</button></div>)}</div><label className="admin-button"><Upload size={14}/>Choose pictures<input hidden multiple type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseGallery}/></label></div>
     </div>
     <label className="admin-check"><input type="checkbox" checked={Boolean(draft.published)} onChange={event => change({ published: event.target.checked })}/>Published</label>
     <small>{dirty ? 'Unsaved changes' : 'Saved'}</small>
