@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Youtube, MessageCircle } from 'lucide-react';
 import { SITE } from '@/content/site';
 
 const XIcon = (props) => (
@@ -37,6 +37,7 @@ export default function Footer() {
           </nav>
           <div className="jic-footer-actions-compact">
             <div className="jic-footer-socials flex gap-2">
+              {SITE.community?.whatsapp && <a href={SITE.community.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Community"><MessageCircle size={18}/></a>}
               {SITE.socials.facebook && <a href={SITE.socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={18}/></a>}
               {SITE.socials.x && <a href={SITE.socials.x} target="_blank" rel="noopener noreferrer" aria-label="X"><XIcon className="h-[18px] w-[18px]"/></a>}
               {SITE.socials.instagram && <a href={SITE.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={18}/></a>}
