@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 const AdminSaveContext = createContext(null);
 
@@ -58,4 +58,11 @@ export function useAdminSave() {
   const context = useContext(AdminSaveContext);
   if (!context) throw new Error('useAdminSave must be used inside <AdminSaveProvider>');
   return context;
+}
+
+export function useRegisterAdminSave(save, dirty, label = 'Save to database') {
+  const { register, updateState } = useAdminSave();
+
+  useEffect(() => register(save, { dirty, label }), [register, save, label]);
+  useEffect(() => updateState({ dirty, label }), [updateState, dirty, label]);
 }
