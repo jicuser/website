@@ -61,5 +61,8 @@
 @import "./header-page-blend-v27.css";
 @import "./prayer-blocks-v28.css";
 
-/* 5. Canonical colour system — always last ------------------------------ */
+/* 5. Canonical colour system -------------------------------------------- */
 @import "./jic-palette-v29.css";
+
+/* 6. Liquid-glass interaction/surface system — loaded last -------------- */
+@import "./liquid-glass.css";
