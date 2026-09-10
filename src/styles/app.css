@@ -37,7 +37,9 @@
 @import "./admin-menu-stability-v25.css";
 
 /* Active feature sources */
+@import "./home.css";
 @import "./hall-booking.css";
+@import "./worship.css";
 @import "./header.css";
 @import "./theme.css";
 @import "./liquid-glass.css";
