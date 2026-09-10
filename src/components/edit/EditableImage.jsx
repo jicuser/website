@@ -10,6 +10,7 @@
  */
 import React, { useRef, useState } from 'react';
 import { Upload, Loader2 } from 'lucide-react';
+import { IMAGE_ACCEPT, validateImage } from '@/lib/images';
 import { useAuth } from '@/context/AuthContext';
 import { useContent } from '@/context/ContentContext';
 
@@ -26,8 +27,7 @@ export default function EditableImage({ contentKey, fallback, alt = '', classNam
   async function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setError('Please select an image file'); return; }
-    if (file.size > 5 * 1024 * 1024)    { setError('Image must be under 5 MB'); return; }
+    try { validateImage(file); } catch (err) { setError(err.message); e.target.value = ''; return; }
     setError('');
     setBusy(true);
     try {
@@ -47,9 +47,12 @@ export default function EditableImage({ contentKey, fallback, alt = '', classNam
       {showEditUI && (
         <>
           {/* Overlay */}
-          <span
+          <button
+            type="button"
+            disabled={busy}
+            aria-label="Replace image"
             className="absolute inset-0 flex flex-col items-center justify-center
-                       bg-black/40 opacity-0 hover:opacity-100 transition-opacity
+                       bg-black/40 opacity-100 transition-opacity
                        rounded-[inherit] cursor-pointer"
             onClick={() => !busy && inputRef.current?.click()}
             title="Click to replace image"
@@ -62,7 +65,7 @@ export default function EditableImage({ contentKey, fallback, alt = '', classNam
                 <span className="text-white text-xs font-medium">Replace image</span>
               </>
             )}
-          </span>
+          </button>
 
           {/* Dashed border indicator */}
           <span
@@ -74,7 +77,7 @@ export default function EditableImage({ contentKey, fallback, alt = '', classNam
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            accept={IMAGE_ACCEPT}
             className="hidden"
             onChange={handleFile}
           />

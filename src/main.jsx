@@ -1,4 +1,4 @@
-import '@/styles/admin-workspace.css';
+import '@/styles/app.css';
 const rootEl = document.getElementById('root');
 
 const showStatus = (title, detail = '') => {
@@ -25,41 +25,6 @@ showStatus('Loading website…');
       import('@/components/ui/toaster'),
       import('@/context/AuthContext'),
       import('@/context/ContentContext'),
-      import('@/styles/index.css'),
-      import('@/styles/reference-match.css'),
-      import('@/styles/navigation-refine.css'),
-      import('@/styles/jic-polish.css'),
-      import('@/styles/mobile-fixes.css'),
-      import('@/styles/ios-glass.css'),
-      import('@/styles/final-touches.css'),
-      import('@/styles/jic-restructure.css'),
-      import('@/styles/jic-final-polish.css'),
-      import('@/styles/jic-popup-overrides.css'),
-      import('@/styles/mobile-home-refine.css'),
-      import('@/styles/scroll-reminder.css'),
-      import('@/styles/header-uniform.css'),
-      import('@/styles/mobile-full-menu.css'),
-      import('@/styles/desktop-refine.css'),
-      import('@/styles/desktop-polish-v2.css'),
-      import('@/styles/navigation-structure-v2.css'),
-      import('@/styles/navigation-cleanup.css'),
-      import('@/styles/compact-desktop-fixes.css'),
-      import('@/styles/ux-refine-v4.css'),
-      import('@/styles/stability-v5.css'),
-      import('@/styles/desktop-admin-v6.css'),
-      import('@/styles/header-ux-v6.css'),
-      import('@/styles/header-ux-v7.css'),
-      import('@/styles/header-final-v8.css'),
-      import('@/styles/header-nav-v9.css'),
-      import('@/styles/header-audit-v10.css'),
-      import('@/styles/desktop-home-alignment-v11.css'),
-      import('@/styles/mobile-admin-quote-v12.css'),
-      import('@/styles/mobile-menu-theme-v13.css'),
-      import('@/styles/mobile-quote-v14.css'),
-      import('@/styles/final-audit-v15.css'),
-      import('@/styles/admin-sections-v16.css'),
-      import('@/styles/mobile-shell-v17.css'),
-      import('@/styles/mobile-header-card-v18.css'),
     ]);
 
     const React = ReactModule.default;

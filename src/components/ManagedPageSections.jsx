@@ -8,13 +8,17 @@ export default function ManagedPageSections(){
 
   useEffect(()=>{
     let active=true;
-    supabase.from('page_sections')
+    setSections([]);
+    const load=()=>supabase.from('page_sections')
       .select('id,section_key,title,body,background_image_url,image_urls,sort_order,published')
       .eq('page_path',pathname)
       .eq('published',true)
       .order('sort_order',{ascending:true})
-      .then(({data,error})=>{if(active&&!error)setSections(data||[])});
-    return()=>{active=false};
+      .then(({data,error})=>{if(active)setSections(error?[]:data||[])});
+    load();
+    window.addEventListener('focus',load);
+    window.addEventListener('jic-content-updated',load);
+    return()=>{active=false;window.removeEventListener('focus',load);window.removeEventListener('jic-content-updated',load)};
   },[pathname]);
 
   if(!sections.length)return null;

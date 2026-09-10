@@ -25,7 +25,7 @@ export default function MainLayout() {
   return (
     <div className={`flex flex-col min-h-screen ${preview?'is-admin-preview':''}`}>
       <Navbar isScrolled={isScrolled} />
-      <main className="flex-grow">
+      <main className={`flex-grow jic-public-main ${pathname !== '/' ? 'jic-inner-page' : ''}`}>
         <motion.div
           key={pathname}
           initial={{ opacity: 0, y: 20 }}

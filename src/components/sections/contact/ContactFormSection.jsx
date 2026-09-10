@@ -11,14 +11,14 @@ const ContactFormSection = () => (
         <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
           <Card className="h-full overflow-hidden rounded-3xl">
             <CardContent className="p-5 sm:p-7">
-              <MapSection />
+              <ContactForm />
             </CardContent>
           </Card>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.05 }}>
           <Card className="h-full rounded-3xl">
             <CardContent className="p-5 sm:p-7">
-              <ContactForm />
+              <MapSection />
             </CardContent>
           </Card>
         </motion.div>

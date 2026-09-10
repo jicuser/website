@@ -10,7 +10,7 @@ const MADRASSAH_LINKS = [
   { name: 'Policies', to: '/madrassah/policies' },
 ];
 
-export default function SectionPage({ eyebrow, title, intro = 'Content for this page will be added next.', backTo, backLabel = 'Back' }) {
+export default function SectionPage({ eyebrow, title, intro = 'Please contact the centre for information and availability.', backTo, backLabel = 'Back' }) {
   const { pathname } = useLocation();
   const showMadrassahNav = pathname === '/madrassah' || ['/madrassah/programs','/madrassah/enrolment','/madrassah/policies'].some(path => pathname === path || pathname.startsWith(`${path}/`));
 
