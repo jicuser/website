@@ -8,7 +8,6 @@ export const standaloneSections = [
   ['funerals','Funerals','Funeral Services',null],
   ['funerals/what-to-do','Funerals','What to Do When Someone Passes Away','/funerals'],
   ['funerals/contact-support','Funerals','Funeral Contact & Support','/funerals'],
-  ['projects/masjid-extension','Masjid Extension','Masjid Extension','/projects'],
   ['projects/masjid-extension/timeline','Masjid Extension','Extension Timeline','/projects/masjid-extension'],
   ['projects/timeline','Masjid Extension','Extension Timeline','/projects/masjid-extension'],
   ['projects/main-prayer-hall','Masjid Extension','Main Prayer Hall','/projects/masjid-extension'],
