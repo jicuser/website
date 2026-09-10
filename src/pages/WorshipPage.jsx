@@ -10,7 +10,7 @@ const TARTEEL = 'https://tarteel.ai';
 
 const views = {
   '/worship': { title: 'Worship & Qur’an', intro: 'Read Qur’an, build a daily routine and find practical worship guides.' },
-  '/worship/quran': { title: 'Read Qur’an', intro: 'Arabic Qur’an with English meaning, loaded from a public Qur’an API.' },
+  '/worship/quran': { title: 'Read Qur’an', intro: 'Arabic Qur’an with English meaning.' },
   '/worship/dalail-al-khayrat': { title: 'Dala’il al-Khayrat', intro: 'A dedicated space for salawat and the Dala’il al-Khayrat reading programme.' },
   '/worship/daily-duas': { title: 'Daily Du‘as', intro: 'A simple collection for morning, evening and everyday supplications.' },
   '/worship/prayer-guide': { title: 'Prayer Guide', intro: 'A clear refresher for preparing for and performing Salah.' },
@@ -140,6 +140,6 @@ export default function WorshipPage() {
     {isJanazah && <Cards items={janazahSteps}/>} 
     {isDuas && <Cards items={duaCards}/>} 
     {isDailySalah && <DailySalah/>}
-    {isDalail && <section className="worship-reading-card"><h2>Dala’il al-Khayrat</h2><p>Use this page for JIC’s approved daily reading, salawat schedule, recordings and notes. Staff can edit the page text and add sections from Admin.</p></section>}
+    {isDalail && <section className="worship-reading-card"><h2>Dala’il al-Khayrat</h2><p>A dedicated place for JIC’s Dala’il al-Khayrat reading programme, salawat and related resources.</p></section>}
   </div>;
 }
