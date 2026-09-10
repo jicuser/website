@@ -5,6 +5,7 @@ import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import {overviewPaths} from '@/content/editablePages';
 import Navbar from '@/components/shell/Navbar';
+import HeaderInteractionBridge from '@/components/shell/HeaderInteractionBridge';
 import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import AdminBar from '@/components/shell/AdminBar';
@@ -25,6 +26,7 @@ export default function MainLayout() {
   return (
     <div className={`flex flex-col min-h-screen ${preview?'is-admin-preview':''}`}>
       <Navbar isScrolled={isScrolled} />
+      <HeaderInteractionBridge />
       <main className={`flex-grow jic-public-main ${pathname !== '/' ? 'jic-inner-page' : ''}`}>
         <motion.div
           key={pathname}
