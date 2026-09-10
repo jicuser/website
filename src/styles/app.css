@@ -1,15 +1,24 @@
-/* Preserve cascade order in one stylesheet across development and production. */
-@import "./admin-workspace.css";
+/*
+ * JIC stylesheet manifest.
+ *
+ * Start here when tracing visual behaviour. Import order matters: later files
+ * refine/override earlier compatibility layers. For new work, edit the active
+ * feature files noted below instead of adding another numbered patch.
+ */
+
+/* 1. Base system ---------------------------------------------------------- */
 @import "./index.css";
 @import "./reference-match.css";
 @import "./navigation-refine.css";
 @import "./jic-polish.css";
-@import "./mobile-fixes.css";
 @import "./ios-glass.css";
 @import "./final-touches.css";
 @import "./jic-restructure.css";
 @import "./jic-final-polish.css";
 @import "./jic-popup-overrides.css";
+
+/* 2. Legacy responsive/layout compatibility ----------------------------- */
+@import "./mobile-fixes.css";
 @import "./mobile-home-refine.css";
 @import "./scroll-reminder.css";
 @import "./header-uniform.css";
@@ -32,7 +41,6 @@
 @import "./mobile-menu-theme-v13.css";
 @import "./mobile-quote-v14.css";
 @import "./final-audit-v15.css";
-@import "./admin-sections-v16.css";
 @import "./mobile-shell-v17.css";
 @import "./mobile-header-card-v18.css";
 @import "./review-fixes.css";
@@ -40,10 +48,18 @@
 @import "./mobile-menu-stability-v20.css";
 @import "./mobile-shell-v21.css";
 @import "./mobile-reminder-order-v22.css";
-@import "./hall-booking-v23.css";
 @import "./header-interactions-v24.css";
+
+/* 3. Admin --------------------------------------------------------------- */
+@import "./admin-workspace.css";
+@import "./admin-sections-v16.css";
 @import "./admin-menu-stability-v25.css";
+
+/* 4. Current feature styles --------------------------------------------- */
+@import "./hall-booking-v23.css";
 @import "./unified-header-v26.css";
 @import "./header-page-blend-v27.css";
 @import "./prayer-blocks-v28.css";
+
+/* 5. Canonical colour system — always last ------------------------------ */
 @import "./jic-palette-v29.css";
