@@ -24,6 +24,16 @@ export const MADRASSAH_TABS = [
   { name: 'Policies', path: '/madrassah/policies' },
 ];
 
+export const WORSHIP_TABS = [
+  { name: 'Overview', path: '/worship' },
+  { name: 'Read Qur’an', path: '/worship/quran' },
+  { name: 'Dala’il al-Khayrat', path: '/worship/dalail-al-khayrat' },
+  { name: 'Daily Du‘as', path: '/worship/daily-duas' },
+  { name: 'Prayer Guide', path: '/worship/prayer-guide' },
+  { name: 'Janazah Guide', path: '/worship/janazah-guide' },
+  { name: 'Daily Salah', path: '/worship/daily-salah' },
+];
+
 export const NAV_GROUPS = [
   { name: 'Home', path: '/', children: [] },
   { name: 'About', path: '/about', children: [
@@ -35,6 +45,7 @@ export const NAV_GROUPS = [
     { name: 'Today', path: '/prayer-times' }, { name: 'Monthly Timetable', path: '/prayer-times/monthly' },
     { name: 'Jummah', path: '/prayer-times/jummah' },
   ]},
+  { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
   { name: 'Services', path: '/services', children: [
     { name: 'Services Overview', path: '/services' }, { name: 'Funeral Services', path: '/funerals' },
     { name: 'Nikah', path: '/services/nikah' }, { name: 'Hall Booking', path: '/services/hall-booking' },
