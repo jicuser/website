@@ -15,11 +15,12 @@ export default function MainLayout() {
   const { pathname, search } = useLocation();
   const { isAdmin } = useAuth();
   const preview = new URLSearchParams(search).get('preview') === '1';
+  const isHome = pathname === '/';
 
   return (
-    <div className={`flex flex-col min-h-screen ${preview?'is-admin-preview':''}`}>
+    <div className={`flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview?'is-admin-preview':''}`}>
       <UnifiedHeader />
-      <main className={`flex-grow jic-public-main ${pathname !== '/' ? 'jic-inner-page' : ''}`}>
+      <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
         <motion.div
           key={pathname}
           initial={{ opacity: 0 }}
@@ -32,7 +33,7 @@ export default function MainLayout() {
           <ManagedPageSections />
         </motion.div>
       </main>
-      {pathname !== '/' && <CornerBrand />}
+      {!isHome && <CornerBrand />}
       <Footer />
       <ScrollToTop />
       {isAdmin && !preview && <AdminBar />}
