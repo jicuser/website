@@ -27,6 +27,7 @@
 @import "./review-fixes.css";
 @import "./mobile-shell-v19.css";
 @import "./mobile-shell-v21.css";
+@import "./corner-brand.css";
 
 /* Administration */
 @import "./admin-workspace.css";
