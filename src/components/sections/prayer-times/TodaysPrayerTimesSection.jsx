@@ -14,7 +14,6 @@ export default function TodaysPrayerTimesSection({ currentDate, todaysTimes }) {
   const now = minutes(currentDate.toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit',hour12:false}));
   const next = rows.find(([name,key]) => name !== 'Sunrise' && minutes(todaysTimes[key]) !== null && minutes(todaysTimes[key]) > now);
   return <section className="jic-prayer-schedule mx-auto max-w-4xl px-4 py-6">
-    <p className="jic-next-prayer" role="status">{next ? <>Next prayer: <strong>{next[0]} · {todaysTimes[next[1]]}</strong></> : 'All of today’s prayer start times have passed.'}</p>
     <div className="overflow-x-auto rounded-2xl border">
       <table className="w-full text-left">
         <caption className="sr-only">Today's prayer start and congregation times</caption>

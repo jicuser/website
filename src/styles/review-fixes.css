@@ -89,3 +89,23 @@ html:not(.dark)[data-surface="solid"] .jic-feature-card{background-color:#fffaf0
   .jic-premium-home .jic-hero-inner h1{font-size:clamp(2.75rem,4.5vw,4.25rem)!important;line-height:1.05!important;letter-spacing:-.04em!important}
   .jic-premium-home .jic-feature-grid{margin-top:16px!important}
 }
+.jic-section-next{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border-radius:12px;background:#dcb650;color:#101820;font-size:14px}
+.jic-header.is-section-header .jic-address,.jic-header.is-section-header .jic-prayer-row,.jic-header.is-section-header .jic-jummah-mini{display:none!important}
+.jic-header.is-section-header .jic-info-shell{display:flex!important;justify-content:flex-end!important;margin-top:6px!important}
+.jic-header .jic-info-shell::after{display:none!important;content:none!important}
+.jic-header .jic-brand{display:flex!important;position:static!important;width:90px!important;min-width:70px!important;height:42px!important;flex-shrink:0!important}
+.jic-header .jic-brand svg,.jic-header .jic-brand img{width:100%!important;height:100%!important;object-fit:contain!important}
+.jic-header .jic-utility-row{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:12px!important;padding:6px 10px!important}
+.jic-header .jic-radio{position:static!important;transform:none!important;display:inline-flex!important;align-items:center!important;gap:7px!important;min-height:40px!important;width:auto!important;padding:6px 12px!important;border-radius:12px!important}
+.jic-header .jic-scroll-reminder{display:flex!important;position:static!important;width:100%!important;min-height:0!important;margin:6px 0 0!important;padding:8px 12px!important;gap:12px!important}
+.jic-header .jic-scroll-reminder .jic-reminder-line strong{font-size:13px!important;line-height:1.3!important}
+.jic-header.is-scrolled .jic-scroll-reminder{display:none!important}
+.jic-prayer-title{padding-top:12px;padding-bottom:0}
+.jic-inner-page .jic-prayer-title h1{font-size:1.5rem!important;margin:0!important}
+@media(max-width:767px){
+ .jic-header .jic-mainnav,.jic-header.is-scrolled .jic-mainnav{min-height:48px!important;justify-content:space-between!important}
+ .jic-header .jic-nav-cluster{display:none!important}
+ .jic-header .jic-info-shell{grid-template-rows:auto auto auto!important}
+ .jic-header .jic-utility-row{grid-row:3!important}
+ .jic-header .jic-scroll-reminder .jic-reminder-meta{display:none!important}
+}

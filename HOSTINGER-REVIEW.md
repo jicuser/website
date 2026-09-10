@@ -4,6 +4,9 @@ Target: lawngreen-kangaroo-881113.hostingersite.com, jicuser/website.
 Baseline: e758881e9299f130f1c54884715ac4ec7d76fee7.
 
 ## Prepared changes
+- Follow-up: compact section header with next prayer, reminder below subtabs, real logo instead of overlapping pseudo-logo, constrained mobile radio, and contact form before map.
+- Removed the oversized prayer-page introduction/date block. Student portal left alone in this follow-up.
+- Supabase recheck: nine public tables still have RLS; leaked-password protection warning remains. No tables or data deleted.
 - Compact inner-page headings/spacing and mobile homepage.
 - Corrected mobile header grid, contained controls, reduced scrolled header.
 - Current subtab highlighting and wrapping navigation.
