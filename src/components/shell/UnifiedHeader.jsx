@@ -9,6 +9,15 @@ import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLo
 import { nextPrayer } from '@/lib/nextPrayer';
 import { cn } from '@/lib/utils';
 
+const PRAYERS = [
+  ['Fajr', 'fajr', 'jamaah_fajr'],
+  ['Sunrise', 'sunrise', null],
+  ['Dhuhr', 'dhuhr', 'jamaah_dhuhr'],
+  ['Asr', 'asr', 'jamaah_asr'],
+  ['Maghrib', 'maghrib', 'jamaah_maghrib'],
+  ['Isha', 'isha', 'jamaah_isha'],
+];
+
 const JAMAAH_KEYS = {
   Fajr: 'jamaah_fajr',
   Dhuhr: 'jamaah_dhuhr',
@@ -61,9 +70,11 @@ export default function UnifiedHeader() {
   const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
   const headerRef = useRef(null);
   const audioRef = useRef(null);
+  const scrollStateRef = useRef(false);
   const next = nextPrayer(todaysTimes, currentDate);
   const nextJamaah = next ? todaysTimes?.[JAMAAH_KEYS[next.name]] : null;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
+  const isPrayerSection = pathname === '/prayer-times' || pathname.startsWith('/prayer-times/');
 
   const [theme, setTheme] = useState(() => safeGet('jic-theme', 'dark'));
   const [playing, setPlaying] = useState(false);
@@ -88,7 +99,22 @@ export default function UnifiedHeader() {
   useEffect(() => {
     setMenuOpen(false);
     setMobileGroup(null);
+    setReminderIndex(index => (index + 1) % REMINDERS.length);
   }, [pathname]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setReminderIndex(index => (index + 1) % REMINDERS.length), 60000);
+    const onScroll = () => {
+      const nearTop = window.scrollY < 32;
+      if (nearTop && !scrollStateRef.current) setReminderIndex(index => (index + 1) % REMINDERS.length);
+      scrollStateRef.current = nearTop;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -151,6 +177,14 @@ export default function UnifiedHeader() {
             <span><MapPin size={15}/>Woodlands Rd · Birmingham · B11 4ER</span>
             <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}><Phone size={14}/>{SITE.phone}</a>
           </div>
+
+          {!isPrayerSection && <div className="jic-today-prayer-row" aria-label="Today's prayer times">
+            {PRAYERS.map(([label, startKey, jamaahKey]) => <Link to="/prayer-times" className="jic-today-prayer" key={startKey}>
+              <span>{label}</span>
+              <div><strong>{shortTime(todaysTimes?.[startKey])}</strong>{jamaahKey && <em>{shortTime(todaysTimes?.[jamaahKey])}</em>}</div>
+              <small><b>START</b>{jamaahKey && <b>JAMA‘AT</b>}</small>
+            </Link>)}
+          </div>}
 
           <div className="jic-unified-summary">
             <Link to="/prayer-times" className="jic-next-summary">
