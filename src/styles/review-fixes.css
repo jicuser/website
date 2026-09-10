@@ -107,5 +107,10 @@ html:not(.dark)[data-surface="solid"] .jic-feature-card{background-color:#fffaf0
  .jic-header .jic-nav-cluster{display:none!important}
  .jic-header .jic-info-shell{grid-template-rows:auto auto auto!important}
  .jic-header .jic-utility-row{grid-row:3!important}
- .jic-header .jic-scroll-reminder .jic-reminder-meta{display:none!important}
+ .jic-header .jic-scroll-reminder .jic-reminder-meta{display:flex!important}
 }
+.jic-header .jic-scroll-reminder{flex-direction:column!important;align-items:stretch!important;gap:4px!important;text-align:left!important;height:auto!important}
+.jic-header .jic-scroll-reminder .jic-reminder-meta{display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;flex-wrap:wrap!important;gap:4px 12px!important;font-size:12px!important;line-height:1.4!important}
+.jic-header .jic-scroll-reminder .jic-reminder-meta b{display:block!important;order:-1!important;color:var(--primary,#dcb650)!important}
+.jic-header .jic-scroll-reminder .jic-reminder-line{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0!important;white-space:normal!important;overflow:visible!important}
+.jic-header .jic-scroll-reminder .jic-reminder-line small{display:block!important;font-size:12px!important;line-height:1.4!important;white-space:normal!important;opacity:.8!important}

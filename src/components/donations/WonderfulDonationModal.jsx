@@ -67,16 +67,13 @@ export default function WonderfulDonationModal({ open, onClose }) {
       {open && (
         <motion.div className="jic-popup-overlay fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }} role="presentation">
           <motion.section initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 32, scale: 0.98 }} transition={{ type: 'spring', stiffness: 280, damping: 26 }} role="dialog" aria-modal="true" aria-labelledby="jic-donation-title" className="jic-popup-panel relative w-full max-w-2xl overflow-y-auto rounded-t-[30px] sm:rounded-[30px]" style={{maxHeight:'calc(100dvh - 12px)'}}>
-            <button type="button" onClick={onClose} className="jic-popup-icon fixed right-4 top-[max(14px,env(safe-area-inset-top))] z-[130] flex h-11 w-11 items-center justify-center rounded-full sm:hidden" aria-label="Close donation window">
-              <X size={21} />
-            </button>
 
             <div className="jic-popup-divider sticky top-0 z-20 flex items-start justify-between gap-4 px-5 py-5 sm:px-7">
-              <div className="flex gap-3 pr-12 sm:pr-0">
+              <div className="flex gap-3 min-w-0">
                 <div className="jic-popup-icon h-11 w-11 shrink-0 rounded-2xl"><Heart className="h-5 w-5" fill="currentColor" /></div>
                 <div><p className="jic-popup-kicker">SUPPORT JIC</p><h2 id="jic-donation-title" className="jic-popup-title mt-1 text-xl font-semibold sm:text-2xl">Donate to Jamatia Islamic Centre</h2></div>
               </div>
-              <button type="button" onClick={onClose} className="jic-popup-icon hidden h-10 w-10 shrink-0 sm:flex sm:items-center sm:justify-center" aria-label="Close donation window"><X size={19} /></button>
+              <button type="button" onClick={onClose} className="jic-popup-icon flex h-11 w-11 shrink-0 items-center justify-center" aria-label="Close donation window"><X size={19} /></button>
             </div>
 
             <div className="px-5 py-5 sm:px-7 sm:py-6">
