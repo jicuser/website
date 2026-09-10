@@ -1,0 +1,95 @@
+/* Force the daily prayer strip to render as discrete blocks on every non-prayer-times page. */
+.jic-today-prayer-row{
+  display:grid !important;
+  grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+  width:100% !important;
+  overflow:hidden !important;
+  border-bottom:1px solid rgba(148,163,184,.16);
+}
+.jic-today-prayer{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-width:0 !important;
+  min-height:92px !important;
+  padding:10px 6px !important;
+  text-align:center !important;
+  border-right:1px solid rgba(148,163,184,.16) !important;
+  text-decoration:none !important;
+  color:#f8fafc !important;
+  overflow:hidden !important;
+}
+.jic-today-prayer:last-child{border-right:0 !important;}
+.jic-today-prayer>span{
+  display:block !important;
+  margin:0 0 7px !important;
+  font-size:13px !important;
+  line-height:1 !important;
+  color:#cbd5e1 !important;
+  white-space:nowrap !important;
+}
+.jic-today-prayer>div{
+  display:flex !important;
+  align-items:baseline !important;
+  justify-content:center !important;
+  gap:7px !important;
+  width:100% !important;
+  line-height:1 !important;
+}
+.jic-today-prayer strong{
+  display:block !important;
+  font-size:18px !important;
+  line-height:1 !important;
+  color:#e5b83b !important;
+  font-weight:800 !important;
+}
+.jic-today-prayer em{
+  display:block !important;
+  font-size:16px !important;
+  line-height:1 !important;
+  color:#cbd5e1 !important;
+  font-style:normal !important;
+  font-weight:500 !important;
+}
+.jic-today-prayer>small{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:10px !important;
+  width:100% !important;
+  margin-top:6px !important;
+  line-height:1 !important;
+}
+.jic-today-prayer>small b{
+  display:block !important;
+  font-size:7px !important;
+  line-height:1 !important;
+  letter-spacing:.11em !important;
+  color:#b9953e !important;
+  white-space:nowrap !important;
+}
+.jic-today-prayer>small b+b{color:#94a3b8 !important;}
+
+@media (max-width:767px){
+  .jic-today-prayer-row{
+    grid-template-columns:repeat(6,minmax(78px,1fr)) !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity;
+  }
+  .jic-today-prayer-row::-webkit-scrollbar{display:none;}
+  .jic-today-prayer{
+    min-width:78px !important;
+    min-height:82px !important;
+    padding:9px 5px 8px !important;
+    scroll-snap-align:start;
+  }
+  .jic-today-prayer>span{font-size:11px !important;margin-bottom:5px !important;}
+  .jic-today-prayer strong{font-size:15px !important;}
+  .jic-today-prayer em{font-size:13px !important;}
+  .jic-today-prayer>small{gap:7px !important;margin-top:5px !important;}
+  .jic-today-prayer>small b{font-size:6.5px !important;}
+}
