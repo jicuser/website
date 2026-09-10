@@ -3,59 +3,79 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 const AdminSaveContext = createContext(null);
 
 export function AdminSaveProvider({ children }) {
-  const handlerRef = useRef(null);
-  const [dirty, setDirty] = useState(false);
+  const entriesRef = useRef(new Map());
+  const [summary, setSummary] = useState({ dirtyCount: 0, label: 'Save to database' });
   const [saving, setSaving] = useState(false);
-  const [label, setLabel] = useState('Save to database');
   const [status, setStatus] = useState('');
 
-  const register = useCallback((handler, options = {}) => {
-    handlerRef.current = handler || null;
-    setDirty(Boolean(options.dirty));
-    setLabel(options.label || 'Save to database');
-    setStatus('');
+  const refreshSummary = useCallback(() => {
+    const dirtyEntries = [...entriesRef.current.values()].filter(entry => entry.dirty);
+    setSummary({
+      dirtyCount: dirtyEntries.length,
+      label: dirtyEntries.length === 1 ? dirtyEntries[0].label : dirtyEntries.length > 1 ? 'Save all changes' : 'Save to database',
+    });
+  }, []);
 
+  const register = useCallback((id, handler, options = {}) => {
+    entriesRef.current.set(id, {
+      handler,
+      dirty: Boolean(options.dirty),
+      label: options.label || 'Save to database',
+    });
+    refreshSummary();
     return () => {
-      if (handlerRef.current !== handler) return;
-      handlerRef.current = null;
-      setDirty(false);
-      setLabel('Save to database');
-      setStatus('');
+      entriesRef.current.delete(id);
+      refreshSummary();
     };
-  }, []);
+  }, [refreshSummary]);
 
-  const updateState = useCallback((next = {}) => {
-    if (Object.prototype.hasOwnProperty.call(next, 'dirty')) setDirty(Boolean(next.dirty));
-    if (next.label) setLabel(next.label);
-  }, []);
+  const updateState = useCallback((id, next = {}) => {
+    const current = entriesRef.current.get(id);
+    if (!current) return;
+    entriesRef.current.set(id, {
+      ...current,
+      ...(Object.prototype.hasOwnProperty.call(next, 'dirty') ? { dirty: Boolean(next.dirty) } : {}),
+      ...(next.label ? { label: next.label } : {}),
+    });
+    refreshSummary();
+  }, [refreshSummary]);
 
   const saveCurrent = useCallback(async () => {
-    if (!handlerRef.current || !dirty || saving) return false;
+    if (saving) return false;
+    const dirtyEntries = [...entriesRef.current.entries()].filter(([, entry]) => entry.dirty);
+    if (!dirtyEntries.length) return false;
+
     setSaving(true);
     setStatus('');
     try {
-      await handlerRef.current();
-      setDirty(false);
+      for (const [id, entry] of dirtyEntries) {
+        await entry.handler();
+        const latest = entriesRef.current.get(id);
+        if (latest) entriesRef.current.set(id, { ...latest, dirty: false });
+      }
+      refreshSummary();
       setStatus('Saved');
       window.setTimeout(() => setStatus(''), 1800);
       return true;
     } catch (error) {
+      refreshSummary();
       setStatus(error?.message || 'Save failed');
       throw error;
     } finally {
       setSaving(false);
     }
-  }, [dirty, saving]);
+  }, [saving, refreshSummary]);
 
   const value = useMemo(() => ({
     register,
     updateState,
     saveCurrent,
-    dirty,
+    dirty: summary.dirtyCount > 0,
+    dirtyCount: summary.dirtyCount,
     saving,
-    label,
+    label: summary.label,
     status,
-  }), [register, updateState, saveCurrent, dirty, saving, label, status]);
+  }), [register, updateState, saveCurrent, summary, saving, status]);
 
   return <AdminSaveContext.Provider value={value}>{children}</AdminSaveContext.Provider>;
 }
@@ -68,7 +88,12 @@ export function useAdminSave() {
 
 export function useRegisterAdminSave(save, dirty, label = 'Save to database') {
   const { register, updateState } = useAdminSave();
+  const idRef = useRef(Symbol(label));
+  const saveRef = useRef(save);
+  saveRef.current = save;
 
-  useEffect(() => register(save, { dirty, label }), [register, save, label]);
-  useEffect(() => updateState({ dirty, label }), [updateState, dirty, label]);
+  const invokeLatest = useCallback(() => saveRef.current(), []);
+
+  useEffect(() => register(idRef.current, invokeLatest, { dirty, label }), [register, invokeLatest]);
+  useEffect(() => updateState(idRef.current, { dirty, label }), [updateState, dirty, label]);
 }
