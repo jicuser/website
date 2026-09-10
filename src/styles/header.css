@@ -1,117 +1,13 @@
 /* Canonical public header layout. Visual translucency belongs in liquid-glass.css. */
-.jic-unified-header{pointer-events:none;}
-.jic-unified-inner{max-width:1500px;margin:0 auto;padding:8px 10px 0;pointer-events:auto;}
-.jic-unified-info{overflow:hidden;border:1px solid var(--jic-border);border-radius:28px;}
-
-.jic-unified-address{min-height:42px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--jic-border);font-size:14px;color:var(--jic-text-secondary);}
-.jic-unified-address>span,.jic-unified-address>a{display:flex;align-items:center;gap:8px;white-space:nowrap;}
-.jic-unified-address>span{min-width:0;overflow:hidden;text-overflow:ellipsis;}
-.jic-unified-address>a{font-weight:700;color:var(--jic-text);text-decoration:none;}
-
-.jic-today-prayer-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));width:100%;overflow:hidden;border-bottom:1px solid var(--jic-border);}
-.jic-today-prayer{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:88px;padding:10px 6px;text-align:center;border-right:1px solid var(--jic-border);text-decoration:none;color:var(--jic-text);overflow:hidden;}
-.jic-today-prayer:last-child{border-right:0;}
-.jic-today-prayer>span{display:block;margin:0 0 6px;font-size:12px;line-height:1;color:var(--jic-text-secondary);white-space:nowrap;}
-.jic-today-prayer>div{display:flex;align-items:baseline;justify-content:center;gap:7px;width:100%;line-height:1;}
-.jic-today-prayer strong{display:block;font-size:17px;line-height:1;color:var(--jic-gold);font-weight:800;}
-.jic-today-prayer em{display:block;font-size:15px;line-height:1;color:var(--jic-text-secondary);font-style:normal;font-weight:500;}
-.jic-today-prayer>small{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:6px;line-height:1;}
-.jic-today-prayer>small b{display:block;font-size:7px;line-height:1;letter-spacing:.11em;color:var(--jic-gold);white-space:nowrap;}
-.jic-today-prayer>small b+b{color:var(--jic-muted);}
-
-.jic-unified-summary{display:grid;grid-template-columns:minmax(220px,1.15fr) minmax(330px,1.45fr) minmax(150px,.72fr);align-items:stretch;min-height:92px;}
-.jic-next-summary,.jic-jummah-summary,.jic-radio-flat{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 18px;color:var(--jic-text);text-decoration:none;background:transparent;border:0;border-radius:0;min-width:0;}
-.jic-next-summary,.jic-jummah-summary{flex-direction:column;gap:4px;text-align:center;}
-.jic-next-summary:after,.jic-jummah-summary:after{content:"";position:absolute;right:0;top:16%;height:68%;width:1px;background:var(--jic-border);}
-.jic-summary-label{font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--jic-gold);}
-.jic-next-summary>strong{font-size:21px;line-height:1.05;}
-.jic-next-summary small,.jic-jummah-lines small{font-size:11px;color:var(--jic-text-secondary);white-space:nowrap;}
-.jic-next-summary small b,.jic-jummah-lines small b{font-size:9px;letter-spacing:.12em;color:var(--jic-gold);margin-right:3px;}
-.jic-next-summary small i{display:inline-block;width:1px;height:12px;background:var(--jic-border);margin:0 8px -2px;}
-.jic-jummah-lines{display:flex;flex-direction:column;gap:4px;}
-.jic-radio-flat{cursor:pointer;font-weight:750;white-space:nowrap;}
-.jic-radio-flat>span{font-size:15px;}
-.jic-radio-flat>i{width:7px;height:7px;border-radius:999px;background:var(--jic-live);box-shadow:0 0 12px color-mix(in srgb,var(--jic-live) 55%,transparent);}
-.jic-radio-flat>small{font-size:12px;color:var(--jic-text-secondary);}
-.jic-radio-flat:disabled{opacity:.5;cursor:not-allowed;}
-
-.jic-free-nav-row{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:7px 8px 3px;}
-.jic-free-brand{display:flex;align-items:center;min-width:0;}
-.jic-free-brand img,.jic-free-brand svg{display:block;max-height:46px;max-width:168px;width:auto;height:auto;object-fit:contain;}
-.jic-free-actions{display:flex;align-items:center;gap:8px;}
-.jic-free-actions button{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:15px;color:var(--jic-text);cursor:pointer;}
-.jic-free-actions button.is-donate{background:var(--jic-gold);color:#0B1420;border-color:var(--jic-gold);}
-
-.jic-unified-subnav{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 0 7px;-webkit-overflow-scrolling:touch;}
-.jic-unified-subnav::-webkit-scrollbar{display:none;}
-.jic-unified-subnav-link{flex:0 0 auto;padding:8px 14px;border-radius:999px;border:1px solid var(--jic-border);color:var(--jic-text-secondary);font-size:13px;font-weight:650;text-decoration:none;}
-.jic-unified-subnav-link.is-current{color:var(--jic-text);border-color:color-mix(in srgb,var(--jic-gold) 45%,var(--jic-border));}
-
-.jic-unified-reminder{width:100%;margin:0 0 6px;padding:10px 14px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;border:1px solid var(--jic-border);border-radius:18px;color:var(--jic-text);text-align:left;cursor:pointer;overflow:hidden;}
-.jic-unified-reminder>div{display:flex;align-items:center;gap:12px;min-width:0;}
-.jic-unified-reminder>div b{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--jic-gold);}
-.jic-unified-reminder>div span{font-size:11px;color:var(--jic-muted);white-space:nowrap;}
-.jic-unified-reminder>strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
-.jic-unified-reminder>small{font-size:11px;color:var(--jic-muted);white-space:nowrap;}
-
-.jic-unified-menu{position:fixed;inset:0;z-index:1000;color:var(--jic-text);overflow:hidden;}
-.jic-unified-menu-head{height:74px;padding:calc(env(safe-area-inset-top) + 8px) 18px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--jic-border);}
-.jic-unified-menu-head a{display:flex;align-items:center;}
-.jic-unified-menu-head img,.jic-unified-menu-head svg{max-height:38px;max-width:145px;width:auto;height:auto;}
-.jic-unified-menu-head button{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:14px;color:var(--jic-text);}
-.jic-unified-menu-scroll{height:calc(100dvh - 74px);overflow-y:auto;padding:14px 16px calc(env(safe-area-inset-bottom) + 24px);overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
-.jic-menu-appearance{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.jic-menu-appearance button{min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--jic-border);border-radius:13px;color:var(--jic-text);font-size:13px;font-weight:700;}
-.jic-unified-menu-group{border-bottom:1px solid var(--jic-border);}
-.jic-unified-menu-row{display:grid;grid-template-columns:1fr auto;align-items:center;min-height:56px;}
-.jic-unified-menu-row>a{font-size:18px;font-weight:750;color:var(--jic-text);text-decoration:none;padding:14px 4px;}
-.jic-unified-menu-row>button{width:40px;height:40px;border:0;background:transparent;color:var(--jic-gold);font-size:24px;}
-.jic-unified-menu-children{display:grid;gap:4px;padding:0 0 12px 12px;}
-.jic-unified-menu-children a{padding:10px 12px;border-radius:10px;color:var(--jic-text-secondary);text-decoration:none;font-size:14px;}
-.jic-unified-admin-link,.jic-unified-menu-donate{margin-top:14px;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;text-decoration:none;font-weight:750;}
-.jic-unified-admin-link{border:1px solid var(--jic-border);color:var(--jic-text);}
-.jic-unified-menu-donate{width:100%;border:0;background:var(--jic-gold);color:#07111b;}
-
-@media (max-width:767px){
-  .jic-unified-inner{padding:8px 8px 0;}
-  .jic-unified-info{border-radius:24px;}
-  .jic-unified-address{min-height:36px;padding:0 12px;font-size:11px;gap:8px;}
-  .jic-unified-address>a{font-size:11px;}
-  .jic-today-prayer-row{grid-template-columns:repeat(6,minmax(78px,1fr));overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
-  .jic-today-prayer-row::-webkit-scrollbar{display:none;}
-  .jic-today-prayer{min-width:78px;min-height:80px;padding:9px 5px 8px;scroll-snap-align:start;}
-  .jic-today-prayer>span{font-size:11px;margin-bottom:5px;}
-  .jic-today-prayer strong{font-size:15px;}
-  .jic-today-prayer em{font-size:13px;}
-  .jic-today-prayer>small{gap:7px;margin-top:5px;}
-  .jic-today-prayer>small b{font-size:6.5px;}
-  .jic-unified-summary{grid-template-columns:1fr 1.22fr 78px;min-height:76px;}
-  .jic-next-summary,.jic-jummah-summary,.jic-radio-flat{padding:9px 8px;gap:3px;}
-  .jic-next-summary>strong{font-size:17px;}
-  .jic-summary-label{font-size:9px;letter-spacing:.14em;}
-  .jic-next-summary small,.jic-jummah-lines small{font-size:9px;}
-  .jic-next-summary small b,.jic-jummah-lines small b{font-size:8px;}
-  .jic-next-summary small i{margin:0 4px -2px;}
-  .jic-jummah-lines{gap:2px;}
-  .jic-radio-flat{flex-direction:column;justify-content:center;gap:3px;}
-  .jic-radio-flat>span{font-size:11px;}
-  .jic-radio-flat>small{font-size:9px;}
-  .jic-radio-flat>i{display:none;}
-  .jic-free-nav-row{min-height:56px;padding:5px 4px 3px;}
-  .jic-free-brand img,.jic-free-brand svg{max-height:36px;max-width:124px;}
-  .jic-free-actions button{width:40px;height:40px;border-radius:13px;}
-  .jic-unified-subnav{padding-bottom:6px;}
-  .jic-unified-subnav-link{padding:7px 12px;font-size:12px;}
-  .jic-unified-reminder{grid-template-columns:1fr auto;grid-template-areas:'meta source' 'text text';gap:4px 8px;padding:8px 10px;border-radius:14px;}
-  .jic-unified-reminder>div{grid-area:meta;justify-content:space-between;}
-  .jic-unified-reminder>strong{grid-area:text;text-align:left;font-size:12px;}
-  .jic-unified-reminder>small{grid-area:source;font-size:9px;}
-}
-
-@media (max-width:390px){
-  .jic-unified-summary{grid-template-columns:1fr 1fr 66px;}
-  .jic-jummah-lines small{font-size:8px;}
-  .jic-free-actions{gap:5px;}
-  .jic-free-actions button{width:39px;height:39px;}
-  .jic-free-brand img,.jic-free-brand svg{max-height:33px;max-width:114px;}
-}
+.jic-unified-header{pointer-events:none}.jic-unified-inner{max-width:1500px;margin:0 auto;padding:8px 10px 0;pointer-events:auto}.jic-unified-info{overflow:hidden;border:1px solid var(--jic-border);border-radius:28px}
+.jic-unified-address{min-height:40px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--jic-border);font-size:13px;color:var(--jic-text-secondary)}.jic-unified-address>span,.jic-unified-address>a{display:flex;align-items:center;gap:8px;white-space:nowrap}.jic-unified-address>span{min-width:0;overflow:hidden;text-overflow:ellipsis}.jic-unified-address>a{font-weight:700;color:var(--jic-text);text-decoration:none}
+.jic-today-prayer-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));width:100%;overflow:hidden;border-bottom:1px solid var(--jic-border)}.jic-today-prayer{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:78px;padding:8px 6px;text-align:center;border-right:1px solid var(--jic-border);text-decoration:none;color:var(--jic-text);overflow:hidden}.jic-today-prayer:last-child{border-right:0}.jic-today-prayer>span{display:block;margin:0 0 5px;font-size:11px;line-height:1;color:var(--jic-text-secondary);white-space:nowrap}.jic-today-prayer>div{display:flex;align-items:baseline;justify-content:center;gap:7px;width:100%;line-height:1}.jic-today-prayer strong{font-size:16px;line-height:1;color:var(--jic-gold);font-weight:800}.jic-today-prayer em{font-size:14px;line-height:1;color:var(--jic-text-secondary);font-style:normal;font-weight:500}.jic-today-prayer>small{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:5px;line-height:1}.jic-today-prayer>small b{font-size:6.5px;line-height:1;letter-spacing:.11em;color:var(--jic-gold);white-space:nowrap}.jic-today-prayer>small b+b{color:var(--jic-muted)}
+.jic-header-live-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;min-height:44px}.jic-prayer-ticker{position:relative;overflow:hidden;min-width:0;border-right:1px solid var(--jic-border)}.jic-prayer-ticker:before,.jic-prayer-ticker:after{content:"";position:absolute;top:0;bottom:0;width:28px;z-index:2;pointer-events:none}.jic-prayer-ticker:before{left:0;background:linear-gradient(90deg,var(--jic-glass-surface,rgba(9,18,28,.7)),transparent)}.jic-prayer-ticker:after{right:0;background:linear-gradient(270deg,var(--jic-glass-surface,rgba(9,18,28,.7)),transparent)}.jic-prayer-ticker-track{height:100%;display:flex;align-items:center;width:max-content;animation:jic-prayer-ticker 28s linear infinite;will-change:transform}.jic-prayer-ticker:hover .jic-prayer-ticker-track{animation-play-state:paused}.jic-prayer-ticker a{height:100%;display:flex;align-items:center;gap:7px;padding:0 14px;color:var(--jic-text);text-decoration:none;white-space:nowrap;font-size:12px}.jic-prayer-ticker b{font-size:9px;letter-spacing:.12em;color:var(--jic-gold)}.jic-prayer-ticker span{color:var(--jic-text-secondary)}.jic-prayer-ticker i{color:var(--jic-muted);font-style:normal;margin-left:7px}@keyframes jic-prayer-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.jic-radio-flat{min-width:116px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:7px;border:0;background:transparent;color:var(--jic-text);font-weight:750;white-space:nowrap;cursor:pointer}.jic-radio-flat>span{font-size:12px}.jic-radio-flat>i{width:7px;height:7px;border-radius:999px;background:var(--jic-live);box-shadow:0 0 12px color-mix(in srgb,var(--jic-live) 55%,transparent)}.jic-radio-flat>small{font-size:10px;color:var(--jic-text-secondary)}.jic-radio-flat:disabled{opacity:.5;cursor:not-allowed}
+.jic-free-nav-row{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:5px 6px 2px}.jic-free-brand{min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:flex-start}.jic-free-brand img,.jic-free-brand svg{display:block;max-height:40px;max-width:148px;width:auto;height:auto;object-fit:contain}.jic-free-actions{display:flex;align-items:center;gap:7px}.jic-free-actions button{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:15px;color:var(--jic-text);cursor:pointer}.jic-free-actions button.is-donate{background:var(--jic-gold);color:#0B1420;border-color:var(--jic-gold)}
+.jic-unified-subnav{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:4px 0 6px;-webkit-overflow-scrolling:touch}.jic-unified-subnav::-webkit-scrollbar{display:none}.jic-unified-subnav-link{flex:0 0 auto;padding:7px 12px;border-radius:999px;border:1px solid var(--jic-border);color:var(--jic-text-secondary);font-size:12px;font-weight:650;text-decoration:none}.jic-unified-subnav-link.is-current{color:var(--jic-text);border-color:color-mix(in srgb,var(--jic-gold) 45%,var(--jic-border))}
+.jic-unified-reminder{width:100%;margin:0 0 6px;padding:8px 12px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;border:1px solid var(--jic-border);border-radius:16px;color:var(--jic-text);text-align:left;cursor:pointer;overflow:hidden}.jic-unified-reminder>div{display:flex;align-items:center;gap:10px;min-width:0}.jic-unified-reminder>div b{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--jic-gold)}.jic-unified-reminder>div span{font-size:10px;color:var(--jic-muted);white-space:nowrap}.jic-unified-reminder>strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}.jic-unified-reminder>small{font-size:10px;color:var(--jic-muted);white-space:nowrap}
+.jic-unified-menu{position:fixed;inset:0;z-index:1000;color:var(--jic-text);overflow:hidden}.jic-unified-menu-head{height:74px;padding:calc(env(safe-area-inset-top) + 8px) 18px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--jic-border)}.jic-unified-menu-head a{display:flex;align-items:center}.jic-unified-menu-head img,.jic-unified-menu-head svg{max-height:38px;max-width:145px;width:auto;height:auto}.jic-unified-menu-head button{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:14px;color:var(--jic-text)}.jic-unified-menu-scroll{height:calc(100dvh - 74px);overflow-y:auto;padding:14px 16px calc(env(safe-area-inset-bottom) + 24px);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.jic-menu-appearance{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.jic-menu-appearance button{min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--jic-border);border-radius:13px;color:var(--jic-text);font-size:13px;font-weight:700}.jic-unified-menu-group{border-bottom:1px solid var(--jic-border)}.jic-unified-menu-row{display:grid;grid-template-columns:1fr auto;align-items:center;min-height:56px}.jic-unified-menu-row>a{font-size:18px;font-weight:750;color:var(--jic-text);text-decoration:none;padding:14px 4px}.jic-unified-menu-row>button{width:40px;height:40px;border:0;background:transparent;color:var(--jic-gold);font-size:24px}.jic-unified-menu-children{display:grid;gap:4px;padding:0 0 12px 12px}.jic-unified-menu-children a{padding:10px 12px;border-radius:10px;color:var(--jic-text-secondary);text-decoration:none;font-size:14px}.jic-unified-admin-link,.jic-unified-menu-donate{margin-top:14px;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;text-decoration:none;font-weight:750}.jic-unified-admin-link{border:1px solid var(--jic-border);color:var(--jic-text)}.jic-unified-menu-donate{width:100%;border:0;background:var(--jic-gold);color:#07111b}
+@media(max-width:767px){.jic-unified-inner{padding:6px 7px 0}.jic-unified-info{border-radius:22px}.jic-unified-address{min-height:32px;padding:0 10px;font-size:10px;gap:7px}.jic-unified-address>a{font-size:10px}.jic-today-prayer-row{grid-template-columns:repeat(6,minmax(74px,1fr));overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}.jic-today-prayer-row::-webkit-scrollbar{display:none}.jic-today-prayer{min-width:74px;min-height:68px;padding:7px 4px 6px;scroll-snap-align:start}.jic-today-prayer>span{font-size:10px;margin-bottom:4px}.jic-today-prayer strong{font-size:14px}.jic-today-prayer em{font-size:12px}.jic-today-prayer>small{gap:6px;margin-top:4px}.jic-today-prayer>small b{font-size:6px}.jic-header-live-row{min-height:38px}.jic-prayer-ticker a{padding:0 10px;font-size:10px;gap:5px}.jic-prayer-ticker b{font-size:8px}.jic-radio-flat{min-width:76px;padding:0 8px;gap:4px}.jic-radio-flat>span{font-size:10px}.jic-radio-flat>small{display:none}.jic-radio-flat>i{width:6px;height:6px}.jic-free-nav-row{min-height:50px;padding:3px 3px 1px}.jic-free-brand{min-height:40px;min-width:40px}.jic-free-brand img,.jic-free-brand svg{max-height:34px;max-width:118px}.jic-free-actions button{width:40px;height:40px;border-radius:13px}.jic-unified-subnav{padding-bottom:5px}.jic-unified-subnav-link{padding:6px 10px;font-size:11px}.jic-unified-reminder{grid-template-columns:1fr auto;grid-template-areas:'meta source' 'text text';gap:3px 7px;padding:7px 9px;border-radius:13px}.jic-unified-reminder>div{grid-area:meta;justify-content:space-between}.jic-unified-reminder>strong{grid-area:text;text-align:left;font-size:11px}.jic-unified-reminder>small{grid-area:source;font-size:8px}}
+@media(max-width:390px){.jic-free-actions{gap:5px}.jic-free-actions button{width:38px;height:38px}.jic-free-brand img,.jic-free-brand svg{max-height:32px;max-width:110px}.jic-radio-flat{min-width:68px}.jic-prayer-ticker a{font-size:9px;padding:0 8px}}
+@media(prefers-reduced-motion:reduce){.jic-prayer-ticker-track{animation:none;overflow-x:auto}.jic-prayer-ticker{overflow-x:auto}}
