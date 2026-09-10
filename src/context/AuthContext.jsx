@@ -11,36 +11,48 @@ export function AuthProvider({ children }) {
   const profileRequest = useRef(0);
   const signInInProgress = useRef(false);
   const currentUserId = useRef(null);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
 
   const loadProfile = useCallback(async (authUser) => {
     const request = ++profileRequest.current;
     if (!authUser) {
+      profileRef.current = null;
       setProfile(null);
       return null;
     }
 
-    const profileQuery = supabase
-      .from('profiles')
-      .select('id, display_name, role, is_active')
-      .eq('id', authUser.id)
-      .maybeSingle();
-
+    let timeoutId;
     const timeout = new Promise((_, reject) => {
-      window.setTimeout(() => reject(new Error('Admin profile request timed out.')), 10000);
+      timeoutId = window.setTimeout(() => reject(new Error('Admin profile request timed out.')), 10000);
     });
 
     try {
+      const profileQuery = supabase
+        .from('profiles')
+        .select('id, display_name, role, is_active')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
       const { data, error } = await Promise.race([profileQuery, timeout]);
       if (request !== profileRequest.current) return error ? null : data ?? null;
       if (error) throw error;
-      setProfile(data ?? null);
-      return data ?? null;
+      const nextProfile = data ?? null;
+      profileRef.current = nextProfile;
+      setProfile(nextProfile);
+      return nextProfile;
     } catch (error) {
       if (request === profileRequest.current) {
         console.error('Unable to load admin profile:', error);
+        profileRef.current = null;
         setProfile(null);
       }
       return null;
+    } finally {
+      if (timeoutId) window.clearTimeout(timeoutId);
     }
   }, []);
 
@@ -51,6 +63,7 @@ export function AuthProvider({ children }) {
     const finishSignedOut = () => {
       ++profileRequest.current;
       currentUserId.current = null;
+      profileRef.current = null;
       setUser(null);
       setProfile(null);
       setLoading(false);
@@ -97,26 +110,22 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // Token/session refreshes must never tear down the Admin UI.
-      // Keep the already-loaded profile and update only the auth user object.
       if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         currentUserId.current = authUser.id;
         setUser(authUser);
         return;
       }
 
-      // signIn() validates/loads the profile itself. Do not duplicate that work.
       if (signInInProgress.current) {
         currentUserId.current = authUser.id;
         setUser(authUser);
         return;
       }
 
-      // Ignore duplicate SIGNED_IN / INITIAL_SESSION events for the same active user.
-      if (currentUserId.current === authUser.id && profile) {
+      if (currentUserId.current === authUser.id && profileRef.current) {
+        initialized = true;
         setUser(authUser);
         setLoading(false);
-        initialized = true;
         return;
       }
 
@@ -131,7 +140,7 @@ export function AuthProvider({ children }) {
       ++profileRequest.current;
       subscription.unsubscribe();
     };
-  }, [loadProfile, profile]);
+  }, [loadProfile]);
 
   async function signIn(email, password, auditName = '') {
     signInInProgress.current = true;
@@ -142,8 +151,8 @@ export function AuthProvider({ children }) {
 
       currentUserId.current = data.user.id;
       setUser(data.user);
-      const p = await loadProfile(data.user);
-      if (!p?.is_active || !ADMIN_ROLES.has(p?.role)) {
+      const nextProfile = await loadProfile(data.user);
+      if (!nextProfile?.is_active || !ADMIN_ROLES.has(nextProfile?.role)) {
         signInInProgress.current = false;
         await supabase.auth.signOut();
         throw new Error('This account does not have JIC administration access.');
@@ -151,8 +160,11 @@ export function AuthProvider({ children }) {
 
       const cleanName = auditName.trim();
       if (cleanName) {
-        const { error: nameError } = await supabase.auth.updateUser({ data: { audit_name: cleanName } });
-        if (nameError) console.warn('Unable to save audit display name:', nameError);
+        const { data: updated, error: nameError } = await supabase.auth.updateUser({
+          data: { audit_name: cleanName },
+        });
+        if (nameError) throw nameError;
+        if (updated?.user) setUser(updated.user);
       }
 
       setLoading(false);
@@ -170,6 +182,7 @@ export function AuthProvider({ children }) {
     if (error) throw error;
     ++profileRequest.current;
     currentUserId.current = null;
+    profileRef.current = null;
     setUser(null);
     setProfile(null);
     setLoading(false);
