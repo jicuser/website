@@ -3,7 +3,7 @@
   :root{--jic-desktop-control:44px;--jic-desktop-radius:18px;}
 
   /* Prevent right-edge clipping and rebalance the utility strip. */
-  .jic-header .max-w-[1500px]{max-width:1480px!important;padding-left:14px!important;padding-right:14px!important;}
+  .jic-header .max-w-\[1500px\]{max-width:1480px!important;padding-left:14px!important;padding-right:14px!important;}
   .jic-info-shell{
     grid-template-columns:minmax(250px,.95fr) minmax(610px,2.25fr) minmax(330px,1.05fr)!important;
     min-height:58px!important;

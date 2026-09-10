@@ -4,12 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
 
 export const ScrollToTop = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    if (!hash) { window.scrollTo(0, 0); return; }
+    const timer = window.setTimeout(() => {
+      const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+      target?.scrollIntoView({ block: 'start' });
+      target?.focus({ preventScroll: true });
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [pathname, hash]);
 
   useEffect(() => {
     const toggleVisibility = () => setIsVisible(window.pageYOffset > 300);

@@ -1,6 +1,6 @@
 /* Desktop refinement layer — loaded last. Keeps mobile behaviour unchanged. */
 @media (min-width: 1025px) {
-  .jic-header .max-w-[1500px]{
+  .jic-header .max-w-\[1500px\]{
     max-width:1500px!important;
     margin-inline:auto!important;
     padding-left:18px!important;

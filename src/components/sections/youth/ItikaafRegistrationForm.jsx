@@ -418,9 +418,6 @@ export default function ItikaafRegistrationForm() {
 				)}
 			</Button>
 
-			<p className="text-center text-[11px] leading-snug text-muted-foreground">
-				Saved to Supabase or your Google Sheet webhook if configured.
-			</p>
 		</form>
 	);
 }

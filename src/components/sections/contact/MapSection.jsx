@@ -4,7 +4,7 @@ import { SITE } from '@/content/site';
 
 const MapSection = () => {
   const query = encodeURIComponent(`Jamatia Islamic Centre, ${SITE.address.line1}, ${SITE.address.line2}`);
-  return <>
+  return <section id="map" className="jic-anchor-target" tabIndex={-1}>
     <div className="mb-5 flex items-center gap-2">
       <MapPin className="h-6 w-6 text-primary" />
       <h2 className="text-2xl font-bold">Find Us</h2>
@@ -25,7 +25,7 @@ const MapSection = () => {
       <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{SITE.address.line1}<br/>{SITE.address.line2}</p>
       <a className="inline-flex items-center gap-2 text-sm font-semibold text-primary" href={`https://www.google.com/maps/search/?api=1&query=${query}`} target="_blank" rel="noreferrer">Open in Maps <ExternalLink size={14}/></a>
     </div>
-  </>;
+  </section>;
 };
 
 export default MapSection;
