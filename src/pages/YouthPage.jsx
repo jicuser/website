@@ -15,14 +15,14 @@ const activities = [
 
 function YouthActivitiesSection() {
   return (
-    <section id="activities" className="jic-anchor-target py-6 md:py-8">
+    <section id="activities" className="jic-anchor-target py-6 md:py-8" aria-label="Youth activities">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-5xl">
           <div className="grid gap-4 md:grid-cols-3">
             {activities.map(({ title, text, icon: Icon }) => (
               <article key={title} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                 <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={22}/></div>
-                <h1 className="text-lg font-bold text-card-foreground">{title}</h1>
+                <h2 className="text-lg font-bold text-card-foreground">{title}</h2>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
               </article>
             ))}
