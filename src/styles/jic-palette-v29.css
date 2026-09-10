@@ -1,4 +1,4 @@
-/* JIC v29 global palette. Imported last to normalise legacy page styles. */
+/* JIC global colour system. This file is loaded last so it is the single theme authority. */
 :root{
   --background:0 0% 100%;
   --foreground:214 49% 8%;
@@ -20,7 +20,7 @@
   --jic-bg:#FFFFFF;
   --jic-bg-secondary:#F5F5F7;
   --jic-surface:#FFFFFF;
-  --jic-glass:rgba(255,255,255,.78);
+  --jic-glass:rgba(255,255,255,.92);
   --jic-text:#0B1420;
   --jic-text-secondary:#5F6875;
   --jic-muted:#86868B;
@@ -53,7 +53,7 @@
   --jic-bg:#050A10;
   --jic-bg-secondary:#0A111A;
   --jic-surface:#0D1622;
-  --jic-glass:rgba(13,22,34,.78);
+  --jic-glass:rgba(13,22,34,.82);
   --jic-text:#F5F7FA;
   --jic-text-secondary:#A8B0BC;
   --jic-muted:#747E8C;
@@ -70,48 +70,79 @@ html,body,#root{background:var(--jic-bg)!important;color:var(--jic-text)!importa
 body{transition:background-color .2s ease,color .2s ease;}
 main,.page-transition,.jic-public-main{color:var(--jic-text);}
 
-/* Legacy Tailwind colour bridge so older pages use the same system. */
-html:not(.dark) .bg-gray-50,html:not(.dark) .bg-gray-100{background-color:var(--jic-bg-secondary)!important;}
+/* Legacy Tailwind bridge. */
+html:not(.dark) .bg-gray-50,html:not(.dark) .bg-gray-100,html:not(.dark) .bg-gray-200{background-color:var(--jic-bg-secondary)!important;}
 html:not(.dark) .bg-gray-800,html:not(.dark) .bg-gray-900,html:not(.dark) .bg-white{background-color:var(--jic-surface)!important;}
 .dark .bg-gray-50,.dark .bg-gray-100,.dark .bg-gray-800,.dark .bg-gray-900,.dark .bg-white{background-color:var(--jic-surface)!important;}
-html:not(.dark) .text-gray-900,html:not(.dark) .text-gray-800,html:not(.dark) .text-gray-700{color:var(--jic-text)!important;}
+html:not(.dark) .text-gray-900,html:not(.dark) .text-gray-800,html:not(.dark) .text-gray-700,html:not(.dark) .text-white{color:var(--jic-text)!important;}
 html:not(.dark) .text-gray-600,html:not(.dark) .text-gray-500{color:var(--jic-text-secondary)!important;}
-html:not(.dark) .text-gray-400,html:not(.dark) .text-gray-300{color:var(--jic-muted)!important;}
+html:not(.dark) .text-gray-400,html:not(.dark) .text-gray-300,html:not(.dark) .text-gray-200{color:var(--jic-muted)!important;}
 .dark .text-gray-900,.dark .text-gray-800,.dark .text-gray-700,.dark .text-white,.dark .text-gray-200{color:var(--jic-text)!important;}
 .dark .text-gray-600,.dark .text-gray-500,.dark .text-gray-400,.dark .text-gray-300{color:var(--jic-text-secondary)!important;}
 html:not(.dark) .border-white\/10,html:not(.dark) .border-white\/20{border-color:var(--jic-border)!important;}
-html:not(.dark) .bg-white\/5,html:not(.dark) .bg-white\/10{background:rgba(255,255,255,.82)!important;}
+html:not(.dark) .bg-white\/5,html:not(.dark) .bg-white\/10{background:var(--jic-surface)!important;}
 .dark .border-white\/10,.dark .border-white\/20{border-color:var(--jic-border)!important;}
 .dark .bg-white\/5,.dark .bg-white\/10{background:rgba(13,22,34,.72)!important;}
 
-/* Common cards, managed content, forms and tables. */
+/* Common public surfaces. */
 .managed-page-content,.jic-hall-intro,.jic-hall-calendar,.jic-event-card,.jic-upcoming-events article,[class*="bg-card"]{background:var(--jic-surface)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
 .managed-page-content p,.prose p,.prose li{color:var(--jic-text-secondary)!important;}
 input:not([type=checkbox]):not([type=radio]),textarea,select{background:var(--jic-surface)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
 input::placeholder,textarea::placeholder{color:var(--jic-muted)!important;}
 table,th,td{border-color:var(--jic-border)!important;}
 
-/* Unified header follows the exact light/dark palette. */
-.jic-unified-header,.jic-unified-inner{background:transparent!important;}
-.jic-unified-info{background:var(--jic-glass)!important;border-color:var(--jic-border)!important;color:var(--jic-text)!important;}
+/* Header: canvas must exactly match the current theme page background. */
+.jic-unified-header,.jic-unified-inner{background:var(--jic-bg)!important;}
+.jic-unified-info{background:var(--jic-surface)!important;border-color:var(--jic-border)!important;color:var(--jic-text)!important;box-shadow:0 8px 26px rgba(11,20,32,.06)!important;}
+.dark .jic-unified-info{background:var(--jic-surface)!important;box-shadow:0 12px 30px rgba(0,0,0,.25)!important;}
 .jic-unified-address,.jic-unified-address a,.jic-next-summary,.jic-jummah-summary,.jic-radio-flat{color:var(--jic-text)!important;}
-.jic-today-prayer{color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
+.jic-today-prayer{background:transparent!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
 .jic-today-prayer>span,.jic-today-prayer em,.jic-next-summary small,.jic-jummah-lines small,.jic-radio-flat small{color:var(--jic-text-secondary)!important;}
 .jic-today-prayer strong,.jic-summary-label,.jic-jummah-lines small b,.jic-next-summary small b{color:var(--jic-gold)!important;}
 .jic-today-prayer>small b{color:var(--jic-gold)!important;}.jic-today-prayer>small b+b{color:var(--jic-muted)!important;}
 .jic-radio-flat>i{background:var(--jic-live)!important;}
-.jic-free-actions button{background:var(--jic-surface)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
+.jic-free-nav-row{background:var(--jic-bg)!important;}
+.jic-free-actions button{background:var(--jic-surface)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;box-shadow:none!important;}
 .jic-free-actions button.is-donate{background:var(--jic-gold)!important;color:#0B1420!important;border-color:var(--jic-gold)!important;}
+.jic-unified-subnav{background:var(--jic-bg)!important;}
 .jic-unified-subnav-link{background:var(--jic-surface)!important;color:var(--jic-text-secondary)!important;border-color:var(--jic-border)!important;}
 .jic-unified-subnav-link.is-current{background:color-mix(in srgb,var(--jic-gold) 14%,var(--jic-surface))!important;color:var(--jic-text)!important;border-color:color-mix(in srgb,var(--jic-gold) 45%,var(--jic-border))!important;}
-.jic-unified-reminder{background:var(--jic-glass)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
+.jic-unified-reminder{background:var(--jic-surface)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;box-shadow:none!important;}
 .jic-unified-reminder>div b{color:var(--jic-gold)!important;}.jic-unified-reminder>div span,.jic-unified-reminder>small{color:var(--jic-muted)!important;}
 .jic-unified-menu,.jic-unified-menu-head{background:var(--jic-bg)!important;color:var(--jic-text)!important;}
 .jic-unified-menu-group,.jic-unified-menu-head{border-color:var(--jic-border)!important;}
-.jic-unified-menu-row>a{color:var(--jic-text)!important;}.jic-unified-menu-children a,.jic-unified-admin-link{background:var(--jic-surface)!important;color:var(--jic-text-secondary)!important;border-color:var(--jic-border)!important;}
-.jic-unified-menu-row>button{color:var(--jic-gold)!important;}.jic-unified-menu-donate{background:var(--jic-gold)!important;color:#0B1420!important;}
+.jic-unified-menu-head button,.jic-unified-menu-children a,.jic-unified-admin-link{background:var(--jic-surface)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
+.jic-unified-menu-row>a{color:var(--jic-text)!important;}.jic-unified-menu-row>button{color:var(--jic-gold)!important;}.jic-unified-menu-donate{background:var(--jic-gold)!important;color:#0B1420!important;}
 
-/* Public homepage and section surfaces. Keep hero imagery dark by design; everything below follows theme. */
+/* Light mode: remove every remaining dark glass/fill from the header. */
+html:not(.dark) .jic-unified-header,
+html:not(.dark) .jic-unified-inner,
+html:not(.dark) .jic-free-nav-row,
+html:not(.dark) .jic-unified-subnav{background:#FFFFFF!important;}
+html:not(.dark) .jic-unified-info,
+html:not(.dark) .jic-unified-reminder,
+html:not(.dark) .jic-free-actions button,
+html:not(.dark) .jic-unified-subnav-link,
+html:not(.dark) .jic-unified-menu,
+html:not(.dark) .jic-unified-menu-head,
+html:not(.dark) .jic-unified-menu-head button,
+html:not(.dark) .jic-unified-menu-children a,
+html:not(.dark) .jic-unified-admin-link{background:#FFFFFF!important;color:#0B1420!important;border-color:#D9DDE3!important;}
+html:not(.dark) .jic-unified-reminder strong,
+html:not(.dark) .jic-unified-address,
+html:not(.dark) .jic-unified-address a,
+html:not(.dark) .jic-next-summary,
+html:not(.dark) .jic-jummah-summary,
+html:not(.dark) .jic-radio-flat{color:#0B1420!important;}
+html:not(.dark) .jic-unified-reminder>div span,
+html:not(.dark) .jic-unified-reminder>small,
+html:not(.dark) .jic-today-prayer>span,
+html:not(.dark) .jic-today-prayer em,
+html:not(.dark) .jic-next-summary small,
+html:not(.dark) .jic-jummah-lines small,
+html:not(.dark) .jic-radio-flat small{color:#5F6875!important;}
+
+/* Home and general sections. Hero stays intentionally dark/photographic. */
 html:not(.dark) .jic-feature-grid,html:not(.dark) .jic-upcoming-events,html:not(.dark) .jic-home-footer-strip{background:var(--jic-bg)!important;color:var(--jic-text)!important;}
 html:not(.dark) .jic-feature-card{background:var(--jic-surface)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;box-shadow:0 8px 30px rgba(11,20,32,.06)!important;}
 html:not(.dark) .jic-feature-card p,html:not(.dark) .jic-home-footer-strip small{color:var(--jic-text-secondary)!important;}
@@ -127,7 +158,7 @@ html:not(.dark) .jic-secondary-cta{background:var(--jic-bg-secondary)!important;
 .jic-hall-day.is-booked::before,.jic-hall-legend i.is-booked{background:var(--jic-error)!important;}
 .jic-hall-contact a{background:var(--jic-gold)!important;color:#0B1420!important;}
 
-/* Admin gets the same neutral system instead of beige/cream. */
+/* Admin uses the same neutral system. */
 .admin-console{background:var(--jic-bg-secondary)!important;color:var(--jic-text)!important;}
 .admin-console header{background:var(--jic-surface)!important;border-color:var(--jic-border)!important;}
 .admin-console header,.admin-console header a,.admin-console header button,.admin-console h1,.admin-console h2,.admin-console h3,.admin-console h4{color:var(--jic-text)!important;}
@@ -139,12 +170,13 @@ html:not(.dark) .jic-secondary-cta{background:var(--jic-bg-secondary)!important;
 .admin-upload,.admin-time-preview,.admin-hint{background:color-mix(in srgb,var(--jic-gold) 8%,var(--jic-surface))!important;border-color:color-mix(in srgb,var(--jic-gold) 35%,var(--jic-border))!important;}
 .admin-page-picker nav button{color:var(--jic-text-secondary)!important;}.admin-page-picker nav button.selected{background:color-mix(in srgb,var(--jic-gold) 14%,var(--jic-surface))!important;color:var(--jic-text)!important;}
 
-/* Status colours remain semantic and accessible. */
+/* Semantic status colours. */
 .bg-green-50{background:color-mix(in srgb,var(--jic-success) 10%,var(--jic-surface))!important;}
 .bg-red-50{background:color-mix(in srgb,var(--jic-error) 9%,var(--jic-surface))!important;}
 .bg-blue-50{background:var(--jic-bg-secondary)!important;}
 
-/* Prevent old cream page tint from showing through in light mode. */
-html:not(.dark) section:not(.jic-hero),html:not(.dark) .page-transition{background-color:transparent;}
+/* Light pages are white; dark pages are deep navy. */
+html:not(.dark) .page-transition,html:not(.dark) .jic-public-main{background:#FFFFFF!important;}
+html:not(.dark) section:not(.jic-hero){background-color:transparent;}
 html:not(.dark) footer{background:var(--jic-bg-secondary)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
 .dark footer{background:var(--jic-bg-secondary)!important;color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
