@@ -17,8 +17,7 @@ const EXTENSION_AREAS = [
 
 export default function ProjectsPage() {
   return <div className="page-transition">
-    <section className="bg-background py-8 md:py-10"><div className="container mx-auto px-4">
-      <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Overview</p><h1 className="mt-2 text-2xl font-bold text-foreground">Current project areas</h1></div>
+    <section className="bg-background py-6 md:py-8"><div className="container mx-auto px-4">
       <div className="grid gap-4 md:grid-cols-3">{PROJECTS.map(({ title, text, to, icon: Icon, status }) => <Link key={to} to={to} className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/30">
         <div className="mb-4 flex items-start justify-between gap-4"><div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={21}/></div><span className="rounded-full border border-border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{status}</span></div>
         <h2 className="text-lg font-bold text-card-foreground">{title}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">Open <ArrowRight size={16}/></span>
