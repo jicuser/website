@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const profileRequest = useRef(0);
   const signInInProgress = useRef(false);
+  const currentUserId = useRef(null);
 
   const loadProfile = useCallback(async (authUser) => {
     const request = ++profileRequest.current;
@@ -18,80 +19,128 @@ export function AuthProvider({ children }) {
       return null;
     }
 
-    const { data, error } = await supabase
+    const profileQuery = supabase
       .from('profiles')
       .select('id, display_name, role, is_active')
       .eq('id', authUser.id)
       .maybeSingle();
 
-    if (request !== profileRequest.current) return error ? null : data ?? null;
-    if (error) {
-      console.error('Unable to load admin profile:', error);
-      setProfile(null);
+    const timeout = new Promise((_, reject) => {
+      window.setTimeout(() => reject(new Error('Admin profile request timed out.')), 10000);
+    });
+
+    try {
+      const { data, error } = await Promise.race([profileQuery, timeout]);
+      if (request !== profileRequest.current) return error ? null : data ?? null;
+      if (error) throw error;
+      setProfile(data ?? null);
+      return data ?? null;
+    } catch (error) {
+      if (request === profileRequest.current) {
+        console.error('Unable to load admin profile:', error);
+        setProfile(null);
+      }
       return null;
     }
-
-    setProfile(data ?? null);
-    return data ?? null;
   }, []);
 
   useEffect(() => {
     let mounted = true;
-    let authEventSeen = false;
-    let timer;
+    let initialized = false;
 
-    const applySession = (session) => {
+    const finishSignedOut = () => {
+      ++profileRequest.current;
+      currentUserId.current = null;
+      setUser(null);
+      setProfile(null);
+      setLoading(false);
+    };
+
+    const establishSession = async (session) => {
+      if (!mounted) return;
+      const authUser = session?.user ?? null;
+      if (!authUser) {
+        finishSignedOut();
+        return;
+      }
+
+      currentUserId.current = authUser.id;
+      setUser(authUser);
+      setLoading(true);
+      await loadProfile(authUser);
+      if (mounted) setLoading(false);
+    };
+
+    supabase.auth.getSession()
+      .then(async ({ data, error }) => {
+        if (!mounted || initialized) return;
+        initialized = true;
+        if (error) {
+          finishSignedOut();
+          return;
+        }
+        await establishSession(data?.session ?? null);
+      })
+      .catch(() => {
+        if (!mounted || initialized) return;
+        initialized = true;
+        finishSignedOut();
+      });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
       const authUser = session?.user ?? null;
 
-      // signIn() owns the profile validation while a login submit is active.
-      // Avoid clearing/reloading the profile a second time from the auth event.
-      if (signInInProgress.current && authUser) {
+      if (event === 'SIGNED_OUT' || !authUser) {
+        initialized = true;
+        finishSignedOut();
+        return;
+      }
+
+      // Token/session refreshes must never tear down the Admin UI.
+      // Keep the already-loaded profile and update only the auth user object.
+      if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        currentUserId.current = authUser.id;
         setUser(authUser);
         return;
       }
 
-      ++profileRequest.current;
-      setUser(authUser);
-      setProfile(null);
-      setLoading(Boolean(authUser));
-      window.clearTimeout(timer);
-
-      if (authUser) {
-        timer = window.setTimeout(() => {
-          if (!mounted) return;
-          loadProfile(authUser)
-            .catch(() => setProfile(null))
-            .finally(() => { if (mounted) setLoading(false); });
-        }, 0);
-      } else {
-        setLoading(false);
+      // signIn() validates/loads the profile itself. Do not duplicate that work.
+      if (signInInProgress.current) {
+        currentUserId.current = authUser.id;
+        setUser(authUser);
+        return;
       }
-    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      authEventSeen = true;
-      applySession(session);
+      // Ignore duplicate SIGNED_IN / INITIAL_SESSION events for the same active user.
+      if (currentUserId.current === authUser.id && profile) {
+        setUser(authUser);
+        setLoading(false);
+        initialized = true;
+        return;
+      }
+
+      initialized = true;
+      establishSession(session).catch(() => {
+        if (mounted) setLoading(false);
+      });
     });
-
-    supabase.auth.getSession()
-      .then(({ data, error }) => { if (!authEventSeen) applySession(error ? null : data?.session); })
-      .catch(() => { if (!authEventSeen) applySession(null); });
 
     return () => {
       mounted = false;
       ++profileRequest.current;
-      window.clearTimeout(timer);
       subscription.unsubscribe();
     };
-  }, [loadProfile]);
+  }, [loadProfile, profile]);
 
   async function signIn(email, password, auditName = '') {
     signInInProgress.current = true;
+    setLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
+      currentUserId.current = data.user.id;
       setUser(data.user);
       const p = await loadProfile(data.user);
       if (!p?.is_active || !ADMIN_ROLES.has(p?.role)) {
@@ -108,6 +157,9 @@ export function AuthProvider({ children }) {
 
       setLoading(false);
       return data;
+    } catch (error) {
+      setLoading(false);
+      throw error;
     } finally {
       signInInProgress.current = false;
     }
@@ -117,6 +169,7 @@ export function AuthProvider({ children }) {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     ++profileRequest.current;
+    currentUserId.current = null;
     setUser(null);
     setProfile(null);
     setLoading(false);
