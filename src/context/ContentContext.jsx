@@ -1,8 +1,6 @@
 /**
- * ContentContext  —  src/context/ContentContext.jsx
- * Provides: editMode, toggleEditMode, getContent, saveContent
- * Content is fetched from Supabase; falls back to the static
- * value passed into EditableText/EditableImage.
+ * Shared editable-content state. Public content is loaded once and refreshed
+ * only after an explicit content update, rather than on every browser focus.
  */
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -13,23 +11,24 @@ const ContentContext = createContext(null);
 
 export function ContentProvider({ children }) {
   const { isAdmin, can } = useAuth();
-  const [editMode, setEditMode]   = useState(false);
-  const [cache, setCache]         = useState({});   // key → value
-  const [saving, setSaving]       = useState(false);
-  const [saveMsg, setSaveMsg]     = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [cache, setCache] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
 
   const refreshContent = useCallback(async () => {
-    const {data,error}=await supabase.from('page_content').select('content_key, content_value');
-    if(error)throw error;
-    setCache(Object.fromEntries((data||[]).map(r=>[r.content_key,r.content_value])));
-  },[]);
-  useEffect(()=>{
-    const refresh=()=>refreshContent().catch(console.error);
-    refresh();window.addEventListener('focus',refresh);window.addEventListener('jic-content-updated',refresh);
-    return()=>{window.removeEventListener('focus',refresh);window.removeEventListener('jic-content-updated',refresh);};
-  },[refreshContent]);
+    const { data, error } = await supabase.from('page_content').select('content_key, content_value');
+    if (error) throw error;
+    setCache(Object.fromEntries((data || []).map(row => [row.content_key, row.content_value])));
+  }, []);
 
-  // Turn off edit mode when user logs out
+  useEffect(() => {
+    const refresh = () => refreshContent().catch(console.error);
+    refresh();
+    window.addEventListener('jic-content-updated', refresh);
+    return () => window.removeEventListener('jic-content-updated', refresh);
+  }, [refreshContent]);
+
   useEffect(() => {
     if (!isAdmin) setEditMode(false);
   }, [isAdmin]);
@@ -45,16 +44,20 @@ export function ContentProvider({ children }) {
     try {
       const { data, error } = await supabase
         .from('page_content')
-        .upsert({ content_key: key, content_value: value, content_type: type }, { onConflict: 'content_key' }).select('content_key');
+        .upsert(
+          { content_key: key, content_value: value, content_type: type },
+          { onConflict: 'content_key' }
+        )
+        .select('content_key');
       if (error) throw error;
       if (data?.length !== 1) throw new Error('The change was not saved. Please try again.');
-      setCache(prev => ({ ...prev, [key]: value }));
+      setCache(previous => ({ ...previous, [key]: value }));
       setSaveMsg('Saved');
-      setTimeout(() => setSaveMsg(''), 2000);
-    } catch (err) {
-      console.error('saveContent error:', err);
+      window.setTimeout(() => setSaveMsg(''), 2000);
+    } catch (error) {
+      console.error('saveContent error:', error);
       setSaveMsg('Error saving');
-      throw err;
+      throw error;
     } finally {
       setSaving(false);
     }
@@ -64,8 +67,8 @@ export function ContentProvider({ children }) {
     if (!can('content')) throw new Error('You do not have permission to replace pictures.');
     const ext = validateImage(file);
     const path = `${key.replace(/\./g, '/')}-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from('site-images').upload(path, file, { upsert: false });
-    if (upErr) throw upErr;
+    const { error: uploadError } = await supabase.storage.from('site-images').upload(path, file, { upsert: false });
+    if (uploadError) throw uploadError;
     const { data } = supabase.storage.from('site-images').getPublicUrl(path);
     await saveContent(key, data.publicUrl, 'image');
     return data.publicUrl;
@@ -74,7 +77,7 @@ export function ContentProvider({ children }) {
   return (
     <ContentContext.Provider value={{
       editMode,
-      toggleEditMode: () => can('content') && setEditMode(p => !p),
+      toggleEditMode: () => can('content') && setEditMode(previous => !previous),
       getContent,
       refreshContent,
       saveContent,
@@ -88,7 +91,7 @@ export function ContentProvider({ children }) {
 }
 
 export function useContent() {
-  const ctx = useContext(ContentContext);
-  if (!ctx) throw new Error('useContent must be used inside <ContentProvider>');
-  return ctx;
+  const context = useContext(ContentContext);
+  if (!context) throw new Error('useContent must be used inside <ContentProvider>');
+  return context;
 }
