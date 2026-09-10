@@ -3,136 +3,81 @@
  * Keeps iPhone-style translucency active without sacrificing contrast.
  */
 :root{
-  --jic-glass-surface:rgba(255,255,255,.62);
-  --jic-glass-surface-strong:rgba(255,255,255,.76);
-  --jic-glass-border:rgba(255,255,255,.72);
-  --jic-glass-shadow:0 12px 34px rgba(15,23,42,.12), inset 0 1px 0 rgba(255,255,255,.78);
+  --jic-glass-surface:rgba(255,255,255,.52);
+  --jic-glass-surface-strong:rgba(255,255,255,.68);
+  --jic-glass-border:rgba(255,255,255,.70);
+  --jic-glass-shadow:0 12px 34px rgba(15,23,42,.12), inset 0 1px 0 rgba(255,255,255,.82);
 }
 .dark{
-  --jic-glass-surface:rgba(9,18,28,.54);
-  --jic-glass-surface-strong:rgba(11,21,32,.68);
-  --jic-glass-border:rgba(255,255,255,.13);
-  --jic-glass-shadow:0 16px 40px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+  --jic-glass-surface:rgba(9,18,28,.44);
+  --jic-glass-surface-strong:rgba(11,21,32,.58);
+  --jic-glass-border:rgba(255,255,255,.15);
+  --jic-glass-shadow:0 16px 40px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.10);
 }
 
-/* Header canvas follows the page; only the controls themselves are glass. */
-.jic-unified-header,
-.jic-unified-inner,
-.jic-free-nav-row,
-.jic-unified-subnav{
-  background:transparent!important;
-}
+/* Header canvas follows the page; only controls are glass. */
+.jic-unified-header,.jic-unified-inner,.jic-free-nav-row,.jic-unified-subnav{background:transparent!important;}
 
-/* Primary timetable / next prayer / Jummah / radio shell. */
+/* Timetable + next prayer + Jummah + radio = one translucent glass slab. */
 .jic-unified-info{
-  position:relative;
-  isolation:isolate;
+  position:relative;isolation:isolate;
   background:var(--jic-glass-surface)!important;
   border:1px solid var(--jic-glass-border)!important;
   box-shadow:var(--jic-glass-shadow)!important;
-  -webkit-backdrop-filter:blur(28px) saturate(165%) contrast(105%);
-  backdrop-filter:blur(28px) saturate(165%) contrast(105%);
+  -webkit-backdrop-filter:blur(30px) saturate(175%) contrast(104%);
+  backdrop-filter:blur(30px) saturate(175%) contrast(104%);
 }
 .jic-unified-info::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:-1;
-  pointer-events:none;
-  border-radius:inherit;
-  background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(255,255,255,.035) 42%,rgba(255,255,255,.10));
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(255,255,255,.24),rgba(255,255,255,.025) 44%,rgba(255,255,255,.12));
 }
-.dark .jic-unified-info::before{
-  background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.01) 45%,rgba(255,255,255,.045));
-}
+.dark .jic-unified-info::before{background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.008) 45%,rgba(255,255,255,.045));}
+.jic-unified-address,.jic-today-prayer-row,.jic-today-prayer,.jic-next-summary::after,.jic-jummah-summary::after{border-color:color-mix(in srgb,var(--jic-border) 50%,transparent)!important;}
 
-/* Preserve the thin etched separators inside the glass slab. */
-.jic-unified-address,
-.jic-today-prayer-row,
-.jic-today-prayer,
-.jic-next-summary::after,
-.jic-jummah-summary::after{
-  border-color:color-mix(in srgb,var(--jic-border) 58%,transparent)!important;
-}
+/* Keep the brand visually balanced against the three controls. */
+.jic-free-brand img,.jic-free-brand svg{max-height:46px!important;max-width:168px!important;width:auto!important;object-fit:contain;}
 
-/* Logo controls should feel like individual floating glass buttons. */
+/* Individual floating controls. */
 .jic-free-actions button{
   background:var(--jic-glass-surface-strong)!important;
   border:1px solid var(--jic-glass-border)!important;
-  box-shadow:0 8px 24px rgba(15,23,42,.10), inset 0 1px 0 rgba(255,255,255,.66)!important;
-  -webkit-backdrop-filter:blur(22px) saturate(160%);
-  backdrop-filter:blur(22px) saturate(160%);
+  box-shadow:0 8px 24px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.70)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);
 }
-.dark .jic-free-actions button{
-  box-shadow:0 10px 28px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08)!important;
-}
-.jic-free-actions button.is-donate{
-  background:linear-gradient(180deg,color-mix(in srgb,var(--jic-gold) 86%,white 14%),var(--jic-gold))!important;
-  border-color:color-mix(in srgb,var(--jic-gold) 72%,white 28%)!important;
-  box-shadow:0 10px 25px color-mix(in srgb,var(--jic-gold) 24%,transparent), inset 0 1px 0 rgba(255,255,255,.52)!important;
-}
+.dark .jic-free-actions button{box-shadow:0 10px 28px rgba(0,0,0,.23),inset 0 1px 0 rgba(255,255,255,.09)!important;}
+.jic-free-actions button.is-donate{background:linear-gradient(180deg,color-mix(in srgb,var(--jic-gold) 86%,white 14%),var(--jic-gold))!important;border-color:color-mix(in srgb,var(--jic-gold) 72%,white 28%)!important;box-shadow:0 10px 25px color-mix(in srgb,var(--jic-gold) 24%,transparent),inset 0 1px 0 rgba(255,255,255,.52)!important;}
 
-/* Reminder and page tabs use lighter glass so they blend into each page. */
-.jic-unified-reminder,
-.jic-unified-subnav-link{
-  background:var(--jic-glass-surface)!important;
-  border-color:var(--jic-glass-border)!important;
-  -webkit-backdrop-filter:blur(22px) saturate(155%);
-  backdrop-filter:blur(22px) saturate(155%);
-  box-shadow:0 8px 22px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.52)!important;
-}
-.dark .jic-unified-reminder,
-.dark .jic-unified-subnav-link{
-  box-shadow:0 10px 26px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.06)!important;
-}
-.jic-unified-subnav-link.is-current{
-  background:color-mix(in srgb,var(--jic-gold) 17%,var(--jic-glass-surface-strong))!important;
-}
+/* Reminder and page tabs. */
+.jic-unified-reminder,.jic-unified-subnav-link{background:var(--jic-glass-surface)!important;border-color:var(--jic-glass-border)!important;-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%);box-shadow:0 8px 22px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.52)!important;}
+.dark .jic-unified-reminder,.dark .jic-unified-subnav-link{box-shadow:0 10px 26px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.06)!important;}
+.jic-unified-subnav-link.is-current{background:color-mix(in srgb,var(--jic-gold) 17%,var(--jic-glass-surface-strong))!important;}
 
-/* Mobile menu is a stable frosted sheet instead of an opaque takeover. */
-.jic-unified-menu,
+/* Burger menu: transparent frosted overlay, not an opaque page. */
+.jic-unified-menu{
+  background:color-mix(in srgb,var(--jic-bg) 48%,transparent)!important;
+  -webkit-backdrop-filter:blur(38px) saturate(180%);backdrop-filter:blur(38px) saturate(180%);
+}
 .jic-unified-menu-head{
-  background:color-mix(in srgb,var(--jic-bg) 74%,transparent)!important;
-  -webkit-backdrop-filter:blur(32px) saturate(165%);
-  backdrop-filter:blur(32px) saturate(165%);
-}
-.jic-unified-menu-children a,
-.jic-unified-admin-link,
-.jic-unified-menu-head button{
-  background:var(--jic-glass-surface-strong)!important;
+  background:color-mix(in srgb,var(--jic-bg) 42%,transparent)!important;
   border-color:var(--jic-glass-border)!important;
-  -webkit-backdrop-filter:blur(18px) saturate(145%);
-  backdrop-filter:blur(18px) saturate(145%);
+  -webkit-backdrop-filter:blur(34px) saturate(175%);backdrop-filter:blur(34px) saturate(175%);
+}
+.jic-unified-menu-group{border-color:color-mix(in srgb,var(--jic-border) 42%,transparent)!important;}
+.jic-unified-menu-children a,.jic-unified-admin-link,.jic-unified-menu-head button{
+  background:var(--jic-glass-surface-strong)!important;border-color:var(--jic-glass-border)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+  -webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%);
 }
 
-/* Respect the existing glass-off accessibility preference. */
-html[data-surface="solid"] .jic-unified-info,
-html[data-surface="solid"] .jic-unified-reminder,
-html[data-surface="solid"] .jic-unified-subnav-link,
-html[data-surface="solid"] .jic-free-actions button,
-html[data-surface="solid"] .jic-unified-menu,
-html[data-surface="solid"] .jic-unified-menu-head,
-html[data-surface="solid"] .jic-unified-menu-children a,
-html[data-surface="solid"] .jic-unified-admin-link,
-html[data-surface="solid"] .jic-unified-menu-head button{
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
-  background:var(--jic-surface)!important;
-}
-html[data-surface="solid"] .jic-free-actions button.is-donate,
-html[data-surface="solid"] .jic-unified-menu-donate{
-  background:var(--jic-gold)!important;
-}
+/* Respect glass-off accessibility preference. */
+html[data-surface="solid"] .jic-unified-info,html[data-surface="solid"] .jic-unified-reminder,html[data-surface="solid"] .jic-unified-subnav-link,html[data-surface="solid"] .jic-free-actions button,html[data-surface="solid"] .jic-unified-menu,html[data-surface="solid"] .jic-unified-menu-head,html[data-surface="solid"] .jic-unified-menu-children a,html[data-surface="solid"] .jic-unified-admin-link,html[data-surface="solid"] .jic-unified-menu-head button{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--jic-surface)!important;}
+html[data-surface="solid"] .jic-free-actions button.is-donate,html[data-surface="solid"] .jic-unified-menu-donate{background:var(--jic-gold)!important;}
 
 @media (max-width:767px){
-  .jic-unified-info{
-    border-radius:24px;
-    -webkit-backdrop-filter:blur(24px) saturate(165%);
-    backdrop-filter:blur(24px) saturate(165%);
-  }
-  .jic-unified-reminder,
-  .jic-unified-subnav-link{
-    -webkit-backdrop-filter:blur(18px) saturate(155%);
-    backdrop-filter:blur(18px) saturate(155%);
-  }
+  .jic-unified-info{border-radius:24px;-webkit-backdrop-filter:blur(28px) saturate(175%);backdrop-filter:blur(28px) saturate(175%);}
+  .jic-free-brand img,.jic-free-brand svg{max-height:36px!important;max-width:124px!important;}
+  .jic-free-nav-row{min-height:56px!important;padding-top:5px!important;padding-bottom:3px!important;}
+  .jic-unified-reminder,.jic-unified-subnav-link{-webkit-backdrop-filter:blur(20px) saturate(165%);backdrop-filter:blur(20px) saturate(165%);}
+  .jic-unified-menu{-webkit-backdrop-filter:blur(34px) saturate(175%);backdrop-filter:blur(34px) saturate(175%);}
 }
+@media (max-width:390px){.jic-free-brand img,.jic-free-brand svg{max-height:33px!important;max-width:114px!important;}}
