@@ -15,6 +15,7 @@ import HallBookingPage from '@/pages/HallBookingPage';
 import HomePage from '@/pages/HomePage';
 import MadrassahEnrolmentPage from '@/pages/MadrassahEnrolmentPage';
 import MadrassahPage from '@/pages/MadrassahPage';
+import MasjidExtensionPage from '@/pages/MasjidExtensionPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import PrayerTimesPage from '@/pages/PrayerTimesPage';
 import PrivacyPage from '@/pages/PrivacyPage';
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="services" element={<ServicesPage />} />
           <Route path="services/hall-booking" element={<HallBookingPage />} />
           <Route path="projects" element={<ProjectsPage />} />
+          <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
           <Route path="madrassah" element={<MadrassahPage />} />
           <Route path="madrassah/classes-courses" element={<ClassesCoursesPage />} />
           <Route path="madrassah/enrolment" element={<MadrassahEnrolmentPage />} />
