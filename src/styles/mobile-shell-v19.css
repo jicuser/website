@@ -1,0 +1,245 @@
+/* Mobile shell v19: one consistent header geometry across all public pages. */
+@media (max-width: 767px) {
+  .jic-header > div {
+    padding-top: 8px !important;
+  }
+
+  /* Inner pages: next-prayer + compact radio share the first row. */
+  .jic-header.is-section-header > div {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto auto auto !important;
+    column-gap: 8px !important;
+    row-gap: 8px !important;
+  }
+
+  .jic-header.is-section-header .jic-section-next {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+    align-items: center !important;
+    border-radius: 16px !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+
+  .jic-header.is-section-header .jic-section-next strong {
+    font-size: 14px !important;
+  }
+
+  .jic-header.is-section-header .jic-info-shell {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .jic-header.is-section-header .jic-address,
+  .jic-header.is-section-header .jic-prayer-row,
+  .jic-header.is-section-header .jic-jummah-mini {
+    display: none !important;
+  }
+
+  .jic-header.is-section-header .jic-utility-row {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .jic-header.is-section-header .jic-radio {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 16px !important;
+  }
+
+  .jic-header.is-section-header .jic-radio > span,
+  .jic-header.is-section-header .jic-radio > small,
+  .jic-header.is-section-header .jic-radio .live-dot {
+    display: none !important;
+  }
+
+  /* Logo/actions row is identical everywhere. */
+  .jic-header .jic-mainnav,
+  .jic-header.is-section-header .jic-mainnav {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    margin: 0 !important;
+    min-height: 58px !important;
+    height: 58px !important;
+    padding: 6px 8px !important;
+    border-radius: 18px !important;
+    align-items: center !important;
+  }
+
+  .jic-header .jic-brand {
+    width: 112px !important;
+    min-width: 96px !important;
+    height: 44px !important;
+  }
+
+  .jic-header .jic-nav-actions {
+    gap: 5px !important;
+  }
+
+  .jic-header .header-icon,
+  .jic-header .donate-button {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    border-radius: 14px !important;
+    justify-content: center !important;
+  }
+
+  .jic-header .donate-button span,
+  .jic-header .jic-admin-entry,
+  .jic-header .jic-settings-wrap {
+    display: none !important;
+  }
+
+  /* Reminder always sits between main nav and section tabs. */
+  .jic-header.is-section-header .jic-scroll-reminder {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+  }
+
+  .jic-header .jic-scroll-reminder {
+    margin: 0 !important;
+    min-height: 52px !important;
+    max-height: 58px !important;
+    padding: 7px 10px !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+  }
+
+  .jic-header .jic-reminder-meta {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+  }
+
+  .jic-header .jic-reminder-meta b {
+    order: 0 !important;
+    display: block !important;
+    letter-spacing: .16em !important;
+  }
+
+  .jic-header .jic-reminder-meta span {
+    order: 1 !important;
+    margin-left: auto !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .jic-header .jic-reminder-line {
+    min-width: 0 !important;
+    gap: 0 !important;
+  }
+
+  .jic-header .jic-reminder-line strong {
+    display: block !important;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .jic-header .jic-reminder-line small,
+  .jic-header .jic-reminder-line em {
+    display: none !important;
+  }
+
+  /* Section navigation is always one horizontal row, never stacked. */
+  .jic-header.is-section-header .jic-subnav {
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+  }
+
+  .jic-header .jic-subnav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 4px 2px 6px !important;
+    scroll-snap-type: x proximity !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .jic-header .jic-subnav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .jic-header .jic-subnav-link {
+    flex: 0 0 auto !important;
+    min-height: 36px !important;
+    padding: 7px 12px !important;
+    border-radius: 13px !important;
+    font-size: 12px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    scroll-snap-align: start !important;
+  }
+
+  /* Remove legacy top padding now that header height is measured dynamically. */
+  .jic-public-main .page-transition,
+  .jic-inner-page .page-transition {
+    padding-top: 0 !important;
+  }
+
+  .jic-public-main.jic-public-main {
+    padding-top: calc(var(--jic-header-height, 250px) + 8px) !important;
+  }
+
+  /* Keep home full prayer card, but align the nav/reminder spacing with inner pages. */
+  .jic-header:not(.is-section-header) .jic-mainnav {
+    margin-top: 8px !important;
+  }
+
+  .jic-header:not(.is-section-header) .jic-scroll-reminder {
+    margin-top: 8px !important;
+  }
+
+  /* Services internal category tabs: compact horizontal control. */
+  .jic-inner-page [role="tablist"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    height: auto !important;
+    min-height: 42px !important;
+  }
+
+  .jic-inner-page [role="tab"] {
+    min-height: 40px !important;
+    padding: 7px 8px !important;
+    font-size: 12px !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  /* Tighter legacy section spacing on mobile. */
+  .jic-inner-page section.py-20,
+  .jic-inner-page section.py-16 {
+    padding-top: 28px !important;
+    padding-bottom: 28px !important;
+  }
+}
