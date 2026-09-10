@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Mail, MessageSquare, Phone } from 'lucide-react';
+import { Mail, MessageSquare, Phone, MessageCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { SITE } from '@/content/site';
 
@@ -55,6 +55,7 @@ const ContactForm = () => {
     <div className="mt-5 grid gap-2 border-t pt-5 text-sm">
       <a href={`mailto:${SITE.email}`} className="inline-flex items-center gap-2 font-medium hover:text-primary"><Mail size={16}/>{SITE.email}</a>
       <a href={`tel:${SITE.phone.replace(/\s+/g,'')}`} className="inline-flex items-center gap-2 font-medium hover:text-primary"><Phone size={16}/>{SITE.phone}</a>
+      {SITE.community?.whatsapp && <a href={SITE.community.whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 font-medium hover:text-primary"><MessageCircle size={16}/>Join WhatsApp Community</a>}
     </div>
   </>;
 };
