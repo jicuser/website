@@ -1,12 +1,6 @@
-/*
- * JIC stylesheet manifest.
- *
- * Start here when tracing visual behaviour. Import order matters: later files
- * refine/override earlier compatibility layers. For new work, edit the active
- * feature files noted below instead of adding another numbered patch.
- */
+/* JIC stylesheet manifest. New work belongs in semantic source files, not chronological patches. */
 
-/* 1. Base system ---------------------------------------------------------- */
+/* Foundation */
 @import "./index.css";
 @import "./reference-match.css";
 @import "./navigation-refine.css";
@@ -17,12 +11,9 @@
 @import "./jic-final-polish.css";
 @import "./jic-popup-overrides.css";
 
-/* 2. Legacy responsive/layout compatibility ----------------------------- */
+/* Existing page compatibility. These remain only while their page rules are migrated. */
 @import "./mobile-fixes.css";
 @import "./mobile-home-refine.css";
-@import "./scroll-reminder.css";
-@import "./header-uniform.css";
-@import "./mobile-full-menu.css";
 @import "./desktop-refine.css";
 @import "./desktop-polish-v2.css";
 @import "./navigation-structure-v2.css";
@@ -31,38 +22,22 @@
 @import "./ux-refine-v4.css";
 @import "./stability-v5.css";
 @import "./desktop-admin-v6.css";
-@import "./header-ux-v6.css";
-@import "./header-ux-v7.css";
-@import "./header-final-v8.css";
-@import "./header-nav-v9.css";
-@import "./header-audit-v10.css";
 @import "./desktop-home-alignment-v11.css";
 @import "./mobile-admin-quote-v12.css";
-@import "./mobile-menu-theme-v13.css";
 @import "./mobile-quote-v14.css";
 @import "./final-audit-v15.css";
 @import "./mobile-shell-v17.css";
-@import "./mobile-header-card-v18.css";
 @import "./review-fixes.css";
 @import "./mobile-shell-v19.css";
-@import "./mobile-menu-stability-v20.css";
 @import "./mobile-shell-v21.css";
-@import "./mobile-reminder-order-v22.css";
-@import "./header-interactions-v24.css";
 
-/* 3. Admin --------------------------------------------------------------- */
+/* Admin */
 @import "./admin-workspace.css";
 @import "./admin-sections-v16.css";
 @import "./admin-menu-stability-v25.css";
 
-/* 4. Current feature styles --------------------------------------------- */
-@import "./hall-booking-v23.css";
-@import "./unified-header-v26.css";
-@import "./header-page-blend-v27.css";
-@import "./prayer-blocks-v28.css";
-
-/* 5. Canonical colour system -------------------------------------------- */
-@import "./jic-palette-v29.css";
-
-/* 6. Liquid-glass interaction/surface system — loaded last -------------- */
+/* Active feature sources */
+@import "./hall-booking.css";
+@import "./header.css";
+@import "./theme.css";
 @import "./liquid-glass.css";
