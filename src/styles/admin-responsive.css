@@ -1,0 +1,36 @@
+/* Responsive behaviour for the administration area. */
+.admin-console header a,
+.admin-console header button{min-height:42px!important}
+.admin-console header .hidden{display:inline!important}
+
+@media(max-width:800px){
+  .admin-console header>div{min-height:58px!important;padding:8px 10px!important;gap:8px!important}
+  .admin-console header>div>div:first-child{min-width:0!important}
+  .admin-console header .font-bold{font-size:15px!important;white-space:nowrap!important}
+  .admin-console header .text-xs{max-width:150px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .admin-console header a,.admin-console header button{padding:9px 10px!important;font-size:12px!important;white-space:nowrap!important}
+  .admin-console aside{position:sticky!important;top:58px!important;z-index:20!important;padding:8px!important;overflow:hidden!important}
+  .admin-console aside nav{display:flex!important;gap:7px!important;overflow-x:auto!important;overflow-y:hidden!important;padding-bottom:2px!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important}
+  .admin-console aside nav::-webkit-scrollbar{display:none!important}
+  .admin-console aside nav button{min-height:42px!important;padding:9px 12px!important;border:1px solid rgba(148,163,184,.25)!important;background:rgba(255,255,255,.64)!important;white-space:nowrap!important}
+  .admin-console aside nav button.bg-amber-100{background:#f4d779!important;color:#172333!important}
+  .admin-console main{padding:14px 10px 28px!important}
+  .admin-console .admin-workspace{width:100%!important}
+  .admin-console h2{font-size:24px!important}
+  .admin-console .grid.sm\:grid-cols-2,.admin-console .grid.md\:grid-cols-2,.admin-console .grid.md\:grid-cols-4{grid-template-columns:1fr!important}
+  .admin-console .rounded-2xl.border.bg-white{overflow:hidden!important}
+  .admin-console table{font-size:12px!important}
+  .admin-panel{padding:14px!important;border-radius:16px!important}
+  .admin-site-preview{height:520px!important;border-width:4px!important;border-radius:18px!important}
+  .admin-page-picker nav{grid-template-columns:1fr!important}
+  .admin-field-grid{grid-template-columns:1fr!important}
+}
+
+@media(max-width:640px){
+  .admin-login-card{width:calc(100vw - 24px)!important;max-width:520px!important;padding:22px 18px!important;border-radius:24px!important}
+  .admin-login-brand{gap:12px!important;align-items:center!important}
+  .admin-login-brand h1{font-size:30px!important;line-height:1!important}
+  .admin-login-brand p{font-size:9px!important;letter-spacing:.16em!important}
+  .admin-login-form input{font-size:16px!important}
+  .admin-login-topline{gap:8px!important}
+}
