@@ -7,6 +7,7 @@ import MainLayout from '@/layouts/MainLayout';
 import AboutPage from '@/pages/AboutPage';
 import ContactPage from '@/pages/ContactPage';
 import FinancialHistoryPage from '@/pages/FinancialHistoryPage';
+import HallBookingPage from '@/pages/HallBookingPage';
 import HomePage from '@/pages/HomePage';
 import MadrassahPage from '@/pages/MadrassahPage';
 import NotFoundPage from '@/pages/NotFoundPage';
@@ -43,6 +44,7 @@ function App() {
           <Route path="privacy" element={<PrivacyPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="services" element={<ServicesPage />} />
+          <Route path="services/hall-booking" element={<HallBookingPage />} />
           <Route path="team" element={<TeamPage />} />
           <Route path="youth" element={<YouthPage />} />
           <Route path="youth/itikaf" element={<YouthPage view="itikaf" />} />
