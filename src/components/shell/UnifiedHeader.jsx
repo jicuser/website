@@ -78,6 +78,7 @@ export default function UnifiedHeader() {
 
   const [theme, setTheme] = useState(() => safeGet('jic-theme', 'dark'));
   const [playing, setPlaying] = useState(false);
+  const [radioLoading, setRadioLoading] = useState(false);
   const [radioError, setRadioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileGroup, setMobileGroup] = useState(null);
@@ -134,34 +135,33 @@ export default function UnifiedHeader() {
   }, []);
 
   useEffect(() => () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = '';
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
     }
   }, []);
 
   const toggleTheme = () => setTheme(value => value === 'dark' ? 'light' : 'dark');
 
   const toggleRadio = async () => {
-    if (!streamUrl) return;
-    if (!audioRef.current) {
-      const audio = new Audio();
-      audio.preload = 'none';
-      audio.src = streamUrl;
-      audioRef.current = audio;
-      audio.addEventListener('playing', () => { setPlaying(true); setRadioError(false); });
-      audio.addEventListener('pause', () => setPlaying(false));
-      audio.addEventListener('error', () => { setPlaying(false); setRadioError(true); });
-    }
+    const audio = audioRef.current;
+    if (!audio || !streamUrl) return;
+
+    setRadioError(false);
     try {
-      if (playing) audioRef.current.pause();
-      else {
-        audioRef.current.src = streamUrl;
-        audioRef.current.load();
-        await audioRef.current.play();
+      if (!audio.paused) {
+        audio.pause();
+        return;
       }
-    } catch {
+
+      setRadioLoading(true);
+      await audio.play();
+    } catch (error) {
+      console.error('Unable to start JIC Radio:', error);
       setPlaying(false);
+      setRadioLoading(false);
       setRadioError(true);
     }
   };
@@ -170,6 +170,20 @@ export default function UnifiedHeader() {
   const secondJummah = jummahTimes?.[1] || {};
 
   return <>
+    <audio
+      ref={audioRef}
+      src={streamUrl || undefined}
+      preload="none"
+      playsInline
+      onLoadStart={() => setRadioLoading(true)}
+      onCanPlay={() => setRadioLoading(false)}
+      onPlaying={() => { setPlaying(true); setRadioLoading(false); setRadioError(false); }}
+      onPause={() => { setPlaying(false); setRadioLoading(false); }}
+      onWaiting={() => setRadioLoading(true)}
+      onError={() => { setPlaying(false); setRadioLoading(false); setRadioError(true); }}
+      aria-hidden="true"
+    />
+
     <header ref={headerRef} className="jic-unified-header fixed inset-x-0 top-0 z-50">
       <div className="jic-unified-inner">
         <div className="jic-unified-info jic-glass">
@@ -203,7 +217,7 @@ export default function UnifiedHeader() {
 
             <button type="button" className={cn('jic-radio-flat', playing && 'is-playing')} onClick={toggleRadio} disabled={!streamUrl} aria-pressed={playing} aria-label={playing ? 'Pause JIC Radio' : 'Play JIC Radio'}>
               {playing ? <Pause size={18}/> : <Play size={18}/>}<span>Radio</span><i/>
-              <small>{radioError ? 'Retry' : playing ? 'Live' : 'Listen'}</small>
+              <small>{radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen'}</small>
             </button>
           </div>
         </div>
