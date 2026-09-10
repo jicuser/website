@@ -2,7 +2,6 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { supabase } from '@/lib/supabaseClient';
 
 const AuthContext = createContext(null);
-
 const ADMIN_ROLES = new Set(['super_admin', 'admin', 'content_editor', 'events_manager', 'teacher']);
 
 export function AuthProvider({ children }) {
@@ -10,6 +9,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const profileRequest = useRef(0);
+  const signInInProgress = useRef(false);
 
   const loadProfile = useCallback(async (authUser) => {
     const request = ++profileRequest.current;
@@ -17,17 +17,20 @@ export function AuthProvider({ children }) {
       setProfile(null);
       return null;
     }
+
     const { data, error } = await supabase
       .from('profiles')
       .select('id, display_name, role, is_active')
       .eq('id', authUser.id)
       .maybeSingle();
+
     if (request !== profileRequest.current) return error ? null : data ?? null;
     if (error) {
       console.error('Unable to load admin profile:', error);
       setProfile(null);
       return null;
     }
+
     setProfile(data ?? null);
     return data ?? null;
   }, []);
@@ -36,29 +39,45 @@ export function AuthProvider({ children }) {
     let mounted = true;
     let authEventSeen = false;
     let timer;
+
     const applySession = (session) => {
       if (!mounted) return;
       const authUser = session?.user ?? null;
+
+      // signIn() owns the profile validation while a login submit is active.
+      // Avoid clearing/reloading the profile a second time from the auth event.
+      if (signInInProgress.current && authUser) {
+        setUser(authUser);
+        return;
+      }
+
       ++profileRequest.current;
       setUser(authUser);
       setProfile(null);
       setLoading(Boolean(authUser));
       window.clearTimeout(timer);
-      // Supabase calls must run outside onAuthStateChange's auth lock.
-      if (authUser) timer = window.setTimeout(() => {
-        if (!mounted) return;
-        loadProfile(authUser).catch(() => setProfile(null)).finally(() => {
-          if (mounted) setLoading(false);
-        });
-      }, 0);
+
+      if (authUser) {
+        timer = window.setTimeout(() => {
+          if (!mounted) return;
+          loadProfile(authUser)
+            .catch(() => setProfile(null))
+            .finally(() => { if (mounted) setLoading(false); });
+        }, 0);
+      } else {
+        setLoading(false);
+      }
     };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       authEventSeen = true;
       applySession(session);
     });
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (!authEventSeen) applySession(error ? null : data?.session);
-    }).catch(() => { if (!authEventSeen) applySession(null); });
+
+    supabase.auth.getSession()
+      .then(({ data, error }) => { if (!authEventSeen) applySession(error ? null : data?.session); })
+      .catch(() => { if (!authEventSeen) applySession(null); });
+
     return () => {
       mounted = false;
       ++profileRequest.current;
@@ -68,19 +87,30 @@ export function AuthProvider({ children }) {
   }, [loadProfile]);
 
   async function signIn(email, password, auditName = '') {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    const p = await loadProfile(data.user);
-    if (!p?.is_active || !ADMIN_ROLES.has(p?.role)) {
-      await supabase.auth.signOut();
-      throw new Error('This account does not have JIC administration access.');
+    signInInProgress.current = true;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      setUser(data.user);
+      const p = await loadProfile(data.user);
+      if (!p?.is_active || !ADMIN_ROLES.has(p?.role)) {
+        signInInProgress.current = false;
+        await supabase.auth.signOut();
+        throw new Error('This account does not have JIC administration access.');
+      }
+
+      const cleanName = auditName.trim();
+      if (cleanName) {
+        const { error: nameError } = await supabase.auth.updateUser({ data: { audit_name: cleanName } });
+        if (nameError) console.warn('Unable to save audit display name:', nameError);
+      }
+
+      setLoading(false);
+      return data;
+    } finally {
+      signInInProgress.current = false;
     }
-    const cleanName = auditName.trim();
-    if (cleanName) {
-      const { error: nameError } = await supabase.auth.updateUser({ data: { audit_name: cleanName } });
-      if (nameError) console.warn('Unable to save audit display name:', nameError);
-    }
-    return data;
   }
 
   async function signOut() {
@@ -89,6 +119,7 @@ export function AuthProvider({ children }) {
     ++profileRequest.current;
     setUser(null);
     setProfile(null);
+    setLoading(false);
   }
 
   const role = profile?.role ?? 'viewer';
@@ -114,7 +145,16 @@ export function AuthProvider({ children }) {
   }, [isAdmin, role]);
 
   const value = useMemo(() => ({
-    user, profile, role, isAdmin, isSuperAdmin, loading, signIn, signOut, can, refreshProfile: () => loadProfile(user),
+    user,
+    profile,
+    role,
+    isAdmin,
+    isSuperAdmin,
+    loading,
+    signIn,
+    signOut,
+    can,
+    refreshProfile: () => loadProfile(user),
   }), [user, profile, role, isAdmin, isSuperAdmin, loading, can, loadProfile]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
