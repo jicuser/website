@@ -13,27 +13,24 @@ const activities = [
   { title: 'Social & Sports', text: 'Positive activities that help young people build friendships and confidence.', icon: Trophy },
 ];
 
-function YouthHero() {
-  return (
-    <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35 }} className="relative bg-gradient-to-br from-primary/10 via-secondary/5 to-background py-8 md:py-11">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Youth at JIC</p>
-          <h1 className="mb-3 text-3xl font-bold text-foreground md:text-4xl">Youth Programs</h1>
-          <p className="mx-auto max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">Faith, learning, service and positive activities for young people.</p>
-        </div>
-      </div>
-    </motion.section>
-  );
-}
-
 function YouthActivitiesSection() {
   return (
-    <section id="activities" className="jic-anchor-target py-10 md:py-12">
+    <section id="activities" className="jic-anchor-target py-8 md:py-10">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-6 text-center"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Activities</p><h2 className="mt-2 text-2xl font-bold text-foreground md:text-3xl">Faith and community</h2></div>
-          <div className="grid gap-4 md:grid-cols-3">{activities.map(({ title, text, icon: Icon }) => <article key={title} className="rounded-2xl border border-border bg-card p-5 shadow-sm"><div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={22}/></div><h3 className="text-lg font-bold text-card-foreground">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p></article>)}</div>
+          <div className="mb-6 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Youth at JIC</p>
+            <h1 className="mt-2 text-2xl font-bold text-foreground md:text-3xl">Faith and community</h1>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {activities.map(({ title, text, icon: Icon }) => (
+              <article key={title} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={22}/></div>
+                <h2 className="text-lg font-bold text-card-foreground">{title}</h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -49,5 +46,15 @@ function YouthRegistrationSection() {
 }
 
 export default function YouthPage({ view = 'overview' }) {
-  return <><Helmet><title>{view === 'itikaf' ? "I'tikaf Registration | Jamatia Islamic Centre" : PAGE_TITLE}</title><meta name="description" content={META_DESCRIPTION}/></Helmet><div className="min-h-screen bg-background">{view === 'itikaf' ? <YouthRegistrationSection/> : <><YouthHero/><YouthActivitiesSection/></>}</div></>;
+  return (
+    <>
+      <Helmet>
+        <title>{view === 'itikaf' ? "I'tikaf Registration | Jamatia Islamic Centre" : PAGE_TITLE}</title>
+        <meta name="description" content={META_DESCRIPTION}/>
+      </Helmet>
+      <div className="min-h-screen bg-background">
+        {view === 'itikaf' ? <YouthRegistrationSection/> : <YouthActivitiesSection/>}
+      </div>
+    </>
+  );
 }
