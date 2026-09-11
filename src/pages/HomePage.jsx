@@ -10,30 +10,9 @@ import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useContent } from '@/context/ContentContext';
 import { supabase } from '@/lib/supabaseClient';
-import { londonDate } from '@/lib/timetable';
+import useHomeLiveContent from '@/hooks/useHomeLiveContent';
+import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
 import { cn } from '@/lib/utils';
-
-function safeWebUrl(raw) {
-  try { const url = new URL(raw); return url.protocol === 'https:' ? url.href : null; } catch { return null; }
-}
-function youtubeEmbedUrl(raw) {
-  try {
-    const u = new URL(raw);
-    if(u.protocol !== 'https:' || !['youtu.be','youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)) return null;
-    const id = u.hostname === 'youtu.be' ? u.pathname.slice(1) : u.searchParams.get('v') || (/^\/(?:live|embed)\//.test(u.pathname) ? u.pathname.split('/')[2] : null);
-    return /^[A-Za-z0-9_-]{11}$/.test(id || '') ? `https://www.youtube.com/embed/${id}` : null;
-  } catch { return null; }
-}
-
-function useHomeLiveContent(){
-  const [events,setEvents]=useState([]);const [announcement,setAnnouncement]=useState(null);const [livestream,setLivestream]=useState(null);
-  useEffect(()=>{const now=new Date().toISOString();const today=londonDate();Promise.all([
-    supabase.from('events').select('*').eq('published',true).gte('event_date',today).order('event_date',{ascending:true}).limit(4),
-    supabase.from('announcements').select('*').eq('published',true).lte('starts_at',now).order('created_at',{ascending:false}).limit(6),
-    supabase.from('livestream_settings').select('*').eq('id',1).maybeSingle(),
-  ]).then(([e,a,l])=>{if(!e.error)setEvents(e.data||[]);if(!a.error)setAnnouncement((a.data||[]).find(x=>!x.expires_at||x.expires_at>now)||null);if(!l.error)setLivestream(l.data||null);});},[]);
-  return{events,announcement,livestream};
-}
 
 const DEFAULT_CARDS=[
   {key:'services',title:'Services',text:'Religious, educational and community services for all.',to:'/services',cta:'Explore Services',icon:MosqueIcon,img:''},

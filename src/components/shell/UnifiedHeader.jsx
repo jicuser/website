@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Heart, Home, LogIn, MapPin, Menu, Moon, Pause, Phone, Play, Sparkles, Sun, X, ExternalLink } from 'lucide-react';
+import { Heart, Home, LogIn, Menu, Moon, Pause, Play, Sparkles, Sun, X, ExternalLink } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
@@ -7,13 +7,10 @@ import { MADRASSAH_TABS, MASJID_EXTENSION_TABS, NAV_GROUPS } from '@/content/nav
 import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useAppearance } from '@/context/AppearanceContext';
-import { nextPrayer } from '@/lib/nextPrayer';
+import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import { cn } from '@/lib/utils';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
-
-const PRAYERS = [['Fajr','fajr','jamaah_fajr'],['Sunrise','sunrise',null],['Dhuhr','dhuhr','jamaah_dhuhr'],['Asr','asr','jamaah_asr'],['Maghrib','maghrib','jamaah_maghrib'],['Isha','isha','jamaah_isha']];
-const shortTime = value => value && value !== 'N/A' ? String(value).replace(/^0/, '').replace(/\s?[AP]M$/i, '') : '—';
 
 function activeNavigation(pathname) {
   if (pathname === '/madrassah' || pathname.startsWith('/madrassah/')) return { name: 'Madrassah', children: MADRASSAH_TABS };
@@ -30,7 +27,6 @@ export default function UnifiedHeader() {
   const headerRef = useRef(null), audioRef = useRef(null), menuRef = useRef(null), menuCloseRef = useRef(null), subnavRef = useRef(null);
   const [playing, setPlaying] = useState(false), [radioLoading, setRadioLoading] = useState(false), [radioError, setRadioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false), [donationOpen, setDonationOpen] = useState(false);
-  const next = nextPrayer(todaysTimes, currentDate);
   const navigation = useMemo(() => activeNavigation(pathname), [pathname]);
   const subtabs = navigation?.children || [];
   const selected = subtabs.filter(item => pathname === item.path || pathname.startsWith(`${item.path}/`)).sort((a,b) => b.path.length - a.path.length)[0]?.path;
@@ -95,14 +91,7 @@ export default function UnifiedHeader() {
   return <>
     <audio ref={audioRef} src={streamUrl || undefined} preload="none" playsInline onPlaying={() => { setPlaying(true); setRadioLoading(false); setRadioError(false); updateRadioMediaSession(audioRef.current); }} onPause={() => { setPlaying(false); setRadioLoading(false); updateRadioMediaSession(audioRef.current); }} onWaiting={() => setRadioLoading(true)} onError={() => { setPlaying(false); setRadioLoading(false); setRadioError(true); }} aria-hidden="true"/>
     <header ref={headerRef} className="jic-unified-header fixed inset-x-0 top-0 z-50"><div className="jic-unified-inner">
-      <div className="jic-unified-info jic-glass">
-        <div className="jic-header-context"><Link to="/contact#map"><MapPin size={14}/><span>{SITE.address.short}</span></Link><a href={`tel:${SITE.phone.replace(/\s/g,'')}`}><Phone size={14}/>{SITE.phone}</a></div>
-        <div className="jic-prayer-legend"><Link to="/prayer-times">{next ? <><strong>Next: {next.name}</strong><span>Start {shortTime(next.time)} · Jama’ah {shortTime(next.jamaah)}</span></> : 'Prayer timetable'} <span aria-hidden="true">›</span></Link>{next && <span className="jic-prayer-countdown">{Math.floor(next.minutesLeft / 60) > 0 ? `${Math.floor(next.minutesLeft / 60)}h ` : ''}{next.minutesLeft % 60}m until {next.name} starts</span>}</div>
-        <div className="jic-today-prayer-row" aria-label="Today’s prayer times">{PRAYERS.map(([label,key,jamaah]) => <Link key={key} to="/prayer-times" className={cn('jic-today-prayer', next?.name === label && 'is-next')} aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}>
-          <span>{label}</span><div><strong><small>Start</small>{shortTime(todaysTimes?.[key])}</strong><em><small>{jamaah ? 'Jama’ah' : '—'}</small>{jamaah ? shortTime(todaysTimes?.[jamaah]) : '—'}</em></div>
-        </Link>)}</div>
-        <div className="jic-header-live-row">{[0,1].map(index => <Link key={index} to="/prayer-times/jummah" className="jic-jummah-compact"><b>Jummah {index + 1}</b><span>{shortTime(jummahTimes?.[index]?.prayer)}</span></Link>)}<div className="jic-header-radio">{radioButton}<a href="/radio" target="_blank" rel="noopener noreferrer" aria-label="Open JIC Radio player" title="Open player" onClick={() => audioRef.current?.pause()}><ExternalLink size={15}/></a></div></div>
-      </div>
+      <PrayerTimeBar todaysTimes={todaysTimes} jummahTimes={jummahTimes} currentDate={currentDate} radio={<div className="jic-header-radio">{radioButton}<a href="/radio" target="_blank" rel="noopener noreferrer" aria-label="Open JIC Radio player" title="Open player" onClick={() => audioRef.current?.pause()}><ExternalLink size={15}/></a></div>}/>
       <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="horizontal"/></Link>
         <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path}) => <div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path === '/'}>{name}</NavLink></div>)}</nav>
         <div className="jic-free-actions"><button type="button" className="jic-quick-theme" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}>{theme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="jic-site-menu"><Menu size={22}/></button></div>
