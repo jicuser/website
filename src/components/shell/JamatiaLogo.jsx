@@ -1,11 +1,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-export default function JamatiaLogo({ className, compact = false }) {
+export default function JamatiaLogo({ className }) {
   return (
     <div className={cn('brand-lockup', className)}>
       <img
-        src={compact ? '/jic-minaret-wordmark.svg' : '/jic-arch-logo.svg'}
+        src="/jic-minaret-wordmark.svg"
         alt="Jamatia Islamic Centre"
         decoding="async"
         fetchPriority="high"
