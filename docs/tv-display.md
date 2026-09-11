@@ -1,6 +1,6 @@
 # Mosque TV display
 
-Open `/tv` on the website, or choose **TV display** in the admin header. Sign in with an existing active staff account on the TV browser. The page uses the existing staff access check and is not added to the public navigation.
+Open `/tv179` on the website, or choose **TV display** in the admin header. The previous `/tv` address redirects here. The display opens directly without a login and is not added to the public navigation. Editing events and livestream settings still uses the existing staff login.
 
 - Choose **Full screen** once on the TV. The prayer bar remains above the content and contains no radio player. The TV clock uses Birmingham/London time.
 - **Auto** shows posters until an enabled, supported YouTube livestream reaches its scheduled time. The video then appears beside a rotating poster. Disabling the stream, a playback error, or the end of playback returns to posters.
@@ -18,4 +18,4 @@ Use **Admin → Livestream** to save the exact YouTube video/live URL and enable
 
 Published content refreshes every minute, retaining the last successful content during a network interruption. There are no new database tables, keys or migrations. Prayer times use the existing website timetable hook. The player does not discover whether the channel is broadcasting independently: the existing enabled/scheduled settings control when it attempts playback.
 
-The page displays public programme/event content behind the existing staff sign-in flow; it does not introduce private media storage or a camera connection. No camera credentials or staff credentials belong in the screen URL.
+The page displays published programme/event content and the enabled livestream without authentication. It does not introduce private media storage or a camera connection. No camera credentials or staff credentials belong in the screen URL.

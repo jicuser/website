@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
@@ -38,7 +38,8 @@ export default function App() {
     <AnimatePresence mode="wait">
       <Routes>
         <Route path="/radio" element={<RadioPlayerPage />} />
-        <Route path="/tv" element={<ProtectedAdminRoute><TvDisplayPage /></ProtectedAdminRoute>} />
+        <Route path="/tv179" element={<TvDisplayPage />} />
+        <Route path="/tv" element={<Navigate to="/tv179" replace />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route
           path="/admin"

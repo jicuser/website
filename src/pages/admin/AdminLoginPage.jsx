@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, LockKeyhole, LogIn, ShieldCheck } from 'lucide-react';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { useAuth } from '@/context/AuthContext';
@@ -7,7 +7,6 @@ import { useAuth } from '@/context/AuthContext';
 export default function AdminLoginPage(){
   const { signIn, loading } = useAuth();
   const navigate = useNavigate();
-  const { state } = useLocation();
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
   const [busy,setBusy] = useState(false);
@@ -20,7 +19,7 @@ export default function AdminLoginPage(){
     setError('');
     try {
       await signIn(email.trim(),password);
-      navigate(state?.from === '/tv' ? '/tv' : '/admin',{replace:true});
+      navigate('/admin',{replace:true});
     } catch (err) {
       setError(err?.message || 'Unable to sign in.');
       setBusy(false);

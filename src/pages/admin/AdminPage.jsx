@@ -276,7 +276,7 @@ export default function AdminPage() {
           <button type="button" onClick={toggleTheme} className={`${btn} border border-slate-200 bg-white text-slate-800`} aria-label={theme === 'dark' ? 'Use light mode' : 'Use dark mode'}>{theme === 'dark' ? <Sun size={15}/> : <Moon size={15}/>}</button>
           <button type="button" onClick={() => saveCurrent().catch(() => {})} disabled={!dirty || saving} className={`${primary} admin-global-save`}><Save size={15}/><span className="hidden sm:inline">{saving ? 'Saving…' : saveLabel}</span><span className="sm:hidden">Save</span></button>
           <Link to="/" className={`${btn} border border-slate-200 bg-white text-slate-800 hover:bg-slate-50`}><Home size={15}/><span className="hidden md:inline">Website</span></Link>
-          <Link to="/tv" target="_blank" className={`${btn} border border-slate-200 bg-white text-slate-800`} aria-label="Open TV display"><Monitor size={15}/><span className="hidden md:inline">TV display</span></Link>
+          <Link to="/tv179" target="_blank" className={`${btn} border border-slate-200 bg-white text-slate-800`} aria-label="Open TV display"><Monitor size={15}/><span className="hidden md:inline">TV display</span></Link>
           <button onClick={safeSignOut} className={`${btn} border border-slate-200 bg-white text-slate-800 hover:bg-red-50 hover:text-red-700`}><LogOut size={15}/><span className="hidden md:inline">Sign out</span></button>
         </div>
       </div>
