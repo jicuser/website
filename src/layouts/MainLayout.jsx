@@ -7,6 +7,8 @@ import {overviewPaths} from '@/content/editablePages';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
 import { IMAGES } from '@/content/images';
 import RelatedContent from '@/components/RelatedContent';
+import ProgrammePosters from '@/components/ProgrammePosters';
+import DailyReminder from '@/components/shell/DailyReminder';
 import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import AdminBar from '@/components/shell/AdminBar';
@@ -23,6 +25,7 @@ export default function MainLayout() {
       {isHome && <div className="jic-page-backdrop" aria-hidden="true"><img src={IMAGES.homeHero} alt="" fetchpriority="high" width="1150" height="1098"/></div>}
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
+        <DailyReminder />
         <motion.div
           key={pathname}
           initial={{ opacity: 0 }}
@@ -33,6 +36,7 @@ export default function MainLayout() {
           <Outlet />
           {overviewPaths.has(pathname) && <div className="mx-auto max-w-5xl px-4 py-8"><ManagedPageContent optional/></div>}
           <ManagedPageSections />
+          {!isHome && <ProgrammePosters />}
           <RelatedContent />
         </motion.div>
       </main>

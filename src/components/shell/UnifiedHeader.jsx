@@ -1,19 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Heart,
-  Home,
-  LogIn,
-  Mail,
-  MapPin,
-  Menu,
-  Moon,
-  Pause,
-  Phone,
-  Play,
-  Sparkles,
-  Sun,
-  X,
-} from 'lucide-react';
+import { Heart, Home, LogIn, MapPin, Menu, Moon, Pause, Phone, Play, Sparkles, Sun, X, ChevronDown } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
@@ -22,84 +8,90 @@ import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useAppearance } from '@/context/AppearanceContext';
 import { nextPrayer } from '@/lib/nextPrayer';
-import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 
-const PRAYERS = [
-  ['Fajr', 'fajr', 'jamaah_fajr'], ['Sunrise', 'sunrise', null], ['Dhuhr', 'dhuhr', 'jamaah_dhuhr'],
-  ['Asr', 'asr', 'jamaah_asr'], ['Maghrib', 'maghrib', 'jamaah_maghrib'], ['Isha', 'isha', 'jamaah_isha'],
-];
-const JAMAAH_KEYS = { Fajr:'jamaah_fajr', Dhuhr:'jamaah_dhuhr', Asr:'jamaah_asr', Maghrib:'jamaah_maghrib', Isha:'jamaah_isha' };
-const DEFAULT_REMINDERS = [
-  { type:'Qur’an', text:'Remember Me; I will remember you.', source:'Qur’an 2:152' },
-  { type:'Qur’an', text:'Allah is near and responds when His servants call upon Him.', source:'Qur’an 2:186' },
-  { type:'Qur’an', text:'Do not falter or grieve.', source:'Qur’an 3:139' },
-  { type:'Qur’an', text:'Allah is with those who persevere.', source:'Qur’an 8:46' },
-  { type:'Qur’an', text:'In the remembrance of Allah hearts find comfort.', source:'Qur’an 13:28' },
-  { type:'Qur’an', text:'Establish prayer for My remembrance.', source:'Qur’an 20:14' },
-  { type:'Qur’an', text:'Allah guides those who strive in His cause.', source:'Qur’an 29:69' },
-  { type:'Qur’an', text:'Do not lose hope in Allah’s mercy.', source:'Qur’an 39:53' },
-  { type:'Qur’an', text:'Whoever trusts Allah will find Him sufficient.', source:'Qur’an 65:3' },
-  { type:'Qur’an', text:'Surely with hardship comes ease.', source:'Qur’an 94:5–6' },
-  { type:'Hadith', text:'Actions are judged by intentions.', source:'Bukhari 1' },
-  { type:'Hadith', text:'A good word is charity.', source:'Bukhari 2989' },
-  { type:'Hadith', text:'Allah is gentle and loves gentleness.', source:'Muslim 2593' },
-  { type:'Reflection', text:'Make time today for prayer, kindness and sincere du‘a.', source:'Daily reminder' },
-];
-const shortTime = value => value && value !== 'N/A' ? String(value).replace(/^0/,'').replace(/\s?[AP]M$/i,'') : '—';
+const PRAYERS = [['Fajr','fajr','jamaah_fajr'],['Sunrise','sunrise',null],['Dhuhr','dhuhr','jamaah_dhuhr'],['Asr','asr','jamaah_asr'],['Maghrib','maghrib','jamaah_maghrib'],['Isha','isha','jamaah_isha']];
+const shortTime = value => value && value !== 'N/A' ? String(value).replace(/^0/, '').replace(/\s?[AP]M$/i, '') : '—';
 
 function activeNavigation(pathname) {
-  if (pathname === '/madrassah' || pathname.startsWith('/madrassah/')) return { label:'Madrassah', items:MADRASSAH_TABS };
-  if (pathname === '/projects/masjid-extension' || MASJID_EXTENSION_TABS.some(item => item.path === pathname)) return { label:'Masjid Extension', items:MASJID_EXTENSION_TABS };
-  if (['/team','/contact','/financial-history'].includes(pathname)) {
-    const group = NAV_GROUPS.find(item => item.name === 'About'); return { label:group?.name, items:group?.children || [] };
-  }
-  if (pathname.startsWith('/funerals')) {
-    const group = NAV_GROUPS.find(item => item.name === 'Services'); return { label:group?.name, items:group?.children || [] };
-  }
-  const group = NAV_GROUPS.find(item => item.path === '/' ? pathname === '/' : pathname === item.path || pathname.startsWith(`${item.path}/`));
-  return { label:group?.name, items:group?.children || [] };
+  if (pathname === '/madrassah' || pathname.startsWith('/madrassah/')) return { name: 'Madrassah', children: MADRASSAH_TABS };
+  if (pathname === '/projects/masjid-extension' || MASJID_EXTENSION_TABS.slice(1).some(item => item.path === pathname)) return { name: 'Masjid Extension', children: MASJID_EXTENSION_TABS };
+  if (['/team','/contact','/financial-history'].includes(pathname)) return NAV_GROUPS.find(item => item.name === 'About');
+  if (pathname.startsWith('/funerals')) return NAV_GROUPS.find(item => item.name === 'Services');
+  return NAV_GROUPS.find(item => item.path === '/' ? pathname === '/' : pathname === item.path || pathname.startsWith(`${item.path}/`));
 }
-function isCurrent(pathname,itemPath){const clean=itemPath.split('#')[0];return pathname===clean||(clean!=='/'&&pathname.startsWith(`${clean}/`));}
-function hijriDate(){try{return new Intl.DateTimeFormat('en-GB-u-ca-islamic-umalqura',{day:'numeric',month:'short',year:'numeric'}).format(new Date());}catch{return '';}}
-function parseJson(value,fallback){try{const parsed=JSON.parse(value||'');return Array.isArray(parsed)?parsed:fallback;}catch{return fallback;}}
 
-export default function UnifiedHeader(){
-  const { pathname }=useLocation(); const { theme,toggleTheme,glassEnabled,toggleGlass }=useAppearance(); const { todaysTimes,jummahTimes,currentDate }=usePrayerTimes();
-  const headerRef=useRef(null); const audioRef=useRef(null); const next=nextPrayer(todaysTimes,currentDate); const nextJamaah=next?todaysTimes?.[JAMAAH_KEYS[next.name]]:null;
-  const streamUrl=import.meta.env.VITE_RADIO_STREAM_URL||SITE.radio?.streamUrl||''; const isPrayerSection=pathname==='/prayer-times'||pathname.startsWith('/prayer-times/');
-  const [playing,setPlaying]=useState(false),[radioLoading,setRadioLoading]=useState(false),[radioError,setRadioError]=useState(false),[menuOpen,setMenuOpen]=useState(false),[mobileGroup,setMobileGroup]=useState(null),[donationOpen,setDonationOpen]=useState(false),[scrolled,setScrolled]=useState(()=>typeof window!=='undefined'&&window.scrollY>28);
-  const [reminders,setReminders]=useState(DEFAULT_REMINDERS),[tickerExtras,setTickerExtras]=useState([]),[reminderIndex,setReminderIndex]=useState(()=>Math.floor(Date.now()/86400000)%DEFAULT_REMINDERS.length);
-  const navigation=useMemo(()=>activeNavigation(pathname),[pathname]); const subnavItems=navigation.items; const subnavLabel=navigation.label;
-  const selectedSubtab=subnavItems.filter(item=>isCurrent(pathname,item.path)).sort((a,b)=>b.path.length-a.path.length)[0]?.path;
-  const reminder=reminders[reminderIndex%reminders.length]||DEFAULT_REMINDERS[0]; const islamicDate=useMemo(hijriDate,[]); const firstJummah=jummahTimes?.[0]||{},secondJummah=jummahTimes?.[1]||{};
-  const tickerItems=useMemo(()=>[
-    {label:'NEXT PRAYER',text:`${next?.name||'Prayer'} · Start ${shortTime(next?.time)} · Jama‘ah ${shortTime(nextJamaah)}`,to:'/prayer-times'},
-    {label:'JUMMAH 1',text:`Khutbah ${shortTime(firstJummah.khutbah)} · Jama‘ah ${shortTime(firstJummah.prayer)}`,to:'/prayer-times/jummah'},
-    {label:'JUMMAH 2',text:`Khutbah ${shortTime(secondJummah.khutbah)} · Jama‘ah ${shortTime(secondJummah.prayer)}`,to:'/prayer-times/jummah'},...tickerExtras.map(item=>({...item,to:item.to||'/'}))
-  ],[next,nextJamaah,firstJummah,secondJummah,tickerExtras]);
-  useEffect(()=>{let active=true;const load=()=>Promise.all([supabase.from('page_content').select('content_value').eq('content_key','header_reminders').maybeSingle(),supabase.from('page_content').select('content_value').eq('content_key','header_ticker_items').maybeSingle()]).then(([r,t])=>{if(!active)return;setReminders(parseJson(r.data?.content_value,DEFAULT_REMINDERS));setTickerExtras(parseJson(t.data?.content_value,[]));});load();window.addEventListener('jic-content-updated',load);return()=>{active=false;window.removeEventListener('jic-content-updated',load);};},[]);
-  useEffect(()=>{setMenuOpen(false);setMobileGroup(null);setReminderIndex(i=>(i+1)%Math.max(reminders.length,1));},[pathname,reminders.length]);
-  useEffect(()=>{const timer=window.setInterval(()=>setReminderIndex(i=>(i+1)%Math.max(reminders.length,1)),45000);const onScroll=()=>setScrolled(window.scrollY>28);window.addEventListener('scroll',onScroll,{passive:true});return()=>{window.clearInterval(timer);window.removeEventListener('scroll',onScroll);};},[reminders.length]);
-  useEffect(()=>{if(!menuOpen)return undefined;const old=document.body.style.overflow;document.body.style.overflow='hidden';return()=>{document.body.style.overflow=old;};},[menuOpen]);
-  useEffect(()=>{const node=headerRef.current;if(!node)return undefined;const update=()=>document.documentElement.style.setProperty('--jic-header-height',`${Math.ceil(node.getBoundingClientRect().height)}px`);update();const observer=new ResizeObserver(update);observer.observe(node);return()=>observer.disconnect();},[]);
-  useEffect(()=>()=>{const audio=audioRef.current;if(!audio)return;audio.pause();audio.removeAttribute('src');audio.load();},[]);
-  const toggleRadio=async()=>{const audio=audioRef.current;if(!audio||!streamUrl)return;setRadioError(false);try{if(!audio.paused){audio.pause();return;}setRadioLoading(true);await audio.play();}catch(error){console.error('Unable to start JIC Radio:',error);setPlaying(false);setRadioLoading(false);setRadioError(true);}};
-  const radioStatus=radioError?'Retry':radioLoading?'Loading':playing?'Live':'Listen';
+export default function UnifiedHeader() {
+  const { pathname } = useLocation();
+  const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
+  const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
+  const headerRef = useRef(null), audioRef = useRef(null), menuRef = useRef(null), subnavRef = useRef(null);
+  const [playing, setPlaying] = useState(false), [radioLoading, setRadioLoading] = useState(false), [radioError, setRadioError] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false), [mobileGroup, setMobileGroup] = useState(null), [donationOpen, setDonationOpen] = useState(false);
+  const next = nextPrayer(todaysTimes, currentDate);
+  const navigation = useMemo(() => activeNavigation(pathname), [pathname]);
+  const subtabs = navigation?.children || [];
+  const selected = subtabs.filter(item => pathname === item.path || pathname.startsWith(`${item.path}/`)).sort((a,b) => b.path.length - a.path.length)[0]?.path;
+  const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
+  const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
+
+  useEffect(() => { setMenuOpen(false); setMobileGroup(null); }, [pathname]);
+  useEffect(() => {
+    const node = headerRef.current;
+    const update = () => document.documentElement.style.setProperty('--jic-header-height', `${Math.ceil(node.getBoundingClientRect().height)}px`);
+    update();
+    const observer = new ResizeObserver(update); observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    const current = subnavRef.current?.querySelector('[aria-current="page"]');
+    if (current) subnavRef.current.scrollLeft = Math.max(0, current.offsetLeft - subnavRef.current.offsetLeft - 12);
+  }, [pathname]);
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const node = menuRef.current, old = document.body.style.overflow;
+    node.showModal(); document.body.style.overflow = 'hidden';
+    return () => { node.close(); document.body.style.overflow = old; };
+  }, [menuOpen]);
+  useEffect(() => { const audio = audioRef.current; return () => { audio?.pause(); }; }, []);
+
+  async function toggleRadio() {
+    const audio = audioRef.current;
+    if (!audio || !streamUrl) return;
+    setRadioError(false);
+    if (!audio.paused) { audio.pause(); return; }
+    try { setRadioLoading(true); await audio.play(); }
+    catch { setPlaying(false); setRadioLoading(false); setRadioError(true); }
+  }
+  const radioButton = <button type="button" className={cn('jic-radio-flat', playing && 'is-playing')} onClick={toggleRadio} disabled={!streamUrl} aria-label={`${playing ? 'Pause' : 'Play'} JIC Radio${radioError ? ' — retry' : ''}`} aria-pressed={playing}>
+    {playing ? <Pause size={17}/> : <Play size={17}/>}<span>Radio</span><i aria-hidden="true"/><small>{status}</small>
+  </button>;
+
   return <>
-    <audio ref={audioRef} src={streamUrl||undefined} preload="none" playsInline onLoadStart={()=>setRadioLoading(true)} onCanPlay={()=>setRadioLoading(false)} onPlaying={()=>{setPlaying(true);setRadioLoading(false);setRadioError(false);}} onPause={()=>{setPlaying(false);setRadioLoading(false);}} onWaiting={()=>setRadioLoading(true)} onError={()=>{setPlaying(false);setRadioLoading(false);setRadioError(true);}} aria-hidden="true"/>
-    <header ref={headerRef} className={cn('jic-unified-header fixed inset-x-0 top-0 z-50',scrolled&&'is-scrolled')}><div className="jic-unified-inner">
+    <audio ref={audioRef} src={streamUrl || undefined} preload="none" playsInline onPlaying={() => { setPlaying(true); setRadioLoading(false); setRadioError(false); }} onPause={() => { setPlaying(false); setRadioLoading(false); }} onWaiting={() => setRadioLoading(true)} onError={() => { setPlaying(false); setRadioLoading(false); setRadioError(true); }} aria-hidden="true"/>
+    <header ref={headerRef} className="jic-unified-header fixed inset-x-0 top-0 z-50"><div className="jic-unified-inner">
       <div className="jic-unified-info jic-glass">
-        <div className="jic-desktop-utility-grid" aria-label="Centre information and Jummah times"><Link to="/contact#map" className="jic-utility-block"><MapPin size={16}/><span><b>Address</b><small>{SITE.address.short}</small></span></Link><a href={`tel:${SITE.phone.replace(/\s/g,'')}`} className="jic-utility-block"><Phone size={16}/><span><b>Phone</b><small>{SITE.phone}</small></span></a><a href={`mailto:${SITE.email}`} className="jic-utility-block"><Mail size={16}/><span><b>Email</b><small>{SITE.email}</small></span></a><Link to="/prayer-times/jummah" className="jic-utility-block"><span className="jic-utility-number">1</span><span><b>Jummah 1</b><small>Khutbah {shortTime(firstJummah.khutbah)} · Jama‘ah {shortTime(firstJummah.prayer)}</small></span></Link><Link to="/prayer-times/jummah" className="jic-utility-block"><span className="jic-utility-number">2</span><span><b>Jummah 2</b><small>Khutbah {shortTime(secondJummah.khutbah)} · Jama‘ah {shortTime(secondJummah.prayer)}</small></span></Link><button type="button" className={cn('jic-utility-block jic-utility-radio',playing&&'is-playing')} onClick={toggleRadio} disabled={!streamUrl}>{playing?<Pause size={16}/>:<Play size={16}/>}<span><b>JIC Radio</b><small>{radioStatus}</small></span><i/></button></div>
-        <div className="jic-mobile-contact-row"><span><MapPin size={14}/>{SITE.address.short}</span><a href={`tel:${SITE.phone.replace(/\s/g,'')}`}><Phone size={13}/>{SITE.phone}</a></div>
-        {!isPrayerSection&&<div className="jic-today-prayer-row" aria-label="Today's prayer times">{PRAYERS.map(([label,startKey,jamaahKey])=><Link to="/prayer-times" className="jic-today-prayer" key={startKey}><span>{label}</span><div><strong>{shortTime(todaysTimes?.[startKey])}</strong>{jamaahKey&&<em>{shortTime(todaysTimes?.[jamaahKey])}</em>}</div><small><b>START</b>{jamaahKey&&<b>JAMA‘AT</b>}</small></Link>)}</div>}
-        <div className="jic-header-live-row"><div className="jic-prayer-ticker"><div className="jic-prayer-ticker-track">{[...tickerItems,...tickerItems].map((item,index)=><Link to={item.to} key={`${item.label}-${index}`}><b>{item.label}</b><span>{item.text}</span><i>•</i></Link>)}</div></div><button type="button" className={cn('jic-radio-flat',playing&&'is-playing')} onClick={toggleRadio} disabled={!streamUrl}>{playing?<Pause size={16}/>:<Play size={16}/>}<span>Radio</span><i/><small>{radioStatus}</small></button></div>
+        <div className="jic-header-context"><Link to="/contact#map"><MapPin size={14}/><span>{SITE.address.short}</span></Link><a href={`tel:${SITE.phone.replace(/\s/g,'')}`}><Phone size={14}/>{SITE.phone}</a></div>
+        <div className="jic-prayer-legend"><span>Begins <b>·</b> Jama‘ah</span><Link to="/prayer-times">{next ? `Next: ${next.name} ${shortTime(next.time)}` : 'Prayer timetable'} <span aria-hidden="true">›</span></Link></div>
+        <div className="jic-today-prayer-row" aria-label="Today’s prayer times">{PRAYERS.map(([label,key,jamaah]) => <Link key={key} to="/prayer-times" className={cn('jic-today-prayer', next?.name === label && 'is-next')} aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}>
+          <span>{label}</span><div><strong>{shortTime(todaysTimes?.[key])}</strong><em>{jamaah ? shortTime(todaysTimes?.[jamaah]) : '—'}</em></div>
+        </Link>)}</div>
+        <div className="jic-header-live-row">{[0,1].map(index => <Link key={index} to="/prayer-times/jummah" className="jic-jummah-compact"><b>Jummah {index + 1}</b><span>{shortTime(jummahTimes?.[index]?.prayer)}</span></Link>)}{radioButton}</div>
       </div>
-      <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo/></Link><nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path,children})=><div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path==='/' }>{name}</NavLink>{children.length>0&&<div className="jic-desktop-nav-dropdown jic-glass">{children.map(child=><Link key={`${name}-${child.path}-${child.name}`} to={child.path}>{child.name}</Link>)}</div>}</div>)}</nav><div className="jic-free-actions"><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={()=>setMenuOpen(true)} aria-label="Menu"><Menu size={22}/></button></div></div>
-      {subnavItems.length>0&&<nav className="jic-unified-subnav" aria-label={`${subnavLabel} sections`}>{subnavItems.map(item=><Link key={`${subnavLabel}-${item.name}`} to={item.path} aria-current={item.path===selectedSubtab?'page':undefined} className={cn('jic-unified-subnav-link',item.path===selectedSubtab&&'is-current')}>{item.name}</Link>)}</nav>}
-      {!scrolled&&<button type="button" className="jic-unified-reminder" onClick={()=>setReminderIndex(i=>(i+1)%Math.max(reminders.length,1))}><div><b>{reminder.type}</b><span>{islamicDate}</span></div><strong>{reminder.text}</strong><small>{reminder.source}</small></button>}
+      <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="pillars"/></Link>
+        <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path,children}) => <div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path === '/'}>{name}</NavLink>{children.length > 0 && <div className="jic-desktop-nav-dropdown jic-glass">{children.map(child => <Link key={`${child.path}-${child.name}`} to={child.path}>{child.name}</Link>)}</div>}</div>)}</nav>
+        <div className="jic-free-actions"><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="jic-site-menu"><Menu size={22}/></button></div>
+      </div>
+      {subtabs.length > 0 && <nav ref={subnavRef} className="jic-unified-subnav" aria-label={`${navigation.name} sections`}>{subtabs.map(item => <Link key={`${item.path}-${item.name}`} to={item.path} aria-current={item.path === selected ? 'page' : undefined} className={cn('jic-unified-subnav-link', item.path === selected && 'is-current')}>{item.name}</Link>)}</nav>}
     </div></header>
-    {menuOpen&&<div className="jic-unified-menu" role="dialog" aria-modal="true"><div className="jic-unified-menu-head"><Link to="/" onClick={()=>setMenuOpen(false)}><JamatiaLogo/></Link><button type="button" onClick={()=>setMenuOpen(false)}><X size={24}/></button></div><div className="jic-unified-menu-scroll"><div className="jic-menu-appearance"><button type="button" onClick={toggleTheme}>{theme==='dark'?<Sun size={17}/>:<Moon size={17}/>} {theme==='dark'?'Light mode':'Dark mode'}</button><button type="button" onClick={toggleGlass}><Sparkles size={17}/> Glass {glassEnabled?'on':'off'}</button></div>{NAV_GROUPS.map(({name,path,children})=><div className="jic-unified-menu-group" key={path}><div className="jic-unified-menu-row"><NavLink to={path} end={path==='/'} onClick={()=>!children.length&&setMenuOpen(false)}>{name}</NavLink>{children.length>0&&<button type="button" onClick={()=>setMobileGroup(c=>c===name?null:name)}>+</button>}</div>{children.length>0&&mobileGroup===name&&<div className="jic-unified-menu-children">{children.map(child=><Link key={`${name}-${child.path}-${child.name}`} to={child.path} onClick={()=>setMenuOpen(false)}>{child.name}</Link>)}</div>}</div>)}<Link to="/admin/login" className="jic-unified-admin-link" onClick={()=>setMenuOpen(false)}><LogIn size={17}/>Admin login</Link><button type="button" className="jic-unified-menu-donate" onClick={()=>{setMenuOpen(false);setDonationOpen(true);}}><Heart size={18}/>Donate</button></div></div>}
-    <WonderfulDonationModal open={donationOpen} onClose={()=>setDonationOpen(false)}/>
+    {radioError && <span className="sr-only" role="status">Radio could not start. Press Radio to retry.</span>}
+    {menuOpen && <dialog id="jic-site-menu" ref={menuRef} className="jic-unified-menu" aria-label="Navigation menu" onCancel={() => setMenuOpen(false)}>
+      <div className="jic-unified-menu-head"><Link to="/" onClick={() => setMenuOpen(false)}><JamatiaLogo/></Link><button type="button" autoFocus onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><X size={24}/></button></div>
+      <div className="jic-unified-menu-scroll"><div className="jic-menu-appearance"><button type="button" onClick={toggleTheme}>{theme === 'dark' ? <Sun size={17}/> : <Moon size={17}/>} {theme === 'dark' ? 'Light mode' : 'Dark mode'}</button><button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}><Sparkles size={17}/> Glass {glassEnabled ? 'on' : 'off'}</button></div>
+        {NAV_GROUPS.map(({name,path,children}) => <div className="jic-unified-menu-group" key={path}><div className="jic-unified-menu-row"><NavLink to={path} end={path === '/'} onClick={() => setMenuOpen(false)}>{name}</NavLink>{children.length > 0 && <button type="button" aria-label={`${mobileGroup === name ? 'Collapse' : 'Expand'} ${name}`} aria-expanded={mobileGroup === name} onClick={() => setMobileGroup(current => current === name ? null : name)}><ChevronDown size={20}/></button>}</div>{children.length > 0 && mobileGroup === name && <div className="jic-unified-menu-children">{children.map(child => <Link key={`${child.path}-${child.name}`} to={child.path} onClick={() => setMenuOpen(false)}>{child.name}</Link>)}</div>}</div>)}
+        <Link to="/admin/login" className="jic-unified-admin-link" onClick={() => setMenuOpen(false)}><LogIn size={17}/>Admin login</Link><button type="button" className="jic-unified-menu-donate" onClick={() => { setMenuOpen(false); setDonationOpen(true); }}><Heart size={18}/>Donate</button>
+      </div>
+    </dialog>}
+    <WonderfulDonationModal open={donationOpen} onClose={() => setDonationOpen(false)}/>
   </>;
 }

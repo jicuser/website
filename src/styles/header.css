@@ -1,24 +1,94 @@
-/* Public header layout. Surface translucency is defined in liquid-glass.css. */
-.jic-unified-header{pointer-events:none}.jic-unified-inner{max-width:1500px;margin:0 auto;padding:6px 10px 0;pointer-events:auto}.jic-unified-info{overflow:hidden;border:1px solid var(--jic-border);border-radius:20px}
-
-/* Desktop information row */
-.jic-desktop-utility-grid{display:grid;grid-template-columns:1.35fr .72fr 1.05fr .9fr .9fr .7fr;border-bottom:1px solid var(--jic-border)}.jic-utility-block{min-width:0;min-height:42px;padding:6px 10px;display:flex;align-items:center;gap:8px;border:0;border-right:1px solid var(--jic-border);background:transparent;color:var(--jic-text);text-decoration:none;text-align:left}.jic-utility-block:last-child{border-right:0}.jic-utility-block>svg{flex:0 0 auto;color:var(--jic-gold)}.jic-utility-block>span:not(.jic-utility-number){min-width:0;display:flex;align-items:baseline;gap:6px}.jic-utility-block b{font-size:8px;line-height:1;letter-spacing:.11em;text-transform:uppercase;color:var(--jic-gold);white-space:nowrap}.jic-utility-block small{min-width:0;font-size:10px;line-height:1.15;color:var(--jic-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.jic-utility-number{width:18px;height:18px;display:grid;place-items:center;flex:0 0 auto;border:1px solid color-mix(in srgb,var(--jic-gold) 45%,var(--jic-border));border-radius:6px;color:var(--jic-gold);font-size:9px;font-weight:800}.jic-utility-radio{cursor:pointer}.jic-utility-radio i{width:6px;height:6px;flex:0 0 auto;border-radius:999px;background:var(--jic-live)}.jic-utility-radio:disabled{opacity:.5;cursor:not-allowed}.jic-mobile-contact-row{display:none}
-
-/* Daily prayer cells */
-.jic-today-prayer-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));width:100%;overflow:hidden}.jic-today-prayer{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:56px;padding:6px 5px;text-align:center;border-right:1px solid var(--jic-border);text-decoration:none;color:var(--jic-text);overflow:hidden}.jic-today-prayer:last-child{border-right:0}.jic-today-prayer>span{display:block;margin:0 0 4px;font-size:10px;line-height:1;color:var(--jic-text-secondary);white-space:nowrap}.jic-today-prayer>div{display:flex;align-items:baseline;justify-content:center;gap:6px;width:100%;line-height:1}.jic-today-prayer strong{font-size:14px;line-height:1;color:var(--jic-gold);font-weight:800}.jic-today-prayer em{font-size:12px;line-height:1;color:var(--jic-text-secondary);font-style:normal;font-weight:500}.jic-today-prayer>small{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:4px;line-height:1}.jic-today-prayer>small b{font-size:5.8px;line-height:1;letter-spacing:.1em;color:var(--jic-gold);white-space:nowrap}.jic-today-prayer>small b+b{color:var(--jic-muted)}
-
-/* Mobile ticker and radio */
-.jic-header-live-row{display:none;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;min-height:38px;border-top:1px solid var(--jic-border)}.jic-prayer-ticker{position:relative;overflow:hidden;min-width:0;border-right:1px solid var(--jic-border)}.jic-prayer-ticker-track{height:100%;display:flex;align-items:center;width:max-content;animation:jic-prayer-ticker 28s linear infinite;will-change:transform}.jic-prayer-ticker:hover .jic-prayer-ticker-track{animation-play-state:paused}.jic-prayer-ticker a{height:100%;display:flex;align-items:center;gap:6px;padding:0 11px;color:var(--jic-text);text-decoration:none;white-space:nowrap;font-size:10px}.jic-prayer-ticker b{font-size:8px;letter-spacing:.12em;color:var(--jic-gold)}.jic-prayer-ticker span{color:var(--jic-text-secondary)}.jic-prayer-ticker i{color:var(--jic-muted);font-style:normal;margin-left:5px}@keyframes jic-prayer-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}.jic-radio-flat{min-width:74px;padding:0 8px;display:flex;align-items:center;justify-content:center;gap:4px;border:0;background:transparent;color:var(--jic-text);font-weight:750;white-space:nowrap;cursor:pointer}.jic-radio-flat>span{font-size:10px}.jic-radio-flat>i{width:6px;height:6px;border-radius:999px;background:var(--jic-live)}.jic-radio-flat>small{display:none}
-
-/* Main navigation */
-.jic-free-nav-row{min-height:52px;display:grid;grid-template-columns:minmax(138px,auto) 1fr auto;align-items:center;gap:14px;padding:3px 5px}.jic-free-brand{min-height:40px;min-width:40px;display:flex;align-items:center;justify-content:flex-start}.jic-free-brand img,.jic-free-brand svg{display:block;max-height:38px;max-width:150px;width:auto;height:auto;object-fit:contain}.jic-desktop-primary-nav{display:flex;align-items:center;justify-content:center;gap:3px;min-width:0}.jic-desktop-nav-group{position:relative}.jic-desktop-nav-group>a{display:block;padding:7px 9px;border-radius:9px;color:var(--jic-text-secondary);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap}.jic-desktop-nav-group>a:hover,.jic-desktop-nav-group>a.active{color:var(--jic-text);background:color-mix(in srgb,var(--jic-gold) 9%,transparent)}.jic-desktop-nav-dropdown{position:absolute;top:calc(100% + 6px);left:50%;z-index:60;min-width:205px;padding:7px;border:1px solid var(--jic-border);border-radius:13px;box-shadow:0 18px 48px rgba(0,0,0,.18);opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,-4px);transition:opacity 140ms ease,transform 140ms ease,visibility 140ms ease}.jic-desktop-nav-group:hover .jic-desktop-nav-dropdown,.jic-desktop-nav-group:focus-within .jic-desktop-nav-dropdown{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0)}.jic-desktop-nav-dropdown a{display:block;padding:9px 10px;border-radius:9px;color:var(--jic-text-secondary);font-size:12px;font-weight:650;text-decoration:none;white-space:nowrap}.jic-desktop-nav-dropdown a:hover{color:var(--jic-text);background:color-mix(in srgb,var(--jic-gold) 10%,transparent)}.jic-free-actions{display:flex;align-items:center;gap:6px}.jic-free-actions button,.jic-free-actions>a{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:12px;color:var(--jic-text);cursor:pointer;text-decoration:none;background:transparent}.jic-free-actions>a.active,.jic-free-actions>a:hover,.jic-free-actions button:hover{background:color-mix(in srgb,var(--jic-gold) 8%,transparent);border-color:color-mix(in srgb,var(--jic-gold) 30%,var(--jic-border))}
-
-/* Section navigation and reminder */
-.jic-unified-subnav{display:flex;justify-content:safe center;align-items:center;gap:18px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:none;padding:2px 6px 7px;-webkit-overflow-scrolling:touch}.jic-unified-subnav::-webkit-scrollbar{display:none}.jic-unified-subnav-link{position:relative;flex:0 0 auto;padding:5px 1px;color:var(--jic-text-secondary);font-size:11px;font-weight:650;text-decoration:none;white-space:nowrap;border:0;background:transparent}.jic-unified-subnav-link:hover{color:var(--jic-text)}.jic-unified-subnav-link.is-current{color:var(--jic-text);font-weight:760}.jic-unified-subnav-link.is-current::after{content:"";position:absolute;left:12%;right:12%;bottom:0;height:2px;border-radius:999px;background:var(--jic-gold)}.jic-unified-reminder{width:100%;margin:0 0 5px;padding:7px 11px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;border:1px solid var(--jic-border);border-radius:12px;color:var(--jic-text);text-align:left;cursor:pointer;overflow:hidden}.jic-unified-reminder>div{display:flex;align-items:center;gap:9px;min-width:0}.jic-unified-reminder>div b{font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--jic-gold)}.jic-unified-reminder>div span{font-size:9px;color:var(--jic-muted);white-space:nowrap}.jic-unified-reminder>strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}.jic-unified-reminder>small{font-size:9px;color:var(--jic-muted);white-space:nowrap}
-
-/* Full-screen menu */
-.jic-unified-menu{position:fixed;inset:0;z-index:1000;color:var(--jic-text);overflow:hidden}.jic-unified-menu-head{height:74px;padding:calc(env(safe-area-inset-top) + 8px) 18px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--jic-border)}.jic-unified-menu-head a{display:flex;align-items:center}.jic-unified-menu-head img,.jic-unified-menu-head svg{max-height:38px;max-width:145px;width:auto;height:auto}.jic-unified-menu-head button{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:14px;color:var(--jic-text)}.jic-unified-menu-scroll{height:calc(100dvh - 74px);overflow-y:auto;padding:14px 16px calc(env(safe-area-inset-bottom) + 24px);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.jic-menu-appearance{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.jic-menu-appearance button{min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--jic-border);border-radius:13px;color:var(--jic-text);font-size:13px;font-weight:700}.jic-unified-menu-group{border-bottom:1px solid var(--jic-border)}.jic-unified-menu-row{display:grid;grid-template-columns:1fr auto;align-items:center;min-height:56px}.jic-unified-menu-row>a{font-size:18px;font-weight:750;color:var(--jic-text);text-decoration:none;padding:14px 4px}.jic-unified-menu-row>button{width:40px;height:40px;border:0;background:transparent;color:var(--jic-gold);font-size:24px}.jic-unified-menu-children{display:grid;gap:1px;padding:0 0 12px 12px}.jic-unified-menu-children a{padding:9px 4px;color:var(--jic-text-secondary);text-decoration:none;font-size:14px;background:transparent;border:0;border-radius:0}.jic-unified-menu-children a:hover{color:var(--jic-text)}.jic-unified-admin-link,.jic-unified-menu-donate{margin-top:14px;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;text-decoration:none;font-weight:750}.jic-unified-admin-link{border:1px solid var(--jic-border);color:var(--jic-text)}.jic-unified-menu-donate{width:100%;border:0;background:var(--jic-gold);color:#07111b}
-
-@media(max-width:1024px){.jic-desktop-primary-nav{display:none}.jic-free-nav-row{grid-template-columns:1fr auto}.jic-unified-subnav{justify-content:flex-start}}
-@media(max-width:767px){.jic-unified-inner{padding:6px 7px 0}.jic-unified-info{border-radius:18px}.jic-desktop-utility-grid{display:none}.jic-mobile-contact-row{min-height:30px;padding:0 9px;display:flex;align-items:center;justify-content:space-between;gap:7px;border-bottom:1px solid var(--jic-border);font-size:9px;color:var(--jic-text-secondary)}.jic-mobile-contact-row>span,.jic-mobile-contact-row>a{display:flex;align-items:center;gap:5px;white-space:nowrap}.jic-mobile-contact-row>span{min-width:0;overflow:hidden;text-overflow:ellipsis}.jic-mobile-contact-row>a{font-size:9px;font-weight:700;color:var(--jic-text);text-decoration:none}.jic-today-prayer-row{grid-template-columns:repeat(6,minmax(72px,1fr));overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}.jic-today-prayer-row::-webkit-scrollbar{display:none}.jic-today-prayer{min-width:72px;min-height:64px;scroll-snap-align:start}.jic-header-live-row{display:grid}.jic-free-nav-row{min-height:48px;padding:2px}.jic-free-brand img,.jic-free-brand svg{max-height:34px;max-width:122px}.jic-free-actions button,.jic-free-actions>a{width:38px;height:38px}.jic-unified-subnav{justify-content:flex-start;gap:17px;padding:1px 4px 6px}.jic-unified-subnav-link{padding:5px 1px;font-size:11px}.jic-unified-reminder{grid-template-columns:1fr auto;grid-template-areas:'meta source' 'text text';gap:3px 7px;padding:6px 8px}.jic-unified-reminder>div{grid-area:meta;justify-content:space-between}.jic-unified-reminder>strong{grid-area:text;text-align:left;font-size:10.5px}.jic-unified-reminder>small{grid-area:source;font-size:8px}}
-@media(prefers-reduced-motion:reduce){.jic-prayer-ticker-track{animation:none}}
+/* Fixed prayer/navigation shell. No scroll-driven height changes. */
+html[data-theme] .jic-unified-header { pointer-events:none; }
+html[data-theme] .jic-unified-inner { width:min(1440px,100%);margin:auto;padding:8px 14px 0;pointer-events:auto; }
+html[data-theme] .jic-unified-info { overflow:hidden;border:1px solid var(--jic-glass-border)!important;border-radius:16px!important;background:var(--jic-glass-surface-strong)!important; }
+html[data-theme] .jic-header-context { display:flex;justify-content:space-between;gap:16px;min-height:30px;padding:4px 14px;border-bottom:1px solid var(--jic-border);font-size:12px;color:var(--jic-text-secondary); }
+.jic-header-context a { display:flex;align-items:center;gap:7px;min-width:0; }
+.jic-header-context span { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+html[data-theme] .jic-prayer-legend { display:flex;justify-content:space-between;align-items:center;padding:4px 14px;gap:8px;font-size:12px;line-height:1.3; }
+.jic-prayer-legend>span { color:var(--jic-text-secondary); }
+.jic-prayer-legend b { padding:0 5px;color:var(--jic-gold); }
+.jic-prayer-legend a { color:var(--jic-text);font-weight:650; }
+html[data-theme] .jic-today-prayer-row { display:grid;grid-template-columns:repeat(6,minmax(0,1fr));overflow-x:auto;scroll-snap-type:x proximity; }
+html[data-theme] .jic-today-prayer { min-width:0;min-height:55px;padding:4px 8px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;border-right:1px solid var(--jic-border);border-bottom:2px solid transparent;color:var(--jic-text);background:transparent!important;backdrop-filter:none;-webkit-backdrop-filter:none; }
+.jic-today-prayer:last-child { border-right:0!important; }
+.jic-today-prayer>span { font-size:14px;line-height:1.2; }
+html[data-theme] .jic-today-prayer>div { display:flex;gap:10px;align-items:center;line-height:1.2;font-variant-numeric:tabular-nums; }
+html[data-theme] .jic-today-prayer strong { font-size:18px;color:var(--jic-gold); }
+html[data-theme] .jic-today-prayer em { font-size:16px;color:var(--jic-text-secondary);font-style:normal; }
+html[data-theme] .jic-today-prayer.is-next { border-bottom-color:var(--jic-gold)!important;background:color-mix(in srgb,var(--jic-gold) 9%,transparent)!important; }
+html[data-theme] .jic-header-live-row { display:grid;grid-template-columns:1fr 1fr auto;min-height:36px;border-top:1px solid var(--jic-border); }
+.jic-jummah-compact { display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 10px;font-size:14px;border-right:1px solid var(--jic-border); }
+.jic-jummah-compact b { font-weight:600;color:var(--jic-text-secondary); }
+.jic-jummah-compact span { color:var(--jic-text);font-weight:700; }
+html[data-theme] .jic-radio-flat { display:flex;align-items:center;justify-content:center;gap:7px;padding:4px 14px;min-width:100px;background:transparent;border:0;font-size:14px;color:var(--jic-text); }
+.jic-radio-flat small { display:none; }
+.jic-radio-flat i { width:6px;height:6px;border-radius:50%;background:var(--jic-muted); }
+.jic-radio-flat.is-playing i { background:var(--jic-live); }
+.jic-radio-flat:disabled { opacity:.5; }
+html[data-theme] .jic-free-nav-row { display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:68px;padding:6px 10px;margin-top:6px;border:1px solid var(--jic-glass-border);border-radius:14px;background:var(--jic-glass-surface-strong)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px); }
+html[data-theme] .jic-free-brand { display:flex;align-items:center;flex:0 0 auto;width:190px; }
+html[data-theme] .brand-lockup { width:100%;height:auto; }
+html[data-theme] img.jic-brand-image { width:100%;height:auto;max-height:none;max-width:none;display:block;object-fit:contain;filter:none!important;opacity:1!important; }
+.jic-desktop-primary-nav { display:flex;justify-content:center;align-items:center;gap:2px;min-width:0; }
+.jic-desktop-nav-group { position:relative; }
+.jic-desktop-nav-group>a { display:block;padding:9px 7px;font-size:14px;line-height:1.2;border-radius:8px;color:var(--jic-text-secondary);white-space:nowrap; }
+.jic-desktop-nav-group>a:hover,.jic-desktop-nav-group>a.active { background:var(--jic-bg-secondary);color:var(--jic-text); }
+.jic-desktop-nav-dropdown { position:absolute;top:100%;left:0;z-index:60;min-width:220px;padding:8px;display:none;border:1px solid var(--jic-border);border-radius:12px;background:var(--jic-surface);box-shadow:0 12px 36px #0003; }
+.jic-desktop-nav-group:hover .jic-desktop-nav-dropdown,.jic-desktop-nav-group:focus-within .jic-desktop-nav-dropdown { display:block; }
+.jic-desktop-nav-dropdown a { display:block;padding:10px;font-size:14px;border-radius:7px;color:var(--jic-text); }
+.jic-desktop-nav-dropdown a:hover { background:var(--jic-bg-secondary); }
+html[data-theme] .jic-free-actions { display:flex;gap:7px; }
+html[data-theme] .jic-free-actions :is(a,button) { width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:11px;background:var(--jic-surface)!important;color:var(--jic-text); }
+html[data-theme] .jic-unified-subnav { display:flex;align-items:center;gap:7px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:7px 0;background:transparent!important;scrollbar-width:thin;-webkit-overflow-scrolling:touch; }
+html[data-theme] .jic-unified-subnav-link { flex:0 0 auto;scroll-snap-align:start;padding:9px 12px;border:1px solid var(--jic-border);border-radius:9px;font-size:14px;line-height:1.3;white-space:nowrap;background:var(--jic-glass-surface-strong)!important;color:var(--jic-text-secondary)!important; }
+html[data-theme] .jic-unified-subnav-link.is-current { background:var(--jic-text)!important;color:var(--jic-bg)!important;border-color:var(--jic-text)!important; }
+html[data-theme] .jic-public-main.jic-public-main { padding-top:calc(var(--jic-header-height,220px) + 10px)!important; }
+html { scroll-padding-top:calc(var(--jic-header-height,220px) + 12px); }
+html[data-theme] .jic-unified-menu { position:fixed;inset:0;width:100%;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;color:var(--jic-text);background:var(--jic-surface)!important;overflow:hidden; }
+.jic-unified-menu::backdrop { background:#0007; }
+.jic-unified-menu-head { height:80px;padding:14px max(18px,calc((100vw - 720px)/2));display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--jic-border); }
+.jic-unified-menu-head>a { width:174px; }
+.jic-unified-menu-head button { width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:10px;flex-shrink:0; }
+.jic-unified-menu-scroll { height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;max-width:756px;margin:auto;padding:16px 18px calc(env(safe-area-inset-bottom) + 28px); }
+.jic-menu-appearance { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px; }
+.jic-menu-appearance button { display:flex;justify-content:center;align-items:center;gap:7px;min-height:44px;padding:8px;font-size:14px;border:1px solid var(--jic-border);border-radius:10px; }
+.jic-unified-menu-group { border-bottom:1px solid var(--jic-border); }
+.jic-unified-menu-row { display:flex;align-items:center;justify-content:space-between;gap:12px; }
+.jic-unified-menu-row>a { flex:1;padding:14px 0;font-size:18px;font-weight:650;color:var(--jic-text); }
+.jic-unified-menu-row>button { width:44px;height:44px;display:grid;place-items:center;color:var(--jic-text); }
+.jic-unified-menu-row>button[aria-expanded=true] svg { transform:rotate(180deg); }
+.jic-unified-menu-children { display:grid;padding:0 0 10px 12px; }
+.jic-unified-menu-children a { padding:12px 8px;font-size:16px; }
+.jic-unified-admin-link,.jic-unified-menu-donate { display:flex;justify-content:center;align-items:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:1px solid var(--jic-border);border-radius:11px;font-size:16px; }
+html[data-theme] .jic-unified-menu-donate { background:var(--jic-action)!important;color:#0C1930!important; }
+.jic-daily-reminder { width:min(1200px,calc(100% - 32px));margin:0 auto 8px; }
+.jic-daily-reminder>button { display:block;width:100%;text-align:left;padding:11px 14px;border:1px solid var(--jic-glass-border);border-radius:12px;background:var(--jic-glass-surface-strong);color:var(--jic-text);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px); }
+.jic-daily-reminder>button>div { display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:12px;line-height:1.4;color:var(--jic-text-secondary); }
+.jic-daily-reminder b { color:var(--jic-gold);text-transform:uppercase;letter-spacing:.09em; }
+.jic-daily-reminder small { margin-left:auto;font-size:12px; }
+.jic-daily-reminder p { margin:4px 0 0;font-size:14px;line-height:1.45; }
+.jic-notices { display:flex;overflow-x:auto;gap:16px;font-size:14px;padding:8px 0; }
+.jic-notices a { flex:0 0 auto; }
+html[data-surface=solid] .jic-free-nav-row,html[data-surface=solid] .jic-daily-reminder>button { background:var(--jic-surface)!important;backdrop-filter:none;-webkit-backdrop-filter:none; }
+@media(max-width:1199px) { .jic-desktop-primary-nav { display:none; } }
+@media(max-width:767px) {
+  html[data-theme] .jic-unified-inner { padding:6px 8px 0; }
+  html[data-theme] .jic-header-context { display:none; }
+  html[data-theme] .jic-prayer-legend { padding:5px 10px;font-size:12px; }
+  html[data-theme] .jic-today-prayer { padding:4px 2px;min-height:67px;gap:3px; }
+  .jic-today-prayer>span { font-size:12px; }
+  html[data-theme] .jic-today-prayer>div { flex-direction:column;gap:2px; }
+  html[data-theme] .jic-today-prayer strong { font-size:16px; }
+  html[data-theme] .jic-today-prayer em { font-size:14px; }
+  .jic-jummah-compact { font-size:12px;padding:7px 4px;gap:5px; }
+  html[data-theme] .jic-radio-flat { min-width:83px;padding:6px;font-size:14px;gap:4px; }
+  html[data-theme] .jic-free-nav-row { min-height:65px;padding:5px 9px; }
+  html[data-theme] .jic-free-brand { width:174px; }
+}
+@media(max-width:340px) {
+  html[data-theme] .jic-today-prayer-row { grid-template-columns:repeat(6,minmax(49px,1fr)); }
+  .jic-jummah-compact { flex-direction:column;gap:1px; }
+  html[data-theme] .jic-free-brand { width:150px; }
+}
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; } }

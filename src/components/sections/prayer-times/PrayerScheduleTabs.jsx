@@ -1,144 +1,16 @@
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Smartphone } from 'lucide-react';
+import WallpaperDownload from '@/components/WallpaperDownload';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 
-const clean = value => value && value !== 'N/A' ? String(value).replace(/^0/, '').replace(/\s?[AP]M$/i, '') : '—';
-
-const saveCanvas = (canvas, filename) => {
-  const link = document.createElement('a');
-  link.download = filename;
-  link.href = canvas.toDataURL('image/jpeg', 0.96);
-  link.click();
-};
-
-const drawText = (ctx, text, x, y, options = {}) => {
-  const { size = 28, weight = 500, align = 'left', color = '#f7f1e3' } = options;
-  ctx.fillStyle = color;
-  ctx.font = `${weight} ${size}px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-  ctx.textAlign = align;
-  ctx.textBaseline = 'middle';
-  ctx.fillText(String(text ?? ''), x, y);
-};
-
-const roundRect = (ctx, x, y, width, height, radius) => {
-  const r = Math.min(radius, width / 2, height / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + width, y, x + width, y + height, r);
-  ctx.arcTo(x + width, y + height, x, y + height, r);
-  ctx.arcTo(x, y + height, x, y, r);
-  ctx.arcTo(x, y, x + width, y, r);
-  ctx.closePath();
-};
-
-const exportWallpaper = (monthlyPrayerTimes, currentMonth) => {
-  if (!monthlyPrayerTimes?.length) return;
-
-  // 19.5:9 portrait canvas: suitable for current iPhone/Android home and lock screens.
-  const canvas = document.createElement('canvas');
-  canvas.width = 1290;
-  canvas.height = 2796;
-  const ctx = canvas.getContext('2d');
-
-  const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  bg.addColorStop(0, '#05090e');
-  bg.addColorStop(0.46, '#07131f');
-  bg.addColorStop(1, '#03070b');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Soft gold glow and understated mosque-arch motif.
-  const glow = ctx.createRadialGradient(1040, 520, 30, 1040, 520, 640);
-  glow.addColorStop(0, 'rgba(220,182,80,.18)');
-  glow.addColorStop(1, 'rgba(220,182,80,0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, canvas.width, 1180);
-
-  ctx.strokeStyle = 'rgba(220,182,80,.10)';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(70, 740);
-  ctx.quadraticCurveTo(645, 70, 1220, 740);
-  ctx.stroke();
-
-  // Leave the top ~300px quiet so lock-screen clock/widgets remain readable.
-  drawText(ctx, 'JAMATIA ISLAMIC CENTRE', 645, 340, { size: 27, weight: 750, align: 'center', color: '#dfb650' });
-  drawText(ctx, `${currentMonth} Prayer Times`, 645, 405, { size: 52, weight: 760, align: 'center', color: '#ffffff' });
-  drawText(ctx, 'Birmingham · Begins & Jama‘ah', 645, 459, { size: 24, align: 'center', color: '#9eabb7' });
-
-  const left = 46;
-  const right = 46;
-  const tableWidth = canvas.width - left - right;
-  const top = 535;
-  const headerH = 64;
-  const rows = monthlyPrayerTimes.length;
-  const availableRowsHeight = 2050;
-  const rowH = Math.min(63, Math.floor(availableRowsHeight / Math.max(rows, 1)));
-  const dateW = 142;
-  const prayerW = (tableWidth - dateW) / 5;
-  const prayers = [
-    ['Fajr', 'fajr_begins', 'fajr_jamah'],
-    ['Dhuhr', 'zuhr_begins', 'zuhr_jamah'],
-    ['Asr', 'asr_begins', 'asr_jamah'],
-    ['Maghrib', 'maghrib_begins', 'maghrib_jamah'],
-    ['Isha', 'isha_begins', 'isha_jamah'],
-  ];
-
-  ctx.fillStyle = 'rgba(10,24,38,.94)';
-  roundRect(ctx, left, top, tableWidth, headerH + rows * rowH + 18, 28);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,.12)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  ctx.fillStyle = 'rgba(220,182,80,.13)';
-  roundRect(ctx, left + 8, top + 8, tableWidth - 16, headerH - 8, 20);
-  ctx.fill();
-
-  drawText(ctx, 'DATE', left + dateW / 2, top + headerH / 2 + 2, { size: 18, weight: 760, align: 'center', color: '#dfb650' });
-  prayers.forEach(([label], index) => {
-    drawText(ctx, label.toUpperCase(), left + dateW + prayerW * index + prayerW / 2, top + headerH / 2 + 2, { size: 18, weight: 760, align: 'center', color: '#dfb650' });
-  });
-
-  monthlyPrayerTimes.forEach((day, row) => {
-    const y = top + headerH + row * rowH;
-    if (row % 2 === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,.025)';
-      ctx.fillRect(left + 10, y, tableWidth - 20, rowH);
-    }
-
-    ctx.strokeStyle = 'rgba(255,255,255,.055)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(left + 18, y + rowH);
-    ctx.lineTo(left + tableWidth - 18, y + rowH);
-    ctx.stroke();
-
-    const dateLabel = clean(day.d_date || day.day);
-    drawText(ctx, dateLabel, left + dateW / 2, y + rowH / 2, { size: 19, weight: 650, align: 'center', color: '#f4f6f8' });
-
-    prayers.forEach(([, beginsKey, jamahKey], index) => {
-      const x = left + dateW + prayerW * index + prayerW / 2;
-      drawText(ctx, `B ${clean(day[beginsKey])}`, x, y + rowH * 0.35, { size: 16, weight: 560, align: 'center', color: '#aeb8c2' });
-      drawText(ctx, `J ${clean(day[jamahKey] || day[beginsKey])}`, x, y + rowH * 0.68, { size: 18, weight: 720, align: 'center', color: '#ffffff' });
-    });
-  });
-
-  const footerY = Math.min(2660, top + headerH + rows * rowH + 82);
-  drawText(ctx, 'B = Begins   ·   J = Jama‘ah', 645, footerY, { size: 20, align: 'center', color: '#8796a3' });
-  drawText(ctx, 'jicmasjid.org', 645, footerY + 48, { size: 22, weight: 720, align: 'center', color: '#dfb650' });
-
-  saveCanvas(canvas, `JIC-${currentMonth.replace(/\s+/g, '-')}-phone-wallpaper.jpg`);
-};
 
 export const MonthlyPrayerTable = ({ monthlyPrayerTimes, currentMonth, currentDate }) => (
   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden">
     <div className="bg-primary text-white px-4 py-3 sm:p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div><p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-80">Monthly schedule</p><h3 className="text-lg sm:text-xl font-bold">{currentMonth} Prayer Times</h3></div>
-        {monthlyPrayerTimes.length > 0 && <button type="button" onClick={() => exportWallpaper(monthlyPrayerTimes,currentMonth)} className="inline-flex min-h-10 w-fit items-center gap-2 rounded-xl border border-white/30 bg-black/15 px-3 py-2 text-xs font-semibold hover:bg-black/25"><Smartphone size={15}/>Download phone wallpaper</button>}
+        {monthlyPrayerTimes.length > 0 && <WallpaperDownload monthlyPrayerTimes={monthlyPrayerTimes} currentMonth={`${currentMonth} ${currentDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London', year: 'numeric' })}`}/>}
       </div>
     </div>
     {monthlyPrayerTimes.length===0 && <p className="p-6 text-center">This month’s timetable has not been uploaded yet. Please contact the centre.</p>}
@@ -165,7 +37,7 @@ export default function PrayerScheduleTabs({ monthlyPrayerTimes,currentMonth,cur
     setActiveTab(value);
     window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
       if(!contentRef.current)return;
-      const headerOffset=220;
+      const headerOffset=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--jic-header-height')) || 220) + 60;
       const top=contentRef.current.getBoundingClientRect().top+window.scrollY-headerOffset;
       window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
     }));
@@ -173,7 +45,7 @@ export default function PrayerScheduleTabs({ monthlyPrayerTimes,currentMonth,cur
   return <section id="prayer-schedule" className="py-16 bg-gray-50 dark:bg-gray-800 scroll-mt-56">
     <div className="container mx-auto px-4">
       <Tabs value={activeTab} onValueChange={handleTab} className="w-full max-w-6xl mx-auto">
-        <div className="sticky top-[188px] z-20 flex justify-center mb-6 sm:top-[204px]"><TabsList className="grid grid-cols-3 w-full max-w-md shadow-lg backdrop-blur-xl"><TabsTrigger value="daily">Monthly</TabsTrigger><TabsTrigger value="jummah">Jummah</TabsTrigger><TabsTrigger value="ramadan">Ramadan</TabsTrigger></TabsList></div>
+        <div className="sticky z-20 flex justify-center mb-6" style={{ top: 'calc(var(--jic-header-height, 220px) + 8px)' }}><TabsList className="grid grid-cols-3 w-full max-w-md shadow-lg backdrop-blur-xl"><TabsTrigger value="daily">Monthly</TabsTrigger><TabsTrigger value="jummah">Jummah</TabsTrigger><TabsTrigger value="ramadan">Ramadan</TabsTrigger></TabsList></div>
         <div ref={contentRef} className="scroll-mt-56">
           <TabsContent value="daily" className="space-y-8">{activeTab==='daily'&&<MonthlyPrayerTable monthlyPrayerTimes={monthlyPrayerTimes} currentMonth={currentMonth} currentDate={currentDate}/>}</TabsContent>
           <TabsContent value="jummah" className="space-y-8">{activeTab==='jummah'&&<JummahTimesCard jummahTimes={jummahTimes}/>}</TabsContent>

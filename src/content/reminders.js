@@ -1,0 +1,16 @@
+export const DEFAULT_REMINDERS = [
+  { type:'Qur’an', text:'Remember Me; I will remember you.', source:'Qur’an 2:152' },
+  { type:'Qur’an', text:'Allah is near and responds when His servants call upon Him.', source:'Qur’an 2:186' },
+  { type:'Qur’an', text:'Do not falter or grieve.', source:'Qur’an 3:139' },
+  { type:'Qur’an', text:'Allah is with those who persevere.', source:'Qur’an 8:46' },
+  { type:'Qur’an', text:'In the remembrance of Allah hearts find comfort.', source:'Qur’an 13:28' },
+  { type:'Qur’an', text:'Establish prayer for My remembrance.', source:'Qur’an 20:14' },
+  { type:'Qur’an', text:'Allah guides those who strive in His cause.', source:'Qur’an 29:69' },
+  { type:'Qur’an', text:'Do not lose hope in Allah’s mercy.', source:'Qur’an 39:53' },
+  { type:'Qur’an', text:'Whoever trusts Allah will find Him sufficient.', source:'Qur’an 65:3' },
+  { type:'Qur’an', text:'Surely with hardship comes ease.', source:'Qur’an 94:5–6' },
+  { type:'Hadith', text:'Actions are judged by intentions.', source:'Bukhari 1' },
+  { type:'Hadith', text:'A good word is charity.', source:'Bukhari 2989' },
+  { type:'Hadith', text:'Allah is gentle and loves gentleness.', source:'Muslim 2593' },
+  { type:'Reflection', text:'Make time today for prayer, kindness and sincere du‘a.', source:'Daily reminder' },
+];
