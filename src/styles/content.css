@@ -34,6 +34,12 @@ html[data-theme] .jic-image-viewer { width:min(900px,calc(100vw - 24px));max-hei
 html[data-theme] .bg-primary.text-white { color:#0C1930!important; }
 html[data-theme] :is(a,button,input,textarea,select,[tabindex]):focus-visible { outline:3px solid var(--jic-gold);outline-offset:3px; }
 .jic-footer-brand { display:block;width:220px;margin:0 0 20px; }
+.jic-footer-brand-desktop { display:none; }
+@media(min-width:1024px) {
+  .jic-footer-brand { width:280px; }
+  .jic-footer-brand-desktop { display:block; }
+  .jic-footer-brand-mobile { display:none; }
+}
 .jic-home-route .jic-rail-heading h2 { color:#fff;text-shadow:0 2px 12px #0008; }
 @media(max-width:767px) {
   .jic-swipe-rail { grid-auto-columns:minmax(250px,84%);gap:12px; }

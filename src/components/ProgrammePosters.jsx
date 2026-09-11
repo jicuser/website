@@ -18,6 +18,6 @@ export default function ProgrammePosters() {
         <div className="jic-programme-copy"><p className="jic-programme-meta">{item.subtitle}</p><h3>{item.title}</h3><p>{item.schedule}</p><p>{item.detail}</p><Link to={item.to === pathname ? '/contact' : item.to}>{item.to === pathname ? 'Enquire at the centre' : 'Explore programme'} <ArrowRight size={16}/></Link></div>
       </article>)}
     </SwipeRail>
-    {selected && <ImageViewer image={{ title: selected.title, url: selected.image, alt: selected.alt }} onClose={() => setSelected(null)}><p>Pinch to zoom, or open the full-size poster to save it.</p><a href={selected.image} target="_blank" rel="noopener noreferrer">Open full-size poster</a><a href={selected.image} download={`${selected.id}.jpg`}>Download poster</a></ImageViewer>}
+    {selected && <ImageViewer image={{ title: selected.title, url: selected.image, alt: selected.alt }} onClose={() => setSelected(null)}><p>Pinch to zoom, or open the full-size poster to save it.</p><a href={selected.image} target="_blank" rel="noopener noreferrer">Open full-size poster</a><a href={selected.image} download={selected.image.split('/').pop()}>Download poster</a></ImageViewer>}
   </>;
 }

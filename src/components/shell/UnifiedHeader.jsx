@@ -9,6 +9,7 @@ import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLo
 import { useAppearance } from '@/context/AppearanceContext';
 import { nextPrayer } from '@/lib/nextPrayer';
 import { cn } from '@/lib/utils';
+import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 
 const PRAYERS = [['Fajr','fajr','jamaah_fajr'],['Sunrise','sunrise',null],['Dhuhr','dhuhr','jamaah_dhuhr'],['Asr','asr','jamaah_asr'],['Maghrib','maghrib','jamaah_maghrib'],['Isha','isha','jamaah_isha']];
 const shortTime = value => value && value !== 'N/A' ? String(value).replace(/^0/, '').replace(/\s?[AP]M$/i, '') : '—';
@@ -33,6 +34,7 @@ export default function UnifiedHeader() {
   const subtabs = navigation?.children || [];
   const selected = subtabs.filter(item => pathname === item.path || pathname.startsWith(`${item.path}/`)).sort((a,b) => b.path.length - a.path.length)[0]?.path;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
+  const availability = useRadioAvailability(streamUrl);
   const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
 
   useEffect(() => { setMenuOpen(false); setMobileGroup(null); }, [pathname]);
@@ -63,7 +65,7 @@ export default function UnifiedHeader() {
     try { setRadioLoading(true); await audio.play(); }
     catch { setPlaying(false); setRadioLoading(false); setRadioError(true); }
   }
-  const radioButton = <button type="button" className={cn('jic-radio-flat', playing && 'is-playing')} onClick={toggleRadio} disabled={!streamUrl} aria-label={`${playing ? 'Pause' : 'Play'} JIC Radio${radioError ? ' — retry' : ''}`} aria-pressed={playing}>
+  const radioButton = <button type="button" className="jic-radio-flat" data-availability={availability} title={`Station ${availability === 'unknown' ? 'status unavailable' : availability}`} onClick={toggleRadio} disabled={!streamUrl} aria-label={`${playing ? 'Pause' : 'Play'} JIC Radio — station ${availability}${radioError ? ' — retry' : ''}`} aria-pressed={playing}>
     {playing ? <Pause size={17}/> : <Play size={17}/>}<span>Radio</span><i aria-hidden="true"/><small>{status}</small>
   </button>;
 
@@ -78,7 +80,7 @@ export default function UnifiedHeader() {
         </Link>)}</div>
         <div className="jic-header-live-row">{[0,1].map(index => <Link key={index} to="/prayer-times/jummah" className="jic-jummah-compact"><b>Jummah {index + 1}</b><span>{shortTime(jummahTimes?.[index]?.prayer)}</span></Link>)}{radioButton}</div>
       </div>
-      <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="pillars"/></Link>
+      <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="wordmark"/></Link>
         <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path,children}) => <div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path === '/'}>{name}</NavLink>{children.length > 0 && <div className="jic-desktop-nav-dropdown jic-glass">{children.map(child => <Link key={`${child.path}-${child.name}`} to={child.path}>{child.name}</Link>)}</div>}</div>)}</nav>
         <div className="jic-free-actions"><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="jic-site-menu"><Menu size={22}/></button></div>
       </div>

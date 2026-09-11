@@ -59,4 +59,6 @@ const samples=variants.map(([name,label,w,h,body],index)=>{
   const id=`sheet-${name}`;
   return `${definitions(id)}<g transform="translate(${x+(720-w*scale)/2} ${y}) scale(${scale})" style="color:#0C1930">${body(id)}</g><text x="${x+360}" y="${y+235}" text-anchor="middle" fill="#425167" font-family="system-ui,sans-serif" font-size="18">${index+1}. ${escapeXml(label)}</text>`;
 }).join('');
+// Browser and Apple icons reuse the approved entrance/minaret geometry.
+writeFileSync('public/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><title>Jamatia Islamic Centre</title><rect width="640" height="640" rx="120" fill="#0C1930"/><style>.metal{fill:#D6AF62}</style>${definitions('favicon')}${entrance('favicon',80,20,1)}</svg>\n`);
 writeFileSync(`${destination}/jic-variations.svg`,`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1110"><title>Jamatia Islamic Centre — seven logo variations</title><rect width="1600" height="1110" fill="white"/><style>.metal{fill:#89501B}</style>${samples}</svg>\n`);

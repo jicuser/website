@@ -2,9 +2,9 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useAppearance } from '@/context/AppearanceContext';
 
-export default function JamatiaLogo({ className, variant = 'compact' }) {
+export default function JamatiaLogo({ className, variant = 'wordmark' }) {
   const { theme } = useAppearance();
-  const safeVariant = ['horizontal','centred','compact','wordmark','entrance','minaret','pillars'].includes(variant) ? variant : 'compact';
+  const safeVariant = ['horizontal','centred','compact','wordmark','entrance','minaret','pillars'].includes(variant) ? variant : 'wordmark';
   return (
     <div className={cn('brand-lockup', `brand-${safeVariant}`, className)}>
       <img

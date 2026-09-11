@@ -10,6 +10,7 @@
 - `public-sections.css` — retained public-page layouts consolidated from the older override files, in their original cascade order.
 - `content.css` — shared swipe rails, programme posters, image previews and wallpaper controls.
 - `liquid-glass.css` — glass surfaces and blur treatment.
+- Glass styles load last: shared translucent backgrounds, stronger on-glass text, and solid/reduced-transparency fallbacks. Change background alpha, never container opacity. Photographs and poster images retain their original opacity.
 - `home.css` — homepage cards and feature layout.
 - `worship.css` — Worship and Qur'an pages.
 - `hall-booking.css` — hall booking calendar and availability states.

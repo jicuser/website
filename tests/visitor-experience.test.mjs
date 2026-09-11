@@ -36,7 +36,7 @@ test('all seven logo variations have paired, self-contained path-based exports',
 });
 
 test('each programme uses a real local poster and an existing content destination', () => {
-  assert.equal(PROGRAMMES.length, 3);
+  assert.equal(PROGRAMMES.length, 4);
   const destinations = ['/youth/classes-skills', '/madrassah/classes-courses', '/worship'];
   for (const programme of PROGRAMMES) {
     assert.ok(existsSync(new URL(`../public${programme.image}`, import.meta.url)));
@@ -56,6 +56,19 @@ function contrast(first, second) {
 }
 test('main solid-surface text and filled-button pairs meet 4.5:1 contrast', () => {
   for (const pair of [['#0C1930','#FAFBFD'], ['#89501B','#FAFBFD'], ['#697486','#FAFBFD'], ['#F4F6FA','#152238'], ['#B7C3D5','#152238'], ['#D6AF62','#152238'], ['#0C1930','#D6AF62']]) assert.ok(contrast(...pair) >= 4.5, `${pair.join(' / ')} must be readable`);
+});
+
+test('glass text retains 4.5:1 contrast at both background extremes', () => {
+  const css = readFileSync(new URL('../src/styles/liquid-glass.css', import.meta.url), 'utf8');
+  for (const selector of ['html[data-theme]', 'html[data-theme=dark]']) {
+    const block = css.slice(css.indexOf(selector + ' {')).split('}')[0];
+    const [, r, g, b, alpha] = block.match(/--jic-glass-surface:rgba\((\d+),(\d+),(\d+),([.\d]+)\)/);
+    const colours = ['ink','secondary','accent'].map(role => block.match(new RegExp(`--jic-glass-${role}:(#[A-Fa-f0-9]{6})`))[1]);
+    for (const background of [0, 255]) {
+      const composite = '#' + [r,g,b].map(channel => Math.round(Number(channel) * Number(alpha) + background * (1 - Number(alpha))).toString(16).padStart(2,'0')).join('');
+      for (const colour of colours) assert.ok(contrast(colour, composite) >= 4.5, `${selector}: ${colour} over ${composite}`);
+    }
+  }
 });
 
 test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Jamaah time', () => {

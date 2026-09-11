@@ -6,11 +6,11 @@ Seven refined SVG compositions, each with a light and dark version. The supplied
 | --- | --- |
 | `horizontal` | Main identity, documents and roomy footers |
 | `centred` | Portrait compositions and entrance-led applications |
-| `compact` | Navigation menu and smaller horizontal spaces |
-| `wordmark` | Very short spaces where architectural detail would be too small |
+| `compact` | Alternative small horizontal composition |
+| `wordmark` | Website header, navigation menu and mobile footer |
 | `entrance` | Standalone architectural mark |
 | `minaret` | Decorative accent, not a replacement for the full name |
-| `pillars` | Seventh variation: writing between two pillars, with no doorway; used below prayer times in the website header |
+| `pillars` | Seventh variation: writing between two pillars, with no doorway; desktop footer only (1024px and wider) |
 
 Use `-light.svg` on pale backgrounds and `-dark.svg` on dark backgrounds. Keep their aspect ratio and clear space around them. Do not use a global CSS colour filter: it destroys the two-colour identity. Use the compact/wordmark/pillars compositions at small sizes; the detailed entrance is best at larger sizes. The website uses an `<img>` for each self-contained SVG.
 

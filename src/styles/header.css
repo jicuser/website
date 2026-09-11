@@ -24,7 +24,8 @@ html[data-theme] .jic-header-live-row { display:grid;grid-template-columns:1fr 1
 html[data-theme] .jic-radio-flat { display:flex;align-items:center;justify-content:center;gap:7px;padding:4px 14px;min-width:100px;background:transparent;border:0;font-size:14px;color:var(--jic-text); }
 .jic-radio-flat small { display:none; }
 .jic-radio-flat i { width:6px;height:6px;border-radius:50%;background:var(--jic-muted); }
-.jic-radio-flat.is-playing i { background:var(--jic-live); }
+.jic-radio-flat[data-availability="online"] i { background:#22c55e; }
+.jic-radio-flat[data-availability="offline"] i { background:#ef4444; }
 .jic-radio-flat:disabled { opacity:.5; }
 html[data-theme] .jic-free-nav-row { display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:68px;padding:6px 10px;margin-top:6px;border:1px solid var(--jic-glass-border);border-radius:14px;background:var(--jic-glass-surface-strong)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px); }
 html[data-theme] .jic-free-brand { display:flex;align-items:center;flex:0 0 auto;width:190px; }

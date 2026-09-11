@@ -39,7 +39,7 @@ table,th,td{border-color:var(--jic-border)!important;}
 .jic-today-prayer>span,.jic-today-prayer em,.jic-next-summary small,.jic-jummah-lines small,.jic-radio-flat small{color:var(--jic-text-secondary)!important;}
 .jic-today-prayer strong,.jic-summary-label,.jic-jummah-lines small b,.jic-next-summary small b,.jic-unified-menu-row>button{color:var(--jic-gold)!important;}
 .jic-today-prayer>small b{color:var(--jic-gold)!important;}.jic-today-prayer>small b+b{color:var(--jic-muted)!important;}
-.jic-radio-flat>i{background:var(--jic-muted)!important;}.jic-radio-flat.is-playing>i{background:var(--jic-live)!important;}
+.jic-radio-flat>i{background:var(--jic-muted)!important;}.jic-radio-flat[data-availability="online"]>i{background:#22c55e!important;}.jic-radio-flat[data-availability="offline"]>i{background:#ef4444!important;}
 .jic-free-actions button,.jic-unified-menu-head button,.jic-menu-appearance button{color:var(--jic-text)!important;border-color:var(--jic-border)!important;}
 .jic-free-actions button.is-donate,.jic-unified-menu-donate{background:var(--jic-gold)!important;color:#0C1930!important;border-color:var(--jic-gold)!important;}
 .jic-unified-subnav-link,.jic-unified-menu-children a{color:var(--jic-text-secondary)!important;}
@@ -78,7 +78,4 @@ footer{background:var(--jic-bg-secondary)!important;color:var(--jic-text)!import
 html[data-theme] .jic-hall-contact a,html[data-theme] .jic-free-actions button.is-donate { background:var(--jic-action)!important;color:#0C1930!important; }
 html[data-theme] .text-primary,html[data-theme] .hover\:text-primary:hover { color:var(--jic-gold)!important; }
 
-/* Explicit opacity for contrast over the homepage photograph. */
-:root { --jic-glass-surface:rgba(250,251,253,.88);--jic-glass-surface-strong:rgba(250,251,253,.94);--jic-glass-border:rgba(70,87,112,.26); }
-html.dark { --jic-glass-surface:rgba(15,26,43,.88);--jic-glass-surface-strong:rgba(15,26,43,.94);--jic-glass-border:rgba(204,216,236,.23); }
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { html[data-theme] { --jic-glass-surface:var(--jic-surface);--jic-glass-surface-strong:var(--jic-surface); } }
+/* Glass opacity and on-glass text are owned by liquid-glass.css. */

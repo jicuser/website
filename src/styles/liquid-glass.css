@@ -1,34 +1,145 @@
-/* Liquid-glass surface system for the public header and menu. */
-:root{--jic-glass-surface:rgba(255,255,255,.30);--jic-glass-surface-strong:rgba(255,255,255,.40);--jic-glass-border:rgba(255,255,255,.58);--jic-glass-shadow:0 14px 38px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.76),inset 0 -1px 0 rgba(255,255,255,.16)}
-.dark{--jic-glass-surface:rgba(7,15,24,.30);--jic-glass-surface-strong:rgba(9,18,28,.40);--jic-glass-border:rgba(255,255,255,.18);--jic-glass-shadow:0 16px 42px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(255,255,255,.035)}
-
-.jic-unified-header,.jic-unified-inner,.jic-free-nav-row,.jic-unified-subnav{background:transparent!important}
-.jic-unified-info{position:relative;isolation:isolate;overflow:hidden;background:var(--jic-glass-surface)!important;border:1px solid var(--jic-glass-border)!important;box-shadow:var(--jic-glass-shadow)!important;-webkit-backdrop-filter:blur(34px) saturate(185%) contrast(105%);backdrop-filter:blur(34px) saturate(185%) contrast(105%)}
-.jic-unified-info::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;background:linear-gradient(132deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,.08) 24%,rgba(255,255,255,.015) 52%,rgba(255,255,255,.16) 100%);opacity:.72}
-.jic-unified-info::after{content:"";position:absolute;pointer-events:none;z-index:-1;width:56%;height:165%;left:-18%;top:-58%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),rgba(255,255,255,0) 70%);transform:rotate(-16deg)}
-.dark .jic-unified-info::before{background:linear-gradient(132deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.035) 27%,rgba(255,255,255,.008) 54%,rgba(255,255,255,.065) 100%);opacity:.82}
-.dark .jic-unified-info::after{background:radial-gradient(circle,rgba(255,255,255,.09),rgba(255,255,255,0) 70%)}
-.jic-unified-address,.jic-today-prayer-row,.jic-today-prayer,.jic-next-summary::after,.jic-jummah-summary::after{border-color:color-mix(in srgb,var(--jic-border) 42%,transparent)!important}
-
-/* Prayer cells share the same optical transparency in both themes. */
-.jic-today-prayer{background:rgba(255,255,255,.065)!important;-webkit-backdrop-filter:blur(19px) saturate(160%);backdrop-filter:blur(19px) saturate(160%)}
-.dark .jic-today-prayer{background:rgba(7,15,24,.065)!important}
-.jic-today-prayer:hover,.jic-today-prayer:focus-visible{background:color-mix(in srgb,var(--jic-gold) 8%,var(--jic-glass-surface))!important}
-
-.jic-free-actions button{background:var(--jic-glass-surface-strong)!important;border:1px solid var(--jic-glass-border)!important;box-shadow:0 8px 24px rgba(15,23,42,.09),inset 0 1px 0 rgba(255,255,255,.62)!important;-webkit-backdrop-filter:blur(26px) saturate(175%);backdrop-filter:blur(26px) saturate(175%)}
-.dark .jic-free-actions button{box-shadow:0 10px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.10)!important}
-.jic-free-actions button.is-donate{background:linear-gradient(180deg,color-mix(in srgb,var(--jic-gold) 86%,white 14%),var(--jic-gold))!important;border-color:color-mix(in srgb,var(--jic-gold) 72%,white 28%)!important}
-
-.jic-unified-reminder,.jic-unified-subnav-link{background:color-mix(in srgb,var(--jic-glass-surface) 86%,transparent)!important;border-color:var(--jic-glass-border)!important;-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);box-shadow:0 8px 22px rgba(15,23,42,.06),inset 0 1px 0 rgba(255,255,255,.42)!important}
-.dark .jic-unified-reminder,.dark .jic-unified-subnav-link{box-shadow:0 9px 24px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.08)!important}
-.jic-unified-subnav-link.is-current{background:color-mix(in srgb,var(--jic-gold) 14%,var(--jic-glass-surface-strong))!important}
-
-.jic-unified-menu{background:color-mix(in srgb,var(--jic-bg) 32%,transparent)!important;-webkit-backdrop-filter:blur(40px) saturate(185%);backdrop-filter:blur(40px) saturate(185%)}
-.jic-unified-menu-head{background:color-mix(in srgb,var(--jic-bg) 28%,transparent)!important;border-color:var(--jic-glass-border)!important;-webkit-backdrop-filter:blur(36px) saturate(180%);backdrop-filter:blur(36px) saturate(180%)}
-.jic-unified-menu-group{border-color:color-mix(in srgb,var(--jic-border) 38%,transparent)!important}
-.jic-unified-menu-children a,.jic-unified-admin-link,.jic-unified-menu-head button,.jic-menu-appearance button{background:var(--jic-glass-surface-strong)!important;border-color:var(--jic-glass-border)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.09);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%)}
-
-html[data-surface="solid"] .jic-unified-info,html[data-surface="solid"] .jic-today-prayer,html[data-surface="solid"] .jic-unified-reminder,html[data-surface="solid"] .jic-unified-subnav-link,html[data-surface="solid"] .jic-free-actions button,html[data-surface="solid"] .jic-unified-menu,html[data-surface="solid"] .jic-unified-menu-head,html[data-surface="solid"] .jic-unified-menu-children a,html[data-surface="solid"] .jic-unified-admin-link,html[data-surface="solid"] .jic-unified-menu-head button,html[data-surface="solid"] .jic-menu-appearance button{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--jic-surface)!important}
-html[data-surface="solid"] .jic-free-actions button.is-donate,html[data-surface="solid"] .jic-unified-menu-donate{background:var(--jic-gold)!important}
-
-@media(max-width:767px){.jic-unified-info{border-radius:24px;-webkit-backdrop-filter:blur(32px) saturate(185%);backdrop-filter:blur(32px) saturate(185%)}.jic-unified-reminder,.jic-unified-subnav-link{-webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%)}.jic-unified-menu{-webkit-backdrop-filter:blur(36px) saturate(180%);backdrop-filter:blur(36px) saturate(180%)}}
+/* Shared public glass. Background tint only; never fade text, images or logos.
+ * Loaded last to prevent legacy solid card styles from repainting the glass. */
+html[data-theme] {
+  --jic-glass-surface:rgba(250,251,253,.62);
+  --jic-glass-surface-strong:rgba(250,251,253,.68);
+  --jic-glass-inset:rgba(255,255,255,.12);
+  --jic-glass-border:rgba(255,255,255,.55);
+  --jic-glass-ink:#081222;
+  --jic-glass-secondary:#182537;
+  --jic-glass-accent:#47240C;
+  --jic-glass-shadow:0 10px 30px #0713241c,inset 0 1px 0 #ffffff66;
+}
+html[data-theme=dark] {
+  --jic-glass-surface:rgba(15,26,43,.68);
+  --jic-glass-surface-strong:rgba(15,26,43,.74);
+  --jic-glass-inset:rgba(5,13,25,.14);
+  --jic-glass-border:rgba(235,242,255,.28);
+  --jic-glass-ink:#FFFFFF;
+  --jic-glass-secondary:#F1F4FA;
+  --jic-glass-accent:#FFE6B0;
+  --jic-glass-shadow:0 12px 32px #0000002b,inset 0 1px 0 #ffffff38;
+}
+/* Admin workspaces keep their existing palette. */
+html[data-theme][data-surface=glass] :is(.jic-home-route,.jic-inner-route,.jic-unified-menu,.jic-image-viewer,.jic-popup-panel) {
+  --jic-text:var(--jic-glass-ink);
+  --jic-text-secondary:var(--jic-glass-secondary);
+  --jic-muted:var(--jic-glass-secondary);
+  --jic-gold:var(--jic-glass-accent);
+  --jic-gold-strong:var(--jic-glass-accent);
+}
+html[data-theme][data-surface=glass] :is(
+  .jic-unified-info,.jic-free-nav-row,.jic-daily-reminder>button,
+  .jic-feature-card.is-glass-only,.jic-home-footer-strip,.jic-site-footer,
+  .jic-event-strip,.jic-live-section,.jic-event-card,.jic-announcement,
+  .jic-programme-card,.jic-related .jic-swipe-rail>a,
+  .jic-hall-intro,.jic-hall-calendar,.managed-page-content,
+  .jic-unified-menu,.jic-image-viewer,.jic-popup-panel,.jic-popup-surface,
+  .jic-desktop-nav-dropdown
+) {
+  background:var(--jic-glass-surface)!important;
+  color:var(--jic-text)!important;
+  border-color:var(--jic-glass-border)!important;
+  box-shadow:var(--jic-glass-shadow)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(125%)!important;
+  backdrop-filter:blur(24px) saturate(125%)!important;
+}
+html[data-theme][data-surface=glass] :is(.jic-unified-info,.jic-free-nav-row,.jic-unified-menu,.jic-image-viewer,.jic-popup-panel,.jic-desktop-nav-dropdown) {
+  background:var(--jic-glass-surface-strong)!important;
+}
+/* Include existing public cards built with utility classes. */
+html[data-theme][data-surface=glass] :is(.jic-home-route,.jic-inner-route) :is(.bg-white,.bg-gray-50,.bg-gray-100,.bg-gray-600,.bg-gray-700,.bg-gray-800,.bg-gray-900,.bg-card) {
+  background:var(--jic-glass-surface)!important;
+  color:var(--jic-text)!important;
+  border-color:var(--jic-glass-border)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(125%)!important;
+  backdrop-filter:blur(24px) saturate(125%)!important;
+}
+/* Inset controls share their parent's tint instead of stacking opaque boxes. */
+html[data-theme][data-surface=glass] :is(
+  .jic-free-actions a,.jic-free-actions button,.jic-community-join,
+  .jic-footer-socials a,.jic-menu-appearance button,
+  .jic-unified-menu-head,.jic-unified-menu-head button,.jic-unified-menu-children a,
+  .jic-unified-admin-link,.jic-image-viewer-heading,.jic-image-viewer-actions a,
+  .jic-image-viewer-actions button,.jic-wallpaper-control>button,.jic-poster-button,
+  .jic-image-viewer-scroll
+) {
+  background:var(--jic-glass-inset)!important;
+  color:var(--jic-text)!important;
+  border-color:var(--jic-glass-border)!important;
+  box-shadow:inset 0 1px 0 #ffffff26!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+html[data-theme][data-surface=glass] :is(.jic-primary-cta,.jic-secondary-cta,.jic-footer-donate,.jic-unified-menu-donate,.jic-unified-subnav-link,.jic-scroll-top,.jic-rail-controls button) {
+  background:var(--jic-glass-surface-strong)!important;
+  color:var(--jic-glass-ink)!important;
+  border:1px solid var(--jic-glass-border)!important;
+  box-shadow:var(--jic-glass-shadow)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(125%)!important;
+  backdrop-filter:blur(24px) saturate(125%)!important;
+}
+html[data-theme][data-surface=glass] .jic-unified-subnav-link.is-current {
+  background:var(--jic-glass-surface-strong)!important;
+  color:var(--jic-glass-ink)!important;
+  border-color:var(--jic-glass-accent)!important;
+  box-shadow:inset 0 -3px 0 var(--jic-glass-accent)!important;
+}
+html[data-theme][data-surface=glass] :is(.jic-home-route,.jic-inner-route) :is(input:not([type=checkbox]):not([type=radio]),textarea,select) {
+  background:var(--jic-glass-inset)!important;
+  color:var(--jic-text)!important;
+  border-color:var(--jic-glass-secondary)!important;
+}
+html[data-theme][data-surface=glass] select option { background:var(--jic-surface);color:var(--jic-glass-ink); }
+html[data-theme][data-surface=glass] :is(.jic-home-route,.jic-inner-route) .bg-primary {
+  background:var(--jic-glass-surface-strong)!important;
+  color:var(--jic-glass-ink)!important;
+}
+/* Old fixed grey footer colours were too faint on the photograph. */
+html[data-theme][data-surface=glass] .jic-site-footer :is(a,p,small,.jic-footer-bottom) {
+  color:var(--jic-glass-ink)!important;
+  opacity:1;
+  text-shadow:none;
+}
+html[data-theme][data-surface=glass] .jic-footer-links-inline a { font-weight:600; }
+html[data-theme][data-surface=glass] .jic-footer-socials a svg { color:inherit!important; }
+html[data-theme][data-surface=glass] :is(.jic-popup-muted,.jic-popup-title,.jic-popup-kicker) { color:var(--jic-text)!important; }
+html[data-theme][data-surface=glass] :is(.jic-free-actions a,.jic-free-actions button,.jic-community-join,.jic-footer-socials a,.jic-primary-cta,.jic-secondary-cta):hover { border-color:var(--jic-glass-accent)!important; }
+.jic-unified-menu::backdrop { background:#07122226; }
+html[data-surface=solid] {
+  --jic-glass-surface:var(--jic-surface);
+  --jic-glass-surface-strong:var(--jic-surface);
+}
+/* Glass off must remove transparency from every public surface, not just blur. */
+html[data-theme][data-surface=solid] :is(
+  .jic-unified-info,.jic-free-nav-row,.jic-site-footer,.jic-daily-reminder>button,
+  .jic-feature-card.is-glass-only,.jic-home-footer-strip,.jic-event-strip,
+  .jic-live-section,.jic-event-card,.jic-programme-card,.jic-related .jic-swipe-rail>a,
+  .jic-unified-menu,.jic-unified-menu-head,.jic-unified-menu-children a,
+  .jic-unified-menu-head button,.jic-unified-admin-link,.jic-menu-appearance button,
+  .jic-free-actions a,.jic-free-actions button,.jic-footer-socials a,
+  .jic-community-join,.jic-unified-subnav-link,.jic-rail-controls button,
+  .jic-image-viewer,.jic-image-viewer-heading,.jic-popup-panel,.jic-popup-surface,
+  .jic-scroll-top,.jic-secondary-cta,.jic-announcement
+) {
+  background:var(--jic-surface)!important;
+  color:var(--jic-text)!important;
+  border-color:var(--jic-border)!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  box-shadow:none!important;
+}
+html[data-theme][data-surface=solid] .jic-unified-subnav-link.is-current {
+  background:var(--jic-text)!important;color:var(--jic-bg)!important;
+}
+html[data-theme][data-surface=solid] .jic-site-footer :is(a,p,small) { color:var(--jic-text)!important;opacity:1; }
+html[data-surface=solid] :is(.jic-unified-info,.jic-free-nav-row,.jic-site-footer,.jic-daily-reminder>button,.jic-unified-menu,.jic-image-viewer,.jic-feature-card.is-glass-only) {
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  html[data-theme] { --jic-glass-surface:var(--jic-surface);--jic-glass-surface-strong:var(--jic-surface); }
+}
+@media(prefers-reduced-transparency:reduce) {
+  html[data-theme] { --jic-glass-surface:var(--jic-surface);--jic-glass-surface-strong:var(--jic-surface);--jic-glass-inset:var(--jic-surface); }
+}

@@ -1,24 +1,8 @@
 import React from 'react';
+import { useAppearance } from '@/context/AppearanceContext';
 
-    const MosqueIcon = ({ className }) => (
-      <svg
-        className={className}
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M4 13.5V22H8V16H16V22H20V13.5L12 6L4 13.5Z" />
-        <path d="M12 3V6" />
-        <path d="M20 9L22 10.5" />
-        <path d="M2 10.5L4 9" />
-        <path d="M7 22V12" />
-        <path d="M17 22V12" />
-        <path d="M2 19H22" />
-      </svg>
-    );
-
-    export default MosqueIcon;
+/** Use JIC's actual entrance and minarets, not a generic mosque symbol. */
+export default function MosqueIcon({ className }) {
+  const { theme } = useAppearance();
+  return <img className={className} src={`/brand/jic-entrance-${theme === 'light' ? 'light' : 'dark'}.svg`} alt="" aria-hidden="true"/>;
+}
