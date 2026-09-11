@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Youtube, Menu } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Menu, MapPin, Phone, Mail } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import { SITE } from '@/content/site';
 import useCommunityLink from '@/hooks/useCommunityLink';
@@ -31,6 +31,8 @@ const QUICK_LINKS = [
 export default function Footer() {
   const whatsapp = useCommunityLink();
   const year = new Date().getFullYear();
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${SITE.name}, ${SITE.address.full}`)}`;
+  const phoneUrl = `tel:${SITE.phone.replace(/[^\d+]/g, '').replace(/^0/, '+44')}`;
   const openDonation = () => window.dispatchEvent(new CustomEvent('jic-open-donation'));
   const openMenu = () => window.dispatchEvent(new CustomEvent('jic-open-menu'));
   return (
@@ -57,6 +59,11 @@ export default function Footer() {
           <p>© {year} {SITE.name}</p>
           <div className="flex gap-4"><Link to="/privacy">Privacy</Link></div>
         </div>
+        <nav className="jic-footer-socials jic-footer-contact-icons" aria-label="Contact the centre">
+          <a href={mapsUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open map to ${SITE.name}, ${SITE.address.full}`} title={SITE.address.full}><MapPin size={20} aria-hidden="true"/></a>
+          <a href={phoneUrl} aria-label={`Call ${SITE.phone}`} title={`Call ${SITE.phone}`}><Phone size={20} aria-hidden="true"/></a>
+          <a href={`mailto:${SITE.email}`} aria-label={`Email ${SITE.email}`} title={`Email ${SITE.email}`}><Mail size={20} aria-hidden="true"/></a>
+        </nav>
       </div>
       <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="pillars-outline"/></Link>
     </footer>
