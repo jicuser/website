@@ -72,6 +72,9 @@ function activeGroupFor(pathname) {
   if (pathname.startsWith('/funerals')) {
     return NAV_GROUPS.find(item => item.name === 'Services');
   }
+  if (pathname === '/education' || pathname.startsWith('/madrassah')) {
+    return NAV_GROUPS.find(item => item.name === 'Education');
+  }
   return NAV_GROUPS.find(group => (
     group.path === '/'
       ? pathname === '/'
