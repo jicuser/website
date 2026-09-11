@@ -6,7 +6,7 @@ html[data-theme] .jic-tv-display {
   padding:clamp(10px,1.4vw,28px);overflow:hidden;
   background:var(--jic-bg);color:var(--jic-text);
 }
-.jic-tv-display .jic-page-backdrop { position:absolute; }
+html[data-theme] .jic-tv-display .jic-unified-info { background:var(--jic-bg-secondary)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important; }
 .jic-tv-heading { display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:10px; }
 .jic-tv-logo { width:clamp(150px,17vw,290px); }
 .jic-tv-clock { display:flex;align-items:center;gap:20px;font-variant-numeric:tabular-nums;text-align:right; }
@@ -38,14 +38,6 @@ html[data-theme] .jic-tv-stage { position:relative;display:grid;min-height:0;min
 .jic-tv-status { text-align:center;font-size:14px;line-height:1.3; }
 .jic-tv-notice { margin:4px 0 0;text-align:center;font-size:14px; }
 .jic-tv-empty { position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:22px; }
-.jic-tv-controls { position:absolute;z-index:2;bottom:16px;left:50%;transform:translate(-50%,calc(100% + 20px));display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;width:max-content;max-width:calc(100% - 32px);padding:10px;border:1px solid var(--jic-border);border-radius:14px;background:var(--jic-surface);color:var(--jic-text);opacity:0;pointer-events:none; }
-.jic-tv-controls.is-visible,.jic-tv-controls:focus-within { opacity:1;pointer-events:auto;transform:translate(-50%,0); }
-.jic-tv-controls :is(a,button) { display:flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;padding:8px;border-radius:8px;font-size:14px; }
-.jic-tv-controls [aria-pressed=true] { background:var(--jic-text);color:var(--jic-bg); }
-.jic-tv-controls button:disabled { opacity:.45; }
-.jic-tv-modes { display:flex;gap:2px; }
-.jic-tv-controls p { flex-basis:100%;font-size:14px;text-align:center; }
-.jic-tv-controls p button { display:inline-flex;text-decoration:underline; }
 @media(max-aspect-ratio:1/1) {
   .jic-tv-clock { flex-direction:column;gap:4px;align-items:flex-end; }
   html[data-theme] .jic-tv-display .jic-today-prayer>div { flex-direction:column;gap:4px; }
