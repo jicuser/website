@@ -1,6 +1,5 @@
 /* Current visitor surfaces. Loaded after legacy styles to keep both themes consistent. */
 .jic-premium-home .jic-hero { background-image:none!important; }
-.jic-hero-photo { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 58%;z-index:0; }
 html .jic-premium-home .jic-hero-overlay { z-index:1;background:linear-gradient(90deg,rgba(3,9,15,.72),rgba(3,9,15,.34) 58%,rgba(3,9,15,.12))!important; }
 html .jic-premium-home .jic-hero h1,html .jic-premium-home .jic-hero-sub { color:#fff!important;text-shadow:0 2px 12px #0009!important; }
 html .jic-premium-home .jic-kicker { color:#f2ce77!important; }
@@ -32,10 +31,36 @@ html[data-theme][data-surface="solid"] :is(.jic-primary-cta,.jic-unified-menu-do
   html { --jic-glass-surface:var(--jic-surface);--jic-glass-surface-strong:var(--jic-surface); }
 }
 @media(max-width:767px) {
-  .jic-hero-photo { object-position:55% 55%; }
   html .jic-premium-home .jic-hero-overlay { background:linear-gradient(180deg,rgba(3,9,15,.28),rgba(3,9,15,.5) 48%,rgba(3,9,15,.74))!important; }
   html .jic-premium-home .jic-hero-inner { min-height:480px!important;padding:32px 20px!important;justify-content:flex-end!important; }
   html .jic-premium-home .jic-hero-buttons { display:flex!important;flex-wrap:wrap; }
   html .jic-premium-home .jic-hero-buttons>a { flex:1 1 145px;padding:10px 12px!important;min-height:48px;height:auto; }
   .jic-related-grid { grid-template-columns:1fr; }
+}
+
+/* Continuous homepage photo behind the header, hero and every lower surface.
+   A fixed element avoids background-attachment:fixed glitches on iOS. */
+.jic-home-route { position:relative;isolation:isolate;min-height:100vh; }
+.jic-page-backdrop { position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:#07111b; }
+.jic-page-backdrop img { width:100%;height:100%;object-fit:cover;object-position:50% 55%; }
+.jic-page-backdrop::after { content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,9,15,.2),rgba(3,9,15,.28) 48%,rgba(3,9,15,.58)); }
+html[data-theme][data-surface] .jic-home-route :is(.jic-public-main,.jic-premium-home,.jic-feature-grid,.jic-upcoming-events,.jic-hero) { background:transparent!important; }
+html[data-theme][data-surface] .jic-home-route .jic-hero { border-radius:0!important; }
+html[data-theme][data-surface] .jic-home-route .jic-hero-overlay { background:transparent!important; }
+html[data-theme][data-surface] .jic-home-route :is(.jic-feature-card.is-glass-only,.jic-event-strip,.jic-home-footer-strip,.jic-event-card,.jic-live-section,footer) {
+  background:var(--jic-glass-surface)!important;color:var(--jic-text)!important;border:1px solid var(--jic-glass-border)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(145%);backdrop-filter:blur(22px) saturate(145%);
+  box-shadow:inset 0 1px 0 #ffffff24,0 8px 28px #0002;
+}
+html[data-theme][data-surface] .jic-home-route .jic-home-footer-strip { margin:16px auto 24px;padding:18px 20px;width:calc(100% - 28px);border-radius:20px; }
+html[data-theme][data-surface] .jic-home-route .jic-upcoming-events>h2 { color:#fff;text-shadow:0 2px 10px #000b; }
+html[data-theme][data-surface="solid"] .jic-home-route :is(.jic-feature-card.is-glass-only,.jic-event-strip,.jic-home-footer-strip,.jic-event-card,.jic-live-section,footer) {
+  background:var(--jic-surface)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+}
+@media(max-width:767px) {
+  .jic-page-backdrop img { object-position:55% 50%; }
+  html[data-theme][data-surface] .jic-home-route .jic-hero-inner { min-height:400px!important; }
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  html[data-theme] { --jic-glass-surface:var(--jic-surface);--jic-glass-surface-strong:var(--jic-surface); }
 }

@@ -22,10 +22,14 @@ Base: main, 01a3e72. This change is intended for jicuser/website main.
 - Radio controls are labelled Radio with play/pause/loading/error logic. Playback itself is not verified.
 - Visit the Centre targets /contact#map; ScrollToTop includes hash handling.
 - One Download phone wallpaper action uses monthly timetable data and produces JPEG. Actual downloading/layout remains unverified.
-- Current logo is /jic-logo-horizontal.svg. Header/footer placement exists; the earlier persistent lower-left logo behaviour is NOT implemented by this patch and still needs reconciling with the latest approved logo design.
+- Current logo is /jic-logo-horizontal.svg. The user cancelled the lower-logo requirement; do not add floating lower-left logos.
 - Existing admin route protection and content/image editing remain except homepage photo selection noted above. No authenticated editing/upload test, staff invitation, Edge Function, I'tikaf submission, or live Supabase data verification was performed.
 
 ## Remaining verification
+Authenticated admin checks are deferred at the user’s request until after their initial testing. Do not request authentication before then.
 The remote browser rejected the local preview URL with ERR_BLOCKED_BY_CLIENT. No before/after browser screenshots or visual sign-off are claimed. Local UI preview had placeholder configuration only, not production Supabase credentials; build output is not deployed from this workspace.
 
 On the deployed site, check 375/390/430px, tablet and desktop, both themes and glass modes; photo loading/crop, button text, menu open/close and scroll, current-tab contrast, light live card and scroll arrow. Check iPhone Safari explicitly. Verify related destinations and real timetable/radio/admin behaviour. Preserve Hostinger's existing build-time environment variables. Confirm deployment separately from Git push.
+
+## Follow-up: full-page background
+The next user reference requested continuous photography across the entire homepage. The photo now lives in MainLayout as a fixed, decorative homepage backdrop, behind the header, hero, lower cards and footer. The separate hero image was removed, solid page wrappers cleared, and lower cards/footer given theme-aware glass surfaces. Solid mode retains the photo with opaque cards. Internal routes keep their existing backgrounds. The existing approved photo is reused; this implements the background treatment, not every layout detail in the reference. Browser access remains blocked, so crop/contrast/scroll behaviour on iPhone and desktop still needs visual sign-off.

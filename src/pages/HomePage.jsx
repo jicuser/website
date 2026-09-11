@@ -6,7 +6,6 @@ import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useContent } from '@/context/ContentContext';
-import { IMAGES } from '@/content/images';
 import { supabase } from '@/lib/supabaseClient';
 import { londonDate } from '@/lib/timetable';
 import { cn } from '@/lib/utils';
@@ -50,12 +49,10 @@ function useHomeTiles(){
 export default function HomePage(){
   const{events,announcement,livestream,whatsapp}=useHomeLiveContent();const cards=useHomeTiles();const{jummahTimes}=usePrayerTimes();const{getContent}=useContent();
   let hero={};try{hero=JSON.parse(getContent('page:/','{}'));}catch{}
-  const heroImage=IMAGES.homeHero;
   const liveUrl=safeWebUrl(livestream?.stream_url)||SITE.socials.youtube;const embedUrl=useMemo(()=>youtubeEmbedUrl(livestream?.stream_url),[livestream]);
 
   return <div className="jic-premium-home">
     <section className="jic-hero">
-      <img className="jic-hero-photo" src={heroImage} alt="" fetchpriority="high" width="1150" height="1098"/>
       <div className="jic-hero-overlay"/>
       <div className="jic-hero-inner">
         <div className="jic-hero-mobile-logo"><JamatiaLogo/></div>

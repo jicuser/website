@@ -5,6 +5,7 @@ import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import {overviewPaths} from '@/content/editablePages';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
+import { IMAGES } from '@/content/images';
 import RelatedContent from '@/components/RelatedContent';
 import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
@@ -19,6 +20,7 @@ export default function MainLayout() {
 
   return (
     <div className={`flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview?'is-admin-preview':''}`}>
+      {isHome && <div className="jic-page-backdrop" aria-hidden="true"><img src={IMAGES.homeHero} alt="" fetchpriority="high" width="1150" height="1098"/></div>}
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
         <motion.div
