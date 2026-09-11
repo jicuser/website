@@ -70,6 +70,9 @@ export default function App() {
           <Route path="worship/daily-salah" element={<WorshipPage />} />
 
           <Route path="services" element={<ServicesPage />} />
+          <Route path="services/religious" element={<ServicesPage />} />
+          <Route path="services/education" element={<ServicesPage />} />
+          <Route path="services/community" element={<ServicesPage />} />
           <Route path="services/hall-booking" element={<HallBookingPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
