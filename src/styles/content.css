@@ -301,6 +301,26 @@ html[data-theme] .jic-radio-player-page {
   color: #fff;
   text-shadow: 0 2px 12px #0008;
 }
+/* The home page uses a compact poster row on laptops; each image still opens the viewer. */
+@media (min-width: 1024px) {
+  .jic-home-route .jic-programmes {
+    margin: 0 auto 24px;
+  }
+  .jic-home-route .jic-programmes .jic-swipe-rail {
+    grid-auto-columns: 160px;
+    gap: 12px;
+  }
+  .jic-home-route .jic-programmes :is(.jic-programme-copy, .jic-rail-controls),
+  .jic-home-route .jic-programmes .jic-poster-button > span {
+    display: none;
+  }
+  .jic-home-route .jic-programmes .jic-poster-button {
+    padding: 6px;
+  }
+  .jic-home-route .jic-programmes .jic-poster-button img {
+    height: 200px;
+  }
+}
 @media (max-width: 767px) {
   .jic-swipe-rail {
     grid-auto-columns: minmax(250px, 84%);

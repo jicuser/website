@@ -27,6 +27,8 @@ Normal responsive and theme rules are intentional. A desktop size, a mobile size
 
 The header and navigation menu select the lettering-only logo with `<JamatiaLogo variant="wordmark" />` in `src/components/shell/UnifiedHeader.jsx`. The shared logo component chooses the light or dark SVG from `public/brand/`. Change the variant at its point of use when changing one placement; keep logo sizing in the existing `header.css` rules.
 
+Homepage links and tiles use the clear glass inset in `home.css`; their appearance is not redefined in `theme.css` or `liquid-glass.css`. At 1024px and wider the hero buttons and tile grid are hidden, and `content.css` shows a compact row of programme posters. Each poster still opens full size. The daily quote's subtle warm tint belongs to its existing button rule in `header.css`.
+
 ## Android and iPhone checks
 
 Check Chrome at 320, 360 and 412 CSS pixels, and Safari on the iPhone. Also check a desktop width around 1440 pixels. Device emulation is useful, but it does not reproduce every phone's font settings or browser behaviour.
@@ -37,6 +39,7 @@ Check Chrome at 320, 360 and 412 CSS pixels, and Safari on the iPhone. Also chec
 - Swipe the section tabs to the last item, select it, and confirm it becomes the current tab.
 - Open and close the menu. Only the menu should scroll while it is open; Escape closes it on a keyboard.
 - Try light/dark mode and glass on/off. Text should stay clear over the photograph.
+- On Home, phone tiles and hero buttons should be translucent with no doubled borders. On a laptop or PC, they should be hidden and the compact posters should open by click or keyboard.
 - Rotate the phone. In short landscape windows the header scrolls with the page to leave room for content.
 - Try 200% text size or zoom. The timetable may scroll sideways instead of clipping or reducing the text.
 - Open `/admin/login` and `/tv179` to check their separate layouts.

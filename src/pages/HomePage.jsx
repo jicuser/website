@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
-import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import useCommunityLink from '@/hooks/useCommunityLink';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import { SITE } from '@/content/site';
@@ -140,11 +139,7 @@ export default function HomePage() {
   return (
     <div className="jic-premium-home">
       <section className="jic-hero">
-        <div className="jic-hero-overlay" />
         <div className="jic-hero-inner">
-          <div className="jic-hero-mobile-logo">
-            <JamatiaLogo />
-          </div>
           <p className="jic-kicker">JAMATIA ISLAMIC CENTRE · BIRMINGHAM</p>
           <h1 style={{ whiteSpace: 'pre-line' }}>
             {hero.title || 'A place for faith.\nA home for community.'}

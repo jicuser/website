@@ -178,37 +178,17 @@ td {
   border-color: var(--jic-border) !important;
 }
 
-html:not(.dark) .jic-feature-grid,
 html:not(.dark) .jic-upcoming-events,
 html:not(.dark) .jic-home-footer-strip {
   background: var(--jic-bg) !important;
   color: var(--jic-text) !important;
 }
-html:not(.dark) .jic-feature-card {
-  background: var(--jic-surface) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-border) !important;
-  box-shadow: 0 8px 30px rgba(11, 20, 32, 0.06) !important;
-}
-html:not(.dark) .jic-feature-card p,
 html:not(.dark) .jic-home-footer-strip small {
   color: var(--jic-text-secondary) !important;
 }
-.jic-card-icon,
 .jic-kicker,
-.jic-gold-rule,
-.jic-feature-card span {
+.jic-gold-rule {
   color: var(--jic-gold) !important;
-}
-.jic-primary-cta {
-  background: var(--jic-gold) !important;
-  color: #0c1930 !important;
-  border-color: var(--jic-gold) !important;
-}
-html:not(.dark) .jic-secondary-cta {
-  background: var(--jic-bg-secondary) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-border) !important;
 }
 
 .jic-hall-kicker {

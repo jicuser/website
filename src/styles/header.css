@@ -416,7 +416,7 @@ html[data-surface='glass'] .jic-unified-menu-donate {
   padding: 11px 14px;
   border: 1px solid var(--jic-glass-border);
   border-radius: 12px;
-  background: var(--jic-glass-surface-strong);
+  background: color-mix(in srgb, var(--jic-glass-surface-strong) 90%, var(--jic-action) 10%);
   color: var(--jic-text);
   box-shadow: var(--jic-glass-shadow);
   backdrop-filter: var(--jic-glass-backdrop);

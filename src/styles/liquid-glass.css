@@ -36,7 +36,6 @@ html[data-theme][data-surface='glass']
 }
 html[data-theme][data-surface='glass']
   :is(
-    .jic-feature-card.is-glass-only,
     .jic-home-footer-strip,
     .jic-site-footer,
     .jic-event-strip,
@@ -104,13 +103,7 @@ html[data-theme][data-surface='glass']
   backdrop-filter: var(--jic-glass-backdrop) !important;
 }
 html[data-theme][data-surface='glass']
-  :is(
-    .jic-primary-cta,
-    .jic-secondary-cta,
-    .jic-footer-donate,
-    .jic-scroll-top,
-    .jic-rail-controls button
-  ) {
+  :is(.jic-footer-donate, .jic-scroll-top, .jic-rail-controls button) {
   background: var(--jic-glass-surface-strong) !important;
   color: var(--jic-glass-ink) !important;
   border: 1px solid var(--jic-glass-border) !important;
@@ -150,8 +143,7 @@ html[data-theme][data-surface='glass'] .jic-footer-socials a svg {
 html[data-theme][data-surface='glass'] :is(.jic-popup-muted, .jic-popup-title, .jic-popup-kicker) {
   color: var(--jic-text) !important;
 }
-html[data-theme][data-surface='glass']
-  :is(.jic-community-join, .jic-footer-socials a, .jic-primary-cta, .jic-secondary-cta):hover {
+html[data-theme][data-surface='glass'] :is(.jic-community-join, .jic-footer-socials a):hover {
   border-color: var(--jic-glass-accent) !important;
 }
 html[data-surface='solid'] {
@@ -166,7 +158,6 @@ html[data-surface='solid'] {
 html[data-theme][data-surface='solid']
   :is(
     .jic-site-footer,
-    .jic-feature-card.is-glass-only,
     .jic-home-footer-strip,
     .jic-event-strip,
     .jic-live-section,
@@ -181,7 +172,6 @@ html[data-theme][data-surface='solid']
     .jic-popup-panel,
     .jic-popup-surface,
     .jic-scroll-top,
-    .jic-secondary-cta,
     .jic-announcement,
     .jic-radio-player-panel
   ) {
@@ -202,8 +192,7 @@ html[data-theme][data-surface='solid'] .jic-site-footer :is(a, p, small) {
   color: var(--jic-text) !important;
   opacity: 1;
 }
-html[data-surface='solid']
-  :is(.jic-site-footer, .jic-image-viewer, .jic-feature-card.is-glass-only) {
+html[data-surface='solid'] :is(.jic-site-footer, .jic-image-viewer) {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
@@ -283,10 +272,6 @@ html[data-theme] .jic-community-join {
   --jic-button-tint: #25d366;
   --jic-button-ink: #052915;
 }
-html[data-theme] .jic-watch-live {
-  --jic-button-tint: #c90000;
-  --jic-button-ink: #ffffff;
-}
 html[data-theme]
   :is(
     .jic-footer-donate,
@@ -305,7 +290,6 @@ html[data-theme][data-surface]
   :is(.jic-public-route)
   :is(
     .jic-community-join,
-    .jic-watch-live,
     .jic-footer-donate,
     .jic-hall-contact a,
     button.bg-primary,
@@ -322,7 +306,6 @@ html[data-theme][data-surface='glass']
   :is(.jic-public-route)
   :is(
     .jic-community-join,
-    .jic-watch-live,
     .jic-footer-donate,
     .jic-hall-contact a,
     button.bg-primary,
@@ -341,8 +324,7 @@ html[data-theme][data-surface='glass']
   backdrop-filter: var(--jic-glass-backdrop) !important;
 }
 @media (hover: hover) and (prefers-reduced-transparency: no-preference) {
-  html[data-theme][data-surface='glass']
-    :is(.jic-community-join, .jic-watch-live, .jic-footer-donate):hover {
+  html[data-theme][data-surface='glass'] :is(.jic-community-join, .jic-footer-donate):hover {
     --jic-button-tint-strength: 92%;
   }
 }
