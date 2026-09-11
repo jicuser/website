@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Heart,
-  House,
+  Home,
   LogIn,
   Mail,
   MapPin,
@@ -333,7 +333,7 @@ export default function UnifiedHeader() {
             ))}
           </nav>
           <div className="jic-free-actions">
-            <Link to="/" className="jic-home-action" aria-label="Home"><House size={20}/></Link>
+            <Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link>
             <button type="button" onClick={() => setMenuOpen(true)} aria-label="Menu" aria-expanded={menuOpen}><Menu size={22}/></button>
           </div>
         </div>
