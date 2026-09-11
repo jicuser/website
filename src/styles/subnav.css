@@ -1,8 +1,8 @@
 /* Contextual section tabs: clean glass navigation with underline + active highlight. */
-.jic-unified-subnav{
+html[data-theme] .jic-unified-subnav{
   display:flex;
   align-items:center;
-  justify-content:safe center;
+  justify-content:flex-start;
   gap:6px;
   overflow-x:auto;
   overscroll-behavior-inline:contain;
@@ -12,6 +12,11 @@
   background:transparent;
 }
 .jic-unified-subnav::-webkit-scrollbar{display:none}
+/* Auto margins centre the whole row when it fits, and collapse on overflow.
+   The first and last tabs remain reachable by touch on narrow screens. */
+.jic-unified-subnav>:first-child{margin-inline-start:auto}
+.jic-unified-subnav>:last-child{margin-inline-end:auto}
+html[data-theme] :is(.jic-home-route,.jic-inner-route) [role="tablist"]{margin-inline:auto}
 
 .jic-unified-subnav-link{
   position:relative;
@@ -58,10 +63,6 @@
   border-radius:999px;
   background:var(--jic-gold);
   box-shadow:0 0 8px color-mix(in srgb,var(--jic-gold) 32%,transparent);
-}
-
-@media(max-width:1024px){
-  .jic-unified-subnav{justify-content:flex-start}
 }
 
 @media(max-width:767px){

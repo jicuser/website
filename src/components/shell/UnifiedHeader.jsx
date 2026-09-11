@@ -41,8 +41,13 @@ export default function UnifiedHeader() {
   useEffect(() => { setMenuOpen(false); setMobileGroup(null); }, [pathname]);
   useEffect(() => {
     const openDonation = () => { setMenuOpen(false); setDonationOpen(true); };
+    const openMenu = () => { setMobileGroup(null); setMenuOpen(true); };
     window.addEventListener('jic-open-donation', openDonation);
-    return () => window.removeEventListener('jic-open-donation', openDonation);
+    window.addEventListener('jic-open-menu', openMenu);
+    return () => {
+      window.removeEventListener('jic-open-donation', openDonation);
+      window.removeEventListener('jic-open-menu', openMenu);
+    };
   }, []);
   useEffect(() => {
     const node = headerRef.current;
@@ -52,8 +57,18 @@ export default function UnifiedHeader() {
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
-    const current = subnavRef.current?.querySelector('[aria-current="page"]');
-    if (current) subnavRef.current.scrollLeft = Math.max(0, current.offsetLeft - subnavRef.current.offsetLeft - 12);
+    const nav = subnavRef.current;
+    if (!nav) return undefined;
+    const centreCurrent = () => {
+      const current = nav.querySelector('[aria-current="page"]');
+      if (!current || nav.scrollWidth <= nav.clientWidth) { nav.scrollLeft = 0; return; }
+      const offset = current.getBoundingClientRect().left - nav.getBoundingClientRect().left;
+      nav.scrollLeft = Math.max(0, nav.scrollLeft + offset - (nav.clientWidth - current.offsetWidth) / 2);
+    };
+    centreCurrent();
+    const observer = new ResizeObserver(centreCurrent);
+    observer.observe(nav);
+    return () => observer.disconnect();
   }, [pathname]);
   useEffect(() => {
     if (!menuOpen) return undefined;

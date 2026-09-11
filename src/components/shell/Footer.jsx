@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Menu } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import { SITE } from '@/content/site';
 import useCommunityLink from '@/hooks/useCommunityLink';
@@ -32,11 +32,13 @@ export default function Footer() {
   const whatsapp = useCommunityLink();
   const year = new Date().getFullYear();
   const openDonation = () => window.dispatchEvent(new CustomEvent('jic-open-donation'));
+  const openMenu = () => window.dispatchEvent(new CustomEvent('jic-open-menu'));
   return (
     <footer className="jic-site-footer jic-site-footer-compact jic-footer-refined">
       <div className="container mx-auto px-4 py-5 md:py-7">
         <div className="jic-footer-compact-grid">
           <nav className="jic-footer-links-inline" aria-label="Footer links">
+            <button type="button" className="jic-footer-menu-toggle" onClick={openMenu} aria-haspopup="dialog" aria-controls="jic-site-menu"><Menu size={18} aria-hidden="true"/>Menu</button>
             {QUICK_LINKS.map(({ label, to }) => <Link key={to} to={to}>{label}</Link>)}
           </nav>
           <div className="jic-footer-actions-compact">

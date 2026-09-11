@@ -106,13 +106,13 @@ html[data-theme][data-surface=glass] .jic-site-footer :is(a,p,small,.jic-footer-
 }
 html[data-theme][data-surface=glass] .jic-footer-links-inline a { font-weight:600; }
 html[data-theme][data-surface=glass] .jic-footer-socials a svg { color:inherit!important; }
-/* Donation is a deliberate teal action in either surface mode. */
+/* Match the identity's copper/light and brass/dark artwork in both surface modes. */
 html[data-theme][data-surface] .jic-footer-refined .jic-footer-donate,
 html[data-theme][data-surface] .jic-unified-menu .jic-unified-menu-donate {
-  background:#0F766E!important;color:#FFFFFF!important;border:1px solid #14948A!important;box-shadow:none!important;
+  background:var(--jic-logo-metal)!important;color:var(--jic-bg)!important;border:1px solid var(--jic-logo-metal)!important;box-shadow:none!important;
 }
 html[data-theme][data-surface] .jic-footer-refined .jic-footer-donate:hover,
-html[data-theme][data-surface] .jic-unified-menu .jic-unified-menu-donate:hover { background:#115E59!important; }
+html[data-theme][data-surface] .jic-unified-menu .jic-unified-menu-donate:hover { background:color-mix(in srgb,var(--jic-logo-metal) 92%,black)!important; }
 html[data-theme][data-surface] .jic-free-actions button.jic-quick-theme {
   background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-radius:0!important;width:36px;min-width:36px;height:44px;color:var(--jic-text)!important;flex-shrink:0;
 }
