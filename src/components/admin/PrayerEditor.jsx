@@ -266,7 +266,7 @@ export default function PrayerEditor() {
                     <tr key={row.d_date}>
                       <td>{row.d_date}</td>
                       {['fajr', 'zuhr', 'asr', 'maghrib', 'isha'].map((key) => (
-                        <td key={key}>{row[`${key}_jamah`]}</td>
+                        <td key={key}>{displayTime(row[`${key}_jamah`])}</td>
                       ))}
                     </tr>
                   ))}

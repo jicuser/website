@@ -127,8 +127,9 @@ export default function TvDisplayPage() {
             <time dateTime={now.toISOString()}>
               {now.toLocaleTimeString('en-GB', {
                 timeZone: 'Europe/London',
-                hour: '2-digit',
+                hour: 'numeric',
                 minute: '2-digit',
+                hourCycle: 'h12',
               })}
             </time>
             <span>

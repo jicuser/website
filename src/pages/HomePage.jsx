@@ -23,6 +23,7 @@ import { useContent } from '@/context/ContentContext';
 import { supabase } from '@/lib/supabaseClient';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
+import { displayTime } from '@/lib/timetable';
 import { cn } from '@/lib/utils';
 
 const DEFAULT_CARDS = [
@@ -210,7 +211,7 @@ export default function HomePage() {
                       year: 'numeric',
                     })}
                   </time>
-                  {event.start_time ? ` · ${event.start_time.slice(0, 5)}` : ''}
+                  {event.start_time ? ` · ${displayTime(event.start_time)}` : ''}
                 </p>
                 {event.location && <p>{event.location}</p>}
                 {event.description && <p>{event.description}</p>}
