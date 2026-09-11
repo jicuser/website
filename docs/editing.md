@@ -25,6 +25,8 @@ CSS custom properties are shared settings. For example, `var(--jic-text)` takes 
 
 Normal responsive and theme rules are intentional. A desktop size, a mobile size and a dark-mode colour are different states. Do not remove them solely because a selector appears more than once. Comments explain non-obvious behaviour and ownership; they should not record a history of attempts or describe a fix as “final”.
 
+The header and navigation menu select the lettering-only logo with `<JamatiaLogo variant="wordmark" />` in `src/components/shell/UnifiedHeader.jsx`. The shared logo component chooses the light or dark SVG from `public/brand/`. Change the variant at its point of use when changing one placement; keep logo sizing in the existing `header.css` rules.
+
 ## Android and iPhone checks
 
 Check Chrome at 320, 360 and 412 CSS pixels, and Safari on the iPhone. Also check a desktop width around 1440 pixels. Device emulation is useful, but it does not reproduce every phone's font settings or browser behaviour.

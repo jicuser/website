@@ -4,14 +4,14 @@ These exports use the approved artwork supplied on 11 September 2026: slender re
 
 | Composition | Use |
 | --- | --- |
-| `horizontal` | Entrance beside lettering: website header, menu, radio and TV |
+| `horizontal` | Entrance beside lettering: home page, radio and TV |
 | `centred` | Full entrance with lettering above the arch |
 | `pillars` | Wide lettering between two pillars |
 | `compact` | Compact lettering between pillars: footer |
 | `arch` | Standalone stone arch and glazed doors |
 | `minaret` | Tall standalone pillar |
 | `minaret-compact` | Compact standalone pillar |
-| `wordmark` | Lettering extracted from the approved master |
+| `wordmark` | Lettering only: website header and navigation menu |
 | `entrance` | Entrance and pillars without lettering: staff login and mosque symbol |
 
 Every composition has SVG and transparent PNG exports. Use `-light` on pale surfaces and `-dark` on dark surfaces. Only the navy lettering becomes pearl in dark mode; stone, glass and finial colours stay unchanged. Preserve the aspect ratio; never apply an image colour filter.

@@ -221,7 +221,7 @@ export default function UnifiedHeader() {
           />
           <div className="jic-free-nav-row">
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
-              <JamatiaLogo variant="horizontal" />
+              <JamatiaLogo variant="wordmark" />
             </Link>
             <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">
               {NAV_GROUPS.map(({ name, path }) => (
@@ -291,7 +291,7 @@ export default function UnifiedHeader() {
         >
           <div className="jic-unified-menu-head">
             <div className="jic-menu-brand">
-              <JamatiaLogo />
+              <JamatiaLogo variant="wordmark" />
             </div>
             <button
               ref={menuCloseRef}
