@@ -5,7 +5,7 @@ export default function JamatiaLogo({ className }) {
   return (
     <div className={cn('brand-lockup', className)}>
       <img
-        src="/jic-logo-horizontal.webp"
+        src="/jic-logo-horizontal.svg"
         alt="Jamatia Islamic Centre"
         decoding="async"
         fetchPriority="high"
