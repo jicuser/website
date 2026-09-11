@@ -36,7 +36,7 @@ export default function Footer() {
   const openDonation = () => window.dispatchEvent(new CustomEvent('jic-open-donation'));
   const openMenu = () => window.dispatchEvent(new CustomEvent('jic-open-menu'));
   return (
-    <footer className="jic-site-footer jic-site-footer-compact jic-footer-refined">
+    <footer className="jic-site-footer">
       <div className="container mx-auto">
         <div className="jic-footer-compact-grid">
           <nav className="jic-footer-links-inline" aria-label="Footer links">
@@ -45,7 +45,7 @@ export default function Footer() {
           </nav>
           <div className="jic-footer-actions-compact">
             <nav className="jic-footer-socials" aria-label="Social media and contact links">
-              <a href={whatsapp} className="jic-whatsapp-action" aria-label="WhatsApp Community"><WhatsAppIcon size={22}/></a>
+              <a href={whatsapp} aria-label="WhatsApp Community"><WhatsAppIcon size={22}/></a>
               {SITE.socials.facebook && <a href={SITE.socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={18}/></a>}
               {SITE.socials.x && <a href={SITE.socials.x} target="_blank" rel="noopener noreferrer" aria-label="X"><XIcon className="h-[18px] w-[18px]"/></a>}
               {SITE.socials.instagram && <a href={SITE.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={18}/></a>}

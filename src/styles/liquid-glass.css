@@ -199,7 +199,7 @@ html[data-theme][data-surface=glass] :is(.jic-public-route,.jic-unified-menu,.ji
   -webkit-backdrop-filter:var(--jic-glass-backdrop)!important;
   backdrop-filter:var(--jic-glass-backdrop)!important;
 }
-html[data-theme] :is(.jic-community-join,.jic-whatsapp-action) {
+html[data-theme] .jic-community-join {
   --jic-button-tint:#25D366;
   --jic-button-ink:#052915;
 }
@@ -216,7 +216,7 @@ html[data-theme] .jic-public-route :is(button.bg-destructive,a.bg-destructive) {
   --jic-button-ink:#FFFFFF;
 }
 html[data-theme][data-surface] :is(.jic-public-route,.jic-unified-menu) :is(
-  .jic-community-join,.jic-whatsapp-action,.jic-watch-live,
+  .jic-community-join,.jic-watch-live,
   .jic-footer-donate,.jic-unified-menu-donate,.jic-hall-contact a,
   button.bg-primary,a.bg-primary,button.bg-destructive,a.bg-destructive
 ) {
@@ -226,7 +226,7 @@ html[data-theme][data-surface] :is(.jic-public-route,.jic-unified-menu) :is(
   box-shadow:none!important;
 }
 html[data-theme][data-surface=glass] :is(.jic-public-route,.jic-unified-menu) :is(
-  .jic-community-join,.jic-whatsapp-action,.jic-watch-live,
+  .jic-community-join,.jic-watch-live,
   .jic-footer-donate,.jic-unified-menu-donate,.jic-hall-contact a,
   button.bg-primary,a.bg-primary,button.bg-destructive,a.bg-destructive
 ) {
@@ -237,7 +237,7 @@ html[data-theme][data-surface=glass] :is(.jic-public-route,.jic-unified-menu) :i
   backdrop-filter:var(--jic-glass-backdrop)!important;
 }
 @media(hover:hover) and (prefers-reduced-transparency:no-preference) {
-  html[data-theme][data-surface=glass] :is(.jic-community-join,.jic-whatsapp-action,.jic-watch-live,.jic-footer-donate,.jic-unified-menu-donate):hover { --jic-button-tint-strength:92%; }
+  html[data-theme][data-surface=glass] :is(.jic-community-join,.jic-watch-live,.jic-footer-donate,.jic-unified-menu-donate):hover { --jic-button-tint-strength:92%; }
 }
 @media(prefers-reduced-transparency:reduce) {
   html[data-theme][data-surface=glass] { --jic-button-tint-strength:100%; }
