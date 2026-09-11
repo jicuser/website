@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import LiquidGlassFilters from '@/components/shell/LiquidGlassFilters';
 
 const AppearanceContext = createContext(null);
 
@@ -45,7 +46,7 @@ export function AppearanceProvider({ children }) {
     toggleGlass: () => setGlassEnabled(current => !current),
   }), [theme, glassEnabled]);
 
-  return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>;
+  return <AppearanceContext.Provider value={value}><LiquidGlassFilters/>{children}</AppearanceContext.Provider>;
 }
 
 export function useAppearance() {

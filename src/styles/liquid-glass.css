@@ -1,6 +1,7 @@
 /* Shared public glass. Background tint only; never fade text, images or logos.
  * Loaded last to prevent legacy solid card styles from repainting the glass. */
 html[data-theme] {
+  --jic-glass-backdrop:blur(16px) saturate(135%);
   --jic-glass-surface:rgba(250,251,253,.62);
   --jic-glass-surface-strong:rgba(250,251,253,.68);
   --jic-glass-inset:rgba(255,255,255,.12);
@@ -8,7 +9,7 @@ html[data-theme] {
   --jic-glass-ink:#081222;
   --jic-glass-secondary:#182537;
   --jic-glass-accent:#47240C;
-  --jic-glass-shadow:0 10px 30px #0713241c,inset 0 1px 0 #ffffff66;
+  --jic-glass-shadow:0 10px 30px #0713241c,inset 1px 1px 1px #ffffffa6,inset -1px -1px 1px #71839933,inset 0 0 12px #ffffff26;
 }
 html[data-theme=dark] {
   --jic-glass-surface:rgba(15,26,43,.68);
@@ -18,7 +19,7 @@ html[data-theme=dark] {
   --jic-glass-ink:#FFFFFF;
   --jic-glass-secondary:#F1F4FA;
   --jic-glass-accent:#FFE6B0;
-  --jic-glass-shadow:0 12px 32px #0000002b,inset 0 1px 0 #ffffff38;
+  --jic-glass-shadow:0 12px 32px #0000002b,inset 1px 1px 1px #ffffff59,inset -1px -1px 1px #04091266,inset 0 0 12px #ffffff0d;
 }
 /* Admin workspaces keep their existing palette. */
 html[data-theme][data-surface=glass] :is(.jic-home-route,.jic-inner-route,.jic-unified-menu,.jic-image-viewer,.jic-popup-panel) {
@@ -41,8 +42,8 @@ html[data-theme][data-surface=glass] :is(
   color:var(--jic-text)!important;
   border-color:var(--jic-glass-border)!important;
   box-shadow:var(--jic-glass-shadow)!important;
-  -webkit-backdrop-filter:blur(24px) saturate(125%)!important;
-  backdrop-filter:blur(24px) saturate(125%)!important;
+  -webkit-backdrop-filter:var(--jic-glass-backdrop)!important;
+  backdrop-filter:var(--jic-glass-backdrop)!important;
 }
 html[data-theme][data-surface=glass] :is(.jic-unified-info,.jic-free-nav-row,.jic-unified-menu,.jic-image-viewer,.jic-popup-panel,.jic-desktop-nav-dropdown) {
   background:var(--jic-glass-surface-strong)!important;
@@ -52,8 +53,8 @@ html[data-theme][data-surface=glass] :is(.jic-home-route,.jic-inner-route) :is(.
   background:var(--jic-glass-surface)!important;
   color:var(--jic-text)!important;
   border-color:var(--jic-glass-border)!important;
-  -webkit-backdrop-filter:blur(24px) saturate(125%)!important;
-  backdrop-filter:blur(24px) saturate(125%)!important;
+  -webkit-backdrop-filter:var(--jic-glass-backdrop)!important;
+  backdrop-filter:var(--jic-glass-backdrop)!important;
 }
 /* Inset controls share their parent's tint instead of stacking opaque boxes. */
 html[data-theme][data-surface=glass] :is(
@@ -68,16 +69,16 @@ html[data-theme][data-surface=glass] :is(
   color:var(--jic-text)!important;
   border-color:var(--jic-glass-border)!important;
   box-shadow:inset 0 1px 0 #ffffff26!important;
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
+  -webkit-backdrop-filter:var(--jic-glass-backdrop)!important;
+  backdrop-filter:var(--jic-glass-backdrop)!important;
 }
 html[data-theme][data-surface=glass] :is(.jic-primary-cta,.jic-secondary-cta,.jic-footer-donate,.jic-unified-menu-donate,.jic-unified-subnav-link,.jic-scroll-top,.jic-rail-controls button) {
   background:var(--jic-glass-surface-strong)!important;
   color:var(--jic-glass-ink)!important;
   border:1px solid var(--jic-glass-border)!important;
   box-shadow:var(--jic-glass-shadow)!important;
-  -webkit-backdrop-filter:blur(24px) saturate(125%)!important;
-  backdrop-filter:blur(24px) saturate(125%)!important;
+  -webkit-backdrop-filter:var(--jic-glass-backdrop)!important;
+  backdrop-filter:var(--jic-glass-backdrop)!important;
 }
 html[data-theme][data-surface=glass] .jic-unified-subnav-link.is-current {
   background:var(--jic-glass-surface-strong)!important;
@@ -89,6 +90,8 @@ html[data-theme][data-surface=glass] :is(.jic-home-route,.jic-inner-route) :is(i
   background:var(--jic-glass-inset)!important;
   color:var(--jic-text)!important;
   border-color:var(--jic-glass-secondary)!important;
+  -webkit-backdrop-filter:var(--jic-glass-backdrop)!important;
+  backdrop-filter:var(--jic-glass-backdrop)!important;
 }
 html[data-theme][data-surface=glass] select option { background:var(--jic-surface);color:var(--jic-glass-ink); }
 html[data-theme][data-surface=glass] :is(.jic-home-route,.jic-inner-route) .bg-primary {
@@ -158,5 +161,33 @@ html[data-surface=solid] :is(.jic-unified-info,.jic-free-nav-row,.jic-site-foote
   html[data-theme] { --jic-glass-surface:var(--jic-surface);--jic-glass-surface-strong:var(--jic-surface); }
 }
 @media(prefers-reduced-transparency:reduce) {
-  html[data-theme] { --jic-glass-surface:var(--jic-surface);--jic-glass-surface-strong:var(--jic-surface);--jic-glass-inset:var(--jic-surface); }
+  html[data-theme] { --jic-glass-surface:var(--jic-surface);--jic-glass-surface-strong:var(--jic-surface);--jic-glass-inset:var(--jic-surface);--jic-glass-backdrop:none; }
+}
+.jic-glass-filter-defs { position:absolute;pointer-events:none;overflow:hidden; }
+/* Progressive enhancement: retain frosted glass when URL filters are unsupported.
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter
+ */
+@supports (backdrop-filter:url("#jic-liquid-refraction")) {
+  @media(prefers-reduced-transparency:no-preference) {
+    html[data-theme][data-surface=glass] { --jic-glass-backdrop:url("#jic-liquid-refraction") blur(10px) saturate(135%); }
+  }
+}
+html[data-theme][data-surface=glass] :is(.jic-community-join,.jic-footer-socials a,.jic-unified-subnav-link,.jic-rail-controls button) {
+  transition:border-radius .24s ease,box-shadow .24s ease,border-color .24s ease;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference) {
+  html[data-theme][data-surface=glass] :is(.jic-community-join,.jic-footer-socials a,.jic-unified-subnav-link,.jic-rail-controls button):hover {
+    border-radius:18px 14px 18px 14px;box-shadow:var(--jic-glass-shadow)!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  html[data-theme][data-surface=glass] { --jic-glass-backdrop:blur(16px) saturate(125%); }
+  html[data-theme][data-surface=glass] :is(.jic-community-join,.jic-footer-socials a,.jic-unified-subnav-link,.jic-rail-controls button) { transition:none!important; }
+}
+@media(prefers-reduced-transparency:reduce) {
+  html[data-theme][data-surface=glass] { --jic-glass-backdrop:none; }
+}
+@media(max-width:600px) {
+  html[data-theme] .jic-prayer-legend { flex-wrap:wrap;gap:4px 10px; }
+  .jic-prayer-countdown { flex-shrink:1; }
 }
