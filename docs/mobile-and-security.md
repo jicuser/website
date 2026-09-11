@@ -2,9 +2,9 @@
 
 ## Editing the mobile layout
 
-`src/components/shell/UnifiedHeader.jsx` owns the Back, Menu, Donate and theme actions. `src/styles/header.css` owns their layout. Below 768px they stay at the bottom with safe-area spacing; the desktop actions are hidden there so there is one visible set. Back uses in-app history, with Home as the fallback. The wordmark remains in normal document flow.
+`src/components/shell/UnifiedHeader.jsx` owns the Back, Menu, Donate and theme actions. `src/styles/header.css` owns their layout. Below 768px Back, Donate and the labelled theme action stay at the bottom with safe-area spacing. The teal burger stays at the top right below the prayer strip. Desktop actions are hidden on phones so there is one visible set. The burger opens a compact text dropdown with independent arrows for subpages, Escape/outside-click dismissal and native dialog focus handling. Back uses in-app history, with Home as the fallback. The wordmark remains in normal document flow.
 
-`src/components/shell/DailyReminder.jsx` owns quote selection and scrolling behaviour. On phones the reminder stays below the prayer strip, fades out during document scrolling and returns with the next reminder after 700ms of inactivity. Its space remains reserved to avoid jumps. Keyboard focus keeps it visible; reduced-motion preferences remove the fade. Desktop interactions are unchanged. Curated text lives in `src/content/reminders.js`; admin content can add reminders.
+`src/components/shell/DailyReminder.jsx` owns quote selection and scrolling behaviour. On phones the reminder stays below the prayer strip with space reserved to its right for the burger, fades out during document scrolling and returns with the next reminder after 700ms of inactivity. Its space remains reserved to avoid jumps. Keyboard focus keeps it visible; reduced-motion preferences remove the fade. Desktop interactions are unchanged. Curated text lives in `src/content/reminders.js`; admin content can add reminders.
 
 ## Protections reviewed
 

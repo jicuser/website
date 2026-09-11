@@ -83,10 +83,12 @@
   min-height: 44px;
   width: min(300px, 100%);
   padding: 0 22px;
-  border: 1px solid var(--jic-logo-metal);
+  --jic-button-tint: #d1d5db;
+  --jic-button-ink: #111827;
+  border: 1px solid var(--jic-button-tint);
   border-radius: 16px;
-  background: var(--jic-logo-metal);
-  color: var(--jic-bg);
+  background: var(--jic-button-tint);
+  color: var(--jic-button-ink);
   font-size: 16px;
   font-weight: 800;
 }

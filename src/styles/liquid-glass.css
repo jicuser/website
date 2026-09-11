@@ -273,12 +273,7 @@ html[data-theme] .jic-community-join {
   --jic-button-ink: #052915;
 }
 html[data-theme]
-  :is(
-    .jic-footer-donate,
-    .jic-hall-contact a,
-    .jic-public-route button.bg-primary,
-    .jic-public-route a.bg-primary
-  ) {
+  :is(.jic-hall-contact a, .jic-public-route button.bg-primary, .jic-public-route a.bg-primary) {
   --jic-button-tint: var(--jic-logo-metal);
   --jic-button-ink: var(--jic-bg);
 }

@@ -241,11 +241,13 @@ export default function UnifiedHeader() {
             <div className="jic-free-actions">
               <button
                 type="button"
+                className="jic-theme-action"
                 onClick={toggleTheme}
                 aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
                 title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}
               >
                 {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+                <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
               </button>
               <Link to="/" aria-label="Home">
                 <Home size={20} />
@@ -253,6 +255,7 @@ export default function UnifiedHeader() {
               <button
                 type="button"
                 onClick={() => setMenuOpen(true)}
+                className="jic-menu-trigger"
                 aria-label="Open navigation menu"
                 aria-expanded={menuOpen}
                 aria-controls="jic-site-menu"
@@ -289,17 +292,8 @@ export default function UnifiedHeader() {
           <ArrowLeft size={21} aria-hidden="true" />
           <span>Back</span>
         </button>
-        <button
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          aria-expanded={menuOpen}
-          aria-controls="jic-site-menu"
-        >
-          <Menu size={21} aria-hidden="true" />
-          <span>Menu</span>
-        </button>
         <button type="button" onClick={() => setDonationOpen(true)}>
-          <Heart size={21} aria-hidden="true" />
+          <Heart className="jic-donate-heart" size={21} aria-hidden="true" />
           <span>Donate</span>
         </button>
         <button
@@ -312,9 +306,19 @@ export default function UnifiedHeader() {
           ) : (
             <Moon size={21} aria-hidden="true" />
           )}
-          <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
         </button>
       </nav>
+      <button
+        type="button"
+        className="jic-mobile-menu-trigger jic-menu-trigger"
+        onClick={() => setMenuOpen(true)}
+        aria-label="Open navigation menu"
+        aria-expanded={menuOpen}
+        aria-controls="jic-site-menu"
+      >
+        <Menu size={23} aria-hidden="true" />
+      </button>
       {radioError && (
         <span className="sr-only" role="status">
           Radio could not start. Press Radio to retry.
@@ -327,11 +331,20 @@ export default function UnifiedHeader() {
           className="jic-unified-menu"
           aria-label="Navigation menu"
           onCancel={() => setMenuOpen(false)}
+          onClick={(event) => {
+            if (event.target !== event.currentTarget) return;
+            const bounds = event.currentTarget.getBoundingClientRect();
+            if (
+              event.clientX < bounds.left ||
+              event.clientX > bounds.right ||
+              event.clientY < bounds.top ||
+              event.clientY > bounds.bottom
+            )
+              setMenuOpen(false);
+          }}
         >
           <div className="jic-unified-menu-head">
-            <div className="jic-menu-brand">
-              <JamatiaLogo variant="wordmark" />
-            </div>
+            <strong>Menu</strong>
             <button
               ref={menuCloseRef}
               type="button"
@@ -342,15 +355,6 @@ export default function UnifiedHeader() {
             </button>
           </div>
           <div className="jic-unified-menu-scroll">
-            <div className="jic-menu-appearance">
-              <button type="button" onClick={toggleTheme}>
-                {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}{' '}
-                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-              </button>
-              <button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}>
-                <Sparkles size={17} /> Glass {glassEnabled ? 'on' : 'off'}
-              </button>
-            </div>
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
                 {[
@@ -404,6 +408,15 @@ export default function UnifiedHeader() {
                 })}
               </ul>
             </nav>
+            <div className="jic-menu-appearance">
+              <button type="button" onClick={toggleTheme}>
+                {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}{' '}
+                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+              </button>
+              <button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}>
+                <Sparkles size={17} /> Glass {glassEnabled ? 'on' : 'off'}
+              </button>
+            </div>
             <div className="jic-menu-bottom-actions">
               <Link
                 to="/admin/login"
@@ -421,7 +434,7 @@ export default function UnifiedHeader() {
                   setDonationOpen(true);
                 }}
               >
-                <Heart size={18} />
+                <Heart className="jic-donate-heart" size={18} aria-hidden="true" />
                 Donate
               </button>
             </div>
