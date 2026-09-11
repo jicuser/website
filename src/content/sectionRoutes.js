@@ -20,7 +20,7 @@ export const standaloneSections = [
   ['projects/how-to-support','Projects','Support Projects','/projects'],
   ['madrassah/contact','Madrassah','Contact the Madrassah','/madrassah'],
   ['madrassah/policies','Madrassah','Policies','/madrassah'],
-  ['madrassah/student-portal','Education','Student Portal','/madrassah'],
+  ['madrassah/student-portal','Education','Student Portal','/education'],
   ['youth/projects','Youth','Youth Projects','/youth'],
   ['youth/activities','Youth','Activities','/youth'],
   ['youth/trips-events','Youth','Trips & Events','/youth'],
