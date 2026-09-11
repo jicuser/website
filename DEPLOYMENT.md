@@ -1,6 +1,7 @@
 # JIC production deployment
 
 ## 1. Supabase database/security
+
 1. Back up the existing Supabase database.
 2. Run `supabase/production_schema.sql` in the Supabase SQL Editor.
 3. Create or identify the trusted owner in Supabase Authentication.
@@ -17,7 +18,9 @@
 Do not put `SUPABASE_SERVICE_ROLE_KEY` in Hostinger or any `VITE_*` browser variable. It belongs only in Supabase server-side functions.
 
 ## 2. Hostinger environment variables
+
 Configure the build environment with:
+
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 - optional `VITE_ITIKAAF_SHEETS_WEBHOOK_URL`
@@ -25,6 +28,7 @@ Configure the build environment with:
 The anon key is designed for browser use; Row Level Security is what protects data.
 
 ## 3. GitHub -> Hostinger
+
 Recommended production branch: `main`.
 
 Build:
@@ -37,6 +41,7 @@ Publish/output directory:
 The included `public/.htaccess` is copied into `dist` and provides SPA route fallback on Apache-compatible Hostinger hosting, so `/about`, `/admin`, etc. can be refreshed directly.
 
 ## 4. Smoke test after deploy
+
 - `/` loads normally.
 - `/prayer-times` loads and shows database rows for today/month.
 - `/admin` redirects public users away.
@@ -50,4 +55,5 @@ The included `public/.htaccess` is copied into `dist` and provides SPA route fal
 - Check audit log records the change.
 
 ## 5. Daily operation
+
 Normal event/prayer/announcement/team/livestream changes happen in `/admin`. GitHub deployment is only needed when changing layout, components, or application code.

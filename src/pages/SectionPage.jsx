@@ -43,26 +43,42 @@ export default function SectionPage({
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
       <div className="max-w-3xl">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">{eyebrow}</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+          {eyebrow}
+        </p>
         <ManagedPageContent fallbackTitle={title} fallbackBody={intro} />
 
         {(actions.length > 0 || backTo) && (
           <div className="mt-5 flex flex-wrap gap-2">
-            {actions.map(({ label, to, href, icon: Icon }) => (
+            {actions.map(({ label, to, href, icon: Icon }) =>
               href ? (
-                <a key={label} href={href} className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:border-primary/40">
-                  <Icon size={16}/>{label}
+                <a
+                  key={label}
+                  href={href}
+                  className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:border-primary/40"
+                >
+                  <Icon size={16} />
+                  {label}
                 </a>
               ) : (
-                <Link key={label} to={to} className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:border-primary/40">
-                  <Icon size={16}/>{label}
+                <Link
+                  key={label}
+                  to={to}
+                  className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:border-primary/40"
+                >
+                  <Icon size={16} />
+                  {label}
                 </Link>
-              )
-            ))}
+              ),
+            )}
 
             {backTo && (
-              <Link to={backTo} className="inline-flex items-center gap-2 px-2 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground">
-                <ArrowLeft size={15}/>{backLabel}
+              <Link
+                to={backTo}
+                className="inline-flex items-center gap-2 px-2 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft size={15} />
+                {backLabel}
               </Link>
             )}
           </div>

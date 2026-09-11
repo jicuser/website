@@ -9,7 +9,11 @@
     "preview": "vite preview --host :: --port 3000",
     "lint": "eslint . --quiet",
     "check": "eslint src --ext .js,.jsx",
-    "build:brand": "node scripts/build-brand.mjs && node scripts/build-icons.cjs"
+    "build:brand": "node scripts/build-brand.mjs && node scripts/build-icons.cjs",
+    "test": "node --test tests/*.test.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate": "npm run check && npm test && npm run build"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.1",
@@ -43,6 +47,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "globals": "^15.14.0",
     "postcss": "^8.4.31",
+    "prettier": "3.9.6",
     "sharp": "^0.35.4",
     "tailwindcss": "^3.3.3",
     "vite": "^4.4.5"

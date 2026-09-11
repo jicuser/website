@@ -1,4 +1,9 @@
-const clean = value => value && value !== 'N/A' ? String(value).replace(/^0/, '').replace(/\s?[AP]M$/i, '') : '—';
+const clean = (value) =>
+  value && value !== 'N/A'
+    ? String(value)
+        .replace(/^0/, '')
+        .replace(/\s?[AP]M$/i, '')
+    : '—';
 
 const drawText = (ctx, text, x, y, options = {}) => {
   const { size = 28, weight = 500, align = 'left', color = '#f7f1e3' } = options;
@@ -52,9 +57,23 @@ export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
   ctx.stroke();
 
   // Leave the top ~300px quiet so lock-screen clock/widgets remain readable.
-  drawText(ctx, 'JAMATIA ISLAMIC CENTRE', 645, 340, { size: 27, weight: 750, align: 'center', color: '#dfb650' });
-  drawText(ctx, `${currentMonth} Prayer Times`, 645, 405, { size: 52, weight: 760, align: 'center', color: '#ffffff' });
-  drawText(ctx, 'Birmingham · Begins & Jama‘ah', 645, 459, { size: 24, align: 'center', color: '#9eabb7' });
+  drawText(ctx, 'JAMATIA ISLAMIC CENTRE', 645, 340, {
+    size: 27,
+    weight: 750,
+    align: 'center',
+    color: '#dfb650',
+  });
+  drawText(ctx, `${currentMonth} Prayer Times`, 645, 405, {
+    size: 52,
+    weight: 760,
+    align: 'center',
+    color: '#ffffff',
+  });
+  drawText(ctx, 'Birmingham · Begins & Jama‘ah', 645, 459, {
+    size: 24,
+    align: 'center',
+    color: '#9eabb7',
+  });
 
   const left = 46;
   const right = 46;
@@ -86,9 +105,20 @@ export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
   roundRect(ctx, left + 8, top + 8, tableWidth - 16, headerH - 8, 20);
   ctx.fill();
 
-  drawText(ctx, 'DATE', left + dateW / 2, top + headerH / 2 + 2, { size: 18, weight: 760, align: 'center', color: '#dfb650' });
+  drawText(ctx, 'DATE', left + dateW / 2, top + headerH / 2 + 2, {
+    size: 18,
+    weight: 760,
+    align: 'center',
+    color: '#dfb650',
+  });
   prayers.forEach(([label], index) => {
-    drawText(ctx, label.toUpperCase(), left + dateW + prayerW * index + prayerW / 2, top + headerH / 2 + 2, { size: 18, weight: 760, align: 'center', color: '#dfb650' });
+    drawText(
+      ctx,
+      label.toUpperCase(),
+      left + dateW + prayerW * index + prayerW / 2,
+      top + headerH / 2 + 2,
+      { size: 18, weight: 760, align: 'center', color: '#dfb650' },
+    );
   });
 
   monthlyPrayerTimes.forEach((day, row) => {
@@ -106,18 +136,42 @@ export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
     ctx.stroke();
 
     const dateLabel = `${day.dayName || ''} ${day.day ?? '—'}`.trim();
-    drawText(ctx, dateLabel, left + dateW / 2, y + rowH / 2, { size: 19, weight: 650, align: 'center', color: '#f4f6f8' });
+    drawText(ctx, dateLabel, left + dateW / 2, y + rowH / 2, {
+      size: 19,
+      weight: 650,
+      align: 'center',
+      color: '#f4f6f8',
+    });
 
     prayers.forEach(([, beginsKey, jamahKey], index) => {
       const x = left + dateW + prayerW * index + prayerW / 2;
-      drawText(ctx, `B ${clean(day[beginsKey])}`, x, y + rowH * 0.35, { size: 16, weight: 560, align: 'center', color: '#aeb8c2' });
-      drawText(ctx, jamahKey ? `J ${clean(day[jamahKey])}` : '', x, y + rowH * 0.68, { size: 18, weight: 720, align: 'center', color: '#ffffff' });
+      drawText(ctx, `B ${clean(day[beginsKey])}`, x, y + rowH * 0.35, {
+        size: 16,
+        weight: 560,
+        align: 'center',
+        color: '#aeb8c2',
+      });
+      drawText(ctx, jamahKey ? `J ${clean(day[jamahKey])}` : '', x, y + rowH * 0.68, {
+        size: 18,
+        weight: 720,
+        align: 'center',
+        color: '#ffffff',
+      });
     });
   });
 
   const footerY = Math.min(2660, top + headerH + rows * rowH + 82);
-  drawText(ctx, 'B = Begins   ·   J = Jama‘ah', 645, footerY, { size: 20, align: 'center', color: '#8796a3' });
-  drawText(ctx, 'jicmasjid.org', 645, footerY + 48, { size: 22, weight: 720, align: 'center', color: '#dfb650' });
+  drawText(ctx, 'B = Begins   ·   J = Jama‘ah', 645, footerY, {
+    size: 20,
+    align: 'center',
+    color: '#8796a3',
+  });
+  drawText(ctx, 'jicmasjid.org', 645, footerY + 48, {
+    size: 22,
+    weight: 720,
+    align: 'center',
+    color: '#dfb650',
+  });
 
   return canvas;
 };

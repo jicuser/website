@@ -1,4 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 const AdminSaveContext = createContext(null);
 
@@ -9,36 +17,49 @@ export function AdminSaveProvider({ children }) {
   const [status, setStatus] = useState('');
 
   const refreshSummary = useCallback(() => {
-    const dirtyEntries = [...entriesRef.current.values()].filter(entry => entry.dirty);
+    const dirtyEntries = [...entriesRef.current.values()].filter((entry) => entry.dirty);
     setSummary({
       dirtyCount: dirtyEntries.length,
-      label: dirtyEntries.length === 1 ? dirtyEntries[0].label : dirtyEntries.length > 1 ? 'Save all changes' : 'Save to database',
+      label:
+        dirtyEntries.length === 1
+          ? dirtyEntries[0].label
+          : dirtyEntries.length > 1
+            ? 'Save all changes'
+            : 'Save to database',
     });
   }, []);
 
-  const register = useCallback((id, handler, options = {}) => {
-    entriesRef.current.set(id, {
-      handler,
-      dirty: Boolean(options.dirty),
-      label: options.label || 'Save to database',
-    });
-    refreshSummary();
-    return () => {
-      entriesRef.current.delete(id);
+  const register = useCallback(
+    (id, handler, options = {}) => {
+      entriesRef.current.set(id, {
+        handler,
+        dirty: Boolean(options.dirty),
+        label: options.label || 'Save to database',
+      });
       refreshSummary();
-    };
-  }, [refreshSummary]);
+      return () => {
+        entriesRef.current.delete(id);
+        refreshSummary();
+      };
+    },
+    [refreshSummary],
+  );
 
-  const updateState = useCallback((id, next = {}) => {
-    const current = entriesRef.current.get(id);
-    if (!current) return;
-    entriesRef.current.set(id, {
-      ...current,
-      ...(Object.prototype.hasOwnProperty.call(next, 'dirty') ? { dirty: Boolean(next.dirty) } : {}),
-      ...(next.label ? { label: next.label } : {}),
-    });
-    refreshSummary();
-  }, [refreshSummary]);
+  const updateState = useCallback(
+    (id, next = {}) => {
+      const current = entriesRef.current.get(id);
+      if (!current) return;
+      entriesRef.current.set(id, {
+        ...current,
+        ...(Object.prototype.hasOwnProperty.call(next, 'dirty')
+          ? { dirty: Boolean(next.dirty) }
+          : {}),
+        ...(next.label ? { label: next.label } : {}),
+      });
+      refreshSummary();
+    },
+    [refreshSummary],
+  );
 
   const saveCurrent = useCallback(async () => {
     if (saving) return false;
@@ -66,16 +87,19 @@ export function AdminSaveProvider({ children }) {
     }
   }, [saving, refreshSummary]);
 
-  const value = useMemo(() => ({
-    register,
-    updateState,
-    saveCurrent,
-    dirty: summary.dirtyCount > 0,
-    dirtyCount: summary.dirtyCount,
-    saving,
-    label: summary.label,
-    status,
-  }), [register, updateState, saveCurrent, summary, saving, status]);
+  const value = useMemo(
+    () => ({
+      register,
+      updateState,
+      saveCurrent,
+      dirty: summary.dirtyCount > 0,
+      dirtyCount: summary.dirtyCount,
+      saving,
+      label: summary.label,
+      status,
+    }),
+    [register, updateState, saveCurrent, summary, saving, status],
+  );
 
   return <AdminSaveContext.Provider value={value}>{children}</AdminSaveContext.Provider>;
 }
@@ -94,6 +118,9 @@ export function useRegisterAdminSave(save, dirty, label = 'Save to database') {
 
   const invokeLatest = useCallback(() => saveRef.current(), []);
 
-  useEffect(() => register(idRef.current, invokeLatest, { dirty, label }), [register, invokeLatest]);
+  useEffect(
+    () => register(idRef.current, invokeLatest, { dirty, label }),
+    [register, invokeLatest],
+  );
   useEffect(() => updateState(idRef.current, { dirty, label }), [updateState, dirty, label]);
 }

@@ -1,39 +1,58 @@
 # Jamatia Islamic Centre website
 
-React/Vite website for JIC. See [the brand and mobile handover](BRAND-AND-MOBILE-HANDOVER.md) for completed checks and remaining verification.
+The JIC website uses React and Vite. The public site, staff administration and mosque TV display share the same repository.
 
-## Included in this build
-- Responsive dark/light design with optional glass or solid surfaces
-- Persistent top information bar with address, both Jummah times, and JIC Radio play/pause
-- Official JIC radio stream fallback: `https://jicmosque.radioca.st/stream`
-- Approved stone-and-glass SVG identity with seven light/dark variants; persistent Home and Menu actions
-- Persistent Salah strip with full timetable link
-- Existing Supabase prayer-time, CMS, admin and page foundation preserved
-- Mobile-first navigation with no duplicate Jummah or directions tiles in the header flow
-- Programme poster previews, native sideways content rails and a phone-friendly timetable save flow
+## Edit in GitHub
 
-## Local development
+1. Open **Code → Codespaces → Create codespace on the selected branch**.
+2. Wait for the dependencies to install.
+3. Run `npm run dev` in the terminal.
+4. Open **Ports → 3000 → Open in Browser** to see your changes.
+
+The repository includes a Node 24 development container, formatting on save and editor tasks. A Codespace is created only when you choose to start one on GitHub.
+
+For a small text-only code change, press `.` while viewing the repository to open GitHub's browser editor. Use Codespaces when you need to run the website.
+
+## Where to edit
+
+| Change                          | File or area                                                        |
+| ------------------------------- | ------------------------------------------------------------------- |
+| Logo, menu and header           | `src/components/shell/UnifiedHeader.jsx`                            |
+| Six prayer columns              | `src/components/shell/PrayerTimeBar.jsx`                            |
+| Header spacing and mobile sizes | `src/styles/header.css`                                             |
+| Section tabs                    | `src/content/nav.js`, `src/styles/subnav.css`                       |
+| Colours and transparency        | `src/styles/theme.css`, `src/styles/liquid-glass.css`               |
+| Homepage content and layout     | `src/pages/HomePage.jsx`, `src/styles/home.css`                     |
+| Address, phone and radio link   | `src/content/site.js`                                               |
+| Photos                          | `src/content/images.js`                                             |
+| Staff pages                     | `src/pages/admin/`, `src/components/admin/`, `src/styles/admin.css` |
+| Mosque TV                       | `src/pages/TvDisplayPage.jsx`, `src/styles/tv.css`                  |
+
+Use the website's `/admin` area for content it manages. A saved CMS value takes priority over its code fallback. Use GitHub for changes to structure, styling and behaviour.
+
+## Run locally
+
+Use Node 24, as specified in `.nvmrc`.
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-## Production build
-```bash
-npm run build
-```
+Copy `.env.example` to `.env.local` and fill in the browser configuration when connecting to your chosen data environment. Without it, the site can show its fallback content; database-backed features require a configured connection. Never commit `.env.local` or put a service-role key in a `VITE_*` variable.
 
-Hostinger should deploy the generated `dist/` directory for a static Vite deployment, or use its Git deployment workflow if already configured.
-
-## Checks and logo assets
+## Check and save
 
 ```bash
-npm run check
-node --test tests/*.test.mjs
-npm run build:brand
+npm run format
+npm run validate
 ```
 
-[Logo variants and colour guidance](public/brand/README.md) · [Seven-variant contact sheet](public/brand/jic-variations.svg)
+`validate` checks JavaScript, runs the tests and builds `dist/`. Check the preview before committing. A push to the branch connected to Hostinger can trigger deployment; editing a local file alone does not update the public website.
 
-## Environment
-Copy `.env.example` to `.env`. `VITE_RADIO_STREAM_URL` is optional because the official JIC stream is included as a fallback in `src/content/site.js`.
+- [Editing guide](docs/editing.md)
+- [Code map](CODEBASE_MAP.md)
+- [Style ownership](src/styles/README.md)
+- [Deployment](DEPLOYMENT.md)
+- [TV setup](docs/tv-display.md)
+- [Earlier handovers](docs/history/README.md)

@@ -38,44 +38,64 @@ export const WORSHIP_TABS = [
 
 export const NAV_GROUPS = [
   { name: 'Home', path: '/', children: [] },
-  { name: 'About', path: '/about', children: [
-    { name: 'Overview', path: '/about' },
-    { name: 'Meet the Team', path: '/team' },
-    { name: 'Our History', path: '/about/history' },
-    { name: 'Financial History', path: '/financial-history' },
-    { name: 'Contact Us', path: '/contact' },
-  ]},
-  { name: 'Prayer Times', path: '/prayer-times', children: [
-    { name: 'Today', path: '/prayer-times' },
-    { name: 'Monthly Timetable', path: '/prayer-times/monthly' },
-    { name: 'Jummah', path: '/prayer-times/jummah' },
-  ]},
+  {
+    name: 'About',
+    path: '/about',
+    children: [
+      { name: 'Overview', path: '/about' },
+      { name: 'Meet the Team', path: '/team' },
+      { name: 'Our History', path: '/about/history' },
+      { name: 'Financial History', path: '/financial-history' },
+      { name: 'Contact Us', path: '/contact' },
+    ],
+  },
+  {
+    name: 'Prayer Times',
+    path: '/prayer-times',
+    children: [
+      { name: 'Today', path: '/prayer-times' },
+      { name: 'Monthly Timetable', path: '/prayer-times/monthly' },
+      { name: 'Jummah', path: '/prayer-times/jummah' },
+    ],
+  },
   { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
-  { name: 'Services', path: '/services', children: [
-    { name: 'Overview', path: '/services' },
-    { name: 'Religious Services', path: '/services/religious' },
-    { name: 'Educational Programs', path: '/services/education' },
-    { name: 'Community Services', path: '/services/community' },
-    { name: 'Funeral Services', path: '/funerals' },
-    { name: 'Nikah', path: '/services/nikah' },
-    { name: 'Hall Booking', path: '/services/hall-booking' },
-  ]},
-  { name: 'Masjid Building Works', path: '/projects', children: [
-    { name: 'Overview', path: '/projects' },
-    { name: 'Masjid Extension', path: '/projects/masjid-extension' },
-    { name: 'Current Appeals', path: '/projects/current-appeals' },
-    { name: 'Updates & Gallery', path: '/projects/gallery' },
-    { name: 'Support the Works', path: '/projects/how-to-support' },
-  ]},
+  {
+    name: 'Services',
+    path: '/services',
+    children: [
+      { name: 'Overview', path: '/services' },
+      { name: 'Religious Services', path: '/services/religious' },
+      { name: 'Educational Programs', path: '/services/education' },
+      { name: 'Community Services', path: '/services/community' },
+      { name: 'Funeral Services', path: '/funerals' },
+      { name: 'Nikah', path: '/services/nikah' },
+      { name: 'Hall Booking', path: '/services/hall-booking' },
+    ],
+  },
+  {
+    name: 'Masjid Building Works',
+    path: '/projects',
+    children: [
+      { name: 'Overview', path: '/projects' },
+      { name: 'Masjid Extension', path: '/projects/masjid-extension' },
+      { name: 'Current Appeals', path: '/projects/current-appeals' },
+      { name: 'Updates & Gallery', path: '/projects/gallery' },
+      { name: 'Support the Works', path: '/projects/how-to-support' },
+    ],
+  },
   { name: 'Education', path: '/education', children: EDUCATION_TABS },
-  { name: 'Youth', path: '/youth', children: [
-    { name: 'Overview', path: '/youth' },
-    { name: 'Activities', path: '/youth/activities' },
-    { name: "I'tikaf Form", path: '/youth/itikaf' },
-    { name: 'Trips & Events', path: '/youth/trips-events' },
-    { name: 'Volunteering', path: '/youth/volunteering' },
-    { name: 'Classes & Skills', path: '/youth/classes-skills' },
-  ]},
+  {
+    name: 'Youth',
+    path: '/youth',
+    children: [
+      { name: 'Overview', path: '/youth' },
+      { name: 'Activities', path: '/youth/activities' },
+      { name: "I'tikaf Form", path: '/youth/itikaf' },
+      { name: 'Trips & Events', path: '/youth/trips-events' },
+      { name: 'Volunteering', path: '/youth/volunteering' },
+      { name: 'Classes & Skills', path: '/youth/classes-skills' },
+    ],
+  },
 ];
 
 export const NAV_ITEMS = [

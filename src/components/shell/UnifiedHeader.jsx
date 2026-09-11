@@ -1,5 +1,17 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Heart, Home, LogIn, Menu, Moon, Pause, Play, Sparkles, Sun, X, ExternalLink } from 'lucide-react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  Heart,
+  Home,
+  LogIn,
+  Menu,
+  Moon,
+  Pause,
+  Play,
+  Sparkles,
+  Sun,
+  X,
+  ExternalLink,
+} from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
@@ -12,31 +24,56 @@ import { cn } from '@/lib/utils';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
+// Related routes share one group of section links.
 function activeNavigation(pathname) {
-  if (pathname === '/madrassah' || pathname.startsWith('/madrassah/')) return { name: 'Madrassah', children: MADRASSAH_TABS };
-  if (pathname === '/projects/masjid-extension' || MASJID_EXTENSION_TABS.slice(1).some(item => item.path === pathname)) return { name: 'Masjid Extension', children: MASJID_EXTENSION_TABS };
-  if (['/team','/contact','/financial-history'].includes(pathname)) return NAV_GROUPS.find(item => item.name === 'About');
-  if (pathname.startsWith('/funerals')) return NAV_GROUPS.find(item => item.name === 'Services');
-  return NAV_GROUPS.find(item => item.path === '/' ? pathname === '/' : pathname === item.path || pathname.startsWith(`${item.path}/`));
+  if (pathname === '/madrassah' || pathname.startsWith('/madrassah/'))
+    return { name: 'Madrassah', children: MADRASSAH_TABS };
+  if (
+    pathname === '/projects/masjid-extension' ||
+    MASJID_EXTENSION_TABS.slice(1).some((item) => item.path === pathname)
+  )
+    return { name: 'Masjid Extension', children: MASJID_EXTENSION_TABS };
+  if (['/team', '/contact', '/financial-history'].includes(pathname))
+    return NAV_GROUPS.find((item) => item.name === 'About');
+  if (pathname.startsWith('/funerals')) return NAV_GROUPS.find((item) => item.name === 'Services');
+  return NAV_GROUPS.find((item) =>
+    item.path === '/'
+      ? pathname === '/'
+      : pathname === item.path || pathname.startsWith(`${item.path}/`),
+  );
 }
 
 export default function UnifiedHeader() {
   const { pathname } = useLocation();
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
-  const headerRef = useRef(null), audioRef = useRef(null), menuRef = useRef(null), menuCloseRef = useRef(null), subnavRef = useRef(null);
-  const [playing, setPlaying] = useState(false), [radioLoading, setRadioLoading] = useState(false), [radioError, setRadioError] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false), [donationOpen, setDonationOpen] = useState(false);
+  const headerRef = useRef(null),
+    audioRef = useRef(null),
+    menuRef = useRef(null),
+    menuCloseRef = useRef(null),
+    subnavRef = useRef(null);
+  const [playing, setPlaying] = useState(false),
+    [radioLoading, setRadioLoading] = useState(false),
+    [radioError, setRadioError] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false),
+    [donationOpen, setDonationOpen] = useState(false);
   const navigation = useMemo(() => activeNavigation(pathname), [pathname]);
   const subtabs = navigation?.children || [];
-  const selected = subtabs.filter(item => pathname === item.path || pathname.startsWith(`${item.path}/`)).sort((a,b) => b.path.length - a.path.length)[0]?.path;
+  const selected = subtabs
+    .filter((item) => pathname === item.path || pathname.startsWith(`${item.path}/`))
+    .sort((a, b) => b.path.length - a.path.length)[0]?.path;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
 
-  useEffect(() => { setMenuOpen(false); }, [pathname]);
   useEffect(() => {
-    const openDonation = () => { setMenuOpen(false); setDonationOpen(true); };
+    setMenuOpen(false);
+  }, [pathname]);
+  useEffect(() => {
+    const openDonation = () => {
+      setMenuOpen(false);
+      setDonationOpen(true);
+    };
     const openMenu = () => setMenuOpen(true);
     window.addEventListener('jic-open-donation', openDonation);
     window.addEventListener('jic-open-menu', openMenu);
@@ -45,11 +82,17 @@ export default function UnifiedHeader() {
       window.removeEventListener('jic-open-menu', openMenu);
     };
   }, []);
-  useEffect(() => {
+  // Measure before paint so larger phone text cannot sit beneath the header.
+  useLayoutEffect(() => {
     const node = headerRef.current;
-    const update = () => document.documentElement.style.setProperty('--jic-header-height', `${Math.ceil(node.getBoundingClientRect().height)}px`);
+    const update = () =>
+      document.documentElement.style.setProperty(
+        '--jic-header-height',
+        `${Math.ceil(node.getBoundingClientRect().height)}px`,
+      );
     update();
-    const observer = new ResizeObserver(update); observer.observe(node);
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
@@ -57,9 +100,15 @@ export default function UnifiedHeader() {
     if (!nav) return undefined;
     const centreCurrent = () => {
       const current = nav.querySelector('[aria-current="page"]');
-      if (!current || nav.scrollWidth <= nav.clientWidth) { nav.scrollLeft = 0; return; }
+      if (!current || nav.scrollWidth <= nav.clientWidth) {
+        nav.scrollLeft = 0;
+        return;
+      }
       const offset = current.getBoundingClientRect().left - nav.getBoundingClientRect().left;
-      nav.scrollLeft = Math.max(0, nav.scrollLeft + offset - (nav.clientWidth - current.offsetWidth) / 2);
+      nav.scrollLeft = Math.max(
+        0,
+        nav.scrollLeft + offset - (nav.clientWidth - current.offsetWidth) / 2,
+      );
     };
     centreCurrent();
     const observer = new ResizeObserver(centreCurrent);
@@ -68,46 +117,256 @@ export default function UnifiedHeader() {
   }, [pathname]);
   useEffect(() => {
     if (!menuOpen) return undefined;
-    const node = menuRef.current, old = document.body.style.overflow;
-    node.showModal(); document.body.style.overflow = 'hidden';
+    const node = menuRef.current,
+      previousOverflow = document.body.style.overflow;
+    node.showModal();
+    document.body.style.overflow = 'hidden';
     // React autofocus can run before showModal; explicitly focus the visible close control.
-    menuCloseRef.current?.focus({ preventScroll:true });
-    return () => { node.close(); document.body.style.overflow = old; };
+    menuCloseRef.current?.focus({ preventScroll: true });
+    return () => {
+      node.close();
+      document.body.style.overflow = previousOverflow;
+    };
   }, [menuOpen]);
-  useEffect(() => { const audio = audioRef.current; return () => { audio?.pause(); clearRadioMediaSession(); }; }, []);
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => {
+      audio?.pause();
+      clearRadioMediaSession();
+    };
+  }, []);
 
   async function toggleRadio() {
     const audio = audioRef.current;
     if (!audio || !streamUrl) return;
     setRadioError(false);
-    if (!audio.paused) { audio.pause(); return; }
-    try { setRadioLoading(true); await audio.play(); }
-    catch { setPlaying(false); setRadioLoading(false); setRadioError(true); }
+    if (!audio.paused) {
+      audio.pause();
+      return;
+    }
+    try {
+      setRadioLoading(true);
+      await audio.play();
+    } catch {
+      setPlaying(false);
+      setRadioLoading(false);
+      setRadioError(true);
+    }
   }
-  const radioButton = <button type="button" className="jic-radio-flat" data-availability={availability} title={`Station ${availability === 'unknown' ? 'status unavailable' : availability}`} onClick={toggleRadio} disabled={!streamUrl} aria-label={`${playing ? 'Pause' : 'Play'} JIC Radio — station ${availability}${radioError ? ' — retry' : ''}`} aria-pressed={playing}>
-    {playing ? <Pause size={17}/> : <Play size={17}/>}<span>Radio</span><i aria-hidden="true"/><small>{status}</small>
-  </button>;
+  const radioButton = (
+    <button
+      type="button"
+      className="jic-radio-flat"
+      data-availability={availability}
+      title={`Station ${availability === 'unknown' ? 'status unavailable' : availability}`}
+      onClick={toggleRadio}
+      disabled={!streamUrl}
+      aria-label={`${playing ? 'Pause' : 'Play'} JIC Radio — station ${availability}${radioError ? ' — retry' : ''}`}
+      aria-pressed={playing}
+    >
+      {playing ? <Pause size={17} /> : <Play size={17} />}
+      <span>Radio</span>
+      <i aria-hidden="true" />
+      <small>{status}</small>
+    </button>
+  );
 
-  return <>
-    <audio ref={audioRef} src={streamUrl || undefined} preload="none" playsInline onPlaying={() => { setPlaying(true); setRadioLoading(false); setRadioError(false); updateRadioMediaSession(audioRef.current); }} onPause={() => { setPlaying(false); setRadioLoading(false); updateRadioMediaSession(audioRef.current); }} onWaiting={() => setRadioLoading(true)} onError={() => { setPlaying(false); setRadioLoading(false); setRadioError(true); }} aria-hidden="true"/>
-    <header ref={headerRef} className="jic-unified-header fixed inset-x-0 top-0 z-50"><div className="jic-unified-inner">
-      <PrayerTimeBar todaysTimes={todaysTimes} jummahTimes={jummahTimes} currentDate={currentDate} radio={<div className="jic-header-radio">{radioButton}<a href="/radio" target="_blank" rel="noopener noreferrer" aria-label="Open JIC Radio player" title="Open player" onClick={() => audioRef.current?.pause()}><ExternalLink size={15}/></a></div>}/>
-      <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="horizontal"/></Link>
-        <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path}) => <div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path === '/'}>{name}</NavLink></div>)}</nav>
-        <div className="jic-free-actions"><button type="button" className="jic-quick-theme" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}>{theme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="jic-site-menu"><Menu size={22}/></button></div>
-      </div>
-      {subtabs.length > 0 && <nav ref={subnavRef} className="jic-unified-subnav" aria-label={`${navigation.name} sections`}>{subtabs.map(item => <Link key={`${item.path}-${item.name}`} to={item.path} aria-current={item.path === selected ? 'page' : undefined} className={cn('jic-unified-subnav-link', item.path === selected && 'is-current')}>{item.name}</Link>)}</nav>}
-    </div></header>
-    {radioError && <span className="sr-only" role="status">Radio could not start. Press Radio to retry.</span>}
-    {menuOpen && <dialog id="jic-site-menu" ref={menuRef} className="jic-unified-menu" aria-label="Navigation menu" onCancel={() => setMenuOpen(false)}>
-      <div className="jic-unified-menu-head"><div className="jic-menu-brand"><JamatiaLogo/></div><button ref={menuCloseRef} type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><X size={24}/></button></div>
-      <div className="jic-unified-menu-scroll"><div className="jic-menu-appearance"><button type="button" onClick={toggleTheme}>{theme === 'dark' ? <Sun size={17}/> : <Moon size={17}/>} {theme === 'dark' ? 'Light mode' : 'Dark mode'}</button><button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}><Sparkles size={17}/> Glass {glassEnabled ? 'on' : 'off'}</button></div>
-        <nav className="jic-menu-directory" aria-label="All pages">
-          {[...NAV_GROUPS, {name:'Madrassah',path:'/madrassah',children:MADRASSAH_TABS}].map(({name,path,children}) => <div className="jic-unified-menu-group" key={path}><div className="jic-unified-menu-row"><NavLink to={path} end onClick={() => setMenuOpen(false)}>{name}</NavLink></div>{children.length > 0 && <div className="jic-unified-menu-children">{children.filter(child => child.path !== path).map(child => <NavLink end key={`${child.path}-${child.name}`} to={child.path} onClick={() => setMenuOpen(false)}>{child.name}</NavLink>)}</div>}</div>)}
-        </nav>
-        <div className="jic-menu-bottom-actions"><Link to="/admin/login" className="jic-unified-admin-link" onClick={() => setMenuOpen(false)}><LogIn size={17}/>Admin login</Link><button type="button" className="jic-unified-menu-donate" onClick={() => { setMenuOpen(false); setDonationOpen(true); }}><Heart size={18}/>Donate</button></div>
-      </div>
-    </dialog>}
-    <WonderfulDonationModal open={donationOpen} onClose={() => setDonationOpen(false)}/>
-  </>;
+  return (
+    <>
+      <audio
+        ref={audioRef}
+        src={streamUrl || undefined}
+        preload="none"
+        playsInline
+        onPlaying={() => {
+          setPlaying(true);
+          setRadioLoading(false);
+          setRadioError(false);
+          updateRadioMediaSession(audioRef.current);
+        }}
+        onPause={() => {
+          setPlaying(false);
+          setRadioLoading(false);
+          updateRadioMediaSession(audioRef.current);
+        }}
+        onWaiting={() => setRadioLoading(true)}
+        onError={() => {
+          setPlaying(false);
+          setRadioLoading(false);
+          setRadioError(true);
+        }}
+        aria-hidden="true"
+      />
+      <header ref={headerRef} className="jic-unified-header fixed inset-x-0 top-0 z-50">
+        <div className="jic-unified-inner">
+          <PrayerTimeBar
+            todaysTimes={todaysTimes}
+            jummahTimes={jummahTimes}
+            currentDate={currentDate}
+            radio={
+              <div className="jic-header-radio">
+                {radioButton}
+                <a
+                  href="/radio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open JIC Radio player"
+                  title="Open player"
+                  onClick={() => audioRef.current?.pause()}
+                >
+                  <ExternalLink size={15} />
+                </a>
+              </div>
+            }
+          />
+          <div className="jic-free-nav-row">
+            <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
+              <JamatiaLogo variant="horizontal" />
+            </Link>
+            <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">
+              {NAV_GROUPS.map(({ name, path }) => (
+                <div className="jic-desktop-nav-group" key={path}>
+                  <NavLink to={path} end={path === '/'}>
+                    {name}
+                  </NavLink>
+                </div>
+              ))}
+            </nav>
+            <div className="jic-free-actions">
+              <button
+                type="button"
+                className="jic-quick-theme"
+                onClick={toggleTheme}
+                aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+              >
+                {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+              </button>
+              <Link to="/" className="jic-home-action" aria-label="Home">
+                <Home size={20} />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                aria-label="Open navigation menu"
+                aria-expanded={menuOpen}
+                aria-controls="jic-site-menu"
+              >
+                <Menu size={22} />
+              </button>
+            </div>
+          </div>
+          {subtabs.length > 0 && (
+            <nav
+              ref={subnavRef}
+              className="jic-unified-subnav"
+              aria-label={`${navigation.name} sections`}
+            >
+              {subtabs.map((item) => (
+                <Link
+                  key={`${item.path}-${item.name}`}
+                  to={item.path}
+                  aria-current={item.path === selected ? 'page' : undefined}
+                  className={cn('jic-unified-subnav-link', item.path === selected && 'is-current')}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+          )}
+        </div>
+      </header>
+      {radioError && (
+        <span className="sr-only" role="status">
+          Radio could not start. Press Radio to retry.
+        </span>
+      )}
+      {menuOpen && (
+        <dialog
+          id="jic-site-menu"
+          ref={menuRef}
+          className="jic-unified-menu"
+          aria-label="Navigation menu"
+          onCancel={() => setMenuOpen(false)}
+        >
+          <div className="jic-unified-menu-head">
+            <div className="jic-menu-brand">
+              <JamatiaLogo />
+            </div>
+            <button
+              ref={menuCloseRef}
+              type="button"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close navigation menu"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <div className="jic-unified-menu-scroll">
+            <div className="jic-menu-appearance">
+              <button type="button" onClick={toggleTheme}>
+                {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}{' '}
+                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+              </button>
+              <button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}>
+                <Sparkles size={17} /> Glass {glassEnabled ? 'on' : 'off'}
+              </button>
+            </div>
+            <nav className="jic-menu-directory" aria-label="All pages">
+              {[
+                ...NAV_GROUPS,
+                { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
+              ].map(({ name, path, children }) => (
+                <div className="jic-unified-menu-group" key={path}>
+                  <div className="jic-unified-menu-row">
+                    <NavLink to={path} end onClick={() => setMenuOpen(false)}>
+                      {name}
+                    </NavLink>
+                  </div>
+                  {children.length > 0 && (
+                    <div className="jic-unified-menu-children">
+                      {children
+                        .filter((child) => child.path !== path)
+                        .map((child) => (
+                          <NavLink
+                            end
+                            key={`${child.path}-${child.name}`}
+                            to={child.path}
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            {child.name}
+                          </NavLink>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
+            <div className="jic-menu-bottom-actions">
+              <Link
+                to="/admin/login"
+                className="jic-unified-admin-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                <LogIn size={17} />
+                Admin login
+              </Link>
+              <button
+                type="button"
+                className="jic-unified-menu-donate"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setDonationOpen(true);
+                }}
+              >
+                <Heart size={18} />
+                Donate
+              </button>
+            </div>
+          </div>
+        </dialog>
+      )}
+      <WonderfulDonationModal open={donationOpen} onClose={() => setDonationOpen(false)} />
+    </>
+  );
 }

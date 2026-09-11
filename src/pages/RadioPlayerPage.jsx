@@ -15,18 +15,54 @@ export default function RadioPlayerPage() {
     const title = document.title;
     document.title = 'JIC Radio · Jamatia Islamic Centre';
     const audio = audioRef.current;
-    return () => { audio?.pause(); clearRadioMediaSession(); document.title = title; };
+    return () => {
+      audio?.pause();
+      clearRadioMediaSession();
+      document.title = title;
+    };
   }, []);
-  return <main className="jic-radio-player-page jic-public-route jic-inner-route">
-    <PublicBackdrop />
-    <section className="jic-radio-player-panel">
-      <Link to="/" className="jic-player-logo" aria-label="Jamatia Islamic Centre home"><JamatiaLogo/></Link>
-      <img src="/icons/jic-icon-512.png?v=stone-glass-1" width="160" height="160" className="jic-player-artwork" alt="Jamatia Islamic Centre entrance"/>
-      <h1>JIC Radio</h1>
-      <p className="jic-player-status" data-availability={availability}><i aria-hidden="true"/>{availability === 'online' ? 'Station online' : availability === 'offline' ? 'Station offline' : availability === 'checking' ? 'Checking station…' : 'Station status unavailable'}</p>
-      <audio ref={audioRef} src={streamUrl || undefined} controls preload="none" playsInline aria-label="JIC Radio player" onPlaying={() => { setError(false); updateRadioMediaSession(audioRef.current); }} onPause={() => updateRadioMediaSession(audioRef.current)} onError={() => setError(true)}/>
-      {error && <p role="alert">The stream is unavailable. Please try Play again later.</p>}
-      <Link to="/">Return to the website</Link>
-    </section>
-  </main>;
+  return (
+    <main className="jic-radio-player-page jic-public-route jic-inner-route">
+      <PublicBackdrop />
+      <section className="jic-radio-player-panel">
+        <Link to="/" className="jic-player-logo" aria-label="Jamatia Islamic Centre home">
+          <JamatiaLogo />
+        </Link>
+        <img
+          src="/icons/jic-icon-512.png?v=stone-glass-1"
+          width="160"
+          height="160"
+          className="jic-player-artwork"
+          alt="Jamatia Islamic Centre entrance"
+        />
+        <h1>JIC Radio</h1>
+        <p className="jic-player-status" data-availability={availability}>
+          <i aria-hidden="true" />
+          {availability === 'online'
+            ? 'Station online'
+            : availability === 'offline'
+              ? 'Station offline'
+              : availability === 'checking'
+                ? 'Checking station…'
+                : 'Station status unavailable'}
+        </p>
+        <audio
+          ref={audioRef}
+          src={streamUrl || undefined}
+          controls
+          preload="none"
+          playsInline
+          aria-label="JIC Radio player"
+          onPlaying={() => {
+            setError(false);
+            updateRadioMediaSession(audioRef.current);
+          }}
+          onPause={() => updateRadioMediaSession(audioRef.current)}
+          onError={() => setError(true)}
+        />
+        {error && <p role="alert">The stream is unavailable. Please try Play again later.</p>}
+        <Link to="/">Return to the website</Link>
+      </section>
+    </main>
+  );
 }

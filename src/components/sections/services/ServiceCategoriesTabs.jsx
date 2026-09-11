@@ -11,9 +11,10 @@ const ROUTES = {
   community: '/services/community',
 };
 
-const tabFromLocation = location => {
+const tabFromLocation = (location) => {
   if (location.pathname === ROUTES.community || location.hash === '#community') return 'community';
-  if (location.pathname === ROUTES.educational || location.hash === '#educational') return 'educational';
+  if (location.pathname === ROUTES.educational || location.hash === '#educational')
+    return 'educational';
   return 'religious';
 };
 
@@ -27,7 +28,7 @@ const ServiceCategoriesTabs = () => {
     setActiveTab(routeTab);
   }, [routeTab]);
 
-  const handleTabChange = value => {
+  const handleTabChange = (value) => {
     setActiveTab(value);
     navigate(ROUTES[value] || '/services', { replace: false });
   };
@@ -38,9 +39,15 @@ const ServiceCategoriesTabs = () => {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <div className="flex justify-center mb-8">
             <TabsList className="grid grid-cols-1 md:grid-cols-3 w-full max-w-2xl">
-              <TabsTrigger value="religious" className="text-sm md:text-base">Religious Services</TabsTrigger>
-              <TabsTrigger value="educational" className="text-sm md:text-base">Educational Programs</TabsTrigger>
-              <TabsTrigger value="community" className="text-sm md:text-base">Community Services</TabsTrigger>
+              <TabsTrigger value="religious" className="text-sm md:text-base">
+                Religious Services
+              </TabsTrigger>
+              <TabsTrigger value="educational" className="text-sm md:text-base">
+                Educational Programs
+              </TabsTrigger>
+              <TabsTrigger value="community" className="text-sm md:text-base">
+                Community Services
+              </TabsTrigger>
             </TabsList>
           </div>
 

@@ -10,50 +10,48 @@ const EnrollmentForm = () => {
     name: '',
     email: '',
     phone: '',
-    query: ''
+    query: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const { error } = await supabase
-      .from('madrassah_inquiries')
-      .insert([
-        { 
-          name: formData.name, 
-          email: formData.email, 
-          phone: formData.phone, 
-          query: formData.query 
-        }
-      ]);
+    const { error } = await supabase.from('madrassah_inquiries').insert([
+      {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        query: formData.query,
+      },
+    ]);
 
     if (error) {
       toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your form. Please try again.",
-        variant: "destructive",
+        title: 'Submission Failed',
+        description: 'There was an error submitting your form. Please try again.',
+        variant: 'destructive',
       });
       console.error('Error submitting Madrassah form:', error);
     } else {
       toast({
-        title: "Inquiry Sent!",
-        description: "Thank you for your interest. We will get back to you soon.",
+        title: 'Inquiry Sent!',
+        description: 'Thank you for your interest. We will get back to you soon.',
       });
       setFormData({
         name: '',
         email: '',
         phone: '',
-        query: ''
+        query: '',
       });
     }
-    
+
     setIsSubmitting(false);
   };
 
@@ -64,10 +62,15 @@ const EnrollmentForm = () => {
       transition={{ duration: 0.5 }}
       className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-8 w-full max-w-2xl mx-auto"
     >
-      <h3 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">Contact Us for Enrollment</h3>
+      <h3 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
+        Contact Us for Enrollment
+      </h3>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Name *
           </label>
           <input
@@ -82,7 +85,10 @@ const EnrollmentForm = () => {
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Email Address *
           </label>
           <input
@@ -97,7 +103,10 @@ const EnrollmentForm = () => {
           />
         </div>
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="phone"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Phone Number
           </label>
           <input
@@ -111,7 +120,10 @@ const EnrollmentForm = () => {
           />
         </div>
         <div>
-          <label htmlFor="query" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="query"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Your Query *
           </label>
           <textarea

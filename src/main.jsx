@@ -16,7 +16,16 @@ showStatus('Loading website…');
 
 (async () => {
   try {
-    const [ReactModule, ReactDOMModule, RouterModule, AppModule, ToasterModule, AuthModule, ContentModule, AppearanceModule] = await Promise.all([
+    const [
+      ReactModule,
+      ReactDOMModule,
+      RouterModule,
+      AppModule,
+      ToasterModule,
+      AuthModule,
+      ContentModule,
+      AppearanceModule,
+    ] = await Promise.all([
       import('react'),
       import('react-dom/client'),
       import('react-router-dom'),
@@ -53,12 +62,12 @@ showStatus('Loading website…');
                 ContentProvider,
                 null,
                 React.createElement(App),
-                React.createElement(Toaster)
-              )
-            )
-          )
-        )
-      )
+                React.createElement(Toaster),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   } catch (error) {
     console.error('JIC startup error', error);

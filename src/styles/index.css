@@ -3,195 +3,92 @@
 @tailwind utilities;
 
 @layer base {
-  /*
-   * ── LIGHT MODE ─────────────────────────────────────────────
-   * Clean off-white base; teal/green primary suits the Islamic
-   * aesthetic and reads well on both light and dark surfaces.
-   */
   :root {
-    --background:   210 20% 98%;    /* warm white */
-    --foreground:   220 25% 10%;    /* near-black with slight warmth */
-
-    --card:         0 0% 100%;
-    --card-foreground: 220 25% 10%;
-
-    --popover:      0 0% 100%;
-    --popover-foreground: 220 25% 10%;
-
-    --primary:      162 65% 35%;    /* rich teal-green */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary:    210 20% 93%;
-    --secondary-foreground: 220 25% 20%;
-
-    --muted:        210 15% 92%;
-    --muted-foreground: 215 15% 46%;
-
-    --accent:       162 30% 92%;
-    --accent-foreground: 162 65% 25%;
-
-    --destructive:  0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border:       210 20% 88%;
-    --input:        210 20% 88%;
-    --ring:         162 65% 35%;
-
     --radius: 0.5rem;
-
-    /* Chart colours */
-    --chart-1: 162 65% 35%;   /* teal   */
-    --chart-2: 210 70% 50%;   /* blue   */
-    --chart-3: 38  90% 50%;   /* amber  */
-    --chart-4: 280 55% 55%;   /* purple */
-    --chart-5: 0   65% 55%;   /* red    */
+    --chart-1: 162 65% 35%;
+    --chart-2: 210 70% 50%;
+    --chart-3: 38 90% 50%;
+    --chart-4: 280 55% 55%;
+    --chart-5: 0 65% 55%;
   }
-
-  /*
-   * ── DARK MODE ──────────────────────────────────────────────
-   * Deep navy-black base (inspired by GitHub dark), not flat gray.
-   * Keeps the teal primary vivid — it pops beautifully on dark.
-   * Surfaces have subtle warmth to avoid clinical coldness.
-   */
   .dark {
-    --background:   222 47% 7%;     /* deep navy-black  #0d1117 */
-    --foreground:   215 28% 88%;    /* warm near-white  #dce3ef */
-
-    --card:         222 35% 11%;    /* slightly lighter navy #161b27 */
-    --card-foreground: 215 28% 88%;
-
-    --popover:      222 35% 10%;
-    --popover-foreground: 215 28% 88%;
-
-    --primary:      162 60% 48%;    /* brighter teal in dark mode */
-    --primary-foreground: 222 47% 7%;
-
-    --secondary:    222 25% 16%;    /* subtle raised surface */
-    --secondary-foreground: 215 25% 78%;
-
-    --muted:        222 22% 14%;
-    --muted-foreground: 215 16% 55%;
-
-    --accent:       162 30% 18%;    /* tinted teal accent bg */
-    --accent-foreground: 162 60% 68%;
-
-    --destructive:  0 60% 48%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border:       222 20% 20%;    /* visible but subtle border */
-    --input:        222 20% 17%;
-    --ring:         162 60% 48%;
-
-    /* Chart colours — slightly lighter for dark mode readability */
     --chart-1: 162 60% 52%;
     --chart-2: 210 70% 60%;
-    --chart-3: 38  85% 60%;
+    --chart-3: 38 85% 60%;
     --chart-4: 280 55% 65%;
-    --chart-5: 0   60% 60%;
+    --chart-5: 0 60% 60%;
   }
-}
-
-@layer base {
-  * { @apply border-border; }
+  * {
+    @apply border-border;
+  }
+  /* Use the same text scaling in mobile engines; browser zoom still works. */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    min-width: 0;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
-  /* Navbar padding so content isn't under the fixed header */
-  main { padding-top: 12.5rem; }
-  @media (min-width: 768px) { main { padding-top: 13.5rem; } }
-
-  /* Selection colour */
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid var(--jic-gold);
+    outline-offset: 3px;
+  }
   ::selection {
     background: hsl(var(--primary) / 0.25);
     color: hsl(var(--foreground));
   }
 }
-
-/* ── Page transition ─────────────────────────────────────────── */
-.page-transition { @apply min-h-screen; }
-
-/* ── Islamic geometric background pattern ────────────────────── */
-.islamic-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2320b27f' fill-opacity='0.07'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0 20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm-20-10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0-20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM10 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0 20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM30 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0 20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM50 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  background-size: 80px 80px;
+.page-transition {
+  min-height: 100vh;
 }
-.dark .islamic-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2320b27f' fill-opacity='0.12'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0 20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm-20-10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0-20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM10 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0 20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM30 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zm0 20c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM50 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
-
-/* ── Gradient accent for prayer times etc. ───────────────────── */
 .prayer-time-gradient {
-  background: linear-gradient(135deg, hsl(162 65% 35% / 0.85) 0%, hsl(162 65% 25% / 0.6) 100%);
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.18), hsl(var(--primary) / 0.06));
 }
-.dark .prayer-time-gradient {
-  background: linear-gradient(135deg, hsl(162 60% 48% / 0.25) 0%, hsl(162 60% 35% / 0.15) 100%);
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-/* ── Scrollbar ───────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track  { background: hsl(var(--muted) / 0.4); border-radius: 10px; }
-::-webkit-scrollbar-thumb  { background: hsl(var(--primary) / 0.5); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.8); }
-
-/* ── Recharts dark mode text fix ─────────────────────────────── */
-.recharts-text, .recharts-legend-item-text {
-  fill: hsl(var(--foreground)) !important;
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.4);
+  border-radius: 10px;
 }
-.recharts-tooltip-label { color: hsl(var(--foreground)) !important; }
-
-/* ── Edit mode global indicator ──────────────────────────────── */
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.5);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.8);
+}
+.recharts-text,
+.recharts-legend-item-text {
+  fill: hsl(var(--foreground));
+}
+.recharts-tooltip-label {
+  color: hsl(var(--foreground));
+}
 body.edit-mode-active {
-  outline: 2px solid hsl(162 60% 48% / 0.3);
+  outline: 2px solid hsl(var(--primary) / 0.3);
   outline-offset: -2px;
 }
-
-/* ── Dark mode card/surface upgrades ─────────────────────────── */
-.dark .bg-gray-50  { background-color: hsl(222 35% 11%) !important; }
-.dark .bg-gray-100 { background-color: hsl(222 30% 13%) !important; }
-.dark .bg-gray-800 { background-color: hsl(222 30% 14%) !important; }
-.dark .bg-gray-900 { background-color: hsl(222 47%  8%) !important; }
-.dark .bg-white    { background-color: hsl(222 35% 11%) !important; }
-
-/* ── Dark mode border upgrades ───────────────────────────────── */
-.dark .border-gray-200 { border-color: hsl(222 20% 20%) !important; }
-.dark .border-gray-700 { border-color: hsl(222 20% 22%) !important; }
-.dark .border-gray-800 { border-color: hsl(222 20% 17%) !important; }
-
-/* ── Dark mode text upgrades ─────────────────────────────────── */
-.dark .text-gray-400 { color: hsl(215 16% 56%) !important; }
-.dark .text-gray-500 { color: hsl(215 14% 50%) !important; }
-.dark .text-gray-600 { color: hsl(215 18% 62%) !important; }
-.dark .text-gray-700 { color: hsl(215 20% 72%) !important; }
-.dark .text-gray-900 { color: hsl(215 28% 88%) !important; }
-
-/* ── JIC premium persistent header ─────────────────────────── */
-:root { --jic-gold:#d9aa43; --jic-ink:#07111b; }
-.jic-header { color:white; pointer-events:none; }
-.jic-header > div, .jic-header a, .jic-header button { pointer-events:auto; }
-.jic-glass { background:rgba(7,17,27,.72); border:1px solid rgba(255,255,255,.20); box-shadow:0 12px 35px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.10); backdrop-filter:blur(22px) saturate(145%); -webkit-backdrop-filter:blur(22px) saturate(145%); }
-html[data-surface="solid"] .jic-glass { background:#0a1621; backdrop-filter:none; -webkit-backdrop-filter:none; }
-html:not(.dark) .jic-glass { color:#101820; background:rgba(250,248,243,.88); border-color:rgba(20,20,20,.12); }
-html:not(.dark)[data-surface="solid"] .jic-glass { background:#faf8f3; }
-.utility-bar { min-height:46px; }
-.utility-item { min-height:46px; padding:0 18px; display:flex; align-items:center; gap:9px; font-size:13px; border-right:1px solid rgba(255,255,255,.10); }
-.brand-lockup { width:100%; height:auto; display:flex; align-items:center; }
-.brand-lockup img { width:100%; height:auto; display:block; }
-.nav-pill { padding:9px 11px; border-radius:10px; font-size:13px; opacity:.86; transition:.2s; white-space:nowrap; }
-.nav-pill:hover,.nav-pill.active { color:#f0cf78; background:rgba(255,255,255,.06); opacity:1; }
-.donate-button { height:44px; padding:0 18px; border-radius:999px; display:flex; align-items:center; gap:8px; color:#17120a!important; font-weight:700; background:linear-gradient(135deg,#f4d992,#c99736); box-shadow:0 8px 22px rgba(217,170,67,.25); }
-.header-icon { width:42px; height:42px; place-items:center; border-radius:50%; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); }
-.drawer-link,.setting-chip { border-radius:10px; padding:10px 12px; font-size:13px; background:rgba(255,255,255,.05); }
-.setting-chip { display:flex; align-items:center; gap:7px; }
-.prayer-bar { overflow:hidden; }
-.prayer-scroll { min-height:72px; display:flex; align-items:stretch; overflow-x:auto; scrollbar-width:none; }
-.prayer-scroll::-webkit-scrollbar{display:none}.prayer-cell{min-width:112px; flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; border-right:1px solid rgba(255,255,255,.12); padding:8px 12px}.prayer-cell span{font-size:11px;opacity:.72}.prayer-cell strong{font-size:17px;font-weight:500;margin-top:2px}.prayer-cell:first-child strong{color:#f0cf78}.full-timetable{min-width:210px;display:flex;align-items:center;justify-content:center;gap:18px;padding:0 20px;font-size:13px}.full-timetable span{font-size:22px}
-@media(max-width:767px){.utility-item{padding:0 10px;font-size:11px}.main-bar{margin-top:6px!important}.prayer-bar{margin-top:6px!important}.prayer-scroll{min-height:62px}.prayer-cell{min-width:74px;padding:6px}.prayer-cell span{font-size:9px}.prayer-cell strong{font-size:14px}.full-timetable{min-width:150px;font-size:11px}.jic-header .max-w-\[1500px\]{padding-left:6px;padding-right:6px}}
-.jic-home-hero{background:#07111b}.jic-hero-shade{background:linear-gradient(90deg,rgba(3,9,15,.88) 0%,rgba(3,9,15,.62) 42%,rgba(3,9,15,.16) 72%,rgba(3,9,15,.34) 100%)}.jic-display{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.035em}@media(max-width:767px){.jic-home-hero .container{min-height:570px;align-items:flex-end;padding-bottom:56px}.jic-hero-shade{background:linear-gradient(180deg,rgba(3,9,15,.22),rgba(3,9,15,.52) 45%,rgba(3,9,15,.94) 100%)}}
-
-/* ── JIC final responsive header refinements ─────────────────── */
-.utility-scroll{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:stretch;min-width:0}.utility-item{white-space:nowrap}.utility-jummah{justify-content:center}.utility-radio{justify-content:flex-end;border-right:0}.radio-playing{color:#f0cf78}.live-dot{width:7px;height:7px;border-radius:999px;background:#ef4444;box-shadow:0 0 0 0 rgba(239,68,68,.55)}.radio-playing .live-dot{animation:jic-live-pulse 1.8s infinite}.radio-status{text-transform:uppercase;letter-spacing:.12em;font-size:9px;opacity:.62}@keyframes jic-live-pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.48)}70%{box-shadow:0 0 0 7px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
-@media(max-width:767px){main{padding-top:12rem}.utility-bar{min-height:40px}.utility-scroll{display:flex;overflow-x:auto;scrollbar-width:none}.utility-scroll::-webkit-scrollbar{display:none}.utility-item{min-height:40px;padding:0 10px;font-size:10px;flex:0 0 auto}.utility-address{max-width:128px}.utility-jummah{font-size:10px}.utility-jummah b{font-size:10px}.utility-label{display:none}.utility-radio{margin-left:auto}.radio-status{display:none}.main-bar{margin-top:6px!important}.donate-button{width:42px;height:42px;padding:0;justify-content:center}.prayer-bar{margin-top:6px!important}.prayer-scroll{min-height:58px}.prayer-cell{min-width:70px;padding:5px}.prayer-cell span{font-size:9px}.prayer-cell strong{font-size:14px}.full-timetable{min-width:132px;font-size:10px;padding:0 12px}}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

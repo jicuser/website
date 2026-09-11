@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
-import {overviewPaths} from '@/content/editablePages';
+import { overviewPaths } from '@/content/editablePages';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import RelatedContent from '@/components/RelatedContent';
@@ -21,7 +21,9 @@ export default function MainLayout() {
   const isHome = pathname === '/';
 
   return (
-    <div className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview?'is-admin-preview':''}`}>
+    <div
+      className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
+    >
       <PublicBackdrop />
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
@@ -34,7 +36,11 @@ export default function MainLayout() {
           transition={{ duration: 0.15 }}
         >
           <Outlet />
-          {overviewPaths.has(pathname) && <div className="mx-auto max-w-5xl px-4 py-8"><ManagedPageContent optional/></div>}
+          {overviewPaths.has(pathname) && (
+            <div className="mx-auto max-w-5xl px-4 py-8">
+              <ManagedPageContent optional />
+            </div>
+          )}
           <ManagedPageSections />
           {!isHome && <ProgrammePosters />}
           <RelatedContent />

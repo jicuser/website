@@ -54,7 +54,9 @@ export default function MadrassahPage() {
                   <Icon className="h-5 w-5" />
                 </span>
                 <strong className="block text-sm text-foreground md:text-base">{title}</strong>
-                <span className="mt-1 hidden text-xs leading-relaxed text-muted-foreground md:block">{description}</span>
+                <span className="mt-1 hidden text-xs leading-relaxed text-muted-foreground md:block">
+                  {description}
+                </span>
               </Link>
             ))}
           </div>

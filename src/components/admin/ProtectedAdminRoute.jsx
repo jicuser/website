@@ -14,7 +14,10 @@ export default function ProtectedAdminRoute({ children, permission }) {
 
   if (loading) {
     return (
-      <div className="admin-console min-h-screen grid place-items-center" aria-label="Loading administration">
+      <div
+        className="admin-console min-h-screen grid place-items-center"
+        aria-label="Loading administration"
+      >
         <Loader2 className="animate-spin" />
       </div>
     );

@@ -36,9 +36,12 @@ export default function EducationPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto mb-6 max-w-3xl text-center md:mb-8">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Education</p>
-            <h1 className="mt-2 text-2xl font-semibold text-foreground md:text-4xl">Learn at Jamatia Islamic Centre</h1>
+            <h1 className="mt-2 text-2xl font-semibold text-foreground md:text-4xl">
+              Learn at Jamatia Islamic Centre
+            </h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-              Choose an education area below. Each section keeps its own tabs visible so you can move between related pages without going back to the main menu.
+              Choose an education area below. Each section keeps its own tabs visible so you can
+              move between related pages without going back to the main menu.
             </p>
           </div>
 
@@ -53,7 +56,9 @@ export default function EducationPage() {
                   <Icon className="h-5 w-5" />
                 </span>
                 <strong className="block text-sm text-foreground md:text-base">{title}</strong>
-                <span className="mt-1 hidden text-xs leading-relaxed text-muted-foreground md:block">{description}</span>
+                <span className="mt-1 hidden text-xs leading-relaxed text-muted-foreground md:block">
+                  {description}
+                </span>
               </Link>
             ))}
           </div>

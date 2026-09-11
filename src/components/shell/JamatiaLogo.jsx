@@ -4,7 +4,19 @@ import { useAppearance } from '@/context/AppearanceContext';
 
 export default function JamatiaLogo({ className, variant = 'horizontal' }) {
   const { theme } = useAppearance();
-  const safeVariant = ['horizontal', 'centred', 'compact', 'wordmark', 'entrance', 'minaret', 'minaret-compact', 'pillars', 'arch'].includes(variant) ? variant : 'horizontal';
+  const safeVariant = [
+    'horizontal',
+    'centred',
+    'compact',
+    'wordmark',
+    'entrance',
+    'minaret',
+    'minaret-compact',
+    'pillars',
+    'arch',
+  ].includes(variant)
+    ? variant
+    : 'horizontal';
   return (
     <div className={cn('brand-lockup', `brand-${safeVariant}`, className)}>
       <img

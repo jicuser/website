@@ -17,9 +17,11 @@ export function ContentProvider({ children }) {
   const [saveMsg, setSaveMsg] = useState('');
 
   const refreshContent = useCallback(async () => {
-    const { data, error } = await supabase.from('page_content').select('content_key, content_value');
+    const { data, error } = await supabase
+      .from('page_content')
+      .select('content_key, content_value');
     if (error) throw error;
-    setCache(Object.fromEntries((data || []).map(row => [row.content_key, row.content_value])));
+    setCache(Object.fromEntries((data || []).map((row) => [row.content_key, row.content_value])));
   }, []);
 
   useEffect(() => {
@@ -37,37 +39,42 @@ export function ContentProvider({ children }) {
     return cache[key] ?? fallback;
   }
 
-  const saveContent = useCallback(async (key, value, type = 'text') => {
-    if (!can('content')) throw new Error('You do not have permission to edit website content.');
-    setSaving(true);
-    setSaveMsg('');
-    try {
-      const { data, error } = await supabase
-        .from('page_content')
-        .upsert(
-          { content_key: key, content_value: value, content_type: type },
-          { onConflict: 'content_key' }
-        )
-        .select('content_key');
-      if (error) throw error;
-      if (data?.length !== 1) throw new Error('The change was not saved. Please try again.');
-      setCache(previous => ({ ...previous, [key]: value }));
-      setSaveMsg('Saved');
-      window.setTimeout(() => setSaveMsg(''), 2000);
-    } catch (error) {
-      console.error('saveContent error:', error);
-      setSaveMsg('Error saving');
-      throw error;
-    } finally {
-      setSaving(false);
-    }
-  }, [can]);
+  const saveContent = useCallback(
+    async (key, value, type = 'text') => {
+      if (!can('content')) throw new Error('You do not have permission to edit website content.');
+      setSaving(true);
+      setSaveMsg('');
+      try {
+        const { data, error } = await supabase
+          .from('page_content')
+          .upsert(
+            { content_key: key, content_value: value, content_type: type },
+            { onConflict: 'content_key' },
+          )
+          .select('content_key');
+        if (error) throw error;
+        if (data?.length !== 1) throw new Error('The change was not saved. Please try again.');
+        setCache((previous) => ({ ...previous, [key]: value }));
+        setSaveMsg('Saved');
+        window.setTimeout(() => setSaveMsg(''), 2000);
+      } catch (error) {
+        console.error('saveContent error:', error);
+        setSaveMsg('Error saving');
+        throw error;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [can],
+  );
 
   async function uploadImage(key, file) {
     if (!can('content')) throw new Error('You do not have permission to replace pictures.');
     const ext = validateImage(file);
     const path = `${key.replace(/\./g, '/')}-${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from('site-images').upload(path, file, { upsert: false });
+    const { error: uploadError } = await supabase.storage
+      .from('site-images')
+      .upload(path, file, { upsert: false });
     if (uploadError) throw uploadError;
     const { data } = supabase.storage.from('site-images').getPublicUrl(path);
     await saveContent(key, data.publicUrl, 'image');
@@ -75,16 +82,18 @@ export function ContentProvider({ children }) {
   }
 
   return (
-    <ContentContext.Provider value={{
-      editMode,
-      toggleEditMode: () => can('content') && setEditMode(previous => !previous),
-      getContent,
-      refreshContent,
-      saveContent,
-      uploadImage,
-      saving,
-      saveMsg,
-    }}>
+    <ContentContext.Provider
+      value={{
+        editMode,
+        toggleEditMode: () => can('content') && setEditMode((previous) => !previous),
+        getContent,
+        refreshContent,
+        saveContent,
+        uploadImage,
+        saving,
+        saveMsg,
+      }}
+    >
       {children}
     </ContentContext.Provider>
   );

@@ -1,6 +1,7 @@
 export const SITE = {
   name: 'Jamatia Islamic Centre',
-  tagline: 'A place of worship, learning, and community service dedicated to spreading the message of peace and harmony.',
+  tagline:
+    'A place of worship, learning, and community service dedicated to spreading the message of peace and harmony.',
 
   address: {
     line1: '179–183 Woodlands Road',

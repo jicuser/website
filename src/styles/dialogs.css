@@ -1,0 +1,46 @@
+/* Public donation dialog. Colour and opacity follow the shared material tokens. */
+.jic-popup-overlay {
+  background: #0006;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.jic-popup-panel {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--jic-glass-border);
+  border-radius: 24px;
+  background: var(--jic-glass-surface-strong);
+  color: var(--jic-text);
+  overflow-y: auto;
+}
+.jic-popup-surface {
+  border: 1px solid var(--jic-glass-border);
+  background: var(--jic-glass-inset);
+  color: var(--jic-text);
+}
+.jic-popup-divider {
+  border-bottom: 1px solid var(--jic-glass-border);
+  background: var(--jic-glass-surface-strong);
+}
+.jic-popup-title {
+  color: var(--jic-text);
+}
+.jic-popup-muted {
+  color: var(--jic-text-secondary);
+}
+.jic-popup-kicker {
+  color: var(--jic-gold);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+.jic-popup-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--jic-glass-border);
+  background: var(--jic-glass-inset);
+  color: var(--jic-gold);
+}
+.jic-popup-icon:hover {
+  background: var(--jic-glass-surface);
+}

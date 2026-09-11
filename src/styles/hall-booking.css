@@ -1,4 +1,252 @@
 /* Hall booking monthly availability calendar. */
-.jic-hall-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}.jic-hall-calendar-head h1{font-size:clamp(1.35rem,3vw,2rem);font-weight:800;line-height:1.1}.jic-hall-kicker{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--jic-gold)}.jic-hall-month-controls{display:flex;align-items:center;gap:7px}.jic-hall-month-controls button{min-width:42px;min-height:42px;padding:0 12px;border:1px solid var(--jic-border);border-radius:13px;background:color-mix(in srgb,var(--jic-surface) 88%,transparent);display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--jic-text)}.jic-hall-notice{margin-bottom:14px;padding:11px 13px;border:1px solid color-mix(in srgb,var(--jic-gold) 28%,transparent);border-radius:14px;background:color-mix(in srgb,var(--jic-gold) 8%,transparent);font-size:.85rem;line-height:1.45}.jic-hall-weekdays,.jic-hall-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}.jic-hall-weekdays{margin-bottom:7px}.jic-hall-weekdays span{text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.04em;color:var(--jic-muted)}.jic-hall-day{position:relative;min-height:86px;padding:9px;border:1px solid var(--jic-border);border-radius:15px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;color:var(--jic-text)}.jic-hall-day::before{content:"";position:absolute;inset:0;opacity:.14;pointer-events:none}.jic-hall-day.is-available::before{background:var(--jic-success)}.jic-hall-day.is-pending::before{background:var(--jic-warning)}.jic-hall-day.is-booked::before{background:var(--jic-error)}.jic-hall-day.is-closed::before{background:#64748b}.jic-hall-day.is-unknown::before{background:#94a3b8}.jic-hall-day.is-today{outline:2px solid var(--jic-gold);outline-offset:1px}.jic-hall-day.is-empty{border-color:transparent;background:transparent;min-height:0}.jic-hall-date{position:relative;z-index:1;font-size:1rem;font-weight:800}.jic-hall-status{position:relative;z-index:1;font-size:.67rem;line-height:1.15;font-weight:700;opacity:.9;overflow-wrap:anywhere}.jic-hall-legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--jic-border)}.jic-hall-legend span{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:700}.jic-hall-legend i{width:11px;height:11px;border-radius:50%;display:inline-block}.jic-hall-legend i.is-available{background:var(--jic-success)}.jic-hall-legend i.is-pending{background:var(--jic-warning)}.jic-hall-legend i.is-booked{background:var(--jic-error)}.jic-hall-legend i.is-closed{background:#64748b}.jic-hall-contact{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:18px;padding:14px;border-radius:16px;background:color-mix(in srgb,var(--jic-surface) 86%,transparent)}.jic-hall-contact>div{display:flex;flex-direction:column;gap:3px}.jic-hall-contact span{font-size:.82rem;opacity:.72}.jic-hall-contact a{min-height:44px;padding:0 14px;display:inline-flex;align-items:center;gap:8px;border-radius:13px;background:var(--jic-gold);color:#101820;font-weight:800;white-space:nowrap}
-@media(max-width:767px){.jic-hall-page{padding-top:8px}.jic-hall-calendar-head{align-items:flex-start}.jic-hall-month-controls button{min-width:38px;min-height:38px;padding:0 9px}.jic-hall-weekdays,.jic-hall-grid{gap:4px}.jic-hall-day{min-height:67px;padding:6px;border-radius:11px}.jic-hall-date{font-size:.88rem}.jic-hall-status{font-size:.56rem}.jic-hall-contact{align-items:stretch;flex-direction:column}.jic-hall-contact a{justify-content:center;width:100%}}
-@media(max-width:390px){.jic-hall-status{font-size:0;color:transparent}.jic-hall-day::after{content:"";position:relative;z-index:1;width:7px;height:7px;border-radius:50%;background:#94a3b8}.jic-hall-day.is-available::after{background:var(--jic-success)}.jic-hall-day.is-pending::after{background:var(--jic-warning)}.jic-hall-day.is-booked::after{background:var(--jic-error)}.jic-hall-day.is-closed::after{background:#64748b}}
+.jic-hall-calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.jic-hall-calendar-head h1 {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+.jic-hall-kicker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--jic-gold);
+}
+.jic-hall-month-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.jic-hall-month-controls button {
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--jic-surface) 88%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--jic-text);
+}
+.jic-hall-notice {
+  margin-bottom: 14px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--jic-gold) 28%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--jic-gold) 8%, transparent);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.jic-hall-weekdays,
+.jic-hall-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 7px;
+}
+.jic-hall-weekdays {
+  margin-bottom: 7px;
+}
+.jic-hall-weekdays span {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--jic-muted);
+}
+.jic-hall-day {
+  position: relative;
+  min-height: 86px;
+  padding: 9px;
+  border: 1px solid var(--jic-border);
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  color: var(--jic-text);
+}
+.jic-hall-day::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  pointer-events: none;
+}
+.jic-hall-day.is-available::before {
+  background: var(--jic-success);
+}
+.jic-hall-day.is-pending::before {
+  background: var(--jic-warning);
+}
+.jic-hall-day.is-booked::before {
+  background: var(--jic-error);
+}
+.jic-hall-day.is-closed::before {
+  background: #64748b;
+}
+.jic-hall-day.is-unknown::before {
+  background: #94a3b8;
+}
+.jic-hall-day.is-today {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 1px;
+}
+.jic-hall-day.is-empty {
+  border-color: transparent;
+  background: transparent;
+  min-height: 0;
+}
+.jic-hall-date {
+  position: relative;
+  z-index: 1;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.jic-hall-status {
+  position: relative;
+  z-index: 1;
+  font-size: 0.67rem;
+  line-height: 1.15;
+  font-weight: 700;
+  opacity: 0.9;
+  overflow-wrap: anywhere;
+}
+.jic-hall-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--jic-border);
+}
+.jic-hall-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.jic-hall-legend i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.jic-hall-legend i.is-available {
+  background: var(--jic-success);
+}
+.jic-hall-legend i.is-pending {
+  background: var(--jic-warning);
+}
+.jic-hall-legend i.is-booked {
+  background: var(--jic-error);
+}
+.jic-hall-legend i.is-closed {
+  background: #64748b;
+}
+.jic-hall-contact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--jic-surface) 86%, transparent);
+}
+.jic-hall-contact > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.jic-hall-contact span {
+  font-size: 0.82rem;
+  opacity: 0.72;
+}
+.jic-hall-contact a {
+  min-height: 44px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 13px;
+  background: var(--jic-gold);
+  color: #101820;
+  font-weight: 800;
+  white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .jic-hall-page {
+    padding-top: 8px;
+  }
+  .jic-hall-calendar-head {
+    align-items: flex-start;
+  }
+  .jic-hall-month-controls button {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0 9px;
+  }
+  .jic-hall-weekdays,
+  .jic-hall-grid {
+    gap: 4px;
+  }
+  .jic-hall-day {
+    min-height: 67px;
+    padding: 6px;
+    border-radius: 11px;
+  }
+  .jic-hall-date {
+    font-size: 0.88rem;
+  }
+  .jic-hall-status {
+    font-size: 0.56rem;
+  }
+  .jic-hall-contact {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .jic-hall-contact a {
+    justify-content: center;
+    width: 100%;
+  }
+}
+@media (max-width: 390px) {
+  .jic-hall-status {
+    font-size: 0;
+    color: transparent;
+  }
+  .jic-hall-day::after {
+    content: '';
+    position: relative;
+    z-index: 1;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #94a3b8;
+  }
+  .jic-hall-day.is-available::after {
+    background: var(--jic-success);
+  }
+  .jic-hall-day.is-pending::after {
+    background: var(--jic-warning);
+  }
+  .jic-hall-day.is-booked::after {
+    background: var(--jic-error);
+  }
+  .jic-hall-day.is-closed::after {
+    background: #64748b;
+  }
+}

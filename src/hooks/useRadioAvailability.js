@@ -4,17 +4,22 @@ import { useEffect, useState } from 'react';
 export function useRadioAvailability(streamUrl) {
   const [availability, setAvailability] = useState('checking');
   useEffect(() => {
-    let disposed = false, active = null, timer = null;
+    let disposed = false,
+      active = null,
+      timer = null;
     setAvailability(streamUrl ? 'checking' : 'offline');
     if (!streamUrl) return undefined;
     const probe = () => {
       if (active || disposed) return;
-      if (!navigator.onLine) { setAvailability('unknown'); return; }
+      if (!navigator.onLine) {
+        setAvailability('unknown');
+        return;
+      }
       const audio = new Audio();
       active = audio;
       audio.muted = true;
       audio.preload = 'auto';
-      const finish = status => {
+      const finish = (status) => {
         clearTimeout(timer);
         audio.onloadeddata = null;
         audio.onerror = null;

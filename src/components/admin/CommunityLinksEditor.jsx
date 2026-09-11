@@ -15,13 +15,20 @@ export default function CommunityLinksEditor() {
 
   useEffect(() => {
     let active = true;
-    supabase.from('page_content').select('content_value').eq('content_key', KEY).maybeSingle().then(({ data }) => {
-      if (!active) return;
-      const value = data?.content_value || '';
-      setUrl(value);
-      setSavedUrl(value);
-    });
-    return () => { active = false; };
+    supabase
+      .from('page_content')
+      .select('content_value')
+      .eq('content_key', KEY)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!active) return;
+        const value = data?.content_value || '';
+        setUrl(value);
+        setSavedUrl(value);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const save = useCallback(async () => {
@@ -32,16 +39,23 @@ export default function CommunityLinksEditor() {
       const clean = url.trim();
       if (clean) {
         const parsed = new URL(clean);
-        if (!['chat.whatsapp.com', 'wa.me', 'www.whatsapp.com', 'whatsapp.com'].includes(parsed.hostname)) {
+        if (
+          !['chat.whatsapp.com', 'wa.me', 'www.whatsapp.com', 'whatsapp.com'].includes(
+            parsed.hostname,
+          )
+        ) {
           throw new Error('Use a valid WhatsApp invite link.');
         }
       }
-      const { error } = await supabase.from('page_content').upsert({
-        content_key: KEY,
-        content_value: clean,
-        content_type: 'text',
-        page: '/',
-      }, { onConflict: 'content_key' });
+      const { error } = await supabase.from('page_content').upsert(
+        {
+          content_key: KEY,
+          content_value: clean,
+          content_type: 'text',
+          page: '/',
+        },
+        { onConflict: 'content_key' },
+      );
       if (error) throw error;
       setUrl(clean);
       setSavedUrl(clean);
@@ -57,9 +71,38 @@ export default function CommunityLinksEditor() {
 
   useRegisterAdminSave(save, dirty && !busy, 'Save WhatsApp link');
 
-  return <section className="admin-panel">
-    <div className="admin-heading"><div><h3>WhatsApp community</h3></div><WhatsAppIcon/></div>
-    <label>Community invite URL<input type="url" value={url} onChange={event => { setUrl(event.target.value); setMsg(''); }} placeholder="https://chat.whatsapp.com/..."/></label>
-    <div className="admin-actions"><button type="button" onClick={() => save().catch(() => {})} disabled={busy || !dirty} className="admin-button primary"><Save size={16}/>{busy ? 'Saving…' : 'Save link'}</button>{msg && <small>{msg}</small>}</div>
-  </section>;
+  return (
+    <section className="admin-panel">
+      <div className="admin-heading">
+        <div>
+          <h3>WhatsApp community</h3>
+        </div>
+        <WhatsAppIcon />
+      </div>
+      <label>
+        Community invite URL
+        <input
+          type="url"
+          value={url}
+          onChange={(event) => {
+            setUrl(event.target.value);
+            setMsg('');
+          }}
+          placeholder="https://chat.whatsapp.com/..."
+        />
+      </label>
+      <div className="admin-actions">
+        <button
+          type="button"
+          onClick={() => save().catch(() => {})}
+          disabled={busy || !dirty}
+          className="admin-button primary"
+        >
+          <Save size={16} />
+          {busy ? 'Saving…' : 'Save link'}
+        </button>
+        {msg && <small>{msg}</small>}
+      </div>
+    </section>
+  );
 }

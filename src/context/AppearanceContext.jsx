@@ -22,7 +22,9 @@ function writeStorage(key, value) {
 
 export function AppearanceProvider({ children }) {
   const [theme, setTheme] = useState(() => readStorage('jic-theme', 'dark'));
-  const [glassEnabled, setGlassEnabled] = useState(() => readStorage('jic_glass_enabled', 'true') !== 'false');
+  const [glassEnabled, setGlassEnabled] = useState(
+    () => readStorage('jic_glass_enabled', 'true') !== 'false',
+  );
 
   useEffect(() => {
     const root = document.documentElement;
@@ -37,16 +39,24 @@ export function AppearanceProvider({ children }) {
     writeStorage('jic_glass_enabled', String(glassEnabled));
   }, [glassEnabled]);
 
-  const value = useMemo(() => ({
-    theme,
-    setTheme,
-    toggleTheme: () => setTheme(current => current === 'dark' ? 'light' : 'dark'),
-    glassEnabled,
-    setGlassEnabled,
-    toggleGlass: () => setGlassEnabled(current => !current),
-  }), [theme, glassEnabled]);
+  const value = useMemo(
+    () => ({
+      theme,
+      setTheme,
+      toggleTheme: () => setTheme((current) => (current === 'dark' ? 'light' : 'dark')),
+      glassEnabled,
+      setGlassEnabled,
+      toggleGlass: () => setGlassEnabled((current) => !current),
+    }),
+    [theme, glassEnabled],
+  );
 
-  return <AppearanceContext.Provider value={value}><LiquidGlassFilters/>{children}</AppearanceContext.Provider>;
+  return (
+    <AppearanceContext.Provider value={value}>
+      <LiquidGlassFilters />
+      {children}
+    </AppearanceContext.Provider>
+  );
 }
 
 export function useAppearance() {

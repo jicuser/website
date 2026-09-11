@@ -43,15 +43,21 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route
           path="/admin"
-          element={(
+          element={
             <ProtectedAdminRoute>
-              <AdminSaveProvider><AdminPage /></AdminSaveProvider>
+              <AdminSaveProvider>
+                <AdminPage />
+              </AdminSaveProvider>
             </ProtectedAdminRoute>
-          )}
+          }
         />
         <Route
           path="/admin/home-tiles"
-          element={<ProtectedAdminRoute permission="content"><TileContentAdminPage /></ProtectedAdminRoute>}
+          element={
+            <ProtectedAdminRoute permission="content">
+              <TileContentAdminPage />
+            </ProtectedAdminRoute>
+          }
         />
 
         <Route path="/" element={<MainLayout />}>
@@ -64,8 +70,14 @@ export default function App() {
           <Route path="privacy" element={<PrivacyPage />} />
 
           <Route path="prayer-times" element={<PrayerTimesPage key="today" initialTab="today" />} />
-          <Route path="prayer-times/monthly" element={<PrayerTimesPage key="monthly" initialTab="daily" />} />
-          <Route path="prayer-times/jummah" element={<PrayerTimesPage key="jummah" initialTab="jummah" />} />
+          <Route
+            path="prayer-times/monthly"
+            element={<PrayerTimesPage key="monthly" initialTab="daily" />}
+          />
+          <Route
+            path="prayer-times/jummah"
+            element={<PrayerTimesPage key="jummah" initialTab="jummah" />}
+          />
 
           <Route path="worship" element={<WorshipPage />} />
           <Route path="worship/quran" element={<WorshipPage />} />
@@ -95,14 +107,14 @@ export default function App() {
             <Route
               key={path}
               path={path}
-              element={(
+              element={
                 <SectionPage
                   eyebrow={eyebrow}
                   title={title}
                   backTo={backTo}
                   backLabel={`Back to ${eyebrow}`}
                 />
-              )}
+              }
             />
           ))}
 

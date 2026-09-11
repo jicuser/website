@@ -1,8 +1,22 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 const AuthContext = createContext(null);
-const ADMIN_ROLES = new Set(['super_admin', 'admin', 'content_editor', 'events_manager', 'teacher']);
+const ADMIN_ROLES = new Set([
+  'super_admin',
+  'admin',
+  'content_editor',
+  'events_manager',
+  'teacher',
+]);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -27,7 +41,10 @@ export function AuthProvider({ children }) {
 
     let timeoutId;
     const timeout = new Promise((_, reject) => {
-      timeoutId = window.setTimeout(() => reject(new Error('Admin profile request timed out.')), 10000);
+      timeoutId = window.setTimeout(
+        () => reject(new Error('Admin profile request timed out.')),
+        10000,
+      );
     });
 
     try {
@@ -37,7 +54,7 @@ export function AuthProvider({ children }) {
       if (request !== profileRequest.current) return null;
       if (error) throw error;
 
-      const nextProfile = Array.isArray(data) ? data[0] ?? null : data ?? null;
+      const nextProfile = Array.isArray(data) ? (data[0] ?? null) : (data ?? null);
       profileRef.current = nextProfile;
       setProfile(nextProfile);
       return nextProfile;
@@ -84,7 +101,8 @@ export function AuthProvider({ children }) {
       }
     };
 
-    supabase.auth.getSession()
+    supabase.auth
+      .getSession()
       .then(async ({ data, error }) => {
         if (!mounted || initialized) return;
         initialized = true;
@@ -100,7 +118,9 @@ export function AuthProvider({ children }) {
         finishSignedOut();
       });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
       const authUser = session?.user ?? null;
 
@@ -189,38 +209,44 @@ export function AuthProvider({ children }) {
   const isAdmin = Boolean(user && profile?.is_active && ADMIN_ROLES.has(role));
   const isSuperAdmin = Boolean(isAdmin && role === 'super_admin');
 
-  const can = useCallback((permission) => {
-    if (!isAdmin) return false;
-    if (role === 'super_admin') return true;
+  const can = useCallback(
+    (permission) => {
+      if (!isAdmin) return false;
+      if (role === 'super_admin') return true;
 
-    const matrix = {
-      dashboard: ['admin', 'content_editor', 'events_manager', 'teacher'],
-      content: ['admin', 'content_editor'],
-      events: ['admin', 'content_editor', 'events_manager'],
-      prayer_times: ['admin'],
-      announcements: ['admin', 'content_editor', 'events_manager', 'teacher'],
-      livestream: ['admin', 'content_editor'],
-      team: ['admin', 'content_editor'],
-      media: ['admin', 'content_editor', 'events_manager', 'teacher'],
-      users: [],
-      audit: ['admin'],
-    };
+      const matrix = {
+        dashboard: ['admin', 'content_editor', 'events_manager', 'teacher'],
+        content: ['admin', 'content_editor'],
+        events: ['admin', 'content_editor', 'events_manager'],
+        prayer_times: ['admin'],
+        announcements: ['admin', 'content_editor', 'events_manager', 'teacher'],
+        livestream: ['admin', 'content_editor'],
+        team: ['admin', 'content_editor'],
+        media: ['admin', 'content_editor', 'events_manager', 'teacher'],
+        users: [],
+        audit: ['admin'],
+      };
 
-    return matrix[permission]?.includes(role) ?? false;
-  }, [isAdmin, role]);
+      return matrix[permission]?.includes(role) ?? false;
+    },
+    [isAdmin, role],
+  );
 
-  const value = useMemo(() => ({
-    user,
-    profile,
-    role,
-    isAdmin,
-    isSuperAdmin,
-    loading,
-    signIn,
-    signOut,
-    can,
-    refreshProfile: () => loadProfile(user),
-  }), [user, profile, role, isAdmin, isSuperAdmin, loading, can, loadProfile]);
+  const value = useMemo(
+    () => ({
+      user,
+      profile,
+      role,
+      isAdmin,
+      isSuperAdmin,
+      loading,
+      signIn,
+      signOut,
+      can,
+      refreshProfile: () => loadProfile(user),
+    }),
+    [user, profile, role, isAdmin, isSuperAdmin, loading, can, loadProfile],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

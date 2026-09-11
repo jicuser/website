@@ -4,6 +4,10 @@ module.exports = {
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module', ecmaFeatures: { jsx: true } },
   extends: ['eslint:recommended'],
   plugins: ['react-hooks'],
-  rules: { 'no-unused-vars': 'off', 'no-empty': ['error', { allowEmptyCatch: true }], 'react-hooks/rules-of-hooks': 'error' },
+  rules: {
+    'no-unused-vars': 'off',
+    'no-empty': ['error', { allowEmptyCatch: true }],
+    'react-hooks/rules-of-hooks': 'error',
+  },
   ignorePatterns: ['dist/', 'node_modules/', 'supabase/'],
 };

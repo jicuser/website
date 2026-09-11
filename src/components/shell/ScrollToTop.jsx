@@ -8,7 +8,10 @@ export const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (!hash) { window.scrollTo(0, 0); return; }
+    if (!hash) {
+      window.scrollTo(0, 0);
+      return;
+    }
     const timer = window.setTimeout(() => {
       const target = document.getElementById(decodeURIComponent(hash.slice(1)));
       target?.scrollIntoView({ block: 'start' });
