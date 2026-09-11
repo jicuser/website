@@ -10,18 +10,15 @@ export const MASJID_EXTENSION_TABS = [
   { name: 'Madrassah Floor', path: '/projects/madrassah-floor' },
 ];
 
+// Kept as a small compatibility export. Madrassah no longer renders a second
+// row of page tabs; the related destinations are surfaced as tiles on its
+// overview page instead.
 export const MADRASSAH_TABS = [
   { name: 'Overview', path: '/madrassah' },
-  { name: 'Enrolment', path: '/madrassah/enrolment' },
-  { name: 'Contact', path: '/madrassah/contact' },
-  { name: 'Policies', path: '/madrassah/policies' },
 ];
 
 export const EDUCATION_TABS = [
-  { name: 'Madrassah Overview', path: '/madrassah' },
-  { name: 'Madrassah Enrolment', path: '/madrassah/enrolment' },
-  { name: 'Madrassah Contact', path: '/madrassah/contact' },
-  { name: 'Madrassah Policies', path: '/madrassah/policies' },
+  { name: 'Madrassah', path: '/madrassah' },
   { name: 'Classes & Courses', path: '/madrassah/classes-courses' },
   { name: 'Student Portal', path: '/madrassah/student-portal' },
 ];
@@ -53,10 +50,12 @@ export const NAV_GROUPS = [
   { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
   { name: 'Services', path: '/services', children: [
     { name: 'Overview', path: '/services' },
+    { name: 'Religious Services', path: '/services#religious' },
+    { name: 'Educational Programs', path: '/services#educational' },
+    { name: 'Community Services', path: '/services#community' },
     { name: 'Funeral Services', path: '/funerals' },
     { name: 'Nikah', path: '/services/nikah' },
     { name: 'Hall Booking', path: '/services/hall-booking' },
-    { name: 'Community Support', path: '/services/community-services' },
   ]},
   { name: 'Projects', path: '/projects', children: [
     { name: 'Overview', path: '/projects' },
