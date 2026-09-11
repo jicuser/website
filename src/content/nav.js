@@ -10,9 +10,6 @@ export const MASJID_EXTENSION_TABS = [
   { name: 'Madrassah Floor', path: '/projects/madrassah-floor' },
 ];
 
-// Kept as a small compatibility export. Madrassah no longer renders a second
-// row of page tabs; the related destinations are surfaced as tiles on its
-// overview page instead.
 export const MADRASSAH_TABS = [
   { name: 'Overview', path: '/madrassah' },
 ];
@@ -50,9 +47,9 @@ export const NAV_GROUPS = [
   { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
   { name: 'Services', path: '/services', children: [
     { name: 'Overview', path: '/services' },
-    { name: 'Religious Services', path: '/services#religious' },
-    { name: 'Educational Programs', path: '/services#educational' },
-    { name: 'Community Services', path: '/services#community' },
+    { name: 'Religious Services', path: '/services/religious' },
+    { name: 'Educational Programs', path: '/services/education' },
+    { name: 'Community Services', path: '/services/community' },
     { name: 'Funeral Services', path: '/funerals' },
     { name: 'Nikah', path: '/services/nikah' },
     { name: 'Hall Booking', path: '/services/hall-booking' },
