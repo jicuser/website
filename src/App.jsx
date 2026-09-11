@@ -39,6 +39,7 @@ export default function App() {
       <Routes>
         <Route path="/radio" element={<RadioPlayerPage />} />
         <Route path="/tv179" element={<TvDisplayPage />} />
+        <Route path="/tv179/:screenId" element={<TvDisplayPage />} />
         <Route path="/tv" element={<Navigate to="/tv179" replace />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route

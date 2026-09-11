@@ -189,9 +189,11 @@ export default function PrayerScheduleTabs({
       window.requestAnimationFrame(() => {
         if (!contentRef.current) return;
         const headerOffset =
-          (parseFloat(
-            getComputedStyle(document.documentElement).getPropertyValue('--jic-header-height'),
-          ) || 220) + 60;
+          (Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue(
+              '--jic-prayer-sticky-offset',
+            ),
+          ) || 0) + 60;
         const top = contentRef.current.getBoundingClientRect().top + window.scrollY - headerOffset;
         window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
       }),
@@ -203,7 +205,7 @@ export default function PrayerScheduleTabs({
         <Tabs value={activeTab} onValueChange={handleTab} className="w-full max-w-6xl mx-auto">
           <div
             className="sticky z-20 flex justify-center mb-6"
-            style={{ top: 'calc(var(--jic-header-height, 220px) + 8px)' }}
+            style={{ top: 'calc(var(--jic-prayer-sticky-offset, 0px) + 8px)' }}
           >
             <TabsList className="grid grid-cols-3 w-full max-w-md shadow-lg backdrop-blur-xl">
               <TabsTrigger value="daily">Monthly</TabsTrigger>

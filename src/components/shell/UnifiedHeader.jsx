@@ -48,7 +48,7 @@ export default function UnifiedHeader() {
   const { pathname } = useLocation();
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
-  const headerRef = useRef(null),
+  const prayerDockRef = useRef(null),
     audioRef = useRef(null),
     menuRef = useRef(null),
     menuCloseRef = useRef(null),
@@ -86,10 +86,10 @@ export default function UnifiedHeader() {
   }, []);
   // Measure before paint so larger phone text cannot sit beneath the header.
   useLayoutEffect(() => {
-    const node = headerRef.current;
+    const node = prayerDockRef.current;
     const update = () =>
       document.documentElement.style.setProperty(
-        '--jic-header-height',
+        '--jic-prayer-dock-height',
         `${Math.ceil(node.getBoundingClientRect().height)}px`,
       );
     update();
@@ -199,8 +199,8 @@ export default function UnifiedHeader() {
         }}
         aria-hidden="true"
       />
-      <header ref={headerRef} className="jic-unified-header fixed inset-x-0 top-0 z-50">
-        <div className="jic-unified-inner">
+      <header className="jic-unified-header">
+        <div ref={prayerDockRef} className="jic-prayer-dock">
           <PrayerTimeBar
             todaysTimes={todaysTimes}
             jummahTimes={jummahTimes}
@@ -221,6 +221,8 @@ export default function UnifiedHeader() {
               </div>
             }
           />
+        </div>
+        <div className="jic-unified-inner">
           <div className="jic-free-nav-row">
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
               <JamatiaLogo variant="wordmark" />

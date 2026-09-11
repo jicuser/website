@@ -1,4 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import useTvScreen from '@/hooks/useTvScreen';
+import PrivateTvPlayer from '@/components/tv/PrivateTvPlayer';
+import { TV_SCREENS } from '@/lib/tvControl';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
@@ -9,9 +13,38 @@ import { PROGRAMMES } from '@/content/programmes';
 import { safeWebUrl, youtubeVideoId } from '@/lib/video';
 import { londonDate } from '@/lib/timetable';
 
-const ROTATE_MS = 20000;
-
 export default function TvDisplayPage() {
+  const { screenId = 'mens-main' } = useParams();
+  if (!TV_SCREENS.some((item) => item.id === screenId))
+    return (
+      <main className="p-8">
+        Unknown TV screen. <a href="/tv179">Open Men’s Main Hall</a>
+      </main>
+    );
+  return <ScreenDisplay key={screenId} screenId={screenId} />;
+}
+
+function ScreenDisplay({ screenId }) {
+  const tv = useTvScreen(screenId);
+  const [pairOpen, setPairOpen] = useState(false);
+  const [pairCode, setPairCode] = useState('');
+  const pairDialog = useRef(null);
+  useEffect(() => {
+    if (pairOpen) pairDialog.current?.showModal();
+  }, [pairOpen]);
+  const [privateFailed, setPrivateFailed] = useState(false);
+  const privateSource =
+    tv.session?.id || (tv.settings.mode === 'camera' ? tv.settings.camera_url : '');
+  const showPrivate = tv.paired && privateSource && !privateFailed;
+  const privateUnavailable = useCallback(() => setPrivateFailed(true), []);
+  useEffect(() => {
+    setPrivateFailed(false);
+  }, [privateSource]);
+  useEffect(() => {
+    if (!privateFailed) return;
+    const timer = setTimeout(() => setPrivateFailed(false), 30000);
+    return () => clearTimeout(timer);
+  }, [privateFailed]);
   const screen = useRef(null);
   const prayers = usePrayerTimes();
   const { events, livestream, stale } = useHomeLiveContent({ eventLimit: 50 });
@@ -21,14 +54,19 @@ export default function TvDisplayPage() {
   const [failedVideo, setFailedVideo] = useState('');
   const today = londonDate();
   const posters = useMemo(() => {
-    const programmePosters = PROGRAMMES.map((item) => ({
+    const programmePosters = PROGRAMMES.filter((item) =>
+      tv.settings.poster_ids.includes(item.id),
+    ).map((item) => ({
       id: item.id,
       title: item.title,
       image: item.image,
       alt: item.alt,
     }));
     const eventPosters = events
-      .filter((event) => event.event_date >= today && safeWebUrl(event.poster_url))
+      .filter(
+        (event) =>
+          tv.settings.include_events && event.event_date >= today && safeWebUrl(event.poster_url),
+      )
       .map((event) => ({
         id: `event-${event.id}`,
         title: event.title,
@@ -41,13 +79,20 @@ export default function TvDisplayPage() {
       seen.add(item.image);
       return true;
     });
-  }, [events, failedImages, today]);
-  const videoId = youtubeVideoId(livestream?.stream_url);
+  }, [events, failedImages, today, tv.settings.poster_ids, tv.settings.include_events]);
+  const videoId = youtubeVideoId(
+    tv.settings.mode === 'youtube' ? tv.settings.youtube_url : livestream?.stream_url,
+  );
   const scheduled = livestream?.scheduled_at ? new Date(livestream.scheduled_at).getTime() : null;
   const liveAvailable = Boolean(
-    livestream?.enabled && videoId && (!scheduled || scheduled <= now.getTime()),
+    videoId &&
+    (tv.settings.mode === 'youtube' ||
+      (tv.settings.mode === 'schedule' &&
+        livestream?.enabled &&
+        (!scheduled || scheduled <= now.getTime()))),
   );
-  const showLive = liveAvailable && failedVideo !== videoId;
+  const showYoutube = !showPrivate && liveAvailable && failedVideo !== videoId;
+  const showLive = showPrivate || showYoutube;
   const visiblePosters = posters.length
     ? [
         posters[slide % posters.length],
@@ -63,16 +108,17 @@ export default function TvDisplayPage() {
     if (posters.length < 2) return undefined;
     const timer = window.setInterval(
       () => setSlide((index) => (index + 1) % posters.length),
-      ROTATE_MS,
+      tv.settings.rotation_seconds * 1000,
     );
     return () => window.clearInterval(timer);
-  }, [posters.length]);
+  }, [posters.length, tv.settings.rotation_seconds]);
   useEffect(() => {
     setFailedVideo('');
   }, [videoId, livestream?.enabled]);
   useEffect(() => {
     const fullscreenKey = (event) => {
       if (event.key.toLowerCase() === 'f' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        if (/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
         screen.current?.requestFullscreen?.().catch(() => {});
       }
     };
@@ -115,13 +161,13 @@ export default function TvDisplayPage() {
   return (
     <div ref={screen} className="jic-tv-display" onDoubleClick={enterFullscreen}>
       <Helmet>
-        <title>JIC · TV Display</title>
+        <title>JIC · {tv.label}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <header className="jic-tv-header">
         <div className="jic-tv-heading">
           <div className="jic-tv-logo">
-            <JamatiaLogo />
+            <JamatiaLogo variant="wordmark" />
           </div>
           <div className="jic-tv-clock">
             <time dateTime={now.toISOString()}>
@@ -154,13 +200,31 @@ export default function TvDisplayPage() {
         className={`jic-tv-stage ${showLive ? 'is-live' : ''}`}
         aria-label={showLive ? 'Livestream and posters' : 'Community posters'}
       >
-        {showLive && (
+        {showPrivate && (
           <section className="jic-tv-video">
-            <h1>{livestream.title || 'JIC Livestream'}</h1>
+            <h1>
+              {tv.label} · {tv.session?.kind === 'screen' ? 'Shared screen' : 'Live camera'}
+            </h1>
+            <PrivateTvPlayer
+              screenId={screenId}
+              deviceToken={tv.deviceToken}
+              sessionId={tv.session?.id}
+              url={tv.settings.camera_url}
+              protocol={tv.settings.camera_protocol}
+              muted={tv.settings.muted}
+              onUnavailable={privateUnavailable}
+            />
+          </section>
+        )}
+        {showYoutube && (
+          <section className="jic-tv-video">
+            <h1>
+              {tv.settings.mode === 'youtube' ? tv.label : livestream?.title || 'JIC Livestream'}
+            </h1>
             <YouTubeScreenPlayer
               videoId={videoId}
-              title={livestream.title}
-              muted
+              title={tv.settings.mode === 'youtube' ? tv.label : livestream?.title}
+              muted={tv.settings.muted}
               onUnavailable={onUnavailable}
             />
           </section>
@@ -186,6 +250,9 @@ export default function TvDisplayPage() {
         )}
       </main>
       <div className="jic-tv-status">
+        <span>{tv.label}</span>
+        {tv.error && <span role="status">{tv.error}</span>}
+        {privateFailed && <span role="status">Live feed unavailable · retrying</span>}
         {stale ? (
           'Content update delayed · reconnecting'
         ) : (
@@ -194,7 +261,46 @@ export default function TvDisplayPage() {
             {posters.length > 1 && ` · ${(slide % posters.length) + 1} / ${posters.length}`}
           </span>
         )}
+        {!tv.paired && (
+          <button className="jic-tv-pair-button" onClick={() => setPairOpen(true)}>
+            Pair TV
+          </button>
+        )}
       </div>
+      {pairOpen && (
+        <dialog
+          ref={pairDialog}
+          onCancel={() => setPairOpen(false)}
+          className="jic-tv-pairing"
+          aria-labelledby="tv-pair-title"
+        >
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              window.location.hash = `pair=${pairCode.trim()}`;
+              setPairOpen(false);
+              tv.refresh();
+            }}
+          >
+            <h2 id="tv-pair-title">Pair {tv.label}</h2>
+            <label>
+              Paste the code from Admin → {tv.label}
+              <input
+                autoFocus
+                value={pairCode}
+                onChange={(event) => setPairCode(event.target.value)}
+                required
+                pattern="[a-f0-9]{64}"
+                autoComplete="off"
+              />
+            </label>
+            <button type="submit">Pair TV</button>
+            <button type="button" onClick={() => setPairOpen(false)}>
+              Cancel
+            </button>
+          </form>
+        </dialog>
+      )}
     </div>
   );
 }

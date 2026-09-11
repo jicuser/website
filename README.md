@@ -15,18 +15,19 @@ For a small text-only code change, press `.` while viewing the repository to ope
 
 ## Where to edit
 
-| Change                          | File or area                                                        |
-| ------------------------------- | ------------------------------------------------------------------- |
-| Logo, menu and header           | `src/components/shell/UnifiedHeader.jsx`                            |
-| Six prayer columns              | `src/components/shell/PrayerTimeBar.jsx`                            |
-| Header spacing and mobile sizes | `src/styles/header.css`                                             |
-| Section tabs                    | `src/content/nav.js`, `src/styles/subnav.css`                       |
-| Colours and transparency        | `src/styles/theme.css`, `src/styles/liquid-glass.css`               |
-| Homepage content and layout     | `src/pages/HomePage.jsx`, `src/styles/home.css`                     |
-| Address, phone and radio link   | `src/content/site.js`                                               |
-| Photos                          | `src/content/images.js`                                             |
-| Staff pages                     | `src/pages/admin/`, `src/components/admin/`, `src/styles/admin.css` |
-| Mosque TV                       | `src/pages/TvDisplayPage.jsx`, `src/styles/tv.css`                  |
+| Change                          | File or area                                                                |
+| ------------------------------- | --------------------------------------------------------------------------- |
+| Logo, menu and header           | `src/components/shell/UnifiedHeader.jsx`                                    |
+| Six prayer columns              | `src/components/shell/PrayerTimeBar.jsx`                                    |
+| Header spacing and mobile sizes | `src/styles/header.css`                                                     |
+| Section tabs                    | `src/content/nav.js`, `src/styles/subnav.css`                               |
+| Colours and transparency        | `src/styles/theme.css`, `src/styles/liquid-glass.css`                       |
+| Homepage content and layout     | `src/pages/HomePage.jsx`, `src/styles/home.css`                             |
+| Address, phone and radio link   | `src/content/site.js`                                                       |
+| Photos                          | `src/content/images.js`                                                     |
+| Staff pages                     | `src/pages/admin/`, `src/components/admin/`, `src/styles/admin.css`         |
+| Mosque TV                       | `src/pages/TvDisplayPage.jsx`, `src/styles/tv.css`                          |
+| Four TV settings and sharing    | `src/components/admin/TvScreenEditor.jsx`, `supabase/functions/tv-control/` |
 
 Use the website's `/admin` area for content it manages. A saved CMS value takes priority over its code fallback. Use GitHub for changes to structure, styling and behaviour.
 

@@ -1,0 +1,6 @@
+project_id = "jic-website"
+
+[functions.tv-control]
+# Public posters, staff JWTs and paired-TV tokens have separate handler checks.
+# All staff mutations still require getUser() and an active trusted database role.
+verify_jwt = false

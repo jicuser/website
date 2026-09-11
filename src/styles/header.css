@@ -1,13 +1,21 @@
 /* Public header layout. Shared colours and materials come from theme.css and liquid-glass.css. */
 .jic-unified-header {
-  pointer-events: none;
+  padding-top: var(--jic-prayer-dock-height, 180px);
+}
+.jic-prayer-dock {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  width: min(1440px, 100%);
+  margin: auto;
+  padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0
+    max(8px, env(safe-area-inset-left));
 }
 .jic-unified-inner {
   width: min(1440px, 100%);
   margin: auto;
   padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0
     max(8px, env(safe-area-inset-left));
-  pointer-events: auto;
 }
 .jic-unified-info {
   overflow: hidden;
@@ -235,12 +243,13 @@
   display: none;
 }
 
-/* ResizeObserver in UnifiedHeader measures the real header, including wrapped text. */
+/* Only the prayer dock is fixed. The unboxed logo and tabs stay in document flow. */
 .jic-public-main {
-  padding-top: calc(var(--jic-header-height, 245px) + 10px);
+  padding-top: 10px;
 }
 html {
-  scroll-padding-top: calc(var(--jic-header-height, 245px) + 12px);
+  --jic-prayer-sticky-offset: var(--jic-prayer-dock-height, 180px);
+  scroll-padding-top: calc(var(--jic-prayer-sticky-offset) + 12px);
 }
 
 /* Native dialog supplies focus trapping, Escape handling and a separate scroll area. */
@@ -580,12 +589,16 @@ html[data-surface='glass'] .jic-unified-menu-donate {
 /* On short landscape screens the header scrolls away so the page stays usable. */
 @media (max-height: 500px) and (orientation: landscape) {
   .jic-unified-header {
-    position: relative;
+    padding-top: 0;
+  }
+  .jic-prayer-dock {
+    position: static;
   }
   .jic-public-main {
     padding-top: 10px;
   }
   html {
+    --jic-prayer-sticky-offset: 0px;
     scroll-padding-top: 12px;
   }
 }

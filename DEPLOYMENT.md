@@ -57,3 +57,9 @@ The included `public/.htaccess` is copied into `dist` and provides SPA route fal
 ## 5. Daily operation
 
 Normal event/prayer/announcement/team/livestream changes happen in `/admin`. GitHub deployment is only needed when changing layout, components, or application code.
+
+## TV screens and sharing
+
+Apply `supabase/migrations/20260911222221_tv_screens_and_sharing.sql` once to an existing installation, then deploy `supabase functions deploy tv-control`. The function-specific configuration in `supabase/config.toml` is required: the handler authenticates staff JWTs and paired-TV credentials itself, while allowing public poster settings. Deploy the migration and function before publishing the matching frontend.
+
+The function uses Supabase's built-in server environment variables; no new browser secrets are needed. Optional TURN servers can be supplied as the `TV_ICE_SERVERS` Edge secret. See [TV setup](docs/tv-display.md) for pairing, camera relays and device checks.

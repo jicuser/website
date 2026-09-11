@@ -28,7 +28,7 @@ html[data-theme='light'] .jic-page-backdrop img {
   filter: brightness(1.12) saturate(0.75);
 }
 html[data-theme='light'] .jic-page-backdrop::after {
-  background: linear-gradient(180deg, #fafbfdd4, #fafbfdbf 42%, #fafbfddb);
+  background: linear-gradient(180deg, #fafbfde8, #fafbfdd9 42%, #fafbfde6);
 }
 html[data-theme] .jic-public-route :is(.jic-public-main, .page-transition) {
   background: transparent !important;

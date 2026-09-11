@@ -15,3 +15,6 @@ Thumbs.db
 
 # editor
 .vscode/settings.json
+
+# Local Supabase CLI state
+supabase/.temp/

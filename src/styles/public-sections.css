@@ -42,6 +42,10 @@
   font-size: 1.5rem !important;
   margin: 0 !important;
 }
+.jic-prayer-table {
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
 .jic-prayer-schedule th,
 .jic-prayer-schedule td {
   padding: 12px 14px;

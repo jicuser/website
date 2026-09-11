@@ -23,6 +23,8 @@ import {
   Moon,
   Monitor,
 } from 'lucide-react';
+import TvScreenEditor from '@/components/admin/TvScreenEditor';
+import { TV_SCREENS } from '@/lib/tvControl';
 import PrayerEditor from '@/components/admin/PrayerEditor';
 import PageEditor from '@/components/admin/PageEditor';
 import { supabase } from '@/lib/supabaseClient';
@@ -46,6 +48,7 @@ const SECTIONS = [
   ['events', 'Events', CalendarDays, 'events'],
   ['announcements', 'Announcements', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
+  ...TV_SCREENS.map((screen) => [`tv-${screen.id}`, screen.label, Monitor, 'livestream']),
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
   ['users', 'Users & roles', ShieldCheck, 'users'],
@@ -1117,6 +1120,12 @@ export default function AdminPage() {
   };
 
   const section = {
+    ...Object.fromEntries(
+      TV_SCREENS.map((screen) => [
+        `tv-${screen.id}`,
+        <TvScreenEditor key={screen.id} screenId={screen.id} />,
+      ]),
+    ),
     dashboard: <DashboardSection onChoose={chooseSection} />,
     prayer: <PrayerEditor />,
     events: <EventsSection />,

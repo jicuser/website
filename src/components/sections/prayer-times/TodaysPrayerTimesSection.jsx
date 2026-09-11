@@ -37,7 +37,7 @@ export default function TodaysPrayerTimesSection({ currentDate, todaysTimes }) {
   );
   return (
     <section className="jic-prayer-schedule mx-auto max-w-4xl px-4 py-6">
-      <div className="overflow-x-auto rounded-2xl border">
+      <div className="jic-prayer-table overflow-x-auto rounded-2xl border">
         <table className="w-full text-left">
           <caption className="sr-only">Today's prayer start and congregation times</caption>
           <thead>
