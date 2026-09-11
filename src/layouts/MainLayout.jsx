@@ -5,7 +5,7 @@ import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import {overviewPaths} from '@/content/editablePages';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
-import { IMAGES } from '@/content/images';
+import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import RelatedContent from '@/components/RelatedContent';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import DailyReminder from '@/components/shell/DailyReminder';
@@ -21,8 +21,8 @@ export default function MainLayout() {
   const isHome = pathname === '/';
 
   return (
-    <div className={`flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview?'is-admin-preview':''}`}>
-      {isHome && <div className="jic-page-backdrop" aria-hidden="true"><img src={IMAGES.homeHero} alt="" fetchpriority="high" width="1150" height="1098"/></div>}
+    <div className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview?'is-admin-preview':''}`}>
+      <PublicBackdrop />
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
         <DailyReminder />

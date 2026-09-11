@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
+import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import { SITE } from '@/content/site';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
@@ -16,7 +17,8 @@ export default function RadioPlayerPage() {
     const audio = audioRef.current;
     return () => { audio?.pause(); clearRadioMediaSession(); document.title = title; };
   }, []);
-  return <main className="jic-radio-player-page">
+  return <main className="jic-radio-player-page jic-public-route jic-inner-route">
+    <PublicBackdrop />
     <section className="jic-radio-player-panel">
       <Link to="/" className="jic-player-logo" aria-label="Jamatia Islamic Centre home"><JamatiaLogo/></Link>
       <img src="/icons/jic-icon-512.png?v=20260911" width="160" height="160" className="jic-player-artwork" alt="Jamatia Islamic Centre entrance"/>

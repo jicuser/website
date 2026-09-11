@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Heart, Home, LogIn, MapPin, Menu, Moon, Pause, Phone, Play, Sparkles, Sun, X, ChevronDown, ExternalLink } from 'lucide-react';
+import { Heart, Home, LogIn, MapPin, Menu, Moon, Pause, Phone, Play, Sparkles, Sun, X, ExternalLink } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
@@ -29,7 +29,7 @@ export default function UnifiedHeader() {
   const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
   const headerRef = useRef(null), audioRef = useRef(null), menuRef = useRef(null), subnavRef = useRef(null);
   const [playing, setPlaying] = useState(false), [radioLoading, setRadioLoading] = useState(false), [radioError, setRadioError] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false), [mobileGroup, setMobileGroup] = useState(null), [donationOpen, setDonationOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false), [donationOpen, setDonationOpen] = useState(false);
   const next = nextPrayer(todaysTimes, currentDate);
   const navigation = useMemo(() => activeNavigation(pathname), [pathname]);
   const subtabs = navigation?.children || [];
@@ -38,10 +38,10 @@ export default function UnifiedHeader() {
   const availability = useRadioAvailability(streamUrl);
   const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
 
-  useEffect(() => { setMenuOpen(false); setMobileGroup(null); }, [pathname]);
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
   useEffect(() => {
     const openDonation = () => { setMenuOpen(false); setDonationOpen(true); };
-    const openMenu = () => { setMobileGroup(null); setMenuOpen(true); };
+    const openMenu = () => setMenuOpen(true);
     window.addEventListener('jic-open-donation', openDonation);
     window.addEventListener('jic-open-menu', openMenu);
     return () => {
@@ -102,7 +102,7 @@ export default function UnifiedHeader() {
         <div className="jic-header-live-row">{[0,1].map(index => <Link key={index} to="/prayer-times/jummah" className="jic-jummah-compact"><b>Jummah {index + 1}</b><span>{shortTime(jummahTimes?.[index]?.prayer)}</span></Link>)}<div className="jic-header-radio">{radioButton}<a href="/radio" target="_blank" rel="noopener noreferrer" aria-label="Open JIC Radio player" title="Open player" onClick={() => audioRef.current?.pause()}><ExternalLink size={15}/></a></div></div>
       </div>
       <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="horizontal"/></Link>
-        <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path,children}) => <div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path === '/'}>{name}</NavLink>{children.length > 0 && <div className="jic-desktop-nav-dropdown jic-glass">{children.map(child => <Link key={`${child.path}-${child.name}`} to={child.path}>{child.name}</Link>)}</div>}</div>)}</nav>
+        <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path}) => <div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path === '/'}>{name}</NavLink></div>)}</nav>
         <div className="jic-free-actions"><button type="button" className="jic-quick-theme" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}>{theme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="jic-site-menu"><Menu size={22}/></button></div>
       </div>
       {subtabs.length > 0 && <nav ref={subnavRef} className="jic-unified-subnav" aria-label={`${navigation.name} sections`}>{subtabs.map(item => <Link key={`${item.path}-${item.name}`} to={item.path} aria-current={item.path === selected ? 'page' : undefined} className={cn('jic-unified-subnav-link', item.path === selected && 'is-current')}>{item.name}</Link>)}</nav>}
@@ -111,7 +111,9 @@ export default function UnifiedHeader() {
     {menuOpen && <dialog id="jic-site-menu" ref={menuRef} className="jic-unified-menu" aria-label="Navigation menu" onCancel={() => setMenuOpen(false)}>
       <div className="jic-unified-menu-head"><Link to="/" onClick={() => setMenuOpen(false)}><JamatiaLogo/></Link><button type="button" autoFocus onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><X size={24}/></button></div>
       <div className="jic-unified-menu-scroll"><div className="jic-menu-appearance"><button type="button" onClick={toggleTheme}>{theme === 'dark' ? <Sun size={17}/> : <Moon size={17}/>} {theme === 'dark' ? 'Light mode' : 'Dark mode'}</button><button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}><Sparkles size={17}/> Glass {glassEnabled ? 'on' : 'off'}</button></div>
-        {NAV_GROUPS.map(({name,path,children}) => <div className="jic-unified-menu-group" key={path}><div className="jic-unified-menu-row"><NavLink to={path} end={path === '/'} onClick={() => setMenuOpen(false)}>{name}</NavLink>{children.length > 0 && <button type="button" aria-label={`${mobileGroup === name ? 'Collapse' : 'Expand'} ${name}`} aria-expanded={mobileGroup === name} onClick={() => setMobileGroup(current => current === name ? null : name)}><ChevronDown size={20}/></button>}</div>{children.length > 0 && mobileGroup === name && <div className="jic-unified-menu-children">{children.map(child => <Link key={`${child.path}-${child.name}`} to={child.path} onClick={() => setMenuOpen(false)}>{child.name}</Link>)}</div>}</div>)}
+        <nav className="jic-menu-directory" aria-label="All pages">
+          {[...NAV_GROUPS, {name:'Madrassah',path:'/madrassah',children:MADRASSAH_TABS}].map(({name,path,children}) => <div className="jic-unified-menu-group" key={path}><div className="jic-unified-menu-row"><NavLink to={path} end onClick={() => setMenuOpen(false)}>{name}</NavLink></div>{children.length > 0 && <div className="jic-unified-menu-children">{children.filter(child => child.path !== path).map(child => <NavLink end key={`${child.path}-${child.name}`} to={child.path} onClick={() => setMenuOpen(false)}>{child.name}</NavLink>)}</div>}</div>)}
+        </nav>
         <Link to="/admin/login" className="jic-unified-admin-link" onClick={() => setMenuOpen(false)}><LogIn size={17}/>Admin login</Link><button type="button" className="jic-unified-menu-donate" onClick={() => { setMenuOpen(false); setDonationOpen(true); }}><Heart size={18}/>Donate</button>
       </div>
     </dialog>}

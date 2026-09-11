@@ -55,16 +55,18 @@ html[data-theme] .jic-unified-menu { position:fixed;inset:0;width:100%;height:10
 .jic-unified-menu-head { height:80px;padding:14px max(18px,calc((100vw - 720px)/2));display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--jic-border); }
 .jic-unified-menu-head>a { width:174px; }
 .jic-unified-menu-head button { width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--jic-border);border-radius:10px;flex-shrink:0; }
-.jic-unified-menu-scroll { height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;max-width:756px;margin:auto;padding:16px 18px calc(env(safe-area-inset-bottom) + 28px); }
+.jic-unified-menu-scroll { height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;max-width:1000px;margin:auto;padding:12px 18px calc(env(safe-area-inset-bottom) + 20px); }
 .jic-menu-appearance { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px; }
 .jic-menu-appearance button { display:flex;justify-content:center;align-items:center;gap:7px;min-height:44px;padding:8px;font-size:14px;border:1px solid var(--jic-border);border-radius:10px; }
-.jic-unified-menu-group { border-bottom:1px solid var(--jic-border); }
+.jic-menu-directory { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start; }
+.jic-unified-menu-group { min-width:0;border-bottom:1px solid var(--jic-border);padding-bottom:8px; }
 .jic-unified-menu-row { display:flex;align-items:center;justify-content:space-between;gap:12px; }
-.jic-unified-menu-row>a { flex:1;padding:14px 0;font-size:18px;font-weight:650;color:var(--jic-text); }
-.jic-unified-menu-row>button { width:44px;height:44px;display:grid;place-items:center;color:var(--jic-text); }
-.jic-unified-menu-row>button[aria-expanded=true] svg { transform:rotate(180deg); }
-.jic-unified-menu-children { display:grid;padding:0 0 10px 12px; }
-.jic-unified-menu-children a { padding:12px 8px;font-size:16px; }
+.jic-unified-menu-row>a { flex:1;min-height:44px;display:flex;align-items:center;padding:6px 0;font-size:16px;line-height:1.35;font-weight:650;color:var(--jic-text);overflow-wrap:anywhere; }
+.jic-unified-menu-children { display:grid;gap:3px;padding:0; }
+.jic-unified-menu-children a { display:flex;align-items:center;min-height:44px;padding:6px 8px;font-size:14px;line-height:1.35;border-radius:7px;overflow-wrap:anywhere; }
+.jic-menu-directory a[aria-current=page] { font-weight:700;text-decoration:underline;text-underline-offset:4px; }
+@media(min-width:768px) { .jic-menu-directory { grid-template-columns:repeat(3,minmax(0,1fr));gap:18px; } }
+@media(max-width:350px) { .jic-menu-directory { grid-template-columns:1fr; } }
 .jic-unified-admin-link,.jic-unified-menu-donate { display:flex;justify-content:center;align-items:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:1px solid var(--jic-border);border-radius:11px;font-size:16px; }
 html[data-theme] .jic-unified-menu-donate { background:var(--jic-action)!important;color:#0C1930!important; }
 .jic-daily-reminder { width:min(1200px,calc(100% - 32px));margin:0 auto 8px; }
@@ -72,7 +74,7 @@ html[data-theme] .jic-unified-menu-donate { background:var(--jic-action)!importa
 .jic-daily-reminder>button>div { display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:12px;line-height:1.4;color:var(--jic-text-secondary); }
 .jic-daily-reminder b { color:var(--jic-gold);text-transform:uppercase;letter-spacing:.09em; }
 .jic-daily-reminder small { margin-left:auto;font-size:12px; }
-.jic-daily-reminder p { margin:4px 0 0;font-size:14px;line-height:1.45; }
+.jic-daily-reminder p { margin:4px 0 0;font-size:14px;line-height:1.45;min-height:2.9em; }
 .jic-notices { display:flex;overflow-x:auto;gap:16px;font-size:14px;padding:8px 0; }
 .jic-notices a { flex:0 0 auto; }
 html[data-surface=solid] .jic-free-nav-row,html[data-surface=solid] .jic-daily-reminder>button { background:var(--jic-surface)!important;backdrop-filter:none;-webkit-backdrop-filter:none; }

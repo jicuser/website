@@ -13,4 +13,20 @@ export const DEFAULT_REMINDERS = [
   { type:'Hadith', text:'A good word is charity.', source:'Bukhari 2989' },
   { type:'Hadith', text:'Allah is gentle and loves gentleness.', source:'Muslim 2593' },
   { type:'Reflection', text:'Make time today for prayer, kindness and sincere du‘a.', source:'Daily reminder' },
+  // Concise translations/paraphrases of meaning, not full verses or narrations.
+  // References checked 2026-09-11; no live API or browser API key required.
+  { type:'Qur’an', text:'Seek help through patience and prayer.', source:'Qur’an 2:153 · meaning', sourceUrl:'https://quran.com/2/153' },
+  { type:'Qur’an', text:'Speak kindly to people.', source:'Qur’an 2:83 · excerpt', sourceUrl:'https://quran.com/2/83' },
+  { type:'Qur’an', text:'Allah commands justice, kindness and generosity to relatives.', source:'Qur’an 16:90 · meaning', sourceUrl:'https://quran.com/16/90' },
+  { type:'Qur’an', text:'Choose the best words when speaking to others.', source:'Qur’an 17:53 · meaning', sourceUrl:'https://quran.com/17/53' },
+  { type:'Qur’an', text:'My Lord, increase me in knowledge.', source:'Qur’an 20:114 · excerpt', sourceUrl:'https://quran.com/20/114' },
+  { type:'Qur’an', text:'Believers are a brotherhood; make peace between one another.', source:'Qur’an 49:10 · meaning', sourceUrl:'https://quran.com/49/10' },
+  { type:'Hadith', text:'Whoever believes in Allah and the Last Day should speak good or remain silent.', source:'Bukhari 6018 · meaning', sourceUrl:'https://sunnah.com/bukhari:6018' },
+  { type:'Hadith', text:'Among the best of you are those who learn the Qur’an and teach it.', source:'Bukhari 5027 · meaning', sourceUrl:'https://sunnah.com/bukhari:5027' },
+  { type:'Hadith', text:'Allah helps a servant who helps another.', source:'Muslim 2699a · meaning', sourceUrl:'https://sunnah.com/muslim:2699a' },
+  { type:'Hadith', text:'Seeking knowledge is a path that Allah makes easy towards Paradise.', source:'Muslim 2699a · meaning', sourceUrl:'https://sunnah.com/muslim:2699a' },
+  { type:'Reflection', text:'Pause before you reply. Let kindness guide your words.', source:'Daily reflection · not a hadith' },
+  { type:'Reflection', text:'Make du‘a for someone who may never know you remembered them.', source:'Daily reflection · not a hadith' },
+  { type:'Reflection', text:'A few quiet moments with the Qur’an can be part of your day.', source:'Daily reflection · not a hadith' },
+  { type:'Reflection', text:'Look for one small way to help your family or neighbour today.', source:'Daily reflection · not a hadith' },
 ];

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, CalendarDays, Play, Radio, Users, Building2, ArrowRight, Megaphone } from 'lucide-react';
+import { BookOpen, CalendarDays, Play, Radio, Users, Building2, ArrowRight, Megaphone, Info, GraduationCap, Mail } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
@@ -41,6 +41,13 @@ const DEFAULT_CARDS=[
   {key:'youth',title:'Youth',text:'Activities, programs and opportunities.',to:'/youth',cta:'Explore Youth',icon:Users,img:''},
   {key:'madrassah',title:'Madrassah',text:'Islamic education for the next generation.',to:'/madrassah',cta:'View Classes',icon:BookOpen,img:''},
 ];
+const MORE_CARDS=[
+  {key:'about',title:'About',text:'Our centre and community.',to:'/about',icon:Info},
+  {key:'prayer-times',title:'Prayer Times',text:'Today, monthly and Jummah.',to:'/prayer-times',icon:CalendarDays},
+  {key:'worship',title:'Worship',text:'Qur’an, prayers and du‘as.',to:'/worship',icon:BookOpen},
+  {key:'education',title:'Education',text:'Learning for all ages.',to:'/education',icon:GraduationCap},
+  {key:'contact',title:'Contact',text:'Visit or get in touch.',to:'/contact',icon:Mail},
+];
 
 function useHomeTiles(){
   const[cards,setCards]=useState(DEFAULT_CARDS);
@@ -68,11 +75,11 @@ export default function HomePage(){
 
     {announcement&&<section className="jic-announcement jic-popup-surface"><Megaphone size={18}/><strong>{announcement.title}</strong><span>{announcement.body}</span></section>}
 
-    <section className="jic-feature-grid">
-      {cards.map(({key,title,text,to,cta,icon:Icon,img})=><Link to={to} className={cn('jic-feature-card',!img&&'is-glass-only')} key={key} style={img?{'--card-image':`url("${img}")`}:undefined}>
-        <Icon className="jic-card-icon"/><div className="jic-card-copy"><h2>{title}</h2><p>{text}</p><span>{cta} <ArrowRight size={17}/></span></div>
+    <nav className="jic-feature-grid" aria-label="Explore the centre">
+      {[...cards,...MORE_CARDS].map(({key,title,text,to,icon:Icon,img})=><Link to={to} className={cn('jic-feature-card',!img&&'is-glass-only')} key={key} style={img?{'--card-image':`url("${img}")`}:undefined}>
+        <Icon className="jic-card-icon" aria-hidden="true"/><div className="jic-card-copy"><h2>{title}</h2><p>{text}</p></div>
       </Link>)}
-    </section>
+    </nav>
 
     <ProgrammePosters />
 

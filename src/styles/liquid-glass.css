@@ -36,7 +36,7 @@ html[data-theme][data-surface=glass] :is(
   .jic-programme-card,.jic-related .jic-swipe-rail>a,
   .jic-hall-intro,.jic-hall-calendar,.managed-page-content,
   .jic-unified-menu,.jic-image-viewer,.jic-popup-panel,.jic-popup-surface,
-  .jic-desktop-nav-dropdown
+  .jic-desktop-nav-dropdown,.jic-radio-player-panel
 ) {
   background:var(--jic-glass-surface)!important;
   color:var(--jic-text)!important;
@@ -140,7 +140,7 @@ html[data-theme][data-surface=solid] :is(
   .jic-free-actions a,.jic-free-actions button,.jic-footer-socials a,
   .jic-community-join,.jic-unified-subnav-link,.jic-rail-controls button,
   .jic-image-viewer,.jic-image-viewer-heading,.jic-popup-panel,.jic-popup-surface,
-  .jic-scroll-top,.jic-secondary-cta,.jic-announcement
+  .jic-scroll-top,.jic-secondary-cta,.jic-announcement,.jic-radio-player-panel
 ) {
   background:var(--jic-surface)!important;
   color:var(--jic-text)!important;
@@ -148,6 +148,12 @@ html[data-theme][data-surface=solid] :is(
   -webkit-backdrop-filter:none!important;
   backdrop-filter:none!important;
   box-shadow:none!important;
+}
+/* Page wrappers must not paint over the shared photo. Keep actual cards intact. */
+html[data-theme][data-surface] .jic-public-route .page-transition>section {
+  background:transparent!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
 }
 html[data-theme][data-surface=solid] .jic-unified-subnav-link.is-current {
   background:var(--jic-text)!important;color:var(--jic-bg)!important;
