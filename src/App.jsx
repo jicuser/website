@@ -10,6 +10,7 @@ import MainLayout from '@/layouts/MainLayout';
 import AboutPage from '@/pages/AboutPage';
 import ClassesCoursesPage from '@/pages/ClassesCoursesPage';
 import ContactPage from '@/pages/ContactPage';
+import EducationPage from '@/pages/EducationPage';
 import FinancialHistoryPage from '@/pages/FinancialHistoryPage';
 import HallBookingPage from '@/pages/HallBookingPage';
 import HomePage from '@/pages/HomePage';
@@ -76,9 +77,12 @@ export default function App() {
           <Route path="services/hall-booking" element={<HallBookingPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
+
+          <Route path="education" element={<EducationPage />} />
           <Route path="madrassah" element={<MadrassahPage />} />
           <Route path="madrassah/classes-courses" element={<ClassesCoursesPage />} />
           <Route path="madrassah/enrolment" element={<MadrassahEnrolmentPage />} />
+
           <Route path="youth" element={<YouthPage />} />
           <Route path="youth/itikaf" element={<YouthPage view="itikaf" />} />
 
