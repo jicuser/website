@@ -242,5 +242,15 @@ html[data-theme][data-surface=glass] :is(.jic-public-route,.jic-unified-menu) :i
 @media(prefers-reduced-transparency:reduce) {
   html[data-theme][data-surface=glass] { --jic-button-tint-strength:100%; }
 }
-/* Touch should not show a focus frame; keyboard navigation remains visible. */
-html[data-theme] .jic-unified-menu-head>a:focus:not(:focus-visible) { outline:none; }
+/* The menu itself is glass; ordinary page links need no extra pane or blur. */
+html[data-theme][data-surface] .jic-menu-directory .jic-unified-menu-children a {
+  background:transparent!important;
+  box-shadow:none!important;
+  border:0!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+html[data-theme][data-surface] .jic-menu-directory .jic-unified-menu-children a:is(:hover,[aria-current=page]) {
+  background:var(--jic-glass-inset)!important;
+  color:var(--jic-text)!important;
+}

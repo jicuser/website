@@ -111,12 +111,12 @@ export default function UnifiedHeader() {
     </div></header>
     {radioError && <span className="sr-only" role="status">Radio could not start. Press Radio to retry.</span>}
     {menuOpen && <dialog id="jic-site-menu" ref={menuRef} className="jic-unified-menu" aria-label="Navigation menu" onCancel={() => setMenuOpen(false)}>
-      <div className="jic-unified-menu-head"><Link to="/" onClick={() => setMenuOpen(false)}><JamatiaLogo/></Link><button ref={menuCloseRef} type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><X size={24}/></button></div>
+      <div className="jic-unified-menu-head"><div className="jic-menu-brand"><JamatiaLogo/></div><button ref={menuCloseRef} type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><X size={24}/></button></div>
       <div className="jic-unified-menu-scroll"><div className="jic-menu-appearance"><button type="button" onClick={toggleTheme}>{theme === 'dark' ? <Sun size={17}/> : <Moon size={17}/>} {theme === 'dark' ? 'Light mode' : 'Dark mode'}</button><button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}><Sparkles size={17}/> Glass {glassEnabled ? 'on' : 'off'}</button></div>
         <nav className="jic-menu-directory" aria-label="All pages">
           {[...NAV_GROUPS, {name:'Madrassah',path:'/madrassah',children:MADRASSAH_TABS}].map(({name,path,children}) => <div className="jic-unified-menu-group" key={path}><div className="jic-unified-menu-row"><NavLink to={path} end onClick={() => setMenuOpen(false)}>{name}</NavLink></div>{children.length > 0 && <div className="jic-unified-menu-children">{children.filter(child => child.path !== path).map(child => <NavLink end key={`${child.path}-${child.name}`} to={child.path} onClick={() => setMenuOpen(false)}>{child.name}</NavLink>)}</div>}</div>)}
         </nav>
-        <Link to="/admin/login" className="jic-unified-admin-link" onClick={() => setMenuOpen(false)}><LogIn size={17}/>Admin login</Link><button type="button" className="jic-unified-menu-donate" onClick={() => { setMenuOpen(false); setDonationOpen(true); }}><Heart size={18}/>Donate</button>
+        <div className="jic-menu-bottom-actions"><Link to="/admin/login" className="jic-unified-admin-link" onClick={() => setMenuOpen(false)}><LogIn size={17}/>Admin login</Link><button type="button" className="jic-unified-menu-donate" onClick={() => { setMenuOpen(false); setDonationOpen(true); }}><Heart size={18}/>Donate</button></div>
       </div>
     </dialog>}
     <WonderfulDonationModal open={donationOpen} onClose={() => setDonationOpen(false)}/>
