@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 const DEFAULT_TILES=[
   {key:'services',title:'Services',text:'Religious, educational and community services for all.',image:''},
-  {key:'projects',title:'Projects',text:'Building for a stronger future.',image:''},
+  {key:'projects',title:'Masjid Building Works',text:'Building for a stronger future.',image:''},
   {key:'youth',title:'Youth',text:'Activities, programs and opportunities.',image:''},
   {key:'madrassah',title:'Madrassah',text:'Islamic education for the next generation.',image:''},
 ];

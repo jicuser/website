@@ -5,6 +5,7 @@ import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import {overviewPaths} from '@/content/editablePages';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
+import RelatedContent from '@/components/RelatedContent';
 import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import AdminBar from '@/components/shell/AdminBar';
@@ -30,6 +31,7 @@ export default function MainLayout() {
           <Outlet />
           {overviewPaths.has(pathname) && <div className="mx-auto max-w-5xl px-4 py-8"><ManagedPageContent optional/></div>}
           <ManagedPageSections />
+          <RelatedContent />
         </motion.div>
       </main>
       <Footer />

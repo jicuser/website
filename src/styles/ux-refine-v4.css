@@ -4,7 +4,6 @@
 .jic-premium-home .jic-hero,
 .jic-premium-home .jic-hero-no-image{
   position:relative;
-  background-image:linear-gradient(90deg,rgba(3,8,14,.76) 0%,rgba(3,8,14,.40) 46%,rgba(3,8,14,.15) 72%),none!important;
   background-size:cover!important;
   background-position:center 61%!important;
   background-repeat:no-repeat!important;
@@ -107,10 +106,8 @@
   /* Homepage keeps the approved mobile controls, now over the supplied aerial image. */
   .jic-premium-home .jic-hero,.jic-premium-home .jic-hero-no-image{
     min-height:650px!important;
-    background-image:linear-gradient(180deg,rgba(4,9,15,.05) 0%,rgba(4,9,15,.18) 46%,rgba(4,9,15,.78) 100%),none!important;
     background-position:center 58%!important;
   }
-  html:not(.dark) .jic-premium-home .jic-hero{background-image:linear-gradient(180deg,rgba(248,242,230,.03),rgba(7,13,20,.25) 48%,rgba(5,10,16,.72)),none!important;}
   .jic-premium-home .jic-hero-inner{min-height:650px!important;padding:26px 22px 42px!important;justify-content:flex-end!important;}
   .jic-premium-home .jic-hero h1{font-size:42px!important;line-height:.98!important;max-width:340px!important;color:#fff!important;}
   .jic-premium-home .jic-hero-sub{font-size:15px!important;color:rgba(255,255,255,.88)!important;}

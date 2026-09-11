@@ -19,7 +19,7 @@ const QUICK_LINKS = [
   { label: 'About', to: '/about' },
   { label: 'Prayer Times', to: '/prayer-times' },
   { label: 'Services', to: '/services' },
-  { label: 'Projects', to: '/projects' },
+  { label: 'Masjid Building Works', to: '/projects' },
   { label: 'Madrassah', to: '/madrassah' },
   { label: 'Youth', to: '/youth' },
   { label: 'Contact', to: '/contact' },

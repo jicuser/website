@@ -6,7 +6,7 @@ import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useContent } from '@/context/ContentContext';
-import { useSiteImages } from '@/hooks/useSiteImages';
+import { IMAGES } from '@/content/images';
 import { supabase } from '@/lib/supabaseClient';
 import { londonDate } from '@/lib/timetable';
 import { cn } from '@/lib/utils';
@@ -36,25 +36,26 @@ function useHomeLiveContent(){
 
 const DEFAULT_CARDS=[
   {key:'services',title:'Services',text:'Religious, educational and community services for all.',to:'/services',cta:'Explore Services',icon:MosqueIcon,img:''},
-  {key:'projects',title:'Masjid Building Works',text:'Follow the latest building works, appeals and progress at JIC.',to:'/projects',cta:'View & Support Works',icon:Building2,img:''},
+  {key:'projects',title:'Masjid Building Works',text:'Follow the latest building works, appeals and progress at JIC.',to:'/projects',cta:'View & Support the Works',icon:Building2,img:''},
   {key:'youth',title:'Youth',text:'Activities, programs and opportunities.',to:'/youth',cta:'Explore Youth',icon:Users,img:''},
   {key:'madrassah',title:'Madrassah',text:'Islamic education for the next generation.',to:'/madrassah',cta:'View Classes',icon:BookOpen,img:''},
 ];
 
 function useHomeTiles(){
   const[cards,setCards]=useState(DEFAULT_CARDS);
-  useEffect(()=>{supabase.from('page_content').select('content_value').eq('content_key','home_tiles').maybeSingle().then(({data,error})=>{if(error||!data?.content_value)return;try{const saved=JSON.parse(data.content_value);if(!Array.isArray(saved))return;setCards(DEFAULT_CARDS.map(base=>{const edit=saved.find(item=>item.key===base.key);if(!edit)return base;return{...base,title:edit.title||base.title,text:edit.text||base.text,img:typeof edit.image==='string'?edit.image:base.img};}));}catch{}});},[]);
+  useEffect(()=>{supabase.from('page_content').select('content_value').eq('content_key','home_tiles').maybeSingle().then(({data,error})=>{if(error||!data?.content_value)return;try{const saved=JSON.parse(data.content_value);if(!Array.isArray(saved))return;setCards(DEFAULT_CARDS.map(base=>{const edit=saved.find(item=>item.key===base.key);if(!edit)return base;return{...base,title:base.key==='projects' && edit.title==='Projects' ? base.title : edit.title||base.title,text:edit.text||base.text,img:typeof edit.image==='string'?edit.image:base.img};}));}catch{}});},[]);
   return cards;
 }
 
 export default function HomePage(){
-  const{events,announcement,livestream,whatsapp}=useHomeLiveContent();const cards=useHomeTiles();const{jummahTimes}=usePrayerTimes();const{getContent}=useContent();const siteImages=useSiteImages();
+  const{events,announcement,livestream,whatsapp}=useHomeLiveContent();const cards=useHomeTiles();const{jummahTimes}=usePrayerTimes();const{getContent}=useContent();
   let hero={};try{hero=JSON.parse(getContent('page:/','{}'));}catch{}
-  const heroImage=hero.image||siteImages.homeHero;
+  const heroImage=IMAGES.homeHero;
   const liveUrl=safeWebUrl(livestream?.stream_url)||SITE.socials.youtube;const embedUrl=useMemo(()=>youtubeEmbedUrl(livestream?.stream_url),[livestream]);
 
   return <div className="jic-premium-home">
-    <section className="jic-hero" style={heroImage?{backgroundImage:`url("${heroImage}")`}:undefined}>
+    <section className="jic-hero">
+      <img className="jic-hero-photo" src={heroImage} alt="" fetchpriority="high" width="1150" height="1098"/>
       <div className="jic-hero-overlay"/>
       <div className="jic-hero-inner">
         <div className="jic-hero-mobile-logo"><JamatiaLogo/></div>

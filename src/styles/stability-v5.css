@@ -3,7 +3,6 @@
 /* The supplied aerial mosque image must remain visible in both themes. */
 .jic-premium-home .jic-hero,
 .jic-premium-home .jic-hero-no-image{
-  background-image:linear-gradient(180deg,rgba(4,9,15,.08) 0%,rgba(4,9,15,.16) 46%,rgba(4,9,15,.78) 100%),none!important;
   background-size:cover!important;
   background-repeat:no-repeat!important;
   background-position:center 57%!important;
@@ -12,7 +11,6 @@
 }
 html:not(.dark) .jic-premium-home .jic-hero,
 html:not(.dark) .jic-premium-home .jic-hero-no-image{
-  background-image:linear-gradient(180deg,rgba(4,9,15,.05) 0%,rgba(4,9,15,.14) 44%,rgba(4,9,15,.70) 100%),none!important;
 }
 .jic-premium-home .jic-hero::before{content:none!important;}
 .jic-premium-home .jic-hero h1,.jic-premium-home .jic-hero-sub,.jic-premium-home .jic-kicker{position:relative;z-index:2;}

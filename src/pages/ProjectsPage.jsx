@@ -30,7 +30,7 @@ export default function ProjectsPage() {
     </div></section>
 
     <section className="bg-background py-8 md:py-10"><div className="container mx-auto px-4"><div className="grid gap-4 md:grid-cols-2">
-      <Link to="/projects/how-to-support" className="rounded-2xl border border-border bg-card p-5"><h3 className="font-bold text-card-foreground">Support the projects</h3><p className="mt-2 text-sm text-muted-foreground">Ways to contribute to JIC development.</p></Link>
+      <Link to="/projects/how-to-support" className="rounded-2xl border border-border bg-card p-5"><h3 className="font-bold text-card-foreground">Support the Works</h3><p className="mt-2 text-sm text-muted-foreground">Ways to contribute to JIC development.</p></Link>
       <Link to="/projects/gallery" className="rounded-2xl border border-border bg-card p-5"><Image className="mb-3 text-primary" size={22}/><h3 className="font-bold text-card-foreground">Latest progress</h3><p className="mt-2 text-sm text-muted-foreground">See photos and recent milestones.</p></Link>
     </div></div></section>
   </div>;
