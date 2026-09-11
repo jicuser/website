@@ -37,35 +37,32 @@ export default function Footer() {
   const openMenu = () => window.dispatchEvent(new CustomEvent('jic-open-menu'));
   return (
     <footer className="jic-site-footer jic-site-footer-compact jic-footer-refined">
-      <div className="container mx-auto px-4 py-5 md:py-7">
+      <div className="container mx-auto">
         <div className="jic-footer-compact-grid">
           <nav className="jic-footer-links-inline" aria-label="Footer links">
             <button type="button" className="jic-footer-menu-toggle" onClick={openMenu} aria-haspopup="dialog" aria-controls="jic-site-menu"><Menu size={18} aria-hidden="true"/>Menu</button>
             {QUICK_LINKS.map(({ label, to }) => <Link key={to} to={to}>{label}</Link>)}
           </nav>
           <div className="jic-footer-actions-compact">
-            <div className="jic-footer-socials flex gap-2">
-              <a href={whatsapp} aria-label="WhatsApp Community"><WhatsAppIcon size={22}/></a>
+            <nav className="jic-footer-socials" aria-label="Social media and contact links">
+              <a href={whatsapp} className="jic-whatsapp-action" aria-label="WhatsApp Community"><WhatsAppIcon size={22}/></a>
               {SITE.socials.facebook && <a href={SITE.socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={18}/></a>}
               {SITE.socials.x && <a href={SITE.socials.x} target="_blank" rel="noopener noreferrer" aria-label="X"><XIcon className="h-[18px] w-[18px]"/></a>}
               {SITE.socials.instagram && <a href={SITE.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={18}/></a>}
               {SITE.socials.youtube && <a href={SITE.socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube"><Youtube size={18}/></a>}
               {SITE.socials.tiktok && <a href={SITE.socials.tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok"><TikTokIcon className="h-[18px] w-[18px]"/></a>}
-            </div>
+              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open map to ${SITE.name}, ${SITE.address.full}`} title={SITE.address.full}><MapPin size={20} aria-hidden="true"/></a>
+              <a href={phoneUrl} aria-label={`Call ${SITE.phone}`} title={`Call ${SITE.phone}`}><Phone size={20} aria-hidden="true"/></a>
+              <a href={`mailto:${SITE.email}`} aria-label={`Email ${SITE.email}`} title={`Email ${SITE.email}`}><Mail size={20} aria-hidden="true"/></a>
+            </nav>
             <button type="button" onClick={openDonation} className="jic-footer-donate inline-flex">Donate</button>
           </div>
         </div>
-        <div className="jic-footer-bottom mt-4 flex flex-col gap-2 pt-4 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year} {SITE.name}</p>
-          <div className="flex gap-4"><Link to="/privacy">Privacy</Link></div>
-        </div>
-        <nav className="jic-footer-socials jic-footer-contact-icons" aria-label="Contact the centre">
-          <a href={mapsUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open map to ${SITE.name}, ${SITE.address.full}`} title={SITE.address.full}><MapPin size={20} aria-hidden="true"/></a>
-          <a href={phoneUrl} aria-label={`Call ${SITE.phone}`} title={`Call ${SITE.phone}`}><Phone size={20} aria-hidden="true"/></a>
-          <a href={`mailto:${SITE.email}`} aria-label={`Email ${SITE.email}`} title={`Email ${SITE.email}`}><Mail size={20} aria-hidden="true"/></a>
-        </nav>
       </div>
-      <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="pillars-outline"/></Link>
+      <div className="jic-footer-bottom">
+        <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="pillars-outline"/></Link>
+        <p className="jic-footer-legal"><span>© {year} {SITE.name}</span><span aria-hidden="true">·</span><Link to="/privacy">Privacy</Link></p>
+      </div>
     </footer>
   );
 }

@@ -27,7 +27,7 @@ export default function UnifiedHeader() {
   const { pathname } = useLocation();
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
-  const headerRef = useRef(null), audioRef = useRef(null), menuRef = useRef(null), subnavRef = useRef(null);
+  const headerRef = useRef(null), audioRef = useRef(null), menuRef = useRef(null), menuCloseRef = useRef(null), subnavRef = useRef(null);
   const [playing, setPlaying] = useState(false), [radioLoading, setRadioLoading] = useState(false), [radioError, setRadioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false), [donationOpen, setDonationOpen] = useState(false);
   const next = nextPrayer(todaysTimes, currentDate);
@@ -74,6 +74,8 @@ export default function UnifiedHeader() {
     if (!menuOpen) return undefined;
     const node = menuRef.current, old = document.body.style.overflow;
     node.showModal(); document.body.style.overflow = 'hidden';
+    // React autofocus can run before showModal; explicitly focus the visible close control.
+    menuCloseRef.current?.focus({ preventScroll:true });
     return () => { node.close(); document.body.style.overflow = old; };
   }, [menuOpen]);
   useEffect(() => { const audio = audioRef.current; return () => { audio?.pause(); clearRadioMediaSession(); }; }, []);
@@ -109,7 +111,7 @@ export default function UnifiedHeader() {
     </div></header>
     {radioError && <span className="sr-only" role="status">Radio could not start. Press Radio to retry.</span>}
     {menuOpen && <dialog id="jic-site-menu" ref={menuRef} className="jic-unified-menu" aria-label="Navigation menu" onCancel={() => setMenuOpen(false)}>
-      <div className="jic-unified-menu-head"><Link to="/" onClick={() => setMenuOpen(false)}><JamatiaLogo/></Link><button type="button" autoFocus onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><X size={24}/></button></div>
+      <div className="jic-unified-menu-head"><Link to="/" onClick={() => setMenuOpen(false)}><JamatiaLogo/></Link><button ref={menuCloseRef} type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><X size={24}/></button></div>
       <div className="jic-unified-menu-scroll"><div className="jic-menu-appearance"><button type="button" onClick={toggleTheme}>{theme === 'dark' ? <Sun size={17}/> : <Moon size={17}/>} {theme === 'dark' ? 'Light mode' : 'Dark mode'}</button><button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}><Sparkles size={17}/> Glass {glassEnabled ? 'on' : 'off'}</button></div>
         <nav className="jic-menu-directory" aria-label="All pages">
           {[...NAV_GROUPS, {name:'Madrassah',path:'/madrassah',children:MADRASSAH_TABS}].map(({name,path,children}) => <div className="jic-unified-menu-group" key={path}><div className="jic-unified-menu-row"><NavLink to={path} end onClick={() => setMenuOpen(false)}>{name}</NavLink></div>{children.length > 0 && <div className="jic-unified-menu-children">{children.filter(child => child.path !== path).map(child => <NavLink end key={`${child.path}-${child.name}`} to={child.path} onClick={() => setMenuOpen(false)}>{child.name}</NavLink>)}</div>}</div>)}

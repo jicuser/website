@@ -40,24 +40,29 @@ html[data-theme] :is(a,button,input,textarea,select,[tabindex]):focus-visible { 
 }
 /* Footer owns its layout; retained page styles must not force overlapping rows. */
 html[data-theme] .jic-footer-refined { padding:0!important; }
-html[data-theme] .jic-footer-refined>.container { max-width:1200px!important;padding:28px 20px 0!important; }
+html[data-theme] .jic-footer-refined>.container { max-width:1200px!important;padding:12px 16px!important; }
 html[data-theme] .jic-footer-refined .jic-footer-brand { width:min(260px,75%);margin:0 0 24px; }
-html[data-theme] .jic-footer-refined .jic-footer-compact-grid { display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:24px!important;align-items:start!important; }
-html[data-theme] .jic-footer-refined .jic-footer-links-inline { display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px 16px!important;align-items:start!important; }
-html[data-theme] .jic-footer-refined .jic-footer-links-inline a { min-width:0;min-height:44px;display:flex;align-items:center;font-size:14px!important;line-height:1.45!important;white-space:normal!important;overflow-wrap:break-word;padding:8px 0!important;color:var(--jic-text)!important;border-radius:4px; }
-html[data-theme] .jic-footer-refined .jic-footer-menu-toggle { display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 0;text-align:left;font-size:14px;line-height:1.45;font-weight:600;background:transparent;border:0;color:var(--jic-text); }
-html[data-theme] .jic-footer-refined .jic-footer-actions-compact { display:flex!important;flex-direction:column;align-items:stretch!important;gap:16px!important;min-width:0; }
-html[data-theme] .jic-footer-refined .jic-footer-socials { display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;width:100%; }
-html[data-theme] .jic-footer-refined .jic-footer-contact-icons { padding:4px 0 20px; }
+html[data-theme] .jic-footer-refined .jic-footer-compact-grid { display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;align-items:start!important; }
+html[data-theme] .jic-footer-refined .jic-footer-links-inline { display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 10px!important;align-items:center!important; }
+html[data-theme] .jic-footer-refined .jic-footer-links-inline a { min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px!important;line-height:1.35!important;white-space:normal!important;overflow-wrap:break-word;padding:5px 0!important;color:var(--jic-text)!important;border-radius:4px; }
+html[data-theme] .jic-footer-refined .jic-footer-menu-toggle { display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:5px 0;text-align:center;font-size:14px;line-height:1.35;font-weight:600;background:transparent;border:0;color:var(--jic-text); }
+html[data-theme] .jic-footer-refined .jic-footer-actions-compact { display:flex!important;flex-direction:column;align-items:center!important;gap:10px!important;min-width:0; }
+html[data-theme] .jic-footer-refined .jic-footer-socials { display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:6px!important;width:100%;max-width:300px; }
 html[data-theme] .jic-footer-refined .jic-footer-socials a { width:44px!important;height:44px!important;flex:0 0 44px; }
-html[data-theme] .jic-footer-refined .jic-footer-donate { min-height:46px!important;width:100%;font-size:16px!important; }
-html[data-theme] .jic-footer-refined .jic-footer-bottom { color:var(--jic-text-secondary)!important;border-color:var(--jic-border);padding-bottom:12px; }
-html[data-theme] .jic-footer-refined .jic-footer-bottom a { display:inline-flex;align-items:center;min-height:44px; }
-html[data-theme] .jic-footer-refined .jic-footer-signature { display:block;margin:0!important;padding:0!important;width:min(250px,70%); }
+html[data-theme] .jic-footer-refined .jic-footer-donate { min-height:44px!important;width:min(300px,100%);font-size:16px!important; }
+html[data-theme] .jic-footer-refined .jic-footer-bottom { display:flex;align-items:center;gap:8px!important;max-width:1200px;margin:0 auto!important;padding:0 8px 0 0!important;color:var(--jic-text-secondary)!important;border-color:var(--jic-border); }
+html[data-theme] .jic-footer-refined .jic-footer-legal { display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0 5px;flex:1;min-width:0;margin:0;font-size:.75rem!important;line-height:1.4; }
+html[data-theme] .jic-footer-refined .jic-footer-legal>span:first-child { white-space:nowrap; }
+html[data-theme] .jic-footer-refined .jic-footer-bottom a { display:inline-flex;align-items:center;min-height:44px;font-size:.75rem!important; }
+html[data-theme] .jic-footer-refined .jic-footer-bottom .jic-footer-signature { display:flex;align-items:flex-end;flex:0 0 64px;align-self:stretch;margin:0!important;padding:0!important;width:64px; }
 html[data-theme] .jic-footer-refined .jic-footer-signature img { display:block;margin:0;padding:0; }
 @media(min-width:768px) {
-  html[data-theme] .jic-footer-refined .jic-footer-compact-grid { grid-template-columns:minmax(0,1fr) minmax(260px,340px)!important;gap:32px!important; }
-  html[data-theme] .jic-footer-refined .jic-footer-links-inline { grid-template-columns:repeat(3,minmax(0,1fr))!important; }
+  html[data-theme] .jic-footer-refined .jic-footer-links-inline { display:flex!important;flex-wrap:wrap;justify-content:center;gap:0 24px!important; }
+  html[data-theme] .jic-footer-refined .jic-footer-actions-compact { flex-direction:row;justify-content:center!important;flex-wrap:wrap; }
+  html[data-theme] .jic-footer-refined .jic-footer-socials { width:auto;max-width:none; }
+  html[data-theme] .jic-footer-refined .jic-footer-donate { width:140px; }
+  html[data-theme] .jic-footer-refined .jic-footer-bottom .jic-footer-signature { flex-basis:100px;width:100px; }
+  html[data-theme] .jic-footer-refined .jic-footer-legal { justify-content:flex-start; }
 }
 .jic-header-radio { display:flex;align-items:center; }
 .jic-header-radio>a { display:grid;place-items:center;min-width:32px;min-height:44px;color:var(--jic-text); }

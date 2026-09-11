@@ -106,18 +106,9 @@ html[data-theme][data-surface=glass] .jic-site-footer :is(a,p,small,.jic-footer-
 }
 html[data-theme][data-surface=glass] .jic-footer-links-inline a { font-weight:600; }
 html[data-theme][data-surface=glass] .jic-footer-socials a svg { color:inherit!important; }
-/* Match the identity's copper/light and brass/dark artwork in both surface modes. */
-html[data-theme][data-surface] .jic-footer-refined .jic-footer-donate,
-html[data-theme][data-surface] .jic-unified-menu .jic-unified-menu-donate {
-  background:var(--jic-logo-metal)!important;color:var(--jic-bg)!important;border:1px solid var(--jic-logo-metal)!important;box-shadow:none!important;
-}
-html[data-theme][data-surface] .jic-footer-refined .jic-footer-donate:hover,
-html[data-theme][data-surface] .jic-unified-menu .jic-unified-menu-donate:hover { background:color-mix(in srgb,var(--jic-logo-metal) 92%,black)!important; }
 html[data-theme][data-surface] .jic-free-actions button.jic-quick-theme {
   background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-radius:0!important;width:36px;min-width:36px;height:44px;color:var(--jic-text)!important;flex-shrink:0;
 }
-html[data-theme][data-surface] .jic-home-route a.jic-watch-live { background:#C90000!important;border-color:#C90000!important;color:#FFFFFF!important;box-shadow:none!important; }
-html[data-theme][data-surface] .jic-home-route a.jic-watch-live:hover { background:#AB0000!important; }
 @media(max-width:430px) {
   html[data-theme] .jic-free-brand { width:clamp(128px,40vw,172px)!important;min-width:0; }
   html[data-theme] .jic-free-actions { gap:4px;flex-wrap:nowrap;flex-shrink:0; }
@@ -197,3 +188,59 @@ html[data-theme][data-surface=glass] :is(.jic-community-join,.jic-footer-socials
   html[data-theme] .jic-prayer-legend { flex-wrap:wrap;gap:4px 10px; }
   .jic-prayer-countdown { flex-shrink:1; }
 }
+
+/* Filled public controls share the glass material, including coloured actions.
+ * Alpha belongs to the background only, never the label or icon. */
+html[data-theme][data-surface=glass] :is(.jic-public-route,.jic-unified-menu,.jic-popup-panel) :is(button,a.inline-flex)[class*="bg-"] {
+  background:var(--jic-glass-surface-strong)!important;
+  color:var(--jic-glass-ink)!important;
+  border-color:var(--jic-glass-border)!important;
+  box-shadow:var(--jic-glass-shadow)!important;
+  -webkit-backdrop-filter:var(--jic-glass-backdrop)!important;
+  backdrop-filter:var(--jic-glass-backdrop)!important;
+}
+html[data-theme] :is(.jic-community-join,.jic-whatsapp-action) {
+  --jic-button-tint:#25D366;
+  --jic-button-ink:#052915;
+}
+html[data-theme] .jic-watch-live {
+  --jic-button-tint:#C90000;
+  --jic-button-ink:#FFFFFF;
+}
+html[data-theme] :is(.jic-footer-donate,.jic-unified-menu-donate,.jic-hall-contact a,.jic-public-route button.bg-primary,.jic-public-route a.bg-primary) {
+  --jic-button-tint:var(--jic-logo-metal);
+  --jic-button-ink:var(--jic-bg);
+}
+html[data-theme] .jic-public-route :is(button.bg-destructive,a.bg-destructive) {
+  --jic-button-tint:#B91C1C;
+  --jic-button-ink:#FFFFFF;
+}
+html[data-theme][data-surface] :is(.jic-public-route,.jic-unified-menu) :is(
+  .jic-community-join,.jic-whatsapp-action,.jic-watch-live,
+  .jic-footer-donate,.jic-unified-menu-donate,.jic-hall-contact a,
+  button.bg-primary,a.bg-primary,button.bg-destructive,a.bg-destructive
+) {
+  background:var(--jic-button-tint)!important;
+  color:var(--jic-button-ink)!important;
+  border:1px solid var(--jic-button-tint)!important;
+  box-shadow:none!important;
+}
+html[data-theme][data-surface=glass] :is(.jic-public-route,.jic-unified-menu) :is(
+  .jic-community-join,.jic-whatsapp-action,.jic-watch-live,
+  .jic-footer-donate,.jic-unified-menu-donate,.jic-hall-contact a,
+  button.bg-primary,a.bg-primary,button.bg-destructive,a.bg-destructive
+) {
+  background:color-mix(in srgb,var(--jic-button-tint) var(--jic-button-tint-strength,86%),transparent)!important;
+  border-color:color-mix(in srgb,var(--jic-button-tint) 72%,var(--jic-glass-border))!important;
+  box-shadow:var(--jic-glass-shadow)!important;
+  -webkit-backdrop-filter:var(--jic-glass-backdrop)!important;
+  backdrop-filter:var(--jic-glass-backdrop)!important;
+}
+@media(hover:hover) and (prefers-reduced-transparency:no-preference) {
+  html[data-theme][data-surface=glass] :is(.jic-community-join,.jic-whatsapp-action,.jic-watch-live,.jic-footer-donate,.jic-unified-menu-donate):hover { --jic-button-tint-strength:92%; }
+}
+@media(prefers-reduced-transparency:reduce) {
+  html[data-theme][data-surface=glass] { --jic-button-tint-strength:100%; }
+}
+/* Touch should not show a focus frame; keyboard navigation remains visible. */
+html[data-theme] .jic-unified-menu-head>a:focus:not(:focus-visible) { outline:none; }
