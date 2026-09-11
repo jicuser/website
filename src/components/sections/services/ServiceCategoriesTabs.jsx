@@ -5,24 +5,31 @@ import ReligiousServicesTab from '@/components/sections/services/ReligiousServic
 import EducationalProgramsTab from '@/components/sections/services/EducationalProgramsTab';
 import CommunityServicesTab from '@/components/sections/services/CommunityServicesTab';
 
-const VALID_TABS = ['religious', 'educational', 'community'];
+const ROUTES = {
+  religious: '/services/religious',
+  educational: '/services/education',
+  community: '/services/community',
+};
+
+const tabFromLocation = location => {
+  if (location.pathname === ROUTES.community || location.hash === '#community') return 'community';
+  if (location.pathname === ROUTES.educational || location.hash === '#educational') return 'educational';
+  return 'religious';
+};
 
 const ServiceCategoriesTabs = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const hashTab = useMemo(() => {
-    const value = location.hash.replace('#', '').toLowerCase();
-    return VALID_TABS.includes(value) ? value : 'religious';
-  }, [location.hash]);
-  const [activeTab, setActiveTab] = useState(hashTab);
+  const routeTab = useMemo(() => tabFromLocation(location), [location.pathname, location.hash]);
+  const [activeTab, setActiveTab] = useState(routeTab);
 
   useEffect(() => {
-    setActiveTab(hashTab);
-  }, [hashTab]);
+    setActiveTab(routeTab);
+  }, [routeTab]);
 
   const handleTabChange = value => {
     setActiveTab(value);
-    navigate(`/services#${value}`, { replace: true });
+    navigate(ROUTES[value] || '/services', { replace: false });
   };
 
   return (
