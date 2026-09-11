@@ -45,6 +45,7 @@ export const variants = [
   ['entrance', 'Entrance', 500, 600, id => entrance(id,10,0,1)],
   ['minaret', 'Single minaret', 100, 600, () => tower(0,0,1)],
   ['pillars', 'Pillars & wordmark', 1120, 385, () => tower(0,0,.65)+tower(1052,0,.65)+wordmark(104,37,910)],
+  ['pillars-outline', 'Outline pillars & wordmark', 1120, 385, () => (tower(0,0,.65)+tower(1052,0,.65)).replaceAll('class="metal"','class="metal" style="fill:none;stroke:currentColor;stroke-width:1.8"')+wordmark(140,60,840)],
 ];
 const svg = (name,label,w,h,body,theme) => {
   const id=`jic-${name}-${theme}`;

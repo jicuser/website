@@ -74,13 +74,13 @@ export default function UnifiedHeader() {
     <header ref={headerRef} className="jic-unified-header fixed inset-x-0 top-0 z-50"><div className="jic-unified-inner">
       <div className="jic-unified-info jic-glass">
         <div className="jic-header-context"><Link to="/contact#map"><MapPin size={14}/><span>{SITE.address.short}</span></Link><a href={`tel:${SITE.phone.replace(/\s/g,'')}`}><Phone size={14}/>{SITE.phone}</a></div>
-        <div className="jic-prayer-legend"><span>Begins <b>·</b> Jama‘ah</span><Link to="/prayer-times">{next ? `Next: ${next.name} ${shortTime(next.time)}` : 'Prayer timetable'} <span aria-hidden="true">›</span></Link></div>
+        <div className="jic-prayer-legend"><Link to="/prayer-times">{next ? <><strong>Next: {next.name}</strong><span>Start {shortTime(next.time)} · Jama’ah {shortTime(next.jamaah)}</span></> : 'Prayer timetable'} <span aria-hidden="true">›</span></Link>{next && <span className="jic-prayer-countdown">{Math.floor(next.minutesLeft / 60) > 0 ? `${Math.floor(next.minutesLeft / 60)}h ` : ''}{next.minutesLeft % 60}m until start</span>}</div>
         <div className="jic-today-prayer-row" aria-label="Today’s prayer times">{PRAYERS.map(([label,key,jamaah]) => <Link key={key} to="/prayer-times" className={cn('jic-today-prayer', next?.name === label && 'is-next')} aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}>
-          <span>{label}</span><div><strong>{shortTime(todaysTimes?.[key])}</strong><em>{jamaah ? shortTime(todaysTimes?.[jamaah]) : '—'}</em></div>
+          <span>{label}</span><div><strong><small>Start</small>{shortTime(todaysTimes?.[key])}</strong><em><small>{jamaah ? 'Jama’ah' : '—'}</small>{jamaah ? shortTime(todaysTimes?.[jamaah]) : '—'}</em></div>
         </Link>)}</div>
         <div className="jic-header-live-row">{[0,1].map(index => <Link key={index} to="/prayer-times/jummah" className="jic-jummah-compact"><b>Jummah {index + 1}</b><span>{shortTime(jummahTimes?.[index]?.prayer)}</span></Link>)}{radioButton}</div>
       </div>
-      <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="wordmark"/></Link>
+      <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="horizontal"/></Link>
         <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path,children}) => <div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path === '/'}>{name}</NavLink>{children.length > 0 && <div className="jic-desktop-nav-dropdown jic-glass">{children.map(child => <Link key={`${child.path}-${child.name}`} to={child.path}>{child.name}</Link>)}</div>}</div>)}</nav>
         <div className="jic-free-actions"><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="jic-site-menu"><Menu size={22}/></button></div>
       </div>

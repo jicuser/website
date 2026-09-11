@@ -34,7 +34,7 @@ export default function Footer() {
   return (
     <footer className="jic-site-footer jic-site-footer-compact">
       <div className="container mx-auto px-4 py-5 md:py-7">
-        <Link to="/" className="jic-footer-brand" aria-label="Jamatia Islamic Centre home"><div className="jic-footer-brand-desktop"><JamatiaLogo variant="pillars"/></div><div className="jic-footer-brand-mobile"><JamatiaLogo variant="wordmark"/></div></Link>
+        <Link to="/" className="jic-footer-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="horizontal"/></Link>
         <div className="jic-footer-compact-grid">
           <nav className="jic-footer-links-inline" aria-label="Footer links">
             {QUICK_LINKS.map(({ label, to }) => <Link key={to} to={to}>{label}</Link>)}
@@ -56,6 +56,7 @@ export default function Footer() {
           <div className="flex gap-4"><Link to="/privacy">Privacy</Link></div>
         </div>
       </div>
+      <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="pillars-outline"/></Link>
     </footer>
   );
 }
