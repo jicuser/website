@@ -1,7 +1,7 @@
 /** Primary navigation grouped by visitor intent. */
 
 export const MASJID_EXTENSION_TABS = [
-  { name: '‹ All Projects', path: '/projects' },
+  { name: '‹ All Building Works', path: '/projects' },
   { name: 'Extension Overview', path: '/projects/masjid-extension' },
   { name: 'Timeline', path: '/projects/masjid-extension/timeline' },
   { name: 'Main Prayer Hall', path: '/projects/main-prayer-hall' },
@@ -60,12 +60,12 @@ export const NAV_GROUPS = [
     { name: 'Nikah', path: '/services/nikah' },
     { name: 'Hall Booking', path: '/services/hall-booking' },
   ]},
-  { name: 'Projects', path: '/projects', children: [
+  { name: 'Masjid Building Works', path: '/projects', children: [
     { name: 'Overview', path: '/projects' },
     { name: 'Masjid Extension', path: '/projects/masjid-extension' },
     { name: 'Current Appeals', path: '/projects/current-appeals' },
     { name: 'Updates & Gallery', path: '/projects/gallery' },
-    { name: 'Support Projects', path: '/projects/how-to-support' },
+    { name: 'Support the Works', path: '/projects/how-to-support' },
   ]},
   { name: 'Education', path: '/education', children: EDUCATION_TABS },
   { name: 'Youth', path: '/youth', children: [
