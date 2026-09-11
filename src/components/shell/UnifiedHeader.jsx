@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Heart,
+  House,
   LogIn,
   Mail,
   MapPin,
@@ -16,7 +17,7 @@ import {
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
-import { MADRASSAH_TABS, NAV_GROUPS } from '@/content/nav';
+import { NAV_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useAppearance } from '@/context/AppearanceContext';
@@ -41,13 +42,6 @@ const JAMAAH_KEYS = {
   Isha: 'jamaah_isha',
 };
 
-const MADRASSAH_PATHS = [
-  '/madrassah',
-  '/madrassah/enrolment',
-  '/madrassah/contact',
-  '/madrassah/policies',
-];
-
 const DEFAULT_REMINDERS = [
   { type: 'Qur’an', text: 'Remember Me; I will remember you.', source: 'Qur’an 2:152' },
   { type: 'Qur’an', text: 'Allah is near and responds when His servants call upon Him.', source: 'Qur’an 2:186' },
@@ -71,10 +65,6 @@ const shortTime = value => (
     : '—'
 );
 
-const usesMadrassahTabs = pathname => MADRASSAH_PATHS.some(
-  path => pathname === path || pathname.startsWith(`${path}/`)
-);
-
 function activeGroupFor(pathname) {
   if (['/team', '/contact', '/financial-history'].includes(pathname)) {
     return NAV_GROUPS.find(item => item.name === 'About');
@@ -90,7 +80,8 @@ function activeGroupFor(pathname) {
 }
 
 function isCurrent(pathname, itemPath) {
-  return pathname === itemPath || (itemPath !== '/' && pathname.startsWith(`${itemPath}/`));
+  const cleanPath = itemPath.split('#')[0];
+  return pathname === cleanPath || (cleanPath !== '/' && pathname.startsWith(`${cleanPath}/`));
 }
 
 function hijriDate() {
@@ -140,11 +131,8 @@ export default function UnifiedHeader() {
   );
 
   const activeGroup = useMemo(() => activeGroupFor(pathname), [pathname]);
-  const showMadrassahTabs = usesMadrassahTabs(pathname)
-    && pathname !== '/madrassah/classes-courses'
-    && pathname !== '/madrassah/student-portal';
-  const subnavItems = showMadrassahTabs ? MADRASSAH_TABS : (activeGroup?.children || []);
-  const subnavLabel = showMadrassahTabs ? 'Madrassah' : activeGroup?.name;
+  const subnavItems = activeGroup?.children || [];
+  const subnavLabel = activeGroup?.name;
   const selectedSubtab = subnavItems
     .filter(item => isCurrent(pathname, item.path))
     .sort((a, b) => b.path.length - a.path.length)[0]?.path;
@@ -345,8 +333,7 @@ export default function UnifiedHeader() {
             ))}
           </nav>
           <div className="jic-free-actions">
-            <button type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>{theme === 'dark' ? <Sun size={20}/> : <Moon size={20}/>}</button>
-            <button type="button" className="is-donate" onClick={() => setDonationOpen(true)} aria-label="Donate"><Heart size={20}/></button>
+            <Link to="/" className="jic-home-action" aria-label="Home"><House size={20}/></Link>
             <button type="button" onClick={() => setMenuOpen(true)} aria-label="Menu" aria-expanded={menuOpen}><Menu size={22}/></button>
           </div>
         </div>
