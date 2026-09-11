@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Heart, Home, LogIn, MapPin, Menu, Moon, Pause, Phone, Play, Sparkles, Sun, X, ChevronDown } from 'lucide-react';
+import { Heart, Home, LogIn, MapPin, Menu, Moon, Pause, Phone, Play, Sparkles, Sun, X, ChevronDown, ExternalLink } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
@@ -10,6 +10,7 @@ import { useAppearance } from '@/context/AppearanceContext';
 import { nextPrayer } from '@/lib/nextPrayer';
 import { cn } from '@/lib/utils';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
+import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
 const PRAYERS = [['Fajr','fajr','jamaah_fajr'],['Sunrise','sunrise',null],['Dhuhr','dhuhr','jamaah_dhuhr'],['Asr','asr','jamaah_asr'],['Maghrib','maghrib','jamaah_maghrib'],['Isha','isha','jamaah_isha']];
 const shortTime = value => value && value !== 'N/A' ? String(value).replace(/^0/, '').replace(/\s?[AP]M$/i, '') : '—';
@@ -39,6 +40,11 @@ export default function UnifiedHeader() {
 
   useEffect(() => { setMenuOpen(false); setMobileGroup(null); }, [pathname]);
   useEffect(() => {
+    const openDonation = () => { setMenuOpen(false); setDonationOpen(true); };
+    window.addEventListener('jic-open-donation', openDonation);
+    return () => window.removeEventListener('jic-open-donation', openDonation);
+  }, []);
+  useEffect(() => {
     const node = headerRef.current;
     const update = () => document.documentElement.style.setProperty('--jic-header-height', `${Math.ceil(node.getBoundingClientRect().height)}px`);
     update();
@@ -55,7 +61,7 @@ export default function UnifiedHeader() {
     node.showModal(); document.body.style.overflow = 'hidden';
     return () => { node.close(); document.body.style.overflow = old; };
   }, [menuOpen]);
-  useEffect(() => { const audio = audioRef.current; return () => { audio?.pause(); }; }, []);
+  useEffect(() => { const audio = audioRef.current; return () => { audio?.pause(); clearRadioMediaSession(); }; }, []);
 
   async function toggleRadio() {
     const audio = audioRef.current;
@@ -70,7 +76,7 @@ export default function UnifiedHeader() {
   </button>;
 
   return <>
-    <audio ref={audioRef} src={streamUrl || undefined} preload="none" playsInline onPlaying={() => { setPlaying(true); setRadioLoading(false); setRadioError(false); }} onPause={() => { setPlaying(false); setRadioLoading(false); }} onWaiting={() => setRadioLoading(true)} onError={() => { setPlaying(false); setRadioLoading(false); setRadioError(true); }} aria-hidden="true"/>
+    <audio ref={audioRef} src={streamUrl || undefined} preload="none" playsInline onPlaying={() => { setPlaying(true); setRadioLoading(false); setRadioError(false); updateRadioMediaSession(audioRef.current); }} onPause={() => { setPlaying(false); setRadioLoading(false); updateRadioMediaSession(audioRef.current); }} onWaiting={() => setRadioLoading(true)} onError={() => { setPlaying(false); setRadioLoading(false); setRadioError(true); }} aria-hidden="true"/>
     <header ref={headerRef} className="jic-unified-header fixed inset-x-0 top-0 z-50"><div className="jic-unified-inner">
       <div className="jic-unified-info jic-glass">
         <div className="jic-header-context"><Link to="/contact#map"><MapPin size={14}/><span>{SITE.address.short}</span></Link><a href={`tel:${SITE.phone.replace(/\s/g,'')}`}><Phone size={14}/>{SITE.phone}</a></div>
@@ -78,11 +84,11 @@ export default function UnifiedHeader() {
         <div className="jic-today-prayer-row" aria-label="Today’s prayer times">{PRAYERS.map(([label,key,jamaah]) => <Link key={key} to="/prayer-times" className={cn('jic-today-prayer', next?.name === label && 'is-next')} aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}>
           <span>{label}</span><div><strong><small>Start</small>{shortTime(todaysTimes?.[key])}</strong><em><small>{jamaah ? 'Jama’ah' : '—'}</small>{jamaah ? shortTime(todaysTimes?.[jamaah]) : '—'}</em></div>
         </Link>)}</div>
-        <div className="jic-header-live-row">{[0,1].map(index => <Link key={index} to="/prayer-times/jummah" className="jic-jummah-compact"><b>Jummah {index + 1}</b><span>{shortTime(jummahTimes?.[index]?.prayer)}</span></Link>)}{radioButton}</div>
+        <div className="jic-header-live-row">{[0,1].map(index => <Link key={index} to="/prayer-times/jummah" className="jic-jummah-compact"><b>Jummah {index + 1}</b><span>{shortTime(jummahTimes?.[index]?.prayer)}</span></Link>)}<div className="jic-header-radio">{radioButton}<a href="/radio" target="_blank" rel="noopener noreferrer" aria-label="Open JIC Radio player" title="Open player" onClick={() => audioRef.current?.pause()}><ExternalLink size={15}/></a></div></div>
       </div>
       <div className="jic-free-nav-row"><Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="horizontal"/></Link>
         <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">{NAV_GROUPS.map(({name,path,children}) => <div className="jic-desktop-nav-group" key={path}><NavLink to={path} end={path === '/'}>{name}</NavLink>{children.length > 0 && <div className="jic-desktop-nav-dropdown jic-glass">{children.map(child => <Link key={`${child.path}-${child.name}`} to={child.path}>{child.name}</Link>)}</div>}</div>)}</nav>
-        <div className="jic-free-actions"><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="jic-site-menu"><Menu size={22}/></button></div>
+        <div className="jic-free-actions"><button type="button" className="jic-quick-theme" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}>{theme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button><Link to="/" className="jic-home-action" aria-label="Home"><Home size={20}/></Link><button type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="jic-site-menu"><Menu size={22}/></button></div>
       </div>
       {subtabs.length > 0 && <nav ref={subnavRef} className="jic-unified-subnav" aria-label={`${navigation.name} sections`}>{subtabs.map(item => <Link key={`${item.path}-${item.name}`} to={item.path} aria-current={item.path === selected ? 'page' : undefined} className={cn('jic-unified-subnav-link', item.path === selected && 'is-current')}>{item.name}</Link>)}</nav>}
     </div></header>

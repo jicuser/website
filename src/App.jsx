@@ -25,6 +25,7 @@ import SectionPage from '@/pages/SectionPage';
 import ServicesPage from '@/pages/ServicesPage';
 import TeamPage from '@/pages/TeamPage';
 import WorshipPage from '@/pages/WorshipPage';
+import RadioPlayerPage from '@/pages/RadioPlayerPage';
 import YouthPage from '@/pages/YouthPage';
 
 import AdminLoginPage from '@/pages/admin/AdminLoginPage';
@@ -35,6 +36,7 @@ export default function App() {
   return (
     <AnimatePresence mode="wait">
       <Routes>
+        <Route path="/radio" element={<RadioPlayerPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route
           path="/admin"

@@ -34,13 +34,43 @@ html[data-theme] .jic-image-viewer { width:min(900px,calc(100vw - 24px));max-hei
 html[data-theme] .bg-primary.text-white { color:#0C1930!important; }
 html[data-theme] :is(a,button,input,textarea,select,[tabindex]):focus-visible { outline:3px solid var(--jic-gold);outline-offset:3px; }
 .jic-footer-brand { display:block;width:220px;margin:0 0 20px; }
-.jic-footer-brand-desktop { display:none; }
 .jic-footer-signature { display:block;width:min(280px,70%);margin:20px auto 0;padding:0 0 8px; }
 @media(min-width:1024px) {
   .jic-footer-brand { width:280px; }
-  .jic-footer-brand-desktop { display:block; }
-  .jic-footer-brand-mobile { display:none; }
 }
+/* Footer owns its layout; retained page styles must not force overlapping rows. */
+html[data-theme] .jic-footer-refined { padding:0!important; }
+html[data-theme] .jic-footer-refined>.container { max-width:1200px!important;padding:28px 20px 0!important; }
+html[data-theme] .jic-footer-refined .jic-footer-brand { width:min(260px,75%);margin:0 0 24px; }
+html[data-theme] .jic-footer-refined .jic-footer-compact-grid { display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:24px!important;align-items:start!important; }
+html[data-theme] .jic-footer-refined .jic-footer-links-inline { display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px 16px!important;align-items:start!important; }
+html[data-theme] .jic-footer-refined .jic-footer-links-inline a { min-width:0;min-height:44px;display:flex;align-items:center;font-size:14px!important;line-height:1.45!important;white-space:normal!important;overflow-wrap:break-word;padding:8px 0!important;color:var(--jic-text)!important;border-radius:4px; }
+html[data-theme] .jic-footer-refined .jic-footer-actions-compact { display:flex!important;flex-direction:column;align-items:stretch!important;gap:16px!important;min-width:0; }
+html[data-theme] .jic-footer-refined .jic-footer-socials { display:flex!important;flex-wrap:wrap!important;gap:8px!important; }
+html[data-theme] .jic-footer-refined .jic-footer-socials a { width:44px!important;height:44px!important;flex:0 0 44px; }
+html[data-theme] .jic-footer-refined .jic-footer-donate { min-height:46px!important;width:100%;font-size:16px!important; }
+html[data-theme] .jic-footer-refined .jic-footer-bottom { color:var(--jic-text-secondary)!important;border-color:var(--jic-border);padding-bottom:12px; }
+html[data-theme] .jic-footer-refined .jic-footer-bottom a { display:inline-flex;align-items:center;min-height:44px; }
+html[data-theme] .jic-footer-refined .jic-footer-signature { display:block;margin:0!important;padding:0!important;width:min(250px,70%); }
+html[data-theme] .jic-footer-refined .jic-footer-signature img { display:block;margin:0;padding:0; }
+@media(min-width:768px) {
+  html[data-theme] .jic-footer-refined .jic-footer-compact-grid { grid-template-columns:minmax(0,1fr) minmax(260px,340px)!important;gap:32px!important; }
+  html[data-theme] .jic-footer-refined .jic-footer-links-inline { grid-template-columns:repeat(3,minmax(0,1fr))!important; }
+}
+.jic-header-radio { display:flex;align-items:center; }
+.jic-header-radio>a { display:grid;place-items:center;min-width:32px;min-height:44px;color:var(--jic-text); }
+html[data-theme] .jic-header-radio .jic-radio-flat { min-width:0;padding-inline:6px; }
+html[data-theme] .jic-radio-player-page { min-height:100dvh;padding:24px!important;display:grid;place-items:center;background:var(--jic-bg);color:var(--jic-text); }
+.jic-radio-player-panel { display:grid;justify-items:center;gap:20px;width:min(440px,100%);padding:24px;border:1px solid var(--jic-border);border-radius:20px;background:var(--jic-surface);text-align:center; }
+.jic-player-logo { display:block;width:min(280px,100%); }
+.jic-player-artwork { width:160px;height:160px;border-radius:28px; }
+.jic-radio-player-panel h1 { font-size:28px;font-weight:650; }
+.jic-radio-player-panel audio { width:100%; }
+.jic-radio-player-panel>a:last-child { min-height:44px;display:grid;place-items:center;text-decoration:underline; }
+.jic-player-status { display:flex;align-items:center;gap:8px; }
+.jic-player-status i { width:8px;height:8px;border-radius:50%;background:var(--jic-muted); }
+.jic-player-status[data-availability=online] i { background:#22c55e; }
+.jic-player-status[data-availability=offline] i { background:#ef4444; }
 .jic-home-route .jic-rail-heading h2 { color:#fff;text-shadow:0 2px 12px #0008; }
 @media(max-width:767px) {
   .jic-swipe-rail { grid-auto-columns:minmax(250px,84%);gap:12px; }

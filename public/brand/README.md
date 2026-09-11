@@ -4,14 +4,14 @@ Seven refined SVG compositions, each with a light and dark version. The supplied
 
 | Variation | Intended placement |
 | --- | --- |
-| `horizontal` | Main website header, menu and upper footer; matching identity throughout |
+| `horizontal` | Main website header and menu |
 | `centred` | Portrait compositions and entrance-led applications |
 | `compact` | Alternative small horizontal composition |
 | `wordmark` | Writing-only alternative and Friday Qur’an Circle poster |
 | `entrance` | Standalone architectural mark |
 | `minaret` | Decorative accent, not a replacement for the full name |
 | `pillars` | Seventh variation: writing between two pillars, with no doorway |
-| `pillars-outline` | Outline version of our own two minarets and writing, at the very bottom of the page |
+| `pillars-outline` | Closely spaced outline minarets and writing, flush at the bottom-left of the footer; no duplicate upper-footer logo |
 
 Use `-light.svg` on pale backgrounds and `-dark.svg` on dark backgrounds. Keep their aspect ratio and clear space around them. Do not use a global CSS colour filter: it destroys the two-colour identity. Use the compact/wordmark/pillars compositions at small sizes; the detailed entrance is best at larger sizes. The website uses an `<img>` for each self-contained SVG.
 

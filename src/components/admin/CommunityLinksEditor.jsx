@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Save, MessageCircle } from 'lucide-react';
+import { Save } from 'lucide-react';
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import { supabase } from '@/lib/supabaseClient';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 
@@ -57,7 +58,7 @@ export default function CommunityLinksEditor() {
   useRegisterAdminSave(save, dirty && !busy, 'Save WhatsApp link');
 
   return <section className="admin-panel">
-    <div className="admin-heading"><div><h3>WhatsApp community</h3></div><MessageCircle/></div>
+    <div className="admin-heading"><div><h3>WhatsApp community</h3></div><WhatsAppIcon/></div>
     <label>Community invite URL<input type="url" value={url} onChange={event => { setUrl(event.target.value); setMsg(''); }} placeholder="https://chat.whatsapp.com/..."/></label>
     <div className="admin-actions"><button type="button" onClick={() => save().catch(() => {})} disabled={busy || !dirty} className="admin-button primary"><Save size={16}/>{busy ? 'Saving…' : 'Save link'}</button>{msg && <small>{msg}</small>}</div>
   </section>;

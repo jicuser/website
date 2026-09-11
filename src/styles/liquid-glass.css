@@ -103,6 +103,23 @@ html[data-theme][data-surface=glass] .jic-site-footer :is(a,p,small,.jic-footer-
 }
 html[data-theme][data-surface=glass] .jic-footer-links-inline a { font-weight:600; }
 html[data-theme][data-surface=glass] .jic-footer-socials a svg { color:inherit!important; }
+/* Donation is a deliberate teal action in either surface mode. */
+html[data-theme][data-surface] .jic-footer-refined .jic-footer-donate,
+html[data-theme][data-surface] .jic-unified-menu .jic-unified-menu-donate {
+  background:#0F766E!important;color:#FFFFFF!important;border:1px solid #14948A!important;box-shadow:none!important;
+}
+html[data-theme][data-surface] .jic-footer-refined .jic-footer-donate:hover,
+html[data-theme][data-surface] .jic-unified-menu .jic-unified-menu-donate:hover { background:#115E59!important; }
+html[data-theme][data-surface] .jic-free-actions button.jic-quick-theme {
+  background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-radius:0!important;width:36px;min-width:36px;height:44px;color:var(--jic-text)!important;flex-shrink:0;
+}
+html[data-theme][data-surface] .jic-home-route a.jic-watch-live { background:#C90000!important;border-color:#C90000!important;color:#FFFFFF!important;box-shadow:none!important; }
+html[data-theme][data-surface] .jic-home-route a.jic-watch-live:hover { background:#AB0000!important; }
+@media(max-width:430px) {
+  html[data-theme] .jic-free-brand { width:clamp(128px,40vw,172px)!important;min-width:0; }
+  html[data-theme] .jic-free-actions { gap:4px;flex-wrap:nowrap;flex-shrink:0; }
+  html[data-theme] .jic-free-nav-row { gap:6px; }
+}
 html[data-theme][data-surface=glass] :is(.jic-popup-muted,.jic-popup-title,.jic-popup-kicker) { color:var(--jic-text)!important; }
 html[data-theme][data-surface=glass] :is(.jic-free-actions a,.jic-free-actions button,.jic-community-join,.jic-footer-socials a,.jic-primary-cta,.jic-secondary-cta):hover { border-color:var(--jic-glass-accent)!important; }
 .jic-unified-menu::backdrop { background:#07122226; }

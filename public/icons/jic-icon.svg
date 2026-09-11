@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><title>Jamatia Islamic Centre</title><rect width="640" height="640" rx="120" fill="#0C1930"/><style>.metal{fill:#D6AF62}</style><defs>
+    <pattern id="favicon-star" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M16 0 20.7 4.7 27.3 4.7 27.3 11.3 32 16 27.3 20.7 27.3 27.3 20.7 27.3 16 32 11.3 27.3 4.7 27.3 4.7 20.7 0 16 4.7 11.3 4.7 4.7 11.3 4.7Z M16 6 19 13 26 16 19 19 16 26 13 19 6 16 13 13Z" fill="none" stroke="black" stroke-width="1.5"/></pattern>
+    <clipPath id="favicon-arch"><path d="M112 578V412Q112 340 240 282Q368 340 368 412V578Z"/></clipPath>
+    <mask id="favicon-entrance" maskUnits="userSpaceOnUse" x="0" y="0" width="480" height="600">
+      <g fill="white"><path d="M55 19a10 10 0 1 0 10 13A9 9 0 0 1 55 19Z"/>
+  <circle cx="52" cy="47" r="4"/><circle cx="52" cy="59" r="4.5"/><circle cx="52" cy="72" r="5"/>
+  <circle cx="52" cy="93" r="12"/>
+  <path d="M40 109h24v6l-4 4H44l-4-4Zm4 13h16v23H44ZM35 149h34v7l-5 5H40l-5-5Zm5 15h24v93H40ZM34 261h36v7l-5 5H39l-5-5Zm5 15h26v88H39ZM34 368h36v7l-5 5H39l-5-5Zm5 15h26v197H39Z"/><g transform="translate(376)"><path d="M55 19a10 10 0 1 0 10 13A9 9 0 0 1 55 19Z"/>
+  <circle cx="52" cy="47" r="4"/><circle cx="52" cy="59" r="4.5"/><circle cx="52" cy="72" r="5"/>
+  <circle cx="52" cy="93" r="12"/>
+  <path d="M40 109h24v6l-4 4H44l-4-4Zm4 13h16v23H44ZM35 149h34v7l-5 5H40l-5-5Zm5 15h24v93H40ZM34 261h36v7l-5 5H39l-5-5Zm5 15h26v88H39ZM34 368h36v7l-5 5H39l-5-5Zm5 15h26v197H39Z"/></g><path d="M65 257h350v323H65ZM0 578h480v2H0Z"/></g>
+      <g fill="none" stroke="black" stroke-width="2.7" stroke-linejoin="round">
+        <path d="M112 578V412Q112 340 240 282Q368 340 368 412V578M112 412h256M118 390h244M198 306v82m84-82v82M209 301v86h62v-86"/>
+        <rect x="124" y="432" width="32" height="138"/><rect x="168" y="432" width="32" height="138"/><rect x="218" y="424" width="44" height="154"/><rect x="280" y="432" width="32" height="138"/><rect x="324" y="432" width="32" height="138"/>
+      </g>
+      <g clip-path="url(#favicon-arch)">
+        <path d="M122 290h71v92h-71ZM214 298h52v84h-52ZM287 290h71v92h-71ZM122 397h71v9h-71ZM204 397h72v9h-72ZM287 397h71v9h-71Z" fill="url(#favicon-star)"/>
+        <rect x="128" y="436" width="24" height="130" fill="url(#favicon-star)"/><rect x="172" y="436" width="24" height="130" fill="url(#favicon-star)"/><rect x="222" y="428" width="36" height="146" fill="url(#favicon-star)"/><rect x="284" y="436" width="24" height="130" fill="url(#favicon-star)"/><rect x="328" y="436" width="24" height="130" fill="url(#favicon-star)"/>
+      </g>
+    </mask>
+  </defs><g transform="translate(80 20) scale(1)"><rect width="480" height="600" class="metal" mask="url(#favicon-entrance)"/></g></svg>

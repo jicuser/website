@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Youtube, MessageCircle } from 'lucide-react';
+import { Facebook, Instagram, Youtube } from 'lucide-react';
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import { SITE } from '@/content/site';
 import useCommunityLink from '@/hooks/useCommunityLink';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
@@ -32,16 +33,15 @@ export default function Footer() {
   const year = new Date().getFullYear();
   const openDonation = () => window.dispatchEvent(new CustomEvent('jic-open-donation'));
   return (
-    <footer className="jic-site-footer jic-site-footer-compact">
+    <footer className="jic-site-footer jic-site-footer-compact jic-footer-refined">
       <div className="container mx-auto px-4 py-5 md:py-7">
-        <Link to="/" className="jic-footer-brand" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="horizontal"/></Link>
         <div className="jic-footer-compact-grid">
           <nav className="jic-footer-links-inline" aria-label="Footer links">
             {QUICK_LINKS.map(({ label, to }) => <Link key={to} to={to}>{label}</Link>)}
           </nav>
           <div className="jic-footer-actions-compact">
             <div className="jic-footer-socials flex gap-2">
-              <a href={whatsapp} aria-label="WhatsApp Community"><MessageCircle size={18}/></a>
+              <a href={whatsapp} aria-label="WhatsApp Community"><WhatsAppIcon size={22}/></a>
               {SITE.socials.facebook && <a href={SITE.socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={18}/></a>}
               {SITE.socials.x && <a href={SITE.socials.x} target="_blank" rel="noopener noreferrer" aria-label="X"><XIcon className="h-[18px] w-[18px]"/></a>}
               {SITE.socials.instagram && <a href={SITE.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={18}/></a>}

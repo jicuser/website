@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, CalendarDays, Play, Radio, Users, Building2, ArrowRight, Megaphone, MessageCircle } from 'lucide-react';
+import { BookOpen, CalendarDays, Play, Radio, Users, Building2, ArrowRight, Megaphone } from 'lucide-react';
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import useCommunityLink from '@/hooks/useCommunityLink';
@@ -61,7 +62,7 @@ export default function HomePage(){
         <h1 style={{whiteSpace:'pre-line'}}>{hero.title||'A place for faith.\nA home for community.'}</h1>
         <div className="jic-gold-rule"/>
         <p className="jic-hero-sub" style={{whiteSpace:'pre-line'}}>{hero.body||'Worship. Learn. Grow. Together.\nA stronger community for a brighter tomorrow.'}</p>
-        <div className="jic-hero-buttons"><Link to="/contact#map" className="jic-primary-cta">Visit the Centre <ArrowRight size={18}/></Link><a href={liveUrl} target="_blank" rel="noreferrer" className="jic-secondary-cta"><Play size={17} fill="currentColor"/> Watch Live</a></div>
+        <div className="jic-hero-buttons"><Link to="/contact#map" className="jic-primary-cta">Visit the Centre <ArrowRight size={18}/></Link><a href={liveUrl} target="_blank" rel="noreferrer" className="jic-secondary-cta jic-watch-live"><Play size={17} fill="currentColor"/> Watch Live</a></div>
       </div>
     </section>
 
@@ -89,8 +90,8 @@ export default function HomePage(){
 
     <section className="jic-event-strip"><div className="jic-event-label"><CalendarDays size={17}/><span>Friday Sermon</span></div><div className="jic-event-main"><strong>{jummahTimes.map((t,i)=>`${i===0?'1st':'2nd'} Jamaat ${t.prayer}`).join(' · ')}</strong><span>Every Friday</span></div><Link to="/prayer-times/jummah" className="jic-event-arrow">›</Link></section>
 
-    {livestream?.enabled&&livestream.stream_url&&<section id="live" className="jic-live-section"><div className="jic-live-heading"><span><Radio size={15}/> Live</span><h2>{livestream.title||'JIC Live'}</h2></div>{embedUrl?<div className="jic-live-frame"><iframe src={embedUrl} title={livestream.title||'JIC Live'} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/></div>:<a className="jic-primary-cta" href={liveUrl} target="_blank" rel="noreferrer">Watch Live on YouTube</a>}</section>}
+    {livestream?.enabled&&livestream.stream_url&&<section id="live" className="jic-live-section"><div className="jic-live-heading"><span><Radio size={15}/> Live</span><h2>{livestream.title||'JIC Live'}</h2></div>{embedUrl?<div className="jic-live-frame"><iframe src={embedUrl} title={livestream.title||'JIC Live'} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/></div>:<a className="jic-primary-cta jic-watch-live" href={liveUrl} target="_blank" rel="noreferrer">Watch Live on YouTube</a>}</section>}
 
-    <section className="jic-home-footer-strip"><div><MessageCircle size={22}/><div><strong>Join our WhatsApp Community</strong><small>Official JIC updates and announcements</small></div></div><a className="jic-community-join" href={whatsapp}>Join WhatsApp <ArrowRight size={17}/></a></section>
+    <section className="jic-home-footer-strip"><div><WhatsAppIcon size={24}/><div><strong>Join our WhatsApp Community</strong><small>Official JIC updates and announcements</small></div></div><a className="jic-community-join" href={whatsapp}>Join WhatsApp <ArrowRight size={17}/></a></section>
   </div>;
 }
