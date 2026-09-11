@@ -69,6 +69,7 @@ export const usePrayerTimes = () => {
         setToday(
           d
             ? {
+                d_date: d.d_date,
                 fajr: formatTime(d.fajr_begins),
                 sunrise: formatTime(d.sunrise),
                 dhuhr: formatTime(d.zuhr_begins),

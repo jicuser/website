@@ -72,3 +72,21 @@ The optional `TV_ICE_SERVERS` Edge secret accepts an `RTCIceServer[]` JSON array
 `npm run validate` checks the frontend, shared TV validation/privacy tests and the production build. The Edge Function can be type-checked with `npx deno check --node-modules-dir=manual supabase/functions/tv-control/index.ts` after installing dependencies.
 
 Before relying on the display during a service, pair one real TV and check each room's posters, 12-hour clock, sound, screen capture and camera feed. Confirm that Stop and Revoke return the TV to public content, then repeat in the remaining halls. Test Android Chrome and iPhone Safari in both themes. Software/API checks do not replace those hardware and local-network checks.
+
+## Prayer sequence and class staff
+
+The three hall screens support cameras, YouTube and paired screen/camera sharing. The shoe-area screen is restricted in both the player and API to times and posters; its live-feed and pairing controls are hidden. The two-pillar logo sits at bottom left and the prayer strip starts at the top of the screen.
+
+With automatic prayer display enabled, each congregation starts a silent phone/quiet-hall notice. Dhikr begins five minutes after Jama‘ah, or ten minutes for Maghrib. At twenty minutes after Jama‘ah, the saved display resumes (posters by default). Friday follows both configured Jummah congregation times instead of Dhuhr. Missing or stale daily data does not trigger a sequence. Ayat al-Kursi is shown in three consecutive parts, followed by short dhikr; each card remains for forty seconds. General mosque-etiquette reminders rotate beneath ordinary hall content. These are original reminders, not attributed hadith or specific reward claims.
+
+**Class mode · 1 hour** temporarily suspends automatic prayer notices so the chosen video or shared lesson remains visible. It expires automatically. **End class mode** restores the saved prayer and notice settings immediately. Screen-sharing capture remains active on the sender while a prayer notice temporarily replaces playback on the TV; stop sharing to end capture itself.
+
+A Super Admin can choose **TV operator (TV controls only)** in **Users & roles**, for an existing user or an invitation. This role can control the four TV panels but cannot edit website pages, timetable records or other users. Assigning it replaces that user's previous role. Existing administrators and content editors retain TV access. No users are promoted automatically. Apply the TV-operator migration and redeploy both `tv-control` and `manage-user` before deploying this frontend.
+
+Camera discovery must run on a device connected to the mosque network. The saved office-PC connection on port 4455 identifies OBS remote control, not a confirmed camera stream. Check the router's connected-device list or the camera source in OBS for the actual address and stream path. Do not assume all cameras share that subnet or add guessed IPs as streams.
+
+## Jummah and Ramadan notices
+
+Each hall has **Special notice screen** in its admin panel: Off, Jummah, or Ramadan · Taraweeh du‘a. Save to show it; switch Off and save to resume ordinary content. This manual choice is available year-round for setup and remains on until changed. It does not automatically follow an inferred Ramadan date.
+
+Edit the Jummah message for welcome information and local notices. It is also used at both Friday congregation times. Taraweeh accepts up to 1,200 characters of Arabic or English. Blank text displays the general Qur’anic supplication in [Al-Baqarah 2:201](https://quran.com/2/201); it is not presented as a prescribed Taraweeh formula. Text is displayed literally, never executed as HTML. Automatic Jama‘ah/dhikr takes priority over special notices; class mode suspends both. Shoe-area settings cannot enable either special notice.

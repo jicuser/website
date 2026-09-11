@@ -243,7 +243,7 @@
   display: none;
 }
 
-/* Only the prayer dock is fixed. The unboxed logo and tabs stay in document flow. */
+/* The unboxed logo and tabs stay in document flow. */
 .jic-public-main {
   padding-top: 10px;
 }
@@ -428,7 +428,7 @@ html[data-surface='glass'] .jic-unified-menu-donate {
   box-shadow: var(--jic-glass-shadow);
 }
 
-/* The daily reminder belongs below the tabs and scrolls with page content. */
+/* One reminder component; mobile movement is handled below. */
 .jic-daily-reminder {
   width: min(1200px, calc(100% - 32px));
   margin: 0 auto 8px;
@@ -479,6 +479,66 @@ html[data-surface='glass'] .jic-unified-menu-donate {
 }
 .jic-notices a {
   flex: 0 0 auto;
+}
+
+/* Mobile controls have one fixed location, separate from the scrolling brand. */
+.jic-mobile-controls {
+  display: none;
+}
+@media (max-width: 767px) {
+  .jic-free-actions {
+    display: none;
+  }
+  .jic-public-route {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  .jic-mobile-controls {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+    background: var(--jic-glass-surface-strong);
+    color: var(--jic-text);
+    border-top: 1px solid var(--jic-border);
+    backdrop-filter: var(--jic-glass-backdrop);
+  }
+  .jic-mobile-controls button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 48px;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font-size: 0.75rem;
+  }
+  .jic-mobile-controls button:focus-visible {
+    outline: 2px solid var(--jic-gold);
+    outline-offset: -2px;
+  }
+  .jic-public-route .jic-admin-bar {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+  .jic-daily-reminder {
+    position: sticky;
+    top: calc(var(--jic-prayer-sticky-offset) + 6px);
+    z-index: 30;
+    transition: opacity 650ms ease;
+  }
+  .jic-daily-reminder.is-scrolling:not(:focus-within) {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jic-daily-reminder {
+    transition: none;
+  }
 }
 
 @media (min-width: 768px) {

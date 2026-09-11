@@ -16,6 +16,7 @@ const ADMIN_ROLES = new Set([
   'content_editor',
   'events_manager',
   'teacher',
+  'tv_operator',
 ]);
 
 export function AuthProvider({ children }) {
@@ -221,6 +222,7 @@ export function AuthProvider({ children }) {
         prayer_times: ['admin'],
         announcements: ['admin', 'content_editor', 'events_manager', 'teacher'],
         livestream: ['admin', 'content_editor'],
+        tv: ['admin', 'content_editor', 'tv_operator'],
         team: ['admin', 'content_editor'],
         media: ['admin', 'content_editor', 'events_manager', 'teacher'],
         users: [],

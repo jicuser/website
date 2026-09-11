@@ -20,6 +20,12 @@ export const DEFAULT_TV_SETTINGS = {
   include_events: true,
   rotation_seconds: 20,
   muted: true,
+  prayer_enabled: true,
+  class_until: '',
+  notice_mode: 'off',
+  jummah_notice:
+    'Welcome to Jumu‘ah. Please silence your phone, make room for others and listen quietly during the khutbah.',
+  taraweeh_dua: '',
 };
 export function screenExists(id) {
   return TV_SCREENS.some((screen) => screen.id === id);
@@ -38,8 +44,33 @@ export function secureStreamUrl(raw) {
   }
   return url.href;
 }
-export function validateSettings(input) {
+export function validateSettings(input, screenId = '') {
   if (!input || typeof input !== 'object') throw new Error('Screen settings are required.');
+  input = { ...DEFAULT_TV_SETTINGS, ...input };
+  if (screenId === 'shoe-area')
+    input = {
+      ...input,
+      mode: 'posters',
+      camera_url: '',
+      youtube_url: '',
+      prayer_enabled: false,
+      class_until: '',
+      notice_mode: 'off',
+    };
+  if (!['off', 'jummah', 'taraweeh'].includes(input.notice_mode))
+    throw new Error('Choose a notice display.');
+  for (const field of ['jummah_notice', 'taraweeh_dua']) {
+    if (typeof input[field] !== 'string' || input[field].length > 1200)
+      throw new Error('Notice text must be at most 1200 characters.');
+  }
+  if (typeof input.class_until !== 'string') throw new Error('Invalid class end time.');
+  if (typeof input.prayer_enabled !== 'boolean') throw new Error('Invalid prayer display setting.');
+  if (
+    input.class_until &&
+    (!Number.isFinite(Date.parse(input.class_until)) ||
+      Date.parse(input.class_until) > Date.now() + 8 * 3600000)
+  )
+    throw new Error('Class mode must end within eight hours.');
   const { mode, camera_protocol, poster_ids, rotation_seconds, include_events, muted } = input;
   if (!['schedule', 'posters', 'youtube', 'camera'].includes(mode))
     throw new Error('Choose a display mode.');
@@ -74,6 +105,11 @@ export function validateSettings(input) {
     youtube_url,
     camera_url,
     camera_protocol,
+    notice_mode: input.notice_mode,
+    jummah_notice: input.jummah_notice.trim(),
+    taraweeh_dua: input.taraweeh_dua.trim(),
+    prayer_enabled: input.prayer_enabled,
+    class_until: input.class_until ? new Date(input.class_until).toISOString() : '',
     poster_ids: [...new Set(poster_ids)],
     include_events,
     rotation_seconds,
@@ -99,6 +135,11 @@ export function publicSettings(settings, paired = false) {
     include_events,
     rotation_seconds,
     muted,
+    notice_mode: settings.notice_mode || 'off',
+    jummah_notice: settings.jummah_notice ?? DEFAULT_TV_SETTINGS.jummah_notice,
+    taraweeh_dua: settings.taraweeh_dua || '',
+    prayer_enabled: settings.prayer_enabled !== false,
+    class_until: settings.class_until || '',
     ...(paired ? { camera_url: settings.camera_url } : {}),
   };
 }
@@ -116,6 +157,7 @@ export function validDescription(description, type) {
 
 export function isTvStaff(profile) {
   return Boolean(
-    profile?.is_active && ['super_admin', 'admin', 'content_editor'].includes(profile.role),
+    profile?.is_active &&
+    ['super_admin', 'admin', 'content_editor', 'tv_operator'].includes(profile.role),
   );
 }

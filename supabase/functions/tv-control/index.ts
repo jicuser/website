@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import {
+  DEFAULT_TV_SETTINGS,
   activeSession,
   isTvStaff,
   publicSettings,
@@ -99,6 +100,25 @@ Deno.serve(async (req) => {
     if (!body || !screenExists(body.screenId)) fail('Unknown TV screen.', 404);
     const { action, screenId } = body;
     const screen = await result(db.from('tv_screens').select('*').eq('id', screenId).single());
+    screen.settings = { ...DEFAULT_TV_SETTINGS, ...screen.settings };
+    if (screenId === 'shoe-area') {
+      screen.settings = {
+        ...screen.settings,
+        mode: 'posters',
+        camera_url: '',
+        youtube_url: '',
+        prayer_enabled: false,
+        notice_mode: 'off',
+        class_until: '',
+      };
+      screen.share_session = null;
+      if (
+        ['start', 'join', 'receive', 'answer', 'offer', 'heartbeat', 'pair', 'pair-code'].includes(
+          action,
+        )
+      )
+        fail('The shoe-area screen shows times and posters only.', 403);
+    }
     let response: any;
 
     if (action === 'status') {
@@ -129,13 +149,11 @@ Deno.serve(async (req) => {
       if (!claimed?.length) fail('This pairing link has expired or was already used.', 401);
       const token = randomToken();
       await result(
-        db
-          .from('tv_devices')
-          .insert({
-            screen_id: screenId,
-            token_hash: await hash(token),
-            expires_at: expires(90 * 86400),
-          }),
+        db.from('tv_devices').insert({
+          screen_id: screenId,
+          token_hash: await hash(token),
+          expires_at: expires(90 * 86400),
+        }),
       );
       response = { deviceToken: token };
     } else if (['join', 'receive', 'answer'].includes(action)) {
@@ -191,7 +209,7 @@ Deno.serve(async (req) => {
         );
         response = { ...screen, devices };
       } else if (action === 'save') {
-        const settings = validateSettings(body.settings);
+        const settings = validateSettings(body.settings, screenId);
         await result(
           db
             .from('tv_screens')

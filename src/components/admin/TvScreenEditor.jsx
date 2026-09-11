@@ -10,6 +10,7 @@ const button =
 const panel = 'rounded-xl border border-slate-200 bg-white p-4 sm:p-6';
 
 export default function TvScreenEditor({ screenId }) {
+  const hall = screenId !== 'shoe-area';
   const screen = TV_SCREENS.find((item) => item.id === screenId);
   const [data, setData] = useState(null);
   const [form, setForm] = useState(null);
@@ -111,10 +112,10 @@ export default function TvScreenEditor({ screenId }) {
                 value={form.mode}
                 onChange={(event) => update('mode', event.target.value)}
               >
-                <option value="schedule">Posters and the website livestream</option>
+                {hall && <option value="schedule">Posters and the website livestream</option>}
                 <option value="posters">Posters only</option>
-                <option value="youtube">A separate YouTube stream</option>
-                <option value="camera">Local camera (paired TVs only)</option>
+                {hall && <option value="youtube">A separate YouTube stream</option>}
+                {hall && <option value="camera">Local camera (paired TVs only)</option>}
               </select>
             </label>
             {form.mode === 'youtube' && (
@@ -212,173 +213,305 @@ export default function TvScreenEditor({ screenId }) {
               Save screen settings
             </button>
           </section>
-          <section className={panel}>
-            <h3 className="text-lg font-bold">Pair a TV</h3>
-            <p className="my-2 text-sm text-slate-600">
-              Pair each TV once to allow private screen and camera sharing. Open the pairing link on
-              the TV, or paste its code into “Pair TV” on the display. Links work once and expire
-              after 10 minutes.
-            </p>
-            <button
-              className={button}
-              disabled={busy}
-              onClick={() =>
-                run(async () =>
-                  setPairing(await tvRequest('pair-code', screenId, {}, { staff: true })),
-                )
-              }
-            >
-              Create pairing link
-            </button>
-            {pairing && (
-              <div className="mt-3 space-y-2">
-                <label className="block text-sm">
-                  Pairing link
-                  <input
-                    readOnly
-                    className={input}
-                    value={`${screenUrl}#pair=${pairing.code}`}
-                    onFocus={(event) => event.target.select()}
-                  />
-                </label>
+          {hall && (
+            <section className={panel}>
+              <h3 className="text-lg font-bold">Prayer display and classes</h3>
+              <label className="my-3 block text-sm font-semibold">
+                Special notice screen
+                <select
+                  className={`${input} mt-1`}
+                  value={form.notice_mode || 'off'}
+                  onChange={(event) => update('notice_mode', event.target.value)}
+                >
+                  <option value="off">Off · normal content</option>
+                  <option value="jummah">Jummah welcome and notice</option>
+                  <option value="taraweeh">Ramadan · Taraweeh du‘a</option>
+                </select>
+              </label>
+              <label className="my-3 block text-sm font-semibold">
+                Jummah message
+                <textarea
+                  className={`${input} mt-1`}
+                  rows={3}
+                  maxLength={1200}
+                  value={form.jummah_notice || ''}
+                  onChange={(event) => update('jummah_notice', event.target.value)}
+                />
+              </label>
+              <label className="my-3 block text-sm font-semibold">
+                Taraweeh du‘a (optional, Arabic or English)
+                <textarea
+                  className={`${input} mt-1`}
+                  dir="auto"
+                  rows={4}
+                  maxLength={1200}
+                  value={form.taraweeh_dua || ''}
+                  onChange={(event) => update('taraweeh_dua', event.target.value)}
+                />
+              </label>
+              <p className="text-sm text-slate-600">
+                Blank du‘a uses Qur’an 2:201, a general supplication. Special notices remain until
+                switched off. Automatic prayer notices take priority; class mode temporarily hides
+                both.
+              </p>
+              <button
+                className={`${button} my-3`}
+                disabled={busy || JSON.stringify(form) === saved}
+                onClick={() => run(save)}
+              >
+                Save prayer and notice settings
+              </button>
+              <label className="my-3 flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form.prayer_enabled !== false}
+                  onChange={(event) => update('prayer_enabled', event.target.checked)}
+                />
+                Automatic Jama‘ah and dhikr display
+              </label>
+              <p className="text-sm text-slate-600">
+                Jama‘ah notice at the congregation time. Dhikr starts 5 minutes later, or 10 minutes
+                after Maghrib. Normal content returns 20 minutes after Jama‘ah. These notices
+                temporarily pause video and screen sharing on the TV.
+              </p>
+              <p className="my-3 text-sm">
+                Class mode pauses automatic prayer notices for one hour, then restores them. Save
+                your chosen video mode first.
+              </p>
+              <div className="flex flex-wrap gap-3">
                 <button
                   className={button}
-                  onClick={() => copy(`${screenUrl}#pair=${pairing.code}`)}
-                >
-                  Copy link
-                </button>
-                <label className="block text-sm">
-                  Pairing code
-                  <input
-                    readOnly
-                    className={input}
-                    value={pairing.code}
-                    onFocus={(event) => event.target.select()}
-                  />
-                </label>
-              </div>
-            )}
-            <h4 className="mb-2 mt-5 text-sm font-bold">Paired TVs</h4>
-            {!data.devices.length && (
-              <p className="text-sm text-slate-600">No paired TVs yet. Refresh after pairing.</p>
-            )}
-            <ul className="space-y-2">
-              {data.devices.map((device, index) => (
-                <li
-                  key={device.id}
-                  className="flex flex-wrap items-center justify-between gap-2 text-sm"
-                >
-                  <span>
-                    TV {index + 1} · paired{' '}
-                    {new Date(device.created_at).toLocaleDateString('en-GB')}
-                  </span>
-                  <button
-                    className={button}
-                    disabled={busy}
-                    onClick={() =>
-                      run(async () => {
-                        await tvRequest(
-                          'revoke',
-                          screenId,
-                          { deviceId: device.id },
-                          { staff: true },
-                        );
-                        setData((previous) => ({
-                          ...previous,
-                          devices: previous.devices.filter((item) => item.id !== device.id),
-                        }));
-                      })
-                    }
-                  >
-                    Revoke
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <button
-              className={`${button} mt-3`}
-              disabled={busy}
-              onClick={() =>
-                run(async () => {
-                  const next = await tvRequest('admin', screenId, {}, { staff: true });
-                  setData(next);
-                })
-              }
-            >
-              Refresh paired TVs
-            </button>
-          </section>
-          <section className={panel}>
-            <h3 className="text-lg font-bold">Share live to {screen.label}</h3>
-            <p className="my-2 text-sm text-slate-600">
-              Keep this admin page open while sharing. Stopping returns the TV to its saved display.
-              Phone camera sharing is silent.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button
-                className={button}
-                disabled={
-                  sharing.busy ||
-                  Boolean(sharing.stream) ||
-                  !navigator.mediaDevices?.getDisplayMedia
-                }
-                onClick={() => sharing.start('screen')}
-              >
-                Share laptop screen
-              </button>
-              <button
-                className={button}
-                disabled={
-                  sharing.busy || Boolean(sharing.stream) || !navigator.mediaDevices?.getUserMedia
-                }
-                onClick={() => sharing.start('camera')}
-              >
-                Share this camera
-              </button>
-              {(sharing.stream || sharing.busy) && (
-                <button className={button} onClick={sharing.stop}>
-                  Stop sharing
-                </button>
-              )}
-              {!sharing.stream && activeRemote && (
-                <button
-                  className={button}
+                  disabled={busy}
                   onClick={() =>
                     run(async () => {
-                      await tvRequest(
-                        'stop',
+                      const next = await tvRequest(
+                        'save',
                         screenId,
-                        { sessionId: data.share_session },
+                        {
+                          settings: {
+                            ...form,
+                            class_until: new Date(Date.now() + 3600000).toISOString(),
+                          },
+                        },
                         { staff: true },
                       );
-                      setData((previous) => ({ ...previous, share_session: null }));
+                      setForm(next.settings);
+                      setSaved(JSON.stringify(next.settings));
+                      setMessage('Class mode enabled for one hour.');
                     })
                   }
                 >
-                  Stop existing session
+                  Start class mode · 1 hour
                 </button>
+                <button
+                  className={button}
+                  disabled={busy || !form.class_until}
+                  onClick={() =>
+                    run(async () => {
+                      const next = await tvRequest(
+                        'save',
+                        screenId,
+                        { settings: { ...form, class_until: '' } },
+                        { staff: true },
+                      );
+                      setForm(next.settings);
+                      setSaved(JSON.stringify(next.settings));
+                      setMessage('Class mode ended. Saved prayer and notice settings are active.');
+                    })
+                  }
+                >
+                  End class mode
+                </button>
+              </div>
+              {form.class_until && (
+                <p className="mt-3 text-sm">
+                  Class mode ends{' '}
+                  {new Date(form.class_until).toLocaleString('en-GB', {
+                    timeZone: 'Europe/London',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  })}{' '}
+                  (London time).
+                </p>
               )}
-            </div>
-            {!navigator.mediaDevices?.getDisplayMedia && (
-              <p className="mt-3 text-sm text-slate-600">
-                This browser cannot share the phone’s whole screen. Use the camera button here, or
-                native AirPlay/Cast for whole-phone mirroring.
-              </p>
-            )}
-            <p role="status" className="mt-3 text-sm">
-              {sharing.message}
-            </p>
-            {sharing.stream && (
-              <video
-                ref={preview}
-                autoPlay
-                playsInline
-                muted
-                className="mt-3 max-h-72 w-full rounded-lg bg-black"
-                aria-label="Your sharing preview"
-              />
-            )}
-          </section>
+            </section>
+          )}
+          {hall && (
+            <>
+              <section className={panel}>
+                <h3 className="text-lg font-bold">Pair a TV</h3>
+                <p className="my-2 text-sm text-slate-600">
+                  Pair each TV once to allow private screen and camera sharing. Open the pairing
+                  link on the TV, or paste its code into “Pair TV” on the display. Links work once
+                  and expire after 10 minutes.
+                </p>
+                <button
+                  className={button}
+                  disabled={busy}
+                  onClick={() =>
+                    run(async () =>
+                      setPairing(await tvRequest('pair-code', screenId, {}, { staff: true })),
+                    )
+                  }
+                >
+                  Create pairing link
+                </button>
+                {pairing && (
+                  <div className="mt-3 space-y-2">
+                    <label className="block text-sm">
+                      Pairing link
+                      <input
+                        readOnly
+                        className={input}
+                        value={`${screenUrl}#pair=${pairing.code}`}
+                        onFocus={(event) => event.target.select()}
+                      />
+                    </label>
+                    <button
+                      className={button}
+                      onClick={() => copy(`${screenUrl}#pair=${pairing.code}`)}
+                    >
+                      Copy link
+                    </button>
+                    <label className="block text-sm">
+                      Pairing code
+                      <input
+                        readOnly
+                        className={input}
+                        value={pairing.code}
+                        onFocus={(event) => event.target.select()}
+                      />
+                    </label>
+                  </div>
+                )}
+                <h4 className="mb-2 mt-5 text-sm font-bold">Paired TVs</h4>
+                {!data.devices.length && (
+                  <p className="text-sm text-slate-600">
+                    No paired TVs yet. Refresh after pairing.
+                  </p>
+                )}
+                <ul className="space-y-2">
+                  {data.devices.map((device, index) => (
+                    <li
+                      key={device.id}
+                      className="flex flex-wrap items-center justify-between gap-2 text-sm"
+                    >
+                      <span>
+                        TV {index + 1} · paired{' '}
+                        {new Date(device.created_at).toLocaleDateString('en-GB')}
+                      </span>
+                      <button
+                        className={button}
+                        disabled={busy}
+                        onClick={() =>
+                          run(async () => {
+                            await tvRequest(
+                              'revoke',
+                              screenId,
+                              { deviceId: device.id },
+                              { staff: true },
+                            );
+                            setData((previous) => ({
+                              ...previous,
+                              devices: previous.devices.filter((item) => item.id !== device.id),
+                            }));
+                          })
+                        }
+                      >
+                        Revoke
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  className={`${button} mt-3`}
+                  disabled={busy}
+                  onClick={() =>
+                    run(async () => {
+                      const next = await tvRequest('admin', screenId, {}, { staff: true });
+                      setData(next);
+                    })
+                  }
+                >
+                  Refresh paired TVs
+                </button>
+              </section>
+              <section className={panel}>
+                <h3 className="text-lg font-bold">Share live to {screen.label}</h3>
+                <p className="my-2 text-sm text-slate-600">
+                  Keep this admin page open while sharing. Stopping returns the TV to its saved
+                  display. Phone camera sharing is silent.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    className={button}
+                    disabled={
+                      sharing.busy ||
+                      Boolean(sharing.stream) ||
+                      !navigator.mediaDevices?.getDisplayMedia
+                    }
+                    onClick={() => sharing.start('screen')}
+                  >
+                    Share laptop screen
+                  </button>
+                  <button
+                    className={button}
+                    disabled={
+                      sharing.busy ||
+                      Boolean(sharing.stream) ||
+                      !navigator.mediaDevices?.getUserMedia
+                    }
+                    onClick={() => sharing.start('camera')}
+                  >
+                    Share this camera
+                  </button>
+                  {(sharing.stream || sharing.busy) && (
+                    <button className={button} onClick={sharing.stop}>
+                      Stop sharing
+                    </button>
+                  )}
+                  {!sharing.stream && activeRemote && (
+                    <button
+                      className={button}
+                      onClick={() =>
+                        run(async () => {
+                          await tvRequest(
+                            'stop',
+                            screenId,
+                            { sessionId: data.share_session },
+                            { staff: true },
+                          );
+                          setData((previous) => ({ ...previous, share_session: null }));
+                        })
+                      }
+                    >
+                      Stop existing session
+                    </button>
+                  )}
+                </div>
+                {!navigator.mediaDevices?.getDisplayMedia && (
+                  <p className="mt-3 text-sm text-slate-600">
+                    This browser cannot share the phone’s whole screen. Use the camera button here,
+                    or native AirPlay/Cast for whole-phone mirroring.
+                  </p>
+                )}
+                <p role="status" className="mt-3 text-sm">
+                  {sharing.message}
+                </p>
+                {sharing.stream && (
+                  <video
+                    ref={preview}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="mt-3 max-h-72 w-full rounded-lg bg-black"
+                    aria-label="Your sharing preview"
+                  />
+                )}
+              </section>
+            </>
+          )}
         </>
       )}
     </div>

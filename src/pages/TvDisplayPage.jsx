@@ -2,6 +2,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import useTvScreen from '@/hooks/useTvScreen';
 import PrivateTvPlayer from '@/components/tv/PrivateTvPlayer';
+import TvPrayerScene from '@/components/tv/TvPrayerScene';
+import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
+import { tvPrayerSequence, tvSpecialNotice } from '@/lib/tvPrayerSequence';
+import { TV_REMINDERS } from '@/content/tvReminders';
 import { TV_SCREENS } from '@/lib/tvControl';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
@@ -35,7 +39,7 @@ function ScreenDisplay({ screenId }) {
   const [privateFailed, setPrivateFailed] = useState(false);
   const privateSource =
     tv.session?.id || (tv.settings.mode === 'camera' ? tv.settings.camera_url : '');
-  const showPrivate = tv.paired && privateSource && !privateFailed;
+
   const privateUnavailable = useCallback(() => setPrivateFailed(true), []);
   useEffect(() => {
     setPrivateFailed(false);
@@ -53,6 +57,17 @@ function ScreenDisplay({ screenId }) {
   const [failedImages, setFailedImages] = useState([]);
   const [failedVideo, setFailedVideo] = useState('');
   const today = londonDate();
+  const sequence = tvPrayerSequence(
+    now,
+    prayers.todaysTimes,
+    prayers.jummahTimes,
+    tv.settings,
+    screenId,
+  );
+  const specialNotice = tvSpecialNotice(now, tv.settings, screenId);
+  const noticeVisible = Boolean(sequence || specialNotice);
+  const showPrivate =
+    screenId !== 'shoe-area' && !noticeVisible && tv.paired && privateSource && !privateFailed;
   const posters = useMemo(() => {
     const programmePosters = PROGRAMMES.filter((item) =>
       tv.settings.poster_ids.includes(item.id),
@@ -91,7 +106,12 @@ function ScreenDisplay({ screenId }) {
         livestream?.enabled &&
         (!scheduled || scheduled <= now.getTime()))),
   );
-  const showYoutube = !showPrivate && liveAvailable && failedVideo !== videoId;
+  const showYoutube =
+    screenId !== 'shoe-area' &&
+    !noticeVisible &&
+    !showPrivate &&
+    liveAvailable &&
+    failedVideo !== videoId;
   const showLive = showPrivate || showYoutube;
   const visiblePosters = posters.length
     ? [
@@ -165,30 +185,6 @@ function ScreenDisplay({ screenId }) {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <header className="jic-tv-header">
-        <div className="jic-tv-heading">
-          <div className="jic-tv-logo">
-            <JamatiaLogo variant="wordmark" />
-          </div>
-          <div className="jic-tv-clock">
-            <time dateTime={now.toISOString()}>
-              {now.toLocaleTimeString('en-GB', {
-                timeZone: 'Europe/London',
-                hour: 'numeric',
-                minute: '2-digit',
-                hourCycle: 'h12',
-              })}
-            </time>
-            <span>
-              {now.toLocaleDateString('en-GB', {
-                timeZone: 'Europe/London',
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </span>
-          </div>
-        </div>
         <PrayerTimeBar {...prayers} currentDate={now} interactive={false} showContact={false} />
         {(prayers.error || (!prayers.isLoadingPrayerTimes && !prayers.todaysTimes)) && (
           <p className="jic-tv-notice" role="status">
@@ -200,6 +196,10 @@ function ScreenDisplay({ screenId }) {
         className={`jic-tv-stage ${showLive ? 'is-live' : ''}`}
         aria-label={showLive ? 'Livestream and posters' : 'Community posters'}
       >
+        {sequence && <TvPrayerScene sequence={sequence} jummahNotice={tv.settings.jummah_notice} />}
+        {!sequence && specialNotice && (
+          <TvSpecialNotice mode={specialNotice} settings={tv.settings} />
+        )}
         {showPrivate && (
           <section className="jic-tv-video">
             <h1>
@@ -229,27 +229,57 @@ function ScreenDisplay({ screenId }) {
             />
           </section>
         )}
-        <div className="jic-tv-posters">
-          {visiblePosters.map((item) => (
-            <figure key={item.id} className="jic-tv-poster">
-              <img
-                src={item.image}
-                alt={item.alt}
-                onError={() =>
-                  setFailedImages((previous) =>
-                    previous.includes(item.image) ? previous : [...previous, item.image],
-                  )
-                }
-              />
-              <figcaption>{item.title}</figcaption>
-            </figure>
-          ))}
-        </div>
-        {!posters.length && !showLive && (
+        {!noticeVisible && (
+          <div className="jic-tv-posters">
+            {visiblePosters.map((item) => (
+              <figure key={item.id} className="jic-tv-poster">
+                <img
+                  src={item.image}
+                  alt={item.alt}
+                  onError={() =>
+                    setFailedImages((previous) =>
+                      previous.includes(item.image) ? previous : [...previous, item.image],
+                    )
+                  }
+                />
+                <figcaption>{item.title}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+        {!noticeVisible && !posters.length && !showLive && (
           <p className="jic-tv-empty">Posters will appear here when available.</p>
         )}
       </main>
-      <div className="jic-tv-status">
+      <footer className="jic-tv-status">
+        <div className="jic-tv-logo">
+          <JamatiaLogo variant="pillars" />
+        </div>
+        <div className="jic-tv-clock">
+          <time dateTime={now.toISOString()}>
+            {now.toLocaleTimeString('en-GB', {
+              timeZone: 'Europe/London',
+              hour: 'numeric',
+              minute: '2-digit',
+              hourCycle: 'h12',
+            })}
+          </time>
+          <span>
+            {now.toLocaleDateString('en-GB', {
+              timeZone: 'Europe/London',
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </span>
+        </div>
+
+        {screenId !== 'shoe-area' && !noticeVisible && (
+          <p className="jic-tv-manners">
+            {TV_REMINDERS[Math.floor(now.getTime() / 45000) % TV_REMINDERS.length]}
+          </p>
+        )}
         <span>{tv.label}</span>
         {tv.error && <span role="status">{tv.error}</span>}
         {privateFailed && <span role="status">Live feed unavailable · retrying</span>}
@@ -257,16 +287,26 @@ function ScreenDisplay({ screenId }) {
           'Content update delayed · reconnecting'
         ) : (
           <span>
-            {showLive ? 'Livestream' : 'Community notices'}
+            {sequence
+              ? sequence.phase === 'jamaah'
+                ? 'Jama‘ah time'
+                : 'Dhikr after salah'
+              : specialNotice
+                ? specialNotice === 'jummah'
+                  ? 'Jummah notice'
+                  : 'Ramadan · Taraweeh'
+                : showLive
+                  ? 'Livestream'
+                  : 'Community notices'}
             {posters.length > 1 && ` · ${(slide % posters.length) + 1} / ${posters.length}`}
           </span>
         )}
-        {!tv.paired && (
+        {screenId !== 'shoe-area' && !tv.paired && (
           <button className="jic-tv-pair-button" onClick={() => setPairOpen(true)}>
             Pair TV
           </button>
         )}
-      </div>
+      </footer>
       {pairOpen && (
         <dialog
           ref={pairDialog}

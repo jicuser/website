@@ -92,3 +92,23 @@ body.edit-mode-active {
     scroll-behavior: auto !important;
   }
 }
+
+/* Visible before React loads, including when startup fails. */
+.jic-startup-status {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: #07111b;
+  color: #fff;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+}
+.jic-startup-status p {
+  color: #f2c35c;
+}
+.jic-startup-status h1 {
+  font-size: 1.25rem;
+}

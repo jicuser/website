@@ -1,7 +1,7 @@
 export function safeWebUrl(raw) {
   try {
     const url = new URL(raw);
-    return url.protocol === 'https:' ? url.href : null;
+    return url.protocol === 'https:' && !url.username && !url.password ? url.href : null;
   } catch {
     return null;
   }
@@ -12,6 +12,8 @@ export function youtubeVideoId(raw) {
     const url = new URL(raw);
     if (
       url.protocol !== 'https:' ||
+      url.username ||
+      url.password ||
       !['youtu.be', 'youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname)
     )
       return null;

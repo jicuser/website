@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
+  ArrowLeft,
   ChevronDown,
   Heart,
   Home,
@@ -13,7 +14,7 @@ import {
   X,
   ExternalLink,
 } from 'lucide-react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
 import { MADRASSAH_TABS, MASJID_EXTENSION_TABS, NAV_GROUPS } from '@/content/nav';
@@ -46,6 +47,7 @@ function activeNavigation(pathname) {
 
 export default function UnifiedHeader() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
   const prayerDockRef = useRef(null),
@@ -279,6 +281,40 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
+      <nav className="jic-mobile-controls" aria-label="Quick navigation">
+        <button
+          type="button"
+          onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/'))}
+        >
+          <ArrowLeft size={21} aria-hidden="true" />
+          <span>Back</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-expanded={menuOpen}
+          aria-controls="jic-site-menu"
+        >
+          <Menu size={21} aria-hidden="true" />
+          <span>Menu</span>
+        </button>
+        <button type="button" onClick={() => setDonationOpen(true)}>
+          <Heart size={21} aria-hidden="true" />
+          <span>Donate</span>
+        </button>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? (
+            <Sun size={21} aria-hidden="true" />
+          ) : (
+            <Moon size={21} aria-hidden="true" />
+          )}
+          <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+        </button>
+      </nav>
       {radioError && (
         <span className="sr-only" role="status">
           Radio could not start. Press Radio to retry.

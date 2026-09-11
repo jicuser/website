@@ -7,12 +7,14 @@ import { internalPath } from '@/lib/navigation';
 export default function DailyReminder() {
   const { getContent } = useContent();
   const [index, setIndex] = useState(() => Math.floor(Date.now() / 86400000));
+  const [scrolling, setScrolling] = useState(false);
   const interactions = useRef(0);
   const advance = useCallback(() => {
     interactions.current = 0;
     setIndex((value) => value + 1);
   }, []);
   useEffect(() => {
+    const mobile = window.matchMedia('(max-width: 767px)');
     let scrollTimer,
       scrollIntentUntil = 0;
     const isEditing = (target) =>
@@ -25,7 +27,7 @@ export default function DailyReminder() {
       if (interactions.current >= 2) advance();
     };
     const onClick = (event) => {
-      if (event.isTrusted && !isEditing(event.target)) countInteraction();
+      if (!mobile.matches && event.isTrusted && !isEditing(event.target)) countInteraction();
     };
     const onIntent = (event) => {
       if (isEditing(event.target)) return;
@@ -47,7 +49,17 @@ export default function DailyReminder() {
       scrollIntentUntil = Date.now() + 2000;
     };
     // One scroll gesture, including its momentum, counts once, not once per pixel.
-    const onScroll = () => {
+    const onScroll = (event) => {
+      if (mobile.matches) {
+        if (event.target !== document) return;
+        setScrolling(true);
+        window.clearTimeout(scrollTimer);
+        scrollTimer = window.setTimeout(() => {
+          advance();
+          setScrolling(false);
+        }, 700);
+        return;
+      }
       if (Date.now() > scrollIntentUntil) return;
       scrollIntentUntil = Date.now() + 1000;
       window.clearTimeout(scrollTimer);
@@ -56,6 +68,11 @@ export default function DailyReminder() {
         countInteraction();
       }, 180);
     };
+    const onResize = () => {
+      window.clearTimeout(scrollTimer);
+      setScrolling(false);
+    };
+    mobile.addEventListener('change', onResize);
     document.addEventListener('click', onClick, true);
     document.addEventListener('scroll', onScroll, { capture: true, passive: true });
     ['wheel', 'touchstart', 'touchmove', 'pointerdown', 'keydown'].forEach((type) =>
@@ -63,6 +80,7 @@ export default function DailyReminder() {
     );
     return () => {
       window.clearTimeout(scrollTimer);
+      mobile.removeEventListener('change', onResize);
       document.removeEventListener('click', onClick, true);
       document.removeEventListener('scroll', onScroll, true);
       ['wheel', 'touchstart', 'touchmove', 'pointerdown', 'keydown'].forEach((type) =>
@@ -112,11 +130,14 @@ export default function DailyReminder() {
     /* Older browsers. */
   }
   return (
-    <aside className="jic-daily-reminder" aria-label="Daily reminder">
+    <aside
+      className={`jic-daily-reminder${scrolling ? ' is-scrolling' : ''}`}
+      aria-label="Daily reminder"
+    >
       <button
         type="button"
         aria-label="Show another daily reminder"
-        title="Changes after two taps or scroll gestures. Tap here for the next reminder."
+        title="Tap for the next reminder. On phones, a new reminder appears after scrolling stops."
         onClick={advance}
       >
         <div>

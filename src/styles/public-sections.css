@@ -92,7 +92,7 @@
   }
   .jic-scroll-top {
     right: max(16px, env(safe-area-inset-right));
-    bottom: calc(18px + env(safe-area-inset-bottom));
+    bottom: calc(80px + env(safe-area-inset-bottom));
   }
 }
 @media (min-width: 1025px) {

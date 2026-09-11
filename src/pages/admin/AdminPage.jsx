@@ -48,7 +48,7 @@ const SECTIONS = [
   ['events', 'Events', CalendarDays, 'events'],
   ['announcements', 'Announcements', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
-  ...TV_SCREENS.map((screen) => [`tv-${screen.id}`, screen.label, Monitor, 'livestream']),
+  ...TV_SCREENS.map((screen) => [`tv-${screen.id}`, screen.label, Monitor, 'tv']),
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
   ['users', 'Users & roles', ShieldCheck, 'users'],
@@ -978,11 +978,18 @@ function UsersSection() {
         </Field>
         <Field title="Role">
           <select className={input} value={role} onChange={(e) => setInviteRole(e.target.value)}>
-            {['teacher', 'events_manager', 'content_editor', 'admin', 'super_admin'].map(
-              (value) => (
-                <option key={value}>{value}</option>
-              ),
-            )}
+            {[
+              'tv_operator',
+              'teacher',
+              'events_manager',
+              'content_editor',
+              'admin',
+              'super_admin',
+            ].map((value) => (
+              <option key={value} value={value}>
+                {value === 'tv_operator' ? 'TV operator (TV controls only)' : value}
+              </option>
+            ))}
           </select>
         </Field>
         <div className="self-end">
@@ -1010,13 +1017,16 @@ function UsersSection() {
             >
               {[
                 'viewer',
+                'tv_operator',
                 'teacher',
                 'events_manager',
                 'content_editor',
                 'admin',
                 'super_admin',
               ].map((value) => (
-                <option key={value}>{value}</option>
+                <option key={value} value={value}>
+                  {value === 'tv_operator' ? 'TV operator (TV controls only)' : value}
+                </option>
               ))}
             </select>
             <span className={`text-sm ${row.is_active ? 'text-emerald-600' : 'text-red-600'}`}>
@@ -1098,19 +1108,18 @@ export default function AdminPage() {
   const { saveCurrent, dirty, saving, label: saveLabel, status } = useAdminSave();
   const allowed = useMemo(
     () =>
-      SECTIONS.filter(
-        ([key, , , permission]) =>
-          key === 'dashboard' || (key === 'users' ? isSuperAdmin : can(permission)),
+      SECTIONS.filter(([key, , , permission]) =>
+        key === 'users' ? isSuperAdmin : can(permission),
       ),
     [can, isSuperAdmin],
   );
-  const [active, setActive] = useState('dashboard');
+  const [active, setActive] = useState(() => allowed[0]?.[0] || 'dashboard');
   useEffect(() => {
-    if (!allowed.some((item) => item[0] === active)) setActive('dashboard');
+    if (!allowed.some((item) => item[0] === active)) setActive(allowed[0]?.[0] || 'dashboard');
   }, [allowed, active]);
 
   const chooseSection = (key) => {
-    if (key === active) return;
+    if (key === active || !allowed.some((item) => item[0] === key)) return;
     if (dirty && !window.confirm('Discard unsaved changes?')) return;
     setActive(key);
   };
