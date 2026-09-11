@@ -12,9 +12,15 @@ export const MASJID_EXTENSION_TABS = [
 
 export const MADRASSAH_TABS = [
   { name: 'Overview', path: '/madrassah' },
+  { name: 'Enrolment', path: '/madrassah/enrolment' },
+  { name: 'Classes & Courses', path: '/madrassah/classes-courses' },
+  { name: 'Student Portal', path: '/madrassah/student-portal' },
+  { name: 'Contact', path: '/madrassah/contact' },
+  { name: 'Policies', path: '/madrassah/policies' },
 ];
 
 export const EDUCATION_TABS = [
+  { name: 'Overview', path: '/education' },
   { name: 'Madrassah', path: '/madrassah' },
   { name: 'Classes & Courses', path: '/madrassah/classes-courses' },
   { name: 'Student Portal', path: '/madrassah/student-portal' },
@@ -61,7 +67,7 @@ export const NAV_GROUPS = [
     { name: 'Updates & Gallery', path: '/projects/gallery' },
     { name: 'Support Projects', path: '/projects/how-to-support' },
   ]},
-  { name: 'Education', path: '/madrassah', children: EDUCATION_TABS },
+  { name: 'Education', path: '/education', children: EDUCATION_TABS },
   { name: 'Youth', path: '/youth', children: [
     { name: 'Overview', path: '/youth' },
     { name: 'Activities', path: '/youth/activities' },
