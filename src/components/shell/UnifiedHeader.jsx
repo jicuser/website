@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
+  ChevronDown,
   Heart,
   Home,
   LogIn,
@@ -57,6 +58,7 @@ export default function UnifiedHeader() {
     [radioError, setRadioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false),
     [donationOpen, setDonationOpen] = useState(false);
+  const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
   const navigation = useMemo(() => activeNavigation(pathname), [pathname]);
   const subtabs = navigation?.children || [];
   const selected = subtabs
@@ -235,14 +237,13 @@ export default function UnifiedHeader() {
             <div className="jic-free-actions">
               <button
                 type="button"
-                className="jic-quick-theme"
                 onClick={toggleTheme}
                 aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
                 title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}
               >
                 {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
               </button>
-              <Link to="/" className="jic-home-action" aria-label="Home">
+              <Link to="/" aria-label="Home">
                 <Home size={20} />
               </Link>
               <button
@@ -313,34 +314,57 @@ export default function UnifiedHeader() {
               </button>
             </div>
             <nav className="jic-menu-directory" aria-label="All pages">
-              {[
-                ...NAV_GROUPS,
-                { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
-              ].map(({ name, path, children }) => (
-                <div className="jic-unified-menu-group" key={path}>
-                  <div className="jic-unified-menu-row">
-                    <NavLink to={path} end onClick={() => setMenuOpen(false)}>
-                      {name}
-                    </NavLink>
-                  </div>
-                  {children.length > 0 && (
-                    <div className="jic-unified-menu-children">
-                      {children
-                        .filter((child) => child.path !== path)
-                        .map((child) => (
-                          <NavLink
-                            end
-                            key={`${child.path}-${child.name}`}
-                            to={child.path}
-                            onClick={() => setMenuOpen(false)}
+              <ul className="jic-menu-list">
+                {[
+                  ...NAV_GROUPS,
+                  { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
+                ].map(({ name, path, children }) => {
+                  const subpages = children.filter((child) => child.path !== path);
+                  const expanded = Boolean(expandedMenuGroups[path]);
+                  const childrenId = `jic-menu-${path.slice(1) || 'home'}-children`;
+                  return (
+                    <li className="jic-unified-menu-group" key={path}>
+                      <div className="jic-unified-menu-row">
+                        <NavLink to={path} end onClick={() => setMenuOpen(false)}>
+                          {name}
+                        </NavLink>
+                        {subpages.length > 0 && (
+                          <button
+                            type="button"
+                            className="jic-menu-expand"
+                            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${name} subpages`}
+                            aria-expanded={expanded}
+                            aria-controls={childrenId}
+                            onClick={() =>
+                              setExpandedMenuGroups((previous) => ({
+                                ...previous,
+                                [path]: !previous[path],
+                              }))
+                            }
                           >
-                            {child.name}
-                          </NavLink>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                            <ChevronDown size={20} aria-hidden="true" />
+                          </button>
+                        )}
+                      </div>
+                      {subpages.length > 0 && (
+                        <ul
+                          id={childrenId}
+                          className="jic-unified-menu-children"
+                          hidden={!expanded}
+                        >
+                          {subpages.map((child) => (
+                            <li key={`${child.path}-${child.name}`}>
+                              <NavLink end to={child.path} onClick={() => setMenuOpen(false)}>
+                                {child.name}
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             </nav>
             <div className="jic-menu-bottom-actions">
               <Link

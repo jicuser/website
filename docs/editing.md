@@ -25,9 +25,11 @@ CSS custom properties are shared settings. For example, `var(--jic-text)` takes 
 
 Normal responsive and theme rules are intentional. A desktop size, a mobile size and a dark-mode colour are different states. Do not remove them solely because a selector appears more than once. Comments explain non-obvious behaviour and ownership; they should not record a history of attempts or describe a fix as “final”.
 
-The header and navigation menu select the lettering-only logo with `<JamatiaLogo variant="wordmark" />` in `src/components/shell/UnifiedHeader.jsx`. The shared logo component chooses the light or dark SVG from `public/brand/`. Change the variant at its point of use when changing one placement; keep logo sizing in the existing `header.css` rules.
+The header and navigation menu select the lettering-only logo with `<JamatiaLogo variant="wordmark" />` in `src/components/shell/UnifiedHeader.jsx`. The shared logo component chooses the light or dark SVG from `public/brand/`. The main header logo and three icons sit directly over the page background, with no pill or icon boxes; the invisible touch targets remain 44px. Change the variant at its point of use when changing one placement; keep logo sizing in the existing `header.css` rules.
 
 Homepage links and tiles use the clear glass inset in `home.css`; their appearance is not redefined in `theme.css` or `liquid-glass.css`. At 1024px and wider the hero buttons and tile grid are hidden, and `content.css` shows a compact row of programme posters. Each poster still opens full size. The daily quote's subtle warm tint belongs to its existing button rule in `header.css`.
+
+The burger menu is a single list on desktop and mobile. Section names navigate; their separate chevrons expand or collapse subpages without closing the menu. Sections start collapsed and remember the visitor's choices while the header stays mounted. The markup and expansion state belong to `UnifiedHeader.jsx`, with all menu layout rules in `header.css`.
 
 ## Android and iPhone checks
 
@@ -38,6 +40,7 @@ Check Chrome at 320, 360 and 412 CSS pixels, and Safari on the iPhone. Also chec
 - Both Jummah times, Radio, the theme button, Home and Menu should be reachable.
 - Swipe the section tabs to the last item, select it, and confirm it becomes the current tab.
 - Open and close the menu. Only the menu should scroll while it is open; Escape closes it on a keyboard.
+- Expand two menu sections. Both should stay open until their chevrons are pressed again, including after resizing or reopening the menu. Choosing a page closes the menu and navigates there.
 - Try light/dark mode and glass on/off. Text should stay clear over the photograph.
 - On Home, phone tiles and hero buttons should be translucent with no doubled borders. On a laptop or PC, they should be hidden and the compact posters should open by click or keyboard.
 - Rotate the phone. In short landscape windows the header scrolls with the page to leave room for content.

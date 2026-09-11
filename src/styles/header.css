@@ -192,7 +192,7 @@
   opacity: 0.5;
 }
 
-/* The brand can shrink; the three touch controls retain their hit areas. */
+/* Unboxed branding and icons. The brand can shrink; touch targets stay 44px. */
 .jic-free-nav-row {
   display: flex;
   align-items: center;
@@ -201,12 +201,6 @@
   min-height: 64px;
   margin-top: 6px;
   padding: 5px 8px;
-  border: 1px solid var(--jic-glass-border);
-  border-radius: 14px;
-  background: var(--jic-glass-surface-strong);
-  box-shadow: var(--jic-glass-shadow);
-  backdrop-filter: var(--jic-glass-backdrop);
-  -webkit-backdrop-filter: var(--jic-glass-backdrop);
 }
 .jic-free-brand {
   display: flex;
@@ -233,14 +227,9 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--jic-glass-border);
-  border-radius: 11px;
-  background: var(--jic-glass-inset);
-  color: var(--jic-text);
-}
-.jic-free-actions .jic-quick-theme {
-  background: transparent;
   border: 0;
+  background: transparent;
+  color: var(--jic-text);
 }
 .jic-desktop-primary-nav {
   display: none;
@@ -282,7 +271,7 @@ html {
 .jic-unified-menu-head {
   flex: 0 0 auto;
   min-height: 68px;
-  padding: max(10px, env(safe-area-inset-top)) max(16px, calc((100vw - 968px) / 2)) 10px;
+  padding: max(10px, env(safe-area-inset-top)) max(16px, calc((100vw - 728px) / 2)) 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -309,7 +298,7 @@ html {
   width: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
-  max-width: 1000px;
+  max-width: 760px;
   margin: 0 auto;
   padding: 10px 16px calc(env(safe-area-inset-bottom) + 16px);
 }
@@ -331,16 +320,24 @@ html {
   border-radius: 10px;
   background: var(--jic-glass-inset);
 }
-.jic-menu-directory {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+/* One list on every screen. Expansion changes only the subpages, never the dialog. */
+.jic-menu-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .jic-unified-menu-group {
   min-width: 0;
   border-bottom: 1px solid var(--jic-border);
-  padding: 6px 0 8px;
+}
+.jic-unified-menu-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .jic-unified-menu-row > a {
+  flex: 1;
+  min-width: 0;
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -351,10 +348,28 @@ html {
   color: var(--jic-text);
   overflow-wrap: anywhere;
 }
-.jic-unified-menu-children {
+.jic-menu-expand {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
-  gap: 2px 10px;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--jic-text);
+}
+.jic-menu-expand:hover {
+  background: var(--jic-glass-inset);
+}
+.jic-menu-expand[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+.jic-unified-menu-children {
+  margin: 0 0 8px 8px;
+  padding: 0 0 0 12px;
+  border-left: 1px solid var(--jic-border);
+  list-style: none;
 }
 .jic-unified-menu-children a {
   display: flex;
@@ -538,13 +553,6 @@ html[data-surface='glass'] .jic-unified-menu-donate {
   }
   .jic-free-actions {
     gap: 7px;
-  }
-  .jic-unified-menu-group {
-    display: grid;
-    grid-template-columns: minmax(150px, 1fr) minmax(0, 3fr);
-    gap: 20px;
-    align-items: start;
-    padding: 10px 0;
   }
 }
 @media (min-width: 1200px) {
