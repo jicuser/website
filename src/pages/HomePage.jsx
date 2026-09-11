@@ -36,7 +36,7 @@ function useHomeLiveContent(){
 
 const DEFAULT_CARDS=[
   {key:'services',title:'Services',text:'Religious, educational and community services for all.',to:'/services',cta:'Explore Services',icon:MosqueIcon,img:''},
-  {key:'projects',title:'Projects',text:'Building for a stronger future.',to:'/projects',cta:'View Projects',icon:Building2,img:''},
+  {key:'projects',title:'Masjid Building Works',text:'Follow the latest building works, appeals and progress at JIC.',to:'/projects',cta:'View & Support Works',icon:Building2,img:''},
   {key:'youth',title:'Youth',text:'Activities, programs and opportunities.',to:'/youth',cta:'Explore Youth',icon:Users,img:''},
   {key:'madrassah',title:'Madrassah',text:'Islamic education for the next generation.',to:'/madrassah',cta:'View Classes',icon:BookOpen,img:''},
 ];
