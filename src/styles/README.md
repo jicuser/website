@@ -29,10 +29,10 @@ The former override files are no longer imported. Their retained section rules l
 
 Use the variables in `theme.css` rather than adding page-specific colour systems.
 
-Light mode uses pearl `#FAFBFD`, secondary `#EFF2F6`, navy text `#0C1930`, and copper text/logo accents `#89501B`.
+Light mode uses pearl `#FAFBFD`, secondary `#EFF2F6`, navy text `#0C1930`, and copper interface accents `#89501B`.
 
 Dark mode uses navy `#080F1D`, secondary `#0F1A2B`, card `#152238`, off-white text `#F4F6FA`, and brass accents `#D6AF62`.
 
-Filled primary buttons use brass `#D6AF62` with navy text in both modes. Do not use the darker light-mode copper as a button background with navy text. The SVGs use two deliberate colour versions; never recolour the entire logo using CSS filters. See `public/brand/README.md` for variants and alternative palette directions.
+Filled primary buttons use brass `#D6AF62` with navy text in both modes. Do not use the darker light-mode copper as a button background with navy text. The approved logos retain their stone and glass colours; only the lettering changes for dark surfaces. Never recolour the entire logo using CSS filters. See `public/brand/README.md` for exports and usage.
 
 Status colours are reserved for real states such as availability, warnings and validation.

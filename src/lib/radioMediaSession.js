@@ -2,7 +2,7 @@ export function updateRadioMediaSession(audio) {
   if (!('mediaSession' in navigator) || typeof window.MediaMetadata !== 'function') return;
   navigator.mediaSession.metadata = new window.MediaMetadata({
     title: 'JIC Radio', artist: 'Jamatia Islamic Centre', album: 'Woodlands Road Masjid',
-    artwork: [192, 512].map(size => ({ src: new URL(`/icons/jic-icon-${size}.png?v=20260911`, window.location.origin).href, sizes: `${size}x${size}`, type: 'image/png' })),
+    artwork: [192, 512].map(size => ({ src: new URL(`/icons/jic-icon-${size}.png?v=stone-glass-1`, window.location.origin).href, sizes: `${size}x${size}`, type: 'image/png' })),
   });
   navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
   try {

@@ -6,7 +6,7 @@ React/Vite website for JIC. See [the brand and mobile handover](BRAND-AND-MOBILE
 - Responsive dark/light design with optional glass or solid surfaces
 - Persistent top information bar with address, both Jummah times, and JIC Radio play/pause
 - Official JIC radio stream fallback: `https://jicmosque.radioca.st/stream`
-- Refined SVG identity with seven light/dark variants; persistent Home and Menu actions
+- Approved stone-and-glass SVG identity with seven light/dark variants; persistent Home and Menu actions
 - Persistent Salah strip with full timetable link
 - Existing Supabase prayer-time, CMS, admin and page foundation preserved
 - Mobile-first navigation with no duplicate Jummah or directions tiles in the header flow
@@ -30,7 +30,7 @@ Hostinger should deploy the generated `dist/` directory for a static Vite deploy
 ```bash
 npm run check
 node --test tests/*.test.mjs
-node scripts/build-brand.mjs
+npm run build:brand
 ```
 
 [Logo variants and colour guidance](public/brand/README.md) · [Seven-variant contact sheet](public/brand/jic-variations.svg)

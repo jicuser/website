@@ -1,5 +1,5 @@
 // Reuse our approved SVG for browser icons and system media artwork.
-// Asset generation only; sharp is provided by the development runtime.
+// Asset generation only; sharp is a pinned development dependency.
 const fs = require('node:fs');
 const sharp = require('sharp');
 (async () => {

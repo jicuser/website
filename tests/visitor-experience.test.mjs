@@ -21,8 +21,8 @@ test('CMS navigation accepts local routes without protocol-relative or backslash
   assert.equal(internalPath('/contact#map'), '/contact#map');
 });
 
-test('all seven logo variations have paired, self-contained path-based exports', () => {
-  for (const name of ['horizontal', 'centred', 'compact', 'wordmark', 'entrance', 'minaret', 'pillars']) {
+test('approved logo variations have paired, self-contained vector exports', () => {
+  for (const name of ['horizontal', 'centred', 'compact', 'wordmark', 'entrance', 'minaret', 'minaret-compact', 'pillars', 'arch']) {
     for (const theme of ['light', 'dark']) {
       const svg = readFileSync(new URL(`../public/brand/jic-${name}-${theme}.svg`, import.meta.url), 'utf8');
       assert.match(svg, /<svg[^>]+viewBox="0 0 \d+ \d+"/);
@@ -30,7 +30,11 @@ test('all seven logo variations have paired, self-contained path-based exports',
       assert.match(svg, /<path /);
       assert.doesNotMatch(svg, /<(?:image|text|script|foreignObject)\b|data:image|@font-face/);
       assert.doesNotMatch(svg, /&(?!amp;|lt;|gt;|quot;|apos;|#\d+;)/);
-      assert.ok(svg.includes(theme === 'light' ? '#89501B' : '#D6AF62'));
+      assert.doesNotMatch(svg, /#89501B|#D6AF62/);
+      assert.ok(existsSync(new URL(`../public/brand/jic-${name}-${theme}.png`, import.meta.url)));
+      if (['horizontal', 'centred', 'compact', 'wordmark', 'pillars'].includes(name)) {
+        assert.ok(svg.includes(theme === 'light' ? '#06162f' : '#F4F6FA'));
+      }
     }
   }
 });

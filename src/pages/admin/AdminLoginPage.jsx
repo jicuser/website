@@ -35,7 +35,7 @@ export default function AdminLoginPage(){
         <span className="admin-login-secure"><ShieldCheck size={15}/> JIC staff</span>
       </div>
       <div className="admin-login-brand">
-        <Link to="/" className="admin-login-logo" aria-label="Return to Jamatia Islamic Centre website"><JamatiaLogo/></Link>
+        <Link to="/" className="admin-login-logo" aria-label="Return to Jamatia Islamic Centre website"><JamatiaLogo variant="entrance"/></Link>
         <div><p>JAMATIA ISLAMIC CENTRE</p><h1 id="admin-login-title">Administration</h1></div>
       </div>
       {error && <div className="admin-login-error">{error}</div>}

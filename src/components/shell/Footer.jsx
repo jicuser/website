@@ -60,7 +60,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="jic-footer-bottom">
-        <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="pillars-outline"/></Link>
+        <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home"><JamatiaLogo variant="compact"/></Link>
         <p className="jic-footer-legal"><span>© {year} {SITE.name}</span><span aria-hidden="true">·</span><Link to="/privacy">Privacy</Link></p>
       </div>
     </footer>

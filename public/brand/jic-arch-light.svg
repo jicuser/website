@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="614" height="665" viewBox="0 0 614 665" role="img" aria-labelledby="06-glass-entrance-title 06-glass-entrance-description"><title id="06-glass-entrance-title">Jamatia Islamic Centre — 06-glass-entrance</title><desc id="06-glass-entrance-description">Transparent vector artwork derived from the approved final logo. Rectangular stepped pillars, layered stone collars, upward crescents and outlined lettering. No external fonts or embedded raster images.</desc><defs><linearGradient id="06-glass-entrance-glass" x2="1" y2="1"><stop stop-color="#698697" /><stop offset=".6" stop-color="#4c6a7c" /><stop offset="1" stop-color="#3c5667" /></linearGradient>
+<clipPath id="06-glass-entrance-glazing-clip"><path d="M403,1118V746C403,665 504,590 642,561C780,590 881,665 881,746V1118Z" /></clipPath>
+<linearGradient id="06-glass-entrance-metal" x2="1" y2="1"><stop stop-color="#31434d" /><stop offset="1" stop-color="#112431" /></linearGradient>
+<linearGradient id="06-glass-entrance-stone" x2=".8" y2="1"><stop stop-color="#d0d0c7" /><stop offset=".5" stop-color="#c1c3ba" /><stop offset="1" stop-color="#d3d4ca" /></linearGradient>
+<clipPath id="06-glass-entrance-stone-clip"><path d="M365,1126V745C365,646 487,550 642,521C797,550 919,646 919,745V1126Z" /></clipPath>
+<g id="06-glass-entrance-arch-only" transform="translate(-365 -521)"><g>
+<path d="M365,1126V745C365,646 487,550 642,521C797,550 919,646 919,745V1126Z" fill="url(#06-glass-entrance-stone)" stroke="#868c86" stroke-width="1.2" />
+<g clip-path="url(#06-glass-entrance-stone-clip)" fill="none" stroke="#92978e" stroke-width="1">
+<path d="M642,521V549M519,556L531,579M766,556L754,579M409,639L430,658M875,639L854,658M365,731H393M891,731H919M365,860H392M892,860H919M365,993H392M892,993H919" />
+</g>
+<path d="M392,1126V745C392,657 498,578 642,549C786,578 892,657 892,745V1126Z" fill="#172a35" stroke="#45525a" stroke-width="1.3" />
+<path d="M403,1118V746C403,665 504,590 642,561C780,590 881,665 881,746V1118Z" fill="url(#06-glass-entrance-glass)" />
+<g clip-path="url(#06-glass-entrance-glazing-clip)">
+<g fill="#e7f0f5" opacity=".1"><path d="M240,840 703,470 748,496 300,865Z" /><path d="M238,1190 972,550 1007,615 319,1210Z" /></g>
+<g fill="url(#06-glass-entrance-metal)" stroke="#132631" stroke-width="1.2">
+<path d="M568,545H577V1126H568Z M709,545H719V1126H709Z M388,711H896V722H388Z M388,790H896V800H388Z M388,839H896V850H388Z" />
+<path d="M403,800H568V838H403Z M579,800H708V838H579Z M720,800H881V838H720Z" />
+<path d="M478,850H490V1126H478Z M794,850H806V1126H794Z" />
+</g>
+<g fill="none" stroke="#90a5ad" stroke-opacity=".28" stroke-width="1.2">
+<path d="M409,1115V862H474V1115Z M495,1115V862H558V1115Z M582,1115V856H705V1115Z M728,1115V862H788V1115Z M813,1115V862H875V1115Z" />
+</g>
+</g>
+<g fill="#182b36" stroke="#0c202c" stroke-width="1.2">
+<rect x="470" y="973" width="8" height="58" rx="2" /><rect x="490" y="973" width="8" height="58" rx="2" />
+<rect x="786" y="973" width="8" height="58" rx="2" /><rect x="806" y="973" width="8" height="58" rx="2" />
+</g></g>
+</g></defs><use xlink:href="#06-glass-entrance-arch-only" transform="translate(30 30) scale(1)" /><path d="M18,635L596,635" fill="none" stroke="#34464f" stroke-width="1.3" /></svg>

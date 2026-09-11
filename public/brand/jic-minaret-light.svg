@@ -1,24 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 600" role="img" aria-labelledby="jic-minaret-light-title"><title id="jic-minaret-light-title">Jamatia Islamic Centre — Single minaret</title><style>.metal{fill:#89501B}</style><defs>
-    <pattern id="jic-minaret-light-star" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M16 0 20.7 4.7 27.3 4.7 27.3 11.3 32 16 27.3 20.7 27.3 27.3 20.7 27.3 16 32 11.3 27.3 4.7 27.3 4.7 20.7 0 16 4.7 11.3 4.7 4.7 11.3 4.7Z M16 6 19 13 26 16 19 19 16 26 13 19 6 16 13 13Z" fill="none" stroke="black" stroke-width="1.5"/></pattern>
-    <clipPath id="jic-minaret-light-arch"><path d="M112 578V412Q112 340 240 282Q368 340 368 412V578Z"/></clipPath>
-    <mask id="jic-minaret-light-entrance" maskUnits="userSpaceOnUse" x="0" y="0" width="480" height="600">
-      <g fill="white"><path d="M55 19a10 10 0 1 0 10 13A9 9 0 0 1 55 19Z"/>
-  <circle cx="52" cy="47" r="4"/><circle cx="52" cy="59" r="4.5"/><circle cx="52" cy="72" r="5"/>
-  <circle cx="52" cy="93" r="12"/>
-  <path d="M40 109h24v6l-4 4H44l-4-4Zm4 13h16v23H44ZM35 149h34v7l-5 5H40l-5-5Zm5 15h24v93H40ZM34 261h36v7l-5 5H39l-5-5Zm5 15h26v88H39ZM34 368h36v7l-5 5H39l-5-5Zm5 15h26v197H39Z"/><g transform="translate(376)"><path d="M55 19a10 10 0 1 0 10 13A9 9 0 0 1 55 19Z"/>
-  <circle cx="52" cy="47" r="4"/><circle cx="52" cy="59" r="4.5"/><circle cx="52" cy="72" r="5"/>
-  <circle cx="52" cy="93" r="12"/>
-  <path d="M40 109h24v6l-4 4H44l-4-4Zm4 13h16v23H44ZM35 149h34v7l-5 5H40l-5-5Zm5 15h24v93H40ZM34 261h36v7l-5 5H39l-5-5Zm5 15h26v88H39ZM34 368h36v7l-5 5H39l-5-5Zm5 15h26v197H39Z"/></g><path d="M65 257h350v323H65ZM0 578h480v2H0Z"/></g>
-      <g fill="none" stroke="black" stroke-width="2.7" stroke-linejoin="round">
-        <path d="M112 578V412Q112 340 240 282Q368 340 368 412V578M112 412h256M118 390h244M198 306v82m84-82v82M209 301v86h62v-86"/>
-        <rect x="124" y="432" width="32" height="138"/><rect x="168" y="432" width="32" height="138"/><rect x="218" y="424" width="44" height="154"/><rect x="280" y="432" width="32" height="138"/><rect x="324" y="432" width="32" height="138"/>
-      </g>
-      <g clip-path="url(#jic-minaret-light-arch)">
-        <path d="M122 290h71v92h-71ZM214 298h52v84h-52ZM287 290h71v92h-71ZM122 397h71v9h-71ZM204 397h72v9h-72ZM287 397h71v9h-71Z" fill="url(#jic-minaret-light-star)"/>
-        <rect x="128" y="436" width="24" height="130" fill="url(#jic-minaret-light-star)"/><rect x="172" y="436" width="24" height="130" fill="url(#jic-minaret-light-star)"/><rect x="222" y="428" width="36" height="146" fill="url(#jic-minaret-light-star)"/><rect x="284" y="436" width="24" height="130" fill="url(#jic-minaret-light-star)"/><rect x="328" y="436" width="24" height="130" fill="url(#jic-minaret-light-star)"/>
-      </g>
-    </mask>
-  </defs><g style="color:#0C1930"><g transform="translate(0 0) scale(1)" class="metal"><path d="M55 19a10 10 0 1 0 10 13A9 9 0 0 1 55 19Z"/>
-  <circle cx="52" cy="47" r="4"/><circle cx="52" cy="59" r="4.5"/><circle cx="52" cy="72" r="5"/>
-  <circle cx="52" cy="93" r="12"/>
-  <path d="M40 109h24v6l-4 4H44l-4-4Zm4 13h16v23H44ZM35 149h34v7l-5 5H40l-5-5Zm5 15h24v93H40ZM34 261h36v7l-5 5H39l-5-5Zm5 15h26v88H39ZM34 368h36v7l-5 5H39l-5-5Zm5 15h26v197H39Z"/></g></g></svg>
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="210" height="1144" viewBox="0 0 210 1144" role="img" aria-labelledby="04-tall-pillar-title 04-tall-pillar-description"><title id="04-tall-pillar-title">Jamatia Islamic Centre — 04-tall-pillar</title><desc id="04-tall-pillar-description">Transparent vector artwork derived from the approved final logo. Rectangular stepped pillars, layered stone collars, upward crescents and outlined lettering. No external fonts or embedded raster images.</desc><defs><linearGradient id="04-tall-pillar-metal" x2="1" y2="1"><stop stop-color="#31434d" /><stop offset="1" stop-color="#112431" /></linearGradient>
+<linearGradient id="04-tall-pillar-moulding" x2="0" y2="1"><stop stop-color="#c5c6bd" /><stop offset=".48" stop-color="#a4a79e" /><stop offset="1" stop-color="#d9dad0" /></linearGradient>
+<radialGradient id="04-tall-pillar-orb" cx=".32" cy=".23" r=".84"><stop stop-color="#fffef5" /><stop offset=".55" stop-color="#efefe5" /><stop offset="1" stop-color="#c8cec3" /></radialGradient>
+<g id="04-tall-pillar-pillar" stroke="#5d6463" stroke-width="1.3" stroke-linejoin="miter">
+<path d="M211.0,814H283.0V1126H211.0Z" fill="#f5f5f0" /><path d="M274.0,814H283.0V1126H274.0Z" fill="#dddeda" stroke="none" /><path d="M214.0,536H280.0V776H214.0Z" fill="#f5f5f0" /><path d="M271.0,536H280.0V776H271.0Z" fill="#dddeda" stroke="none" /><path d="M218.0,309H276.0V499H218.0Z" fill="#f5f5f0" /><path d="M267.0,309H276.0V499H267.0Z" fill="#dddeda" stroke="none" /><path d="M223.0,241H271.0V280H223.0Z" fill="#f5f5f0" /><path d="M262.0,241H271.0V280H262.0Z" fill="#dddeda" stroke="none" />
+<g>
+    <path d="M194.5,773H299.5L305.5,781V791L298.5,798V820L292.5,813H201.5V798L194.5,791Z" fill="#aaaDA6" />
+    <path d="M194.5,773H299.5V785H194.5Z" fill="#d5d5cc" />
+    <path d="M194.5,785H299.5L294.5,795H199.5Z" fill="url(#04-tall-pillar-moulding)" />
+    <path d="M199.5,795H294.5V802H199.5Z" fill="#bebfb6" />
+    <path d="M202.5,802H291.5V813H202.5Z" fill="#dfdfd5" />
+    <path d="M202.5,813H291.5L289.5,817H204.5Z" fill="#b8bcb4" />
+    </g><g>
+    <path d="M199.0,496H295.0L301.0,504V514L294.0,521V543L288.0,536H206.0V521L199.0,514Z" fill="#aaaDA6" />
+    <path d="M199.0,496H295.0V508H199.0Z" fill="#d5d5cc" />
+    <path d="M199.0,508H295.0L290.0,518H204.0Z" fill="url(#04-tall-pillar-moulding)" />
+    <path d="M204.0,518H290.0V525H204.0Z" fill="#bebfb6" />
+    <path d="M207.0,525H287.0V536H207.0Z" fill="#dfdfd5" />
+    <path d="M207.0,536H287.0L285.0,540H209.0Z" fill="#b8bcb4" />
+    </g><g>
+    <path d="M205.0,277H289.0L295.0,285V295L288.0,302V317L282.0,310H212.0V302L205.0,295Z" fill="#aaaDA6" />
+    <path d="M205.0,277H289.0V289H205.0Z" fill="#d5d5cc" />
+    <path d="M205.0,289H289.0L284.0,299H210.0Z" fill="url(#04-tall-pillar-moulding)" />
+    <path d="M210.0,299H284.0V306H210.0Z" fill="#bebfb6" />
+    <path d="M213.0,306H281.0V310H213.0Z" fill="#dfdfd5" />
+    <path d="M213.0,310H281.0L279.0,314H215.0Z" fill="#b8bcb4" />
+    </g>
+<path d="M215,228H272L278,234V249L272,245H215Z" fill="#b2b7ae" />
+<path d="M215,228H272V239H215Z" fill="#d4d6cb" />
+<path d="M215,239H272L269,245H218Z" fill="#b5bcb0" />
+<path d="M232,211H261V228H232Z" fill="#efefe5" />
+<path d="M247,90V171" fill="none" stroke="#253340" stroke-width="3.4" />
+<circle cx="247" cy="159" r="7.7" fill="url(#04-tall-pillar-metal)" />
+<circle cx="247" cy="138" r="9.7" fill="url(#04-tall-pillar-metal)" />
+<circle cx="247" cy="114" r="10.3" fill="url(#04-tall-pillar-metal)" />
+<circle cx="247" cy="192" r="28" fill="url(#04-tall-pillar-orb)" />
+<path d="M221,62C216,83 231,95 247,95C264,95 278,83 273,62C273,79 261,88 247,88C233,88 222,80 221,62Z" fill="#243441" stroke="#111f2c" stroke-width=".8" />
+</g>
+<g id="04-tall-pillar-pillar-left" transform="translate(-194 -62)"><use xlink:href="#04-tall-pillar-pillar" transform="translate(0 0) scale(1)" /></g></defs><use xlink:href="#04-tall-pillar-pillar-left" transform="translate(50 40) scale(1)" /><path d="M38,1104L173,1104" fill="none" stroke="#34464f" stroke-width="1.3" /></svg>

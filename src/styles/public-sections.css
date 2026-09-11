@@ -593,8 +593,8 @@ html:not(.dark) .nav-pill:hover,html:not(.dark) .nav-pill.active{color:#8d6215;b
 .admin-login-back,.admin-login-secure{display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.72);}
 .admin-login-secure{padding:7px 10px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.045);}
 .admin-login-brand{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
-.admin-login-logo{width:64px;max-height:58px;overflow:hidden;display:flex;align-items:center;}
-.admin-login-logo img{width:100%;height:auto;filter:brightness(0) invert(1);}
+.admin-login-logo{width:64px;flex:0 0 64px;display:flex;align-items:center;}
+.admin-login-logo img{width:100%;height:auto;}
 .admin-login-brand p{font-size:10px;letter-spacing:.22em;color:#e5b955;font-weight:750;}
 .admin-login-brand h1{font-size:28px;line-height:1.05;font-weight:750;letter-spacing:-.025em;}
 .admin-login-intro{font-size:14px;line-height:1.6;color:rgba(255,255,255,.62);margin-bottom:20px;}
@@ -614,7 +614,7 @@ html:not(.dark) .nav-pill:hover,html:not(.dark) .nav-pill.active{color:#8d6215;b
   .admin-login-page{padding:12px;align-items:end;}
   .admin-login-card{border-radius:28px;padding:18px;margin-bottom:8px;}
   .admin-login-brand h1{font-size:25px;}
-  .admin-login-logo{width:54px;}
+  .admin-login-logo{width:54px;flex-basis:54px;}
   .admin-login-topline{margin-bottom:18px;}
 }
 
@@ -1515,11 +1515,6 @@ html:not(.dark) .page-transition .bg-card{border-color:rgba(16,32,51,.12)!import
   .jic-brand { grid-column:1 !important; grid-row:1 !important; min-width:0 !important; justify-self:start !important; }
   .jic-nav-actions { grid-column:2 !important; grid-row:1 !important; justify-self:end !important; min-width:0 !important; }
   .jic-header.is-scrolled .jic-mainnav { grid-template-rows:54px auto !important; align-items:center !important; }
-  .jic-header.is-scrolled .jic-mainnav::before {
-    content:'' !important; grid-column:1 !important; grid-row:1 !important; display:block !important;
-    width:112px !important; height:48px !important; justify-self:start !important;
-    background:url('/brand-logo.svg') left center / contain no-repeat !important; opacity:.96 !important; pointer-events:none !important;
-  }
   .jic-header.is-scrolled .jic-nav-actions { grid-column:2 !important; grid-row:1 !important; }
 
   .jic-header.is-scrolled .jic-scroll-reminder {
@@ -1777,15 +1772,6 @@ html:not(.dark) textarea::placeholder{color:#7d8490!important;opacity:1;}
     display:flex!important;
     flex-wrap:nowrap!important;
   }
-  .jic-header.is-scrolled .jic-mainnav::before{
-    content:'';
-    grid-column:1;
-    grid-row:1;
-    width:104px;
-    height:44px;
-    background:url('/brand-logo.svg') left center/contain no-repeat;
-    display:block;
-  }
   .jic-scroll-reminder{
     grid-column:1 / -1!important;
     grid-row:2!important;
@@ -1920,7 +1906,6 @@ html:not(.dark) textarea::placeholder{color:#7d8490!important;opacity:1;}
   .jic-nav-actions .donate-button span{display:none!important}
 
   .jic-header.is-scrolled .jic-mainnav{display:block!important;padding:8px 62px 8px 90px!important;min-height:76px!important}
-  .jic-header.is-scrolled .jic-mainnav::before{content:"";position:absolute;left:9px;top:11px;width:72px;height:52px;background:url('/brand-logo.svg') center/contain no-repeat;opacity:.98}
   .jic-scroll-reminder{
     width:100%!important;min-width:0!important;max-width:none!important;height:58px!important;min-height:58px!important;border-radius:17px!important;padding:7px 10px!important;
     display:grid!important;grid-template-rows:auto 1fr!important;align-content:center!important;text-align:left!important;overflow:hidden!important;background:rgba(8,19,31,.28)!important;border:1px solid rgba(255,255,255,.08)!important;
