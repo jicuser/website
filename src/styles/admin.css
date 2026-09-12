@@ -1092,13 +1092,6 @@ html:not(.dark) .managed-page-section-copy {
 .admin-task-grid > :is(a, button):hover {
   border-color: var(--jic-gold-strong);
 }
-.admin-tv-select {
-  display: grid;
-  gap: 6px;
-  max-width: 420px;
-  font-weight: 700;
-  margin-bottom: 24px;
-}
 .admin-console :is(select, input:not([type='checkbox']):not([type='file']), textarea) {
   width: 100%;
   max-width: 100%;
@@ -1132,33 +1125,10 @@ html:not(.dark) .managed-page-section-copy {
   font-size: 17px;
   font-weight: 650;
 }
-.admin-tv-modes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-  gap: 10px;
-}
-.admin-tv-modes button {
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-  padding: 14px 6px;
-  border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  font-size: 14px;
-}
 .admin-tv-editor button[aria-pressed='true'] {
   border-color: var(--jic-action);
   background: var(--jic-action) !important;
   color: #0c1930 !important;
-}
-.admin-tv-sources {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 8px;
-  margin: 16px 0;
-}
-.admin-tv-address {
-  overflow-wrap: anywhere;
 }
 .admin-tv-help {
   margin: 12px 0;
@@ -1203,48 +1173,8 @@ html:not(.dark) .managed-page-section-copy {
 .admin-tv-editor :is(input, select, textarea, button, summary) {
   scroll-margin-block: 140px;
 }
-.admin-tv-save {
-  position: sticky;
-  bottom: max(12px, env(safe-area-inset-bottom));
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  padding: 14px;
-  margin-top: 24px;
-  background: var(--jic-surface);
-  border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  box-shadow: 0 6px 24px #0002;
-  z-index: 5;
-}
-.admin-tv-save > span {
-  flex: 1 1 200px;
-  min-width: 0;
-  font-size: 13px;
-  line-height: 1.5;
-}
-.admin-tv-save > .admin-button {
-  flex: 0 1 auto;
-}
 .admin-session-panel {
   overflow-wrap: anywhere;
-}
-.admin-session-code {
-  display: block;
-  width: fit-content;
-  max-width: 100%;
-  margin: 16px 0;
-  padding: 12px 18px;
-  border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  background: var(--jic-surface);
-  color: var(--jic-text);
-  font:
-    700 clamp(24px, 5vw, 38px)/1.2 ui-monospace,
-    monospace;
-  letter-spacing: 0.16em;
-  font-variant-numeric: tabular-nums;
 }
 .admin-device-list {
   display: grid;
@@ -1422,12 +1352,6 @@ html:not(.dark) .managed-page-section-copy {
   .admin-poster-picker {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .admin-tv-modes {
-    gap: 6px;
-  }
-  .admin-tv-modes button {
-    font-size: 12px;
-  }
   .admin-field-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1461,176 +1385,141 @@ html:not(.dark) .managed-page-section-copy {
   margin: 12px 0;
 }
 
-/* Scene editing uses the same percentage geometry as the display. */
+/* The editor and display share percentage geometry; controls never cover the canvas. */
+.stream-setup {
+  min-width: 0;
+}
+.stream-setup > * + * {
+  margin-top: 20px;
+}
+.stream-setup label:not(.admin-check),
+.scene-dialog-form label:not(.admin-check) {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+.stream-setup :is(select, input:not([type='checkbox']), textarea) {
+  min-width: 0;
+  max-width: 100%;
+}
+.stream-setup-heading,
+.scene-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stream-setup-heading h2,
+.scene-heading h3 {
+  margin: 4px 0;
+}
+.stream-feedback,
+.scene-feedback,
+.stream-live-status {
+  padding: 14px;
+  border-left: 3px solid var(--jic-gold-strong);
+  border-radius: 8px;
+  background: var(--jic-surface);
+}
+.stream-address a {
+  display: block;
+  overflow-wrap: anywhere;
+  margin: 16px 0;
+}
+.stream-start-bar {
+  padding: 20px;
+  border: 1px solid var(--jic-border);
+  border-radius: 16px;
+  background: var(--jic-surface);
+}
+.stream-start-bar > * + * {
+  margin-top: 14px;
+}
+.stream-start-bar > span {
+  display: block;
+}
+.stream-start-bar .admin-actions {
+  justify-content: flex-end;
+}
+.stream-setup .admin-actions {
+  gap: 12px;
+}
+.admin-connection-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+  align-items: start;
+}
+.admin-connection-form > :is(button, .admin-actions, p) {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
 .scene-editor {
   container-type: inline-size;
 }
 .scene-heading {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
   margin-bottom: 18px;
 }
-.scene-heading h3 {
-  margin-bottom: 6px;
-}
 .scene-count {
-  flex-shrink: 0;
   color: var(--jic-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
 }
 .scene-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: end;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-.scene-editor label:not(.admin-button):not(.admin-check) {
-  display: grid;
-  min-width: 0;
-  gap: 7px;
-  margin: 0;
-}
-.scene-editor input:not([type='checkbox']):not([type='file']),
-.scene-editor select,
-.scene-editor textarea {
-  min-width: 0;
-  margin: 0;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 .scene-editor small {
   line-height: 1.5;
 }
-.scene-editor :is(.scene-add-content, .scene-properties) {
-  border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  padding: 16px;
-  margin: 0;
-  min-width: 0;
-}
-.scene-editor legend {
-  max-width: 100%;
-  padding: 0 6px;
-  font-size: 14px;
-  font-weight: 700;
-  overflow-wrap: anywhere;
-}
-.scene-editor .scene-add-content {
+.scene-layout-options {
+  border: 0;
+  padding: 0;
+  margin: 16px 0 24px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.scene-add-content > :is(.scene-action-row, p) {
-  grid-column: 1 / -1;
-}
-.scene-action-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
-.scene-action-row > .admin-button {
-  flex: 1 1 120px;
+.scene-layout-options legend {
+  margin-bottom: 12px;
+  font-weight: 600;
 }
-.scene-add-content .scene-action-row {
-  justify-content: end;
-}
-.scene-add-content .scene-action-row > .admin-button {
-  flex: 0 1 160px;
-}
-.scene-feedback {
-  margin-bottom: 16px;
-  padding: 12px;
-  border-left: 3px solid var(--jic-gold-strong);
-  border-radius: 6px;
-  background: var(--jic-surface);
-}
-.scene-workspace {
+.scene-layout-preset.admin-button {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: 20px;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  font-size: 13px;
+}
+.scene-layout-miniature {
+  display: block;
+  position: relative;
+  width: 80px;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0b1524;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: auto;
+}
+.scene-layout-miniature > span {
+  position: absolute;
+  background: #d6bb7a;
+  border: 2px solid #0b1524;
 }
 .scene-preview-column {
   min-width: 0;
 }
-.scene-selected-source {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.scene-selected-source > strong {
-  min-width: 0;
-  flex: 1 1 120px;
-  font-size: 14px;
-  overflow-wrap: anywhere;
-}
-.scene-source-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-.scene-source-actions .admin-button {
-  padding: 10px 12px;
-}
 .scene-edit-canvas {
   margin: 0;
   border: 1px solid var(--jic-border);
-  border-radius: 10px;
-}
-.scene-empty {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  padding: 16px;
-  width: 100%;
-  color: #f8fafc;
-  text-align: center;
-  border: 0;
-  background: radial-gradient(ellipse at center, #20344c, #0b1524 75%);
-}
-.scene-empty > span:first-child {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid #f0d68e;
   border-radius: 12px;
-  color: #f0d68e;
-  font-size: 30px;
-  line-height: 1;
-}
-.scene-empty > strong {
-  font-size: clamp(15px, 3cqw, 22px);
-}
-.scene-empty > span:last-child {
-  font-size: clamp(11px, 2cqw, 14px);
-  color: #cbd5e1;
-}
-.scene-empty:disabled {
-  opacity: 0.6;
-}
-.scene-edit-layer {
-  display: grid;
-  place-items: center;
-  background: #20344c;
-  border: 1px solid #8ca8c7;
-  color: #fff;
-  touch-action: none;
-  user-select: none;
-  cursor: move;
+  overflow: hidden;
 }
 .scene-preview-content {
   position: absolute;
@@ -1640,32 +1529,47 @@ html:not(.dark) .managed-page-section-copy {
 .scene-preview-content .scene-player .scene-canvas {
   width: 100%;
 }
-.has-preview .scene-edit-layer {
+.scene-edit-layer {
+  display: grid;
+  place-items: center;
   background: transparent;
+  border: 1px solid #8ca8c7;
+  color: #fff;
+  touch-action: none;
+  user-select: none;
+  cursor: move;
 }
-.has-preview .scene-edit-layer > img {
-  display: none;
+.scene-edit-layer.is-empty {
+  background: #132139bb;
 }
-.has-preview .scene-edit-layer:not(.is-selected) > span:not(.scene-resize) {
-  visibility: hidden;
-}
-.scene-edit-layer img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0.6;
-  pointer-events: none;
-}
-.scene-edit-layer > span:not(.scene-resize) {
-  position: relative;
+.scene-edit-layer > .scene-area-label {
   max-width: 100%;
-  background: #0a192ee6;
-  padding: 4px 8px;
-  font-size: clamp(9px, 2cqw, 18px);
+  padding: 5px 9px;
+  font-size: clamp(10px, 2cqw, 18px);
   overflow-wrap: anywhere;
   pointer-events: none;
+  background: #0a192ee6;
+  border-radius: 6px;
+}
+.scene-edit-layer:not(.is-selected) > .scene-area-label {
+  opacity: 0;
+}
+.scene-edit-layer:is(:hover, :focus-visible) > .scene-area-label {
+  opacity: 1;
+}
+.scene-add-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: clamp(10px, 2cqw, 20px);
+  text-align: center;
+  pointer-events: none;
+}
+.scene-add-area > span,
+.scene-add-area > b {
+  font-size: clamp(20px, 4cqw, 36px);
+  line-height: 1;
 }
 .scene-edit-layer.is-selected {
   border: 3px solid #f0d68e;
@@ -1680,103 +1584,168 @@ html:not(.dark) .managed-page-section-copy {
   right: 0;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   background: #f0d68e;
   color: #132139;
   font-size: 22px;
   cursor: nwse-resize;
   touch-action: none;
 }
-.scene-layer-list {
+.scene-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 20px;
+  gap: 10px;
+  color: #fff;
+  background: #0b1524;
+  text-align: center;
+}
+.scene-editor-footer {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 12px 0;
-}
-.scene-layer-list .admin-button {
-  min-width: 0;
-  text-align: left;
-}
-.scene-preview-options {
-  display: flex;
-  flex-wrap: wrap;
+  gap: 12px;
   align-items: center;
-  gap: 12px 20px;
-  margin-top: 16px;
-  font-size: 13px;
-}
-.scene-properties > * + * {
+  justify-content: space-between;
   margin-top: 16px;
 }
-.scene-properties > h4 {
-  margin-bottom: 12px;
-  font-size: 13px;
-  font-weight: 700;
+.scene-selected-source {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
 }
-.scene-editor .scene-properties > label:not(.admin-check) {
-  margin-top: 16px;
+.scene-selected-source > strong {
+  overflow-wrap: anywhere;
 }
-.scene-properties .admin-poster-picker {
+.scene-source-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.scene-source-actions .admin-button {
+  flex: 1 1 120px;
+}
+.scene-editor-dialog.admin-edit-dialog {
+  width: min(780px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  overscroll-behavior: contain;
+}
+.scene-editor-dialog .scene-heading {
+  position: relative;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--jic-border);
+}
+.scene-editor-dialog .scene-heading > div {
+  flex: 1;
+  min-width: 0;
+}
+.scene-dialog-form {
+  display: grid;
+  gap: 20px;
+}
+.scene-dialog-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.scene-dialog-form legend {
+  font-weight: 650;
+  padding: 0;
+  margin-bottom: 10px;
+}
+.scene-content-types {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.scene-content-types .admin-button {
+  min-width: 0;
+  padding: 12px;
+}
+.scene-posters .admin-poster-picker {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.scene-properties .admin-poster-picker label {
-  gap: 0;
+  max-height: 340px;
+  overflow-y: auto;
 }
 .scene-dimensions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+  margin-top: 14px;
 }
-.scene-editor .scene-settings {
+.scene-device-controls {
+  scroll-margin-top: 16px;
   margin-top: 20px;
-  border-top: 1px solid var(--jic-border);
-  padding-top: 8px;
 }
-.scene-settings > summary {
-  margin-bottom: 12px;
+.scene-device-controls .admin-share-preview {
+  max-height: 260px;
+  object-fit: contain;
 }
-.scene-settings > .scene-action-row {
-  margin-top: 16px;
+.scene-device-controls .admin-actions .admin-button {
+  flex: 1 1 150px;
 }
-@container (min-width: 820px) {
-  .scene-workspace.has-selection {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.55fr);
-  }
+.scene-template-library .admin-actions {
+  align-items: end;
 }
-@container (max-width: 480px) {
+.scene-template-library .admin-actions > label {
+  flex: 1 1 220px;
+}
+@container (max-width: 540px) {
   .scene-toolbar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .scene-toolbar > label {
+  .scene-toolbar > label:first-child {
     grid-column: 1 / -1;
   }
-  .scene-editor .scene-add-content {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .scene-selected-source > strong {
-    flex-basis: 100%;
-  }
-  .scene-source-actions {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    width: 100%;
-  }
-  .scene-source-actions .admin-button {
-    padding: 10px 8px;
+  .scene-layout-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 600px) {
-  .admin-tv-save {
-    position: static;
+  .stream-setup-heading {
+    align-items: stretch;
+  }
+  .stream-setup-heading > .admin-button {
+    width: 100%;
+  }
+  .stream-start-bar {
+    padding: 16px;
+  }
+  .stream-start-bar .admin-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stream-start-bar .primary {
+    order: -1;
+  }
+  .admin-connection-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-connection-form > :is(button, .admin-actions) {
+    width: 100%;
+  }
+  .scene-editor-dialog.admin-edit-dialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+    padding: 16px;
+    border-radius: 16px;
+  }
+  .scene-content-types {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .scene-dimensions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .scene-editor-dialog .admin-edit-dialog-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 12px;
   }
-  .admin-tv-save > span {
-    grid-column: 1 / -1;
-  }
-  .admin-tv-save > .primary {
+  .scene-editor-dialog .admin-edit-dialog-actions .primary {
     grid-column: 1 / -1;
   }
 }

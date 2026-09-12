@@ -42,7 +42,7 @@ export async function tvRequest(action, screenId, values = {}, { staff = false, 
       }
       if (!response.ok) {
         const error = new Error(
-          data.error || 'TV controls are temporarily unavailable. Retry the connection.',
+          data.error || 'Stream controls are temporarily unavailable. Retry the connection.',
         );
         error.status = response.status;
         throw error;

@@ -204,7 +204,18 @@ Deno.serve(async (req) => {
           slot, id: session_id, kind,
         })) : [],
       };
+    } else if (action === 'display-code') {
+      if (!validToken(body.deviceToken)) fail('Refresh this display webpage to get a code.');
+      const issued = await result(db.rpc('request_display_code', {
+        hall: screenId, credential_hash: await hash(body.deviceToken),
+        client_hash: await hash(req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'),
+      }));
+      if (issued.error) fail(issued.error, issued.status || 400);
+      response = issued;
     } else if (action === 'join-session') {
+      if (body.presentationId !== undefined &&
+          (!validId(body.presentationId) || body.presentationId !== presentation?.id))
+        fail('This watching link has ended. Ask the organiser for the current link.', 410);
       const name = validateDeviceName(body.name);
       const token = randomToken();
       // Supabase's gateway supplies the forwarding address. The database also caps
@@ -289,14 +300,58 @@ Deno.serve(async (req) => {
         response = {
           ...screen, settings: { ...screen.settings, scene_mode: displayMode },
           presentation, devices: presentation ? devices.filter((d: any) => !d.is_preview) : [],
+          templates: await result(db.from('tv_scene_templates').select('id,name,scene,updated_at')
+            .eq('screen_id', screenId).order('name')),
           inputs: presentation ? await liveInputs() : [],
           relayConfigured: iceServers().some((server: any) =>
             [server.urls].flat().some((url: unknown) => typeof url === 'string' && /^turns?:/.test(url))),
         };
-      } else if (['normal', 'save', 'new-presentation'].includes(action)) {
+      } else if (action === 'approve-display') {
+        const code = typeof body.code === 'string' ? body.code.trim() : '';
+        if (!/^\d{6}$/.test(code)) fail('Enter the six-digit code shown on the display webpage.');
+        const name = typeof body.name === 'string' && body.name.trim()
+          ? validateDeviceName(body.name) : null;
+        const approved = await result(db.rpc('approve_display_code', {
+          actor: userId, hall: screenId, connection_code: code, display_name: name,
+        }));
+        if (approved.error) fail(approved.error, approved.status || 400);
+        response = approved;
+      } else if (action === 'save-template') {
+        if (screenId === 'shoe-area') fail('Choose a hall stream to save a scene.');
+        const name = typeof body.name === 'string' ? body.name.trim() : '';
+        if (!name || name.length > 80) fail('Use 1–80 characters for the saved scene name.');
+        const checked = validateSettings({
+          ...screen.settings, scene_mode: 'teaching', class_until: '',
+          scenes: [body.scene], active_scene_id: body.scene?.id,
+        }, screenId);
+        const values = { name, scene: checked.scenes[0], updated_at: new Date().toISOString() };
+        let template;
+        if (body.templateId) {
+          if (!validId(body.templateId) || typeof body.expectedUpdatedAt !== 'string')
+            fail('Choose a saved scene to update.');
+          template = await result(db.from('tv_scene_templates').update(values)
+            .eq('id', body.templateId).eq('screen_id', screenId)
+            .eq('updated_at', body.expectedUpdatedAt).select('id,name,scene,updated_at').maybeSingle());
+          if (!template) fail('This saved scene changed. Reload it before replacing it.', 409);
+        } else {
+          template = await result(db.from('tv_scene_templates').insert({
+            ...values, screen_id: screenId, created_by: userId,
+          }).select('id,name,scene,updated_at').single());
+        }
+        response = { template };
+      } else if (action === 'delete-template') {
+        if (!validId(body.templateId)) fail('Choose a saved scene to remove.');
+        await result(db.from('tv_scene_templates').delete().eq('id', body.templateId)
+          .eq('screen_id', screenId));
+        response = { ok: true };
+      } else if (['normal', 'save', 'save-background', 'new-presentation'].includes(action)) {
         const settings = validateSettings(
           action === 'normal'
             ? { ...screen.settings, scene_mode: 'normal', class_until: '' }
+            : action === 'save-background'
+            ? { ...body.settings, scene_mode: screen.settings.scene_mode,
+                scenes: screen.settings.scenes, active_scene_id: screen.settings.active_scene_id,
+                class_until: screen.settings.class_until, muted: screen.settings.muted }
             : body.settings,
           screenId,
         );
@@ -313,7 +368,7 @@ Deno.serve(async (req) => {
         if (error) fail(error.message, 409);
         response = saved;
       } else if (action === 'preview') {
-        if (!presentation) fail('Press Present to start the live preview. Your draft is kept.', 409);
+        if (!presentation) fail('Start the stream to preview connected devices. Your draft is kept.', 409);
         let duration = 600;
         if (body.purpose === 'broadcast') {
           const profile = await result(
@@ -354,7 +409,7 @@ Deno.serve(async (req) => {
         );
         response = { ok: true };
       } else if (action === 'start') {
-        if (!presentation) fail('Press Present before starting a device input.', 409);
+        if (!presentation) fail('Start the stream before connecting a device input.', 409);
         if (
           !['screen', 'camera'].includes(body.kind) ||
           !['input-1', 'input-2', 'input-3', 'input-4'].includes(body.slot)

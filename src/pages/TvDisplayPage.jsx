@@ -42,10 +42,10 @@ function ScreenDisplay({ screenId }) {
     const timer = setInterval(() => refreshContent().catch(() => {}), 30000);
     return () => clearInterval(timer);
   }, [refreshContent]);
-  const connection = useTvScreen(screenId);
   const normalPreview =
     window.parent !== window &&
     new URLSearchParams(window.location.search).get('preview') === 'normal';
+  const connection = useTvScreen(screenId, { normalPreview });
   const [draft, setDraft] = useState({});
   useEffect(() => {
     if (!normalPreview) return;
@@ -75,7 +75,6 @@ function ScreenDisplay({ screenId }) {
       }
     : connection;
   const screen = useRef(null);
-  const [connectRequest, setConnectRequest] = useState(0);
   const prayers = usePrayerTimes({ includeTomorrow: true });
   const { events, livestream, stale } = useHomeLiveContent({ eventLimit: 50 });
   const [now, setNow] = useState(() => new Date());
@@ -184,7 +183,7 @@ function ScreenDisplay({ screenId }) {
           lock = null;
         });
       } catch {
-        /* TVs without Wake Lock use their own screen timeout setting. */
+        /* Devices without Wake Lock use their own screen timeout setting. */
       }
     };
     keepAwake();
@@ -203,13 +202,11 @@ function ScreenDisplay({ screenId }) {
       await screen.current?.requestFullscreen?.();
       await window.screen.orientation?.lock?.('landscape');
     } catch {
-      /* The TV controls its own orientation when locking is unavailable. */
+      /* The device keeps its orientation when browser locking is unavailable. */
     }
   };
 
-  const connectionControl = !normalPreview && (
-    <DisplayConnection screenId={screenId} tv={tv} openRequest={connectRequest} />
-  );
+  const connectionControl = !normalPreview && <DisplayConnection screenId={screenId} tv={tv} />;
 
   if (
     tv.status !== 'ready' ||
@@ -235,14 +232,11 @@ function ScreenDisplay({ screenId }) {
             </>
           ) : !tv.paired ? (
             <>
-              <p>Presentation in progress. Enter the session code to watch.</p>
-              <button type="button" onClick={() => setConnectRequest((value) => value + 1)}>
-                Join presentation
-              </button>
+              <p>Stream ready. Enter this display’s code in Admin to connect.</p>
             </>
           ) : (
             <>
-              <p>Updating the presentation…</p>
+              <p>Updating the stream…</p>
               <button type="button" onClick={tv.refresh}>
                 Retry connection
               </button>

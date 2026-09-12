@@ -5,7 +5,10 @@ import {
   interruptedDisplayState,
   receivedDisplayState,
   validDeviceToken,
-  validateSessionJoin,
+  createDisplayToken,
+  readDisplayIdentity,
+  readDisplayLink,
+  displayCodeRemaining,
 } from '../src/hooks/tvScreenConnection.js';
 import { DEFAULT_TV_SETTINGS } from '../supabase/functions/_shared/tv.js';
 
@@ -56,7 +59,7 @@ test('a valid remembered session restores its private scene without becoming Nor
   assert.equal(ready.status, 'ready');
 });
 
-test('a new presentation or rejected token drops every private source and credential', () => {
+test('a new presentation or rejected approval drops private players and source data', () => {
   for (const badToken of ['', 'short', token.toUpperCase()]) {
     const invalid = receivedDisplayState(privateDisplay, badToken);
     assert.equal(invalid.paired, false);
@@ -98,11 +101,51 @@ test('returning to Normal clears session sources and does not require a code', (
   assert.deepEqual(normal.inputs, []);
 });
 
-test('session join feedback identifies the actual missing or invalid field', () => {
-  assert.deepEqual(Object.keys(validateSessionJoin(' ', '')), ['name', 'code']);
-  assert.deepEqual(Object.keys(validateSessionJoin('Classroom laptop', '123')), ['code']);
-  assert.deepEqual(Object.keys(validateSessionJoin('x'.repeat(61), '12345678')), ['name']);
-  assert.deepEqual(validateSessionJoin('Classroom laptop', '12345678'), {});
-  assert.equal(validDeviceToken(token), true);
-  assert.equal(validDeviceToken('12345678'), false);
+test('display identity survives reloads and malformed saved identities are replaced', () => {
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.get(key),
+    setItem: (key, value) => values.set(key, value),
+  };
+  const key = 'display-test';
+  const first = readDisplayIdentity(storage, key);
+  assert.equal(validDeviceToken(first), true);
+  assert.equal(readDisplayIdentity(storage, key), first);
+  values.set(key, 'invalid');
+  const replacement = readDisplayIdentity(storage, key);
+  assert.notEqual(replacement, first);
+  assert.equal(validDeviceToken(replacement), true);
+  assert.equal(storage.getItem(key), replacement);
+  assert.equal(
+    readDisplayIdentity(null, key, () => token),
+    token,
+  );
+  assert.notEqual(createDisplayToken(), createDisplayToken());
+});
+
+test('shared links require both the eight-digit code and the exact presentation identity', () => {
+  const presentationId = '443af68f-4c25-4b41-bd30-418d4cc48c79';
+  assert.deepEqual(readDisplayLink(`#watch=12345678&session=${presentationId}`), {
+    code: '12345678',
+    presentationId,
+  });
+  for (const hash of [
+    '#watch=12345678',
+    '#watch=123&session=' + presentationId,
+    '#watch=12345678&session=wrong',
+  ])
+    assert.match(readDisplayLink(hash).error, /incomplete/);
+  assert.equal(readDisplayLink('#unrelated=value'), null);
+  assert.deepEqual(readDisplayLink(`#preview=${token}`), { previewToken: token });
+  assert.equal(readDisplayLink('#preview=invalid'), null);
+});
+
+test('rolling display codes stop displaying at expiry and countdown never becomes negative', () => {
+  const now = Date.parse('2026-09-12T12:00:00Z');
+  assert.equal(displayCodeRemaining('2026-09-12T12:10:00Z', now), 600);
+  assert.equal(displayCodeRemaining('2026-09-12T12:00:00.001Z', now), 1);
+  assert.equal(displayCodeRemaining('2026-09-12T12:00:00Z', now), 0);
+  assert.equal(displayCodeRemaining('2026-09-12T11:59:00Z', now), 0);
+  assert.equal(displayCodeRemaining('invalid', now), 0);
+  assert.equal(displayCodeRemaining(undefined, now), 0);
 });

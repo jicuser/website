@@ -1,5 +1,5 @@
 import { hasPermission } from './access.js';
-import { newScene, validateScenes } from './tv-scenes.js';
+import { newScene, validateScenes, hasSceneContent } from './tv-scenes.js';
 export const TV_SCREENS = [
   { id: 'mens-main', label: 'Men’s Main Hall' },
   { id: 'mens-upstairs', label: 'Men’s Upstairs Hall' },
@@ -196,7 +196,7 @@ export function activeTvScene(settings = {}) {
 }
 export function tvScene(settings = {}, now = Date.now()) {
   return settings.scene_mode === 'teaching' &&
-    Boolean(activeTvScene(settings)?.layers?.length) &&
+    hasSceneContent(activeTvScene(settings)) &&
     (!settings.class_until || Date.parse(settings.class_until) > now)
     ? 'teaching'
     : 'normal';

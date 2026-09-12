@@ -1,34 +1,39 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TV_SCREENS, deviceKey, tvRequest } from '@/lib/tvControl';
 import {
+  readDisplayIdentity,
   initialDisplayState,
   interruptedDisplayState,
+  readDisplayLink,
   receivedDisplayState,
   validDeviceToken,
 } from './tvScreenConnection';
 
-export default function useTvScreen(screenId) {
+function rememberToken(screenId, token) {
+  try {
+    localStorage.setItem(deviceKey(screenId), token);
+  } catch {
+    // Storage restrictions only prevent remembering this display after the page closes.
+  }
+}
+
+function viewerName() {
+  try {
+    return localStorage.getItem('jic-display-name')?.trim().slice(0, 60) || 'Shared-link viewer';
+  } catch {
+    return 'Shared-link viewer';
+  }
+}
+
+export default function useTvScreen(screenId, { normalPreview = false } = {}) {
   const [state, setState] = useState(initialDisplayState);
+  const [identity, setIdentity] = useState({ token: '', preview: false });
+  const [linkError, setLinkError] = useState('');
   const [revision, setRevision] = useState(0);
   const credential = useRef(null);
+  const openingLink = useRef(undefined);
   const seenRevision = useRef('');
   const refresh = useCallback(() => setRevision((value) => value + 1), []);
-
-  const connect = useCallback(
-    (result) => {
-      if (!validDeviceToken(result.deviceToken))
-        throw new Error('The session could not be opened. Please try again.');
-      credential.current = { screenId, token: result.deviceToken, preview: false };
-      try {
-        localStorage.setItem(deviceKey(screenId), result.deviceToken);
-      } catch {
-        // The current page can still watch when browser storage is unavailable.
-      }
-      setState((previous) => ({ ...previous, status: 'loading', error: '' }));
-      refresh();
-    },
-    [screenId, refresh],
-  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -37,36 +42,25 @@ export default function useTvScreen(screenId) {
     let pollAgain = false;
     if (credential.current?.screenId !== screenId) {
       let token = '';
-      try {
-        token = localStorage.getItem(deviceKey(screenId)) || '';
-        localStorage.removeItem(`jic-tv-setup-${screenId}`);
-      } catch {
-        // Normal display content does not require browser storage.
-      }
-      credential.current = {
-        screenId,
-        token: validDeviceToken(token) ? token : '',
-        preview: false,
-      };
-      seenRevision.current = '';
-    }
-    const hash = new URLSearchParams(window.location.hash.slice(1));
-    if (validDeviceToken(hash.get('preview'))) {
-      credential.current = { screenId, token: hash.get('preview'), preview: true };
-      history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-
-    function forgetCredential() {
-      const previous = credential.current;
-      credential.current = { screenId, token: '', preview: false };
-      if (!previous?.preview) {
+      if (!normalPreview) {
         try {
-          localStorage.removeItem(deviceKey(screenId));
+          token = readDisplayIdentity(localStorage, deviceKey(screenId));
         } catch {
-          // An in-memory credential is enough for this visit.
+          // Some browsers restrict even access to the storage object.
+          token = readDisplayIdentity(null, deviceKey(screenId));
         }
       }
+      credential.current = { screenId, token, preview: normalPreview };
+      seenRevision.current = '';
     }
+    if (openingLink.current === undefined) {
+      openingLink.current = normalPreview ? null : readDisplayLink(window.location.hash);
+      if (openingLink.current)
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    if (openingLink.current?.previewToken)
+      credential.current = { screenId, token: openingLink.current.previewToken, preview: true };
+    setIdentity(credential.current);
 
     async function poll() {
       if (controller.signal.aborted) return;
@@ -85,12 +79,11 @@ export default function useTvScreen(screenId) {
           { signal: controller.signal },
         );
         if (controller.signal.aborted) return;
-        if (!data.paired && token) forgetCredential();
         seenRevision.current = data.revision || '';
-        setState(receivedDisplayState(data, data.paired ? token : ''));
+        // Approval may end, but this browser still needs its identity and rolling code.
+        setState(receivedDisplayState(data, token));
       } catch (error) {
         if (controller.signal.aborted) return;
-        if (error.status === 401) forgetCredential();
         setState((previous) =>
           interruptedDisplayState(
             { ...previous, deviceToken: credential.current.token },
@@ -106,10 +99,38 @@ export default function useTvScreen(screenId) {
       }
     }
 
+    let joining = Boolean(openingLink.current?.code);
+    async function open() {
+      const link = openingLink.current;
+      if (link?.error) setLinkError(link.error);
+      if (link?.code) {
+        setLinkError('');
+        try {
+          const result = await tvRequest(
+            'join-session',
+            screenId,
+            { code: link.code, presentationId: link.presentationId, name: viewerName() },
+            { signal: controller.signal },
+          );
+          if (controller.signal.aborted) return;
+          if (!validDeviceToken(result.deviceToken))
+            throw new Error('Unable to open this stream link. Please try again.');
+          credential.current = { screenId, token: result.deviceToken, preview: false };
+          rememberToken(screenId, result.deviceToken);
+          setIdentity(credential.current);
+          openingLink.current = null;
+        } catch (error) {
+          if (controller.signal.aborted) return;
+          setLinkError(error.message || 'Unable to open this stream link. Please try again.');
+        }
+      }
+      joining = false;
+      poll();
+    }
     const resume = () => {
-      if (document.visibilityState !== 'hidden') poll();
+      if (!joining && document.visibilityState !== 'hidden') poll();
     };
-    poll();
+    open();
     window.addEventListener('online', resume);
     window.addEventListener('focus', resume);
     document.addEventListener('visibilitychange', resume);
@@ -120,11 +141,13 @@ export default function useTvScreen(screenId) {
       window.removeEventListener('focus', resume);
       document.removeEventListener('visibilitychange', resume);
     };
-  }, [screenId, revision]);
+  }, [screenId, revision, normalPreview]);
   return {
     ...state,
+    identityToken: identity.token,
+    preview: identity.preview,
+    linkError,
     label: TV_SCREENS.find((item) => item.id === screenId)?.label,
     refresh,
-    connect,
   };
 }

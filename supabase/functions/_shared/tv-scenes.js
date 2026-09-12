@@ -2,6 +2,7 @@
 export const SOURCE_TYPES = [
   ['poster', 'Posters'],
   ['youtube', 'YouTube'],
+  ['video', 'Saved video'],
   ['camera', 'CCTV stream'],
   ['input', 'Phone camera / shared screen'],
   ['schedule', 'Use website’s saved live video'],
@@ -13,6 +14,8 @@ export const SOURCE_TYPES = [
 export const INPUT_SLOTS = ['input-1', 'input-2', 'input-3', 'input-4'];
 export const MAX_SCENES = 6;
 export const MAX_LAYERS = 12;
+export const hasSceneContent = (scene) =>
+  Boolean(scene?.layers?.some((layer) => layer.type !== 'empty'));
 export function validateDeviceName(name) {
   if (typeof name !== 'string' || !name.trim() || name.length > 60)
     throw new Error('Give the device a name using up to 60 characters.');
@@ -81,7 +84,7 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
       name: scene.name.trim(),
       overlap: scene.overlap,
       layers: scene.layers.map((layer) => {
-        if (!validId(layer?.id) || !(SOURCE_TYPES.some(([id]) => id === layer.type) || layer.type === 'poster-next'))
+        if (!validId(layer?.id) || !(SOURCE_TYPES.some(([id]) => id === layer.type) || ['poster-next', 'empty'].includes(layer.type)))
           throw new Error('Unknown scene source.');
         for (const key of ['x', 'y', 'width', 'height'])
           if (!Number.isFinite(layer[key])) throw new Error('Enter valid source positions.');
@@ -102,6 +105,7 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
           }
         }
         if (layer.type === 'youtube') item.url = youtubeUrl(layer.url);
+        if (layer.type === 'video') item.url = streamUrl(layer.url);
         if (layer.type === 'camera') {
           item.url = streamUrl(layer.url);
           if (!['hls', 'whep'].includes(layer.protocol))
@@ -123,7 +127,7 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
             throw new Error('Use up to 1200 characters per notice.');
           item.text = layer.text;
         }
-        if (['youtube', 'camera', 'input', 'schedule'].includes(layer.type)) {
+        if (['youtube', 'video', 'camera', 'input', 'schedule'].includes(layer.type)) {
           if (typeof layer.audio !== 'boolean')
             throw new Error('Choose whether this source plays audio.');
           item.audio = layer.audio;

@@ -68,6 +68,8 @@ function harness({
   settings = teaching(),
   presentation = { id: presentationId, code: '12345678', expires_at: future() },
   devices = [],
+  templates = [],
+  staffProfile = { id: 'staff-id', is_active: true, is_owner: false, permissions: ['tv'] },
   rpcResult,
 } = {}) {
   const rows = {
@@ -76,6 +78,7 @@ function harness({
     ],
     tv_presentations: presentation ? [{ ...presentation, screen_id: hall }] : [],
     tv_devices: devices,
+    tv_scene_templates: templates,
     tv_inputs: [
       {
         screen_id: hall,
@@ -85,7 +88,7 @@ function harness({
         expires_at: future(),
       },
     ],
-    profiles: [{ id: 'staff-id', is_active: true, is_owner: false, permissions: ['tv'] }],
+    profiles: [staffProfile],
   };
   const calls = [];
   const database = {
@@ -151,14 +154,18 @@ function harness({
           return query;
         },
         then(resolve, reject) {
-          calls.push({ type: 'query', table, operation });
-          const selected = (rows[table] || []).filter((row) =>
+          calls.push({ type: 'query', table, operation, values: structuredClone(values) });
+          let selected = (rows[table] || []).filter((row) =>
             filters.every((filter) => filter(row)),
           );
           if (operation === 'update') selected.forEach((row) => Object.assign(row, values));
           if (operation === 'delete')
-            rows[table] = rows[table].filter((row) => !selected.includes(row));
-          if (operation === 'insert') selected.push({ id: viewerId, ...values });
+            rows[table] = (rows[table] || []).filter((row) => !selected.includes(row));
+          if (operation === 'insert') {
+            const created = { id: viewerId, ...values };
+            rows[table] = [...(rows[table] || []), created];
+            selected = [created];
+          }
           return Promise.resolve({
             data: structuredClone(single ? selected[0] || null : selected),
             error: null,
@@ -174,6 +181,7 @@ function harness({
     crypto: webcrypto,
     TextEncoder,
     Response,
+    URL,
     console,
     Deno: {
       env: { get: () => undefined },
@@ -184,6 +192,7 @@ function harness({
   });
   return {
     calls,
+    rows,
     async request(action, values = {}, bearer) {
       const response = await handler(
         new Request('https://example.test/tv-control', {
@@ -347,6 +356,10 @@ test('viewer credentials do not grant editing, publishing, preview or legacy pai
     'save',
     'normal',
     'new-presentation',
+    'save-background',
+    'approve-display',
+    'save-template',
+    'delete-template',
     'start',
     'stop',
     'preview',
@@ -383,4 +396,305 @@ test('retired pairing actions stay unavailable even to staff', async () => {
       false,
     );
   }
+});
+
+test('a display can request its rolling code before a stream starts without exposing its credential', async () => {
+  const expiresAt = new Date(Date.now() + 600000).toISOString();
+  const api = harness({
+    settings: DEFAULT_TV_SETTINGS,
+    presentation: null,
+    rpcResult: { code: '012345', expires_at: expiresAt },
+  });
+  const response = await api.request('display-code', { deviceToken: token });
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.data, { code: '012345', expires_at: expiresAt });
+  const call = api.calls.find((entry) => entry.type === 'rpc');
+  assert.equal(call.name, 'request_display_code');
+  assert.equal(call.values.hall, hall);
+  assert.equal(call.values.credential_hash, tokenHash(token));
+  assert.match(call.values.client_hash, /^[a-f0-9]{64}$/);
+  assert.equal(
+    api.calls.some((entry) => entry.type === 'auth'),
+    false,
+  );
+  assert.equal(JSON.stringify(response.data).includes(token), false);
+});
+
+test('display-code rejects malformed credentials and preserves allocation limits', async () => {
+  for (const deviceToken of [undefined, '', '123456', 'A'.repeat(64)]) {
+    const api = harness();
+    const response = await api.request('display-code', { deviceToken });
+    assert.equal(response.status, 400);
+    assert.equal(
+      api.calls.some((entry) => entry.type === 'rpc'),
+      false,
+    );
+  }
+  const limited = harness({ rpcResult: { error: 'Try again shortly.', status: 429 } });
+  const response = await limited.request('display-code', { deviceToken: token });
+  assert.equal(response.status, 429);
+  assert.equal(response.data.code, undefined);
+});
+
+test('staff approve the code from the display, with an optional name supplied only once', async () => {
+  for (const name of [undefined, ' ', ' Main hall projector ']) {
+    const api = harness({
+      rpcResult: { deviceId: viewerId, name: 'Main hall projector', presentationId },
+    });
+    const response = await api.request(
+      'approve-display',
+      { code: ' 012345 ', name },
+      'staff-token',
+    );
+    assert.equal(response.status, 200);
+    assert.equal(response.data.deviceId, viewerId);
+    const call = api.calls.find((entry) => entry.type === 'rpc');
+    assert.equal(call.name, 'approve_display_code');
+    assert.equal(call.values.actor, 'staff-id');
+    assert.equal(call.values.hall, hall);
+    assert.equal(call.values.connection_code, '012345');
+    assert.equal(call.values.display_name, name?.trim() || null);
+  }
+});
+
+test('approval validates fields and rejects staff without stream permission before database mutation', async () => {
+  for (const values of [
+    { code: '' },
+    { code: '12345678' },
+    { code: '123456', name: 'x'.repeat(61) },
+  ]) {
+    const api = harness();
+    const response = await api.request('approve-display', values, 'staff-token');
+    assert.equal(response.status, 400);
+    assert.equal(
+      api.calls.some((entry) => entry.type === 'rpc'),
+      false,
+    );
+  }
+  for (const action of ['approve-display', 'save-template', 'delete-template', 'admin']) {
+    const api = harness({
+      staffProfile: { id: 'staff-id', is_active: true, permissions: ['posters'] },
+    });
+    const response = await api.request(action, { code: '123456' }, 'staff-token');
+    assert.equal(response.status, 403, action);
+    assert.equal(
+      api.calls.some((entry) => entry.type === 'rpc'),
+      false,
+      action,
+    );
+    assert.equal(
+      api.calls.some((entry) => entry.type === 'query' && entry.operation !== 'select'),
+      false,
+      action,
+    );
+  }
+  const expired = harness({ rpcResult: { error: 'This display code has expired.', status: 410 } });
+  assert.equal(
+    (await expired.request('approve-display', { code: '123456' }, 'staff-token')).status,
+    410,
+  );
+});
+
+test('watching links are bound to the current presentation even when another session reuses its code', async () => {
+  const otherId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+  const current = harness();
+  const joined = await current.request('join-session', {
+    presentationId,
+    code: '12345678',
+    name: 'Shared-link viewer',
+  });
+  assert.equal(joined.status, 200);
+  assert.match(joined.data.deviceToken, /^[a-f0-9]{64}$/);
+  for (const options of [
+    { suppliedId: otherId },
+    { suppliedId: 'bad-id' },
+    { suppliedId: null },
+    { suppliedId: presentationId, presentation: null },
+    {
+      suppliedId: presentationId,
+      presentation: { id: otherId, code: '12345678', expires_at: future() },
+    },
+  ]) {
+    const { suppliedId, ...state } = options;
+    const api = harness(state);
+    const response = await api.request('join-session', {
+      presentationId: suppliedId,
+      code: '12345678',
+      name: 'Shared-link viewer',
+    });
+    assert.equal(response.status, 410);
+    assert.equal(response.data.deviceToken, undefined);
+    assert.equal(
+      api.calls.some((entry) => entry.type === 'rpc'),
+      false,
+    );
+  }
+});
+
+test('Admin returns only saved scenes for the chosen hall', async () => {
+  const api = harness({
+    templates: [
+      { id: viewerId, screen_id: hall, name: 'Main hall scene', scene: teaching().scenes[0] },
+      {
+        id: presentationId,
+        screen_id: 'ladies-upstairs',
+        name: 'Other hall scene',
+        scene: teaching().scenes[0],
+      },
+    ],
+  });
+  const response = await api.request('admin', {}, 'staff-token');
+  assert.equal(response.status, 200);
+  assert.deepEqual(
+    response.data.templates.map((item) => item.name),
+    ['Main hall scene'],
+  );
+  assert.equal(
+    api.calls.some((entry) => entry.table === 'tv_scene_templates'),
+    true,
+  );
+});
+
+test('saving a scene keeps source settings and positions but excludes live device credentials', async () => {
+  const scene = {
+    id: 'scene-template',
+    name: 'Camera with video',
+    overlap: true,
+    deviceToken: token,
+    presentationId,
+    layers: [
+      {
+        id: 'camera',
+        type: 'input',
+        name: 'Lectern camera',
+        slot: 'input-1',
+        capture: 'camera',
+        audio: true,
+        x: 0,
+        y: 0,
+        width: 70,
+        height: 100,
+        sessionId: viewerId,
+        deviceToken: token,
+      },
+      {
+        id: 'video',
+        type: 'video',
+        url: 'https://media.example.test/lesson.mp4',
+        audio: false,
+        x: 70,
+        y: 0,
+        width: 30,
+        height: 100,
+      },
+    ],
+  };
+  const api = harness();
+  const response = await api.request(
+    'save-template',
+    { name: ' Camera with video ', scene },
+    'staff-token',
+  );
+  assert.equal(response.status, 200);
+  const stored = api.rows.tv_scene_templates[0];
+  assert.equal(stored.name, 'Camera with video');
+  assert.equal(stored.screen_id, hall);
+  assert.equal(stored.created_by, 'staff-id');
+  assert.equal(stored.scene.layers[0].slot, 'input-1');
+  assert.equal(stored.scene.layers[0].audio, true);
+  assert.equal(stored.scene.layers[1].url, 'https://media.example.test/lesson.mp4');
+  assert.equal(stored.scene.layers[1].width, 30);
+  assert.equal(JSON.stringify(stored.scene).includes(token), false);
+  assert.equal(JSON.stringify(stored.scene).includes(viewerId), false);
+  assert.equal(JSON.stringify(stored.scene).includes(presentationId), false);
+});
+
+test('invalid saved scene fields are rejected before a template write', async () => {
+  const scene = teaching().scenes[0];
+  const invalidSources = [
+    { ...scene.layers[0], type: 'unknown' },
+    { ...scene.layers[0], x: 90 },
+    {
+      ...scene.layers[0],
+      type: 'video',
+      url: 'http://media.example.test/lesson.mp4',
+      audio: false,
+    },
+    { ...scene.layers[0], type: 'input', slot: 'input-1', capture: 'camera' },
+  ];
+  const invalid = [
+    { name: '', scene },
+    { name: 'x'.repeat(81), scene },
+    ...invalidSources.map((source) => ({ name: 'Scene', scene: { ...scene, layers: [source] } })),
+  ];
+  for (const values of invalid) {
+    const api = harness();
+    const response = await api.request('save-template', values, 'staff-token');
+    assert.equal(response.status, 400);
+    assert.equal(
+      api.calls.some(
+        (entry) => entry.table === 'tv_scene_templates' && entry.operation !== 'select',
+      ),
+      false,
+    );
+  }
+});
+
+test('blank region presets can be saved for reuse without starting a presentation', async () => {
+  const api = harness({ settings: DEFAULT_TV_SETTINGS, presentation: null });
+  const scene = {
+    id: 'blank-scene',
+    name: 'Blank canvas',
+    overlap: true,
+    layers: [{ id: 'area-1', type: 'empty', x: 0, y: 0, width: 100, height: 100 }],
+  };
+  const response = await api.request(
+    'save-template',
+    { name: 'Blank canvas', scene },
+    'staff-token',
+  );
+  assert.equal(response.status, 200);
+  assert.equal(response.data.template.scene.layers[0].type, 'empty');
+  assert.equal(
+    api.calls.some((entry) => entry.type === 'rpc'),
+    false,
+  );
+  assert.equal(api.rows.tv_presentations.length, 0);
+});
+
+test('template replacement checks its revision and both replacement and deletion stay within the hall', async () => {
+  const revision = '2026-09-12T10:00:00.000Z';
+  const template = () => ({
+    id: viewerId,
+    screen_id: hall,
+    name: 'Original',
+    updated_at: revision,
+    scene: teaching().scenes[0],
+  });
+  const values = {
+    templateId: viewerId,
+    expectedUpdatedAt: revision,
+    name: 'Updated',
+    scene: teaching().scenes[0],
+  };
+  const api = harness({ templates: [template()] });
+  assert.equal((await api.request('save-template', values, 'staff-token')).status, 200);
+  assert.equal(api.rows.tv_scene_templates[0].name, 'Updated');
+
+  const stale = harness({ templates: [template()] });
+  assert.equal(
+    (await stale.request('save-template', { ...values, expectedUpdatedAt: past() }, 'staff-token'))
+      .status,
+    409,
+  );
+  assert.equal(stale.rows.tv_scene_templates[0].name, 'Original');
+
+  const otherHall = harness({ templates: [{ ...template(), screen_id: 'ladies-upstairs' }] });
+  assert.equal((await otherHall.request('save-template', values, 'staff-token')).status, 409);
+  assert.equal(
+    (await otherHall.request('delete-template', { templateId: viewerId }, 'staff-token')).status,
+    200,
+  );
+  assert.equal(otherHall.rows.tv_scene_templates.length, 1);
+  assert.equal(otherHall.rows.tv_scene_templates[0].name, 'Original');
 });

@@ -24,9 +24,8 @@ import {
 } from 'lucide-react';
 import FormsInbox from '@/components/admin/FormsInbox';
 import StaffAccess from '@/components/admin/StaffAccess';
-import TvScreenEditor from '@/components/admin/TvScreenEditor';
+import StreamSetup from '@/components/admin/StreamSetup';
 import PostersEditor from '@/components/admin/PostersEditor';
-import { TV_SCREENS } from '@/lib/tvControl';
 import PrayerEditor from '@/components/admin/PrayerEditor';
 import PageEditor from '@/components/admin/PageEditor';
 import { supabase } from '@/lib/supabaseClient';
@@ -168,27 +167,7 @@ function DashboardSection({ onChoose }) {
   );
 }
 function TvSection() {
-  const [screenId, setScreenId] = useState('mens-main');
-  return (
-    <div className="admin-tv-workspace">
-      <label className="admin-tv-select">
-        Choose hall stream
-        <select
-          value={screenId}
-          onChange={(event) => {
-            setScreenId(event.target.value);
-          }}
-        >
-          {TV_SCREENS.map((screen) => (
-            <option key={screen.id} value={screen.id}>
-              {screen.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <TvScreenEditor key={screenId} screenId={screenId} />
-    </div>
-  );
+  return <StreamSetup />;
 }
 
 function EventsSection() {

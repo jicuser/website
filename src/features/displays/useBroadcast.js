@@ -43,10 +43,10 @@ export default function useBroadcast(screenId) {
     if (current.current) return false;
     const active = { id: '', stream: null, recorder: null, health: null };
     current.current = active;
-    update({ live: false, busy: true, message: 'Choose the TV tab and include its audio.' });
+    update({ live: false, busy: true, message: 'Choose the display tab and include its audio.' });
     try {
       if (!MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus'))
-        throw new Error('Use desktop Chrome or Edge to broadcast the TV tab.');
+        throw new Error('Use desktop Chrome or Edge to broadcast the display tab.');
       active.stream = await navigator.mediaDevices.getDisplayMedia({
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 25 } },
         audio: true,

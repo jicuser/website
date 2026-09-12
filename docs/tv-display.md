@@ -1,52 +1,61 @@
-# Hall streams and presentation sessions
+# Hall streams and display webpages
 
-Every hall has a permanent `/tv179/<hall>` display webpage. Open it on the TV, laptop or phone that will show the output. Changing scenes never changes that address.
+Each hall has one permanent `/tv179/<hall>` webpage. The address stays the same when a stream starts, changes scenes or ends. When no stream is running, it shows public posters, prayer times and scheduled notices. An active stream shows its selected scene to approved viewers.
 
-## Normal and Class / Teach
+## Set up a stream
 
-Normal is public and shows the configured posters, prayer timetable and automatic prayer, Jummah and Ramadan notices. It never requires a viewing code. Class / Teach pauses those automatic notices and shows the selected scene.
+1. In **Hall streams**, choose the hall and press **Next**.
+2. Choose one to six scenes and press **Next · arrange content**.
+3. In each scene choose one to four areas. Pick a side-by-side, grid, sidebar or picture-in-picture arrangement. Each blank area displays **+ Add content**.
+4. Press an area to choose screen sharing, a device camera, CCTV, a YouTube link, a saved video URL, posters, prayer times, next prayer, a clock or text. Complete the fields in its dialog. Required fields show an error beside the field and receive focus.
+5. Save the content, then move or resize its area in the preview. Areas can overlap; snapping aligns edges. Bring forward and Send back change stacking. Removing content keeps a blank area ready to use again.
+6. Press **Start stream**. Prepared camera/screen inputs begin publishing. **Save & update stream** applies later changes and scene selection to connected displays.
 
-In Admin, choose the hall stream, choose Class / Teach, then build a scene:
+A camera or screen has one reusable name, with a default if no custom name is needed. Saving its content keeps the dialog open so the operator can prepare local capture or copy its contributor link. Closing the dialog keeps capture running and visible in the canvas. Preview sound is muted to avoid feedback; source audio and the display's master mute are separate controls.
 
-1. Press **Add content**, choose its type and complete the fields shown. Name a camera or sharing laptop once. Reuse its named source in other scenes when needed.
-2. Select content in the canvas to edit, move, resize, change audio or remove it. Properties appear alongside on wide screens and below on phones. The live picture preview stays inside the canvas.
-3. Draft changes are kept on this browser. **Save draft** keeps them without changing viewers. **Present** saves the selected scene and updates the display webpage.
-4. Give viewers the eight-digit session code shown in Admin. On the display webpage, they press **Connect display**, enter their display name and the code. They do not need a staff account.
+**Saved scenes** stores layouts and settings in the shared database. Load one explicitly into the selected scene. Live browser captures and permissions are not stored in templates. **New setup** starts empty and stops this browser's captures; an existing stream keeps its saved layout until replaced or ended. Merely opening Admin or joining as a contributor never clears another operator's setup.
 
-The connection icon fades while the display is idle and returns when touched, pointed at or focused. Its panel can be closed with × or Escape and closes after joining. The public display never reveals the session code.
+An in-progress setup survives refresh in the same browser tab. Capture itself stops on reload, so reopen the input and restart it. Login remains active. **End stream**, or saving a selected scene whose areas are all empty, returns viewers to the background schedule. The separate **Background posters & prayer notices** settings are available before scene setup, and do not replace an active stream.
 
-Saving another scene keeps the current session code. **Start new presentation** ends previous live inputs and viewing access while retaining saved scenes, then opens a draft. Press Present to start the new session and generate its new code. **Return to Normal now**, saving Normal, a timed end, or presenting an empty selected scene ends private viewing. Joining from a second staff device never resets the session.
+## Connect a display or share a watching link
 
-## Camera and laptop contributors
+The corner of each hall display webpage shows a six-digit **Display code**, valid for ten minutes. It refreshes automatically; no connection icon or code-entry form is needed on the viewing device.
 
-Add a named camera or screen source, then Present it. In **Share from a device**, start the matching source on the device that supplies it. **Allow another device to join** reveals that source's sharing link. The link opens a dedicated staff page for that source; it has no scene editor or reset control. A viewer's session code cannot publish a camera, change scenes or edit the website.
+After starting the stream, enter that display's code in **Connect a display** in Admin. Its name is optional. The open webpage then receives the stream; the connected list reports when it last checked in and which layout it received. Rotating the corner code does not disconnect an approved viewer. Approval lasts for the current stream; starting a new stream clears prior approvals and source leases.
 
-Keep each contributing page open. Capture begins only after the browser grants camera or screen permission. Refreshing a capture page stops its browser capture; login is retained, and **Restart this camera / Restart screen sharing** can replace only that tab's leftover connection. Refreshing a viewing page reconnects it to the current presentation. Switching focus does not intentionally stop capture, but phones and browsers may suspend background cameras. The active-sharing notice and browser leave warning explain this limitation.
+**Copy watching link** creates a link for the current stream. Anyone with that link can watch without a staff account or individual display approval. Treat it as a viewing invitation: it contains the stream's secret in the URL fragment, which is removed from the address bar after joining. The link expires when that stream ends and cannot join a later stream at the same hall address. Watching never grants permission to edit or send a camera.
 
-**Retry viewing connection** rebuilds that source's connections without restarting its camera or screen capture. Local camera preview, a connected transport, and a received layout are different signals. Inspect the receiving picture and sound before treating a session as ready.
+The shoe-area webpage remains a public timetable/poster display and does not run presentations or issue display codes. Private Admin preview pages also omit corner codes.
+
+## Contributing from another device
+
+In a camera or screen area's dialog, choose **Use another device**. Copy its device sharing link to the contributing phone or laptop. Start the stream, then open that link and sign in on the contributing device. This dedicated page controls the selected source without opening the scene editor or resetting other devices.
+
+Keep contributing pages open. Browser permission is required for camera/screen capture. Refreshing stops local capture, while tab authentication survives. Restart releases only that tab's leftover source lease. Closing the content dialog is safe; closing the browser page ends capture. Phones may suspend cameras when backgrounded or locked, regardless of the website. Check the receiving picture and sound before relying on it.
+
+**Retry connection** rebuilds the viewer connections while retaining the local camera/screen preview. A local preview, a connected transport and a received layout are separate signals; only checking the receiving display establishes what the audience sees.
 
 ## Network and outgoing broadcasts
 
-Same Wi-Fi is a useful first test, but guest network isolation can still block peer connections. Reliable connections across different networks may require TURN, configured in the `TV_ICE_SERVERS` Edge secret. See the [WebRTC TURN guide](https://webrtc.org/getting-started/turn-server). A “relay configured” message only confirms a TURN URL is configured; it does not prove that server is reachable.
+Same Wi-Fi is a useful first test, but guest isolation can still block connections. Reliable connections across different networks may need TURN in the `TV_ICE_SERVERS` Edge secret. See the [WebRTC TURN guide](https://webrtc.org/getting-started/turn-server). A configured URL does not prove that the relay is reachable.
 
-Website broadcasting to YouTube/TikTok uses a separate media relay (`VITE_MEDIA_RELAY_URL`, `services/media-relay`). TURN helps devices exchange media; the media relay forwards the finished display picture to a broadcast platform. Neither is configured by a viewing code. Broadcast controls explain when the outgoing service is absent. A broadcasting laptop can use the finished display tab through OBS or the configured website relay. Do not feed the outgoing YouTube broadcast back into the same scene.
+YouTube/TikTok broadcasting uses the separate media relay (`VITE_MEDIA_RELAY_URL`, `services/media-relay`). TURN carries media between devices; the outgoing relay sends the finished picture to a broadcast platform. A display code sets up neither service. Existing OBS software can also capture the finished display tab and send it to YouTube. Do not add that outgoing broadcast back into the same scene.
 
-## Implementation and access boundaries
+## Code and access boundaries
 
-- `tv_screens` stores saved layouts and their revision. A save rejects a stale revision instead of overwriting another operator's changes.
-- `tv_presentations` holds the current session ID and code for each hall. Only the server service role can read it. The code is returned only to authenticated staff with hall-stream permission.
-- `tv_devices` holds hashed viewer credentials bound to a presentation and hall. Session removal cascades to those credentials and their receivers. Admin previews use shorter credentials and do not appear in the viewer list.
-- `tv_join_attempts` bounds failed guesses per address hash and hall. Successful joins do not consume the failed-guess allowance, so a class can join behind one Wi-Fi address. The address itself is not stored.
-- `tv_inputs` are four independent named source slots per hall. The slot is an internal identifier; the UI uses its saved name. Each mounted player has its own `tv_peers` row, avoiding negotiation collisions between tabs.
-- Public status returns a known mode separately from redacted public settings. It contains no private scene, media source IDs or session code until authorized. The webpage uses a neutral loading/reconnecting state before reliable status arrives.
-- Browser tab authentication survives refresh. Profile RPCs run after auth notifications return, and bounded requests expose Retry without clearing login. Explicit logout remains available on Admin and the public website.
+- `StreamSetup` and `useStreamSetup` own the three setup steps, the private tab draft and save conflicts. Polls never replace an unsaved layout. A stopped or replaced managed stream releases this browser's capture controllers.
+- `SceneEditor`, `ContentEditorDialog` and `SceneCanvas` share percentage geometry. `sceneLayouts` provides presets/snapping; `streamWorkspace` builds blank scenes and remaps template inputs without merging distinct sources.
+- `DeviceInputs` keeps per-slot controllers mounted outside the dialog. Portals render only their controls inside the selected source. `tvPublisherController` separates capture preparation, publication and stopping.
+- `tv_screens` stores saved layouts and revisions. `save_tv_presentation` checks the revision while holding the hall lock; `new-presentation` rotates the stream identity. Background saves preserve the active scene and presentation fields.
+- `tv_presentations` stores each active stream's private identity/code. `tv_devices` stores hashed viewer credentials bound to that hall and stream. Ending a stream removes its credentials and receivers. Admin previews are short lived and excluded from the viewer list.
+- `display_connection_codes` stores hashed browser identities and rolling six-digit codes. Only service-role requests access this table. `approve_display_code` checks staff permission, hall and code expiry before granting current-stream access. New identity allocations are bounded per network and hall; known-browser refreshes remain usable.
+- `tv_scene_templates` stores private reusable scenes. Staff Edge actions validate names, source types and URLs; replacements check the template revision. No service-role key or capture credential enters the scene JSON.
+- Public status never exposes private source details before authorization. Initial loading and connection failures use a neutral state instead of flashing background posters during an active stream.
 
-Scene JSON and the Edge request contract are reusable from a future Flutter client. Flutter must preserve stable hall, scene and source IDs, use authenticated contributor requests, and implement media capture/playback for its own platform.
+## Deployment and verification
 
-## Deployment and checks
+Apply the migrations through `20260912114647_display_codes_and_scene_templates.sql`, deploy `tv-control` with its shared modules, then publish the matching frontend. The display-code/template migration adds private tables and updates empty-scene handling; it does not reset existing streams or delete posters/accounts. Historical SQL migrations remain necessary deployment history.
 
-Apply `20260912105049_presentation_sessions.sql`, deploy `tv-control` and its shared modules, then publish the matching frontend. This migration clears old connections and approvals and returns displays to Normal; saved scenes, posters and accounts remain. Old browser-pairing endpoints are retired. Historical migrations remain as database history, not active alternate implementations.
+Run `npm run validate`. Database suites use isolated fixtures and roll back: `tests/display-connections.sql`, `tests/tv-presentation-sessions.sql`, `tests/tv-receiver.sql` and `tests/staff-tv-permissions.sql`. They cover code rotation, expiry, rate limits, permissions, template privacy, stale saves, stream isolation and receiver independence.
 
-Run `npm run validate`. Run `tests/tv-presentation-sessions.sql`, `tests/tv-receiver.sql` and `tests/staff-tv-permissions.sql` against the migrated schema; their fixture changes roll back. The tests cover code access, shared-Wi-Fi joins, session rotation, expired viewing access, empty-scene fallback, stale saves, permission boundaries, independent receivers, auth restoration and capture lease recovery.
-
-For acceptance, test one viewing display, one laptop screen and one phone camera: join the current code, show both named inputs, rearrange and Present, refresh each device separately, change scenes, end the session, then join a new session with its new code. Check mobile button placement and audio on the physical devices. Automated tests do not establish browser codec support, camera delivery or network reliability.
+For acceptance, open one display webpage, build a two-area scene with a laptop screen and phone camera, then Start stream and approve the displayed six-digit code. Check picture and audio, resize and save, close/reopen the content dialog, refresh each device separately, load a saved scene, and end the stream. Confirm old watching links no longer work. Automated checks do not establish physical browser codec support or camera/network delivery.

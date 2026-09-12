@@ -6,7 +6,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
   return (
     <>
       <section className="admin-panel">
-        <h3>Normal display</h3>
+        <h3>Background display</h3>
         {[
           ['show_times', 'Salah timetable'],
           ['show_next', 'Next prayer'],
@@ -25,7 +25,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
       <details className="admin-panel" open={true}>
         <summary>Posters & rotation</summary>
         <p>
-          Tick the posters for this TV. Up to four show across, moving one place each rotation.
+          Tick the posters for this display. Up to four show across, moving one place each rotation.
           Announcements rotate as a poster too.
         </p>
         <Link to="/admin?section=posters">Edit posters & announcements →</Link>
@@ -107,7 +107,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
           </label>
           <p>
             At Jama‘ah: silence your phone. Dhikr begins 5 minutes later, or 10 minutes after
-            Maghrib. Posters return 20 minutes after Jama‘ah. Class / Teach pauses all automatic
+            Maghrib. Posters return 20 minutes after Jama‘ah. An active stream pauses all automatic
             notices.
           </p>
           <label className="admin-check">
@@ -119,7 +119,8 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
             Automatically show Friday’s Jummah welcome
           </label>
           <p>
-            In Normal mode: from one hour before the first Jummah until 20 minutes after the last.
+            When no stream is running: from one hour before the first Jummah until 20 minutes after
+            the last.
           </p>
           <label>
             Ramadan calendar
@@ -150,7 +151,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
             </label>
           )}
           <label>
-            Notice override in Normal mode
+            Background notice override
             <select
               value={form.notice_mode || 'off'}
               onChange={(event) => update('notice_mode', event.target.value)}
@@ -180,9 +181,9 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
             />
           </label>
           <p>
-            Blank uses Qur’an 2:201. During Ramadan, Normal shows du‘a 20–40 minutes after Isha
-            Jama‘ah, then alternates fasting times and posters. Class / Teach uses your saved
-            scenes.
+            Blank uses Qur’an 2:201. During Ramadan, the background shows du‘a 20–40 minutes after
+            Isha Jama‘ah, then alternates fasting times and posters. An active stream shows your
+            selected scene.
           </p>
         </details>
       )}

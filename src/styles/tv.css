@@ -1,4 +1,4 @@
-/* One landscape coordinate system for a physical TV and a phone preview. */
+/* One landscape coordinate system for display webpages and previews. */
 .jic-tv-shell {
   --tv-unit: min(1vw, 1.777778vh);
   position: fixed;
@@ -15,7 +15,7 @@
     --tv-unit: min(1vw, 1.777778dvh);
   }
 }
-/* Normal's dimensions are proportional to a 1920 × 1080 frame. */
+/* The notice display uses a proportional 1920 × 1080 frame. */
 .jic-tv-display .jic-prayer-table-scroll {
   overflow: hidden;
 }
@@ -337,139 +337,80 @@ html[data-theme] .jic-tv-stage {
   font-size: calc(var(--tv-unit) * 4.166667);
 }
 
-/* Connection controls stay readable outside the scaled display picture. */
+/* The approval code stays separate from the saved scene layout. */
 .display-connection {
   position: absolute;
-  right: max(16px, env(safe-area-inset-right));
-  bottom: max(16px, env(safe-area-inset-bottom));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
   z-index: 70;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 12px;
-  max-width: calc(100% - 32px);
+  gap: 8px;
+  max-width: min(300px, calc(100% - 24px));
   color: #f5f7fa;
-  font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.3;
 }
-.display-connection button {
-  min-height: 44px;
-  border: 1px solid #62728a;
+.display-code-card {
+  display: grid;
+  gap: 3px;
+  padding: 8px 12px;
+  border: 1px solid #526176;
   border-radius: 10px;
-  padding: 10px 16px;
-  font: inherit;
+  background: #101b2bee;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-shadow: 0 2px 12px #0004;
+}
+.display-code-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c4d0df;
+}
+.display-code-card strong {
+  font-size: clamp(20px, 1.5vw, 28px);
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.display-code-card small {
+  font-size: 10px;
+  color: #c4d0df;
+}
+.display-code-card .display-code-connected {
+  color: #a3e9c8;
+}
+.display-code-error {
+  padding: 10px 12px;
+  border: 1px solid #ba7780;
+  border-radius: 10px;
+  background: #101b2b;
+  font-size: 13px;
+}
+.display-code-error p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.display-code-error button {
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border: 1px solid #62728a;
+  border-radius: 8px;
   color: inherit;
   background: #192a40;
+  font: inherit;
 }
-.display-connection button:focus-visible,
-.display-connection input:focus-visible {
+.display-code-error button:focus-visible {
   outline: 3px solid #f0d791;
   outline-offset: 3px;
 }
-.display-connection .display-connection-trigger,
-.display-connection .display-connection-close {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  flex-shrink: 0;
-}
-.display-connection-trigger {
-  box-shadow: 0 4px 16px #0005;
-  transition: opacity 180ms ease;
-}
-.display-connection.is-idle:not(:focus-within) .display-connection-trigger {
-  opacity: 0;
-  pointer-events: none;
-}
-.display-connection-panel {
-  width: min(390px, calc(100vw - 32px));
-  max-height: calc(100vh - 108px);
-  max-height: calc(100dvh - 108px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border: 1px solid #62728a;
-  border-radius: 16px;
-  background: #101e30;
-  box-shadow: 0 8px 32px #0007;
-  padding: 20px;
-  text-align: left;
-}
-.display-connection-panel header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.display-connection-panel h2 {
-  margin: 0;
-  font-size: 21px;
-  font-weight: 650;
-}
-.display-connection-panel form {
-  display: grid;
-  gap: 8px;
-}
-.display-connection-panel p {
-  margin: 0 0 12px;
-}
-.display-connection-panel label {
-  margin-top: 8px;
-  font-weight: 600;
-}
-.display-connection-panel label span,
-.display-connection-panel small,
 .display-connection-note {
   color: #b9c8dc;
   font-weight: 400;
 }
-.display-connection-panel small {
-  font-size: 13px;
-}
-.display-connection-panel input {
-  width: 100%;
-  min-height: 46px;
-  padding: 10px 12px;
-  border: 1px solid #697b91;
-  border-radius: 8px;
-  background: #0a1422;
-  color: #f5f7fa;
-  font: inherit;
-}
-.display-connection-panel input::placeholder {
-  color: #9eafc5;
-}
-.display-code-input {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.12em;
-}
-.display-connection-panel input[aria-invalid='true'] {
-  border: 2px solid #ff8585;
-}
-.display-connection-panel .display-field-error {
-  margin: 0;
-  color: #ffa6a6;
-  font-size: 14px;
-}
-.display-connection-panel .display-connection-submit {
-  width: 100%;
-  margin-top: 12px;
-  background: #ead18d;
-  color: #111e30;
-  font-weight: 650;
-}
-.display-connection button:disabled {
-  opacity: 0.65;
-}
-@media (prefers-reduced-motion: reduce) {
-  .display-connection-trigger {
-    transition: none;
-  }
-}
 
-/* Saved scenes keep the same 16:9 coordinate system on every TV and preview. */
+/* Saved scenes keep the same 16:9 coordinates on displays and previews. */
 .jic-tv-teaching {
   color: #f5f7fa;
 }

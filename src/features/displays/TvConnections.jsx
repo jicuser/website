@@ -1,51 +1,146 @@
-import React, { useRef, useState } from 'react';
+import React, { useId, useRef, useState } from 'react';
 import { Copy, Monitor, Pencil, X } from 'lucide-react';
 import { tvRequest } from '@/lib/tvControl';
 
 export default function TvConnections({ screenId, data, setData, run, busy }) {
+  const fieldId = useId();
+  const [code, setCode] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [codeError, setCodeError] = useState('');
   const [editing, setEditing] = useState(null);
   const [message, setMessage] = useState('');
   const [nameError, setNameError] = useState(false);
+  const [showWatchingLink, setShowWatchingLink] = useState(false);
+  const codeField = useRef(null);
   const nameField = useRef(null);
   const presentation = data.presentation;
   const devices = data.devices || [];
+  const watchingLink = presentation
+    ? `${window.location.origin}/tv179/${screenId}#watch=${presentation.code}&session=${presentation.id}`
+    : '';
 
-  async function copyCode() {
+  async function copyWatchingLink() {
     try {
-      await navigator.clipboard.writeText(presentation.code);
-      setMessage('Session code copied. Give it to people who may watch this presentation.');
+      await navigator.clipboard.writeText(watchingLink);
+      setMessage(
+        'Watching link copied. Anyone with this link can watch this stream until it ends.',
+      );
+      setShowWatchingLink(false);
     } catch {
-      setMessage('Select the code below and copy it.');
+      setShowWatchingLink(true);
+      setMessage('Copy the watching link below.');
     }
   }
 
+  function connectDisplay(event) {
+    event.preventDefault();
+    setMessage('');
+    if (!/^\d{6}$/.test(code)) {
+      setCodeError('Enter the six-digit code shown in the corner of the display webpage.');
+      codeField.current?.focus();
+      return;
+    }
+    setCodeError('');
+    run(async () => {
+      let connected;
+      try {
+        connected = await tvRequest(
+          'approve-display',
+          screenId,
+          { code, name: displayName.trim() || undefined },
+          { staff: true },
+        );
+      } catch (error) {
+        if (/code|expired|display/i.test(error.message)) {
+          setCodeError(error.message);
+          codeField.current?.focus();
+        }
+        throw error;
+      }
+      setCode('');
+      setDisplayName('');
+      setMessage(`${connected.name || 'Display'} connected to this stream.`);
+      setData(await tvRequest('admin', screenId, {}, { staff: true }));
+    });
+  }
+
   return (
-    <section className="admin-panel admin-session-panel" aria-label="Presentation viewers">
-      <h3>Watch this hall stream</h3>
+    <section className="admin-panel admin-session-panel" aria-label="Stream displays and viewers">
+      <h3>Connect a display</h3>
       {presentation ? (
         <>
-          <p>Open the display webpage, choose Connect display and enter this session code.</p>
+          <p>
+            Open this hall’s display webpage on the device that will show the stream. Enter the
+            six-digit code from its corner here. The code refreshes every 10 minutes.
+          </p>
+          <form className="admin-connection-form" noValidate onSubmit={connectDisplay}>
+            <label htmlFor={`${fieldId}-code`}>
+              Display code (required)
+              <input
+                id={`${fieldId}-code`}
+                ref={codeField}
+                value={code}
+                inputMode="numeric"
+                autoComplete="off"
+                pattern="[0-9]{6}"
+                placeholder="e.g. 123456"
+                required
+                disabled={busy}
+                aria-invalid={Boolean(codeError)}
+                aria-describedby={codeError ? `${fieldId}-code-error` : undefined}
+                onChange={(event) => {
+                  setCode(event.target.value.replace(/\D/g, '').slice(0, 6));
+                  setCodeError('');
+                }}
+              />
+              {codeError && (
+                <small id={`${fieldId}-code-error`} className="admin-field-error" role="alert">
+                  {codeError}
+                </small>
+              )}
+            </label>
+            <label htmlFor={`${fieldId}-name`}>
+              Display name (optional)
+              <input
+                id={`${fieldId}-name`}
+                value={displayName}
+                maxLength={60}
+                placeholder="e.g. Main hall projector"
+                disabled={busy}
+                onChange={(event) => setDisplayName(event.target.value)}
+              />
+            </label>
+            <div className="admin-actions">
+              <button type="submit" className="admin-button" disabled={busy}>
+                <Monitor size={18} aria-hidden="true" /> Connect display
+              </button>
+            </div>
+          </form>
+          <h4>Invite someone to watch</h4>
+          <p>Share a watching link for this stream. It stops working when the stream ends.</p>
           <div className="admin-actions">
-            <output className="admin-session-code" aria-label="Current session code">
-              {presentation.code}
-            </output>
-            <button type="button" className="admin-button" onClick={copyCode}>
-              <Copy size={18} aria-hidden="true" /> Copy session code
+            <button type="button" className="admin-button" onClick={copyWatchingLink}>
+              <Copy size={18} aria-hidden="true" /> Copy watching link
             </button>
           </div>
-          <p>
-            The code stays the same when you save or change scenes. Return to Normal ends access; a
-            new presentation gets a new code. Viewers can watch without a staff account.
-          </p>
+          {showWatchingLink && (
+            <label>
+              Watching link
+              <input readOnly value={watchingLink} onFocus={(event) => event.target.select()} />
+            </label>
+          )}
         </>
       ) : (
-        <p>Normal is public. Press Present with a scene ready to get a session code for viewers.</p>
+        <p>
+          Start the stream when your scenes are ready. Then connect displays or copy a watching link
+          here.
+        </p>
       )}
       {message && <p role="status">{message}</p>}
       {presentation && (
         <>
           <h4>Connected displays · {devices.length}</h4>
-          {!devices.length && <p>No viewers have joined this session yet.</p>}
+          {!devices.length && <p>No displays or viewers have joined this stream yet.</p>}
           <ul className="admin-device-list">
             {devices.map((device) => {
               const online = Date.now() - Date.parse(device.last_seen_at) < 45000;
@@ -143,14 +238,14 @@ export default function TvConnections({ screenId, data, setData, run, busy }) {
               maxLength={60}
               disabled={busy}
               aria-invalid={nameError}
-              aria-describedby="display-rename-error"
+              aria-describedby={nameError ? `${fieldId}-rename-error` : undefined}
               onChange={(event) => {
                 setEditing({ ...editing, name: event.target.value });
                 setNameError(false);
               }}
             />
             {nameError && (
-              <small id="display-rename-error" className="admin-field-error" role="alert">
+              <small id={`${fieldId}-rename-error`} className="admin-field-error" role="alert">
                 Enter a name for this display.
               </small>
             )}
