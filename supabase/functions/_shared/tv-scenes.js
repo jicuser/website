@@ -16,9 +16,18 @@ export const MAX_SCENES = 6;
 export const MAX_LAYERS = 12;
 export const hasSceneContent = (scene) =>
   Boolean(scene?.layers?.some((layer) => layer.type !== 'empty'));
-export function validateDeviceName(name) {
+export function nameProblem(name, label = 'name') {
+  if (typeof name !== 'string' || !name.trim()) return `Enter a ${label}.`;
+  if (name.trim().length > 60) return 'Use up to 60 characters.';
+  if (/^(?:(?:new|default|untitled)\s+)?(?:device|stream|scene|input|camera|screen|display)(?:[\s_-]*(?:#?\d+|one|two|three|four|five|six))?$/i.test(name.trim()))
+    return `Use a descriptive ${label}, such as “Main lesson” or “Haider’s iPhone”.`;
+  return '';
+}
+export function validateDeviceName(name, allowLegacy = false) {
   if (typeof name !== 'string' || !name.trim() || name.length > 60)
     throw new Error('Give the device a name using up to 60 characters.');
+  const problem = nameProblem(name, 'device name');
+  if (problem && !allowLegacy) throw new Error(problem);
   return name.trim();
 }
 export const newScene = (id = 'scene-1', name = 'Scene 1') => ({
@@ -116,7 +125,7 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
           if (!INPUT_SLOTS.includes(layer.slot)) throw new Error('Choose a device input.');
           item.slot = layer.slot;
           // Older saved scenes have no name; keep them usable until staff name them.
-          if (layer.name !== undefined) item.name = validateDeviceName(layer.name);
+          if (layer.name !== undefined) item.name = validateDeviceName(layer.name, true);
           if (layer.capture !== undefined) {
             if (!['camera', 'screen'].includes(layer.capture)) throw new Error('Choose camera or screen sharing.');
             item.capture = layer.capture;

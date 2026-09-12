@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { tvRequest } from '@/lib/tvControl';
 import { normaliseTvSettings } from '../../supabase/functions/_shared/tv.js';
-import { hasSceneContent } from '../../supabase/functions/_shared/tv-scenes.js';
+import { hasSceneContent, nameProblem } from '../../supabase/functions/_shared/tv-scenes.js';
 import { createStreamScenes, streamSettings } from '@/lib/streamWorkspace';
 
 export default function useStreamSetup(screenId, userId) {
@@ -109,8 +109,16 @@ export default function useStreamSetup(screenId, userId) {
 
   const started = Boolean(managedId && data?.presentation?.id === managedId);
   const dirty = Boolean(form && JSON.stringify(form) !== JSON.stringify(baseline));
-  const build = () => {
-    const scenes = createStreamScenes(count);
+  const build = (names) => {
+    const scenes = createStreamScenes(count).map((scene, index) => ({
+      ...scene,
+      name: (names[index] || '').trim(),
+    }));
+    const problem = scenes.map((scene) => nameProblem(scene.name, 'scene name')).find(Boolean);
+    if (problem) {
+      setMessage(problem);
+      return;
+    }
     setForm({
       ...data.settings,
       scene_mode: 'teaching',
@@ -121,6 +129,12 @@ export default function useStreamSetup(screenId, userId) {
     setRevision(data.updated_at);
     setStage(3);
     setMessage('Choose the number of inputs in each scene, then press + Select input type.');
+  };
+  const loadSettings = (settings) => {
+    setWorkspaceId(crypto.randomUUID());
+    setForm(settings);
+    setCount(settings.scenes.length);
+    setMessage('Stream settings loaded. Reconnect camera and screen inputs when ready.');
   };
   const newSetup = () => {
     discard();
@@ -143,6 +157,10 @@ export default function useStreamSetup(screenId, userId) {
   };
   const publish = useCallback(async () => {
     if (inFlight.current || !form) return;
+    const namingProblem = form.scenes
+      .map((item) => nameProblem(item.name, 'scene name'))
+      .find(Boolean);
+    if (namingProblem) throw new Error(namingProblem);
     const scene = form.scenes.find((item) => item.id === form.active_scene_id);
     if (!hasSceneContent(scene) && !started)
       throw new Error('Select an input type in the selected scene before starting the stream.');
@@ -234,6 +252,7 @@ export default function useStreamSetup(screenId, userId) {
     setMessage,
     refresh,
     build,
+    loadSettings,
     newSetup,
     manageLive,
     publish,

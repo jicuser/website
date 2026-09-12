@@ -13,7 +13,7 @@ Each hall has one permanent `/tv179/<hall>` webpage. The address stays the same 
 
 A camera or screen has one reusable name, with a default if no custom name is needed. Saving its content keeps the dialog open so the operator can prepare local capture or copy its contributor link. Closing the dialog keeps capture running and visible in the canvas. Preview sound is muted to avoid feedback; source audio and the display's master mute are separate controls.
 
-**Saved scenes** stores layouts and settings in the shared database. Load one explicitly into the selected scene. Live browser captures and permissions are not stored in templates. **New setup** starts empty and stops this browser's captures; an existing stream keeps its saved layout until replaced or ended. Merely opening Admin or joining as a contributor never clears another operator's setup.
+**Save stream settings** becomes available after every scene has a descriptive name and configured inputs. It saves all scenes, input details, layouts, active scene and audio settings together under the first scene’s name. Loading settings replaces the draft; older single-scene presets can still be loaded into the selected scene. Generic numbered names such as “Scene 1” and “Device 1” must be replaced before publishing. Live browser captures and permissions are not stored in templates. **New setup** starts empty and stops this browser's captures; an existing stream keeps its saved layout until replaced or ended. Merely opening Admin or joining as a contributor never clears another operator's setup.
 
 An in-progress setup survives refresh in the same browser tab. Capture itself stops on reload, so reopen the input and restart it. Login remains active. **End stream**, or saving a selected scene whose inputs are all empty, returns viewers to the background schedule. The separate **Background posters & prayer notices** settings are available before scene setup, and do not replace an active stream.
 
@@ -54,7 +54,7 @@ YouTube/TikTok broadcasting uses the separate media relay (`VITE_MEDIA_RELAY_URL
 
 ## Deployment and verification
 
-Apply the migrations through `20260912114647_display_codes_and_scene_templates.sql`, deploy `tv-control` with its shared modules, then publish the matching frontend. The display-code/template migration adds private tables and updates empty-scene handling; it does not reset existing streams or delete posters/accounts. Historical SQL migrations remain necessary deployment history.
+Apply the migrations through `20260912121025_saved_stream_settings.sql`, deploy `tv-control` with its shared modules, then publish the matching frontend. The display-code/template migration adds private tables and updates empty-scene handling; it does not reset existing streams or delete posters/accounts. Historical SQL migrations remain necessary deployment history.
 
 Run `npm run validate`. Database suites use isolated fixtures and roll back: `tests/display-connections.sql`, `tests/tv-presentation-sessions.sql`, `tests/tv-receiver.sql` and `tests/staff-tv-permissions.sql`. They cover code rotation, expiry, rate limits, permissions, template privacy, stale saves, stream isolation and receiver independence.
 

@@ -8,7 +8,8 @@ import useStreamSetup from '@/hooks/useStreamSetup';
 import { safeWebUrl } from '@/lib/video';
 import { londonDate } from '@/lib/timetable';
 import SceneEditor from '@/features/displays/SceneEditor';
-import SceneTemplates from '@/features/displays/SceneTemplates';
+import StreamSettingsLibrary from '@/features/displays/StreamSettingsLibrary';
+import { nameProblem } from '../../../supabase/functions/_shared/tv-scenes.js';
 import BackgroundSettings from '@/features/displays/BackgroundSettings';
 import DeviceInputs from '@/features/displays/DeviceInputs';
 import TvConnections from '@/features/displays/TvConnections';
@@ -89,6 +90,8 @@ function HallWorkspace({ screenId, userId, onBack }) {
   const setup = useStreamSetup(screenId, userId);
   const { data, form, stage, busy } = setup;
   const [backgroundOpen, setBackgroundOpen] = useState(false);
+  const [sceneNames, setSceneNames] = useState(Array(6).fill(''));
+  const [nameErrors, setNameErrors] = useState([]);
   const [targets, setTargets] = useState({});
   const [localStreams, setLocalStreams] = useState({});
   const targetRef = useRef({});
@@ -122,7 +125,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
             if (
               form &&
               !window.confirm(
-                'Leave this setup? Local camera and screen sharing will stop. Save any scene you want to reuse first.',
+                'Leave this setup? Local camera and screen sharing will stop. Save stream settings you want to reuse first.',
               )
             )
               return;
@@ -168,28 +171,72 @@ function HallWorkspace({ screenId, userId, onBack }) {
           {hall && stage === 2 && (
             <section className="admin-panel">
               <h3>How many scenes?</h3>
-              <p>
-                A scene is one arrangement of content. You can switch between scenes during the
-                stream.
-              </p>
-              <label>
-                Number of scenes
-                <select
-                  value={setup.count}
-                  onChange={(event) => setup.setCount(Number(event.target.value))}
-                >
-                  {[1, 2, 3, 4, 5, 6].map((n) => (
-                    <option key={n} value={n}>
-                      {n} {n === 1 ? 'scene' : 'scenes'}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="admin-actions">
-                <button className="admin-button primary" onClick={setup.build}>
-                  Next · arrange content
-                </button>
-              </div>
+              <form
+                noValidate
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const errors = sceneNames
+                    .slice(0, setup.count)
+                    .map((name) => nameProblem(name, 'scene name'));
+                  setNameErrors(errors);
+                  if (errors.some(Boolean)) {
+                    event.currentTarget
+                      .querySelector(`[data-scene-name="${errors.findIndex(Boolean)}"]`)
+                      ?.focus();
+                    return;
+                  }
+                  setup.build(sceneNames);
+                }}
+              >
+                <p>
+                  A scene is one arrangement of content. You can switch between scenes during the
+                  stream.
+                </p>
+                <label>
+                  Number of scenes
+                  <select
+                    value={setup.count}
+                    onChange={(event) => setup.setCount(Number(event.target.value))}
+                  >
+                    {[1, 2, 3, 4, 5, 6].map((n) => (
+                      <option key={n} value={n}>
+                        {n} {n === 1 ? 'scene' : 'scenes'}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {sceneNames.slice(0, setup.count).map((name, index) => (
+                  <label key={index}>
+                    Scene {index + 1} name (required)
+                    <input
+                      data-scene-name={index}
+                      value={name}
+                      required
+                      maxLength={60}
+                      placeholder="e.g. Welcome or Main lesson"
+                      aria-invalid={Boolean(nameErrors[index])}
+                      onChange={(event) => {
+                        setSceneNames((names) =>
+                          names.map((saved, i) => (i === index ? event.target.value : saved)),
+                        );
+                        setNameErrors((errors) =>
+                          errors.map((error, i) => (i === index ? '' : error)),
+                        );
+                      }}
+                    />
+                    {nameErrors[index] && (
+                      <small className="admin-field-error" role="alert">
+                        {nameErrors[index]}
+                      </small>
+                    )}
+                  </label>
+                ))}
+                <div className="admin-actions">
+                  <button className="admin-button primary" type="submit">
+                    Next · arrange content
+                  </button>
+                </div>
+              </form>
               {data.presentation && (
                 <div className="stream-live-status">
                   <p>
@@ -238,14 +285,6 @@ function HallWorkspace({ screenId, userId, onBack }) {
                 relayConfigured={data.relayConfigured}
                 onRefresh={setup.refresh}
               />
-              <SceneTemplates
-                screenId={screenId}
-                value={form}
-                onChange={setup.setForm}
-                templates={data.templates}
-                onRefresh={setup.refresh}
-                disabled={busy}
-              />
               <div className="stream-start-bar">
                 <label className="admin-check">
                   <input
@@ -256,6 +295,14 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   />
                   Mute display audio
                 </label>
+                <StreamSettingsLibrary
+                  screenId={screenId}
+                  value={form}
+                  onChange={setup.loadSettings}
+                  templates={data.templates}
+                  onRefresh={setup.refresh}
+                  disabled={busy}
+                />
                 <span>
                   {setup.started
                     ? setup.dirty
@@ -270,7 +317,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
                     onClick={() => {
                       if (
                         window.confirm(
-                          'Start a clean setup? Save scenes you want to keep first. Local sharing will stop.',
+                          'Start a clean setup? Save stream settings you want to keep first. Local sharing will stop.',
                         )
                       )
                         setup.newSetup();

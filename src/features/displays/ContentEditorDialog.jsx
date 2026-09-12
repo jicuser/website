@@ -1,5 +1,9 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { INPUT_SLOTS, fitRect } from '../../../supabase/functions/_shared/tv-scenes.js';
+import {
+  INPUT_SLOTS,
+  fitRect,
+  nameProblem,
+} from '../../../supabase/functions/_shared/tv-scenes.js';
 import { secureStreamUrl, youtubeUrl } from '../../../supabase/functions/_shared/tv.js';
 import {
   updateInputCapture,
@@ -102,7 +106,7 @@ export default function ContentEditorDialog({
         });
         return;
       }
-      next.name = same?.name || (!unused && reused?.name) || defaultName(next.capture, next.slot);
+      next.name = same?.name || (!unused && reused?.name) || '';
     }
     if (['youtube', 'video', 'camera', 'input', 'schedule'].includes(next.type)) next.audio = false;
     if (['youtube', 'video', 'camera'].includes(next.type)) next.url = '';
@@ -136,8 +140,11 @@ export default function ContentEditorDialog({
     }
     if (next.type === 'text' && !next.text?.trim())
       invalid.text = 'Write the notice you want to show.';
-    if (next.type === 'input')
-      next.name = next.name?.trim() || defaultName(next.capture, next.slot);
+    if (next.type === 'input') {
+      next.name = next.name?.trim() || '';
+      if (nameProblem(next.name, 'device name'))
+        invalid.name = nameProblem(next.name, 'device name');
+    }
     if (Object.keys(invalid).length) {
       setErrors(invalid);
       requestAnimationFrame(() => form.current?.querySelector('[aria-invalid="true"]')?.focus());
@@ -328,18 +335,18 @@ export default function ContentEditorDialog({
             {draft.type === 'input' && (
               <>
                 <label>
-                  Device label (optional)
+                  Device name (required)
                   <input
                     disabled={disabled}
                     value={draft.name || ''}
                     maxLength={60}
-                    placeholder={defaultName(draft.capture, draft.slot)}
+                    placeholder="e.g. Haider’s iPhone or Classroom laptop"
+                    {...fieldProps('name')}
                     onChange={(event) => changeDraft({ ...draft, name: event.target.value })}
                   />
-                  <small>
-                    We use {defaultName(draft.capture, draft.slot)} if you leave this blank.
-                  </small>
+                  <small>Use a name that helps you recognise this device.</small>
                 </label>
+                {errorFor('name')}
                 {deviceSources.some(
                   (item) =>
                     item.slot !== draft.slot &&

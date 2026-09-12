@@ -1,4 +1,5 @@
-import { validateDeviceName } from '../_shared/tv-scenes.js';
+import { validateDeviceName, nameProblem } from '../_shared/tv-scenes.js';
+import { streamTemplateSettings } from '../_shared/stream-template.js';
 import { createSessionCode, isActivePresentation } from '../_shared/tv-session.js';
 import { hasPermission } from '../_shared/access.js';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
@@ -300,7 +301,7 @@ Deno.serve(async (req) => {
         response = {
           ...screen, settings: { ...screen.settings, scene_mode: displayMode },
           presentation, devices: presentation ? devices.filter((d: any) => !d.is_preview) : [],
-          templates: await result(db.from('tv_scene_templates').select('id,name,scene,updated_at')
+          templates: await result(db.from('tv_scene_templates').select('id,name,scene,settings,updated_at')
             .eq('screen_id', screenId).order('name')),
           inputs: presentation ? await liveInputs() : [],
           relayConfigured: iceServers().some((server: any) =>
@@ -320,23 +321,24 @@ Deno.serve(async (req) => {
         if (screenId === 'shoe-area') fail('Choose a hall stream to save a scene.');
         const name = typeof body.name === 'string' ? body.name.trim() : '';
         if (!name || name.length > 80) fail('Use 1–80 characters for the saved scene name.');
+        const complete = body.settings ? streamTemplateSettings(body.settings, screenId) : null;
         const checked = validateSettings({
           ...screen.settings, scene_mode: 'teaching', class_until: '',
-          scenes: [body.scene], active_scene_id: body.scene?.id,
+          ...(complete || { scenes: [body.scene], active_scene_id: body.scene?.id }),
         }, screenId);
-        const values = { name, scene: checked.scenes[0], updated_at: new Date().toISOString() };
+        const values = { name, scene: checked.scenes[0], settings: complete, updated_at: new Date().toISOString() };
         let template;
         if (body.templateId) {
           if (!validId(body.templateId) || typeof body.expectedUpdatedAt !== 'string')
             fail('Choose a saved scene to update.');
           template = await result(db.from('tv_scene_templates').update(values)
             .eq('id', body.templateId).eq('screen_id', screenId)
-            .eq('updated_at', body.expectedUpdatedAt).select('id,name,scene,updated_at').maybeSingle());
+            .eq('updated_at', body.expectedUpdatedAt).select('id,name,scene,settings,updated_at').maybeSingle());
           if (!template) fail('This saved scene changed. Reload it before replacing it.', 409);
         } else {
           template = await result(db.from('tv_scene_templates').insert({
             ...values, screen_id: screenId, created_by: userId,
-          }).select('id,name,scene,updated_at').single());
+          }).select('id,name,scene,settings,updated_at').single());
         }
         response = { template };
       } else if (action === 'delete-template') {
@@ -355,6 +357,15 @@ Deno.serve(async (req) => {
             : body.settings,
           screenId,
         );
+        if (['save', 'new-presentation'].includes(action) && settings.scene_mode === 'teaching') {
+          for (const scene of settings.scenes) {
+            const problem = nameProblem(scene.name, 'scene name');
+            if (problem) fail(problem);
+            for (const layer of scene.layers) {
+              if (layer.type === 'input') validateDeviceName(layer.name);
+            }
+          }
+        }
         let nextCode;
         do nextCode = createSessionCode(); while (nextCode === savedPresentation?.code);
         const { data: saved, error } = await db.rpc('save_tv_presentation', {

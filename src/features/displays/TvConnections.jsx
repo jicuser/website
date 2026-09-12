@@ -1,5 +1,6 @@
 import React, { useId, useRef, useState } from 'react';
 import { Copy, Monitor, Pencil, X } from 'lucide-react';
+import { nameProblem } from '../../../supabase/functions/_shared/tv-scenes.js';
 import { tvRequest } from '@/lib/tvControl';
 
 export default function TvConnections({ screenId, data, setData, run, busy }) {
@@ -9,6 +10,8 @@ export default function TvConnections({ screenId, data, setData, run, busy }) {
   const [codeError, setCodeError] = useState('');
   const [editing, setEditing] = useState(null);
   const [message, setMessage] = useState('');
+  const [displayError, setDisplayError] = useState('');
+  const displayField = useRef(null);
   const [nameError, setNameError] = useState(false);
   const [showWatchingLink, setShowWatchingLink] = useState(false);
   const codeField = useRef(null);
@@ -41,6 +44,12 @@ export default function TvConnections({ screenId, data, setData, run, busy }) {
       return;
     }
     setCodeError('');
+    const problem = nameProblem(displayName, 'display name');
+    setDisplayError(problem);
+    if (problem) {
+      displayField.current?.focus();
+      return;
+    }
     run(async () => {
       let connected;
       try {
@@ -100,16 +109,27 @@ export default function TvConnections({ screenId, data, setData, run, busy }) {
               )}
             </label>
             <label htmlFor={`${fieldId}-name`}>
-              Display name (optional)
+              Display name (required)
               <input
                 id={`${fieldId}-name`}
+                ref={displayField}
+                aria-invalid={Boolean(displayError)}
+                aria-describedby={displayError ? `${fieldId}-display-error` : undefined}
                 value={displayName}
                 maxLength={60}
                 placeholder="e.g. Main hall projector"
                 disabled={busy}
-                onChange={(event) => setDisplayName(event.target.value)}
+                onChange={(event) => {
+                  setDisplayName(event.target.value);
+                  setDisplayError('');
+                }}
               />
             </label>
+            {displayError && (
+              <small id={`${fieldId}-display-error`} className="admin-field-error" role="alert">
+                {displayError}
+              </small>
+            )}
             <div className="admin-actions">
               <button type="submit" className="admin-button" disabled={busy}>
                 <Monitor size={18} aria-hidden="true" /> Connect display
@@ -207,7 +227,7 @@ export default function TvConnections({ screenId, data, setData, run, busy }) {
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
-            if (!editing.name.trim()) {
+            if (nameProblem(editing.name, 'display name')) {
               setNameError(true);
               nameField.current?.focus();
               return;
@@ -246,7 +266,7 @@ export default function TvConnections({ screenId, data, setData, run, busy }) {
             />
             {nameError && (
               <small id={`${fieldId}-rename-error`} className="admin-field-error" role="alert">
-                Enter a name for this display.
+                {nameProblem(editing.name, 'display name')}
               </small>
             )}
           </label>

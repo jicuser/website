@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { tvRequest } from '@/lib/tvControl';
-import { loadSceneTemplate } from '@/lib/streamWorkspace';
+import {
+  streamSetupProblem,
+  streamTemplateSettings,
+} from '../../../supabase/functions/_shared/stream-template.js';
+import { streamSettings, loadSceneTemplate } from '@/lib/streamWorkspace';
 
-export default function SceneTemplates({
+export default function StreamSettingsLibrary({
   screenId,
   value,
   onChange,
@@ -13,7 +17,7 @@ export default function SceneTemplates({
   const [selected, setSelected] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const current = value.scenes.find((scene) => scene.id === value.active_scene_id);
+  const problem = streamSetupProblem(value);
   const template = templates.find((item) => item.id === selected);
   async function save(replace = false) {
     setBusy(true);
@@ -23,8 +27,8 @@ export default function SceneTemplates({
         'save-template',
         screenId,
         {
-          name: current.name.trim() || 'Saved scene',
-          scene: current,
+          name: value.scenes[0].name.trim(),
+          settings: streamTemplateSettings(value, screenId),
           ...(replace && template
             ? { templateId: template.id, expectedUpdatedAt: template.updated_at }
             : {}),
@@ -32,7 +36,9 @@ export default function SceneTemplates({
         { staff: true },
       );
       await onRefresh();
-      setMessage('Scene saved for your next setup. Live device connections are not stored.');
+      setMessage(
+        'All stream settings saved, including scenes, input details, layouts and audio. Reconnect live devices when reusing them.',
+      );
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -40,21 +46,26 @@ export default function SceneTemplates({
     }
   }
   return (
-    <details className="scene-template-library admin-panel">
-      <summary>Saved scenes</summary>
-      <p>Save the selected scene, or load one into this setup.</p>
+    <section className="scene-template-library admin-panel">
+      <h3>Saved stream settings</h3>
+      <p>
+        Save all scenes and their input details together. The first scene’s name identifies these
+        settings.
+      </p>
+      {problem && <p>{problem}</p>}
       <div className="admin-actions">
         <label>
-          Choose a saved scene
+          Choose saved settings
           <select
             value={selected}
             disabled={disabled || busy}
             onChange={(event) => setSelected(event.target.value)}
           >
-            <option value="">Select a scene…</option>
+            <option value="">Select saved settings…</option>
             {templates.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
+                {item.settings ? ` · ${item.settings.scenes.length} scenes` : ' · single scene'}
               </option>
             ))}
           </select>
@@ -64,33 +75,47 @@ export default function SceneTemplates({
           disabled={disabled || busy || !template}
           onClick={() => {
             if (
-              current.layers.some((layer) => layer.type !== 'empty') &&
-              !window.confirm('Replace this scene’s content with the saved scene?')
+              value.scenes.some((scene) => scene.layers.some((layer) => layer.type !== 'empty')) &&
+              !window.confirm(
+                'Load saved settings? This replaces your draft content and stops local sharing.',
+              )
             )
               return;
             try {
-              onChange(loadSceneTemplate(value, template.scene));
-              setMessage('Saved scene loaded. Reconnect any camera or screen when ready.');
+              onChange(
+                template.settings
+                  ? streamSettings(value, structuredClone(template.settings))
+                  : loadSceneTemplate(value, template.scene),
+              );
+              setMessage('Saved settings loaded. Reconnect any camera or screen when ready.');
             } catch (error) {
               setMessage(error.message);
             }
           }}
         >
-          Load scene
+          Load settings
         </button>
-        <button className="admin-button" disabled={disabled || busy} onClick={() => save()}>
-          Save current scene
-        </button>
-        {template && (
+        <>
+          {!problem && (
+            <button className="admin-button" disabled={disabled || busy} onClick={() => save()}>
+              Save stream settings
+            </button>
+          )}
+        </>
+        {template && !problem && (
           <button
             className="admin-button"
             disabled={disabled || busy}
             onClick={() => {
-              if (window.confirm(`Replace saved scene “${template.name}” with the current scene?`))
+              if (
+                window.confirm(
+                  `Replace saved settings “${template.name}” with all current stream settings?`,
+                )
+              )
                 save(true);
             }}
           >
-            Replace saved scene
+            Update saved settings
           </button>
         )}
         {template && (
@@ -100,7 +125,7 @@ export default function SceneTemplates({
             onClick={async () => {
               if (
                 !window.confirm(
-                  `Delete saved scene “${template.name}”? Your current setup stays open.`,
+                  `Delete saved settings “${template.name}”? Your current setup stays open.`,
                 )
               )
                 return;
@@ -121,11 +146,11 @@ export default function SceneTemplates({
               }
             }}
           >
-            Delete saved scene
+            Delete saved settings
           </button>
         )}
       </div>
       {message && <p role="status">{message}</p>}
-    </details>
+    </section>
   );
 }

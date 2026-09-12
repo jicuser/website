@@ -292,3 +292,47 @@ test('starting a prepared workspace keeps the latest public background settings'
   assert.equal(latest.scene_mode, 'normal');
   assert.equal(draft.scene_mode, 'normal');
 });
+
+test('saved stream settings retain every scene and input detail without live credentials', async () => {
+  const { streamTemplateSettings, streamSetupProblem } =
+    await import('../supabase/functions/_shared/stream-template.js');
+  const config = workspace(
+    [
+      scene('Welcome', [region('text', { text: 'Welcome everyone' })]),
+      scene('Lesson', [input('input-1', { name: 'Haider’s iPhone', audio: true })]),
+    ],
+    { active_scene_id: 'Lesson', muted: false, token: 'private', session_id: 'active-session' },
+  );
+  const saved = streamTemplateSettings(config, 'mens-main');
+  assert.equal(saved.scenes.length, 2);
+  assert.equal(saved.active_scene_id, 'Lesson');
+  assert.equal(saved.muted, false);
+  assert.equal(saved.scenes[1].layers[0].name, 'Haider’s iPhone');
+  assert.equal(saved.scenes[1].layers[0].audio, true);
+  assert.deepEqual(Object.keys(saved).sort(), ['active_scene_id', 'muted', 'scenes']);
+  assert.equal(streamSetupProblem(config), '');
+  assert.match(
+    streamSetupProblem(workspace([scene('Welcome', [region('empty')])])),
+    /Select an input type/,
+  );
+  config.scenes[1].name = 'Scene 1';
+  assert.throws(() => streamTemplateSettings(config, 'mens-main'), /descriptive/);
+});
+
+test('scene and device names reject generic placeholders and allow recognisable names', async () => {
+  const { nameProblem, validateDeviceName } =
+    await import('../supabase/functions/_shared/tv-scenes.js');
+  for (const name of ['', 'Device 1', 'stream 1', 'Scene 2', 'Input-3', 'Camera 1', 'Screen 1']) {
+    assert.ok(nameProblem(name));
+    assert.throws(() => validateDeviceName(name));
+  }
+  for (const name of [
+    'Main lesson',
+    'Haider’s iPhone',
+    'Classroom laptop',
+    'Main hall projector',
+  ]) {
+    assert.equal(nameProblem(name), '');
+    assert.equal(validateDeviceName(name), name);
+  }
+});

@@ -698,3 +698,30 @@ test('template replacement checks its revision and both replacement and deletion
   assert.equal(otherHall.rows.tv_scene_templates.length, 1);
   assert.equal(otherHall.rows.tv_scene_templates[0].name, 'Original');
 });
+
+test('whole stream templates save all scenes privately without changing the live presentation', async () => {
+  const api = harness();
+  const settings = teaching();
+  settings.scenes.push({ ...settings.scenes[0], id: 'welcome', name: 'Welcome' });
+  settings.active_scene_id = 'welcome';
+  settings.muted = false;
+  const response = await api.request(
+    'save-template',
+    { name: 'Private lesson', settings },
+    'staff-token',
+  );
+  assert.equal(response.status, 200);
+  assert.equal(response.data.template.settings.scenes.length, 2);
+  assert.equal(response.data.template.settings.active_scene_id, 'welcome');
+  assert.equal(response.data.template.settings.muted, false);
+  assert.equal(
+    api.calls.some((entry) => entry.type === 'rpc'),
+    false,
+  );
+  settings.scenes[1].name = 'Stream 1';
+  assert.equal(
+    (await api.request('save-template', { name: 'Private lesson', settings }, 'staff-token'))
+      .status,
+    400,
+  );
+});

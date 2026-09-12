@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import {
   SOURCE_TYPES,
+  nameProblem,
   fitRect,
   layerStyle,
 } from '../../../supabase/functions/_shared/tv-scenes.js';
@@ -174,13 +175,21 @@ export default function SceneEditor({
           </select>
         </label>
         <label>
-          Scene name
+          Scene name (required)
           <input
+            required
+            placeholder="e.g. Welcome or Main lesson"
+            aria-invalid={Boolean(nameProblem(scene.name, 'scene name'))}
             disabled={disabled}
             maxLength={60}
             value={scene.name}
             onChange={(event) => updateScene({ ...scene, name: event.target.value })}
           />
+          {nameProblem(scene.name, 'scene name') && (
+            <small className="admin-field-error" role="alert">
+              {nameProblem(scene.name, 'scene name')}
+            </small>
+          )}
         </label>
         <label>
           How many inputs?
