@@ -4,7 +4,7 @@ import { Heart, Loader2, Phone, ShieldCheck, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
-import { submitItikaafRegistration } from '@/lib/submitItikaafRegistration';
+import { submitWebsiteForm } from '@/lib/submitWebsiteForm';
 
 const inputClass =
   'flex w-full min-h-9 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1';
@@ -58,7 +58,7 @@ export default function ItikaafRegistrationForm() {
   const [error, setError] = useState('');
 
   const attendeeAgeNum = useMemo(() => {
-    const n = parseInt(form.attendee_age, 10);
+    const n = form.attendee_age.trim() ? Number(form.attendee_age) : NaN;
     return Number.isFinite(n) ? n : NaN;
   }, [form.attendee_age]);
 
@@ -83,7 +83,7 @@ export default function ItikaafRegistrationForm() {
 
     if (
       !attendeeName ||
-      !Number.isFinite(attendeeAgeNum) ||
+      !Number.isInteger(attendeeAgeNum) || attendeeAgeNum < 1 || attendeeAgeNum > 120 ||
       !attendeeAddress ||
       !attendeePhone ||
       !attendeeEmail
@@ -133,22 +133,17 @@ export default function ItikaafRegistrationForm() {
       parent_email: needsParentConsent ? form.parent_email.trim() : '',
       parent_consent_signature: needsParentConsent ? form.parent_consent_signature.trim() : '',
       parent_consent_date: needsParentConsent ? form.parent_consent_date : '',
-      registered_at: new Date().toISOString(),
     };
 
     setSubmitting(true);
     try {
-      const { destination } = await submitItikaafRegistration(payload);
+      await submitWebsiteForm('itikaaf', payload);
       setForm(initialState);
       toast({
         title: 'Registration successful',
-        description:
-          destination === 'sheets'
-            ? 'Your details were saved. Thank you.'
-            : 'Your details were saved. Thank you.',
+        description: 'Your details were saved. Thank you.',
       });
     } catch (err) {
-      console.error(err);
       setError(err.message || 'Something went wrong. Please try again.');
       toast({
         title: 'Could not submit',

@@ -72,3 +72,7 @@ Choose **Website** to open the public site. On an editable page, **Edit this pag
 - `src/pages/SocialMediaPage.jsx`: optional previews load only on request, with external profile links as fallback.
 - `src/styles/liquid-glass.css`: clear, frosted and dense materials. `home.css` owns the photograph veil that supports text contrast. URL-based refraction is progressive enhancement and is not identical across browsers.
 - `public/fonts/allura-menu.woff`: a small Allura subset containing “Menu”, sourced from Google Fonts under the accompanying SIL Open Font License. The logo artwork is unchanged.
+
+## Forms and staff
+
+[Forms and staff access](forms-and-staff.md) explains the private Forms inbox, invitations, role descriptions and Enable/Disable switches. All three public forms now use the same validated submission endpoint.

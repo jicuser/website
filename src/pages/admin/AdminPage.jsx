@@ -17,12 +17,13 @@ import {
   Save,
   Upload,
   Activity,
-  UserPlus,
   X,
   Sun,
   Moon,
   Monitor,
 } from 'lucide-react';
+import FormsInbox from '@/components/admin/FormsInbox';
+import StaffAccess from '@/components/admin/StaffAccess';
 import TvScreenEditor from '@/components/admin/TvScreenEditor';
 import { TV_SCREENS } from '@/lib/tvControl';
 import PrayerEditor from '@/components/admin/PrayerEditor';
@@ -51,6 +52,7 @@ const SECTIONS = [
   ['tv', 'TV screens', Monitor, 'tv'],
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
+  ['forms', 'Forms inbox', FileText, 'forms'],
   ['users', 'Users & roles', ShieldCheck, 'users'],
   ['audit', 'Audit log', Activity, 'audit'],
 ];
@@ -119,6 +121,13 @@ function DashboardSection({ onChoose }) {
     ['events', 'Events & posters', 'Add a poster, date and event details.', CalendarDays, 'events'],
     ['announcements', 'Notices', 'Keep the community up to date.', Megaphone, 'announcements'],
     ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
+    [
+      'forms',
+      'Forms inbox',
+      'Read messages and registrations, then mark them completed.',
+      FileText,
+      'forms',
+    ],
     ['users', 'Staff access', 'Choose who can edit and control TVs.', Users, 'users'],
   ].filter(([, , , , permission]) => (permission === 'users' ? isSuperAdmin : can(permission)));
   return (
@@ -890,133 +899,6 @@ function TeamSection() {
   );
 }
 
-function UsersSection() {
-  const { isSuperAdmin } = useAuth();
-  const [rows, setRows] = useState([]);
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [role, setInviteRole] = useState('teacher');
-  const [pendingRoles, setPendingRoles] = useState({});
-  const [msg, setMsg] = useState('');
-  const load = useCallback(async () => {
-    const { data, error } = await supabase.from('profiles').select('*').order('created_at');
-    setRows(data || []);
-    if (error) setMsg(error.message);
-  }, []);
-  useEffect(() => {
-    load();
-  }, [load]);
-  const invoke = useCallback(async (body) => {
-    const { data, error } = await supabase.functions.invoke('manage-user', { body });
-    if (error) throw error;
-    if (!data?.ok) throw new Error(data?.error || 'Request failed');
-    return data;
-  }, []);
-  const saveRoles = useCallback(async () => {
-    const changes = Object.entries(pendingRoles);
-    for (const [id, nextRole] of changes)
-      await invoke({ action: 'set_role', user_id: id, role: nextRole });
-    setPendingRoles({});
-    setMsg(changes.length === 1 ? 'Role saved.' : `${changes.length} roles saved.`);
-    await load();
-  }, [pendingRoles, invoke, load]);
-  useRegisterAdminSave(saveRoles, Object.keys(pendingRoles).length > 0, 'Save role changes');
-  if (!isSuperAdmin) return <Empty>Only a Super Admin can manage user accounts and roles.</Empty>;
-  const invite = async (event) => {
-    event.preventDefault();
-    try {
-      await invoke({ action: 'invite', email, display_name: name, role });
-      setMsg('Invitation sent.');
-      setEmail('');
-      setName('');
-      load();
-    } catch (error) {
-      setMsg(error.message);
-    }
-  };
-  return (
-    <div>
-      <h2 className="text-2xl font-bold">Users & roles</h2>
-      <Notice message={msg} error={msg && !/(sent|saved)/.test(msg)} />
-      <form
-        onSubmit={invite}
-        className="mb-6 grid gap-3 rounded-2xl border bg-white p-5 md:grid-cols-4"
-      >
-        <Field title="Name">
-          <input className={input} value={name} onChange={(e) => setName(e.target.value)} />
-        </Field>
-        <Field title="Email">
-          <input
-            required
-            type="email"
-            className={input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Field>
-        <Field title="Role">
-          <select className={input} value={role} onChange={(e) => setInviteRole(e.target.value)}>
-            {[
-              'tv_operator',
-              'teacher',
-              'events_manager',
-              'content_editor',
-              'admin',
-              'super_admin',
-            ].map((value) => (
-              <option key={value} value={value}>
-                {value === 'tv_operator' ? 'TV operator (TV controls only)' : value}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <div className="self-end">
-          <button className={primary}>
-            <UserPlus size={15} />
-            Invite
-          </button>
-        </div>
-      </form>
-      <div className="space-y-3">
-        {rows.map((row) => (
-          <div
-            key={row.id}
-            className="grid items-center gap-3 rounded-xl border bg-white p-4 md:grid-cols-[1fr_220px_100px]"
-          >
-            <div>
-              <div className="font-semibold">{row.display_name || 'User'}</div>
-            </div>
-            <select
-              className={input}
-              value={pendingRoles[row.id] ?? row.role}
-              onChange={(e) =>
-                setPendingRoles((current) => ({ ...current, [row.id]: e.target.value }))
-              }
-            >
-              {[
-                'viewer',
-                'tv_operator',
-                'teacher',
-                'events_manager',
-                'content_editor',
-                'admin',
-                'super_admin',
-              ].map((value) => (
-                <option key={value} value={value}>
-                  {value === 'tv_operator' ? 'TV operator (TV controls only)' : value}
-                </option>
-              ))}
-            </select>
-            <span className={`text-sm ${row.is_active ? 'text-emerald-600' : 'text-red-600'}`}>
-              {row.is_active ? 'Active' : 'Disabled'}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function AuditSection() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1117,7 +999,8 @@ export default function AdminPage() {
     livestream: <LivestreamSection />,
     content: <PageEditor initialPath={params.get('page') || '/'} />,
     team: <TeamSection />,
-    users: <UsersSection />,
+    forms: <FormsInbox />,
+    users: <StaffAccess />,
     audit: <AuditSection />,
   }[active];
 
@@ -1185,7 +1068,7 @@ export default function AdminPage() {
           <nav aria-label="Admin sections">
             {[
               ['Everyday', ['dashboard', 'tv', 'prayer', 'events', 'announcements', 'livestream']],
-              ['Website & people', ['content', 'team', 'users', 'audit']],
+              ['Website & people', ['content', 'forms', 'team', 'users', 'audit']],
             ].map(([group, keys]) => (
               <div key={group}>
                 <p>{group}</p>

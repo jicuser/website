@@ -225,6 +225,7 @@ export function AuthProvider({ children }) {
         tv: ['admin', 'content_editor', 'tv_operator'],
         team: ['admin', 'content_editor'],
         media: ['admin', 'content_editor', 'events_manager', 'teacher'],
+        forms: ['admin', 'events_manager', 'teacher'],
         users: [],
         audit: ['admin'],
       };

@@ -23,7 +23,6 @@ Configure the build environment with:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
-- optional `VITE_ITIKAAF_SHEETS_WEBHOOK_URL`
 
 The anon key is designed for browser use; Row Level Security is what protects data.
 
@@ -63,3 +62,7 @@ Normal event/prayer/announcement/team/livestream changes happen in `/admin`. Git
 Apply `supabase/migrations/20260911222221_tv_screens_and_sharing.sql` once to an existing installation, then deploy `supabase functions deploy tv-control`. The function-specific configuration in `supabase/config.toml` is required: the handler authenticates staff JWTs and paired-TV credentials itself, while allowing public poster settings. Deploy the migration and function before publishing the matching frontend.
 
 The function uses Supabase's built-in server environment variables; no new browser secrets are needed. Optional TURN servers can be supplied as the `TV_ICE_SERVERS` Edge secret. See [TV setup](docs/tv-display.md) for pairing, camera relays and device checks.
+
+## Website forms and staff access
+
+Apply `supabase/migrations/20260912010000_website_forms.sql` once, then deploy `supabase functions deploy submit-form` before this frontend. Messages and registrations go to Admin → Forms inbox. No mail provider or extra browser environment variables are required; email notifications are not enabled. See [Forms and staff access](docs/forms-and-staff.md) for role permissions and operation.

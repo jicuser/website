@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabaseClient';
+import { submitWebsiteForm } from '@/lib/submitWebsiteForm';
 
 const EnrollmentForm = () => {
   const { toast } = useToast();
@@ -23,36 +23,16 @@ const EnrollmentForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const { error } = await supabase.from('madrassah_inquiries').insert([
-      {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        query: formData.query,
-      },
-    ]);
-
-    if (error) {
-      toast({
-        title: 'Submission Failed',
-        description: 'There was an error submitting your form. Please try again.',
-        variant: 'destructive',
-      });
-      console.error('Error submitting Madrassah form:', error);
-    } else {
-      toast({
-        title: 'Inquiry Sent!',
-        description: 'Thank you for your interest. We will get back to you soon.',
-      });
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        query: '',
-      });
+    try {
+      await submitWebsiteForm('madrassah', formData);
+      toast({ title: 'Inquiry received', description: 'Thank you for your interest. We will get back to you soon.' });
+      setFormData({ name: '', email: '', phone: '', query: '' });
+    } catch (error) {
+      toast({ title: 'Submission failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsSubmitting(false);
     }
 
-    setIsSubmitting(false);
   };
 
   return (
@@ -77,6 +57,7 @@ const EnrollmentForm = () => {
             type="text"
             id="name"
             name="name"
+            maxLength={120}
             value={formData.name}
             onChange={handleChange}
             required
@@ -95,6 +76,7 @@ const EnrollmentForm = () => {
             type="email"
             id="email"
             name="email"
+            maxLength={254}
             value={formData.email}
             onChange={handleChange}
             required
@@ -113,6 +95,7 @@ const EnrollmentForm = () => {
             type="tel"
             id="phone"
             name="phone"
+            maxLength={40}
             value={formData.phone}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800"
@@ -129,6 +112,7 @@ const EnrollmentForm = () => {
           <textarea
             id="query"
             name="query"
+            maxLength={4000}
             value={formData.query}
             onChange={handleChange}
             required

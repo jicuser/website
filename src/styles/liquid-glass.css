@@ -377,6 +377,7 @@ html[data-theme][data-surface='solid']
 
 @media (prefers-reduced-transparency: reduce) {
   html[data-theme][data-surface]
+    :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
     :is(
       [data-glass='clear'],
       .jic-primary-cta,

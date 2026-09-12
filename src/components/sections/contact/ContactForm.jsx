@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Mail, MessageSquare, Phone } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
-import { supabase } from '@/lib/supabaseClient';
+import { submitWebsiteForm } from '@/lib/submitWebsiteForm';
 import { SITE } from '@/content/site';
 import useCommunityLink from '@/hooks/useCommunityLink';
 
@@ -24,13 +24,9 @@ const ContactForm = () => {
     setIsSubmitting(true);
     setSendFailed(false);
     try {
-      const { data, error } = await supabase.functions.invoke('send-contact-email', {
-        body: JSON.stringify(formData),
-      });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
+      await submitWebsiteForm('contact', formData);
       toast({
-        title: 'Message Sent!',
+        title: 'Message received',
         description: 'Thank you for contacting us. We will get back to you soon.',
       });
       setFormData({ name: '', email: '', question: '' });
@@ -65,6 +61,7 @@ const ContactForm = () => {
             type="text"
             id="name"
             name="name"
+            maxLength={120}
             value={formData.name}
             onChange={handleChange}
             required
@@ -83,6 +80,7 @@ const ContactForm = () => {
             type="email"
             id="email"
             name="email"
+            maxLength={254}
             value={formData.email}
             onChange={handleChange}
             required
@@ -100,6 +98,7 @@ const ContactForm = () => {
           <textarea
             id="question"
             name="question"
+            maxLength={4000}
             value={formData.question}
             onChange={handleChange}
             required

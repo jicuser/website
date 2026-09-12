@@ -4,3 +4,7 @@ project_id = "jic-website"
 # Public posters, staff JWTs and paired-TV tokens have separate handler checks.
 # All staff mutations still require getUser() and an active trusted database role.
 verify_jwt = false
+
+[functions.submit-form]
+# The SDK supplies the public anon JWT; visitors need no account to submit.
+verify_jwt = true
