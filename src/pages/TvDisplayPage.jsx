@@ -15,8 +15,7 @@ import {
 import { TV_SCREENS } from '@/lib/tvControl';
 import { tvScene, publicSettings } from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
-import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
-import JamatiaLogo from '@/components/shell/JamatiaLogo';
+import PrayerTimeBar, { NextPrayerSummary } from '@/components/shell/PrayerTimeBar';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import usePosters from '@/hooks/usePosters';
@@ -273,14 +272,14 @@ function ScreenDisplay({ screenId }) {
       </Helmet>
       <div className="jic-tv-display">
         <header className="jic-tv-header">
-          {(tv.settings.show_times !== false || tv.settings.show_next !== false) && (
+          {tv.settings.show_times !== false && (
             <PrayerTimeBar
               {...prayers}
               currentDate={now}
               interactive={false}
               showContact={false}
               showTimes={tv.settings.show_times !== false}
-              showNext={tv.settings.show_next !== false}
+              showNext={false}
             />
           )}
           {(tv.settings.show_times !== false || tv.settings.show_next !== false) &&
@@ -310,8 +309,13 @@ function ScreenDisplay({ screenId }) {
           )}
         </main>
         <footer className="jic-tv-status">
+          {tv.settings.show_next !== false && (
+            <div className="jic-tv-next">
+              <NextPrayerSummary todaysTimes={prayers.todaysTimes} currentDate={now} />
+            </div>
+          )}
           <div className="jic-tv-logo">
-            <JamatiaLogo variant="pillars" />
+            <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
           </div>
           {tv.settings.show_clock !== false && (
             <div className="jic-tv-clock">

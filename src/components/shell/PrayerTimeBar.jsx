@@ -21,6 +21,35 @@ const shortTime = (value) =>
         .replace(/\s?[AP]M$/i, '')
     : '—';
 
+export function NextPrayerSummary({ todaysTimes, currentDate, interactive = false }) {
+  const next = nextPrayer(todaysTimes, currentDate);
+  const Item = interactive ? Link : 'div';
+  const destination = (path) => (interactive ? { to: path } : {});
+  return (
+    <div className="jic-prayer-legend">
+      <Item {...destination('/prayer-times')} className="jic-next-prayer-summary">
+        {next ? (
+          <>
+            <strong>Next: {next.name}</strong>
+            <span>
+              Start {shortTime(next.time)} · Jama’ah {shortTime(next.jamaah)}
+            </span>
+          </>
+        ) : (
+          'Prayer timetable'
+        )}
+        {interactive && <span aria-hidden="true">›</span>}
+      </Item>
+      {next && (
+        <span className="jic-prayer-countdown">
+          {Math.floor(next.minutesLeft / 60) > 0 ? `${Math.floor(next.minutesLeft / 60)}h ` : ''}
+          {next.minutesLeft % 60}m until {next.name} starts
+        </span>
+      )}
+    </div>
+  );
+}
+
 /** Shared timetable data for the website and TV. The optional radio belongs to the website. */
 export default function PrayerTimeBar({
   todaysTimes,
@@ -32,7 +61,6 @@ export default function PrayerTimeBar({
   showTimes = true,
   showNext = true,
 }) {
-  const next = nextPrayer(todaysTimes, currentDate);
   const current = currentPrayer(todaysTimes, currentDate);
   const Item = interactive ? Link : 'div';
   const destination = (path) => (interactive ? { to: path } : {});
@@ -52,29 +80,11 @@ export default function PrayerTimeBar({
         </div>
       )}
       {showNext && (
-        <div className="jic-prayer-legend">
-          <Item {...destination('/prayer-times')} className="jic-next-prayer-summary">
-            {next ? (
-              <>
-                <strong>Next: {next.name}</strong>
-                <span>
-                  Start {shortTime(next.time)} · Jama’ah {shortTime(next.jamaah)}
-                </span>
-              </>
-            ) : (
-              'Prayer timetable'
-            )}
-            {interactive && <span aria-hidden="true">›</span>}
-          </Item>
-          {next && (
-            <span className="jic-prayer-countdown">
-              {Math.floor(next.minutesLeft / 60) > 0
-                ? `${Math.floor(next.minutesLeft / 60)}h `
-                : ''}
-              {next.minutesLeft % 60}m until {next.name} starts
-            </span>
-          )}
-        </div>
+        <NextPrayerSummary
+          todaysTimes={todaysTimes}
+          currentDate={currentDate}
+          interactive={interactive}
+        />
       )}
       {showTimes && (
         <>

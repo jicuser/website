@@ -103,20 +103,24 @@ function DeviceInput({
           it before changing its type.
         </p>
       )}
-      {busyMessage && <p role="status">{busyMessage}</p>}
+      {busyMessage && (!sharing.stream || disabled || conflict) && (
+        <p role="status">{busyMessage}</p>
+      )}
       {capture !== 'camera' && screenProblem && <p>{screenProblem}</p>}
       {capture !== 'screen' && cameraProblem && <p>{cameraProblem}</p>}
-      <label className="admin-check">
-        <input
-          type="checkbox"
-          disabled={Boolean(sharing.stream) || sharing.busy}
-          checked={audio}
-          onChange={(event) => setAudio(event.target.checked)}
-        />
-        {capture === 'camera' ? 'Include microphone audio' : 'Include shared audio'}
-      </label>
+      {!sharing.stream && (
+        <label className="admin-check">
+          <input
+            type="checkbox"
+            disabled={Boolean(sharing.stream) || sharing.busy}
+            checked={audio}
+            onChange={(event) => setAudio(event.target.checked)}
+          />
+          {capture === 'camera' ? 'Include microphone audio' : 'Include shared audio'}
+        </label>
+      )}
       <div className="admin-actions">
-        {capture !== 'camera' && (
+        {!sharing.stream && !sharing.busy && !occupied && capture !== 'camera' && (
           <button
             type="button"
             className="admin-button"
@@ -126,7 +130,7 @@ function DeviceInput({
             {ownLease && !setupOnly ? 'Restart screen sharing' : 'Share this screen'}
           </button>
         )}
-        {capture !== 'screen' && (
+        {!sharing.stream && !sharing.busy && !occupied && capture !== 'screen' && (
           <button
             type="button"
             className="admin-button"
@@ -170,7 +174,7 @@ function DeviceInput({
             Retry connection
           </button>
         )}
-        {allowJoin && (
+        {allowJoin && !sharing.stream && !sharing.busy && !occupied && (
           <button
             type="button"
             className="admin-button"
@@ -209,7 +213,7 @@ function DeviceInput({
           </button>
         </section>
       )}
-      {sharing.stream && (
+      {sharing.stream && !embedded && (
         <p className="admin-sharing-notice" role="status">
           {setupOnly
             ? 'Preview is ready. It goes live when you start the stream.'
@@ -218,7 +222,7 @@ function DeviceInput({
           restart it here.
         </p>
       )}
-      {sharing.stream && (
+      {sharing.stream && !embedded && (
         <video
           ref={video}
           className="admin-share-preview"
@@ -232,11 +236,18 @@ function DeviceInput({
         <p role={error ? 'alert' : 'status'}>{error || sharing.message}</p>
       )}
       {embedded && (
-        <p className="admin-tv-help">
-          {relayConfigured === true
-            ? 'Both devices need an internet connection. A relay is configured for different networks.'
-            : 'Use the same Wi-Fi for testing. Guest networks may block connections; different networks may need a relay.'}
-        </p>
+        <details className="admin-tv-help">
+          <summary>Connection help</summary>
+          <p>
+            Keep this page open while sharing. Closing this popup keeps capture active; refreshing
+            the page stops it.
+          </p>
+          <p>
+            {relayConfigured === true
+              ? 'Both devices need an internet connection. A relay is configured for different networks.'
+              : 'Use the same Wi-Fi for testing. Guest networks may block connections; different networks may need a relay.'}
+          </p>
+        </details>
       )}
     </article>
   );

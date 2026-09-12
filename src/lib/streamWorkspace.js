@@ -1,14 +1,25 @@
 import { createSceneRegions } from './sceneLayouts.js';
-import { INPUT_SLOTS, MAX_SCENES } from '../../supabase/functions/_shared/tv-scenes.js';
+import {
+  INPUT_SLOTS,
+  MAX_SCENES,
+  nameProblem,
+} from '../../supabase/functions/_shared/tv-scenes.js';
 
-export function createStreamScenes(count, idFactory = () => crypto.randomUUID()) {
-  const size = Math.min(MAX_SCENES, Math.max(1, Math.trunc(Number(count)) || 1));
-  return Array.from({ length: size }, (_, index) => ({
+export function createStreamScene(name, idFactory = () => crypto.randomUUID()) {
+  const problem = nameProblem(name, 'scene name');
+  if (problem) throw new Error(problem);
+  return {
     id: idFactory(),
-    name: `Scene ${index + 1}`,
+    name: name.trim(),
     overlap: true,
     layers: createSceneRegions(1, 'columns', idFactory),
-  }));
+  };
+}
+
+export function addStreamScene(settings, name, idFactory = () => crypto.randomUUID()) {
+  if (settings.scenes.length >= MAX_SCENES) throw new Error('A stream can have up to six scenes.');
+  const scene = createStreamScene(name, idFactory);
+  return { ...settings, scenes: [...settings.scenes, scene], active_scene_id: scene.id };
 }
 
 // Templates contain layout and source settings. A new scene gets fresh region IDs,

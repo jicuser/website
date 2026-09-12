@@ -1481,6 +1481,20 @@ html:not(.dark) .managed-page-section-copy {
   gap: 16px;
   margin-bottom: 20px;
 }
+.scene-management {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.scene-add-form {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+}
 .scene-editor small {
   line-height: 1.5;
 }
@@ -1647,6 +1661,16 @@ html:not(.dark) .managed-page-section-copy {
   padding-bottom: 14px;
   border-bottom: 1px solid var(--jic-border);
 }
+.scene-editor-dialog .scene-heading h3 {
+  flex: 1;
+  min-width: 0;
+}
+.scene-settings-button.admin-button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 10px;
+}
 .scene-editor-dialog .scene-heading > div {
   flex: 1;
   min-width: 0;
@@ -1687,12 +1711,7 @@ html:not(.dark) .managed-page-section-copy {
   margin-top: 14px;
 }
 .scene-device-controls {
-  scroll-margin-top: 16px;
-  margin-top: 20px;
-}
-.scene-device-controls .admin-share-preview {
-  max-height: 260px;
-  object-fit: contain;
+  margin-top: 12px;
 }
 .scene-device-controls .admin-actions .admin-button {
   flex: 1 1 150px;

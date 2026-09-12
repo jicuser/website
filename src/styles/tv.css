@@ -1,5 +1,14 @@
 /* One landscape coordinate system for display webpages and previews. */
 .jic-tv-shell {
+  color-scheme: dark;
+  --jic-bg: #000;
+  --jic-bg-secondary: #07090c;
+  --jic-surface: #07090c;
+  --jic-text: #f7f8fa;
+  --jic-text-secondary: #cbd0d8;
+  --jic-border: #272a30;
+  --jic-gold: #e8c77d;
+  --jic-glass-border: #272a30;
   --tv-unit: min(1vw, 1.777778vh);
   position: fixed;
   inset: 0;
@@ -8,7 +17,8 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: #050b12;
+  background: #000;
+  color: var(--jic-text);
 }
 @supports (height: 100dvh) {
   .jic-tv-shell {
@@ -46,6 +56,7 @@ html[data-theme] .jic-tv-display .jic-unified-info {
   background: var(--jic-bg-secondary) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
 }
 .jic-tv-logo {
   position: absolute;
@@ -75,8 +86,9 @@ html[data-theme] .jic-tv-display .jic-unified-info {
 }
 html[data-theme] .jic-tv-display .jic-prayer-legend {
   gap: calc(var(--tv-unit) * 0.15625) calc(var(--tv-unit) * 0.625);
-  font-size: calc(var(--tv-unit) * 1.25);
-  padding: calc(var(--tv-unit) * 0.416667) calc(var(--tv-unit) * 0.833333);
+  font-size: calc(var(--tv-unit) * 1.45);
+  padding: calc(var(--tv-unit) * 0.2) 0;
+  justify-content: center;
 }
 .jic-tv-display .jic-next-prayer-summary {
   display: flex;
@@ -89,25 +101,27 @@ html[data-theme] .jic-tv-display .jic-today-prayer {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding: calc(var(--tv-unit) * 0.416667);
-  gap: calc(var(--tv-unit) * 0.260417);
+  padding: calc(var(--tv-unit) * 0.5);
+  gap: calc(var(--tv-unit) * 0.35);
 }
 html[data-theme] .jic-tv-display .jic-today-prayer > span {
-  font-size: calc(var(--tv-unit) * 1.354167);
+  font-size: calc(var(--tv-unit) * 2.2);
+  font-weight: 650;
 }
 html[data-theme] .jic-tv-display .jic-today-prayer > div {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
-  gap: calc(var(--tv-unit) * 1.041667);
+  gap: calc(var(--tv-unit) * 0.2);
 }
 html[data-theme] .jic-tv-display .jic-today-prayer strong {
-  line-height: 1.2;
-  font-size: calc(var(--tv-unit) * 2.395833);
+  line-height: 1.05;
+  font-size: calc(var(--tv-unit) * 4.5);
 }
 html[data-theme] .jic-tv-display .jic-today-prayer em {
-  line-height: 1.2;
-  font-size: calc(var(--tv-unit) * 2.083333);
+  line-height: 1.05;
+  font-size: calc(var(--tv-unit) * 4);
+  font-weight: 600;
 }
 html[data-theme] .jic-tv-display .jic-today-prayer small {
   display: block;
@@ -121,7 +135,7 @@ html[data-theme] .jic-tv-display .jic-header-live-row {
 .jic-tv-display .jic-jummah-compact {
   gap: calc(var(--tv-unit) * 0.416667);
   padding: calc(var(--tv-unit) * 0.3125) calc(var(--tv-unit) * 0.625);
-  font-size: calc(var(--tv-unit) * 1.354167);
+  font-size: calc(var(--tv-unit) * 1.8);
 }
 .jic-tv-display .jic-jummah-compact:last-child {
   border-right: 0;
@@ -236,15 +250,19 @@ html[data-theme] .jic-tv-stage {
 .jic-tv-status {
   position: relative;
   min-height: calc(var(--tv-unit) * 3.541667);
-  padding-left: calc(var(--tv-unit) * 6.041667);
+  padding-inline: calc(var(--tv-unit) * 6.041667);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: calc(var(--tv-unit) * 0.3125) calc(var(--tv-unit) * 0.833333);
   text-align: center;
-  font-size: calc(var(--tv-unit) * 0.729167);
+  font-size: calc(var(--tv-unit) * 1);
   line-height: 1.3;
+}
+.jic-tv-next {
+  flex-basis: 100%;
+  min-width: 0;
 }
 .jic-tv-notice {
   margin: calc(var(--tv-unit) * 0.208333) 0 0;
@@ -418,7 +436,7 @@ html[data-theme] .jic-tv-stage {
   aspect-ratio: 16/9;
   width: 100%;
   overflow: hidden;
-  background: #0b1524;
+  background: #000;
   container-type: inline-size;
   color: #f5f7fa;
 }
@@ -468,7 +486,7 @@ html[data-theme] .jic-tv-stage {
   text-align: center;
   padding: 1%;
   margin: 0;
-  background: #101f31;
+  background: #07090c;
   color: #f5f7fa;
 }
 .scene-clock {
@@ -489,7 +507,12 @@ html[data-theme] .jic-tv-stage {
   grid-template-columns: repeat(6, minmax(0, 1fr));
   width: 100%;
   height: 100%;
-  background: #101f31;
+  background: #07090c;
+  color: #f7f8fa;
+}
+.scene-source-times,
+.scene-source-next {
+  container-type: inline-size;
 }
 .scene-timetable > div {
   display: flex;
@@ -498,14 +521,14 @@ html[data-theme] .jic-tv-stage {
   justify-content: center;
   gap: 3%;
   border-right: 1px solid #3d4f63;
-  font-size: 1.6cqw;
+  font-size: 2.2cqw;
 }
 .scene-timetable strong {
-  font-size: 2.4cqw;
+  font-size: 3.6cqw;
   color: #f0d791;
 }
 .scene-timetable small {
-  font-size: 1.2cqw;
+  font-size: 1.6cqw;
 }
 
 .scene-timetable > .is-current {

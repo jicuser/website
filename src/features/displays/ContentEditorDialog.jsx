@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
+import { Settings2 } from 'lucide-react';
 import {
   INPUT_SLOTS,
   fitRect,
@@ -26,9 +27,11 @@ const contentTypes = [
   ['text', 'Text notice'],
 ];
 const typeOf = (layer) =>
-  layer.type === 'input' ? `input-${layer.capture || 'camera'}` : layer.type;
-const defaultName = (capture, slot) =>
-  `${capture === 'camera' ? 'Camera' : 'Screen'} ${INPUT_SLOTS.indexOf(slot) + 1}`;
+  layer.type === 'input'
+    ? `input-${layer.capture || 'camera'}`
+    : layer.type === 'poster-next'
+      ? 'poster'
+      : layer.type;
 
 export default function ContentEditorDialog({
   area,
@@ -43,10 +46,12 @@ export default function ContentEditorDialog({
   const editorId = useId();
   const [draft, setDraft] = useState(() => ({ ...area }));
   const [errors, setErrors] = useState({});
-  const [savedInput, setSavedInput] = useState(area.type === 'input');
+  const [savedInput, setSavedInput] = useState(
+    area.type === 'input' && !nameProblem(area.name, 'device name'),
+  );
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const dialog = useRef(null);
   const form = useRef(null);
-  const sharing = useRef(null);
   const deviceSources = tvInputSources(value);
   const layer = scene.layers.find((item) => item.id === area.id);
   const closeDialog = onClose;
@@ -58,8 +63,8 @@ export default function ContentEditorDialog({
   }, []);
 
   useEffect(() => {
-    if (savedInput) sharing.current?.scrollIntoView({ block: 'nearest' });
-  }, [savedInput]);
+    if (dialog.current) dialog.current.scrollTop = 0;
+  }, [draft.type, draft.capture, savedInput, settingsOpen]);
 
   function updateLayer(next) {
     onChange({
@@ -94,7 +99,7 @@ export default function ContentEditorDialog({
             (item) => item.id !== draft.id && item.type === 'input' && item.slot === slot,
           ),
       );
-      const same = draft.type === 'input' && draft.capture === next.capture ? draft : null;
+      const same = draft.type === 'input' ? draft : null;
       const unused = available.find((slot) => !deviceSources.some((item) => item.slot === slot));
       const reused = deviceSources.find(
         (item) => available.includes(item.slot) && item.capture === next.capture,
@@ -150,6 +155,11 @@ export default function ContentEditorDialog({
       requestAnimationFrame(() => form.current?.querySelector('[aria-invalid="true"]')?.focus());
       return;
     }
+    applyContent(next);
+  }
+
+  function applyContent(next) {
+    setErrors({});
     let settings = {
       ...value,
       scenes: value.scenes.map((item) =>
@@ -171,6 +181,7 @@ export default function ContentEditorDialog({
       onChange(settings);
       setDraft(next);
       setSavedInput(true);
+      setSettingsOpen(false);
     } else {
       onChange(settings);
       closeDialog();
@@ -202,8 +213,22 @@ export default function ContentEditorDialog({
         <>
           <header className="scene-heading">
             <h3 id={`${editorId}-dialog-title`}>
-              {draft.type === 'empty' ? 'Select input type' : 'Edit content'}
+              {draft.type === 'empty'
+                ? 'Select input type'
+                : contentTypes.find(([type]) => type === typeOf(draft))?.[1] || 'Input settings'}
             </h3>
+            {draft.type === 'input' && savedInput && (
+              <button
+                type="button"
+                className="admin-button scene-settings-button"
+                aria-label="Change input settings"
+                aria-expanded={settingsOpen}
+                disabled={disabled}
+                onClick={() => setSettingsOpen(!settingsOpen)}
+              >
+                <Settings2 size={20} aria-hidden="true" />
+              </button>
+            )}
             <button
               className="admin-button"
               type="button"
@@ -213,282 +238,307 @@ export default function ContentEditorDialog({
               ×
             </button>
           </header>
-          <form ref={form} className="scene-dialog-form" onSubmit={saveContent} noValidate>
-            <fieldset className="scene-content-types" disabled={disabled}>
-              <legend>What should this input show?</legend>
-              {contentTypes.map(([type, name]) => (
-                <button
-                  key={type}
-                  className={`admin-button ${typeOf(draft) === type ? 'primary' : ''}`}
-                  type="button"
-                  aria-pressed={typeOf(draft) === type}
-                  {...fieldProps('type')}
-                  onClick={() => {
-                    if (typeOf(draft) !== type) chooseContent(type);
-                  }}
-                >
-                  {name}
-                </button>
-              ))}
-              {errorFor('type')}
-            </fieldset>
-            {['youtube', 'camera', 'video'].includes(draft.type) && (
-              <label>
-                {draft.type === 'youtube'
-                  ? 'YouTube link'
-                  : draft.type === 'video'
-                    ? 'Saved video link'
-                    : 'CCTV stream address'}
-                <input
-                  type="url"
-                  disabled={disabled}
-                  autoComplete="off"
-                  required
-                  value={draft.url || ''}
-                  placeholder={
-                    draft.type === 'youtube'
-                      ? 'https://www.youtube.com/watch?v=…'
-                      : draft.type === 'video'
-                        ? 'https://…/video.mp4'
-                        : 'https://…/camera.m3u8'
-                  }
-                  {...fieldProps('url')}
-                  onChange={(event) => changeDraft({ ...draft, url: event.target.value })}
-                />
-                {errorFor('url')}
-                {draft.type === 'video' && (
-                  <small>Use a direct HTTPS video link, such as an MP4 file.</small>
-                )}
-              </label>
-            )}
-            {draft.type === 'camera' && (
-              <label>
-                Camera format
-                <select
-                  disabled={disabled}
-                  value={draft.protocol}
-                  onChange={(event) => changeDraft({ ...draft, protocol: event.target.value })}
-                >
-                  <option value="hls">HLS</option>
-                  <option value="whep">WebRTC / WHEP</option>
-                </select>
-                <small>
-                  Use a browser stream address. Local RTSP addresses need a camera gateway.
-                </small>
-              </label>
-            )}
-            {['poster', 'poster-next'].includes(draft.type) && (
-              <fieldset className="scene-posters" disabled={disabled}>
-                <legend>Choose posters</legend>
-                <p>Tick one to keep it on screen, or several to rotate.</p>
-                <div className="admin-poster-picker">
-                  {posters.map((poster) => (
-                    <label key={poster.id}>
-                      <span>
-                        {poster.kind === 'announcement' ? (
-                          'Text & pictures'
-                        ) : (
-                          <img src={poster.image} alt="" loading="lazy" />
-                        )}
-                      </span>
-                      <span>
-                        <input
-                          type="checkbox"
-                          checked={(draft.poster_ids || []).includes(poster.id)}
-                          {...fieldProps('poster_ids')}
-                          onChange={(event) =>
-                            changeDraft({
-                              ...draft,
-                              poster_ids: event.target.checked
-                                ? [...(draft.poster_ids || []), poster.id]
-                                : (draft.poster_ids || []).filter((id) => id !== poster.id),
-                            })
-                          }
-                        />
-                        {poster.title}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                {!posters.length && <p>No posters have been added yet.</p>}
-                {errorFor('poster_ids')}
-                <a href="/admin?section=posters" target="_blank" rel="noreferrer">
-                  Add or edit posters ↗
-                </a>
-                <label>
-                  Seconds between posters
-                  <input
-                    type="number"
-                    min="5"
-                    max="300"
-                    required
-                    value={draft.rotation_seconds ?? 20}
-                    {...fieldProps('rotation_seconds')}
-                    onChange={(event) =>
-                      changeDraft({ ...draft, rotation_seconds: Number(event.target.value) })
-                    }
-                  />
-                  {errorFor('rotation_seconds')}
-                </label>
-              </fieldset>
-            )}
-            {draft.type === 'input' && (
-              <>
-                <label>
-                  Device name (required)
-                  <input
-                    disabled={disabled}
-                    value={draft.name || ''}
-                    maxLength={60}
-                    placeholder="e.g. Haider’s iPhone or Classroom laptop"
-                    {...fieldProps('name')}
-                    onChange={(event) => changeDraft({ ...draft, name: event.target.value })}
-                  />
-                  <small>Use a name that helps you recognise this device.</small>
-                </label>
-                {errorFor('name')}
-                {deviceSources.some(
-                  (item) =>
-                    item.slot !== draft.slot &&
-                    item.capture === draft.capture &&
-                    !scene.layers.some(
-                      (candidate) =>
-                        candidate.id !== draft.id &&
-                        candidate.type === 'input' &&
-                        candidate.slot === item.slot,
-                    ),
-                ) && (
-                  <label>
-                    Use a saved device
-                    <select
-                      disabled={disabled}
-                      value={draft.slot}
-                      onChange={(event) => {
-                        const saved = deviceSources.find(
-                          (item) => item.slot === event.target.value,
-                        );
-                        changeDraft({
-                          ...draft,
-                          slot: saved.slot,
-                          name: saved.name || defaultName(draft.capture, saved.slot),
-                        });
+          {(draft.type !== 'input' || !savedInput || settingsOpen) && (
+            <form ref={form} className="scene-dialog-form" onSubmit={saveContent} noValidate>
+              {draft.type === 'empty' ? (
+                <fieldset className="scene-content-types" disabled={disabled}>
+                  <legend>What should this input show?</legend>
+                  {contentTypes.map(([type, name]) => (
+                    <button
+                      key={type}
+                      className={`admin-button ${typeOf(draft) === type ? 'primary' : ''}`}
+                      type="button"
+                      aria-pressed={typeOf(draft) === type}
+                      {...fieldProps('type')}
+                      onClick={() => {
+                        if (typeOf(draft) !== type) chooseContent(type);
                       }}
                     >
-                      <option value={draft.slot}>
-                        {draft.name || defaultName(draft.capture, draft.slot)}
+                      {name}
+                    </button>
+                  ))}
+                  {errorFor('type')}
+                </fieldset>
+              ) : (
+                <label>
+                  Input type
+                  <select
+                    value={typeOf(draft)}
+                    disabled={disabled}
+                    {...fieldProps('type')}
+                    onChange={(event) => chooseContent(event.target.value)}
+                  >
+                    {draft.type === 'schedule' && (
+                      <option value="schedule">Website livestream</option>
+                    )}
+                    {contentTypes.map(([type, name]) => (
+                      <option key={type} value={type}>
+                        {name}
                       </option>
-                      {deviceSources
-                        .filter(
-                          (item) =>
-                            item.slot !== draft.slot &&
-                            item.capture === draft.capture &&
-                            !scene.layers.some(
-                              (candidate) =>
-                                candidate.id !== draft.id &&
-                                candidate.type === 'input' &&
-                                candidate.slot === item.slot,
-                            ),
-                        )
-                        .map((item) => (
-                          <option value={item.slot} key={item.slot}>
-                            {inputLabel(item)}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                )}
-                {!savedInput && <p>Save this content to show its sharing controls here.</p>}
-              </>
-            )}
-            {draft.type === 'text' && (
-              <label>
-                Notice
-                <textarea
-                  rows={4}
-                  required
-                  maxLength={1200}
-                  disabled={disabled}
-                  value={draft.text || ''}
-                  {...fieldProps('text')}
-                  onChange={(event) => changeDraft({ ...draft, text: event.target.value })}
-                />
-                {errorFor('text')}
-              </label>
-            )}
-            {draft.type === 'schedule' && (
-              <p>This input uses the live video saved in the website’s livestream settings.</p>
-            )}
-            {'audio' in draft && (
-              <label className="admin-check">
-                <input
-                  disabled={disabled}
-                  type="checkbox"
-                  checked={draft.audio}
-                  onChange={(event) => changeDraft({ ...draft, audio: event.target.checked })}
-                />
-                Play this content’s audio
-              </label>
-            )}
-            <details className="scene-position-details">
-              <summary>Position and size</summary>
-              <div className="scene-dimensions">
-                {[
-                  ['x', 'Left %'],
-                  ['y', 'Top %'],
-                  ['width', 'Width %'],
-                  ['height', 'Height %'],
-                ].map(([key, name]) => (
-                  <label key={key}>
-                    {name}
-                    <input
-                      type="number"
-                      disabled={disabled}
-                      min={['width', 'height'].includes(key) ? 5 : 0}
-                      max="100"
-                      step="1"
-                      value={Math.round(draft[key] * 10) / 10}
-                      onChange={(event) => {
-                        if (event.target.value !== '')
-                          changeDraft({
-                            ...draft,
-                            ...fitRect({ ...draft, [key]: Number(event.target.value) }),
-                          });
-                      }}
-                    />
-                  </label>
-                ))}
-              </div>
-            </details>
-            <div className="admin-edit-dialog-actions">
-              <button type="button" className="admin-button" onClick={closeDialog}>
-                Close
-              </button>
-              {layer?.type !== 'empty' && (
-                <button
-                  type="button"
-                  className="admin-button"
-                  disabled={disabled}
-                  onClick={() => {
-                    updateLayer(clearRegion(layer));
-                    closeDialog();
-                  }}
-                >
-                  Remove content
-                </button>
+                    ))}
+                  </select>
+                  {errorFor('type')}
+                </label>
               )}
-              <button
-                type="submit"
-                className="admin-button primary"
-                disabled={disabled || (savedInput && draft.type === 'input')}
-              >
-                {savedInput && draft.type === 'input' ? 'Content saved' : 'Save content'}
-              </button>
-            </div>
-          </form>
-          {draft.type === 'input' && savedInput && (
-            <div ref={sharing} className="scene-device-controls">
-              {renderDeviceInput?.(draft)}
-            </div>
+              {draft.type !== 'empty' && (
+                <>
+                  {['youtube', 'camera', 'video'].includes(draft.type) && (
+                    <label>
+                      {draft.type === 'youtube'
+                        ? 'YouTube link'
+                        : draft.type === 'video'
+                          ? 'Saved video link'
+                          : 'CCTV stream address'}
+                      <input
+                        type="url"
+                        disabled={disabled}
+                        autoComplete="off"
+                        required
+                        value={draft.url || ''}
+                        placeholder={
+                          draft.type === 'youtube'
+                            ? 'https://www.youtube.com/watch?v=…'
+                            : draft.type === 'video'
+                              ? 'https://…/video.mp4'
+                              : 'https://…/camera.m3u8'
+                        }
+                        {...fieldProps('url')}
+                        onChange={(event) => changeDraft({ ...draft, url: event.target.value })}
+                      />
+                      {errorFor('url')}
+                      {draft.type === 'video' && (
+                        <small>Use a direct HTTPS video link, such as an MP4 file.</small>
+                      )}
+                    </label>
+                  )}
+                  {draft.type === 'camera' && (
+                    <label>
+                      Camera format
+                      <select
+                        disabled={disabled}
+                        value={draft.protocol}
+                        onChange={(event) =>
+                          changeDraft({ ...draft, protocol: event.target.value })
+                        }
+                      >
+                        <option value="hls">HLS</option>
+                        <option value="whep">WebRTC / WHEP</option>
+                      </select>
+                      <small>
+                        Use a browser stream address. Local RTSP addresses need a camera gateway.
+                      </small>
+                    </label>
+                  )}
+                  {['poster', 'poster-next'].includes(draft.type) && (
+                    <fieldset className="scene-posters" disabled={disabled}>
+                      <legend>Choose posters</legend>
+                      <p>Tick one to keep it on screen, or several to rotate.</p>
+                      <div className="admin-poster-picker">
+                        {posters.map((poster) => (
+                          <label key={poster.id}>
+                            <span>
+                              {poster.kind === 'announcement' ? (
+                                'Text & pictures'
+                              ) : (
+                                <img src={poster.image} alt="" loading="lazy" />
+                              )}
+                            </span>
+                            <span>
+                              <input
+                                type="checkbox"
+                                checked={(draft.poster_ids || []).includes(poster.id)}
+                                {...fieldProps('poster_ids')}
+                                onChange={(event) =>
+                                  changeDraft({
+                                    ...draft,
+                                    poster_ids: event.target.checked
+                                      ? [...(draft.poster_ids || []), poster.id]
+                                      : (draft.poster_ids || []).filter((id) => id !== poster.id),
+                                  })
+                                }
+                              />
+                              {poster.title}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      {!posters.length && <p>No posters have been added yet.</p>}
+                      {errorFor('poster_ids')}
+                      <a href="/admin?section=posters" target="_blank" rel="noreferrer">
+                        Add or edit posters ↗
+                      </a>
+                      <label>
+                        Seconds between posters
+                        <input
+                          type="number"
+                          min="5"
+                          max="300"
+                          required
+                          value={draft.rotation_seconds ?? 20}
+                          {...fieldProps('rotation_seconds')}
+                          onChange={(event) =>
+                            changeDraft({ ...draft, rotation_seconds: Number(event.target.value) })
+                          }
+                        />
+                        {errorFor('rotation_seconds')}
+                      </label>
+                    </fieldset>
+                  )}
+                  {draft.type === 'input' && (
+                    <>
+                      <label>
+                        Device name (required)
+                        <input
+                          disabled={disabled}
+                          value={draft.name || ''}
+                          maxLength={60}
+                          placeholder="e.g. Haider’s iPhone or Classroom laptop"
+                          {...fieldProps('name')}
+                          onChange={(event) => changeDraft({ ...draft, name: event.target.value })}
+                        />
+                        <small>Use a name that helps you recognise this device.</small>
+                      </label>
+                      {errorFor('name')}
+                      {deviceSources.some(
+                        (item) =>
+                          item.slot !== draft.slot &&
+                          item.capture === draft.capture &&
+                          !scene.layers.some(
+                            (candidate) =>
+                              candidate.id !== draft.id &&
+                              candidate.type === 'input' &&
+                              candidate.slot === item.slot,
+                          ),
+                      ) && (
+                        <label>
+                          Use a saved device
+                          <select
+                            disabled={disabled}
+                            value={draft.slot}
+                            onChange={(event) => {
+                              const saved = deviceSources.find(
+                                (item) => item.slot === event.target.value,
+                              );
+                              const next = {
+                                ...draft,
+                                slot: saved.slot,
+                                name: saved.name || '',
+                              };
+                              if (nameProblem(next.name, 'device name')) changeDraft(next);
+                              else applyContent(next);
+                            }}
+                          >
+                            <option value={draft.slot}>{draft.name || 'New device'}</option>
+                            {deviceSources
+                              .filter(
+                                (item) =>
+                                  item.slot !== draft.slot &&
+                                  item.capture === draft.capture &&
+                                  !scene.layers.some(
+                                    (candidate) =>
+                                      candidate.id !== draft.id &&
+                                      candidate.type === 'input' &&
+                                      candidate.slot === item.slot,
+                                  ),
+                              )
+                              .map((item) => (
+                                <option value={item.slot} key={item.slot}>
+                                  {inputLabel(item)}
+                                </option>
+                              ))}
+                          </select>
+                        </label>
+                      )}
+                    </>
+                  )}
+                  {draft.type === 'text' && (
+                    <label>
+                      Notice
+                      <textarea
+                        rows={4}
+                        required
+                        maxLength={1200}
+                        disabled={disabled}
+                        value={draft.text || ''}
+                        {...fieldProps('text')}
+                        onChange={(event) => changeDraft({ ...draft, text: event.target.value })}
+                      />
+                      {errorFor('text')}
+                    </label>
+                  )}
+                  {draft.type === 'schedule' && (
+                    <p>
+                      This input uses the live video saved in the website’s livestream settings.
+                    </p>
+                  )}
+                  {'audio' in draft && (
+                    <label className="admin-check">
+                      <input
+                        disabled={disabled}
+                        type="checkbox"
+                        checked={draft.audio}
+                        onChange={(event) => changeDraft({ ...draft, audio: event.target.checked })}
+                      />
+                      Play this content’s audio
+                    </label>
+                  )}
+                  <details className="scene-position-details">
+                    <summary>Position and size</summary>
+                    <div className="scene-dimensions">
+                      {[
+                        ['x', 'Left %'],
+                        ['y', 'Top %'],
+                        ['width', 'Width %'],
+                        ['height', 'Height %'],
+                      ].map(([key, name]) => (
+                        <label key={key}>
+                          {name}
+                          <input
+                            type="number"
+                            disabled={disabled}
+                            min={['width', 'height'].includes(key) ? 5 : 0}
+                            max="100"
+                            step="1"
+                            value={Math.round(draft[key] * 10) / 10}
+                            onChange={(event) => {
+                              if (event.target.value !== '')
+                                changeDraft({
+                                  ...draft,
+                                  ...fitRect({ ...draft, [key]: Number(event.target.value) }),
+                                });
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </details>
+                  <div className="admin-edit-dialog-actions">
+                    <button type="button" className="admin-button" onClick={closeDialog}>
+                      Close
+                    </button>
+                    {layer?.type !== 'empty' && (
+                      <button
+                        type="button"
+                        className="admin-button"
+                        disabled={disabled}
+                        onClick={() => {
+                          updateLayer(clearRegion(layer));
+                          closeDialog();
+                        }}
+                      >
+                        Remove content
+                      </button>
+                    )}
+                    <button type="submit" className="admin-button primary" disabled={disabled}>
+                      {draft.type === 'input' ? 'Continue to connection' : 'Apply input'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          )}
+          {draft.type === 'input' && savedInput && !settingsOpen && (
+            <div className="scene-device-controls">{renderDeviceInput?.(draft)}</div>
           )}
         </>
       )}

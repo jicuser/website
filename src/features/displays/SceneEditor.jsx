@@ -1,6 +1,8 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
+import { Plus, Settings2 } from 'lucide-react';
 import {
   SOURCE_TYPES,
+  MAX_SCENES,
   nameProblem,
   fitRect,
   layerStyle,
@@ -12,6 +14,7 @@ import useTvPreview from '@/hooks/useTvPreview';
 import { inputLabel } from '@/lib/tvSceneState';
 import ContentEditorDialog from './ContentEditorDialog';
 import { SCENE_LAYOUTS, arrangeScene, layoutRegions, snapRect } from '@/lib/sceneLayouts';
+import { addStreamScene } from '@/lib/streamWorkspace';
 
 const sourceLabel = (layer) =>
   layer.type === 'empty'
@@ -41,6 +44,9 @@ export default function SceneEditor({
   const [selected, setSelected] = useState('');
   const [editing, setEditing] = useState(null);
   const [snap, setSnap] = useState(true);
+  const [addingScene, setAddingScene] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [sceneError, setSceneError] = useState('');
   const canvas = useRef(null);
   const drag = useRef(null);
   const layer = scene.layers.find((item) => item.id === selected);
@@ -155,6 +161,84 @@ export default function SceneEditor({
         </div>
         <span className="scene-count">Draft preview</span>
       </div>
+      <div className="scene-management">
+        <button
+          type="button"
+          className="admin-button"
+          disabled={disabled || value.scenes.length >= MAX_SCENES}
+          onClick={() => {
+            setAddingScene(true);
+            setSceneError('');
+          }}
+        >
+          <Plus size={18} aria-hidden="true" /> Add scene
+        </button>
+        {value.scenes.length > 1 && (
+          <button
+            type="button"
+            className="admin-button"
+            disabled={disabled}
+            onClick={() => {
+              if (!window.confirm(`Remove “${scene.name}” and its inputs from this setup?`)) return;
+              const scenes = value.scenes.filter((item) => item.id !== scene.id);
+              onChange({ ...value, scenes, active_scene_id: scenes[0].id });
+              setSelected('');
+              closeDialog();
+            }}
+          >
+            Remove scene
+          </button>
+        )}
+      </div>
+      {addingScene && (
+        <form
+          className="scene-add-form"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            try {
+              onChange(addStreamScene(value, newName));
+              setNewName('');
+              setAddingScene(false);
+              setSelected('');
+              closeDialog();
+            } catch (error) {
+              setSceneError(error.message);
+              event.currentTarget.querySelector('input')?.focus();
+            }
+          }}
+        >
+          <label>
+            New scene name (required)
+            <input
+              autoFocus
+              required
+              maxLength={60}
+              value={newName}
+              placeholder="e.g. Questions and answers"
+              aria-invalid={Boolean(sceneError)}
+              disabled={disabled}
+              onChange={(event) => {
+                setNewName(event.target.value);
+                setSceneError('');
+              }}
+            />
+            {sceneError && (
+              <small className="admin-field-error" role="alert">
+                {sceneError}
+              </small>
+            )}
+          </label>
+          <div className="admin-actions">
+            <button type="submit" className="admin-button primary" disabled={disabled}>
+              Add scene
+            </button>
+            <button type="button" className="admin-button" onClick={() => setAddingScene(false)}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
       <div className="scene-toolbar">
         <label>
           Scene
@@ -331,7 +415,8 @@ export default function SceneEditor({
                 disabled={disabled}
                 onClick={() => edit(layer)}
               >
-                {layer.type === 'empty' ? 'Select input type' : 'Edit content'}
+                {layer.type !== 'empty' && <Settings2 size={18} aria-hidden="true" />}
+                {layer.type === 'empty' ? 'Select input type' : 'Input controls'}
               </button>
               <button
                 type="button"

@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  createStreamScenes,
+  createStreamScene,
+  addStreamScene,
   loadSceneTemplate,
   streamSettings,
 } from '../src/lib/streamWorkspace.js';
@@ -49,46 +50,36 @@ function freeze(value) {
   return value;
 }
 
-test('a fresh stream contains independent named scenes with empty full-screen areas', () => {
+test('new scenes require names, start empty, and append without changing existing inputs', () => {
   const nextId = ids();
-  const first = createStreamScenes(3, nextId);
-  const second = createStreamScenes(2, nextId);
-  assert.deepEqual(
-    first.map((item) => item.name),
-    ['Scene 1', 'Scene 2', 'Scene 3'],
-  );
-  const allIds = [...first, ...second].flatMap((item) => [
-    item.id,
-    ...item.layers.map((layer) => layer.id),
-  ]);
-  assert.equal(new Set(allIds).size, 10);
-  for (const item of [...first, ...second]) {
-    assert.equal(item.overlap, true);
-    assert.equal(item.layers.length, 1);
-    assert.deepEqual(item.layers[0], region('empty', { id: item.layers[0].id }));
-    assert.equal(hasSceneContent(item), false);
-  }
-  first[0].layers[0].type = 'clock';
-  assert.equal(first[1].layers[0].type, 'empty');
-  assert.equal(second[0].layers[0].type, 'empty');
+  const first = createStreamScene(' Main lesson ', nextId);
+  assert.equal(first.name, 'Main lesson');
+  assert.equal(first.overlap, true);
+  assert.equal(first.layers.length, 1);
+  assert.deepEqual(first.layers[0], region('empty', { id: first.layers[0].id }));
+  assert.equal(hasSceneContent(first), false);
+  const initial = freeze(workspace([first]));
+  const added = addStreamScene(initial, 'Questions and answers', nextId);
+  assert.equal(added.scenes.length, 2);
+  assert.strictEqual(added.scenes[0], first);
+  assert.equal(added.active_scene_id, added.scenes[1].id);
+  assert.equal(new Set(added.scenes.flatMap((item) => [item.id, item.layers[0].id])).size, 4);
+  assert.equal(initial.scenes.length, 1);
+  for (const name of ['', 'Scene 1'])
+    assert.throws(() => addStreamScene(initial, name), /name|descriptive/);
 });
 
-test('scene counts stay within one to six without malformed count errors', () => {
-  for (const [raw, count] of [
-    [0, 1],
-    [-2, 1],
-    [undefined, 1],
-    ['bad', 1],
-    ['3', 3],
-    [2.9, 2],
-    [999, 6],
-    [Infinity, 6],
-  ])
-    assert.equal(createStreamScenes(raw, ids()).length, count);
+test('adding a seventh scene is rejected without changing the current scene', () => {
+  const settings = freeze(workspace(Array.from({ length: 6 }, (_, i) => scene(`Lesson ${i + 1}`))));
+  assert.throws(() => addStreamScene(settings, 'Another lesson'), /six scenes/);
+  assert.equal(settings.scenes.length, 6);
+  assert.equal(settings.active_scene_id, 'Lesson 1');
 });
 
 test('prepared empty areas do not put an output into presentation playback', () => {
-  const draft = workspace(createStreamScenes(3, ids()));
+  const draft = workspace(
+    ['Welcome', 'Lesson', 'Questions'].map((name) => createStreamScene(name, ids(name))),
+  );
   const prepared = streamSettings(DEFAULT_TV_SETTINGS, draft);
   assert.equal(tvScene(prepared), 'normal');
   const saved = validateSettings(prepared);

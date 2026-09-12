@@ -2,14 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { tvRequest } from '@/lib/tvControl';
 import { normaliseTvSettings } from '../../supabase/functions/_shared/tv.js';
 import { hasSceneContent, nameProblem } from '../../supabase/functions/_shared/tv-scenes.js';
-import { createStreamScenes, streamSettings } from '@/lib/streamWorkspace';
+import { createStreamScene, streamSettings } from '@/lib/streamWorkspace';
 
 export default function useStreamSetup(screenId, userId) {
   const key = `jic-stream-workspace:${userId}:${screenId}`;
   const [data, setData] = useState(null);
   const [form, setForm] = useState(null);
   const [stage, setStage] = useState(2);
-  const [count, setCount] = useState(1);
   const [managedId, setManagedId] = useState(null);
   const [workspaceId, setWorkspaceId] = useState(() => crypto.randomUUID());
   const [revision, setRevision] = useState(null);
@@ -66,7 +65,6 @@ export default function useStreamSetup(screenId, userId) {
               const restored = normaliseTvSettings(draft.form);
               if (restored.scenes?.length && restored.scenes.length <= 6) {
                 setForm(restored);
-                setCount(restored.scenes.length);
                 setStage(3);
                 setRevision(draft.revision || next.updated_at);
                 setManagedId(draft.managedId === next.presentation?.id ? draft.managedId : null);
@@ -105,7 +103,9 @@ export default function useStreamSetup(screenId, userId) {
         JSON.stringify({ form, stage, revision, managedId, baseline, savedTemplate, pendingSave }),
       );
     } catch {
-      setMessage('Your browser could not keep this draft. Save the scene before leaving.');
+      setMessage(
+        'Your browser could not keep this draft. Keep this page open; settings can be saved when ending the stream.',
+      );
     }
   }, [form, stage, revision, managedId, baseline, savedTemplate, pendingSave, key]);
 
@@ -121,16 +121,13 @@ export default function useStreamSetup(screenId, userId) {
 
   const started = Boolean(managedId && data?.presentation?.id === managedId);
   const dirty = Boolean(form && JSON.stringify(form) !== JSON.stringify(baseline));
-  const build = (names) => {
-    const scenes = createStreamScenes(count).map((scene, index) => ({
-      ...scene,
-      name: (names[index] || '').trim(),
-    }));
-    const problem = scenes.map((scene) => nameProblem(scene.name, 'scene name')).find(Boolean);
+  const build = (name) => {
+    const problem = nameProblem(name, 'scene name');
     if (problem) {
       setMessage(problem);
       return;
     }
+    const scenes = [createStreamScene(name)];
     setForm({
       ...data.settings,
       scene_mode: 'teaching',
@@ -147,7 +144,6 @@ export default function useStreamSetup(screenId, userId) {
     setStage(3);
     setWorkspaceId(crypto.randomUUID());
     setForm(settings);
-    setCount(settings.scenes.length);
     setMessage('Stream settings loaded. Reconnect camera and screen inputs when ready.');
   };
   const newSetup = () => {
@@ -159,18 +155,16 @@ export default function useStreamSetup(screenId, userId) {
     setForm(null);
     setBaseline(null);
     setStage(2);
-    setCount(1);
     setMessage('Clean setup ready. Saved scenes are available in the editor.');
   };
   const manageLive = () => {
     setSavedTemplate(null);
     setForm(data.settings);
     setBaseline(data.settings);
-    setCount(data.settings.scenes.length);
     setRevision(data.updated_at);
     setManagedId(data.presentation.id);
     setStage(3);
-    setMessage('Editing the live stream. Save & update applies your changes.');
+    setMessage('Editing the live stream. Update live layout applies your changes.');
   };
   const publish = useCallback(async () => {
     if (inFlight.current || !form) return;
@@ -264,8 +258,6 @@ export default function useStreamSetup(screenId, userId) {
     form,
     setForm,
     stage,
-    count,
-    setCount,
     started,
     dirty,
     workspaceId,
