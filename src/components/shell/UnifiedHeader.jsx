@@ -22,6 +22,7 @@ import { MADRASSAH_TABS, MASJID_EXTENSION_TABS, NAV_GROUPS } from '@/content/nav
 import { SITE } from '@/content/site';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import { useAppearance } from '@/context/AppearanceContext';
+import { useNavigationHistory } from '@/context/NavigationContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import { cn } from '@/lib/utils';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
@@ -55,6 +56,8 @@ function activeNavigation(pathname) {
 export default function UnifiedHeader() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { canGoBack, previousPath } = useNavigationHistory();
+  const showHome = pathname === '/' || !canGoBack || previousPath === '/';
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
   const prayerDockRef = useRef(null),
@@ -355,10 +358,18 @@ export default function UnifiedHeader() {
       <nav className="jic-mobile-controls" aria-label="Quick navigation">
         <button
           type="button"
-          onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/'))}
+          onClick={() => {
+            if (pathname === '/') window.scrollTo({ top: 0, behavior: 'smooth' });
+            else if (canGoBack) navigate(-1);
+            else navigate('/');
+          }}
         >
-          <ArrowLeft size={21} aria-hidden="true" />
-          <span>Back</span>
+          {showHome ? (
+            <Home size={21} aria-hidden="true" />
+          ) : (
+            <ArrowLeft size={21} aria-hidden="true" />
+          )}
+          <span>{showHome ? 'Home' : 'Back'}</span>
         </button>
         <button type="button" onClick={() => setDonationOpen(true)}>
           <Heart className="jic-donate-heart" size={21} aria-hidden="true" />

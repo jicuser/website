@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 
 import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
 import { AdminSaveProvider } from '@/context/AdminSaveContext';
+import { NavigationProvider } from '@/context/NavigationContext';
 import { standaloneSections } from '@/content/sectionRoutes';
 import MainLayout from '@/layouts/MainLayout';
 import RouteScrollReset from '@/components/shell/RouteScrollReset';
@@ -40,6 +41,14 @@ const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const TileContentAdminPage = lazy(() => import('@/pages/admin/TileContentAdminPage'));
 
 export default function App() {
+  return (
+    <NavigationProvider>
+      <AppRoutes />
+    </NavigationProvider>
+  );
+}
+
+function AppRoutes() {
   return (
     <PageLoadBoundary>
       <Suspense
