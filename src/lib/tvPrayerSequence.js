@@ -1,3 +1,4 @@
+import { tvScene } from '../../supabase/functions/_shared/tv.js';
 // Timings are measured from the congregation start, using the mosque's London clock.
 export function prayerMinutes(value) {
   const match = String(value || '')
@@ -15,7 +16,7 @@ export function tvPrayerSequence(now, times, jummah = [], settings = {}, screenI
     screenId === 'shoe-area' ||
     !times ||
     settings.prayer_enabled === false ||
-    Date.parse(settings.class_until) > now.getTime()
+    tvScene(settings, now.getTime()) === 'class'
   )
     return null;
   const parts = Object.fromEntries(
@@ -65,6 +66,52 @@ export function tvPrayerSequence(now, times, jummah = [], settings = {}, screenI
 
 // Manual seasonal notices yield to class mode and never appear in the shoe area.
 export function tvSpecialNotice(now, settings = {}, screenId = '') {
-  if (screenId === 'shoe-area' || Date.parse(settings.class_until) > now.getTime()) return null;
+  if (screenId === 'shoe-area' || tvScene(settings, now.getTime()) === 'class') return null;
   return ['jummah', 'taraweeh'].includes(settings.notice_mode) ? settings.notice_mode : null;
+}
+
+export function ramadanScene(now, times, screenId = '') {
+  if (screenId === 'shoe-area' || !times) return null;
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/London',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(now)
+      .map(({ type, value }) => [type, value]),
+  );
+  if (times.d_date !== `${parts.year}-${parts.month}-${parts.day}`) return null;
+  const minute = Number(parts.hour) * 60 + Number(parts.minute);
+  const isha = prayerMinutes(times.jamaah_isha);
+  return isha !== null && minute >= isha + 20 && minute < isha + 40 ? 'taraweeh' : 'fasting';
+}
+
+// After iftar, display the next dated record, including month/year boundaries.
+export function fastingTimes(now, today, tomorrow) {
+  const date = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/London',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+  if (today?.d_date !== date) return null;
+  const clock = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(now);
+  const sunset = prayerMinutes(today.maghrib);
+  if (sunset === null) return null;
+  if (prayerMinutes(clock) < sunset) return { ...today, label: 'Today' };
+  const next = new Date(date + 'T12:00:00Z');
+  next.setUTCDate(next.getUTCDate() + 1);
+  return tomorrow?.d_date === next.toISOString().slice(0, 10)
+    ? { ...tomorrow, label: 'Tomorrow' }
+    : null;
 }

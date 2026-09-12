@@ -19,6 +19,7 @@ export default function MainLayout() {
   const { isAdmin } = useAuth();
   const preview = new URLSearchParams(search).get('preview') === '1';
   const isHome = pathname === '/';
+  const isDiscovery = ['/search', '/social-media'].includes(pathname);
 
   return (
     <div
@@ -50,8 +51,8 @@ export default function MainLayout() {
             </div>
           )}
           <ManagedPageSections />
-          {!isHome && <ProgrammePosters />}
-          <RelatedContent />
+          {!isHome && !isDiscovery && <ProgrammePosters />}
+          {!isDiscovery && <RelatedContent />}
         </motion.div>
       </main>
       <Footer />

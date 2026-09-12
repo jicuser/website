@@ -16,6 +16,7 @@ export default function useTvScreen(screenId) {
     let timer;
     let token = '';
     let pairError = '';
+    let isPreview = false;
     async function poll() {
       try {
         const data = await tvRequest(
@@ -30,7 +31,7 @@ export default function useTvScreen(screenId) {
         if (error.status === 401) {
           token = '';
           try {
-            localStorage.removeItem(deviceKey(screenId));
+            if (!isPreview) localStorage.removeItem(deviceKey(screenId));
           } catch {
             /* Storage may be disabled. */
           }
@@ -52,7 +53,14 @@ export default function useTvScreen(screenId) {
       } catch {
         /* Public posters still work. */
       }
-      const code = new URLSearchParams(window.location.hash.slice(1)).get('pair');
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const previewToken = hash.get('preview');
+      if (previewToken && /^[a-f0-9]{64}$/.test(previewToken)) {
+        isPreview = true;
+        token = previewToken;
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+      const code = hash.get('pair');
       if (code) {
         history.replaceState(null, '', window.location.pathname + window.location.search);
         try {

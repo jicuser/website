@@ -1,14 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Monitor, Camera, Presentation, Image, Radio, RotateCcw, Eye, X } from 'lucide-react';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { PROGRAMMES } from '@/content/programmes';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import useTvPublisher from '@/hooks/useTvPublisher';
+import TvPreview from './TvPreview';
+import { tvScene } from '../../../supabase/functions/_shared/tv.js';
 
-const input = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900';
-const button =
-  'rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 disabled:opacity-50';
-const panel = 'rounded-xl border border-slate-200 bg-white p-4 sm:p-6';
-
+const MODES = [
+  ['normal', 'Normal', Image, 'Posters, notices and automatic prayer reminders.'],
+  ['class', 'Class', Presentation, 'Share a lesson. Prayer notices pause until the class ends.'],
+  ['speech', 'Speech', Radio, 'Show the speaker with event posters. Prayer notices continue.'],
+  ['ramadan', 'Ramadan', Monitor, 'Isha du‘a and fasting times, with optional live video.'],
+];
+const button = 'admin-button';
 export default function TvScreenEditor({ screenId }) {
   const hall = screenId !== 'shoe-area';
   const screen = TV_SCREENS.find((item) => item.id === screenId);
@@ -18,9 +23,15 @@ export default function TvScreenEditor({ screenId }) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [pairing, setPairing] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [minutes, setMinutes] = useState(60);
+  const [now, setNow] = useState(Date.now());
   const preview = useRef(null);
+  const editing = useRef(false);
   const sharing = useTvPublisher(screenId);
   const screenUrl = `${window.location.origin}/tv179/${screenId}`;
+  const dirty = Boolean(form && JSON.stringify(form) !== saved);
+  editing.current = dirty || busy || sharing.busy;
   const load = useCallback(async () => {
     try {
       const next = await tvRequest('admin', screenId, {}, { staff: true });
@@ -36,24 +47,60 @@ export default function TvScreenEditor({ screenId }) {
     load();
   }, [load]);
   useEffect(() => {
+    let active = true;
+    let timer;
+    async function refresh() {
+      try {
+        const next = await tvRequest('admin', screenId, {}, { staff: true });
+        if (active) {
+          setData(next);
+          if (!editing.current) {
+            setForm(next.settings);
+            setSaved(JSON.stringify(next.settings));
+          }
+        }
+      } catch {
+        /* Keep edits when a background refresh fails. Explicit saves report errors. */
+      }
+      if (active) timer = setTimeout(refresh, 8000);
+    }
+    timer = setTimeout(refresh, 8000);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [screenId]);
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  useEffect(() => {
     if (preview.current) preview.current.srcObject = sharing.stream;
   }, [sharing.stream]);
-  const save = useCallback(async () => {
-    try {
-      const result = await tvRequest('save', screenId, { settings: form }, { staff: true });
+  const persist = useCallback(
+    async (settings, stopSharing = false) => {
+      if (stopSharing) await sharing.stop();
+      const result = await tvRequest('save', screenId, { settings, stopSharing }, { staff: true });
       setForm(result.settings);
       setSaved(JSON.stringify(result.settings));
-      setMessage('Screen settings saved. The TV updates within a few seconds.');
+      setData((previous) => ({
+        ...previous,
+        settings: result.settings,
+        ...(stopSharing ? { share_session: null } : {}),
+      }));
+      setMessage('Saved. This TV updates within a few seconds.');
+    },
+    [screenId, sharing.stop],
+  );
+  const save = useCallback(async () => {
+    try {
+      await persist(form, form.mode !== JSON.parse(saved).mode);
     } catch (error) {
       setMessage(error.message);
       throw error;
     }
-  }, [screenId, form]);
-  useRegisterAdminSave(
-    save,
-    Boolean(form && JSON.stringify(form) !== saved),
-    `Save ${screen.label}`,
-  );
+  }, [form, saved, persist]);
+  useRegisterAdminSave(save, dirty, `Save ${screen.label}`);
   const update = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
   async function run(task) {
     setBusy(true);
@@ -66,285 +113,416 @@ export default function TvScreenEditor({ screenId }) {
       setBusy(false);
     }
   }
+  async function normal() {
+    await sharing.stop();
+    const next = await tvRequest('normal', screenId, {}, { staff: true });
+    setForm(next.settings);
+    setSaved(JSON.stringify(next.settings));
+    setData((previous) => ({ ...previous, settings: next.settings, share_session: null }));
+    setMessage('Normal display restored.');
+  }
   async function copy(text) {
     try {
       await navigator.clipboard.writeText(text);
-      setMessage('Copied.');
+      setMessage('Link copied.');
     } catch {
       setMessage('Select and copy the link below.');
     }
   }
-  const activeRemote = data?.share_session && new Date(data.share_expires).getTime() > Date.now();
+  const scene = form ? tvScene(form, now) : 'normal';
+  const liveSession =
+    sharing.stream || (data?.share_session && Date.parse(data.share_expires) > now);
   return (
-    <div className="space-y-5">
-      <div>
-        <span className="admin-eyebrow">TV SCREENS</span>
-        <h2 className="text-2xl font-bold">{screen.label}</h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Settings apply only to this screen. Prayer times and the 12-hour clock stay visible.
-        </p>
+    <div className="admin-tv-editor">
+      <div className="admin-heading">
+        <div>
+          <span className="admin-eyebrow">TV SCREENS</span>
+          <h2>{screen.label}</h2>
+        </div>
+        <button className={button} onClick={() => setShowPreview((value) => !value)}>
+          <Eye size={18} />
+          {showPreview ? 'Close preview' : 'Preview TV'}
+        </button>
       </div>
+      {showPreview && <TvPreview key={screenId} screenId={screenId} label={screen.label} />}
       {message && (
-        <p role="status" className="rounded-lg bg-slate-100 p-3 text-sm text-slate-900">
+        <p className="admin-success" role="status">
           {message}
         </p>
       )}
       {!form ? (
         <button className={button} onClick={load}>
-          Load screen settings
+          Load TV settings
         </button>
       ) : (
         <>
-          <section className={panel}>
-            <h3 className="mb-3 text-lg font-bold">Display</h3>
-            <a
-              className="break-all text-sm underline"
-              href={screenUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {screenUrl}
-            </a>
-            <label className="mt-4 block text-sm font-semibold">
-              Show on this TV
-              <select
-                className={`${input} mt-1`}
-                value={form.mode}
-                onChange={(event) => update('mode', event.target.value)}
-              >
-                {hall && <option value="schedule">Posters and the website livestream</option>}
-                <option value="posters">Posters only</option>
-                {hall && <option value="youtube">A separate YouTube stream</option>}
-                {hall && <option value="camera">Local camera (paired TVs only)</option>}
-              </select>
-            </label>
-            {form.mode === 'youtube' && (
-              <label className="mt-4 block text-sm font-semibold">
-                YouTube video or live link
-                <input
-                  className={`${input} mt-1`}
-                  type="url"
-                  value={form.youtube_url}
-                  onChange={(event) => update('youtube_url', event.target.value)}
-                />
-              </label>
-            )}
-            {form.mode === 'camera' && (
-              <div className="mt-4 space-y-3">
-                <label className="block text-sm font-semibold">
-                  Camera format
-                  <select
-                    className={`${input} mt-1`}
-                    value={form.camera_protocol}
-                    onChange={(event) => update('camera_protocol', event.target.value)}
-                  >
-                    <option value="hls">HLS (.m3u8)</option>
-                    <option value="whep">WebRTC (WHEP)</option>
-                  </select>
-                </label>
-                <label className="block text-sm font-semibold">
-                  HTTPS camera stream URL
-                  <input
-                    className={`${input} mt-1`}
-                    type="url"
-                    value={form.camera_url}
-                    onChange={(event) => update('camera_url', event.target.value)}
-                  />
-                </label>
-                <p className="text-sm text-slate-600">
-                  Use a stream reachable from the TV’s Wi-Fi. RTSP cameras need a local HLS or
-                  WebRTC relay with HTTPS and browser access enabled. The camera link is sent only
-                  to paired TVs.
+          <section className="admin-panel">
+            <div className="admin-heading">
+              <div>
+                <h3>{hall ? '1. Choose the occasion' : 'Times & posters'}</h3>
+                <p>
+                  {hall
+                    ? `Current mode: ${MODES.find(([id]) => id === tvScene(data.settings, now))?.[1] || 'Normal'}`
+                    : 'The shoe area always shows the timetable and posters.'}
                 </p>
               </div>
+              {hall && (
+                <button
+                  className={button}
+                  disabled={busy || sharing.busy}
+                  onClick={() => run(normal)}
+                >
+                  <RotateCcw size={16} />
+                  Back to normal
+                </button>
+              )}
+            </div>
+            {hall && (
+              <>
+                <div className="admin-tv-modes">
+                  {MODES.map(([id, label, Icon]) => (
+                    <button
+                      key={id}
+                      aria-pressed={scene === id}
+                      disabled={busy || sharing.busy}
+                      onClick={() =>
+                        run(() =>
+                          id === 'normal'
+                            ? normal()
+                            : persist(
+                                {
+                                  ...form,
+                                  scene_mode: id,
+                                  mode: 'posters',
+                                  notice_mode: 'off',
+                                  class_until: ['class', 'speech'].includes(id)
+                                    ? new Date(Date.now() + minutes * 60000).toISOString()
+                                    : '',
+                                },
+                                true,
+                              ),
+                        )
+                      }
+                    >
+                      <Icon size={22} />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="admin-tv-help">{MODES.find(([id]) => id === scene)?.[3]}</p>
+                {['class', 'speech'].includes(scene) && (
+                  <label>
+                    Return to normal
+                    <select
+                      value={minutes}
+                      disabled={busy}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        setMinutes(value);
+                        run(() =>
+                          persist({
+                            ...form,
+                            class_until: new Date(Date.now() + value * 60000).toISOString(),
+                          }),
+                        );
+                      }}
+                    >
+                      <option value="30">After 30 minutes</option>
+                      <option value="60">After 1 hour</option>
+                      <option value="120">After 2 hours</option>
+                      <option value="240">After 4 hours</option>
+                    </select>
+                    <small>
+                      Ends{' '}
+                      {new Date(form.class_until).toLocaleTimeString('en-GB', {
+                        timeZone: 'Europe/London',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true,
+                      })}{' '}
+                      · London time
+                    </small>
+                  </label>
+                )}
+              </>
             )}
-            <fieldset className="mt-5 space-y-2">
-              <legend className="mb-2 text-sm font-bold">Posters</legend>
-              {PROGRAMMES.map((item) => (
-                <label key={item.id} className="flex items-center gap-2 text-sm">
+          </section>
+          {hall && scene !== 'normal' && (
+            <section className="admin-panel">
+              <h3>2. What should appear?</h3>
+              <div className="admin-tv-sources">
+                {[
+                  ['posters', 'Posters', Image],
+                  ['camera', 'Installed camera', Camera],
+                  ['youtube', 'YouTube', Radio],
+                  ['schedule', 'Website live', Monitor],
+                ].map(([id, label, Icon]) => (
+                  <button
+                    key={id}
+                    className={button}
+                    aria-pressed={!liveSession && form.mode === id}
+                    disabled={busy || sharing.busy}
+                    onClick={() => {
+                      if (
+                        (id === 'camera' && !form.camera_url) ||
+                        (id === 'youtube' && !form.youtube_url)
+                      ) {
+                        update('mode', id);
+                        setMessage('Add the source below, then save.');
+                      } else run(() => persist({ ...form, mode: id, notice_mode: 'off' }, true));
+                    }}
+                  >
+                    <Icon size={18} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {form.mode === 'youtube' && (
+                <label>
+                  YouTube link
                   <input
-                    type="checkbox"
-                    checked={form.poster_ids.includes(item.id)}
-                    onChange={(event) =>
-                      update(
-                        'poster_ids',
-                        event.target.checked
-                          ? [...form.poster_ids, item.id]
-                          : form.poster_ids.filter((id) => id !== item.id),
-                      )
-                    }
+                    type="url"
+                    value={form.youtube_url}
+                    onChange={(event) => update('youtube_url', event.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=…"
                   />
-                  {item.title}
+                </label>
+              )}
+              {form.mode === 'camera' && (
+                <>
+                  <label>
+                    Installed camera stream
+                    <input
+                      type="url"
+                      value={form.camera_url}
+                      onChange={(event) => update('camera_url', event.target.value)}
+                      placeholder="https://…/live.m3u8"
+                    />
+                  </label>
+                  <label>
+                    Stream format
+                    <select
+                      value={form.camera_protocol}
+                      onChange={(event) => update('camera_protocol', event.target.value)}
+                    >
+                      <option value="hls">HLS</option>
+                      <option value="whep">WebRTC (WHEP)</option>
+                    </select>
+                  </label>
+                  <p>
+                    Camera links stay private to paired TVs. A local RTSP camera needs an HTTPS
+                    browser stream from a relay.
+                  </p>
+                </>
+              )}
+              <div className="admin-actions">
+                <button
+                  className={button}
+                  disabled={
+                    busy ||
+                    sharing.busy ||
+                    dirty ||
+                    Boolean(sharing.stream) ||
+                    !navigator.mediaDevices?.getDisplayMedia
+                  }
+                  onClick={() => sharing.start('screen')}
+                >
+                  <Presentation size={18} />
+                  Share screen
+                </button>
+                <button
+                  className={button}
+                  disabled={
+                    busy ||
+                    sharing.busy ||
+                    dirty ||
+                    Boolean(sharing.stream) ||
+                    !navigator.mediaDevices?.getUserMedia
+                  }
+                  onClick={() => sharing.start('camera')}
+                >
+                  <Camera size={18} />
+                  This device’s camera
+                </button>
+                {(liveSession || sharing.busy) && (
+                  <button
+                    className={button}
+                    onClick={() =>
+                      run(async () => {
+                        if (sharing.stream || sharing.busy) await sharing.stop();
+                        else
+                          await tvRequest(
+                            'stop',
+                            screenId,
+                            { sessionId: data.share_session },
+                            { staff: true },
+                          );
+                        setData((old) => ({ ...old, share_session: null }));
+                      })
+                    }
+                  >
+                    <X size={16} />
+                    Stop sharing
+                  </button>
+                )}
+              </div>
+              <p className="admin-tv-help">
+                Keep this page open while sharing. Save any source changes first.{' '}
+                {!navigator.mediaDevices?.getDisplayMedia &&
+                  'This browser supports camera sharing but cannot share the whole screen.'}
+              </p>
+              <p role="status">{sharing.message}</p>
+              {sharing.stream && (
+                <video
+                  ref={preview}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="admin-share-preview"
+                  aria-label="Your source preview"
+                />
+              )}
+              <details>
+                <summary>Event title & message</summary>
+                <label>
+                  Title
+                  <input
+                    maxLength={120}
+                    value={form.event_title || ''}
+                    onChange={(event) => update('event_title', event.target.value)}
+                  />
+                </label>
+                <label>
+                  Message
+                  <textarea
+                    rows={2}
+                    maxLength={500}
+                    value={form.event_message || ''}
+                    onChange={(event) => update('event_message', event.target.value)}
+                  />
+                </label>
+              </details>
+            </section>
+          )}
+          <details className="admin-panel" open={scene === 'normal'}>
+            <summary>Posters & rotation</summary>
+            <div className="admin-poster-picker">
+              {PROGRAMMES.map((item) => (
+                <label key={item.id}>
+                  <img src={item.image} alt="" loading="lazy" />
+                  <span>
+                    <input
+                      type="checkbox"
+                      checked={form.poster_ids.includes(item.id)}
+                      onChange={(event) =>
+                        update(
+                          'poster_ids',
+                          event.target.checked
+                            ? [...form.poster_ids, item.id]
+                            : form.poster_ids.filter((id) => id !== item.id),
+                        )
+                      }
+                    />
+                    {item.title}
+                  </span>
                 </label>
               ))}
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.include_events}
-                  onChange={(event) => update('include_events', event.target.checked)}
-                />
-                Include upcoming event posters
-              </label>
-            </fieldset>
-            <label className="mt-4 block text-sm font-semibold">
-              Seconds between posters
-              <input
-                className={`${input} mt-1 max-w-32`}
-                type="number"
-                min="5"
-                max="300"
-                value={form.rotation_seconds}
-                onChange={(event) => update('rotation_seconds', Number(event.target.value))}
-              />
-            </label>
-            <label className="mt-4 flex items-center gap-2 text-sm">
+            </div>
+            <label className="admin-check">
               <input
                 type="checkbox"
-                checked={form.muted}
-                onChange={(event) => update('muted', event.target.checked)}
+                checked={form.include_events}
+                onChange={(event) => update('include_events', event.target.checked)}
               />
-              Mute TV audio (helps automatic playback)
+              Include upcoming event posters
             </label>
-            <button
-              className={`${button} mt-5`}
-              disabled={busy || JSON.stringify(form) === saved}
-              onClick={() => run(save)}
-            >
-              Save screen settings
-            </button>
-          </section>
+            <label>
+              Change poster every
+              <select
+                value={form.rotation_seconds}
+                onChange={(event) => update('rotation_seconds', Number(event.target.value))}
+              >
+                {[...new Set([10, 15, 20, 30, 60, form.rotation_seconds])]
+                  .sort((a, b) => a - b)
+                  .map((value) => (
+                    <option key={value} value={value}>
+                      {value} seconds
+                    </option>
+                  ))}
+              </select>
+            </label>
+          </details>
           {hall && (
-            <section className={panel}>
-              <h3 className="text-lg font-bold">Prayer display and classes</h3>
-              <label className="my-3 block text-sm font-semibold">
-                Special notice screen
+            <details className="admin-panel">
+              <summary>Prayer, Jummah & Ramadan notices</summary>
+              <label className="admin-check">
+                <input
+                  type="checkbox"
+                  checked={form.prayer_enabled !== false}
+                  onChange={(event) => update('prayer_enabled', event.target.checked)}
+                />
+                Automatic prayer reminders
+              </label>
+              <p>
+                At Jama‘ah: silence your phone. Dhikr begins 5 minutes later, or 10 minutes after
+                Maghrib. Posters return 20 minutes after Jama‘ah. Class mode pauses this sequence.
+              </p>
+              <label>
+                Show a special notice
                 <select
-                  className={`${input} mt-1`}
                   value={form.notice_mode || 'off'}
                   onChange={(event) => update('notice_mode', event.target.value)}
                 >
-                  <option value="off">Off · normal content</option>
-                  <option value="jummah">Jummah welcome and notice</option>
-                  <option value="taraweeh">Ramadan · Taraweeh du‘a</option>
+                  <option value="off">Use the chosen occasion</option>
+                  <option value="jummah">Jummah welcome</option>
+                  <option value="taraweeh">Taraweeh du‘a</option>
                 </select>
               </label>
-              <label className="my-3 block text-sm font-semibold">
+              <label>
                 Jummah message
                 <textarea
-                  className={`${input} mt-1`}
                   rows={3}
                   maxLength={1200}
                   value={form.jummah_notice || ''}
                   onChange={(event) => update('jummah_notice', event.target.value)}
                 />
               </label>
-              <label className="my-3 block text-sm font-semibold">
-                Taraweeh du‘a (optional, Arabic or English)
+              <label>
+                Ramadan du‘a (optional)
                 <textarea
-                  className={`${input} mt-1`}
+                  rows={3}
                   dir="auto"
-                  rows={4}
                   maxLength={1200}
                   value={form.taraweeh_dua || ''}
                   onChange={(event) => update('taraweeh_dua', event.target.value)}
                 />
               </label>
-              <p className="text-sm text-slate-600">
-                Blank du‘a uses Qur’an 2:201, a general supplication. Special notices remain until
-                switched off. Automatic prayer notices take priority; class mode temporarily hides
-                both.
+              <p>
+                Blank uses Qur’an 2:201. Ramadan mode shows du‘a 20–40 minutes after Isha Jama‘ah,
+                then fasting times. Live video takes its place; prayer reminders still take
+                priority.
               </p>
-              <button
-                className={`${button} my-3`}
-                disabled={busy || JSON.stringify(form) === saved}
-                onClick={() => run(save)}
-              >
-                Save prayer and notice settings
-              </button>
-              <label className="my-3 flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.prayer_enabled !== false}
-                  onChange={(event) => update('prayer_enabled', event.target.checked)}
-                />
-                Automatic Jama‘ah and dhikr display
-              </label>
-              <p className="text-sm text-slate-600">
-                Jama‘ah notice at the congregation time. Dhikr starts 5 minutes later, or 10 minutes
-                after Maghrib. Normal content returns 20 minutes after Jama‘ah. These notices
-                temporarily pause video and screen sharing on the TV.
-              </p>
-              <p className="my-3 text-sm">
-                Class mode pauses automatic prayer notices for one hour, then restores them. Save
-                your chosen video mode first.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  className={button}
-                  disabled={busy}
-                  onClick={() =>
-                    run(async () => {
-                      const next = await tvRequest(
-                        'save',
-                        screenId,
-                        {
-                          settings: {
-                            ...form,
-                            class_until: new Date(Date.now() + 3600000).toISOString(),
-                          },
-                        },
-                        { staff: true },
-                      );
-                      setForm(next.settings);
-                      setSaved(JSON.stringify(next.settings));
-                      setMessage('Class mode enabled for one hour.');
-                    })
-                  }
-                >
-                  Start class mode · 1 hour
-                </button>
-                <button
-                  className={button}
-                  disabled={busy || !form.class_until}
-                  onClick={() =>
-                    run(async () => {
-                      const next = await tvRequest(
-                        'save',
-                        screenId,
-                        { settings: { ...form, class_until: '' } },
-                        { staff: true },
-                      );
-                      setForm(next.settings);
-                      setSaved(JSON.stringify(next.settings));
-                      setMessage('Class mode ended. Saved prayer and notice settings are active.');
-                    })
-                  }
-                >
-                  End class mode
-                </button>
-              </div>
-              {form.class_until && (
-                <p className="mt-3 text-sm">
-                  Class mode ends{' '}
-                  {new Date(form.class_until).toLocaleString('en-GB', {
-                    timeZone: 'Europe/London',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true,
-                  })}{' '}
-                  (London time).
-                </p>
-              )}
-            </section>
+            </details>
           )}
-          {hall && (
-            <>
-              <section className={panel}>
-                <h3 className="text-lg font-bold">Pair a TV</h3>
-                <p className="my-2 text-sm text-slate-600">
-                  Pair each TV once to allow private screen and camera sharing. Open the pairing
-                  link on the TV, or paste its code into “Pair TV” on the display. Links work once
-                  and expire after 10 minutes.
+          <details className="admin-panel">
+            <summary>TV setup & sound</summary>
+            <a className={button} href={screenUrl} target="_blank" rel="noreferrer">
+              Open TV display ↗
+            </a>
+            <p>Use landscape orientation on the TV. Posters and video fit without cropping.</p>
+            <label className="admin-check">
+              <input
+                type="checkbox"
+                checked={form.muted}
+                onChange={(event) => update('muted', event.target.checked)}
+              />
+              Mute TV audio
+            </label>
+            {hall && (
+              <>
+                <h4>Connect a TV once</h4>
+                <p>
+                  Create a link and open it on the TV. Links work once and expire in 10 minutes.
                 </p>
                 <button
                   className={button}
@@ -355,162 +533,81 @@ export default function TvScreenEditor({ screenId }) {
                     )
                   }
                 >
-                  Create pairing link
+                  Create TV link
                 </button>
                 {pairing && (
-                  <div className="mt-3 space-y-2">
-                    <label className="block text-sm">
-                      Pairing link
-                      <input
-                        readOnly
-                        className={input}
-                        value={`${screenUrl}#pair=${pairing.code}`}
-                        onFocus={(event) => event.target.select()}
-                      />
-                    </label>
+                  <div className="admin-actions">
+                    <input
+                      readOnly
+                      aria-label="TV pairing link"
+                      value={`${screenUrl}#pair=${pairing.code}`}
+                      onFocus={(event) => event.target.select()}
+                    />
                     <button
                       className={button}
                       onClick={() => copy(`${screenUrl}#pair=${pairing.code}`)}
                     >
                       Copy link
                     </button>
-                    <label className="block text-sm">
-                      Pairing code
-                      <input
-                        readOnly
-                        className={input}
-                        value={pairing.code}
-                        onFocus={(event) => event.target.select()}
-                      />
-                    </label>
                   </div>
                 )}
-                <h4 className="mb-2 mt-5 text-sm font-bold">Paired TVs</h4>
-                {!data.devices.length && (
-                  <p className="text-sm text-slate-600">
-                    No paired TVs yet. Refresh after pairing.
-                  </p>
-                )}
-                <ul className="space-y-2">
-                  {data.devices.map((device, index) => (
-                    <li
-                      key={device.id}
-                      className="flex flex-wrap items-center justify-between gap-2 text-sm"
-                    >
-                      <span>
-                        TV {index + 1} · paired{' '}
-                        {new Date(device.created_at).toLocaleDateString('en-GB')}
-                      </span>
-                      <button
-                        className={button}
-                        disabled={busy}
-                        onClick={() =>
-                          run(async () => {
-                            await tvRequest(
-                              'revoke',
-                              screenId,
-                              { deviceId: device.id },
-                              { staff: true },
-                            );
-                            setData((previous) => ({
-                              ...previous,
-                              devices: previous.devices.filter((item) => item.id !== device.id),
-                            }));
-                          })
-                        }
-                      >
-                        Revoke
-                      </button>
-                    </li>
-                  ))}
+                <ul className="admin-device-list">
+                  {data.devices
+                    .filter(
+                      (device) =>
+                        Date.parse(device.expires_at) - Date.parse(device.created_at) > 3600000,
+                    )
+                    .map((device, index) => (
+                      <li key={device.id}>
+                        TV {index + 1}
+                        <button
+                          className={button}
+                          disabled={busy}
+                          onClick={() =>
+                            run(async () => {
+                              await tvRequest(
+                                'revoke',
+                                screenId,
+                                { deviceId: device.id },
+                                { staff: true },
+                              );
+                              setData((previous) => ({
+                                ...previous,
+                                devices: previous.devices.filter((item) => item.id !== device.id),
+                              }));
+                            })
+                          }
+                        >
+                          Disconnect
+                        </button>
+                      </li>
+                    ))}
                 </ul>
                 <button
-                  className={`${button} mt-3`}
+                  className={button}
                   disabled={busy}
                   onClick={() =>
                     run(async () => {
-                      const next = await tvRequest('admin', screenId, {}, { staff: true });
-                      setData(next);
+                      setData(await tvRequest('admin', screenId, {}, { staff: true }));
                     })
                   }
                 >
-                  Refresh paired TVs
+                  Refresh connections
                 </button>
-              </section>
-              <section className={panel}>
-                <h3 className="text-lg font-bold">Share live to {screen.label}</h3>
-                <p className="my-2 text-sm text-slate-600">
-                  Keep this admin page open while sharing. Stopping returns the TV to its saved
-                  display. Phone camera sharing is silent.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    className={button}
-                    disabled={
-                      sharing.busy ||
-                      Boolean(sharing.stream) ||
-                      !navigator.mediaDevices?.getDisplayMedia
-                    }
-                    onClick={() => sharing.start('screen')}
-                  >
-                    Share laptop screen
-                  </button>
-                  <button
-                    className={button}
-                    disabled={
-                      sharing.busy ||
-                      Boolean(sharing.stream) ||
-                      !navigator.mediaDevices?.getUserMedia
-                    }
-                    onClick={() => sharing.start('camera')}
-                  >
-                    Share this camera
-                  </button>
-                  {(sharing.stream || sharing.busy) && (
-                    <button className={button} onClick={sharing.stop}>
-                      Stop sharing
-                    </button>
-                  )}
-                  {!sharing.stream && activeRemote && (
-                    <button
-                      className={button}
-                      onClick={() =>
-                        run(async () => {
-                          await tvRequest(
-                            'stop',
-                            screenId,
-                            { sessionId: data.share_session },
-                            { staff: true },
-                          );
-                          setData((previous) => ({ ...previous, share_session: null }));
-                        })
-                      }
-                    >
-                      Stop existing session
-                    </button>
-                  )}
-                </div>
-                {!navigator.mediaDevices?.getDisplayMedia && (
-                  <p className="mt-3 text-sm text-slate-600">
-                    This browser cannot share the phone’s whole screen. Use the camera button here,
-                    or native AirPlay/Cast for whole-phone mirroring.
-                  </p>
-                )}
-                <p role="status" className="mt-3 text-sm">
-                  {sharing.message}
-                </p>
-                {sharing.stream && (
-                  <video
-                    ref={preview}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="mt-3 max-h-72 w-full rounded-lg bg-black"
-                    aria-label="Your sharing preview"
-                  />
-                )}
-              </section>
-            </>
+              </>
+            )}
+          </details>
+          {dirty && (
+            <div className="admin-tv-save">
+              <span>Unsaved changes</span>
+              <button
+                className="admin-button primary"
+                disabled={busy || sharing.busy}
+                onClick={() => run(() => persist(form, form.mode !== JSON.parse(saved).mode))}
+              >
+                Save changes
+              </button>
+            </div>
           )}
         </>
       )}

@@ -1,6 +1,6 @@
 # Mosque TV screens
 
-Each screen has its own entry in Admin and its own saved display settings.
+Open **Admin → TV screens**, then choose a hall from the selector. Each hall keeps its own settings.
 
 | Admin entry           | TV address               |
 | --------------------- | ------------------------ |
@@ -13,27 +13,38 @@ Each screen has its own entry in Admin and its own saved display settings.
 
 ## Choose what each TV shows
 
-Open the screen's entry in Admin. Choose posters, the website livestream, a separate YouTube video/live link, or a local camera. Select programme posters, whether to include published upcoming events, rotation speed and muted audio. Press **Save screen settings**. The TV checks settings every eight seconds; programme/event content refreshes every minute.
+Choose **Normal**, **Class**, **Speech** or **Ramadan**. Occasion and source buttons save immediately. Poster, text and setup edits use **Save changes**. Updates reach TVs within eight seconds.
 
-All screens retain prayer times and a 12-hour clock using Europe/London time. Posters fit without cropping. Press **F**, double-click the display, or use the TV browser's full-screen option. Wake Lock is requested where available; also check the TV's sleep settings.
+| Occasion | Default display                                      | Prayer sequence             | Live sources                                                     |
+| -------- | ---------------------------------------------------- | --------------------------- | ---------------------------------------------------------------- |
+| Normal   | Posters and notices                                  | Automatic                   | Off                                                              |
+| Class    | Posters until a source is chosen                     | Paused until the class ends | Screen, device camera, installed camera, YouTube or website live |
+| Speech   | Posters until a source is chosen                     | Continues                   | Same sources as Class                                            |
+| Ramadan  | Fasting times; du‘a 20–40 minutes after Isha Jama‘ah | Continues                   | Same sources as Class                                            |
 
-The default mode follows the website's enabled/scheduled YouTube livestream, otherwise it shows posters. A YouTube channel homepage is not a video/live link. Videos must allow embedding. Sound starts muted by default; a TV may require someone to press its playback button when sound is enabled.
+Class and Speech return to Normal after the selected duration. **Back to normal** stops any active sharing session, clears temporary notices and restores posters. Changing a saved video source also stops sharing. The shoe area always shows times and posters.
+
+All screens retain prayer times and a 12-hour Europe/London clock. Posters and video fit without cropping. Use landscape orientation on the TV. Double-click requests fullscreen and landscape locking when supported; the TV browser can also enter fullscreen. Wake Lock is requested where available.
+
+**Preview TV** opens the real TV page at 1280×720 inside Admin. It can receive the active shared source. Its separate credential expires after ten minutes and is revoked on closing; it does not replace the physical TV’s pairing. Local feeds require the previewing device to reach the mosque network. A working preview is not confirmation that the physical TV is playing.
+
+YouTube links must identify an embeddable video or live video, not a channel homepage. Audio is muted by default; browsers may require a playback gesture when sound is enabled. Setup controls do not appear on TV pages.
 
 ## Pair a TV for private feeds
 
-1. In Admin, open the correct room and press **Create pairing link**.
-2. Open that link in the TV browser. Alternatively, open the room's TV address, press **Pair TV**, and paste the pairing code using the TV's keyboard or remote-control app.
-3. In Admin, press **Refresh paired TVs** to check that it appears.
+1. Choose the hall in Admin, expand **TV setup & sound**, and press **Create TV link**.
+2. Open that link in the TV browser.
+3. Press **Refresh connections** in Admin to check that it appears.
 
-Pairing links work once and expire after ten minutes. A paired browser remembers its credential for 90 days. Clearing browser storage requires pairing again. Use **Revoke** to remove a TV's private access. Public poster and YouTube displays continue to work without pairing.
+Pairing links work once and expire after ten minutes. A paired browser remembers its credential for 90 days. Clearing browser storage requires pairing again. Use **Disconnect** to remove a TV's private access. Public poster and YouTube displays continue to work without pairing.
 
 Treat an unused pairing link as access to that room's private feed. It is removed from the TV address after use. No staff login is saved on the TV. Camera URLs and screen-sharing connection details are withheld from public visitors.
 
 ## Share a laptop screen or phone camera
 
-Open the room in Admin on the sending device, then choose **Share laptop screen** or **Share this camera**. Approve the browser's capture request. The selected screen or camera appears on paired TVs for that room, beside a poster and below prayer times.
+Open the room in Admin on the sending device. Choose Class, Speech or Ramadan, then **Share screen** or **This device’s camera**. Approve the browser's capture request. The selected screen or camera appears on paired TVs for that room, beside a poster and below prayer times.
 
-Keep the sending admin page open and the phone awake. Stop with **Stop sharing**, the browser's sharing control, or by leaving that admin screen. Normal display resumes. If the sender loses its connection, the session expires within 90 seconds, followed by the TV's next status check. A different authorised staff member can refresh the room and stop its existing session.
+Keep the sending admin page open and the phone awake. Stop with **Stop sharing**, the browser's sharing control, or by leaving that admin screen. The saved source resumes; **Back to normal** restores posters. If the sender loses its connection, the session expires within 90 seconds, followed by the TV's next status check. A different authorised staff member can refresh the room and stop its existing session.
 
 Laptop screen capture can include audio when the selected browser/source supports it. The camera button sends video without microphone audio. Whole-phone screen capture is not supported by current iPhone/Android browsers; native AirPlay/Cast is separate and takes over the TV display rather than appearing inside this prayer layout. See [browser screen capture](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) and [camera capture](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
 
@@ -79,14 +90,20 @@ The three hall screens support cameras, YouTube and paired screen/camera sharing
 
 With automatic prayer display enabled, each congregation starts a silent phone/quiet-hall notice. Dhikr begins five minutes after Jama‘ah, or ten minutes for Maghrib. At twenty minutes after Jama‘ah, the saved display resumes (posters by default). Friday follows both configured Jummah congregation times instead of Dhuhr. Missing or stale daily data does not trigger a sequence. Ayat al-Kursi is shown in three consecutive parts, followed by short dhikr; each card remains for forty seconds. General mosque-etiquette reminders rotate beneath ordinary hall content. These are original reminders, not attributed hadith or specific reward claims.
 
-**Class mode · 1 hour** temporarily suspends automatic prayer notices so the chosen video or shared lesson remains visible. It expires automatically. **End class mode** restores the saved prayer and notice settings immediately. Screen-sharing capture remains active on the sender while a prayer notice temporarily replaces playback on the TV; stop sharing to end capture itself.
+Class pauses prayer and manual notices until its expiry. Speech and Ramadan allow prayer notices to temporarily replace video. Capture remains active on the sender during that interruption; use Stop sharing to end capture itself.
 
-A Super Admin can choose **TV operator (TV controls only)** in **Users & roles**, for an existing user or an invitation. This role can control the four TV panels but cannot edit website pages, timetable records or other users. Assigning it replaces that user's previous role. Existing administrators and content editors retain TV access. No users are promoted automatically. Apply the TV-operator migration and redeploy both `tv-control` and `manage-user` before deploying this frontend.
+A Super Admin can choose **TV operator (TV controls only)** in **Staff access / Users & roles**, for an existing user or an invitation. This role can control the four TV panels but cannot edit website pages, timetable records or other users. Assigning it replaces that user's previous role. Existing administrators and content editors retain TV access. No users are promoted automatically. Apply the TV-operator migration and redeploy both `tv-control` and `manage-user` before deploying this frontend.
 
 Camera discovery must run on a device connected to the mosque network. The saved office-PC connection on port 4455 identifies OBS remote control, not a confirmed camera stream. Check the router's connected-device list or the camera source in OBS for the actual address and stream path. Do not assume all cameras share that subnet or add guessed IPs as streams.
 
 ## Jummah and Ramadan notices
 
-Each hall has **Special notice screen** in its admin panel: Off, Jummah, or Ramadan · Taraweeh du‘a. Save to show it; switch Off and save to resume ordinary content. This manual choice is available year-round for setup and remains on until changed. It does not automatically follow an inferred Ramadan date.
+Under **Prayer, Jummah & Ramadan notices**, each hall has **Show a special notice** in its admin panel: Off, Jummah, or Ramadan · Taraweeh du‘a. Save to show it; switch Off and save to resume ordinary content. This manual choice is available year-round for setup and remains on until changed. It does not automatically follow an inferred Ramadan date.
 
 Edit the Jummah message for welcome information and local notices. It is also used at both Friday congregation times. Taraweeh accepts up to 1,200 characters of Arabic or English. Blank text displays the general Qur’anic supplication in [Al-Baqarah 2:201](https://quran.com/2/201); it is not presented as a prescribed Taraweeh formula. Text is displayed literally, never executed as HTML. Automatic Jama‘ah/dhikr takes priority over special notices; class mode suspends both. Shoe-area settings cannot enable either special notice.
+
+In Ramadan mode, fasting times use the dated mosque timetable. Before iftar the display shows today’s Fajr and Maghrib beginning times. At/after iftar it uses tomorrow’s record, including month and year boundaries. Missing data is labelled unavailable; times are never guessed. Live video takes the place of Ramadan cards, while enabled automatic prayer notices retain priority.
+
+## Streamerr video
+
+[Streamerr Video](https://streamerr.co/videostreaming) is a separate video service supporting OBS/RTMP input and website embedding. An existing radio URL is audio only. This implementation accepts browser-playable HLS/WHEP camera sources and YouTube video links; a Streamerr account’s embed/player must be checked before connecting that service. No video subscription is purchased or configured automatically.

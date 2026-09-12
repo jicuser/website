@@ -99,3 +99,39 @@ test('notice settings reject malformed and oversized input without evaluating te
   const text = "<script>alert(1)</script>'; DROP TABLE profiles; --";
   assert.equal(validateSettings({ jummah_notice: text }).jummah_notice, text);
 });
+
+import { ramadanScene, fastingTimes } from '../src/lib/tvPrayerSequence.js';
+import { tvScene } from '../supabase/functions/_shared/tv.js';
+test('Class and Speech expire exactly; only Class suspends prayer notices', () => {
+  const end = '2026-09-12T18:00:00Z';
+  for (const scene_mode of ['class', 'speech']) {
+    assert.equal(tvScene({ scene_mode, class_until: end }, Date.parse(end) - 1), scene_mode);
+    assert.equal(tvScene({ scene_mode, class_until: end }, Date.parse(end)), 'normal');
+  }
+  assert.equal(run('18:05:00', { scene_mode: 'speech', class_until: end }).phase, 'dhikr');
+  assert.equal(run('18:05:00', { scene_mode: 'class', class_until: end }), null);
+  assert.equal(tvScene({ scene_mode: 'ramadan' }), 'ramadan');
+  assert.throws(() => validateSettings({ scene_mode: 'random' }));
+  assert.throws(() => validateSettings({ event_title: 'x'.repeat(121) }));
+});
+test('Ramadan du‘a starts after Isha dhikr and lasts twenty minutes', () => {
+  const at = (time) => ramadanScene(new Date(`2026-09-12T${time}+01:00`), times);
+  assert.equal(at('21:34:59'), 'fasting');
+  assert.equal(at('21:35:00'), 'taraweeh');
+  assert.equal(at('21:54:59'), 'taraweeh');
+  assert.equal(at('21:55:00'), 'fasting');
+  assert.equal(ramadanScene(new Date('2026-09-13T12:00:00Z'), times), null);
+  assert.equal(ramadanScene(new Date('2026-09-12T12:00:00Z'), times, 'shoe-area'), null);
+});
+test('fasting times move to the next date after iftar, including month boundaries', () => {
+  const today = { d_date: '2026-09-30', fajr: '5:30 AM', maghrib: '6:40 PM' };
+  const tomorrow = { d_date: '2026-10-01', fajr: '5:32 AM', maghrib: '6:38 PM' };
+  const at = (time, next = tomorrow) =>
+    fastingTimes(new Date(`2026-09-30T${time}+01:00`), today, next);
+  assert.equal(at('18:39:59').d_date, today.d_date);
+  assert.equal(at('18:40:00').d_date, tomorrow.d_date);
+  assert.equal(at('23:59:59').fajr, '5:32 AM');
+  assert.equal(at('20:00:00', null), null);
+  assert.equal(at('20:00:00', today), null);
+  assert.equal(fastingTimes(new Date('2026-10-01T12:00:00Z'), today, tomorrow), null);
+});

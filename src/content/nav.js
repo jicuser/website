@@ -47,6 +47,7 @@ export const NAV_GROUPS = [
       { name: 'Our History', path: '/about/history' },
       { name: 'Financial History', path: '/financial-history' },
       { name: 'Contact Us', path: '/contact' },
+      { name: 'Social Media', path: '/social-media' },
     ],
   },
   {

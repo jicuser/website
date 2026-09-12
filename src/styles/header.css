@@ -180,6 +180,9 @@
   line-height: 1.2;
   color: var(--jic-text);
 }
+.jic-radio-flat > svg {
+  color: #8b929c;
+}
 .jic-radio-flat small {
   display: none;
 }
@@ -188,13 +191,10 @@
   height: 6px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--jic-muted);
+  background: #ef4444;
 }
 .jic-radio-flat[data-availability='online'] i {
   background: #22c55e;
-}
-.jic-radio-flat[data-availability='offline'] i {
-  background: #ef4444;
 }
 .jic-radio-flat:disabled {
   opacity: 0.5;
@@ -476,6 +476,14 @@ html {
   flex: 0 0 auto;
 }
 
+/* The four-letter local subset avoids a remote font request on phones. */
+@font-face {
+  font-family: 'JIC Menu';
+  src: url('/fonts/allura-menu.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 /* Mobile: an inline compact menu and a separate full directory in the bottom bar. */
 .jic-mobile-controls,
 .jic-mobile-quick-nav {
@@ -500,6 +508,8 @@ html {
     position: relative;
     flex: 0 0 auto;
     z-index: 40;
+    align-self: flex-end;
+    margin-bottom: 4px;
   }
   .jic-menu-word {
     display: flex;
@@ -510,9 +520,10 @@ html {
     border: 0;
     background: transparent;
     color: var(--jic-text);
-    font-family: 'Snell Roundhand', 'Segoe Script', 'Brush Script MT', cursive;
-    font-style: italic;
-    font-size: clamp(1.75rem, 7vw, 2.2rem);
+    font-family: 'JIC Menu', cursive;
+    font-style: normal;
+    font-weight: 400;
+    font-size: clamp(2rem, 8vw, 2.5rem);
     line-height: 1.25;
   }
   .jic-menu-word[aria-expanded='true'] svg {
@@ -593,7 +604,7 @@ html {
     inset: auto 0 0;
     z-index: 50;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom))
       max(8px, env(safe-area-inset-left));
     background: var(--jic-glass-surface-strong);
@@ -601,7 +612,7 @@ html {
     border-top: 1px solid var(--jic-border);
     backdrop-filter: var(--jic-glass-backdrop);
   }
-  .jic-mobile-controls button {
+  .jic-mobile-controls :is(button, a) {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -616,7 +627,7 @@ html {
   .jic-bottom-menu-trigger svg {
     color: var(--jic-gold);
   }
-  .jic-mobile-controls button:focus-visible {
+  .jic-mobile-controls :is(button, a):focus-visible {
     outline: 2px solid var(--jic-gold);
     outline-offset: -2px;
   }

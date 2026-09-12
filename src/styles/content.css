@@ -289,13 +289,10 @@ html[data-theme] .jic-radio-player-page {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--jic-muted);
+  background: #ef4444;
 }
 .jic-player-status[data-availability='online'] i {
   background: #22c55e;
-}
-.jic-player-status[data-availability='offline'] i {
-  background: #ef4444;
 }
 .jic-home-route .jic-rail-heading h2 {
   color: #fff;

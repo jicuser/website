@@ -1,0 +1,185 @@
+/* Public search and social pages. Materials belong to liquid-glass.css. */
+.jic-search-page,
+.jic-social-page {
+  width: min(100% - 32px, 1000px);
+  margin: 24px auto 40px;
+}
+.jic-search-page > p,
+.jic-social-intro > p {
+  margin: 10px 0 22px;
+  color: var(--jic-text-secondary);
+}
+.jic-search-page label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.jic-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+}
+.jic-search-field input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  border: 0;
+  font-size: 16px;
+  padding: 6px;
+}
+.jic-search-suggestions,
+.jic-social-jump {
+  display: flex;
+  gap: 8px;
+  margin-block: 20px;
+  overflow-x: auto;
+  padding-block: 4px 10px;
+}
+.jic-search-suggestions button,
+.jic-social-jump a {
+  min-height: 44px;
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+}
+.jic-search-results {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.jic-search-results a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+}
+.jic-search-results a > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.jic-search-results a > svg {
+  flex-shrink: 0;
+}
+.jic-search-results small,
+.jic-search-results strong {
+  display: block;
+}
+.jic-search-results small {
+  color: var(--jic-text-secondary);
+  margin-bottom: 5px;
+}
+.jic-search-results p {
+  margin-top: 6px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.jic-social-eyebrow {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.jic-social-intro {
+  max-width: 620px;
+}
+.jic-social-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.jic-social-card {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--jic-border);
+  border-radius: 18px;
+  scroll-margin-top: calc(var(--jic-prayer-sticky-offset) + 20px);
+}
+.jic-social-identity {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.jic-social-identity svg {
+  flex-shrink: 0;
+}
+.jic-social-identity h2 {
+  margin: 0 0 3px;
+}
+.jic-social-identity a {
+  font-size: 0.875rem;
+  color: var(--jic-text-secondary);
+}
+.jic-social-card > p {
+  margin-block: 18px;
+  line-height: 1.6;
+}
+.jic-social-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--jic-text-secondary);
+}
+.jic-social-topics li::before {
+  content: '· ';
+}
+.jic-social-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.jic-social-actions :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  min-height: 44px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  font-size: 0.875rem;
+}
+.jic-social-preview {
+  margin-top: 20px;
+}
+.jic-social-preview iframe {
+  width: 100%;
+  height: 480px;
+  border: 0;
+  border-radius: 8px;
+  background: white;
+}
+#youtube .jic-social-preview iframe {
+  height: auto;
+  min-height: 200px;
+  aspect-ratio: 16/9;
+}
+.jic-social-preview p {
+  margin-top: 8px;
+  font-size: 0.75rem;
+}
+.jic-social-preview p a {
+  text-decoration: underline;
+}
+@media (max-width: 767px) {
+  .jic-social-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .jic-social-card {
+    padding: 18px;
+  }
+  .jic-social-jump {
+    margin-inline: -4px;
+  }
+}

@@ -12,6 +12,7 @@ import {
   Info,
   GraduationCap,
   Mail,
+  Share2,
 } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
@@ -88,6 +89,13 @@ const MORE_CARDS = [
     icon: GraduationCap,
   },
   { key: 'contact', title: 'Contact', text: 'Visit or get in touch.', to: '/contact', icon: Mail },
+  {
+    key: 'social-media',
+    title: 'Social Media',
+    text: 'Our channels, videos and community updates.',
+    to: '/social-media',
+    icon: Share2,
+  },
 ];
 
 function useHomeTiles() {
@@ -179,6 +187,7 @@ export default function HomePage() {
           <Link
             to={to}
             className={cn('jic-feature-card', !img && 'is-glass-only')}
+            data-glass={!img ? 'clear' : undefined}
             key={key}
             style={img ? { '--card-image': `url("${img}")` } : undefined}
           >

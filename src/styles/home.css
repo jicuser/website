@@ -1,3 +1,10 @@
+/* The photo veil guarantees contrast under clear glass and unboxed text. */
+html[data-theme] {
+  --jic-photo-veil: rgba(250, 251, 253, 0.7);
+}
+html[data-theme='dark'] {
+  --jic-photo-veil: rgba(3, 9, 15, 0.66);
+}
 /* One approved photograph across public routes. Admin has a separate layout. */
 .jic-public-route {
   position: relative;
@@ -22,13 +29,10 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #03090faa, #03090f99 42%, #03090fbb);
+  background: var(--jic-photo-veil);
 }
 html[data-theme='light'] .jic-page-backdrop img {
   filter: brightness(1.12) saturate(0.75);
-}
-html[data-theme='light'] .jic-page-backdrop::after {
-  background: linear-gradient(180deg, #fafbfde8, #fafbfdd9 42%, #fafbfde6);
 }
 html[data-theme] .jic-public-route :is(.jic-public-main, .page-transition) {
   background: transparent !important;

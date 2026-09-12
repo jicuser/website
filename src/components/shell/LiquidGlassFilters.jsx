@@ -58,7 +58,7 @@ export default function LiquidGlassFilters() {
           <feDisplacementMap
             in="SourceGraphic"
             in2="edges"
-            scale="12"
+            scale="20"
             xChannelSelector="R"
             yChannelSelector="G"
           />

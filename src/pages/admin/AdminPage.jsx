@@ -1,6 +1,6 @@
 import { IMAGE_ACCEPT, validateImage } from '@/lib/images';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   CalendarDays,
   Clock3,
@@ -48,7 +48,7 @@ const SECTIONS = [
   ['events', 'Events', CalendarDays, 'events'],
   ['announcements', 'Announcements', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
-  ...TV_SCREENS.map((screen) => [`tv-${screen.id}`, screen.label, Monitor, 'tv']),
+  ['tv', 'TV screens', Monitor, 'tv'],
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
   ['users', 'Users & roles', ShieldCheck, 'users'],
@@ -106,92 +106,70 @@ async function uploadImage(file, folder = 'admin') {
 }
 
 function DashboardSection({ onChoose }) {
-  const [stats, setStats] = useState(null);
-  const load = useCallback(async () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const [events, announcements, prayers, team] = await Promise.all([
-      supabase.from('events').select('*', { count: 'exact', head: true }).gte('event_date', today),
-      supabase
-        .from('announcements')
-        .select('*', { count: 'exact', head: true })
-        .eq('published', true),
-      supabase
-        .from('prayer_times')
-        .select('*', { count: 'exact', head: true })
-        .gte('d_date', today),
-      supabase
-        .from('team_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('published', true),
-    ]);
-    setStats({
-      events: events.count ?? 0,
-      announcements: announcements.count ?? 0,
-      prayers: prayers.count ?? 0,
-      team: team.count ?? 0,
-    });
-  }, []);
-  useEffect(() => {
-    load();
-  }, [load]);
-  const cards = [
-    ['Upcoming events', stats?.events, CalendarDays],
-    ['Live announcements', stats?.announcements, Megaphone],
-    ['Timetable days', stats?.prayers, Clock3],
-    ['Team members', stats?.team, Users],
-  ];
+  const { can, isSuperAdmin } = useAuth();
+  const tasks = [
+    ['tv', 'TV screens', 'Choose a hall, show a class or return to posters.', Monitor, 'tv'],
+    [
+      'prayer',
+      'Prayer times',
+      'Today’s times, monthly timetable and Jummah.',
+      Clock3,
+      'prayer_times',
+    ],
+    ['events', 'Events & posters', 'Add a poster, date and event details.', CalendarDays, 'events'],
+    ['announcements', 'Notices', 'Keep the community up to date.', Megaphone, 'announcements'],
+    ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
+    ['users', 'Staff access', 'Choose who can edit and control TVs.', Users, 'users'],
+  ].filter(([, , , , permission]) => (permission === 'users' ? isSuperAdmin : can(permission)));
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="admin-heading">
         <div>
           <span className="admin-eyebrow">JAMATIA ISLAMIC CENTRE</span>
-          <h2 className="text-2xl font-bold">Overview</h2>
+          <h2>What would you like to do?</h2>
         </div>
-        <button onClick={load} className={ghost}>
-          <RefreshCw size={15} />
-          Refresh
-        </button>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(([name, value, Icon]) => (
-          <div key={name} className="rounded-2xl border bg-white p-5 shadow-sm">
-            <Icon className="mb-4 text-amber-600" />
-            <div className="text-3xl font-bold">{value ?? '—'}</div>
-            <div className="text-sm text-slate-500">{name}</div>
-          </div>
+      <div className="admin-task-grid">
+        {can('content') && (
+          <Link to="/">
+            <Home />
+            <strong>Website</strong>
+            <span>Open the site, then choose Edit this page for pictures and text.</span>
+          </Link>
+        )}
+        {tasks.map(([id, title, description, Icon]) => (
+          <button key={id} onClick={() => onChoose(id)}>
+            <Icon />
+            <strong>{title}</strong>
+            <span>{description}</span>
+          </button>
         ))}
       </div>
-      <div className="admin-shortcuts">
-        <button onClick={() => onChoose('content')}>
-          <FileText />
-          <strong>Pages & pictures</strong>
-          <b>Open editor →</b>
-        </button>
-        <Link to="/admin/home-tiles">
-          <Home />
-          <strong>Homepage tiles</strong>
-          <b>Edit tiles →</b>
-        </Link>
-        <button onClick={() => onChoose('prayer')}>
-          <Clock3 />
-          <strong>Timetable & Jummah</strong>
-          <b>Manage times →</b>
-        </button>
-      </div>
-      <section className="admin-panel">
-        <div className="admin-heading">
-          <div>
-            <span className="admin-eyebrow">LIVE PREVIEW</span>
-            <h3>Website preview</h3>
-          </div>
-          <Link to="/" className="admin-button">
-            Open website ↗
-          </Link>
-        </div>
-        <div className="admin-site-preview">
-          <iframe src="/?preview=1" title="JIC live website preview" />
-        </div>
-      </section>
+    </div>
+  );
+}
+function TvSection() {
+  const [screenId, setScreenId] = useState('mens-main');
+  const { dirty } = useAdminSave();
+  return (
+    <div className="admin-tv-workspace">
+      <label className="admin-tv-select">
+        Choose a TV
+        <select
+          value={screenId}
+          onChange={(event) => {
+            if (!dirty || window.confirm('Discard unsaved screen settings?'))
+              setScreenId(event.target.value);
+          }}
+        >
+          {TV_SCREENS.map((screen) => (
+            <option key={screen.id} value={screen.id}>
+              {screen.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <TvScreenEditor key={screenId} screenId={screenId} />
     </div>
   );
 }
@@ -1113,10 +1091,12 @@ export default function AdminPage() {
       ),
     [can, isSuperAdmin],
   );
-  const [active, setActive] = useState(() => allowed[0]?.[0] || 'dashboard');
-  useEffect(() => {
-    if (!allowed.some((item) => item[0] === active)) setActive(allowed[0]?.[0] || 'dashboard');
-  }, [allowed, active]);
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const active = allowed.some((item) => item[0] === params.get('section'))
+    ? params.get('section')
+    : allowed[0]?.[0] || 'dashboard';
+  const setActive = (key) => setParams({ section: key }, { replace: true });
 
   const chooseSection = (key) => {
     if (key === active || !allowed.some((item) => item[0] === key)) return;
@@ -1129,18 +1109,13 @@ export default function AdminPage() {
   };
 
   const section = {
-    ...Object.fromEntries(
-      TV_SCREENS.map((screen) => [
-        `tv-${screen.id}`,
-        <TvScreenEditor key={screen.id} screenId={screen.id} />,
-      ]),
-    ),
+    tv: <TvSection />,
     dashboard: <DashboardSection onChoose={chooseSection} />,
     prayer: <PrayerEditor />,
     events: <EventsSection />,
     announcements: <AnnouncementsSection />,
     livestream: <LivestreamSection />,
-    content: <PageEditor />,
+    content: <PageEditor initialPath={params.get('page') || '/'} />,
     team: <TeamSection />,
     users: <UsersSection />,
     audit: <AuditSection />,
@@ -1150,81 +1125,87 @@ export default function AdminPage() {
 
   return (
     <div className="admin-console min-h-screen bg-slate-100 text-slate-900">
-      <header className="sticky top-0 z-30 border-b bg-[#faf7ef] text-slate-950">
-        <div className="flex min-h-16 items-center justify-between gap-3 px-4 lg:px-6">
-          <div className="min-w-0">
-            <div className="font-bold">JIC Admin</div>
-            <div className="truncate text-xs text-slate-500">
-              {auditName} · {role}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className={`${btn} border border-slate-200 bg-white text-slate-800`}
-              aria-label={theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
-            >
-              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-            <button
-              type="button"
-              onClick={() => saveCurrent().catch(() => {})}
-              disabled={!dirty || saving}
-              className={`${primary} admin-global-save`}
-            >
-              <Save size={15} />
-              <span className="hidden sm:inline">{saving ? 'Saving…' : saveLabel}</span>
-              <span className="sm:hidden">Save</span>
-            </button>
-            <Link
-              to="/"
-              className={`${btn} border border-slate-200 bg-white text-slate-800 hover:bg-slate-50`}
-            >
-              <Home size={15} />
-              <span className="hidden md:inline">Website</span>
-            </Link>
-            <Link
-              to="/tv179"
-              target="_blank"
-              className={`${btn} border border-slate-200 bg-white text-slate-800`}
-              aria-label="Open TV display"
-            >
-              <Monitor size={15} />
-              <span className="hidden md:inline">TV display</span>
-            </Link>
-            <button
-              onClick={safeSignOut}
-              className={`${btn} border border-slate-200 bg-white text-slate-800 hover:bg-red-50 hover:text-red-700`}
-            >
-              <LogOut size={15} />
-              <span className="hidden md:inline">Sign out</span>
-            </button>
-          </div>
+      <header className="admin-toolbar">
+        <div className="admin-toolbar-title">
+          <strong>JIC Admin</strong>
+          <small>
+            {auditName} · {role.replaceAll('_', ' ')}
+          </small>
         </div>
+        <div className="admin-toolbar-actions">
+          <button
+            className="admin-button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <button
+            className="admin-button"
+            onClick={() => {
+              if (!dirty || window.confirm('Discard unsaved changes?')) navigate('/');
+            }}
+          >
+            <Home size={18} />
+            Website
+          </button>
+          <button className="admin-button" onClick={safeSignOut} aria-label="Sign out">
+            <LogOut size={18} />
+            <span className="admin-desktop-label">Sign out</span>
+          </button>
+        </div>
+        {dirty && (
+          <button
+            className="admin-button primary admin-save-pending"
+            disabled={saving}
+            onClick={() => saveCurrent().catch(() => {})}
+          >
+            <Save size={16} />
+            {saving ? 'Saving…' : saveLabel}
+          </button>
+        )}
         {status && (
-          <div className="px-4 pb-2 text-right text-xs font-semibold text-slate-500 lg:px-6">
+          <p role="status" className="admin-toolbar-status">
             {status}
-          </div>
+          </p>
         )}
       </header>
-
-      <div className="mx-auto grid max-w-[1500px] lg:grid-cols-[240px_1fr]">
-        <aside className="border-b bg-white p-3 lg:min-h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r">
-          <nav className="flex gap-2 overflow-x-auto lg:flex-col">
-            {allowed.map(([key, name, Icon]) => (
-              <button
-                key={key}
-                onClick={() => chooseSection(key)}
-                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium ${active === key ? 'bg-amber-100 text-amber-900' : 'text-slate-600 hover:bg-slate-50'}`}
-              >
-                <Icon size={17} />
-                {name}
-              </button>
+      <div className="admin-console-layout">
+        <aside className="admin-navigation">
+          <label className="admin-mobile-section">
+            Go to
+            <select value={active} onChange={(event) => chooseSection(event.target.value)}>
+              {allowed.map(([key, name]) => (
+                <option key={key} value={key}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <nav aria-label="Admin sections">
+            {[
+              ['Everyday', ['dashboard', 'tv', 'prayer', 'events', 'announcements', 'livestream']],
+              ['Website & people', ['content', 'team', 'users', 'audit']],
+            ].map(([group, keys]) => (
+              <div key={group}>
+                <p>{group}</p>
+                {allowed
+                  .filter(([key]) => keys.includes(key))
+                  .map(([key, name, Icon]) => (
+                    <button
+                      key={key}
+                      onClick={() => chooseSection(key)}
+                      aria-current={active === key ? 'page' : undefined}
+                    >
+                      <Icon size={18} />
+                      {name}
+                    </button>
+                  ))}
+              </div>
             ))}
           </nav>
         </aside>
-        <main className="min-w-0 p-4 lg:p-8">{section}</main>
+        <main className="admin-main">{section}</main>
       </div>
     </div>
   );

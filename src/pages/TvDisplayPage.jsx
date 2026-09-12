@@ -4,9 +4,15 @@ import useTvScreen from '@/hooks/useTvScreen';
 import PrivateTvPlayer from '@/components/tv/PrivateTvPlayer';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
-import { tvPrayerSequence, tvSpecialNotice } from '@/lib/tvPrayerSequence';
+import {
+  tvPrayerSequence,
+  tvSpecialNotice,
+  ramadanScene,
+  fastingTimes,
+} from '@/lib/tvPrayerSequence';
 import { TV_REMINDERS } from '@/content/tvReminders';
 import { TV_SCREENS } from '@/lib/tvControl';
+import { tvScene } from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
@@ -30,12 +36,6 @@ export default function TvDisplayPage() {
 
 function ScreenDisplay({ screenId }) {
   const tv = useTvScreen(screenId);
-  const [pairOpen, setPairOpen] = useState(false);
-  const [pairCode, setPairCode] = useState('');
-  const pairDialog = useRef(null);
-  useEffect(() => {
-    if (pairOpen) pairDialog.current?.showModal();
-  }, [pairOpen]);
   const [privateFailed, setPrivateFailed] = useState(false);
   const privateSource =
     tv.session?.id || (tv.settings.mode === 'camera' ? tv.settings.camera_url : '');
@@ -50,7 +50,7 @@ function ScreenDisplay({ screenId }) {
     return () => clearTimeout(timer);
   }, [privateFailed]);
   const screen = useRef(null);
-  const prayers = usePrayerTimes();
+  const prayers = usePrayerTimes({ includeTomorrow: true });
   const { events, livestream, stale } = useHomeLiveContent({ eventLimit: 50 });
   const [now, setNow] = useState(() => new Date());
   const [slide, setSlide] = useState(0);
@@ -64,10 +64,7 @@ function ScreenDisplay({ screenId }) {
     tv.settings,
     screenId,
   );
-  const specialNotice = tvSpecialNotice(now, tv.settings, screenId);
-  const noticeVisible = Boolean(sequence || specialNotice);
-  const showPrivate =
-    screenId !== 'shoe-area' && !noticeVisible && tv.paired && privateSource && !privateFailed;
+  const scene = tvScene(tv.settings, now.getTime());
   const posters = useMemo(() => {
     const programmePosters = PROGRAMMES.filter((item) =>
       tv.settings.poster_ids.includes(item.id),
@@ -106,12 +103,18 @@ function ScreenDisplay({ screenId }) {
         livestream?.enabled &&
         (!scheduled || scheduled <= now.getTime()))),
   );
-  const showYoutube =
-    screenId !== 'shoe-area' &&
-    !noticeVisible &&
-    !showPrivate &&
-    liveAvailable &&
-    failedVideo !== videoId;
+  const privateReady =
+    screenId !== 'shoe-area' && scene !== 'normal' && tv.paired && privateSource && !privateFailed;
+  const youtubeReady =
+    screenId !== 'shoe-area' && scene !== 'normal' && liveAvailable && failedVideo !== videoId;
+  const specialNotice =
+    !privateReady && !youtubeReady
+      ? tvSpecialNotice(now, tv.settings, screenId) ||
+        (scene === 'ramadan' ? ramadanScene(now, prayers.todaysTimes, screenId) : null)
+      : null;
+  const noticeVisible = Boolean(sequence || specialNotice);
+  const showPrivate = !noticeVisible && privateReady;
+  const showYoutube = !noticeVisible && !showPrivate && youtubeReady;
   const showLive = showPrivate || showYoutube;
   const visiblePosters = posters.length
     ? [
@@ -176,7 +179,14 @@ function ScreenDisplay({ screenId }) {
   }, []);
 
   const onUnavailable = useCallback(() => setFailedVideo(videoId), [videoId]);
-  const enterFullscreen = () => screen.current?.requestFullscreen?.().catch(() => {});
+  const enterFullscreen = async () => {
+    try {
+      await screen.current?.requestFullscreen?.();
+      await window.screen.orientation?.lock?.('landscape');
+    } catch {
+      /* The TV controls its own orientation when locking is unavailable. */
+    }
+  };
 
   return (
     <div ref={screen} className="jic-tv-display" onDoubleClick={enterFullscreen}>
@@ -198,13 +208,18 @@ function ScreenDisplay({ screenId }) {
       >
         {sequence && <TvPrayerScene sequence={sequence} jummahNotice={tv.settings.jummah_notice} />}
         {!sequence && specialNotice && (
-          <TvSpecialNotice mode={specialNotice} settings={tv.settings} />
+          <TvSpecialNotice
+            mode={specialNotice}
+            settings={tv.settings}
+            fasting={fastingTimes(now, prayers.todaysTimes, prayers.tomorrowsTimes)}
+          />
         )}
         {showPrivate && (
           <section className="jic-tv-video">
-            <h1>
-              {tv.label} · {tv.session?.kind === 'screen' ? 'Shared screen' : 'Live camera'}
-            </h1>
+            <h1>{tv.settings.event_title || tv.label}</h1>
+            {tv.settings.event_message && (
+              <p className="jic-tv-event-message">{tv.settings.event_message}</p>
+            )}
             <PrivateTvPlayer
               screenId={screenId}
               deviceToken={tv.deviceToken}
@@ -219,8 +234,12 @@ function ScreenDisplay({ screenId }) {
         {showYoutube && (
           <section className="jic-tv-video">
             <h1>
-              {tv.settings.mode === 'youtube' ? tv.label : livestream?.title || 'JIC Livestream'}
+              {tv.settings.event_title ||
+                (tv.settings.mode === 'youtube' ? tv.label : livestream?.title || 'JIC Livestream')}
             </h1>
+            {tv.settings.event_message && (
+              <p className="jic-tv-event-message">{tv.settings.event_message}</p>
+            )}
             <YouTubeScreenPlayer
               videoId={videoId}
               title={tv.settings.mode === 'youtube' ? tv.label : livestream?.title}
@@ -281,7 +300,7 @@ function ScreenDisplay({ screenId }) {
           </p>
         )}
         <span>{tv.label}</span>
-        {tv.error && <span role="status">{tv.error}</span>}
+        {tv.error && <span role="status">Display update delayed</span>}
         {privateFailed && <span role="status">Live feed unavailable · retrying</span>}
         {stale ? (
           'Content update delayed · reconnecting'
@@ -301,46 +320,7 @@ function ScreenDisplay({ screenId }) {
             {posters.length > 1 && ` · ${(slide % posters.length) + 1} / ${posters.length}`}
           </span>
         )}
-        {screenId !== 'shoe-area' && !tv.paired && (
-          <button className="jic-tv-pair-button" onClick={() => setPairOpen(true)}>
-            Pair TV
-          </button>
-        )}
       </footer>
-      {pairOpen && (
-        <dialog
-          ref={pairDialog}
-          onCancel={() => setPairOpen(false)}
-          className="jic-tv-pairing"
-          aria-labelledby="tv-pair-title"
-        >
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              window.location.hash = `pair=${pairCode.trim()}`;
-              setPairOpen(false);
-              tv.refresh();
-            }}
-          >
-            <h2 id="tv-pair-title">Pair {tv.label}</h2>
-            <label>
-              Paste the code from Admin → {tv.label}
-              <input
-                autoFocus
-                value={pairCode}
-                onChange={(event) => setPairCode(event.target.value)}
-                required
-                pattern="[a-f0-9]{64}"
-                autoComplete="off"
-              />
-            </label>
-            <button type="submit">Pair TV</button>
-            <button type="button" onClick={() => setPairOpen(false)}>
-              Cancel
-            </button>
-          </form>
-        </dialog>
-      )}
     </div>
   );
 }

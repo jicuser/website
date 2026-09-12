@@ -13,6 +13,7 @@ import {
   Sun,
   X,
   ExternalLink,
+  Search,
 } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
@@ -29,6 +30,7 @@ import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMedi
 const MENU_GROUPS = [
   ...NAV_GROUPS,
   { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
+  { name: 'Social Media', path: '/social-media', children: [] },
 ];
 
 // Related routes share one group of section links.
@@ -40,7 +42,7 @@ function activeNavigation(pathname) {
     MASJID_EXTENSION_TABS.slice(1).some((item) => item.path === pathname)
   )
     return { name: 'Masjid Extension', children: MASJID_EXTENSION_TABS };
-  if (['/team', '/contact', '/financial-history'].includes(pathname))
+  if (['/team', '/contact', '/financial-history', '/social-media'].includes(pathname))
     return NAV_GROUPS.find((item) => item.name === 'About');
   if (pathname.startsWith('/funerals')) return NAV_GROUPS.find((item) => item.name === 'Services');
   return NAV_GROUPS.find((item) =>
@@ -301,6 +303,9 @@ export default function UnifiedHeader() {
               ))}
             </nav>
             <div className="jic-free-actions">
+              <Link to="/search" aria-label="Search site">
+                <Search size={20} />
+              </Link>
               <button
                 type="button"
                 className="jic-theme-action"
@@ -354,21 +359,14 @@ export default function UnifiedHeader() {
           <ArrowLeft size={21} aria-hidden="true" />
           <span>Back</span>
         </button>
-        <button
-          type="button"
-          className="jic-bottom-menu-trigger"
-          onClick={() => setMenuOpen(true)}
-          aria-expanded={menuOpen}
-          aria-controls="jic-site-menu"
-          aria-haspopup="dialog"
-        >
-          <Menu size={22} aria-hidden="true" />
-          <span>Menu</span>
-        </button>
         <button type="button" onClick={() => setDonationOpen(true)}>
           <Heart className="jic-donate-heart" size={21} aria-hidden="true" />
           <span>Donate</span>
         </button>
+        <Link to="/search" aria-label="Search site">
+          <Search size={21} aria-hidden="true" />
+          <span>Search</span>
+        </Link>
         <button
           type="button"
           onClick={toggleTheme}
@@ -380,6 +378,17 @@ export default function UnifiedHeader() {
             <Moon size={21} aria-hidden="true" />
           )}
           <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+        </button>
+        <button
+          type="button"
+          className="jic-bottom-menu-trigger"
+          onClick={() => setMenuOpen(true)}
+          aria-expanded={menuOpen}
+          aria-controls="jic-site-menu"
+          aria-haspopup="dialog"
+        >
+          <Menu size={22} aria-hidden="true" />
+          <span>Menu</span>
         </button>
       </nav>
       {radioError && (

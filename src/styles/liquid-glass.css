@@ -1,31 +1,35 @@
 /* Public materials: clear controls, frosted cards and dense reading surfaces.
  * Layout stays with each component. Only the legacy utility bridge needs !important. */
 html[data-theme] {
-  --jic-glass-clear: rgba(250, 251, 253, 0.62);
-  --jic-glass-surface: rgba(250, 251, 253, 0.78);
-  --jic-glass-surface-strong: rgba(250, 251, 253, 0.92);
+  --jic-glass-clear: rgba(250, 251, 253, 0.26);
+  --jic-glass-surface: rgba(250, 251, 253, 0.54);
+  --jic-glass-surface-strong: rgba(250, 251, 253, 0.86);
   --jic-glass-inset: rgba(255, 255, 255, 0.16);
   --jic-glass-border: rgba(255, 255, 255, 0.65);
   --jic-glass-ink: #081222;
   --jic-glass-secondary: #182537;
   --jic-glass-accent: #47240c;
-  --jic-glass-clear-filter: blur(5px) saturate(145%);
-  --jic-glass-backdrop: blur(12px) saturate(125%);
+  --jic-glass-clear-filter: blur(2px) saturate(160%);
+  --jic-glass-backdrop: blur(14px) saturate(140%);
   --jic-glass-dense-filter: blur(16px) saturate(110%);
-  --jic-glass-shadow: 0 5px 18px #07132418, inset 0 1px 1px #ffffffcc, inset 0 -1px 1px #71839933;
+  --jic-glass-shadow:
+    0 5px 18px #07132418, inset 0 2px 2px #ffffffd9, inset 1px 0 2px #ffffff80,
+    inset 0 -2px 3px #71839955;
   --jic-glass-sheen: linear-gradient(145deg, #ffffff38, #ffffff00 48%, #ffffff12);
   --jic-button-tint-strength: 88%;
 }
 html[data-theme='dark'] {
-  --jic-glass-clear: rgba(15, 26, 43, 0.68);
-  --jic-glass-surface: rgba(15, 26, 43, 0.82);
-  --jic-glass-surface-strong: rgba(15, 26, 43, 0.94);
+  --jic-glass-clear: rgba(15, 26, 43, 0.28);
+  --jic-glass-surface: rgba(15, 26, 43, 0.58);
+  --jic-glass-surface-strong: rgba(15, 26, 43, 0.9);
   --jic-glass-inset: rgba(235, 242, 255, 0.08);
   --jic-glass-border: rgba(235, 242, 255, 0.32);
   --jic-glass-ink: #ffffff;
   --jic-glass-secondary: #f1f4fa;
   --jic-glass-accent: #ffe6b0;
-  --jic-glass-shadow: 0 5px 18px #00000029, inset 0 1px 1px #ffffff61, inset 0 -1px 1px #04091266;
+  --jic-glass-shadow:
+    0 5px 18px #00000029, inset 0 2px 2px #ffffff70, inset 1px 0 2px #ffffff33,
+    inset 0 -2px 3px #04091288;
   --jic-glass-sheen: linear-gradient(145deg, #ffffff08, #ffffff00 48%, #ffffff04);
 }
 html[data-theme][data-surface='glass'] :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer) {
@@ -70,6 +74,7 @@ html[data-theme][data-surface]
     .jic-daily-reminder > button,
     .jic-mobile-controls,
     .jic-prayer-schedule,
+    .jic-quick-menu,
     .bg-white,
     .bg-gray-50,
     .bg-gray-100,
@@ -114,7 +119,8 @@ html[data-theme][data-surface]
     .jic-unified-menu,
     .jic-daily-reminder > button,
     .jic-mobile-controls,
-    .jic-prayer-schedule
+    .jic-prayer-schedule,
+    .jic-quick-menu
   ) {
   --glass-fill: var(--jic-glass-surface-strong);
   --glass-filter: var(--jic-glass-dense-filter);
@@ -185,9 +191,12 @@ html[data-theme][data-surface]
     button.bg-destructive,
     a.bg-destructive
   ) {
-  background:
-    var(--jic-glass-sheen),
-    color-mix(in srgb, var(--jic-button-tint) var(--jic-button-tint-strength), transparent) !important;
+  --glass-fill: color-mix(
+    in srgb,
+    var(--jic-button-tint) var(--jic-button-tint-strength),
+    transparent
+  );
+  background: var(--jic-glass-sheen), var(--glass-fill) !important;
   color: var(--jic-button-ink) !important;
   border: 1px solid color-mix(in srgb, var(--jic-button-tint) 70%, var(--jic-glass-border)) !important;
   box-shadow: var(--jic-glass-shadow) !important;
@@ -219,10 +228,17 @@ html[data-theme][data-surface] .jic-footer-socials a svg {
   overflow: hidden;
 }
 @supports (backdrop-filter: url('#jic-liquid-refraction')) {
-  @media (prefers-reduced-transparency: no-preference) and (prefers-reduced-motion: no-preference) {
+  @media (prefers-reduced-motion: no-preference) {
     html[data-theme][data-surface='glass']
       :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
-      :is(.jic-primary-cta, .jic-secondary-cta, .jic-unified-subnav-link.is-current) {
+      :is(
+        [data-glass='clear'],
+        .jic-primary-cta,
+        .jic-secondary-cta,
+        .jic-unified-subnav-link,
+        .jic-footer-socials a,
+        .jic-rail-controls button
+      ) {
       position: relative;
       z-index: 0;
       background: transparent !important;
@@ -231,10 +247,24 @@ html[data-theme][data-surface] .jic-footer-socials a svg {
     }
     html[data-theme][data-surface='glass']
       :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
-      :is(.jic-primary-cta, .jic-secondary-cta, .jic-unified-subnav-link.is-current)::before,
+      :is(
+        [data-glass='clear'],
+        .jic-primary-cta,
+        .jic-secondary-cta,
+        .jic-unified-subnav-link,
+        .jic-footer-socials a,
+        .jic-rail-controls button
+      )::before,
     html[data-theme][data-surface='glass']
       :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
-      :is(.jic-primary-cta, .jic-secondary-cta, .jic-unified-subnav-link.is-current)::after {
+      :is(
+        [data-glass='clear'],
+        .jic-primary-cta,
+        .jic-secondary-cta,
+        .jic-unified-subnav-link,
+        .jic-footer-socials a,
+        .jic-rail-controls button
+      )::after {
       content: '';
       position: absolute;
       inset: 0;
@@ -243,16 +273,31 @@ html[data-theme][data-surface] .jic-footer-socials a svg {
     }
     html[data-theme][data-surface='glass']
       :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
-      :is(.jic-primary-cta, .jic-secondary-cta, .jic-unified-subnav-link.is-current)::before {
+      :is(
+        [data-glass='clear'],
+        .jic-primary-cta,
+        .jic-secondary-cta,
+        .jic-unified-subnav-link,
+        .jic-footer-socials a,
+        .jic-rail-controls button
+      )::before {
       z-index: -2;
-      background: var(--jic-glass-sheen), var(--jic-glass-clear);
+      background: var(--jic-glass-sheen), var(--glass-fill, var(--jic-glass-clear));
       -webkit-backdrop-filter: var(--jic-glass-clear-filter);
       backdrop-filter: var(--jic-glass-clear-filter);
     }
     html[data-theme][data-surface='glass']
       :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
-      :is(.jic-primary-cta, .jic-secondary-cta, .jic-unified-subnav-link.is-current)::after {
+      :is(
+        [data-glass='clear'],
+        .jic-primary-cta,
+        .jic-secondary-cta,
+        .jic-unified-subnav-link,
+        .jic-footer-socials a,
+        .jic-rail-controls button
+      )::after {
       z-index: -1;
+      -webkit-backdrop-filter: url('#jic-liquid-refraction');
       backdrop-filter: url('#jic-liquid-refraction');
     }
   }
@@ -260,9 +305,9 @@ html[data-theme][data-surface] .jic-footer-socials a svg {
 /* Smaller blur kernels reduce mobile compositing work. */
 @media (max-width: 767px) {
   html[data-theme] {
-    --jic-glass-backdrop: blur(8px) saturate(125%);
+    --jic-glass-backdrop: blur(10px) saturate(140%);
     --jic-glass-dense-filter: blur(10px) saturate(110%);
-    --jic-glass-clear-filter: blur(3px) saturate(140%);
+    --jic-glass-clear-filter: blur(2px) saturate(150%);
   }
 }
 html[data-theme][data-surface='solid'] {
@@ -310,8 +355,36 @@ html[data-theme][data-surface='solid'] {
 }
 /* Glass off also removes the optional refraction layers. */
 html[data-theme][data-surface='solid']
-  :is(.jic-primary-cta, .jic-secondary-cta, .jic-unified-subnav-link)::before,
+  :is(
+    [data-glass='clear'],
+    .jic-primary-cta,
+    .jic-secondary-cta,
+    .jic-unified-subnav-link,
+    .jic-footer-socials a,
+    .jic-rail-controls button
+  )::before,
 html[data-theme][data-surface='solid']
-  :is(.jic-primary-cta, .jic-secondary-cta, .jic-unified-subnav-link)::after {
+  :is(
+    [data-glass='clear'],
+    .jic-primary-cta,
+    .jic-secondary-cta,
+    .jic-unified-subnav-link,
+    .jic-footer-socials a,
+    .jic-rail-controls button
+  )::after {
   content: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-theme][data-surface]
+    :is(
+      [data-glass='clear'],
+      .jic-primary-cta,
+      .jic-secondary-cta,
+      .jic-unified-subnav-link,
+      .jic-footer-socials a,
+      .jic-rail-controls button
+    )::after {
+    content: none;
+  }
 }

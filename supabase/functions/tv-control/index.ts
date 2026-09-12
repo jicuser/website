@@ -7,6 +7,7 @@ import {
   screenExists,
   validateSettings,
   validDescription,
+  tvScene,
 } from '../_shared/tv.js';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
@@ -110,6 +111,7 @@ Deno.serve(async (req) => {
         prayer_enabled: false,
         notice_mode: 'off',
         class_until: '',
+        scene_mode: 'normal',
       };
       screen.share_session = null;
       if (
@@ -129,7 +131,7 @@ Deno.serve(async (req) => {
         settings: publicSettings(screen.settings, paired),
         paired,
         session:
-          paired && activeSession(screen)
+          paired && tvScene(screen.settings) !== 'normal' && activeSession(screen)
             ? { id: screen.share_session, kind: screen.share_kind }
             : null,
       };
@@ -158,7 +160,11 @@ Deno.serve(async (req) => {
       response = { deviceToken: token };
     } else if (['join', 'receive', 'answer'].includes(action)) {
       const deviceId = await device(screenId, body.deviceToken);
-      if (!activeSession(screen) || body.sessionId !== screen.share_session)
+      if (
+        tvScene(screen.settings) === 'normal' ||
+        !activeSession(screen) ||
+        body.sessionId !== screen.share_session
+      )
         fail('Sharing has ended.', 409);
       if (action === 'join') {
         const peer = await result(
@@ -208,15 +214,65 @@ Deno.serve(async (req) => {
             .order('created_at'),
         );
         response = { ...screen, devices };
+      } else if (action === 'normal') {
+        const settings = validateSettings(
+          {
+            ...screen.settings,
+            scene_mode: 'normal',
+            mode: 'posters',
+            class_until: '',
+            notice_mode: 'off',
+            event_title: '',
+            event_message: '',
+          },
+          screenId,
+        );
+        await result(
+          db
+            .from('tv_screens')
+            .update({
+              settings,
+              share_session: null,
+              share_owner: null,
+              share_kind: null,
+              share_expires: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', screenId),
+        );
+        await result(db.from('tv_peers').delete().eq('screen_id', screenId));
+        response = { settings };
       } else if (action === 'save') {
         const settings = validateSettings(body.settings, screenId);
         await result(
           db
             .from('tv_screens')
-            .update({ settings, updated_at: new Date().toISOString() })
+            .update({
+              settings,
+              ...(body.stopSharing === true || tvScene(settings) === 'normal'
+                ? { share_session: null, share_owner: null, share_kind: null, share_expires: null }
+                : {}),
+              updated_at: new Date().toISOString(),
+            })
             .eq('id', screenId),
         );
+        if (body.stopSharing === true || tvScene(settings) === 'normal')
+          await result(db.from('tv_peers').delete().eq('screen_id', screenId));
         response = { settings };
+      } else if (action === 'preview') {
+        const token = randomToken();
+        const preview = await result(
+          db
+            .from('tv_devices')
+            .insert({
+              screen_id: screenId,
+              token_hash: await hash(token),
+              expires_at: expires(600),
+            })
+            .select('id')
+            .single(),
+        );
+        response = { deviceToken: token, deviceId: preview.id };
       } else if (action === 'pair-code') {
         const code = randomToken();
         const expires_at = expires(600);
@@ -232,6 +288,8 @@ Deno.serve(async (req) => {
         );
         response = { ok: true };
       } else if (action === 'start') {
+        if (tvScene(screen.settings) === 'normal')
+          fail('Choose and save Class, Speech or Ramadan mode before sharing.');
         if (!['screen', 'camera'].includes(body.kind)) fail('Choose screen or camera.');
         const sessionId = crypto.randomUUID();
         const started = await result(
@@ -270,6 +328,7 @@ Deno.serve(async (req) => {
         response = { ok: true };
       } else if (['heartbeat', 'peers', 'offer'].includes(action)) {
         if (
+          tvScene(screen.settings) === 'normal' ||
           !activeSession(screen) ||
           screen.share_owner !== userId ||
           screen.share_session !== body.sessionId

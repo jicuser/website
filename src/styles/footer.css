@@ -49,12 +49,14 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
+  width: min(100% - 32px, 396px);
+  margin: 10px auto 6px;
 }
 .jic-footer-socials {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
-  gap: 4px;
+  gap: 0;
   width: 100%;
   max-width: 428px;
 }
@@ -62,12 +64,12 @@
   display: grid;
   place-items: center;
   flex: 1 1 0;
-  min-width: 24px;
+  min-width: 0;
   max-width: 44px;
   height: 44px;
   border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  background: var(--jic-surface);
+  border-radius: 9px;
+  background: var(--jic-glass-clear);
   color: var(--jic-text);
 }
 .jic-footer-socials a svg {
@@ -98,7 +100,7 @@
   gap: 8px;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 8px 0 0;
+  padding: 0 16px 0 0;
   border: 0;
 }
 .jic-footer-signature {
@@ -140,19 +142,20 @@
   align-items: center;
   min-height: 44px;
 }
+.jic-footer-donation-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+.jic-footer-donation-copy .jic-footer-legal {
+  margin-top: 10px;
+}
 .jic-footer-legal a:hover {
   text-decoration: underline;
-}
-/* Match the complete rendered icon row, including optional social links. */
-@media (max-width: 767px) {
-  .jic-footer-actions-compact {
-    width: min(100%, calc(var(--jic-footer-icon-count) * 48px - 4px));
-    margin-inline: auto;
-  }
-  .jic-footer-actions-compact :is(.jic-footer-socials, .jic-footer-donate) {
-    width: 100%;
-    max-width: none;
-  }
 }
 @media (min-width: 768px) {
   .jic-footer-links-inline {

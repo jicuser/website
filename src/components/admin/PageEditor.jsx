@@ -19,8 +19,10 @@ import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
 import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 
-export default function PageEditor() {
-  const [selected, setSelected] = useState('/');
+export default function PageEditor({ initialPath = '/', inline = false }) {
+  const [selected, setSelected] = useState(() =>
+    EDITABLE_PAGES.some((item) => item.path === initialPath) ? initialPath : '/',
+  );
   const [query, setQuery] = useState('');
   const [draft, setDraft] = useState({});
   const [busy, setBusy] = useState(false);
@@ -206,43 +208,50 @@ export default function PageEditor() {
           Home tiles <ArrowUpRight size={16} />
         </Link>
       </div>
-      <HeaderContentEditor />
-      <CommunityLinksEditor />
-      <div className="admin-page-layout">
-        <aside className="admin-panel admin-page-picker">
-          <label className="admin-search">
-            <Search size={16} />
-            <input
-              aria-label="Find a page"
-              placeholder="Find a page…"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
-          <nav>
-            {[...new Set(visible.map((item) => item.group))].map((group) => (
-              <div key={group}>
-                <h4>{group}</h4>
-                {visible
-                  .filter((item) => item.group === group)
-                  .map((item) => (
-                    <button
-                      disabled={busy}
-                      key={item.path}
-                      onClick={() => choose(item.path)}
-                      className={selected === item.path ? 'selected' : ''}
-                    >
-                      {item.name}
-                      <span>›</span>
-                    </button>
-                  ))}
-              </div>
-            ))}
-          </nav>
-          <small>
-            <Lock size={12} /> Navigation is fixed.
-          </small>
-        </aside>
+      {!inline && (
+        <details className="admin-panel">
+          <summary>Site-wide text & community links</summary>
+          <HeaderContentEditor />
+          <CommunityLinksEditor />
+        </details>
+      )}
+      <div className={inline ? 'admin-inline-page' : 'admin-page-layout'}>
+        {!inline && (
+          <aside className="admin-panel admin-page-picker">
+            <label className="admin-search">
+              <Search size={16} />
+              <input
+                aria-label="Find a page"
+                placeholder="Find a page…"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </label>
+            <nav>
+              {[...new Set(visible.map((item) => item.group))].map((group) => (
+                <div key={group}>
+                  <h4>{group}</h4>
+                  {visible
+                    .filter((item) => item.group === group)
+                    .map((item) => (
+                      <button
+                        disabled={busy}
+                        key={item.path}
+                        onClick={() => choose(item.path)}
+                        className={selected === item.path ? 'selected' : ''}
+                      >
+                        {item.name}
+                        <span>›</span>
+                      </button>
+                    ))}
+                </div>
+              ))}
+            </nav>
+            <small>
+              <Lock size={12} /> Navigation is fixed.
+            </small>
+          </aside>
+        )}
 
         <div className="admin-page-main">
           <section className="admin-panel">
@@ -321,52 +330,56 @@ export default function PageEditor() {
             </div>
           </section>
 
-          <section className="admin-panel">
-            <span className="admin-eyebrow">PREVIEW · {dirty ? 'DRAFT' : 'SAVED'}</span>
-            <article className="admin-draft-card">
-              {shownImage ? (
-                <img src={shownImage} alt="Page picture preview" />
-              ) : (
-                <div className="admin-picture-empty">
-                  <ImageIcon />
-                  <span>No picture</span>
-                </div>
-              )}
-              <h2>{draft.title}</h2>
-              <p>{draft.body || ''}</p>
-            </article>
-          </section>
+          {!inline && (
+            <section className="admin-panel">
+              <span className="admin-eyebrow">PREVIEW · {dirty ? 'DRAFT' : 'SAVED'}</span>
+              <article className="admin-draft-card">
+                {shownImage ? (
+                  <img src={shownImage} alt="Page picture preview" />
+                ) : (
+                  <div className="admin-picture-empty">
+                    <ImageIcon />
+                    <span>No picture</span>
+                  </div>
+                )}
+                <h2>{draft.title}</h2>
+                <p>{draft.body || ''}</p>
+              </article>
+            </section>
+          )}
           <PageSectionsEditor pagePath={selected} />
-          <section className="admin-panel">
-            <div className="admin-heading">
-              <div>
-                <h3>Website preview</h3>
+          {!inline && (
+            <section className="admin-panel">
+              <div className="admin-heading">
+                <div>
+                  <h3>Website preview</h3>
+                </div>
+                <div className="admin-actions">
+                  <button
+                    aria-label="Mobile preview"
+                    className={`admin-button ${mobile ? 'active' : ''}`}
+                    onClick={() => setMobile(true)}
+                  >
+                    <Smartphone size={17} />
+                  </button>
+                  <button
+                    aria-label="Desktop preview"
+                    className={`admin-button ${!mobile ? 'active' : ''}`}
+                    onClick={() => setMobile(false)}
+                  >
+                    <Monitor size={17} />
+                  </button>
+                </div>
               </div>
-              <div className="admin-actions">
-                <button
-                  aria-label="Mobile preview"
-                  className={`admin-button ${mobile ? 'active' : ''}`}
-                  onClick={() => setMobile(true)}
-                >
-                  <Smartphone size={17} />
-                </button>
-                <button
-                  aria-label="Desktop preview"
-                  className={`admin-button ${!mobile ? 'active' : ''}`}
-                  onClick={() => setMobile(false)}
-                >
-                  <Monitor size={17} />
-                </button>
+              <div className={`admin-site-preview ${mobile ? 'mobile' : ''}`}>
+                <iframe
+                  key={`${selected}-${revision}`}
+                  src={`${selected}${selected.includes('?') ? '&' : '?'}preview=1`}
+                  title={`${page.name} website preview`}
+                />
               </div>
-            </div>
-            <div className={`admin-site-preview ${mobile ? 'mobile' : ''}`}>
-              <iframe
-                key={`${selected}-${revision}`}
-                src={`${selected}${selected.includes('?') ? '&' : '?'}preview=1`}
-                title={`${page.name} website preview`}
-              />
-            </div>
-          </section>
+            </section>
+          )}
         </div>
       </div>
     </div>

@@ -27,10 +27,11 @@ const formatMonthRecord = (pt) => {
   };
 };
 
-export const usePrayerTimes = () => {
+export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
   const [currentDate, setCurrentDate] = useState(new Date()),
     [monthlyPrayerTimes, setMonth] = useState([]),
     [todaysTimes, setToday] = useState(null),
+    [tomorrowsTimes, setTomorrow] = useState(null),
     [jummahTimes, setJummah] = useState([]),
     [isLoading, setLoading] = useState(true),
     [error, setError] = useState('');
@@ -40,10 +41,12 @@ export const usePrayerTimes = () => {
       const today = londonDate(),
         [year, month] = today.split('-').map(Number);
       const days = new Date(Date.UTC(year, month, 0)).getUTCDate();
+      const tomorrow = new Date(today + 'T12:00:00Z');
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
       const friday = new Date(today + 'T12:00:00Z');
       friday.setUTCDate(friday.getUTCDate() + ((5 - friday.getUTCDay() + 7) % 7));
       try {
-        const [daily, monthly, settings, fridayRow] = await Promise.all([
+        const [daily, monthly, settings, fridayRow, nextDay] = await Promise.all([
           supabase.from('prayer_times').select('*').eq('d_date', today).maybeSingle(),
           supabase
             .from('prayer_times')
@@ -61,6 +64,13 @@ export const usePrayerTimes = () => {
             .select('*')
             .eq('d_date', friday.toISOString().slice(0, 10))
             .maybeSingle(),
+          includeTomorrow
+            ? supabase
+                .from('prayer_times')
+                .select('d_date,fajr_begins,maghrib_begins')
+                .eq('d_date', tomorrow.toISOString().slice(0, 10))
+                .maybeSingle()
+            : Promise.resolve({ data: null }),
         ]);
         if (!alive) return;
         const failed = daily.error || monthly.error || settings.error || fridayRow.error;
@@ -82,6 +92,15 @@ export const usePrayerTimes = () => {
                 jamaah_maghrib: formatTime(d.maghrib_jamah),
                 jamaah_isha: formatTime(d.isha_jamah),
                 is_ramadan: d.is_ramadan,
+              }
+            : null,
+        );
+        setTomorrow(
+          nextDay.data && !nextDay.error
+            ? {
+                d_date: nextDay.data.d_date,
+                fajr: formatTime(nextDay.data.fajr_begins),
+                maghrib: formatTime(nextDay.data.maghrib_begins),
               }
             : null,
         );
@@ -109,6 +128,7 @@ export const usePrayerTimes = () => {
         if (alive) {
           setError('Timetable could not be loaded. Please contact the centre.');
           setToday(null);
+          setTomorrow(null);
           setMonth([]);
         }
       } finally {
@@ -125,7 +145,7 @@ export const usePrayerTimes = () => {
       window.removeEventListener('focus', load);
       window.removeEventListener('jic-content-updated', load);
     };
-  }, []);
+  }, [includeTomorrow]);
   const options = { timeZone: 'Europe/London' };
   return {
     currentDate,
@@ -145,6 +165,7 @@ export const usePrayerTimes = () => {
     currentMonth: currentDate.toLocaleDateString('en-GB', { ...options, month: 'long' }),
     monthlyPrayerTimes,
     todaysTimes,
+    tomorrowsTimes,
     jummahTimes,
     ramadanTimes: monthlyPrayerTimes
       .filter((d) => d.is_ramadan)

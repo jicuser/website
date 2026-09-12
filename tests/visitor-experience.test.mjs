@@ -108,7 +108,7 @@ test('main solid-surface text and filled-button pairs meet 4.5:1 contrast', () =
     assert.ok(contrast(...pair) >= 4.5, `${pair.join(' / ')} must be readable`);
 });
 
-test('glass text retains 4.5:1 contrast at both background extremes', () => {
+test('glass text retains 4.5:1 contrast over the page veil at both photo extremes', () => {
   const css = readFileSync(new URL('../src/styles/liquid-glass.css', import.meta.url), 'utf8');
   for (const selector of ['html[data-theme]', 'html[data-theme=dark]']) {
     const rule = postcss
@@ -120,6 +120,15 @@ test('glass text retains 4.5:1 contrast at both background extremes', () => {
     const tokens = Object.fromEntries(
       rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]),
     );
+    const veilRule = postcss
+      .parse(readFileSync(new URL('../src/styles/home.css', import.meta.url), 'utf8'))
+      .nodes.find(
+        (node) => node.type === 'rule' && node.selector.replace(/[\"']/g, '') === selector,
+      );
+    const veil = veilRule.nodes
+      .find((node) => node.prop === '--jic-photo-veil')
+      .value.match(/[\d.]+/g)
+      .map(Number);
     for (const material of [
       '--jic-glass-clear',
       '--jic-glass-surface',
@@ -134,9 +143,10 @@ test('glass text retains 4.5:1 contrast at both background extremes', () => {
           const composite =
             '#' +
             [r, g, b]
-              .map((channel) =>
+              .map((channel, index) =>
                 Math.round(
-                  (Number(channel) * Number(alpha) + background * (1 - Number(alpha))) *
+                  (Number(channel) * Number(alpha) +
+                    (veil[index] * veil[3] + background * (1 - veil[3])) * (1 - Number(alpha))) *
                     (1 - sheen) +
                     255 * sheen,
                 )

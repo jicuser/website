@@ -29,6 +29,8 @@ const WorshipPage = lazy(() => import('@/pages/WorshipPage'));
 const RadioPlayerPage = lazy(() => import('@/pages/RadioPlayerPage'));
 const TvDisplayPage = lazy(() => import('@/pages/TvDisplayPage'));
 const YouthPage = lazy(() => import('@/pages/YouthPage'));
+const SocialMediaPage = lazy(() => import('@/pages/SocialMediaPage'));
+const SearchPage = lazy(() => import('@/pages/SearchPage'));
 
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
@@ -78,6 +80,8 @@ export default function App() {
               <Route path="contact" element={<ContactPage />} />
               <Route path="financial-history" element={<FinancialHistoryPage />} />
               <Route path="privacy" element={<PrivacyPage />} />
+              <Route path="social-media" element={<SocialMediaPage />} />
+              <Route path="search" element={<SearchPage />} />
 
               <Route
                 path="prayer-times"

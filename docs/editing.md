@@ -58,3 +58,17 @@ Use a test data environment when trying forms or staff edits. Opening a local pr
 The Codespaces configuration and local build use Node 24. The development server allows the exact Codespace preview hostname supplied by GitHub; host checks remain enabled.
 
 The Android cleanup was checked with the production build, JavaScript checks and the existing tests. This session's browser preview was blocked with `ERR_BLOCKED_BY_CLIENT`, so real-device layout and signed-in staff workflows still need the checks above. No claim of completed physical Android/iPhone testing is made.
+
+## Simple Admin navigation
+
+The Admin home page groups tasks into Website, TV screens, Prayer times, Events & posters, Notices, Livestream and Staff access, according to the signed-in user’s permissions. Phones use a compact **Go to** selector; desktop uses a grouped sidebar.
+
+Choose **Website** to open the public site. On an editable page, **Edit this page** opens its text, picture and section editor in place. Save before closing. Site-wide text and community links remain under Website & pages in Admin. Homepage tile links still open the dedicated tile editor.
+
+## Search, social channels and materials
+
+- `src/lib/siteSearch.js`: public route index and literal-text search. No SQL or dynamic regular expressions are built from visitor input.
+- `src/content/socials.js`: official profile links, handles and channel descriptions.
+- `src/pages/SocialMediaPage.jsx`: optional previews load only on request, with external profile links as fallback.
+- `src/styles/liquid-glass.css`: clear, frosted and dense materials. `home.css` owns the photograph veil that supports text contrast. URL-based refraction is progressive enhancement and is not identical across browsers.
+- `public/fonts/allura-menu.woff`: a small Allura subset containing “Menu”, sourced from Google Fonts under the accompanying SIL Open Font License. The logo artwork is unchanged.

@@ -12,7 +12,10 @@ export const POSTER_IDS = [
   'after-maghrib',
 ];
 export const DEFAULT_TV_SETTINGS = {
-  mode: 'schedule',
+  mode: 'posters',
+  scene_mode: 'normal',
+  event_title: '',
+  event_message: '',
   youtube_url: '',
   camera_url: '',
   camera_protocol: 'hls',
@@ -56,7 +59,19 @@ export function validateSettings(input, screenId = '') {
       prayer_enabled: false,
       class_until: '',
       notice_mode: 'off',
+      scene_mode: 'normal',
+      event_title: '',
+      event_message: '',
     };
+  if (!['normal', 'class', 'speech', 'ramadan'].includes(input.scene_mode))
+    throw new Error('Choose Normal, Class, Speech or Ramadan.');
+  for (const [field, limit] of [
+    ['event_title', 120],
+    ['event_message', 500],
+  ]) {
+    if (typeof input[field] !== 'string' || input[field].length > limit)
+      throw new Error(`Event text must be at most ${limit} characters.`);
+  }
   if (!['off', 'jummah', 'taraweeh'].includes(input.notice_mode))
     throw new Error('Choose a notice display.');
   for (const field of ['jummah_notice', 'taraweeh_dua']) {
@@ -102,6 +117,9 @@ export function validateSettings(input, screenId = '') {
     throw new Error('Keep at least one poster or upcoming events for the fallback display.');
   return {
     mode,
+    scene_mode: input.scene_mode,
+    event_title: input.event_title.trim(),
+    event_message: input.event_message.trim(),
     youtube_url,
     camera_url,
     camera_protocol,
@@ -129,6 +147,9 @@ export function publicSettings(settings, paired = false) {
   } = settings;
   return {
     mode: mode === 'camera' && !paired ? 'posters' : mode,
+    scene_mode: settings.scene_mode || 'normal',
+    event_title: settings.event_title || '',
+    event_message: settings.event_message || '',
     youtube_url,
     camera_protocol,
     poster_ids,
@@ -145,6 +166,15 @@ export function publicSettings(settings, paired = false) {
 }
 export function activeSession(screen, now = Date.now()) {
   return Boolean(screen.share_session && new Date(screen.share_expires).getTime() > now);
+}
+
+// Timed classes/speeches return to normal without depending on a browser timer firing.
+export function tvScene(settings = {}, now = Date.now()) {
+  const scene =
+    settings.scene_mode || (Date.parse(settings.class_until) > now ? 'class' : 'normal');
+  if (['class', 'speech'].includes(scene) && !(Date.parse(settings.class_until) > now))
+    return 'normal';
+  return ['normal', 'class', 'speech', 'ramadan'].includes(scene) ? scene : 'normal';
 }
 export function validDescription(description, type) {
   return Boolean(
