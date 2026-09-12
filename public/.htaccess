@@ -5,6 +5,10 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [L]
 
 <IfModule mod_headers.c>
+  # Revalidate the entry page after deployments; hashed CSS/JS can stay cached.
+  <FilesMatch "^(index\.html|appearance\.js)$">
+    Header always set Cache-Control "no-cache"
+  </FilesMatch>
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"

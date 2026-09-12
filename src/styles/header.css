@@ -514,6 +514,8 @@ html {
     margin-bottom: 0;
   }
   .jic-menu-word {
+    appearance: none;
+    -webkit-appearance: none;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -521,7 +523,9 @@ html {
     /* Place the script's visible baseline by the logo subtitle inside this row. */
     padding: 8px 0 0 10px;
     border: 0;
+    border-radius: 0;
     background: transparent;
+    box-shadow: none;
     color: var(--jic-text);
     font-family: 'JIC Menu', cursive;
     font-style: normal;

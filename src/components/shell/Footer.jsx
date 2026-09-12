@@ -11,7 +11,7 @@ import JamatiaLogo from '@/components/shell/JamatiaLogo';
 const QUICK_LINKS = [
   { label: 'About', to: '/about' },
   { label: 'Prayer Times', to: '/prayer-times' },
-  { label: 'Phone timetable wallpaper', to: '/prayer-times#phone-wallpaper' },
+  { label: 'Phone timetable wallpaper', to: '/prayer-times/monthly#phone-wallpaper' },
   { label: 'Services', to: '/services' },
   { label: 'Masjid Building Works', to: '/projects' },
   { label: 'Madrassah', to: '/madrassah' },

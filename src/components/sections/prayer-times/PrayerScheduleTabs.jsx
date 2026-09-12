@@ -1,16 +1,10 @@
 import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
 import WallpaperDownload from '@/components/WallpaperDownload';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const MonthlyPrayerTable = ({ monthlyPrayerTimes, currentMonth, currentDate }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.35 }}
-    className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden"
-  >
+  <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden">
     <div className="bg-primary text-white px-4 py-3 sm:p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -19,12 +13,10 @@ export const MonthlyPrayerTable = ({ monthlyPrayerTimes, currentMonth, currentDa
           </p>
           <h3 className="text-lg sm:text-xl font-bold">{currentMonth} Prayer Times</h3>
         </div>
-        {monthlyPrayerTimes.length > 0 && (
-          <WallpaperDownload
-            monthlyPrayerTimes={monthlyPrayerTimes}
-            currentMonth={`${currentMonth} ${currentDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London', year: 'numeric' })}`}
-          />
-        )}
+        <WallpaperDownload
+          monthlyPrayerTimes={monthlyPrayerTimes}
+          currentMonth={`${currentMonth} ${currentDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London', year: 'numeric' })}`}
+        />
       </div>
     </div>
     {monthlyPrayerTimes.length === 0 && (
@@ -75,16 +67,11 @@ export const MonthlyPrayerTable = ({ monthlyPrayerTimes, currentMonth, currentDa
         </tbody>
       </table>
     </div>
-  </motion.div>
+  </div>
 );
 
 export const JummahTimesCard = ({ jummahTimes }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.35 }}
-    className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden max-w-2xl mx-auto"
-  >
+  <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden max-w-2xl mx-auto">
     <div className="bg-primary text-white px-4 py-3 text-center">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-80">
         Every Friday
@@ -117,16 +104,11 @@ export const JummahTimesCard = ({ jummahTimes }) => (
         </p>
       </div>
     </div>
-  </motion.div>
+  </div>
 );
 
 export const RamadanTimesTable = ({ ramadanTimes }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.35 }}
-    className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden"
-  >
+  <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden">
     <div className="bg-primary text-white p-4 text-center">
       <h3 className="text-xl font-bold">Ramadan Prayer Times</h3>
     </div>
@@ -170,7 +152,7 @@ export const RamadanTimesTable = ({ ramadanTimes }) => (
         </p>
       )}
     </div>
-  </motion.div>
+  </div>
 );
 
 export default function PrayerScheduleTabs({

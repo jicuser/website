@@ -211,7 +211,7 @@ html[data-theme] .jic-image-viewer {
   color: var(--jic-text-secondary);
 }
 .jic-image-viewer-actions :is(a, button),
-.jic-wallpaper-control > button {
+.jic-wallpaper-control > :is(a, button) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -227,6 +227,14 @@ html[data-theme] .jic-image-viewer {
 }
 .jic-wallpaper-control > button:disabled {
   opacity: 0.6;
+}
+.jic-wallpaper-control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.jic-wallpaper-control [role='alert'] {
+  flex-basis: 100%;
 }
 .jic-wallpaper-control [role='alert'],
 .jic-image-viewer-actions [role='alert'] {

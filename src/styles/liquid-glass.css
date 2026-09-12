@@ -61,7 +61,7 @@ html[data-theme][data-surface='glass']
     .jic-scroll-top,
     .jic-rail-controls button,
     .extension-hub-controls button,
-    .jic-wallpaper-control > button,
+    .jic-wallpaper-control > :is(a, button),
     .jic-poster-button,
     .jic-image-viewer-actions :is(a, button)
   ):not(

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import PrayerTimesHeroSection from '@/components/sections/prayer-times/PrayerTimesHeroSection';
 import TodaysPrayerTimesSection from '@/components/sections/prayer-times/TodaysPrayerTimesSection';
 import {
@@ -10,6 +11,7 @@ import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLo
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PrayerTimesPage({ initialTab = 'today' }) {
+  const { hash, search } = useLocation();
   const {
     currentDate,
     formattedDate,
@@ -19,6 +21,10 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
     jummahTimes,
     isLoadingPrayerTimes,
   } = usePrayerTimes();
+
+  // Preserve wallpaper links shared before the timetable was split into pages.
+  if (initialTab !== 'daily' && hash === '#phone-wallpaper')
+    return <Navigate to={`/prayer-times/monthly${search}#phone-wallpaper`} replace />;
 
   if (isLoadingPrayerTimes) {
     return (
