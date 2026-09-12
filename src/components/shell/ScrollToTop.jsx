@@ -1,20 +1,9 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
-import { scrollToAnchor } from '@/lib/scrollToAnchor';
 
 export const ScrollToTop = () => {
-  const { pathname, hash } = useLocation();
   const [isVisible, setIsVisible] = useState(false);
-
-  useLayoutEffect(() => {
-    if (!hash) {
-      window.scrollTo(0, 0);
-      return;
-    }
-    return scrollToAnchor(hash);
-  }, [pathname, hash]);
 
   useEffect(() => {
     const toggleVisibility = () => setIsVisible(window.pageYOffset > 300);

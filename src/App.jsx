@@ -7,6 +7,7 @@ import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
 import { AdminSaveProvider } from '@/context/AdminSaveContext';
 import { standaloneSections } from '@/content/sectionRoutes';
 import MainLayout from '@/layouts/MainLayout';
+import RouteScrollReset from '@/components/shell/RouteScrollReset';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
@@ -48,6 +49,7 @@ export default function App() {
           </p>
         }
       >
+        <RouteScrollReset />
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/radio" element={<RadioPlayerPage />} />

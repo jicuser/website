@@ -80,7 +80,8 @@ export default function UnifiedHeader() {
   const availability = useRadioAvailability(streamUrl);
   const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
 
-  useEffect(() => {
+  // Close when navigation commits, so a slow page cannot expose the old screen.
+  useLayoutEffect(() => {
     setMenuOpen(false);
     setQuickMenuOpen(false);
   }, [pathname]);
@@ -157,7 +158,7 @@ export default function UnifiedHeader() {
     observer.observe(nav);
     return () => observer.disconnect();
   }, [pathname]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!menuOpen) return undefined;
     const node = menuRef.current,
       previousOverflow = document.body.style.overflow;
@@ -436,7 +437,13 @@ export default function UnifiedHeader() {
                   return (
                     <li className="jic-unified-menu-group" key={path}>
                       <div className="jic-unified-menu-row">
-                        <NavLink to={path} end onClick={() => setMenuOpen(false)}>
+                        <NavLink
+                          to={path}
+                          end
+                          onClick={() => {
+                            if (pathname === path) setMenuOpen(false);
+                          }}
+                        >
                           {name}
                         </NavLink>
                         {subpages.length > 0 && (
@@ -465,7 +472,13 @@ export default function UnifiedHeader() {
                         >
                           {subpages.map((child) => (
                             <li key={`${child.path}-${child.name}`}>
-                              <NavLink end to={child.path} onClick={() => setMenuOpen(false)}>
+                              <NavLink
+                                end
+                                to={child.path}
+                                onClick={() => {
+                                  if (pathname === child.path) setMenuOpen(false);
+                                }}
+                              >
                                 {child.name}
                               </NavLink>
                             </li>
@@ -487,11 +500,7 @@ export default function UnifiedHeader() {
               </button>
             </div>
             <div className="jic-menu-bottom-actions">
-              <Link
-                to="/admin/login"
-                className="jic-unified-admin-link"
-                onClick={() => setMenuOpen(false)}
-              >
+              <Link to="/admin/login" className="jic-unified-admin-link">
                 <LogIn size={17} />
                 Admin login
               </Link>
