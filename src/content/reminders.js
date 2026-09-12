@@ -107,4 +107,68 @@ export const DEFAULT_REMINDERS = [
     text: 'Look for one small way to help your family or neighbour today.',
     source: 'Daily reflection · not a hadith',
   },
+  {
+    type: 'Qur’an',
+    text: 'If you are grateful, I will surely increase you.',
+    source: 'Qur’an 14:7 · meaning',
+    sourceUrl: 'https://quran.com/14/7',
+  },
+  {
+    type: 'Qur’an',
+    text: 'Do not lose hope, nor be sad.',
+    source: 'Qur’an 3:139 · meaning',
+    sourceUrl: 'https://quran.com/3/139',
+  },
+  {
+    type: 'Qur’an',
+    text: 'My mercy encompasses all things.',
+    source: 'Qur’an 7:156 · meaning',
+    sourceUrl: 'https://quran.com/7/156',
+  },
+  {
+    type: 'Qur’an',
+    text: 'Call upon Me; I will respond to you.',
+    source: 'Qur’an 40:60 · meaning',
+    sourceUrl: 'https://quran.com/40/60',
+  },
+  {
+    type: 'Qur’an',
+    text: 'Whoever is mindful of Allah, He makes a way out for them.',
+    source: 'Qur’an 65:2 · meaning',
+    sourceUrl: 'https://quran.com/65/2',
+  },
+  {
+    type: 'Qur’an',
+    text: 'And whoever relies upon Allah, He is enough for them.',
+    source: 'Qur’an 65:3 · meaning',
+    sourceUrl: 'https://quran.com/65/3',
+  },
+  {
+    type: 'Hadith',
+    text: 'The strong believer is better and more beloved to Allah than the weak believer.',
+    source: 'Muslim 2664 · meaning',
+    sourceUrl: 'https://sunnah.com/muslim:2664',
+  },
+  {
+    type: 'Hadith',
+    text: 'None of you truly believes until he loves for his brother what he loves for himself.',
+    source: 'Bukhari 13 · meaning',
+    sourceUrl: 'https://sunnah.com/bukhari:13',
+  },
+  {
+    type: 'Hadith',
+    text: 'Whoever does not show mercy will not be shown mercy.',
+    source: 'Bukhari 6013 · meaning',
+    sourceUrl: 'https://sunnah.com/bukhari:6013',
+  },
+  {
+    type: 'Reflection',
+    text: 'A sincere intention can turn an ordinary act into worship.',
+    source: 'Daily reflection · not a hadith',
+  },
+  {
+    type: 'Reflection',
+    text: 'Before today ends, thank Allah for one blessing you often overlook.',
+    source: 'Daily reflection · not a hadith',
+  },
 ];
