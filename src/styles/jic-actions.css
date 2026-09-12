@@ -1,0 +1,44 @@
+/* Small action overrides: translucent status colours and restrained colour transitions. */
+html[data-theme][data-surface='glass'] .jic-community-join {
+  --jic-button-tint-strength: 60%;
+}
+
+html[data-theme][data-surface='glass'] .jic-watch-live {
+  --jic-button-tint: #dc2626;
+  --jic-button-ink: #fff;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.025) 48%, transparent),
+    color-mix(in srgb, var(--jic-button-tint) 62%, transparent) !important;
+  color: var(--jic-button-ink) !important;
+  border-color: color-mix(in srgb, var(--jic-button-tint) 70%, var(--jic-glass-border)) !important;
+  box-shadow: var(--jic-glass-shadow) !important;
+  -webkit-backdrop-filter: var(--jic-glass-control-filter);
+  backdrop-filter: var(--jic-glass-control-filter);
+}
+
+html[data-theme][data-surface='glass'] :is(.jic-footer-donate, .jic-menu-trigger, .jic-bottom-menu-trigger, .jic-menu-word) {
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.03) 46%, rgba(255, 224, 160, 0.16)),
+    var(--jic-glass-control) !important;
+  background-size: 220% 100%;
+  border-color: var(--jic-glass-border) !important;
+  box-shadow: var(--jic-glass-shadow) !important;
+  -webkit-backdrop-filter: var(--jic-glass-control-filter);
+  backdrop-filter: var(--jic-glass-control-filter);
+  transition: background-position 420ms ease, border-color 220ms ease, transform 180ms ease;
+}
+
+html[data-theme][data-surface='glass'] :is(.jic-footer-donate, .jic-menu-trigger, .jic-bottom-menu-trigger, .jic-menu-word):hover,
+html[data-theme][data-surface='glass'] :is(.jic-footer-donate, .jic-menu-trigger, .jic-bottom-menu-trigger, .jic-menu-word)[aria-expanded='true'] {
+  background-position: 100% 0;
+}
+
+html[data-theme][data-surface='glass'] :is(.jic-footer-donate, .jic-menu-trigger, .jic-bottom-menu-trigger, .jic-menu-word):active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme][data-surface='glass'] :is(.jic-footer-donate, .jic-menu-trigger, .jic-bottom-menu-trigger, .jic-menu-word) {
+    transition: none;
+  }
+}
