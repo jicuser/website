@@ -19,6 +19,34 @@ GitHub documentation: [dev containers](https://docs.github.com/en/codespaces/set
 
 `src/main.jsx` loads the application and providers. `src/App.jsx` maps addresses to pages. Public pages use `src/layouts/MainLayout.jsx`, which places the header, daily reminder, content and footer in order.
 
+## Shared logic and naming
+
+Keep each behavior with one clear owner in [the code map](../CODEBASE_MAP.md).
+When fixing a fault, change that owner and remove the superseded implementation in
+the same change. Avoid adding another timer, event handler, storage key or CSS
+override that competes with it. Add shared helpers when multiple callers need the
+same behavior, rather than creating a framework for a single action.
+
+Use descriptive names consistently: PascalCase for React components, camelCase
+for JavaScript functions and values, snake_case for database fields, and kebab-case
+for public URL segments. Preserve established API fields, permission IDs and public
+URLs; a naming improvement must not silently break existing clients or bookmarks.
+Display labels belong in the existing navigation/content registries where shared.
+Avoid names describing attempts, such as `new`, `fixed`, `final` or `v2`, unless a
+real versioned data contract requires a version.
+
+Website and Flutter clients share the backend contract and permission IDs. The
+server enforces access and valid state changes; client checks provide helpful
+feedback using the same rules. A hidden button is not authorization. Keep UI state
+(menu open, theme, navigation history) local to the client; shared records such as
+tasks, forms and notification read status belong in Supabase.
+
+The [shared app/backend plan](flutter-shared-backend.md) owns the future app inbox,
+push delivery and optional email workflow. Update that plan when decisions change
+instead of adding another competing app plan.
+
+## Styling and component ownership
+
 `src/styles/app.css` imports the styles once. Find a component's class name in the appropriate stylesheet and change its existing rule. Put that component's mobile rules in the same file. Do not add a second stylesheet to override an old version of the same component.
 
 CSS custom properties are shared settings. For example, `var(--jic-text)` takes the current theme's text colour. Change the token in `theme.css` if every use should change; edit the component if only that component should change.

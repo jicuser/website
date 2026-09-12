@@ -2,6 +2,44 @@
 
 Keep the existing React/Vite website. Flutter will use its own Dart UI and the same Supabase records, authentication, RLS and Edge Functions. No Flutter app or native widget is created by this website change.
 
+## App inbox and notifications: agreed direction
+
+This section is the plan for future implementation. The repository already has a
+private forms inbox and staff access; it does not yet implement a general app task
+system, per-user notification inbox or mobile push delivery.
+
+| Responsibility                 | Owner and intended behavior                                                                                                                                                                                                                     |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Announcements, tasks and forms | Store shared records in Supabase and reuse existing content/form records. Website Admin and Flutter operate on the same records and stable IDs.                                                                                                 |
+| User inbox                     | Store each recipient's notification and read state in Supabase. Opening an alert leads to the original task, form or announcement, subject to current access.                                                                                   |
+| Delivery                       | Save the underlying change and notification together before sending push. Retry delivery using the same notification identity so failures cannot create duplicate inbox items.                                                                  |
+| Phone push                     | A server-side sender uses a mobile push service. Supabase remains the data and access backend; push is a delivery channel, not a second user database.                                                                                          |
+| Missed alerts                  | Fetch the authorised inbox on app open/resume. Live updates can refresh an open app; they do not replace background phone push.                                                                                                                 |
+| Optional email                 | Offer explicit Copy, Share or Open email actions for a selected record. Let the user review recipients and text in their email app; opening a draft does not mean it was sent. Routine task/notice delivery does not depend on automatic email. |
+
+Keep the notification inbox distinct from the underlying task: reading an alert
+does not complete its task. Changes to task status must use the shared backend
+operation. Delivery retries must not repeat that operation. Apply recipient access
+and notification preferences on the server, including when a queued alert is sent.
+Private form details should be read inside the authenticated app, not copied into
+lock-screen push text by default.
+
+For the future Flutter app, choose one compatible push integration, with credentials
+held on the server and device registrations associated with the signed-in user.
+Supabase documents Edge Functions sending through services such as FCM or Expo;
+the final provider choice and native setup remain implementation work. See
+[Supabase push notifications](https://supabase.com/docs/guides/functions/examples/push-notifications).
+
+The optional-email direction concerns routine notices, tasks and form replies.
+Existing account invitations and password setup/recovery remain separate Auth
+flows until an alternative is deliberately implemented and verified.
+
+Build this in order: shared task/inbox records and permissions, website/app inbox
+screens, phone push delivery, then optional sharing/email draft controls. Reuse the
+existing forms endpoint and content model rather than introducing parallel inboxes.
+
+## Existing shared contracts
+
 | Area             | Contract / code                                                                                                                                 |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Identity         | Supabase Auth user ID; `get_my_profile()` returns `id`, `display_name`, `is_active`, `is_owner`, `permissions`, `staff_kinds`                   |

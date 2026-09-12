@@ -24,6 +24,10 @@ Apply the migration once, then deploy `supabase functions deploy submit-form` be
 
 The old optional spreadsheet submission path was removed. New submissions go to this inbox. No existing external spreadsheet records are imported or deleted. Saving a form does **not** send an email notification; staff should check the inbox. Submissions remain until an authorised database administrator removes them under the centre’s retention process.
 
+Future app alerts and optional Copy/Share/Open email actions follow the
+[shared app/backend plan](flutter-shared-backend.md#app-inbox-and-notifications-agreed-direction).
+They are planned features, not part of the current form submission flow.
+
 Use a separate test project for end-to-end form submissions and email invitations. Production permission checks can use a transaction that is rolled back; do not leave test registrations or real medical details in logs.
 
 ## Invitation and password setup links
