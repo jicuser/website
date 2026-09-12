@@ -24,7 +24,12 @@ export default function TvPosterRail({ posters, seconds, onImageError }) {
     }, 500);
     return () => clearTimeout(timer);
   }, [moving, posters.length]);
-  if (!slots) return <div className="jic-tv-empty">No posters selected</div>;
+  if (!slots)
+    return (
+      <div className="jic-tv-idle-brand">
+        <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
+      </div>
+    );
   return (
     <section
       className="tv-poster-rail"

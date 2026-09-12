@@ -314,9 +314,11 @@ function ScreenDisplay({ screenId }) {
               <NextPrayerSummary todaysTimes={prayers.todaysTimes} currentDate={now} />
             </div>
           )}
-          <div className="jic-tv-logo">
-            <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
-          </div>
+          {(noticeVisible || posters.length > 0) && (
+            <div className="jic-tv-logo">
+              <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
+            </div>
+          )}
           {tv.settings.show_clock !== false && (
             <div className="jic-tv-clock">
               <time dateTime={now.toISOString()}>

@@ -158,9 +158,10 @@ export default function useStreamSetup(screenId, userId) {
     setMessage('Choose the number of inputs in each scene, then press + Select input type.');
   };
   const loadSettings = (settings, template = null, name = template?.name || '') => {
+    const restoredName = typeof name === 'string' ? name.trim() : '';
     setSavedTemplate(template);
-    setStreamName(name);
-    setStage(3);
+    setStreamName(restoredName);
+    setStage(nameProblem(restoredName, 'stream name') ? 2 : 3);
     setWorkspaceId(crypto.randomUUID());
     setForm(settings);
     setMessage('Stream settings loaded. Reconnect camera and screen inputs when ready.');

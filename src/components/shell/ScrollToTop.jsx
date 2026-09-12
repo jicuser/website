@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
@@ -7,13 +7,19 @@ export const ScrollToTop = () => {
   const { pathname, hash } = useLocation();
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!hash) {
       window.scrollTo(0, 0);
       return;
     }
     const timer = window.setTimeout(() => {
-      const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+      let id = hash.slice(1);
+      try {
+        id = decodeURIComponent(id);
+      } catch {
+        // A malformed shared URL must not break the page.
+      }
+      const target = document.getElementById(id);
       target?.scrollIntoView({ block: 'start' });
       target?.focus({ preventScroll: true });
     }, 350);

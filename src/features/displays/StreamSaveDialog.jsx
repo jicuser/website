@@ -131,7 +131,12 @@ export default function StreamSaveDialog({
             {ended ? 'Don’t save' : 'Cancel'}
           </button>
           {problem && onEdit && (
-            <button className="admin-button" type="button" disabled={busy} onClick={onEdit}>
+            <button
+              className="admin-button"
+              type="button"
+              disabled={busy}
+              onClick={() => onEdit(name)}
+            >
               Edit settings
             </button>
           )}

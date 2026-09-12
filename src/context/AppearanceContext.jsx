@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import LiquidGlassFilters from '@/components/shell/LiquidGlassFilters';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 const AppearanceContext = createContext(null);
 
@@ -21,23 +27,26 @@ function writeStorage(key, value) {
 }
 
 export function AppearanceProvider({ children }) {
-  const [theme, setTheme] = useState(() => readStorage('jic-theme', 'dark'));
+  const [theme, setTheme] = useState(() =>
+    readStorage('jic-theme', 'dark') === 'light' ? 'light' : 'dark',
+  );
   const [glassEnabled, setGlassEnabled] = useState(
     () => readStorage('jic_glass_enabled', 'true') !== 'false',
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
     root.classList.toggle('dark', theme === 'dark');
     root.dataset.theme = theme;
-    writeStorage('jic-theme', theme);
-  }, [theme]);
+    root.dataset.surface = glassEnabled ? 'glass' : 'solid';
+    root.style.colorScheme = theme;
+    root.style.backgroundColor = theme === 'dark' ? '#080f1d' : '#fafbfd';
+  }, [theme, glassEnabled]);
 
   useEffect(() => {
-    const root = document.documentElement;
-    root.dataset.surface = glassEnabled ? 'glass' : 'solid';
+    writeStorage('jic-theme', theme);
     writeStorage('jic_glass_enabled', String(glassEnabled));
-  }, [glassEnabled]);
+  }, [theme, glassEnabled]);
 
   const value = useMemo(
     () => ({
@@ -51,12 +60,7 @@ export function AppearanceProvider({ children }) {
     [theme, glassEnabled],
   );
 
-  return (
-    <AppearanceContext.Provider value={value}>
-      <LiquidGlassFilters />
-      {children}
-    </AppearanceContext.Provider>
-  );
+  return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>;
 }
 
 export function useAppearance() {

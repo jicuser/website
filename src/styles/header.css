@@ -261,6 +261,7 @@ html {
 /* Native dialog supplies focus trapping, Escape handling and a separate scroll area. */
 .jic-unified-menu {
   --jic-glass-panel: var(--jic-glass-panel-strong);
+  --jic-glass-control-filter: none;
   position: fixed;
   inset: calc(var(--jic-prayer-sticky-offset) + 62px) max(12px, env(safe-area-inset-right)) auto
     auto;
@@ -303,7 +304,7 @@ html {
   border: 1px solid var(--jic-glass-border);
   border-radius: 10px;
   flex-shrink: 0;
-  background: var(--jic-glass-control);
+  background: transparent;
 }
 .jic-unified-menu-scroll {
   flex: 1;
@@ -510,14 +511,15 @@ html {
     flex: 0 0 auto;
     z-index: 40;
     align-self: flex-end;
-    margin-bottom: 4px;
+    margin-bottom: 0;
   }
   .jic-menu-word {
     display: flex;
     align-items: center;
     gap: 6px;
     min-height: 44px;
-    padding: 4px 0 4px 10px;
+    /* Place the script's visible baseline by the logo subtitle inside this row. */
+    padding: 8px 0 0 10px;
     border: 0;
     background: transparent;
     color: var(--jic-text);
@@ -531,6 +533,7 @@ html {
     transform: rotate(180deg);
   }
   .jic-quick-menu {
+    --jic-glass-panel: var(--jic-glass-panel-strong);
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
@@ -569,7 +572,9 @@ html {
     border: 0;
     border-radius: 0;
     --jic-glass-panel: var(--jic-bg);
+    --jic-glass-panel-strong: var(--jic-bg);
     --jic-glass-shadow: none;
+    --jic-glass-panel-filter: none;
     --jic-glass-dense-filter: none;
   }
   .jic-unified-menu-head {
@@ -590,12 +595,6 @@ html {
     font-size: 1.375rem;
     font-weight: 600;
   }
-  .jic-unified-menu
-    :is(.jic-menu-appearance button, .jic-unified-admin-link, .jic-unified-menu-donate) {
-    border: 0;
-    border-radius: 10px;
-    background: transparent;
-  }
   .jic-public-route {
     padding-bottom: calc(72px + env(safe-area-inset-bottom));
   }
@@ -611,6 +610,7 @@ html {
     color: var(--jic-text);
     border-top: 1px solid var(--jic-border);
     backdrop-filter: var(--jic-glass-panel-filter);
+    -webkit-backdrop-filter: var(--jic-glass-panel-filter);
   }
   .jic-mobile-controls :is(button, a) {
     display: flex;

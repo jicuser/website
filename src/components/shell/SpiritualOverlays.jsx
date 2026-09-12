@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { DEFAULT_REMINDERS } from '@/content/reminders';
@@ -13,10 +13,10 @@ const SALAWAT = {
   urdu: 'اللہ ہمارے آقا محمد ﷺ پر رحمتیں نازل فرمائے۔',
 };
 
-function readReminders(getContent) {
+function readReminders(savedReminders) {
   let reminders = DEFAULT_REMINDERS;
   try {
-    const saved = JSON.parse(getContent('header_reminders', '[]'));
+    const saved = JSON.parse(savedReminders);
     const valid = Array.isArray(saved)
       ? saved.filter(
           (item) =>
@@ -26,7 +26,13 @@ function readReminders(getContent) {
             (item.source == null || typeof item.source === 'string'),
         )
       : [];
-    if (valid.length) reminders = [...valid, ...DEFAULT_REMINDERS.filter((item) => !valid.some((custom) => custom.text.trim() === item.text))];
+    if (valid.length)
+      reminders = [
+        ...valid,
+        ...DEFAULT_REMINDERS.filter(
+          (item) => !valid.some((custom) => custom.text.trim() === item.text),
+        ),
+      ];
   } catch {
     // Keep curated defaults.
   }
@@ -34,72 +40,113 @@ function readReminders(getContent) {
 }
 
 export default function SpiritualOverlays() {
-  const { getContent } = useContent();
-  const reminders = useMemo(() => readReminders(getContent), [getContent]);
-  const [salawatOpen, setSalawatOpen] = useState(false);
+  const { getContent, editMode } = useContent();
+  const savedReminders = getContent('header_reminders', '[]');
+  const reminders = useMemo(() => readReminders(savedReminders), [savedReminders]);
+  const [salawatOpen, setSalawatOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem(SESSION_KEY) !== '1';
+    } catch {
+      return true;
+    }
+  });
   const [reflection, setReflection] = useState(null);
+  const salawatTimer = useRef(null);
+  const salawatDismiss = useRef(null);
+  const lastShown = useRef(0);
+  const interactionCount = useRef(0);
 
   const closeSalawat = useCallback((delay = 0) => {
+    window.clearTimeout(salawatTimer.current);
     if (!delay) {
       setSalawatOpen(false);
       return;
     }
-    window.setTimeout(() => setSalawatOpen(false), delay);
+    // A tap replaces the original deadline, giving readers three full seconds.
+    salawatTimer.current = window.setTimeout(() => setSalawatOpen(false), delay);
   }, []);
 
   useEffect(() => {
+    if (!salawatOpen) return undefined;
     try {
-      if (sessionStorage.getItem(SESSION_KEY) === '1') return undefined;
       sessionStorage.setItem(SESSION_KEY, '1');
     } catch {
       // If storage is unavailable, still show the welcome once for this page load.
     }
-    setSalawatOpen(true);
-    const timer = window.setTimeout(() => setSalawatOpen(false), 5000);
-    return () => window.clearTimeout(timer);
-  }, []);
+    lastShown.current = Date.now();
+    salawatTimer.current = window.setTimeout(() => setSalawatOpen(false), 5000);
+    const previousFocus = document.activeElement;
+    salawatDismiss.current?.focus({ preventScroll: true });
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') closeSalawat();
+      if (event.key !== 'Tab') return;
+      event.preventDefault();
+      salawatDismiss.current?.focus({ preventScroll: true });
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.clearTimeout(salawatTimer.current);
+      document.removeEventListener('keydown', onKeyDown);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [salawatOpen, closeSalawat]);
 
   useEffect(() => {
-    let lastShown = 0;
-    let interactionCount = 0;
-
     const isExcluded = (target) =>
       target instanceof Element &&
       target.closest(
-        'button,a,input,textarea,select,[contenteditable="true"],dialog,.jic-spiritual-overlay,.jic-daily-reminder',
+        'button,a,input,textarea,select,[contenteditable="true"],[role="button"],[role="dialog"],dialog,.jic-spiritual-overlay,.jic-daily-reminder',
       );
 
     const onClick = (event) => {
-      if (!event.isTrusted || salawatOpen || reflection || isExcluded(event.target)) return;
-      interactionCount += 1;
-      if (interactionCount < 2 || Date.now() - lastShown < RANDOM_COOLDOWN) return;
+      if (
+        !event.isTrusted ||
+        salawatOpen ||
+        reflection ||
+        editMode ||
+        isExcluded(event.target) ||
+        document.querySelector('dialog[open],[aria-modal="true"]')
+      )
+        return;
+      interactionCount.current += 1;
+      if (interactionCount.current < 2 || Date.now() - lastShown.current < RANDOM_COOLDOWN) return;
       if (Math.random() > 0.14) return;
 
-      lastShown = Date.now();
-      interactionCount = 0;
+      // Refs survive re-renders and listener cleanup, keeping the cooldown intact.
+      lastShown.current = Date.now();
+      interactionCount.current = 0;
       const item = reminders[Math.floor(Math.random() * reminders.length)];
       setReflection({ ...item, mode: Math.random() < 0.55 ? 'toast' : 'spotlight' });
     };
 
     document.addEventListener('click', onClick, true);
     return () => document.removeEventListener('click', onClick, true);
-  }, [reflection, reminders, salawatOpen]);
+  }, [reflection, reminders, salawatOpen, editMode]);
 
   useEffect(() => {
     if (!reflection) return undefined;
-    const timer = window.setTimeout(() => setReflection(null), reflection.mode === 'toast' ? 4200 : 5600);
+    const timer = window.setTimeout(
+      () => setReflection(null),
+      reflection.mode === 'toast' ? 4200 : 5600,
+    );
     return () => window.clearTimeout(timer);
   }, [reflection]);
 
   return (
     <>
       {salawatOpen && (
-        <div className="jic-spiritual-overlay jic-salawat-overlay" role="dialog" aria-modal="true" aria-label="Salawat">
+        <div
+          className="jic-spiritual-overlay jic-salawat-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Salawat"
+        >
           <button
+            ref={salawatDismiss}
             type="button"
             className="jic-spiritual-dismiss"
             aria-label="Close salawat"
-            onClick={() => closeSalawat(3000)}
+            onClick={() => closeSalawat()}
           >
             <X size={20} />
           </button>
@@ -113,7 +160,7 @@ export default function SpiritualOverlays() {
             <p className="jic-salawat-urdu" lang="ur" dir="rtl">
               {SALAWAT.urdu}
             </p>
-            <small>Tap to close</small>
+            <small>Tap to close after 3 seconds</small>
           </div>
         </div>
       )}

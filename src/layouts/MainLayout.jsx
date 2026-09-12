@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import { overviewPaths } from '@/content/editablePages';
@@ -30,13 +29,7 @@ export default function MainLayout() {
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
         <DailyReminder />
-        <motion.div
-          key={pathname}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-        >
+        <div>
           <Suspense
             fallback={
               <p className="jic-page-loading" role="status">
@@ -51,10 +44,10 @@ export default function MainLayout() {
               <ManagedPageContent optional />
             </div>
           )}
-          <ManagedPageSections />
+          <ManagedPageSections key={pathname} />
           {!isHome && !isDiscovery && <ProgrammePosters />}
           {!isDiscovery && <RelatedContent />}
-        </motion.div>
+        </div>
       </main>
       <Footer />
       <ScrollToTop />

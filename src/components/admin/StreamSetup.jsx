@@ -149,12 +149,8 @@ function HallWorkspace({ screenId, userId, onBack }) {
           template={setup.pendingSave.template}
           initialName={setup.pendingSave.name}
           onDismiss={() => setup.setPendingSave(null)}
-          onEdit={() => {
-            setup.loadSettings(
-              setup.pendingSave.settings,
-              setup.pendingSave.template,
-              setup.pendingSave.name,
-            );
+          onEdit={(name) => {
+            setup.loadSettings(setup.pendingSave.settings, setup.pendingSave.template, name);
             setup.setPendingSave(null);
           }}
           onSaved={() => {

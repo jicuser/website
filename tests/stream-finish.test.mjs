@@ -191,6 +191,39 @@ test('setup asks for a stream name and keeps it through refresh without a scene-
   assert.equal(refreshed.stage, 3);
 });
 
+test('editing an ended stream with no name asks for its name and preserves the input draft', async () => {
+  const app = harness();
+  let setup = await app.flush();
+  setup.manageLive();
+  setup = await app.flush();
+  await setup.run(setup.end);
+  setup = await app.flush();
+  const pending = setup.pendingSave;
+  setup.loadSettings(pending.settings, pending.template, pending.name);
+  setup.setPendingSave(null);
+  setup = await app.flush();
+  assert.equal(setup.stage, 2);
+  assert.equal(setup.form.scenes[0].layers[0].text, 'Welcome');
+  setup.build('Evening study circle');
+  setup = await app.flush();
+  assert.equal(setup.stage, 3);
+  assert.equal(setup.streamName, 'Evening study circle');
+  assert.equal(setup.form.scenes[0].layers[0].text, 'Welcome');
+  await setup.publish();
+  setup = await app.flush();
+  assert.equal(setup.started, true);
+});
+
+test('returning to an ended draft keeps the name entered in its save prompt', async () => {
+  const app = harness();
+  let setup = await app.flush();
+  setup.loadSettings(settings, null, '  Saturday Quran lesson  ');
+  setup = await app.flush();
+  assert.equal(setup.stage, 3);
+  assert.equal(setup.streamName, 'Saturday Quran lesson');
+  assert.equal(setup.form.scenes[0].layers[0].text, 'Welcome');
+});
+
 test('a failed end keeps the live setup and does not open the save prompt', async () => {
   const app = harness({ rejectEnd: true });
   let setup = await app.flush();
