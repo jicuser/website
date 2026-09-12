@@ -26,11 +26,11 @@
   line-height: 1.3;
   white-space: nowrap;
   text-decoration: none;
-  background: var(--jic-glass-surface-strong);
+  background: var(--jic-glass-panel-strong);
   color: var(--jic-text-secondary);
   box-shadow: var(--jic-glass-shadow);
-  backdrop-filter: var(--jic-glass-backdrop);
-  -webkit-backdrop-filter: var(--jic-glass-backdrop);
+  backdrop-filter: var(--jic-glass-panel-filter);
+  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
 }
 .jic-unified-subnav-link:is(:hover, .is-current) {
   color: var(--jic-text);

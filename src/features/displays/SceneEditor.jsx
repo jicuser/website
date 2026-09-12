@@ -1,9 +1,8 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { Plus, Settings2 } from 'lucide-react';
+import { Plus, Settings2, Link2 } from 'lucide-react';
 import {
   SOURCE_TYPES,
   MAX_SCENES,
-  nameProblem,
   fitRect,
   layerStyle,
 } from '../../../supabase/functions/_shared/tv-scenes.js';
@@ -44,9 +43,7 @@ export default function SceneEditor({
   const [selected, setSelected] = useState('');
   const [editing, setEditing] = useState(null);
   const [snap, setSnap] = useState(true);
-  const [addingScene, setAddingScene] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [sceneError, setSceneError] = useState('');
+  const [showConnection, setShowConnection] = useState(false);
   const canvas = useRef(null);
   const drag = useRef(null);
   const layer = scene.layers.find((item) => item.id === selected);
@@ -76,9 +73,10 @@ export default function SceneEditor({
     setEditing(null);
   }
 
-  function edit(item) {
+  function edit(item, connection = false) {
     if (disabled) return;
     setSelected(item.id);
+    setShowConnection(connection);
     setEditing({ ...item });
   }
 
@@ -167,8 +165,9 @@ export default function SceneEditor({
           className="admin-button"
           disabled={disabled || value.scenes.length >= MAX_SCENES}
           onClick={() => {
-            setAddingScene(true);
-            setSceneError('');
+            onChange(addStreamScene(value));
+            setSelected('');
+            closeDialog();
           }}
         >
           <Plus size={18} aria-hidden="true" /> Add scene
@@ -179,7 +178,7 @@ export default function SceneEditor({
             className="admin-button"
             disabled={disabled}
             onClick={() => {
-              if (!window.confirm(`Remove “${scene.name}” and its inputs from this setup?`)) return;
+              if (!window.confirm('Remove this scene and its inputs from this setup?')) return;
               const scenes = value.scenes.filter((item) => item.id !== scene.id);
               onChange({ ...value, scenes, active_scene_id: scenes[0].id });
               setSelected('');
@@ -190,55 +189,6 @@ export default function SceneEditor({
           </button>
         )}
       </div>
-      {addingScene && (
-        <form
-          className="scene-add-form"
-          noValidate
-          onSubmit={(event) => {
-            event.preventDefault();
-            try {
-              onChange(addStreamScene(value, newName));
-              setNewName('');
-              setAddingScene(false);
-              setSelected('');
-              closeDialog();
-            } catch (error) {
-              setSceneError(error.message);
-              event.currentTarget.querySelector('input')?.focus();
-            }
-          }}
-        >
-          <label>
-            New scene name (required)
-            <input
-              autoFocus
-              required
-              maxLength={60}
-              value={newName}
-              placeholder="e.g. Questions and answers"
-              aria-invalid={Boolean(sceneError)}
-              disabled={disabled}
-              onChange={(event) => {
-                setNewName(event.target.value);
-                setSceneError('');
-              }}
-            />
-            {sceneError && (
-              <small className="admin-field-error" role="alert">
-                {sceneError}
-              </small>
-            )}
-          </label>
-          <div className="admin-actions">
-            <button type="submit" className="admin-button primary" disabled={disabled}>
-              Add scene
-            </button>
-            <button type="button" className="admin-button" onClick={() => setAddingScene(false)}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
       <div className="scene-toolbar">
         <label>
           Scene
@@ -253,27 +203,10 @@ export default function SceneEditor({
           >
             {value.scenes.map((item, index) => (
               <option key={item.id} value={item.id}>
-                {index + 1}. {item.name}
+                Scene {index + 1}
               </option>
             ))}
           </select>
-        </label>
-        <label>
-          Scene name (required)
-          <input
-            required
-            placeholder="e.g. Welcome or Main lesson"
-            aria-invalid={Boolean(nameProblem(scene.name, 'scene name'))}
-            disabled={disabled}
-            maxLength={60}
-            value={scene.name}
-            onChange={(event) => updateScene({ ...scene, name: event.target.value })}
-          />
-          {nameProblem(scene.name, 'scene name') && (
-            <small className="admin-field-error" role="alert">
-              {nameProblem(scene.name, 'scene name')}
-            </small>
-          )}
         </label>
         <label>
           How many inputs?
@@ -409,6 +342,17 @@ export default function SceneEditor({
           <div className="scene-selected-source" aria-label="Selected input controls">
             <strong>{sourceLabel(layer)}</strong>
             <div className="scene-source-actions">
+              {layer.type === 'input' && (
+                <button
+                  type="button"
+                  className="admin-button primary"
+                  disabled={disabled}
+                  onClick={() => edit(layer, true)}
+                >
+                  <Link2 size={18} aria-hidden="true" />
+                  {localStreams[layer.slot] ? 'Sharing controls' : 'Connect device'}
+                </button>
+              )}
               <button
                 type="button"
                 className="admin-button"
@@ -416,7 +360,7 @@ export default function SceneEditor({
                 onClick={() => edit(layer)}
               >
                 {layer.type !== 'empty' && <Settings2 size={18} aria-hidden="true" />}
-                {layer.type === 'empty' ? 'Select input type' : 'Input controls'}
+                {layer.type === 'empty' ? 'Select input type' : 'Input settings'}
               </button>
               <button
                 type="button"
@@ -448,6 +392,7 @@ export default function SceneEditor({
           disabled={disabled}
           posters={posters}
           renderDeviceInput={renderDeviceInput}
+          showConnection={showConnection}
           onClose={closeDialog}
         />
       )}

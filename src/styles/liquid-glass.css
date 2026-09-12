@@ -21,9 +21,9 @@ html[data-theme] {
 }
 
 html[data-theme='dark'] {
-  --jic-glass-control: rgba(10, 25, 45, 0.35);
-  --jic-glass-tile: rgba(10, 25, 45, 0.42);
-  --jic-glass-panel: rgba(10, 25, 45, 0.50);
+  --jic-glass-control: rgba(10, 25, 45, 0.48);
+  --jic-glass-tile: rgba(10, 25, 45, 0.48);
+  --jic-glass-panel: rgba(10, 25, 45, 0.5);
   --jic-glass-panel-strong: rgba(10, 25, 45, 0.64);
   --jic-glass-border: rgba(255, 255, 255, 0.15);
   --jic-glass-highlight: rgba(255, 255, 255, 0.18);
@@ -34,10 +34,12 @@ html[data-theme='dark'] {
   --jic-button-tint-strength: 70%;
 }
 
-html[data-theme][data-surface='glass'] :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell) {
+html[data-theme][data-surface='glass']
+  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell) {
   --jic-text: var(--jic-glass-ink);
   --jic-text-secondary: var(--jic-glass-muted);
   --jic-muted: var(--jic-glass-muted);
+  --jic-gold: var(--jic-glass-accent);
 }
 
 /* Small interactive surfaces: buttons, pills, icon tiles and compact navigation. */
@@ -50,6 +52,7 @@ html[data-theme][data-surface='glass']
     .jic-primary-cta,
     .jic-secondary-cta,
     .jic-unified-subnav-link,
+    .jic-unified-admin-link,
     .jic-footer-socials a,
     .jic-scroll-top,
     .jic-rail-controls button,
@@ -57,7 +60,7 @@ html[data-theme][data-surface='glass']
     .jic-wallpaper-control > button,
     .jic-poster-button,
     .jic-image-viewer-actions :is(a, button)
-  ) {
+  ):not(.jic-menu-word, .jic-radio-flat, .jic-footer-menu-toggle, .jic-mobile-controls > *) {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.035) 52%, transparent),
     var(--jic-glass-control) !important;
@@ -143,7 +146,8 @@ html[data-theme][data-surface='glass']
 /* Do not composite another backdrop when a control sits inside a glass card. */
 html[data-theme][data-surface='glass']
   :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
-  [data-glass='frosted'] [data-glass] {
+  [data-glass='frosted']
+  [data-glass] {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
@@ -151,9 +155,15 @@ html[data-theme][data-surface='glass']
 /* Active state remains obvious across themes. */
 html[data-theme][data-surface='glass']
   :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
-  :is(.jic-unified-subnav-link.is-current, [role='tab'][data-state='active'], [aria-current='page']) {
+  :is(
+    .jic-unified-subnav-link.is-current,
+    [role='tab'][data-state='active'],
+    [aria-current='page']
+  ) {
   border-color: var(--jic-gold) !important;
-  box-shadow: inset 0 -3px var(--jic-gold), var(--jic-glass-shadow) !important;
+  box-shadow:
+    inset 0 -3px var(--jic-gold),
+    var(--jic-glass-shadow) !important;
   font-weight: 750;
 }
 

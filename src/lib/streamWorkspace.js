@@ -5,7 +5,16 @@ import {
   nameProblem,
 } from '../../supabase/functions/_shared/tv-scenes.js';
 
-export function createStreamScene(name, idFactory = () => crypto.randomUUID()) {
+const sceneNames = [
+  'Main view',
+  'Second view',
+  'Third view',
+  'Fourth view',
+  'Fifth view',
+  'Sixth view',
+];
+
+export function createStreamScene(name = sceneNames[0], idFactory = () => crypto.randomUUID()) {
   const problem = nameProblem(name, 'scene name');
   if (problem) throw new Error(problem);
   return {
@@ -18,7 +27,10 @@ export function createStreamScene(name, idFactory = () => crypto.randomUUID()) {
 
 export function addStreamScene(settings, name, idFactory = () => crypto.randomUUID()) {
   if (settings.scenes.length >= MAX_SCENES) throw new Error('A stream can have up to six scenes.');
-  const scene = createStreamScene(name, idFactory);
+  const scene = createStreamScene(
+    name ?? sceneNames.find((label) => !settings.scenes.some((item) => item.name === label)),
+    idFactory,
+  );
   return { ...settings, scenes: [...settings.scenes, scene], active_scene_id: scene.id };
 }
 
@@ -64,7 +76,9 @@ export function loadSceneTemplate(settings, template, idFactory = () => crypto.r
 export function streamSettings(background, draft) {
   return {
     ...background,
-    scenes: draft.scenes,
+    scenes: draft.scenes.map((scene, index) =>
+      nameProblem(scene.name, 'scene name') ? { ...scene, name: sceneNames[index] } : scene,
+    ),
     active_scene_id: draft.active_scene_id,
     muted: draft.muted,
     scene_mode: 'teaching',

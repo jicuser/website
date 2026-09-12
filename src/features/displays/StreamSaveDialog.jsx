@@ -10,6 +10,7 @@ export default function StreamSaveDialog({
   screenId,
   settings,
   template,
+  initialName,
   ended = false,
   onSaved,
   onDismiss,
@@ -19,7 +20,7 @@ export default function StreamSaveDialog({
   const dialog = useRef(null);
   const nameField = useRef(null);
   const saving = useRef(false);
-  const [name, setName] = useState(template?.name || '');
+  const [name, setName] = useState(initialName || template?.name || '');
   const [replace, setReplace] = useState(Boolean(template));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');

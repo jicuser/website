@@ -50,7 +50,7 @@ const input = {
   width: 100,
   height: 100,
 };
-function inputMarkup(area) {
+function inputMarkup(area, extraProps = {}) {
   const scene = { id: 'lesson', name: 'Main lesson', overlap: true, layers: [area] };
   return renderToStaticMarkup(
     React.createElement(InputDialog, {
@@ -61,22 +61,28 @@ function inputMarkup(area) {
       onClose: noop,
       posters: [],
       renderDeviceInput: () => React.createElement('button', null, 'Connect classroom laptop'),
+      ...extraProps,
     }),
   );
 }
 
-test('reopening a configured device shows connection controls and a settings cog without the setup form', () => {
+test('reopening a configured device shows its settings before connection controls', () => {
   const markup = inputMarkup(input);
-  assert.match(markup, /Connect classroom laptop/);
-  assert.match(markup, /aria-label="Change input settings"/);
-  assert.doesNotMatch(
-    markup,
-    /scene-content-types|Device name \(required\)|Continue to connection/,
-  );
+  assert.match(markup, /Device name \(required\)/);
+  assert.match(markup, /value="Classroom laptop"/);
+  assert.match(markup, /Continue to connection/);
+  assert.match(markup, /Position and size/);
+  assert.doesNotMatch(markup, /scene-content-types|Connect classroom laptop/);
 });
 
-test('empty inputs show the chooser; selected links show only the relevant form and type dropdown', () => {
-  assert.match(inputMarkup({ ...input, type: 'empty' }), /scene-content-types/);
+test('empty and selected inputs use one type dropdown with only relevant settings', () => {
+  const empty = inputMarkup({ ...input, type: 'empty' });
+  assert.match(empty, /<select/);
+  assert.match(empty, /<option value="empty" disabled="" selected="">Select input type/);
+  assert.doesNotMatch(
+    empty,
+    /scene-content-types|Connect classroom laptop|Device name \(required\)/,
+  );
   const link = inputMarkup({
     ...input,
     type: 'youtube',
@@ -92,9 +98,16 @@ test('empty inputs show the chooser; selected links show only the relevant form 
 });
 
 test('legacy generic device names return to the name form instead of starting a connection', () => {
-  const markup = inputMarkup({ ...input, name: 'Device 1' });
+  const markup = inputMarkup({ ...input, name: 'Device 1' }, { showConnection: true });
   assert.match(markup, /Device name \(required\)/);
   assert.doesNotMatch(markup, /Connect classroom laptop/);
+});
+
+test('the direct connection action opens controls without repeating the input form', () => {
+  const markup = inputMarkup(input, { showConnection: true });
+  assert.match(markup, /Connect classroom laptop/);
+  assert.match(markup, /Change input settings/);
+  assert.doesNotMatch(markup, /Device name \(required\)|Continue to connection/);
 });
 
 test('saved settings are offered for loading without asking to save before ending', () => {

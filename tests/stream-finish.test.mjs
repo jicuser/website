@@ -154,6 +154,7 @@ test('ending returns to normal and retains all settings for the save prompt and 
   setup = await app.flush();
   const template = { id: 'saved-lesson', name: 'Sunday lesson', updated_at: 'saved' };
   setup.setSavedTemplate(template);
+  setup.setStreamName('Saturday Quran lesson');
   setup = await app.flush();
   await setup.run(setup.end);
   setup = await app.flush();
@@ -162,13 +163,32 @@ test('ending returns to normal and retains all settings for the save prompt and 
   assert.equal(setup.form, null);
   assert.equal(setup.pendingSave.settings.scenes[0].layers[0].text, 'Welcome');
   assert.equal(setup.pendingSave.template.name, 'Sunday lesson');
+  assert.equal(setup.pendingSave.name, 'Saturday Quran lesson');
   assert.equal(app.calls.filter((action) => action === 'save-template').length, 0);
   const restored = harness({ storage: app.storage });
   const reloaded = await restored.flush();
   assert.equal(reloaded.pendingSave.settings.active_scene_id, 'lesson');
+  assert.equal(reloaded.pendingSave.name, 'Saturday Quran lesson');
   reloaded.setPendingSave(null);
   await restored.flush();
   assert.equal(app.storage.size, 0);
+});
+
+test('setup asks for a stream name and keeps it through refresh without a scene-name prompt', async () => {
+  const app = harness();
+  let setup = await app.flush();
+  setup.build('Stream 1');
+  setup = await app.flush();
+  assert.equal(setup.form, null);
+  assert.match(setup.message, /descriptive/);
+  setup.build(' Friday study circle ');
+  setup = await app.flush();
+  assert.equal(setup.streamName, 'Friday study circle');
+  assert.equal(setup.form.scenes.length, 1);
+  assert.equal(setup.form.scenes[0].name, 'Main view');
+  const refreshed = await harness({ storage: app.storage }).flush();
+  assert.equal(refreshed.streamName, 'Friday study circle');
+  assert.equal(refreshed.stage, 3);
 });
 
 test('a failed end keeps the live setup and does not open the save prompt', async () => {

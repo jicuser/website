@@ -67,7 +67,7 @@
   place-items: center;
   border-radius: 13px;
   border: 1px solid var(--jic-glass-border);
-  background: var(--jic-glass-surface-strong);
+  background: var(--jic-glass-panel-strong);
   color: var(--jic-text);
 }
 @media (max-width: 767px) {

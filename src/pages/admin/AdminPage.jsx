@@ -58,6 +58,10 @@ const SECTIONS = [
   ['users', 'Staff & access', ShieldCheck, 'users'],
   ['audit', 'Audit log', Activity, 'audit'],
 ];
+const SECTION_GROUPS = [
+  ['Everyday', ['dashboard', 'tv', 'prayer', 'posters', 'events', 'announcements', 'livestream']],
+  ['Website & people', ['content', 'forms', 'team', 'users', 'audit']],
+];
 
 function Field({ title, children, className = '' }) {
   return (
@@ -1044,37 +1048,42 @@ export default function AdminPage() {
           <label className="admin-mobile-section">
             Go to
             <select value={active} onChange={(event) => chooseSection(event.target.value)}>
-              {allowed.map(([key, name]) => (
-                <option key={key} value={key}>
-                  {name}
-                </option>
-              ))}
+              {SECTION_GROUPS.map(([group, keys]) => {
+                const sections = allowed.filter(([key]) => keys.includes(key));
+                return (
+                  sections.length > 0 && (
+                    <optgroup key={group} label={group}>
+                      {sections.map(([key, name]) => (
+                        <option key={key} value={key}>
+                          {name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )
+                );
+              })}
             </select>
           </label>
           <nav aria-label="Admin sections">
-            {[
-              [
-                'Everyday',
-                ['dashboard', 'tv', 'prayer', 'posters', 'events', 'announcements', 'livestream'],
-              ],
-              ['Website & people', ['content', 'forms', 'team', 'users', 'audit']],
-            ].map(([group, keys]) => (
-              <div key={group}>
-                <p>{group}</p>
-                {allowed
-                  .filter(([key]) => keys.includes(key))
-                  .map(([key, name, Icon]) => (
-                    <button
-                      key={key}
-                      onClick={() => chooseSection(key)}
-                      aria-current={active === key ? 'page' : undefined}
-                    >
-                      <Icon size={18} />
-                      {name}
-                    </button>
-                  ))}
-              </div>
-            ))}
+            {SECTION_GROUPS.filter(([, keys]) => allowed.some(([key]) => keys.includes(key))).map(
+              ([group, keys]) => (
+                <div key={group}>
+                  <p>{group}</p>
+                  {allowed
+                    .filter(([key]) => keys.includes(key))
+                    .map(([key, name, Icon]) => (
+                      <button
+                        key={key}
+                        onClick={() => chooseSection(key)}
+                        aria-current={active === key ? 'page' : undefined}
+                      >
+                        <Icon size={18} />
+                        {name}
+                      </button>
+                    ))}
+                </div>
+              ),
+            )}
           </nav>
         </aside>
         <main className="admin-main">{section}</main>

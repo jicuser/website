@@ -41,15 +41,15 @@ export default function ContentEditorDialog({
   disabled,
   posters,
   renderDeviceInput,
+  showConnection = false,
   onClose,
 }) {
   const editorId = useId();
   const [draft, setDraft] = useState(() => ({ ...area }));
   const [errors, setErrors] = useState({});
-  const [savedInput, setSavedInput] = useState(
-    area.type === 'input' && !nameProblem(area.name, 'device name'),
+  const [connectionOpen, setConnectionOpen] = useState(
+    showConnection && area.type === 'input' && !nameProblem(area.name, 'device name'),
   );
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const dialog = useRef(null);
   const form = useRef(null);
   const deviceSources = tvInputSources(value);
@@ -64,7 +64,7 @@ export default function ContentEditorDialog({
 
   useEffect(() => {
     if (dialog.current) dialog.current.scrollTop = 0;
-  }, [draft.type, draft.capture, savedInput, settingsOpen]);
+  }, [draft.type, draft.capture, connectionOpen]);
 
   function updateLayer(next) {
     onChange({
@@ -83,7 +83,7 @@ export default function ContentEditorDialog({
 
   function changeDraft(next) {
     setDraft(next);
-    setSavedInput(false);
+    setConnectionOpen(false);
     setErrors({});
   }
 
@@ -180,8 +180,7 @@ export default function ContentEditorDialog({
       );
       onChange(settings);
       setDraft(next);
-      setSavedInput(true);
-      setSettingsOpen(false);
+      setConnectionOpen(true);
     } else {
       onChange(settings);
       closeDialog();
@@ -217,14 +216,13 @@ export default function ContentEditorDialog({
                 ? 'Select input type'
                 : contentTypes.find(([type]) => type === typeOf(draft))?.[1] || 'Input settings'}
             </h3>
-            {draft.type === 'input' && savedInput && (
+            {draft.type === 'input' && connectionOpen && (
               <button
                 type="button"
                 className="admin-button scene-settings-button"
                 aria-label="Change input settings"
-                aria-expanded={settingsOpen}
                 disabled={disabled}
-                onClick={() => setSettingsOpen(!settingsOpen)}
+                onClick={() => setConnectionOpen(false)}
               >
                 <Settings2 size={20} aria-hidden="true" />
               </button>
@@ -238,48 +236,30 @@ export default function ContentEditorDialog({
               ×
             </button>
           </header>
-          {(draft.type !== 'input' || !savedInput || settingsOpen) && (
+          {!connectionOpen && (
             <form ref={form} className="scene-dialog-form" onSubmit={saveContent} noValidate>
-              {draft.type === 'empty' ? (
-                <fieldset className="scene-content-types" disabled={disabled}>
-                  <legend>What should this input show?</legend>
+              <label>
+                Input type
+                <select
+                  value={typeOf(draft)}
+                  disabled={disabled}
+                  {...fieldProps('type')}
+                  onChange={(event) => chooseContent(event.target.value)}
+                >
+                  <option value="empty" disabled>
+                    Select input type
+                  </option>
+                  {draft.type === 'schedule' && (
+                    <option value="schedule">Website livestream</option>
+                  )}
                   {contentTypes.map(([type, name]) => (
-                    <button
-                      key={type}
-                      className={`admin-button ${typeOf(draft) === type ? 'primary' : ''}`}
-                      type="button"
-                      aria-pressed={typeOf(draft) === type}
-                      {...fieldProps('type')}
-                      onClick={() => {
-                        if (typeOf(draft) !== type) chooseContent(type);
-                      }}
-                    >
+                    <option key={type} value={type}>
                       {name}
-                    </button>
+                    </option>
                   ))}
-                  {errorFor('type')}
-                </fieldset>
-              ) : (
-                <label>
-                  Input type
-                  <select
-                    value={typeOf(draft)}
-                    disabled={disabled}
-                    {...fieldProps('type')}
-                    onChange={(event) => chooseContent(event.target.value)}
-                  >
-                    {draft.type === 'schedule' && (
-                      <option value="schedule">Website livestream</option>
-                    )}
-                    {contentTypes.map(([type, name]) => (
-                      <option key={type} value={type}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                  {errorFor('type')}
-                </label>
-              )}
+                </select>
+                {errorFor('type')}
+              </label>
               {draft.type !== 'empty' && (
                 <>
                   {['youtube', 'camera', 'video'].includes(draft.type) && (
@@ -390,6 +370,7 @@ export default function ContentEditorDialog({
                         Device name (required)
                         <input
                           disabled={disabled}
+                          required
                           value={draft.name || ''}
                           maxLength={60}
                           placeholder="e.g. Haider’s iPhone or Classroom laptop"
@@ -424,8 +405,7 @@ export default function ContentEditorDialog({
                                 slot: saved.slot,
                                 name: saved.name || '',
                               };
-                              if (nameProblem(next.name, 'device name')) changeDraft(next);
-                              else applyContent(next);
+                              changeDraft(next);
                             }}
                           >
                             <option value={draft.slot}>{draft.name || 'New device'}</option>
@@ -537,7 +517,7 @@ export default function ContentEditorDialog({
               )}
             </form>
           )}
-          {draft.type === 'input' && savedInput && !settingsOpen && (
+          {draft.type === 'input' && connectionOpen && (
             <div className="scene-device-controls">{renderDeviceInput?.(draft)}</div>
           )}
         </>

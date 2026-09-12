@@ -91,7 +91,6 @@ function HallWorkspace({ screenId, userId, onBack }) {
   const setup = useStreamSetup(screenId, userId);
   const { data, form, stage, busy } = setup;
   const [backgroundOpen, setBackgroundOpen] = useState(false);
-  const [sceneName, setSceneName] = useState('');
   const [nameError, setNameError] = useState('');
   const [targets, setTargets] = useState({});
   const [localStreams, setLocalStreams] = useState({});
@@ -148,9 +147,14 @@ function HallWorkspace({ screenId, userId, onBack }) {
           ended
           settings={setup.pendingSave.settings}
           template={setup.pendingSave.template}
+          initialName={setup.pendingSave.name}
           onDismiss={() => setup.setPendingSave(null)}
           onEdit={() => {
-            setup.loadSettings(setup.pendingSave.settings, setup.pendingSave.template);
+            setup.loadSettings(
+              setup.pendingSave.settings,
+              setup.pendingSave.template,
+              setup.pendingSave.name,
+            );
             setup.setPendingSave(null);
           }}
           onSaved={() => {
@@ -189,32 +193,31 @@ function HallWorkspace({ screenId, userId, onBack }) {
           </details>
           {hall && stage === 2 && (
             <section className="admin-panel">
-              <h3>Create your first scene</h3>
+              <h3>Name your stream</h3>
               <form
                 noValidate
                 onSubmit={(event) => {
                   event.preventDefault();
-                  const problem = nameProblem(sceneName, 'scene name');
+                  const problem = nameProblem(setup.streamName, 'stream name');
                   setNameError(problem);
                   if (problem) {
                     event.currentTarget.querySelector('input')?.focus();
                     return;
                   }
-                  setup.build(sceneName);
-                  setSceneName('');
+                  setup.build(setup.streamName);
                 }}
               >
-                <p>Start with one scene. Add more in the editor whenever you need them.</p>
+                <p>You can change this name when saving settings after the stream ends.</p>
                 <label>
-                  Scene name (required)
+                  Stream name (required)
                   <input
-                    value={sceneName}
+                    value={setup.streamName}
                     required
                     maxLength={60}
-                    placeholder="e.g. Welcome or Main lesson"
+                    placeholder="e.g. Sunday Quran lesson"
                     aria-invalid={Boolean(nameError)}
                     onChange={(event) => {
-                      setSceneName(event.target.value);
+                      setup.setStreamName(event.target.value);
                       setNameError('');
                     }}
                   />
@@ -254,6 +257,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
           )}
           {hall && stage === 3 && form && (
             <>
+              {setup.streamName && <h3>{setup.streamName}</h3>}
               <SceneEditor
                 value={form}
                 onChange={setup.setForm}

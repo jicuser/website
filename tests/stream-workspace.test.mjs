@@ -50,7 +50,7 @@ function freeze(value) {
   return value;
 }
 
-test('new scenes require names, start empty, and append without changing existing inputs', () => {
+test('scenes start empty and append without changing existing inputs', () => {
   const nextId = ids();
   const first = createStreamScene(' Main lesson ', nextId);
   assert.equal(first.name, 'Main lesson');
@@ -67,6 +67,21 @@ test('new scenes require names, start empty, and append without changing existin
   assert.equal(initial.scenes.length, 1);
   for (const name of ['', 'Scene 1'])
     assert.throws(() => addStreamScene(initial, name), /name|descriptive/);
+});
+
+test('adding scenes without names assigns valid labels and preserves existing scenes', () => {
+  const nextId = ids();
+  const first = createStreamScene(undefined, nextId);
+  let settings = workspace([first]);
+  for (let index = 1; index < 6; index++) settings = addStreamScene(settings, undefined, nextId);
+  assert.equal(settings.scenes.length, 6);
+  assert.equal(new Set(settings.scenes.map((item) => item.name)).size, 6);
+  assert.strictEqual(settings.scenes[0], first);
+  const legacy = workspace([{ ...scene('legacy', [region('clock')]), name: 'Scene 1' }]);
+  const prepared = streamSettings(DEFAULT_TV_SETTINGS, legacy);
+  assert.equal(prepared.scenes[0].name, 'Main view');
+  assert.deepEqual(prepared.scenes[0].layers, legacy.scenes[0].layers);
+  assert.doesNotThrow(() => validateSettings(prepared));
 });
 
 test('adding a seventh scene is rejected without changing the current scene', () => {

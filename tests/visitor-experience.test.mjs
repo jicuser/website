@@ -139,15 +139,14 @@ test('glass text retains 4.5:1 contrast over the page veil at both photo extreme
         .value.match(/[\d.]+/g)
         .map(Number);
       for (const material of [
-        '--jic-glass-clear',
+        '--jic-glass-control',
         '--jic-glass-tile',
-        '--jic-glass-surface',
-        '--jic-glass-surface-strong',
+        '--jic-glass-panel',
+        '--jic-glass-panel-strong',
       ]) {
         const [r, g, b, alpha] = tokens[material].match(/[\d.]+/g).map(Number);
-        const colours = ['ink', 'secondary', 'accent'].map((role) => tokens[`--jic-glass-${role}`]);
-        const sheenAlpha =
-          parseInt(tokens['--jic-glass-sheen'].match(/#ffffff([a-f0-9]{2})/i)[1], 16) / 255;
+        const colours = ['ink', 'muted', 'accent'].map((role) => tokens[`--jic-glass-${role}`]);
+        const sheenAlpha = 0.18;
         for (const sheen of [0, sheenAlpha]) {
           for (const background of [0, 255]) {
             const composite =

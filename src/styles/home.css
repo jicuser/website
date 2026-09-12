@@ -125,10 +125,10 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
   font-size: 16px;
   font-weight: 650;
   text-decoration: none;
-  background: var(--jic-glass-inset);
+  background: var(--jic-glass-control);
   color: var(--jic-text);
-  backdrop-filter: var(--jic-glass-backdrop);
-  -webkit-backdrop-filter: var(--jic-glass-backdrop);
+  backdrop-filter: var(--jic-glass-panel-filter);
+  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
 }
 .jic-watch-live svg {
   color: var(--jic-error);
@@ -153,10 +153,10 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
   border: 1px solid var(--jic-glass-border);
   border-radius: 12px;
   overflow: hidden;
-  background: var(--jic-glass-inset);
+  background: var(--jic-glass-control);
   color: var(--jic-text);
-  backdrop-filter: var(--jic-glass-backdrop);
-  -webkit-backdrop-filter: var(--jic-glass-backdrop);
+  backdrop-filter: var(--jic-glass-panel-filter);
+  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
   text-decoration: none;
 }
 .jic-feature-card .jic-card-icon {

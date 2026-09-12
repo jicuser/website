@@ -69,7 +69,7 @@
   height: 44px;
   border: 1px solid var(--jic-border);
   border-radius: 9px;
-  background: var(--jic-glass-clear);
+  background: var(--jic-glass-control);
   color: var(--jic-text);
 }
 .jic-footer-socials a svg {

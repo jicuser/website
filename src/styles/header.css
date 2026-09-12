@@ -21,11 +21,11 @@
   overflow: hidden;
   border: 1px solid var(--jic-glass-border);
   border-radius: 16px;
-  background: var(--jic-glass-surface-strong);
+  background: var(--jic-glass-panel-strong);
   color: var(--jic-text);
   box-shadow: var(--jic-glass-shadow);
-  backdrop-filter: var(--jic-glass-backdrop);
-  -webkit-backdrop-filter: var(--jic-glass-backdrop);
+  backdrop-filter: var(--jic-glass-panel-filter);
+  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
 }
 .jic-header-context {
   display: none;
@@ -260,6 +260,7 @@ html {
 
 /* Native dialog supplies focus trapping, Escape handling and a separate scroll area. */
 .jic-unified-menu {
+  --jic-glass-panel: var(--jic-glass-panel-strong);
   position: fixed;
   inset: calc(var(--jic-prayer-sticky-offset) + 62px) max(12px, env(safe-area-inset-right)) auto
     auto;
@@ -272,9 +273,9 @@ html {
   border-radius: 12px;
   box-shadow: var(--jic-glass-shadow);
   color: var(--jic-text);
-  background: var(--jic-glass-surface-strong);
-  backdrop-filter: var(--jic-glass-backdrop);
-  -webkit-backdrop-filter: var(--jic-glass-backdrop);
+  background: var(--jic-glass-panel-strong);
+  backdrop-filter: var(--jic-glass-panel-filter);
+  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
   overflow: hidden;
 }
 .jic-unified-menu[open] {
@@ -282,7 +283,7 @@ html {
   flex-direction: column;
 }
 .jic-unified-menu::backdrop {
-  background: #07122226;
+  background: #07122266;
 }
 .jic-unified-menu-head {
   flex: 0 0 auto;
@@ -302,7 +303,7 @@ html {
   border: 1px solid var(--jic-glass-border);
   border-radius: 10px;
   flex-shrink: 0;
-  background: var(--jic-glass-inset);
+  background: var(--jic-glass-control);
 }
 .jic-unified-menu-scroll {
   flex: 1;
@@ -330,7 +331,7 @@ html {
   font-size: 0.875rem;
   border: 1px solid var(--jic-glass-border);
   border-radius: 10px;
-  background: var(--jic-glass-inset);
+  background: var(--jic-glass-control);
 }
 /* One list on every screen. Expansion changes only the subpages, never the dialog. */
 .jic-menu-list {
@@ -372,7 +373,7 @@ html {
   color: var(--jic-text);
 }
 .jic-menu-expand:hover {
-  background: var(--jic-glass-inset);
+  background: var(--jic-glass-control);
 }
 .jic-menu-expand[aria-expanded='true'] svg {
   transform: rotate(180deg);
@@ -395,7 +396,7 @@ html {
   color: var(--jic-text-secondary);
 }
 .jic-unified-menu-children a:is(:hover, [aria-current='page']) {
-  background: var(--jic-glass-inset);
+  background: var(--jic-glass-control);
   color: var(--jic-text);
 }
 .jic-menu-directory a[aria-current='page'] {
@@ -420,7 +421,7 @@ html {
   border: 1px solid var(--jic-glass-border);
   border-radius: 11px;
   font-size: 1rem;
-  background: var(--jic-glass-inset);
+  background: var(--jic-glass-control);
 }
 
 /* One reminder component; mobile movement is handled below. */
@@ -435,11 +436,11 @@ html {
   padding: 11px 14px;
   border: 1px solid var(--jic-glass-border);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--jic-glass-surface-strong) 90%, var(--jic-action) 10%);
+  background: color-mix(in srgb, var(--jic-glass-panel-strong) 90%, var(--jic-action) 10%);
   color: var(--jic-text);
   box-shadow: var(--jic-glass-shadow);
-  backdrop-filter: var(--jic-glass-backdrop);
-  -webkit-backdrop-filter: var(--jic-glass-backdrop);
+  backdrop-filter: var(--jic-glass-panel-filter);
+  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
 }
 .jic-daily-reminder > button > div {
   display: flex;
@@ -541,7 +542,7 @@ html {
     padding: 6px 12px;
     border: 1px solid var(--jic-border);
     border-radius: 8px;
-    background: var(--jic-glass-surface-strong);
+    background: var(--jic-glass-panel-strong);
     box-shadow: var(--jic-glass-shadow);
     color: var(--jic-text);
   }
@@ -567,8 +568,7 @@ html {
     max-height: none;
     border: 0;
     border-radius: 0;
-    --jic-glass-surface-strong: var(--jic-bg);
-    --jic-glass-sheen: linear-gradient(transparent, transparent);
+    --jic-glass-panel: var(--jic-bg);
     --jic-glass-shadow: none;
     --jic-glass-dense-filter: none;
   }
@@ -579,7 +579,7 @@ html {
   .jic-unified-menu-head button {
     border: 0;
     background: transparent;
-    border-radius: 0;
+    border-radius: 10px;
   }
   .jic-unified-menu-scroll {
     padding: 8px 24px calc(20px + env(safe-area-inset-bottom));
@@ -593,7 +593,7 @@ html {
   .jic-unified-menu
     :is(.jic-menu-appearance button, .jic-unified-admin-link, .jic-unified-menu-donate) {
     border: 0;
-    border-radius: 0;
+    border-radius: 10px;
     background: transparent;
   }
   .jic-public-route {
@@ -607,10 +607,10 @@ html {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom))
       max(8px, env(safe-area-inset-left));
-    background: var(--jic-glass-surface-strong);
+    background: var(--jic-glass-panel-strong);
     color: var(--jic-text);
     border-top: 1px solid var(--jic-border);
-    backdrop-filter: var(--jic-glass-backdrop);
+    backdrop-filter: var(--jic-glass-panel-filter);
   }
   .jic-mobile-controls :is(button, a) {
     display: flex;
@@ -621,6 +621,7 @@ html {
     min-height: 48px;
     background: transparent;
     border: 0;
+    border-radius: 10px;
     color: inherit;
     font-size: 0.75rem;
   }
@@ -754,7 +755,7 @@ html {
     white-space: nowrap;
   }
   .jic-desktop-nav-group > a:is(:hover, .active) {
-    background: var(--jic-glass-inset);
+    background: var(--jic-glass-control);
     color: var(--jic-text);
   }
 }

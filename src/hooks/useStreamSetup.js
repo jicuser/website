@@ -17,6 +17,7 @@ export default function useStreamSetup(screenId, userId) {
   const [operation, setOperation] = useState('');
   const [message, setMessage] = useState('');
   const [savedTemplate, setSavedTemplate] = useState(null);
+  const [streamName, setStreamName] = useState('');
   const [pendingSave, setPendingSave] = useState(null);
   const loaded = useRef(false);
   const inFlight = useRef(false);
@@ -59,13 +60,19 @@ export default function useStreamSetup(screenId, userId) {
           setRevision(next.updated_at);
           try {
             const draft = JSON.parse(sessionStorage.getItem(key));
+            const restoredName =
+              draft?.streamName ||
+              draft?.savedTemplate?.name ||
+              draft?.form?.scenes?.[0]?.name ||
+              '';
+            setStreamName(restoredName);
             if (draft?.pendingSave?.settings?.scenes?.length) setPendingSave(draft.pendingSave);
-            if (draft?.form && draft.stage === 3) {
+            if (draft?.form && [2, 3].includes(draft.stage)) {
               setSavedTemplate(draft.savedTemplate || null);
               const restored = normaliseTvSettings(draft.form);
               if (restored.scenes?.length && restored.scenes.length <= 6) {
                 setForm(restored);
-                setStage(3);
+                setStage(nameProblem(restoredName, 'stream name') ? 2 : 3);
                 setRevision(draft.revision || next.updated_at);
                 setManagedId(draft.managedId === next.presentation?.id ? draft.managedId : null);
                 setBaseline(draft.baseline || null);
@@ -94,20 +101,29 @@ export default function useStreamSetup(screenId, userId) {
   useEffect(() => {
     if (!loaded.current) return;
     try {
-      if ((!form || stage !== 3) && !pendingSave) {
+      if ((!form || stage !== 3) && !pendingSave && !streamName) {
         sessionStorage.removeItem(key);
         return;
       }
       sessionStorage.setItem(
         key,
-        JSON.stringify({ form, stage, revision, managedId, baseline, savedTemplate, pendingSave }),
+        JSON.stringify({
+          form,
+          stage,
+          revision,
+          managedId,
+          baseline,
+          savedTemplate,
+          pendingSave,
+          streamName,
+        }),
       );
     } catch {
       setMessage(
         'Your browser could not keep this draft. Keep this page open; settings can be saved when ending the stream.',
       );
     }
-  }, [form, stage, revision, managedId, baseline, savedTemplate, pendingSave, key]);
+  }, [form, stage, revision, managedId, baseline, savedTemplate, pendingSave, streamName, key]);
 
   useEffect(() => {
     if (managedId && data && data.presentation?.id !== managedId) {
@@ -122,25 +138,28 @@ export default function useStreamSetup(screenId, userId) {
   const started = Boolean(managedId && data?.presentation?.id === managedId);
   const dirty = Boolean(form && JSON.stringify(form) !== JSON.stringify(baseline));
   const build = (name) => {
-    const problem = nameProblem(name, 'scene name');
+    const problem = nameProblem(name, 'stream name');
     if (problem) {
       setMessage(problem);
       return;
     }
-    const scenes = [createStreamScene(name)];
+    const scenes = form?.scenes || [createStreamScene()];
+    setStreamName(name.trim());
     setForm({
       ...data.settings,
+      ...form,
       scene_mode: 'teaching',
       class_until: '',
       scenes,
-      active_scene_id: scenes[0].id,
+      active_scene_id: form?.active_scene_id || scenes[0].id,
     });
     setRevision(data.updated_at);
     setStage(3);
     setMessage('Choose the number of inputs in each scene, then press + Select input type.');
   };
-  const loadSettings = (settings, template = null) => {
+  const loadSettings = (settings, template = null, name = template?.name || '') => {
     setSavedTemplate(template);
+    setStreamName(name);
     setStage(3);
     setWorkspaceId(crypto.randomUUID());
     setForm(settings);
@@ -149,13 +168,14 @@ export default function useStreamSetup(screenId, userId) {
   const newSetup = () => {
     discard();
     setSavedTemplate(null);
+    setStreamName('');
     setPendingSave(null);
     setWorkspaceId(crypto.randomUUID());
     setManagedId(null);
     setForm(null);
     setBaseline(null);
     setStage(2);
-    setMessage('Clean setup ready. Saved scenes are available in the editor.');
+    setMessage('Clean setup ready. Name your stream or load saved stream settings.');
   };
   const manageLive = () => {
     setSavedTemplate(null);
@@ -168,10 +188,8 @@ export default function useStreamSetup(screenId, userId) {
   };
   const publish = useCallback(async () => {
     if (inFlight.current || !form) return;
-    const namingProblem = form.scenes
-      .map((item) => nameProblem(item.name, 'scene name'))
-      .find(Boolean);
-    if (namingProblem) throw new Error(namingProblem);
+    if (!started && nameProblem(streamName, 'stream name'))
+      throw new Error(nameProblem(streamName, 'stream name'));
     const scene = form.scenes.find((item) => item.id === form.active_scene_id);
     if (!hasSceneContent(scene) && !started)
       throw new Error('Select an input type in the selected scene before starting the stream.');
@@ -221,9 +239,13 @@ export default function useStreamSetup(screenId, userId) {
       setBusy(false);
       setOperation('');
     }
-  }, [form, started, data, screenId, revision]);
+  }, [form, started, data, screenId, revision, streamName]);
   async function end() {
-    const snapshot = { settings: structuredClone(form || data.settings), template: savedTemplate };
+    const snapshot = {
+      settings: structuredClone(streamSettings(data.settings, form || data.settings)),
+      template: savedTemplate,
+      name: streamName,
+    };
     const next = await tvRequest(
       'normal',
       screenId,
@@ -266,6 +288,8 @@ export default function useStreamSetup(screenId, userId) {
     message,
     setMessage,
     savedTemplate,
+    streamName,
+    setStreamName,
     setSavedTemplate,
     pendingSave,
     setPendingSave,
