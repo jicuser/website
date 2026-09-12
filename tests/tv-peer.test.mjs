@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createReceiverNegotiator, waitForIce, publisherMessage } from '../src/lib/tvPeer.js';
+import { createReceiverNegotiator, waitForIce } from '../src/lib/tvPeer.js';
 
 class Peer extends EventTarget {
   iceGatheringState = 'complete';
@@ -141,12 +141,4 @@ test('stopping during ICE gathering cannot publish an answer', async () => {
   await assert.rejects(pending, { name: 'AbortError' });
   assert.equal(sent, false);
   receiver.close();
-});
-
-test('status distinguishes missing receiver, unanswered offer and connected media', () => {
-  assert.match(publisherMessage([], 0), /Waiting for a TV/);
-  assert.match(publisherMessage([{ answer: null }], 0), /Waiting for it to accept/);
-  assert.match(publisherMessage([{ answer: {} }], 0), /Video accepted/);
-  assert.match(publisherMessage([{ receiver_state: 'OperationError' }], 0), /could not accept/);
-  assert.match(publisherMessage([{}], 1), /Sharing to 1 display/);
 });

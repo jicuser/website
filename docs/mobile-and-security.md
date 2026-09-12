@@ -12,9 +12,9 @@ The wordmark and script-style Menu button share a row in normal document flow. T
 
 ## Protections reviewed
 
-- TV actions verify signed-in identity and the active database role on the server. TV operators cannot manage website content or roles. Private tables deny direct browser access through RLS and grants.
+- Hall stream actions verify signed-in identity and explicit staff permissions on the server. Hall stream permission alone does not grant website editing or account administration. Private tables deny direct browser access through RLS and grants.
 - TV room names, modes, URLs, durations and notice lengths are validated. Database operations use Supabase query parameters, not user-built SQL. Notice strings are rendered as React text, not HTML.
-- Private camera URLs and signalling require room-scoped pairing. Device credentials and single-use pairing codes are hashed in the database. Revoking a TV removes its signalling access.
+- Private scenes and signalling require a viewer credential bound to the current hall presentation. Viewer credentials are hashed; the session code is held in a service-only table. Ending the presentation removes its viewing access. See `tv-display.md`.
 - Media links require HTTPS; embedded YouTube video IDs are allowlisted. URLs containing embedded usernames/passwords are rejected. Startup messages use DOM text nodes instead of HTML interpolation.
 - The profile bootstrap RPC is executable by authenticated users and the service role only. Its `auth.uid()` filter still restricts the result to the caller's profile.
 

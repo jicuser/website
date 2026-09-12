@@ -52,7 +52,7 @@ const SECTIONS = [
   ['posters', 'Posters & announcements', FileText, 'content'],
   ['announcements', 'Announcements', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
-  ['tv', 'TV screens', Monitor, 'tv'],
+  ['tv', 'Hall streams', Monitor, 'tv'],
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
   ['forms', 'Forms inbox', FileText, 'forms'],
@@ -113,7 +113,7 @@ async function uploadImage(file, folder = 'admin') {
 function DashboardSection({ onChoose }) {
   const { can } = useAuth();
   const tasks = [
-    ['tv', 'TV screens', 'Choose a hall, show a class or return to posters.', Monitor, 'tv'],
+    ['tv', 'Hall streams', 'Choose a hall, show a class or return to posters.', Monitor, 'tv'],
     [
       'prayer',
       'Prayer times',
@@ -172,7 +172,7 @@ function TvSection() {
   return (
     <div className="admin-tv-workspace">
       <label className="admin-tv-select">
-        Choose a TV
+        Choose hall stream
         <select
           value={screenId}
           onChange={(event) => {

@@ -1,101 +1,52 @@
-# Staff access and TV scenes
+# Hall streams and presentation sessions
 
-## Invite a colleague
+Every hall has a permanent `/tv179/<hall>` display webpage. Open it on the TV, laptop or phone that will show the output. Changing scenes never changes that address.
 
-Open **Admin → Staff & access**. Enter their name and email, tick optional staff labels, then tick the specific editing permissions. Nothing is selected automatically. Being a teacher or volunteer does not grant access. TV operators need **TV scenes and device inputs**; external broadcasting additionally needs the broadcast permission.
+## Normal and Class / Teach
 
-Invited accounts without permissions can complete account setup but cannot open Admin. An owner can grant access later. A delegated staff manager can only grant permissions they hold and cannot change an owner or their own access. Picture uploads require the upload permission plus access to the relevant editor. Delete permission applies only inside permitted sections.
+Normal is public and shows the configured posters, prayer timetable and automatic prayer, Jummah and Ramadan notices. It never requires a viewing code. Class / Teach pauses those automatic notices and shows the selected scene.
 
-Invites use `/admin/setup`. In Supabase **Authentication → URL Configuration**, the public JIC website must be the Site URL and its exact `/admin/setup` URL must be allowlisted. Do not use a Vercel dashboard or protected deployment address. Existing incorrect emails need a new setup email after this configuration is corrected. No automatic test invitations are sent.
+In Admin, choose the hall stream, choose Class / Teach, then build a scene:
 
-## Put a TV on the wall
+1. Press **Add content**, choose its type and complete the fields shown. Name a camera or sharing laptop once. Reuse its named source in other scenes when needed.
+2. Select content in the canvas to edit, move, resize, change audio or remove it. Properties appear alongside on wide screens and below on phones. The live picture preview stays inside the canvas.
+3. Draft changes are kept on this browser. **Save draft** keeps them without changing viewers. **Present** saves the selected scene and updates the display webpage.
+4. Give viewers the eight-digit session code shown in Admin. On the display webpage, they press **Connect display**, enter their display name and the code. They do not need a staff account.
 
-1. Connect it to the mosque network and open its browser.
-2. Open the hall address shown in **Admin → TV screens**. Times and posters work immediately.
-3. For Class / Teach, choose **Connect TV** on that page. Enter its six-digit code and a recognisable device name (for example Main hall TV or Test phone) in **Admin → TV screens → your hall → Connect TV**. The code lasts ten minutes; the browser remembers approval. The address never changes when saving, clearing or switching scenes. Active TVs renew their approval; approval lasts up to 90 days from issue or renewal. A cleared, expired or disconnected browser needs approval again.
-4. Leave the page open in landscape. Double-click or press F to request fullscreen if supported. Admin controls what it displays.
+The connection icon fades while the display is idle and returns when touched, pointed at or focused. Its panel can be closed with × or Escape and closes after joining. The public display never reveals the session code.
 
-A second phone can receive the output for testing: open the same address and connect it using its own code. Admin lists its name and whether that browser was seen recently and received the latest save. Existing unnamed TVs can be renamed without a new code. This acknowledges settings delivery, not successful video playback.
+Saving another scene keeps the current session code. **Start new presentation** ends previous live inputs and viewing access while retaining saved scenes, then opens a draft. Press Present to start the new session and generate its new code. **Return to Normal now**, saving Normal, a timed end, or presenting an empty selected scene ends private viewing. Joining from a second staff device never resets the session.
 
-There are four addresses: `/tv179/mens-main`, `/tv179/mens-upstairs`, `/tv179/ladies-upstairs`, `/tv179/shoe-area`. The shoe area stays on times and posters.
+## Camera and laptop contributors
 
-## Normal
+Add a named camera or screen source, then Present it. In **Share from a device**, start the matching source on the device that supplies it. **Allow another device to join** reveals that source's sharing link. The link opens a dedicated staff page for that source; it has no scene editor or reset control. A viewer's session code cannot publish a camera, change scenes or edit the website.
 
-Normal shows up to four portrait posters across the landscape display. The row moves left by one poster each rotation, bringing the next into view and wrapping back to the start. Reduced-motion browsers change the row without sliding. It uses selected programme posters, announcement posters and published upcoming event posters. **Admin → Posters** shows current programme pictures: edit names, replace pictures, add posters and choose website destinations. The shared catalogue is `page_content.programme_posters`; bundled programme definitions are initial defaults only. TVs refresh the catalogue every 30 seconds. Dated event posters are edited in **Admin → Events**. In **Admin → Posters & announcements**, add an announcement poster, enter its text and optionally upload up to two pictures. Preview it there, publish, then tick its name in the TV picker. The same card works on selected website pages and in Class scenes. General reminders appear in this editable poster; the repeated reminder in the TV footer is removed. Its timetable, next-prayer line and clock have separate switches. Normal has no broadcasting or device controls.
+Keep each contributing page open. Capture begins only after the browser grants camera or screen permission. Refreshing a capture page stops its browser capture; login is retained, and **Restart this camera / Restart screen sharing** can replace only that tab's leftover connection. Refreshing a viewing page reconnects it to the current presentation. Switching focus does not intentionally stop capture, but phones and browsers may suspend background cameras. The active-sharing notice and browser leave warning explain this limitation.
 
-Normal alone runs prayer reminders, Jummah and Ramadan notices. At Jama‘ah it shows the phone reminder, then dhikr after five minutes (ten for Maghrib). Posters return twenty minutes after Jama‘ah. Jummah welcome runs from one hour before the first congregation until twenty minutes after the last. Ramadan follows the Islamic calendar with an optional local offset or explicit on/off setting. After Isha it shows the configured du‘a twenty to forty minutes after Jama‘ah, then fasting times among posters.
+**Retry viewing connection** rebuilds that source's connections without restarting its camera or screen capture. Local camera preview, a connected transport, and a received layout are different signals. Inspect the receiving picture and sound before treating a session as ready.
 
-## Class / Teach
+## Network and outgoing broadcasts
 
-1. Choose **Class / Teach**.
-2. Add scenes with **+ Scene**, up to six. Choose a scene to work on.
-3. Start with an empty scene. Add Posters, YouTube, CCTV, screen share, device camera, timetable, next prayer, clock or text. Each item opens its own properties. For Posters, tick names and set rotation seconds; for YouTube, enter its link. Add more than one Posters item if you want separate rotating areas.
-4. Drag sources, resize using the corner, or edit the percentage fields. Use **Bring to front** and **Send to back** for layering. Disable overlap after arranging sources apart if wanted.
-5. Press **Save & update TV**. This saves the layout and selects that scene on the TV. Choosing a different scene also needs Save.
+Same Wi-Fi is a useful first test, but guest network isolation can still block peer connections. Reliable connections across different networks may require TURN, configured in the `TV_ICE_SERVERS` Edge secret. See the [WebRTC TURN guide](https://webrtc.org/getting-started/turn-server). A “relay configured” message only confirms a TURN URL is configured; it does not prove that server is reachable.
 
-Class / Teach hides Normal settings and pauses all automatic seasonal and prayer notices. Optional timetable and next-prayer elements still work as chosen. Return to Normal manually and save, or choose a timed return. Drafts are stored per account and hall on the current browser, including after switching sections. Clear draft restores the published version; Clear scene removes items only from the draft. Saving an empty selected scene returns the TV to Normal and retains other scenes. A stale draft is rejected if another staff device saved first; clear the stale draft before editing the latest version.
+Website broadcasting to YouTube/TikTok uses a separate media relay (`VITE_MEDIA_RELAY_URL`, `services/media-relay`). TURN helps devices exchange media; the media relay forwards the finished display picture to a broadcast platform. Neither is configured by a viewing code. Broadcast controls explain when the outgoing service is absent. A broadcasting laptop can use the finished display tab through OBS or the configured website relay. Do not feed the outgoing YouTube broadcast back into the same scene.
 
-The editor and TV share a 16:9 coordinate system. The TV letterboxes other aspect ratios. Each scene supports twelve layers. The bottom-left pillar logo stays visible. In Class / Teach, **Show picture while arranging** renders the draft inside the drag/resize canvas. It includes saved, running camera/screen feeds using a short-lived receiver credential. The preview is muted and does not publish unsaved changes. Normal keeps its View TV preview. This does not prove playback on the physical TV. `/tv179` and hall URLs remain supported because installed TVs use them; `/tv` is just a redirect, not a second player.
+## Implementation and access boundaries
 
-## Laptop presentation and phone camera together
+- `tv_screens` stores saved layouts and their revision. A save rejects a stale revision instead of overwriting another operator's changes.
+- `tv_presentations` holds the current session ID and code for each hall. Only the server service role can read it. The code is returned only to authenticated staff with hall-stream permission.
+- `tv_devices` holds hashed viewer credentials bound to a presentation and hall. Session removal cascades to those credentials and their receivers. Admin previews use shorter credentials and do not appear in the viewer list.
+- `tv_join_attempts` bounds failed guesses per address hash and hall. Successful joins do not consume the failed-guess allowance, so a class can join behind one Wi-Fi address. The address itself is not stored.
+- `tv_inputs` are four independent named source slots per hall. The slot is an internal identifier; the UI uses its saved name. Each mounted player has its own `tv_peers` row, avoiding negotiation collisions between tabs.
+- Public status returns a known mode separately from redacted public settings. It contains no private scene, media source IDs or session code until authorized. The webpage uses a neutral loading/reconnecting state before reliable status arrives.
+- Browser tab authentication survives refresh. Profile RPCs run after auth notifications return, and bounded requests expose Retry without clearing login. Explicit logout remains available on Admin and the public website.
 
-Add **Screen share** and **Device camera** to a scene, give each a meaningful device name, arrange them and save. The names appear in the canvas, source list and capture controls, and stay consistent when the same connection is reused across scenes. Internal slots such as `input-1` are stable identifiers, not device names.
+Scene JSON and the Edge request contract are reusable from a future Flutter client. Flutter must preserve stable hall, scene and source IDs, use authenticated contributor requests, and implement media capture/playback for its own platform.
 
-On each contributing laptop or phone, sign in to Admin and open the same hall. Under **Share from a device**, enter the name of that physical laptop/phone, then choose **Share this screen** or **Use this camera** for its named source. Other operators see which named device is publishing. Enable the microphone before starting when audio is needed. Keep both pages open. Up to four independent devices can supply inputs. A live input cannot be replaced by another device until it is stopped or expires; **Stop other device** makes that choice explicit. Connecting a TV using its code grants viewing access; it does not turn that browser into a publisher.
+## Deployment and checks
 
-Capture controls use the latest saved server settings, not this browser's draft baseline. Unrelated draft edits do not block an existing saved source. A new source or mode change still needs Save before starting. The browser chooser opens directly from the click before any network/authentication awaits. Unsupported capture, HTTPS/policy restrictions, a busy source, permission denial and operating-system capture failures have separate explanations. The deployed Hostinger headers allow same-origin camera, microphone and display capture.
+Apply `20260912105049_presentation_sessions.sql`, deploy `tv-control` and its shared modules, then publish the matching frontend. This migration clears old connections and approvals and returns displays to Normal; saved scenes, posters and accounts remain. Old browser-pairing endpoints are retired. Historical migrations remain as database history, not active alternate implementations.
 
-A saved Class / Teach never runs Normal prayer automation. An unapproved browser shows a Class / Teach connection screen while private content stays hidden. A temporary status failure pauses private output and shows a reconnection message; it does not silently substitute the Normal poster rotation. Saving an empty selected scene or explicitly saving Normal still restores Normal.
+Run `npm run validate`. Run `tests/tv-presentation-sessions.sql`, `tests/tv-receiver.sql` and `tests/staff-tv-permissions.sql` against the migrated schema; their fixture changes roll back. The tests cover code access, shared-Wi-Fi joins, session rotation, expired viewing access, empty-scene fallback, stale saves, permission boundaries, independent receivers, auth restoration and capture lease recovery.
 
-For testing, connect the TV, laptop and phone to the same non-isolated Wi-Fi. Different networks are possible with WebRTC, but often require TURN. The Admin panel reports whether TURN is configured in `TV_ICE_SERVERS`; this checks configuration presence, not that the relay actually works. Browser support and network reachability still need a physical device test. See https://webrtc.org/getting-started/turn-server and https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia.
-
-Device inputs can be reused across scenes, but only once in each scene. Removing an input from every scene or saving Normal ends it. Capture permission is requested by the browser; the website cannot bypass it. Whole-screen capture is not generally available in phone browsers. Camera capture requires HTTPS and a supported browser. Screen audio depends on the browser and the selected tab. To hear a source on the TV, enable that layer's audio and turn off **Mute TV audio**. A TV may require one playback click before unmuted autoplay.
-
-Private input signalling is authenticated and hall-scoped. The TV browser polls saved settings every eight seconds, input signalling every two seconds. Publisher heartbeats expire after ninety seconds without renewal. TURN may be required when direct WebRTC cannot connect. Set `TV_ICE_SERVERS` only in Edge secrets.
-
-### Receiver lifecycle rollout
-
-Apply `supabase/migrations/20260912074952_tv_receiver_lifecycle.sql` first, then deploy `tv-control`, then publish the website. The schema adds `last_seen_at`, allowlisted `receiver_state`, and the service-only `join_tv_receiver` function, and removes the old shared-peer uniqueness constraint. Publish the Edge function immediately after the migration: old Edge join requests use that constraint and can fail during this short gap. Existing connected peer rows and live inputs are preserved.
-
-Each mounted receiver now gets a separate peer, including multiple tabs from one approved browser. Closing it sends an authenticated leave request. Receivers unseen for 90 seconds are excluded from publisher polling, and stale rows for a device are removed when it joins again. A device may have at most eight active receiver rows. New answers reference the offer they processed to reject stale negotiation responses. Older browser clients remain supported by the updated Edge function; refresh them after deployment for cleanup and reconnection improvements. Diagnostic states contain only fixed status/error names, never camera details, SDP or arbitrary browser messages.
-
-`npm test` includes negotiation retries, browser SDP normalisation, simultaneous input handlers and ICE cancellation. `tests/tv-receiver.sql` checks independent receivers, stale cleanup, limits and access grants in a rolled-back transaction. These checks do not replace a real browser/media test. Use **Show picture while arranging** first, then test a separately approved TV; the status distinguishes no receiver, an unanswered offer, and a connected display. Keep source devices awake with their admin pages open. Testing from mobile data may require TURN; a successful local camera preview alone does not prove delivery to another device.
-
-### Permanent browser setup rollout
-
-Apply `supabase/migrations/20260912083609_tv_browser_setup.sql`, deploy `tv-control`, then publish the website. The setup table and approval functions are service-only. Browser credentials are hashed before storage; setup codes do not grant public access. Existing approved browsers and old one-use links continue working during rollout.
-
-`tests/tv-browser-setup.sql` verifies grants, expiry, idempotency, hall boundaries, atomic approval and queue limits in a rolled-back transaction. The Edge status response includes a revision; the browser acknowledges it on its next poll. Only an exact current revision is accepted as received. Physical TVs report contact at most every 30 seconds; this does not indicate that audio or video decoded successfully.
-
-## Installed cameras
-
-Enter an HTTPS HLS (`.m3u8`) or WebRTC WHEP stream URL for a CCTV layer. A local IP by itself is not a browser stream. RTSP cameras usually need a local relay to convert video and provide trusted HTTPS/CORS. TVs and viewers must be able to reach that relay on the mosque LAN; guest Wi-Fi isolation can prevent it. Port 4455 in the earlier OBS screenshot is the OBS remote-control service, not a camera video URL.
-
-The website does not scan the LAN or expose cameras publicly. Private camera URLs are only returned to authorised TV browsers. Do not put camera passwords or platform stream keys into public site content. Obtain the actual camera/NVR model and stream URL before on-site testing.
-
-## Broadcast the finished TV view
-
-Local recording controls have been removed. On a desktop, open the finished TV view in a tab, enable its sound, then choose that tab with shared audio for the outgoing broadcast. Keep that laptop and the contributing phone camera open. Never put the same outgoing YouTube broadcast into its own TV scene: that creates repeating video/audio feedback. The broadcast view has an eight-hour credential; close or revoke it when finished.
-
-A stream key is the private destination code from the streaming platform. Screen sharing and phone/CCTV inputs do not need one. In YouTube Studio choose Create → Go live → Stream and copy the stream URL and key. A relay converts the finished browser picture/audio into the format YouTube accepts. The existing OBS computer can alternatively capture that TV view and stream directly to YouTube. See https://support.google.com/youtube/answer/2907883.
-
-External YouTube/TikTok output needs the separately hosted media relay in `services/media-relay`. Static website hosting and Supabase Edge Functions do not run its persistent encoder. No external stream is started until an operator enters destination details and explicitly chooses **Go live**. Platform passwords are not collected. Enter the stream server and key from the platform's Live Studio; TikTok streaming access depends on the account.
-
-The relay has not been deployed or tested with the mosque's platform credentials. Its UI remains unavailable until `VITE_MEDIA_RELAY_URL` is configured. See `services/media-relay/README.md`.
-
-
-## Named devices rollout
-
-Apply `supabase/migrations/20260912092802_tv_device_names.sql`, deploy `tv-control`, then publish the website. Device names are separate from credentials and the four stable input slots. The service-only named approval/start functions reuse the existing locking and access checks, and save each name atomically. Older clients can still use the original endpoints; no existing TV approval is reset. Name edits are scoped to the selected hall. The shared scene JSON contains each input's optional `name`; Flutter should use it for presentation and retain `slot` for identity.
-
-`tests/tv-capture.test.mjs` covers capture capability/gesture handling; `tests/tv-control.test.mjs` checks saved source names. The rolled-back SQL tests also check named approval, invalid names without consuming codes, publisher names and occupied input protection. A build or simulated capture test does not confirm video delivery on a physical laptop/TV.
-
-## Staff login in a browser tab
-
-There is no inactivity logout. Staff stay signed in when refreshing, switching apps or moving between Admin and the website in the same tab. The website staff bar includes **Log out** beside **Admin** and **Edit page**. Explicit sign-out uses Supabase's local session scope so separately signed-in staff devices keep working.
-
-`src/lib/tabAuthStorage.js` stores Supabase login in `sessionStorage`. Normal tab closure clears it. Browser tab restore and duplicated tabs may preserve/copy that storage; closing a tab is not a server-side token revocation. Use **Log out** to explicitly end the session. Browsers that block storage use memory and require sign-in after reloading. See [browser session storage behaviour](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
-
-Each running Supabase client has its own notification channel, while its storage adapter uses stable per-project keys across reloads. This prevents another tab's auth events from displaying an account whose session is absent here. A duplicated tab can still share the original server session; logging out either copy ends that shared session.
-
-On deployment, old persistent localStorage login keys are discarded, so existing staff must sign in once again. TV approvals, device names, drafts and preferences remain intact. This change needs a website deployment only; no database migration or permission changes. `tests/tab-auth.test.mjs` checks reload/new-tab behaviour, storage restrictions, legacy cleanup and explicit sign-out with the installed Supabase client.
+For acceptance, test one viewing display, one laptop screen and one phone camera: join the current code, show both named inputs, rearrange and Present, refresh each device separately, change scenes, end the session, then join a new session with its new code. Check mobile button placement and audio on the physical devices. Automated tests do not establish browser codec support, camera delivery or network reliability.

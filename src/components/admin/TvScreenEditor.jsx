@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Eye } from 'lucide-react';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
@@ -25,8 +24,7 @@ export default function TvScreenEditor({ screenId }) {
     [form, setForm] = useState(null);
   const [baseline, setBaseline] = useState(null),
     [message, setMessage] = useState('');
-  const [busy, setBusy] = useState(false),
-    [showPreview, setShowPreview] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [minutes, setMinutes] = useState('0');
   const editing = useRef(false),
     saving = useRef(false);
@@ -53,7 +51,7 @@ export default function TvScreenEditor({ screenId }) {
         if (draft?.settings && draft?.baseline) {
           setForm(normaliseTvSettings(draft.settings));
           setBaseline(draft.baseline);
-          setMessage('Draft restored. Save to update the TV, or clear the draft.');
+          setMessage('Draft restored. Present when ready, or clear the draft.');
         } else setMessage('');
       } catch {
         setMessage('');
@@ -116,7 +114,7 @@ export default function TvScreenEditor({ screenId }) {
       );
       accept({ ...data, ...next });
       setMessage(
-        `Saved ${tvScene(next.settings) === 'teaching' ? 'Class / Teach' : 'Normal'}. Connected browsers update within a few seconds; check their status in Connect TV.`,
+        `Saved ${tvScene(next.settings) === 'teaching' ? 'Class / Teach' : 'Normal'}. Connected viewers update within a few seconds; check Connected displays.`,
       );
     } catch (e) {
       setMessage(e.message);
@@ -154,25 +152,19 @@ export default function TvScreenEditor({ screenId }) {
     <div className="admin-tv-editor">
       <div className="admin-heading">
         <div>
-          <span className="admin-eyebrow">TV SCREENS</span>
+          <span className="admin-eyebrow">HALL STREAM</span>
           <h2>{screen.label}</h2>
         </div>
-        {form?.scene_mode === 'normal' && (
-          <button className="admin-button" onClick={() => setShowPreview((v) => !v)}>
-            <Eye size={18} />
-            {showPreview ? 'Close preview' : 'View TV'}
-          </button>
-        )}
       </div>
       <p>
         {hall
-          ? 'Open this permanent address in the TV browser. Connect it once using the code shown on the TV, then Save & update TV sends your selected scene to it.'
-          : 'Open this address in the TV’s browser for posters and times. Save & update TV applies your changes.'}
+          ? 'Keep this permanent webpage open on a TV, laptop or phone. Normal is public. In Class / Teach, viewers enter the session code once; Present updates their open webpage.'
+          : 'Open this webpage for posters and times. Save applies your changes.'}
       </p>
       {hall && (
         <p>
-          Normal shows posters and prayer notices. Class / Teach shows your scene. Saving an empty
-          scene returns the TV to Normal.
+          Normal shows posters and prayer notices. Class / Teach shows your scene. Presenting an
+          empty scene returns the display to Normal.
         </p>
       )}
       <div className="admin-actions admin-tv-address">
@@ -180,16 +172,13 @@ export default function TvScreenEditor({ screenId }) {
           {screenUrl}
         </a>
         <button className="admin-button" onClick={() => copy(screenUrl)}>
-          Copy TV address
+          Copy display webpage address
         </button>
       </div>
-      {showPreview && form?.scene_mode === 'normal' && (
-        <TvPreview screenId={screenId} label={screen.label} />
-      )}
       {message && <p role="status">{message}</p>}
       {!form ? (
         <button className="admin-button" onClick={load}>
-          Load TV settings
+          Retry loading hall stream
         </button>
       ) : (
         <>
@@ -198,17 +187,68 @@ export default function TvScreenEditor({ screenId }) {
               screenId={screenId}
               data={data}
               setData={setData}
-              form={form}
-              update={update}
               run={run}
               busy={busy}
             />
           )}
           <section className="admin-panel">
-            <h3>Display</h3>
+            <h3>Display mode</h3>
+            {hall && (
+              <div className="admin-actions">
+                <button
+                  className="admin-button"
+                  disabled={busy}
+                  onClick={() => {
+                    if (
+                      !window.confirm(
+                        'Start a new presentation? Previous live inputs and viewing access will end. Saved scenes are kept; viewers will need the new session code.',
+                      )
+                    )
+                      return;
+                    run(async () => {
+                      const latest = await tvRequest('admin', screenId, {}, { staff: true });
+                      const normal = await tvRequest(
+                        'normal',
+                        screenId,
+                        { expectedUpdatedAt: latest.updated_at },
+                        { staff: true },
+                      );
+                      accept({ ...latest, ...normal, inputs: [] });
+                      setForm({ ...normal.settings, scene_mode: 'teaching', class_until: '' });
+                      setMessage(
+                        'New presentation draft ready. Choose your scene, then press Present. Previous inputs and viewing access have ended. A new code will appear when you press Present.',
+                      );
+                    });
+                  }}
+                >
+                  Start new presentation
+                </button>
+                {tvScene(data.settings) === 'teaching' && (
+                  <button
+                    className="admin-button"
+                    disabled={busy}
+                    onClick={() =>
+                      run(async () => {
+                        const normal = await tvRequest(
+                          'normal',
+                          screenId,
+                          { expectedUpdatedAt: data.updated_at },
+                          { staff: true },
+                        );
+                        accept({ ...data, ...normal, inputs: [] });
+                        setMessage('Normal is showing. Presentation inputs have stopped.');
+                      })
+                    }
+                  >
+                    Return to Normal now
+                  </button>
+                )}
+              </div>
+            )}
             <p>
-              Currently saved: {tvScene(data.settings) === 'teaching' ? 'Class / Teach' : 'Normal'}
-              {dirty ? ' · unsaved changes' : ''}
+              Currently showing:{' '}
+              {tvScene(data.settings) === 'teaching' ? 'Class / Teach' : 'Normal'}
+              {dirty ? ' · draft changes below are not live yet' : ''}
             </p>
             <div className="admin-tv-modes">
               {[['normal', 'Normal'], ...(hall ? [['teaching', 'Class / Teach']] : [])].map(
@@ -242,6 +282,17 @@ export default function TvScreenEditor({ screenId }) {
                 ? 'Posters and the timetable, with automatic prayer, Jummah and Ramadan notices.'
                 : 'Your saved scenes. Automatic prayer and seasonal notices stay paused.'}
             </p>
+            {form.scene_mode === 'teaching' && (
+              <label className="admin-check">
+                <input
+                  type="checkbox"
+                  checked={form.muted}
+                  disabled={busy}
+                  onChange={(event) => update('muted', event.target.checked)}
+                />
+                Mute display audio
+              </label>
+            )}
             {form.scene_mode === 'teaching' && (
               <label>
                 Return to Normal
@@ -279,6 +330,13 @@ export default function TvScreenEditor({ screenId }) {
               </label>
             )}
           </section>
+          {form.scene_mode === 'normal' && (
+            <section className="admin-panel">
+              <h3>Preview · Normal draft</h3>
+              <p>Shows your choices below. Save & show Normal updates the open display webpage.</p>
+              <TvPreview screenId={screenId} label={screen.label} settings={form} />
+            </section>
+          )}
           {hall && form.scene_mode === 'teaching' && (
             <SceneEditor
               value={form}
@@ -296,20 +354,22 @@ export default function TvScreenEditor({ screenId }) {
               ]}
             />
           )}
-          {hall && form.scene_mode === 'teaching' && sourceSettings && (
-            <DeviceInputs
-              screenId={screenId}
-              settings={sourceSettings}
-              inputs={data.inputs || []}
-              disabled={busy}
-              hasDraft={dirty}
-              relayConfigured={data.relayConfigured}
-              onRefresh={() =>
-                tvRequest('admin', screenId, {}, { staff: true })
-                  .then(setData)
-                  .catch((e) => setMessage(e.message))
-              }
-            />
+          {hall && sourceSettings && (
+            <div hidden={form.scene_mode !== 'teaching'}>
+              <DeviceInputs
+                screenId={screenId}
+                settings={sourceSettings}
+                inputs={data.inputs || []}
+                disabled={busy}
+                hasDraft={dirty}
+                relayConfigured={data.relayConfigured}
+                onRefresh={() =>
+                  tvRequest('admin', screenId, {}, { staff: true })
+                    .then(setData)
+                    .catch((e) => setMessage(e.message))
+                }
+              />
+            </div>
           )}
           {form.scene_mode === 'normal' && (
             <section>
@@ -324,13 +384,16 @@ export default function TvScreenEditor({ screenId }) {
           {hall && form.scene_mode === 'teaching' && <SessionOutput screenId={screenId} />}
           <div className="admin-tv-save">
             <span>
-              {dirty ? 'Draft kept on this browser. Save to update the TV.' : 'All changes saved.'}
+              {dirty
+                ? 'Draft kept on this browser. Press Present or Save & show Normal to update viewers.'
+                : 'All changes saved.'}
             </span>
             <button
               className="admin-button"
               disabled={busy}
               onClick={() => {
-                if (!window.confirm('Clear your draft and restore the saved TV settings?')) return;
+                if (!window.confirm('Clear your draft and restore the saved display settings?'))
+                  return;
                 localStorage.removeItem(draftKey);
                 load();
               }}
@@ -338,11 +401,37 @@ export default function TvScreenEditor({ screenId }) {
               Clear draft
             </button>
             <button
+              className="admin-button"
+              disabled={busy}
+              onClick={() => {
+                try {
+                  localStorage.setItem(
+                    draftKey,
+                    JSON.stringify({
+                      settings: form,
+                      baseline: { settings: baseline.settings, updated_at: baseline.updated_at },
+                    }),
+                  );
+                  setMessage(
+                    'Draft saved on this browser. Viewers will see it when you press Present.',
+                  );
+                } catch {
+                  setMessage('This browser could not save the draft. Keep this page open.');
+                }
+              }}
+            >
+              Save draft
+            </button>
+            <button
               className="admin-button primary"
-              disabled={busy || !dirty}
+              disabled={busy}
               onClick={() => save().catch(() => {})}
             >
-              {busy ? 'Saving…' : 'Save & update TV'}
+              {busy
+                ? 'Updating…'
+                : form.scene_mode === 'teaching'
+                  ? 'Present'
+                  : 'Save & show Normal'}
             </button>
           </div>
         </>

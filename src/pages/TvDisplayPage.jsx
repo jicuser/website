@@ -5,7 +5,7 @@ import TvPosterRail from '@/components/tv/TvPosterRail';
 import SceneCanvas from '@/features/displays/SceneCanvas';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
-import TvBrowserSetup from '@/components/tv/TvBrowserSetup';
+import DisplayConnection from '@/components/tv/DisplayConnection';
 import {
   tvPrayerSequence,
   tvSpecialNotice,
@@ -13,7 +13,7 @@ import {
   fastingTimes,
 } from '@/lib/tvPrayerSequence';
 import { TV_SCREENS } from '@/lib/tvControl';
-import { tvScene } from '../../supabase/functions/_shared/tv.js';
+import { tvScene, publicSettings } from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
@@ -29,7 +29,7 @@ export default function TvDisplayPage() {
   if (!TV_SCREENS.some((item) => item.id === screenId))
     return (
       <main className="p-8">
-        Unknown TV screen. <a href="/tv179">Open Men’s Main Hall</a>
+        Unknown hall stream. <a href="/tv179">Open Men’s Main Hall</a>
       </main>
     );
   return <ScreenDisplay key={screenId} screenId={screenId} />;
@@ -42,8 +42,40 @@ function ScreenDisplay({ screenId }) {
     const timer = setInterval(() => refreshContent().catch(() => {}), 30000);
     return () => clearInterval(timer);
   }, [refreshContent]);
-  const tv = useTvScreen(screenId);
+  const connection = useTvScreen(screenId);
+  const normalPreview =
+    window.parent !== window &&
+    new URLSearchParams(window.location.search).get('preview') === 'normal';
+  const [draft, setDraft] = useState({});
+  useEffect(() => {
+    if (!normalPreview) return;
+    const receive = (event) => {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== window.parent ||
+        event.data?.type !== 'jic-normal-preview' ||
+        event.data.screenId !== screenId
+      )
+        return;
+      if (event.data.settings && typeof event.data.settings === 'object')
+        setDraft(event.data.settings);
+    };
+    window.addEventListener('message', receive);
+    window.parent.postMessage({ type: 'jic-preview-ready' }, window.location.origin);
+    return () => window.removeEventListener('message', receive);
+  }, [normalPreview, screenId]);
+  const tv = normalPreview
+    ? {
+        ...connection,
+        settings: publicSettings({ ...draft, scene_mode: 'normal', muted: true }),
+        displayMode: 'normal',
+        inputs: [],
+        error: '',
+        status: 'ready',
+      }
+    : connection;
   const screen = useRef(null);
+  const [connectRequest, setConnectRequest] = useState(0);
   const prayers = usePrayerTimes({ includeTomorrow: true });
   const { events, livestream, stale } = useHomeLiveContent({ eventLimit: 50 });
   const [now, setNow] = useState(() => new Date());
@@ -175,28 +207,49 @@ function ScreenDisplay({ screenId }) {
     }
   };
 
-  if (tv.displayMode === 'teaching' && scene !== 'teaching')
+  const connectionControl = !normalPreview && (
+    <DisplayConnection screenId={screenId} tv={tv} openRequest={connectRequest} />
+  );
+
+  if (
+    tv.status !== 'ready' ||
+    (tv.displayMode === 'teaching' && (!tv.paired || scene !== 'teaching'))
+  )
     return (
       <div ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
         <Helmet>
           <title>JIC · {tv.label}</title>
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
-        <main className="tv-class-waiting" role="status">
-          <h1>Class / Teach</h1>
-          <p>
-            {tv.needsApproval
-              ? 'Connect this browser in Admin to show the presentation here.'
-              : 'Reconnecting to the saved presentation…'}
-          </p>
-          {tv.error && <p>{tv.error}</p>}
-          <button type="button" onClick={tv.refresh}>
-            Check connection
-          </button>
+        <main className="tv-class-waiting" aria-live="polite">
+          <h1>{tv.label}</h1>
+          {tv.status === 'loading' ? (
+            <p>Loading hall stream…</p>
+          ) : tv.status === 'error' ? (
+            <>
+              <p>Reconnecting to the hall stream…</p>
+              <p className="display-connection-note">{tv.error}</p>
+              <button type="button" onClick={tv.refresh}>
+                Retry connection
+              </button>
+            </>
+          ) : !tv.paired ? (
+            <>
+              <p>Presentation in progress. Enter the session code to watch.</p>
+              <button type="button" onClick={() => setConnectRequest((value) => value + 1)}>
+                Join presentation
+              </button>
+            </>
+          ) : (
+            <>
+              <p>Updating the presentation…</p>
+              <button type="button" onClick={tv.refresh}>
+                Retry connection
+              </button>
+            </>
+          )}
         </main>
-        {tv.needsApproval && (
-          <TvBrowserSetup screenId={screenId} paired={false} onConnected={tv.refresh} />
-        )}
+        {connectionControl}
       </div>
     );
 
@@ -217,6 +270,7 @@ function ScreenDisplay({ screenId }) {
           onImageError={onImageError}
           livestream={livestream}
         />
+        {connectionControl}
       </div>
     );
 
@@ -245,7 +299,7 @@ function ScreenDisplay({ screenId }) {
               </p>
             )}
         </header>
-        <main className="jic-tv-stage" aria-label="TV content">
+        <main className="jic-tv-stage" aria-label="Hall display content">
           {sequence && (
             <TvPrayerScene sequence={sequence} jummahNotice={tv.settings.jummah_notice} />
           )}
@@ -295,12 +349,7 @@ function ScreenDisplay({ screenId }) {
           {stale && <span role="status">Content update delayed · reconnecting</span>}
         </footer>
       </div>
-      <TvBrowserSetup
-        key={screenId}
-        screenId={screenId}
-        paired={tv.paired}
-        onConnected={tv.refresh}
-      />
+      {connectionControl}
     </div>
   );
 }

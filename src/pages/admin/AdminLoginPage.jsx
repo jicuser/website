@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, LockKeyhole, LogIn, ShieldCheck } from 'lucide-react';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLoginPage() {
-  const { signIn, loading } = useAuth();
+  const { signIn, signOut, loading, isAdmin, user, profileError, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const from = location.state?.from;
+  const destination =
+    typeof from === 'string' && /^\/admin(?:[/?]|$)/.test(from) && !from.startsWith('/admin/login')
+      ? from
+      : '/admin';
+
+  useEffect(() => {
+    if (!loading && isAdmin) navigate(destination, { replace: true });
+  }, [loading, isAdmin, destination, navigate]);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -19,7 +29,7 @@ export default function AdminLoginPage() {
     setError('');
     try {
       await signIn(email.trim(), password);
-      navigate('/admin', { replace: true });
+      navigate(destination, { replace: true });
     } catch (err) {
       setError(err?.message || 'Unable to sign in.');
       setBusy(false);
@@ -52,40 +62,79 @@ export default function AdminLoginPage() {
             <h1 id="admin-login-title">Administration</h1>
           </div>
         </div>
-        {error && <div className="admin-login-error">{error}</div>}
-        <form onSubmit={submit} className="admin-login-form">
-          <label>
-            <span>Email address</span>
-            <input
-              type="email"
-              required
-              inputMode="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-            />
-          </label>
-          <label>
-            <span>Password</span>
-            <div className="admin-login-password">
-              <LockKeyhole size={17} />
-              <input
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-              />
-            </div>
-          </label>
-          <button disabled={busy || loading}>
-            <LogIn size={18} />
-            {busy ? 'Signing in…' : 'Sign in'}
+        {error && (
+          <div className="admin-login-error" role="alert">
+            {error}
+          </div>
+        )}
+        {profileError && (
+          <div className="admin-login-error" role="alert">
+            <p>{profileError}</p>
+            <button
+              type="button"
+              className="admin-button"
+              disabled={loading}
+              onClick={() => {
+                setError('');
+                refreshProfile().catch(() => {});
+              }}
+            >
+              Retry connection
+            </button>
+          </div>
+        )}
+        {user && !isAdmin && !loading && !profileError && (
+          <p className="admin-login-error" role="alert">
+            This account does not have JIC administration access.
+          </p>
+        )}
+        {user ? (
+          <button
+            type="button"
+            className="admin-button"
+            disabled={loading}
+            onClick={() => {
+              setError('');
+              signOut().catch((failure) => setError(failure.message));
+            }}
+          >
+            Log out
           </button>
-        </form>
+        ) : (
+          <form onSubmit={submit} className="admin-login-form">
+            <label>
+              <span>Email address</span>
+              <input
+                type="email"
+                required
+                inputMode="email"
+                autoCapitalize="none"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+              />
+            </label>
+            <label>
+              <span>Password</span>
+              <div className="admin-login-password">
+                <LockKeyhole size={17} />
+                <input
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                />
+              </div>
+            </label>
+            <button disabled={busy || loading}>
+              <LogIn size={18} />
+              {busy ? 'Signing in…' : loading ? 'Restoring login…' : 'Sign in'}
+            </button>
+          </form>
+        )}
       </section>
     </main>
   );

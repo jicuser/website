@@ -68,20 +68,3 @@ export function receiverErrorState(error) {
     ? error.name
     : 'failed';
 }
-
-export function publisherMessage(peers, connected) {
-  if (connected)
-    return `Sharing to ${connected} display${connected > 1 ? 's' : ''}. Keep this page open.`;
-  if (!peers.length)
-    return 'Waiting for a TV. Turn on Show picture while arranging to test, or connect the TV using its on-screen code.';
-  if (
-    peers.some((p) =>
-      ['NotSupportedError', 'OperationError', 'InvalidStateError'].includes(p.receiver_state),
-    )
-  )
-    return 'The receiving browser could not accept the video. Try an updated browser or a TV browser device.';
-  if (peers.some((p) => ['failed', 'NetworkError', 'TimeoutError'].includes(p.receiver_state)))
-    return 'The display could not connect. Reconnecting; check both devices are on the mosque Wi-Fi. Other networks may need a relay.';
-  if (peers.every((p) => !p.answer)) return 'Display found. Waiting for it to accept the video…';
-  return 'Video accepted. Connecting devices… Different networks may need a relay.';
-}

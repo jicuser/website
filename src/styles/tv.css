@@ -337,52 +337,136 @@ html[data-theme] .jic-tv-stage {
   font-size: calc(var(--tv-unit) * 4.166667);
 }
 
-/* Setup controls stay readable and usable outside the scaled TV picture. */
-.tv-browser-setup {
+/* Connection controls stay readable outside the scaled display picture. */
+.display-connection {
   position: absolute;
-  inset: auto max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) auto;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
   z-index: 70;
-  width: min(340px, calc(100% - 32px));
-  color: #f5f7fa;
-  text-align: center;
-  font-size: 16px;
-  line-height: 1.4;
-}
-.tv-browser-setup:not(.is-pending) {
-  width: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
   max-width: calc(100% - 32px);
+  color: #f5f7fa;
+  font-size: 16px;
+  line-height: 1.5;
 }
-.tv-browser-setup button,
-.tv-browser-setup.is-pending {
-  border: 1px solid #536780;
-  border-radius: 12px;
-  background: #152238;
-  padding: 12px 18px;
-  box-shadow: 0 4px 20px #0005;
-}
-.tv-browser-setup button {
+.display-connection button {
   min-height: 44px;
+  border: 1px solid #62728a;
+  border-radius: 10px;
+  padding: 10px 16px;
   font: inherit;
   color: inherit;
+  background: #192a40;
 }
-.tv-browser-setup button:focus-visible {
+.display-connection button:focus-visible,
+.display-connection input:focus-visible {
   outline: 3px solid #f0d791;
   outline-offset: 3px;
 }
-.tv-browser-setup p {
-  margin: 8px 0;
+.display-connection .display-connection-trigger,
+.display-connection .display-connection-close {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  flex-shrink: 0;
 }
-.tv-browser-setup small {
-  display: block;
+.display-connection-trigger {
+  box-shadow: 0 4px 16px #0005;
+  transition: opacity 180ms ease;
+}
+.display-connection.is-idle:not(:focus-within) .display-connection-trigger {
+  opacity: 0;
+  pointer-events: none;
+}
+.display-connection-panel {
+  width: min(390px, calc(100vw - 32px));
+  max-height: calc(100vh - 108px);
+  max-height: calc(100dvh - 108px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #62728a;
+  border-radius: 16px;
+  background: #101e30;
+  box-shadow: 0 8px 32px #0007;
+  padding: 20px;
+  text-align: left;
+}
+.display-connection-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.display-connection-panel h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 650;
+}
+.display-connection-panel form {
+  display: grid;
+  gap: 8px;
+}
+.display-connection-panel p {
+  margin: 0 0 12px;
+}
+.display-connection-panel label {
+  margin-top: 8px;
+  font-weight: 600;
+}
+.display-connection-panel label span,
+.display-connection-panel small,
+.display-connection-note {
+  color: #b9c8dc;
+  font-weight: 400;
+}
+.display-connection-panel small {
   font-size: 13px;
 }
-.tv-setup-code {
-  display: block;
-  margin: 12px 0;
-  font-size: 38px;
-  letter-spacing: 0.12em;
+.display-connection-panel input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #697b91;
+  border-radius: 8px;
+  background: #0a1422;
+  color: #f5f7fa;
+  font: inherit;
+}
+.display-connection-panel input::placeholder {
+  color: #9eafc5;
+}
+.display-code-input {
   font-variant-numeric: tabular-nums;
-  color: #f0d791;
+  letter-spacing: 0.12em;
+}
+.display-connection-panel input[aria-invalid='true'] {
+  border: 2px solid #ff8585;
+}
+.display-connection-panel .display-field-error {
+  margin: 0;
+  color: #ffa6a6;
+  font-size: 14px;
+}
+.display-connection-panel .display-connection-submit {
+  width: 100%;
+  margin-top: 12px;
+  background: #ead18d;
+  color: #111e30;
+  font-weight: 650;
+}
+.display-connection button:disabled {
+  opacity: 0.65;
+}
+@media (prefers-reduced-motion: reduce) {
+  .display-connection-trigger {
+    transition: none;
+  }
 }
 
 /* Saved scenes keep the same 16:9 coordinate system on every TV and preview. */

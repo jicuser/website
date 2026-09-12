@@ -1,12 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { tvRequest, waitForIce } from '@/lib/tvControl';
-import { descriptionJson, publisherMessage } from '@/lib/tvPeer';
+import { descriptionJson } from '@/lib/tvPeer';
+import { publisherStatus } from '@/lib/publisherStatus';
 import { requestCapture, captureError } from '@/lib/tvCapture';
+import { releaseOwnCaptureLease, saveCaptureLease, clearCaptureLease } from '@/lib/captureLease';
 
 export default function useTvPublisher(screenId, slot) {
   const active = useRef(null);
   const mounted = useRef(true);
-  const [state, setState] = useState({ busy: false, stream: null, sessionId: '', message: '' });
+  const [state, setState] = useState({
+    busy: false,
+    stream: null,
+    sessionId: '',
+    message: '',
+    connected: 0,
+  });
   const stop = useCallback(
     async (expected = active.current) => {
       const current = active.current;
@@ -18,21 +26,28 @@ export default function useTvPublisher(screenId, slot) {
       current.peers.forEach((entry) => entry.pc.close());
       current.stream?.getTracks().forEach((track) => track.stop());
       if (mounted.current)
-        setState({ busy: false, stream: null, sessionId: '', message: 'Sharing stopped.' });
+        setState({
+          busy: false,
+          stream: null,
+          sessionId: '',
+          message: 'Sharing stopped.',
+          connected: 0,
+        });
       if (current.sessionId) {
         try {
           await tvRequest('stop', screenId, { sessionId: current.sessionId }, { staff: true });
+          clearCaptureLease(screenId, slot, current.sessionId);
         } catch {
           if (mounted.current && !active.current)
             setState((previous) => ({
               ...previous,
               message:
-                'Capture stopped. Its connection will expire shortly. Class / Teach stays selected.',
+                'Capture stopped on this device. Its server connection will expire shortly; you can retry here.',
             }));
         }
       }
     },
-    [screenId],
+    [screenId, slot],
   );
   useEffect(() => {
     mounted.current = true;
@@ -41,6 +56,15 @@ export default function useTvPublisher(screenId, slot) {
       stop();
     };
   }, [stop]);
+  useEffect(() => {
+    if (!state.stream) return;
+    const warn = (event) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [state.stream]);
   const start = useCallback(
     async (kind, audio = false, deviceName = '') => {
       if (active.current) return;
@@ -53,7 +77,13 @@ export default function useTvPublisher(screenId, slot) {
         heartbeat: 0,
       };
       active.current = current;
-      setState({ busy: true, stream: null, sessionId: '', message: 'Choose what to share…' });
+      setState({
+        busy: true,
+        stream: null,
+        sessionId: '',
+        message: 'Choose what to share…',
+        connected: 0,
+      });
       const call = (action, values = {}) =>
         tvRequest(
           action,
@@ -68,20 +98,32 @@ export default function useTvPublisher(screenId, slot) {
           current.stream.getTracks().forEach((track) => track.stop());
           return;
         }
-        const started = await call('start', { kind, slot, deviceName });
-        current.sessionId = started.sessionId;
-        if (active.current !== current) {
-          await tvRequest('stop', screenId, { sessionId: started.sessionId }, { staff: true });
-          return;
-        }
         current.stream
           .getVideoTracks()
           .forEach((track) => track.addEventListener('ended', () => stop(current), { once: true }));
+        setState((previous) => ({
+          ...previous,
+          stream: current.stream,
+          message: 'Capture is active on this device. Starting its viewing connection…',
+        }));
+        // A refresh ends local capture, but its server lease may still be alive.
+        // Release only this tab's old lease; another contributor is never reset.
+        await releaseOwnCaptureLease(screenId, slot, (sessionId) => call('stop', { sessionId }));
+        if (active.current !== current) return;
+        const started = await call('start', { kind, slot, deviceName });
+        current.sessionId = started.sessionId;
+        saveCaptureLease(screenId, slot, started.sessionId);
+        if (active.current !== current) {
+          await tvRequest('stop', screenId, { sessionId: started.sessionId }, { staff: true });
+          clearCaptureLease(screenId, slot, started.sessionId);
+          return;
+        }
         setState({
           busy: false,
           stream: current.stream,
           sessionId: current.sessionId,
-          message: 'Waiting for the approved TV browser…',
+          message: 'Capture is active on this device. Waiting for a viewing screen…',
+          connected: 0,
         });
         const poll = async () => {
           try {
@@ -97,7 +139,9 @@ export default function useTvPublisher(screenId, slot) {
                 current.peers.delete(id);
               }
             }
-            await Promise.all(
+            // Finish every peer before the next poll; one failed viewer must
+            // not leave offers running behind a replacement negotiation.
+            const negotiations = await Promise.allSettled(
               peers.map(async (peer) => {
                 let entry = current.peers.get(peer.id);
                 try {
@@ -137,13 +181,20 @@ export default function useTvPublisher(screenId, slot) {
                 }
               }),
             );
+            const failures = negotiations.filter((result) => result.status === 'rejected');
+            if (failures.length)
+              throw (
+                failures.find((result) => [401, 403, 409].includes(result.reason.status)) ||
+                failures[0]
+              ).reason;
             const connected = [...current.peers.values()].filter(
               ({ pc }) => pc.connectionState === 'connected',
             ).length;
             if (active.current === current)
               setState((previous) => ({
                 ...previous,
-                message: publisherMessage(peers, connected),
+                connected,
+                message: publisherStatus(peers, connected),
               }));
           } catch (error) {
             if (active.current !== current) return;
@@ -157,8 +208,8 @@ export default function useTvPublisher(screenId, slot) {
               ...previous,
               message:
                 error.name === 'TimeoutError'
-                  ? 'The network connection timed out. Check Wi-Fi; connections across networks may need a relay.'
-                  : 'Connection interrupted. Reconnecting…',
+                  ? 'The network connection timed out. Retrying automatically; check Wi-Fi. Connections across networks may need a relay.'
+                  : `${error.message || 'Connection interrupted.'} Retrying automatically…`,
             }));
           }
           if (active.current === current) current.timer = setTimeout(poll, 2000);
@@ -171,11 +222,24 @@ export default function useTvPublisher(screenId, slot) {
             busy: false,
             stream: null,
             sessionId: '',
+            connected: 0,
             message: captureError(error, kind),
           });
       }
     },
     [screenId, slot, stop],
   );
-  return { ...state, start, stop };
+  const retry = useCallback(() => {
+    const current = active.current;
+    if (!current) return;
+    // Closing only this publisher's peers lets the existing poll rebuild them.
+    current.peers.forEach(({ pc }) => pc.close());
+    current.peers.clear();
+    setState((previous) => ({
+      ...previous,
+      connected: 0,
+      message: 'Retrying the viewing connections…',
+    }));
+  }, []);
+  return { ...state, start, stop, retry };
 }

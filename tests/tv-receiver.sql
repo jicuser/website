@@ -1,13 +1,15 @@
--- Integration check after the receiver migration. Fixtures are always rolled back.
+-- Database-owner integration check. All fixtures and hall changes roll back.
 begin;
 do $$
 declare
-  owner uuid;
-  slot_name text;
+  operator_id uuid := gen_random_uuid();
   session uuid;
   device uuid;
   first_peer uuid;
   second_peer uuid;
+  settings jsonb;
+  stamp timestamptz;
+  saved jsonb;
   rejected boolean := false;
 begin
   if has_function_privilege('anon', 'public.join_tv_receiver(text,uuid,uuid)', 'execute')
@@ -19,15 +21,16 @@ begin
   if not has_function_privilege('service_role', 'public.join_tv_receiver(text,uuid,uuid)', 'execute') then
     raise exception 'The Edge service cannot create receivers';
   end if;
-  select id into owner from public.profiles where is_owner and is_active limit 1;
-  select slot into slot_name from unnest(array['input-1','input-2','input-3','input-4']) slot
-    where not exists(select 1 from public.tv_inputs where screen_id='mens-upstairs' and tv_inputs.slot=slot)
-    limit 1;
-  if slot_name is null or owner is null then raise exception 'No isolated test fixture available'; end if;
-  insert into public.tv_inputs(screen_id,slot,owner_id,kind,expires_at)
-    values('mens-upstairs',slot_name,owner,'screen',now()+interval '5 minutes') returning session_id into session;
-  insert into public.tv_devices(screen_id,token_hash,expires_at)
-    values('mens-upstairs',md5(gen_random_uuid()::text),now()+interval '5 minutes') returning id into device;
+  insert into auth.users(id,email) values(operator_id,operator_id||'@example.invalid');
+  update public.profiles set is_active=true,permissions=array['tv'] where id=operator_id;
+  select tv_screens.settings,updated_at into settings,stamp from public.tv_screens where id='mens-upstairs';
+  settings := settings || '{"scene_mode":"teaching","class_until":"","active_scene_id":"receiver-test","scenes":[{"id":"receiver-test","name":"Receiver test","overlap":false,"layers":[{"id":"laptop","type":"input","slot":"input-1","capture":"screen","name":"Teacher laptop","audio":true,"x":0,"y":0,"width":100,"height":100}]}]}'::jsonb;
+  set local role service_role;
+  saved := public.save_tv_presentation(operator_id,'mens-upstairs',settings,stamp,'55667788',true);
+  session := public.start_named_tv_input(operator_id,'mens-upstairs','input-1','screen','Teacher laptop');
+  insert into public.tv_devices(screen_id,token_hash,name,presentation_id,expires_at)
+    values('mens-upstairs',repeat('d',64),'Test display',(saved->'presentation'->>'id')::uuid,now()+interval '5 minutes')
+    returning id into device;
   first_peer := public.join_tv_receiver('mens-upstairs',session,device);
   update public.tv_peers set offer='{"type":"offer","sdp":"v=0\r\ntest"}' where id=first_peer;
   second_peer := public.join_tv_receiver('mens-upstairs',session,device);
@@ -35,8 +38,7 @@ begin
     raise exception 'Second receiver reset the first receiver';
   end if;
   for i in 1..6 loop perform public.join_tv_receiver('mens-upstairs',session,device); end loop;
-  begin
-    perform public.join_tv_receiver('mens-upstairs',session,device);
+  begin perform public.join_tv_receiver('mens-upstairs',session,device);
   exception when raise_exception then rejected := true;
   end;
   if not rejected then raise exception 'Receiver limit failed'; end if;
@@ -48,7 +50,14 @@ begin
   exception when raise_exception then rejected := true;
   end;
   if not rejected then raise exception 'Cross-hall receiver allowed'; end if;
+  update public.tv_presentations set expires_at=now()-interval '1 second' where screen_id='mens-upstairs';
+  rejected := false;
+  begin perform public.join_tv_receiver('mens-upstairs',session,device);
+  exception when raise_exception then rejected := true;
+  end;
+  if not rejected then raise exception 'Expired presentation allowed another receiver'; end if;
+  reset role;
 end;
 $$;
-select 'PASS: independent receivers, preserved offer, limit, stale cleanup, hall scope and private grants' as result;
+select 'PASS: independent receivers, preserved offer, limit, stale cleanup, hall scope, presentation expiry and private grants' as result;
 rollback;

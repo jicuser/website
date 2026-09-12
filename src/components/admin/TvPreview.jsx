@@ -1,63 +1,51 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { tvRequest } from '@/lib/tvControl';
+import { publicSettings } from '../../../supabase/functions/_shared/tv.js';
 
-// Use the real TV route at 1280×720. Preview credentials expire and are never stored.
-export default function TvPreview({ screenId, label }) {
+// Normal drafts use the real display renderer, but never publish or send private sources.
+export default function TvPreview({ screenId, label, settings }) {
   const box = useRef(null);
+  const frame = useRef(null);
   const [scale, setScale] = useState(0);
-  const [url, setUrl] = useState('');
-  const [error, setError] = useState('');
+  const latest = useRef(settings);
+  latest.current = settings;
+  const send = () =>
+    frame.current?.contentWindow?.postMessage(
+      {
+        type: 'jic-normal-preview',
+        screenId,
+        settings: publicSettings({ ...latest.current, scene_mode: 'normal', muted: true }),
+      },
+      window.location.origin,
+    );
   useEffect(() => {
     const observer = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / 1280));
     observer.observe(box.current);
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
-    let active = true;
-    let deviceId;
-    const revoke = () =>
-      deviceId && tvRequest('revoke', screenId, { deviceId }, { staff: true }).catch(() => {});
-    async function open() {
-      try {
-        if (screenId === 'shoe-area') {
-          setUrl(`/tv179/${screenId}`);
-          return;
-        }
-        const preview = await tvRequest('preview', screenId, {}, { staff: true });
-        deviceId = preview.deviceId;
-        if (!active) {
-          revoke();
-          return;
-        }
-        setUrl(`/tv179/${screenId}#preview=${preview.deviceToken}`);
-      } catch (failure) {
-        if (active) setError(failure.message);
-      }
-    }
-    open();
-    return () => {
-      active = false;
-      revoke();
+    const ready = (event) => {
+      if (
+        event.origin === window.location.origin &&
+        event.source === frame.current?.contentWindow &&
+        event.data?.type === 'jic-preview-ready'
+      )
+        send();
     };
+    window.addEventListener('message', ready);
+    return () => window.removeEventListener('message', ready);
   }, [screenId]);
+  useEffect(() => {
+    send();
+  }, [settings, screenId]);
   return (
-    <section className="admin-tv-preview-panel">
-      <div ref={box} className="admin-tv-preview">
-        {url && scale > 0 ? (
-          <iframe
-            title={`${label} landscape preview`}
-            src={url}
-            style={{ transform: `scale(${scale})` }}
-            allow="autoplay"
-          />
-        ) : (
-          <p role="status">{error || 'Opening TV preview…'}</p>
-        )}
-      </div>
-      <p>
-        Landscape · saved display. Preview lasts 10 minutes. Local cameras need this device on the
-        mosque network. This preview does not confirm playback on the physical TV.
-      </p>
-    </section>
+    <div ref={box} className="admin-tv-preview">
+      <iframe
+        ref={frame}
+        title={`${label} Normal draft preview`}
+        src={`/tv179/${screenId}?preview=normal`}
+        onLoad={send}
+        style={{ transform: `scale(${scale})` }}
+      />
+    </div>
   );
 }

@@ -34,6 +34,7 @@ const SearchPage = lazy(() => import('@/pages/SearchPage'));
 
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AccountSetupPage = lazy(() => import('@/pages/admin/AccountSetupPage'));
+const ShareDevicePage = lazy(() => import('@/pages/admin/ShareDevicePage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const TileContentAdminPage = lazy(() => import('@/pages/admin/TileContentAdminPage'));
 
@@ -55,6 +56,14 @@ export default function App() {
             <Route path="/tv" element={<Navigate to="/tv179" replace />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin/setup" element={<AccountSetupPage />} />
+            <Route
+              path="/admin/share/:screenId"
+              element={
+                <ProtectedAdminRoute permission="tv">
+                  <ShareDevicePage />
+                </ProtectedAdminRoute>
+              }
+            />
             <Route
               path="/admin"
               element={

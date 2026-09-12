@@ -1,178 +1,175 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { Copy, Monitor, Pencil, X } from 'lucide-react';
 import { tvRequest } from '@/lib/tvControl';
 
-export default function TvConnections({ screenId, data, setData, form, update, run, busy }) {
-  const [code, setCode] = useState('');
-  const [name, setName] = useState('');
-  const [editingDevice, setEditingDevice] = useState(null);
+export default function TvConnections({ screenId, data, setData, run, busy }) {
+  const [editing, setEditing] = useState(null);
   const [message, setMessage] = useState('');
-  // Short previews are not physical TVs and should not clutter the connection list.
-  const devices = data.devices.filter(
-    (device) => Date.parse(device.expires_at) - Date.parse(device.created_at) > 86400000,
-  );
+  const [nameError, setNameError] = useState(false);
+  const nameField = useRef(null);
+  const presentation = data.presentation;
+  const devices = data.devices || [];
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(presentation.code);
+      setMessage('Session code copied. Give it to people who may watch this presentation.');
+    } catch {
+      setMessage('Select the code below and copy it.');
+    }
+  }
+
   return (
-    <details className="admin-panel" id="tv-connection">
-      <summary>
-        Connect TV · {devices.length ? `${devices.length} saved` : 'not connected yet'}
-      </summary>
-      <p>
-        Use the same TV address every time. On the TV, choose Connect TV and enter its code here
-        once. A second phone can connect in the same way for testing.
-      </p>
-      <div className="admin-actions">
-        <label>
-          Name of TV or test device
-          <input
-            value={name}
-            maxLength={60}
-            required
-            disabled={busy}
-            placeholder="e.g. Main hall TV or Test phone"
-            onChange={(event) => setName(event.target.value)}
-          />
-        </label>
-        <label>
-          Code shown on the TV
-          <input
-            inputMode="numeric"
-            autoComplete="off"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            value={code}
-            placeholder="123456"
-            disabled={busy}
-            onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
-          />
-        </label>
-        <button
-          className="admin-button primary"
-          disabled={busy || code.length !== 6 || !name.trim()}
-          onClick={() =>
-            run(async () => {
-              await tvRequest(
-                'approve-setup',
-                screenId,
-                { code, name: name.trim() },
-                { staff: true },
-              );
-              setCode('');
-              setName('');
-              setMessage(
-                'TV connected. Keep its browser open; saved changes appear automatically.',
-              );
-              setData(await tvRequest('admin', screenId, {}, { staff: true }));
-            })
-          }
-        >
-          Connect this TV
-        </button>
-      </div>
+    <section className="admin-panel admin-session-panel" aria-label="Presentation viewers">
+      <h3>Watch this hall stream</h3>
+      {presentation ? (
+        <>
+          <p>Open the display webpage, choose Connect display and enter this session code.</p>
+          <div className="admin-actions">
+            <output className="admin-session-code" aria-label="Current session code">
+              {presentation.code}
+            </output>
+            <button type="button" className="admin-button" onClick={copyCode}>
+              <Copy size={18} aria-hidden="true" /> Copy session code
+            </button>
+          </div>
+          <p>
+            The code stays the same when you save or change scenes. Return to Normal ends access; a
+            new presentation gets a new code. Viewers can watch without a staff account.
+          </p>
+        </>
+      ) : (
+        <p>Normal is public. Press Present with a scene ready to get a session code for viewers.</p>
+      )}
       {message && <p role="status">{message}</p>}
-      <p>
-        Saving or clearing a scene never changes the address. Reconnect only if browser storage is
-        cleared, access is removed, or its approval expires.
-      </p>
-      <ul className="admin-device-list">
-        {devices.map((device) => {
-          const online = Date.now() - Date.parse(device.last_seen_at) < 90000;
-          const current = Date.parse(device.applied_revision) === Date.parse(data.updated_at);
-          return (
-            <li key={device.id}>
-              <span>
-                {device.name ||
-                  `Unnamed TV · ${new Date(device.created_at).toLocaleString('en-GB')}`}
-                <small className="block">
-                  {online
-                    ? current
-                      ? 'Online · latest save received'
-                      : 'Online · waiting for latest save'
-                    : 'Browser not seen recently'}
-                </small>
-              </span>
-              <button
-                className="admin-button"
-                disabled={busy}
-                onClick={() => setEditingDevice({ id: device.id, name: device.name || '' })}
-              >
-                Rename
-              </button>
-              <button
-                className="admin-button"
-                disabled={busy}
-                onClick={() =>
-                  run(async () => {
-                    await tvRequest('revoke', screenId, { deviceId: device.id }, { staff: true });
-                    setData((previous) => ({
-                      ...previous,
-                      devices: previous.devices.filter((item) => item.id !== device.id),
-                    }));
-                  })
-                }
-              >
-                Disconnect
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      {editingDevice && (
+      {presentation && (
+        <>
+          <h4>Connected displays · {devices.length}</h4>
+          {!devices.length && <p>No viewers have joined this session yet.</p>}
+          <ul className="admin-device-list">
+            {devices.map((device) => {
+              const online = Date.now() - Date.parse(device.last_seen_at) < 45000;
+              const current = Date.parse(device.applied_revision) === Date.parse(data.updated_at);
+              return (
+                <li key={device.id}>
+                  <Monitor size={20} aria-hidden="true" />
+                  <span>
+                    {device.name || 'Viewing display'}
+                    <small className="block">
+                      {online
+                        ? current
+                          ? 'Online · latest layout received'
+                          : 'Online · waiting for latest layout'
+                        : 'Disconnected · webpage not seen recently'}
+                    </small>
+                  </span>
+                  <div className="admin-actions">
+                    <button
+                      type="button"
+                      className="admin-button"
+                      disabled={busy}
+                      onClick={() => {
+                        setNameError(false);
+                        setEditing({ id: device.id, name: device.name || '' });
+                      }}
+                    >
+                      <Pencil size={16} aria-hidden="true" /> Rename
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-button"
+                      disabled={busy}
+                      onClick={() =>
+                        run(async () => {
+                          await tvRequest(
+                            'revoke',
+                            screenId,
+                            { deviceId: device.id },
+                            { staff: true },
+                          );
+                          setData((previous) => ({
+                            ...previous,
+                            devices: previous.devices.filter((item) => item.id !== device.id),
+                          }));
+                        })
+                      }
+                    >
+                      <X size={16} aria-hidden="true" /> Disconnect
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <small>
+            Layout received confirms the webpage updated. Check the picture on the receiving
+            display.
+          </small>
+        </>
+      )}
+      {editing && (
         <form
+          noValidate
           onSubmit={(event) => {
             event.preventDefault();
+            if (!editing.name.trim()) {
+              setNameError(true);
+              nameField.current?.focus();
+              return;
+            }
             run(async () => {
               await tvRequest(
                 'rename-device',
                 screenId,
-                { deviceId: editingDevice.id, name: editingDevice.name.trim() },
+                { deviceId: editing.id, name: editing.name.trim() },
                 { staff: true },
               );
               setData((previous) => ({
                 ...previous,
                 devices: previous.devices.map((item) =>
-                  item.id === editingDevice.id
-                    ? { ...item, name: editingDevice.name.trim() }
-                    : item,
+                  item.id === editing.id ? { ...item, name: editing.name.trim() } : item,
                 ),
               }));
-              setEditingDevice(null);
+              setEditing(null);
             });
           }}
         >
           <label>
-            Device name
+            Display name (required)
             <input
-              value={editingDevice.name}
+              ref={nameField}
+              value={editing.name}
               required
               maxLength={60}
               disabled={busy}
-              onChange={(event) => setEditingDevice({ ...editingDevice, name: event.target.value })}
+              aria-invalid={nameError}
+              aria-describedby="display-rename-error"
+              onChange={(event) => {
+                setEditing({ ...editing, name: event.target.value });
+                setNameError(false);
+              }}
             />
+            {nameError && (
+              <small id="display-rename-error" className="admin-field-error" role="alert">
+                Enter a name for this display.
+              </small>
+            )}
           </label>
           <div className="admin-actions">
-            <button className="admin-button" disabled={busy || !editingDevice.name.trim()}>
+            <button className="admin-button" disabled={busy}>
               Save name
             </button>
             <button
               type="button"
               className="admin-button"
               disabled={busy}
-              onClick={() => setEditingDevice(null)}
+              onClick={() => setEditing(null)}
             >
               Cancel
             </button>
           </div>
         </form>
       )}
-      {form.scene_mode === 'teaching' && (
-        <label className="admin-check">
-          <input
-            type="checkbox"
-            checked={form.muted}
-            onChange={(event) => update('muted', event.target.checked)}
-          />
-          Mute TV audio
-        </label>
-      )}
-    </details>
+    </section>
   );
 }

@@ -1,4 +1,5 @@
 import { validateDeviceName } from '../_shared/tv-scenes.js';
+import { createSessionCode, isActivePresentation } from '../_shared/tv-session.js';
 import { hasPermission } from '../_shared/access.js';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import {
@@ -8,7 +9,6 @@ import {
   screenExists,
   validateSettings,
   validDescription,
-  tvScene,
 } from '../_shared/tv.js';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
@@ -36,7 +36,7 @@ async function result(query: any) {
   const { data, error } = await query;
   if (error) {
     console.error('TV database operation failed:', error.code);
-    fail('TV service could not complete the request.', 503);
+    fail('The display service could not complete the request.', 503);
   }
   return data;
 }
@@ -58,61 +58,57 @@ async function hash(value: string) {
 }
 async function staff(req: Request) {
   const token = req.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
-  if (!token) fail('Sign in to manage TV screens.', 401);
+  if (!token) fail('Sign in to manage hall streams.', 401);
   const {
     data: { user },
     error,
   } = await db.auth.getUser(token);
-  if (error || !user) fail('Sign in to manage TV screens.', 401);
+  if (error || !user) fail('Sign in to manage hall streams.', 401);
   const profile = await result(
     db.from('profiles').select('is_owner,permissions,is_active').eq('id', user.id).maybeSingle(),
   );
-  if (!isTvStaff(profile)) fail('You do not have permission to manage TV screens.', 403);
+  if (!isTvStaff(profile)) fail('You do not have permission to manage hall streams.', 403);
   return user.id;
 }
 const validToken = (token: unknown): token is string =>
   typeof token === 'string' && /^[a-f0-9]{64}$/.test(token);
+type Presentation = { id: string; code: string; expires_at: string | null };
 async function device(
   screenId: string,
   token: unknown,
+  presentation: Presentation | null,
   acknowledgement?: { seenRevision: unknown; revision: string },
 ) {
-  if (!validToken(token)) fail('Approve this TV in Admin.', 401);
+  if (!validToken(token) || !presentation) fail('Enter the current session code to watch.', 401);
   const now = Date.now();
   const row = await result(
-    db
-      .from('tv_devices')
-      .select('id,name,created_at,expires_at,last_seen_at,applied_revision')
+    db.from('tv_devices')
+      .select('id,name,expires_at,last_seen_at,applied_revision,is_preview')
       .eq('screen_id', screenId)
+      .eq('presentation_id', presentation.id)
       .eq('token_hash', await hash(token))
       .gt('expires_at', new Date(now).toISOString())
       .maybeSingle(),
   );
-  if (!row) fail('This TV approval has expired or was removed. Approve it again in Admin.', 401);
+  if (!row) fail('This viewing session ended. Enter the current session code.', 401);
   const changes: Record<string, string> = {};
-  const remaining = Date.parse(row.expires_at) - now;
-  const lifetime = Date.parse(row.expires_at) - Date.parse(row.created_at);
-  // Keep a regularly used TV approved. Short-lived previews must still expire.
-  if (lifetime > 86400000 && remaining < 30 * 86400000) changes.expires_at = expires(90 * 86400);
+  // Active viewers may refresh during the same presentation. Previews still expire.
+  if (!row.is_preview && Date.parse(row.expires_at) - now < 3600000) {
+    changes.expires_at = new Date(Math.min(now + 86400000,
+      presentation.expires_at ? Date.parse(presentation.expires_at) : Infinity)).toISOString();
+  }
   if (acknowledgement) {
-    if (!row.last_seen_at || now - Date.parse(row.last_seen_at) >= 30000)
+    if (!row.last_seen_at || now - Date.parse(row.last_seen_at) >= 15000)
       changes.last_seen_at = new Date(now).toISOString();
-    if (
-      acknowledgement.seenRevision === acknowledgement.revision &&
-      row.applied_revision !== acknowledgement.revision
-    ) {
+    if (acknowledgement.seenRevision === acknowledgement.revision &&
+        row.applied_revision !== acknowledgement.revision) {
       changes.applied_revision = acknowledgement.revision;
       changes.last_seen_at = new Date(now).toISOString();
     }
   }
   if (Object.keys(changes).length) {
-    await result(
-      db.from('tv_devices')
-        .update(changes)
-        .eq('id', row.id)
-        .eq('screen_id', screenId)
-        .gt('expires_at', new Date().toISOString()),
-    );
+    await result(db.from('tv_devices').update(changes).eq('id', row.id)
+      .eq('presentation_id', presentation.id).gt('expires_at', new Date().toISOString()));
   }
   return row.id;
 }
@@ -138,18 +134,23 @@ Deno.serve(async (req) => {
     } catch {
       fail('Invalid request.');
     }
-    if (!body || !screenExists(body.screenId)) fail('Unknown TV screen.', 404);
+    if (!body || !screenExists(body.screenId)) fail('Unknown hall stream.', 404);
     const { action, screenId } = body;
     const screen = await result(db.from('tv_screens').select('*').eq('id', screenId).single());
     screen.settings = normaliseTvSettings(screen.settings);
     if (screenId === 'shoe-area') {
       screen.settings = validateSettings(screen.settings, screenId);
       if (
-        ['start', 'join', 'receive', 'answer', 'offer', 'heartbeat', 'pair', 'pair-code',
-          'begin-setup', 'setup-status', 'approve-setup'].includes(action)
+        ['start', 'join', 'receive', 'answer', 'offer', 'heartbeat', 'join-session', 'new-presentation'].includes(action)
       )
         fail('The shoe-area screen shows times and posters only.', 403);
     }
+    const savedPresentation = await result(
+      db.from('tv_presentations').select('id,code,expires_at').eq('screen_id', screenId).maybeSingle(),
+    );
+    const presentation: Presentation | null = isActivePresentation(savedPresentation, screen.settings)
+      ? savedPresentation : null;
+    const displayMode = presentation ? 'teaching' : 'normal';
     const liveInputs = () =>
       result(
         db
@@ -170,7 +171,7 @@ Deno.serve(async (req) => {
           .gt('expires_at', new Date().toISOString())
           .maybeSingle(),
       );
-      if (!input || tvScene(screen.settings) !== 'teaching') fail('This input has ended.', 409);
+      if (!input || !presentation) fail('This input has ended.', 409);
       const owner = await result(
         db
           .from('profiles')
@@ -184,85 +185,41 @@ Deno.serve(async (req) => {
     let response: any;
 
     if (action === 'status') {
-      const paired = body.deviceToken
-        ? Boolean(await device(screenId, body.deviceToken, {
-            seenRevision: body.seenRevision,
-            revision: screen.updated_at,
-        displayMode: tvScene(screen.settings),
-          }))
-        : false;
-      response = {
-        id: screen.id,
-        label: screen.label,
-        revision: screen.updated_at,
-        displayMode: tvScene(screen.settings),
-        settings: publicSettings(screen.settings, paired),
-        paired,
-        inputs:
-          paired && tvScene(screen.settings) === 'teaching'
-            ? (await liveInputs()).map(({ slot, session_id, kind }: any) => ({
-                slot,
-                id: session_id,
-                kind,
-              }))
-            : [],
-      };
-    } else if (action === 'begin-setup' || action === 'setup-status') {
-      if (!validToken(body.setupToken)) fail('This TV could not start setup. Reload its page.', 400);
-      const token_hash = await hash(body.setupToken);
-      if (action === 'begin-setup') {
-        const { data, error } = await db.rpc('begin_tv_browser_setup', {
-          hall: screenId,
-          token_digest: token_hash,
-        });
-        if (error?.code === 'P0001')
-          fail('Too many TVs are waiting for approval. Try again in ten minutes.', 429);
-        if (error) fail('This TV could not start setup. Reload its page.', 409);
-        response = data;
-      } else {
-        const approved = await result(
-          db.from('tv_devices').select('id')
-            .eq('screen_id', screenId).eq('token_hash', token_hash)
-            .gt('expires_at', new Date().toISOString()).maybeSingle(),
-        );
-        if (approved) response = { approved: true };
-        else {
-          const pending = await result(
-            db.from('tv_browser_setup').select('code,expires_at')
-              .eq('screen_id', screenId).eq('token_hash', token_hash)
-              .gt('expires_at', new Date().toISOString()).maybeSingle(),
-          );
-          if (!pending)
-            fail('This setup code has expired. Reload the TV page for a new code.', 410);
-          response = { approved: false, ...pending };
+      let paired = false;
+      if (body.deviceToken && presentation) {
+        try {
+          paired = Boolean(await device(screenId, body.deviceToken, presentation, {
+            seenRevision: body.seenRevision, revision: screen.updated_at,
+          }));
+        } catch (error) {
+          if (!(error instanceof ApiError) || error.status !== 401) throw error;
         }
       }
-    } else if (action === 'pair') {
-      if (typeof body.code !== 'string' || !/^[a-f0-9]{64}$/.test(body.code))
-        fail('Invalid pairing code.', 401);
-      // DELETE … RETURNING makes a pairing link single-use, including simultaneous requests.
-      const claimed = await result(
-        db
-          .from('tv_pairing_codes')
-          .delete()
-          .eq('screen_id', screenId)
-          .eq('code_hash', await hash(body.code))
-          .gt('expires_at', new Date().toISOString())
-          .select('screen_id'),
-      );
-      if (!claimed?.length) fail('This pairing link has expired or was already used.', 401);
+      response = {
+        id: screen.id, label: screen.label, revision: screen.updated_at,
+        displayMode, presentationId: presentation?.id || null,
+        settings: publicSettings({ ...screen.settings, scene_mode: displayMode }, paired),
+        paired,
+        inputs: paired ? (await liveInputs()).map(({ slot, session_id, kind }: any) => ({
+          slot, id: session_id, kind,
+        })) : [],
+      };
+    } else if (action === 'join-session') {
+      const name = validateDeviceName(body.name);
       const token = randomToken();
-      await result(
-        db.from('tv_devices').insert({
-          screen_id: screenId,
-          token_hash: await hash(token),
-          expires_at: expires(90 * 86400),
-        }),
-      );
-      response = { deviceToken: token };
+      // Supabase's gateway supplies the forwarding address. The database also caps
+      // attempts per hall so a missing or changing address cannot bypass the limit.
+      const clientAddress = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+      const joined = await result(db.rpc('join_tv_presentation', {
+        hall: screenId, session_code: typeof body.code === 'string' ? body.code.trim() : '',
+        viewer_name: name, credential_hash: await hash(token),
+        client_hash: await hash(clientAddress),
+      }));
+      if (joined.error) fail(joined.error, joined.status || 403);
+      response = { ...joined, deviceToken: token };
     } else if (action === 'leave') {
       // Cleanup is safe even when the publisher has stopped or the scene has changed.
-      const deviceId = await device(screenId, body.deviceToken);
+      const deviceId = await device(screenId, body.deviceToken, presentation);
       if (!validId(body.peerId) || !validId(body.sessionId)) fail('Unknown receiver.', 400);
       await result(
         db.from('tv_peers').delete()
@@ -273,7 +230,7 @@ Deno.serve(async (req) => {
       );
       response = { ok: true };
     } else if (['join', 'receive', 'answer', 'receiver-state'].includes(action)) {
-      const deviceId = await device(screenId, body.deviceToken);
+      const deviceId = await device(screenId, body.deviceToken, presentation);
       const input = await getInput();
       if (action === 'join') {
         // Each mounted player gets its own peer; opening another tab cannot reset its SDP.
@@ -282,7 +239,7 @@ Deno.serve(async (req) => {
           input_session: input.session_id,
           receiver_device: deviceId,
         });
-        if (error) fail('This TV has too many open receivers, or the input ended. Close an unused TV tab and try again.', 409);
+        if (error) fail('This display has too many open receivers, or the input ended. Close an unused viewing tab and try again.', 409);
         response = { peerId, iceServers: iceServers() };
       } else {
         if (!validId(body.peerId)) fail('Unknown receiver.', 400);
@@ -323,32 +280,40 @@ Deno.serve(async (req) => {
         const devices = await result(
           db
             .from('tv_devices')
-            .select('id,name,created_at,expires_at,last_seen_at,applied_revision')
+            .select('id,name,created_at,expires_at,last_seen_at,applied_revision,is_preview')
             .eq('screen_id', screenId)
+            .eq('presentation_id', presentation?.id || '00000000-0000-0000-0000-000000000000')
             .gt('expires_at', new Date().toISOString())
             .order('created_at'),
         );
         response = {
-          ...screen, devices, inputs: await liveInputs(),
+          ...screen, settings: { ...screen.settings, scene_mode: displayMode },
+          presentation, devices: presentation ? devices.filter((d: any) => !d.is_preview) : [],
+          inputs: presentation ? await liveInputs() : [],
           relayConfigured: iceServers().some((server: any) =>
             [server.urls].flat().some((url: unknown) => typeof url === 'string' && /^turns?:/.test(url))),
         };
-      } else if (action === 'normal' || action === 'save') {
+      } else if (['normal', 'save', 'new-presentation'].includes(action)) {
         const settings = validateSettings(
           action === 'normal'
             ? { ...screen.settings, scene_mode: 'normal', class_until: '' }
             : body.settings,
           screenId,
         );
-        const { data: updated_at, error } = await db.rpc('save_tv_scene', {
+        let nextCode;
+        do nextCode = createSessionCode(); while (nextCode === savedPresentation?.code);
+        const { data: saved, error } = await db.rpc('save_tv_presentation', {
           actor: userId,
           hall: screenId,
           config: settings,
           expected: body.expectedUpdatedAt,
+          new_code: nextCode,
+          restart: action === 'new-presentation',
         });
         if (error) fail(error.message, 409);
-        response = { settings, updated_at };
+        response = saved;
       } else if (action === 'preview') {
+        if (!presentation) fail('Press Present to start the live preview. Your draft is kept.', 409);
         let duration = 600;
         if (body.purpose === 'broadcast') {
           const profile = await result(
@@ -363,41 +328,25 @@ Deno.serve(async (req) => {
             .from('tv_devices')
             .insert({
               screen_id: screenId,
+              presentation_id: presentation.id,
+              is_preview: true,
+              name: 'Admin preview',
               token_hash: await hash(token),
-              expires_at: expires(duration),
+              expires_at: new Date(Math.min(Date.now() + duration * 1000,
+                presentation.expires_at ? Date.parse(presentation.expires_at) : Infinity)).toISOString(),
             })
             .select('id')
             .single(),
         );
         response = { deviceToken: token, deviceId: preview.id };
-      } else if (action === 'approve-setup') {
-        if (typeof body.code !== 'string' || !/^[0-9]{6}$/.test(body.code))
-          fail('Enter the six-digit code shown on the TV.', 400);
-        const name = body.name === undefined ? null : validateDeviceName(body.name);
-        const { data: deviceId, error } = await db.rpc(name ? 'approve_named_tv_browser' : 'approve_tv_browser_setup', {
-          hall: screenId,
-          setup_code: body.code,
-          ...(name ? { device_name: name } : {}),
-        });
-        if (error) fail('That code has expired or belongs to another TV. Check the code on this TV.', 409);
-        response = { ok: true, deviceId };
-      } else if (action === 'pair-code') {
-        const code = randomToken();
-        const expires_at = expires(600);
-        await result(
-          db
-            .from('tv_pairing_codes')
-            .upsert({ screen_id: screenId, code_hash: await hash(code), expires_at }),
-        );
-        response = { code, expires_at };
       } else if (action === 'rename-device') {
-        if (!validId(body.deviceId)) fail('Choose a connected TV.', 400);
+        if (!validId(body.deviceId)) fail('Choose a connected display.', 400);
         const renamed = await result(
           db.from('tv_devices').update({ name: validateDeviceName(body.name) })
             .eq('screen_id', screenId).eq('id', body.deviceId)
             .gt('expires_at', new Date().toISOString()).select('id').maybeSingle(),
         );
-        if (!renamed) fail('This TV is no longer connected to this hall.', 404);
+        if (!renamed) fail('This display is no longer connected to this session.', 404);
         response = { ok: true };
       } else if (action === 'revoke') {
         await result(
@@ -405,6 +354,7 @@ Deno.serve(async (req) => {
         );
         response = { ok: true };
       } else if (action === 'start') {
+        if (!presentation) fail('Press Present before starting a device input.', 409);
         if (
           !['screen', 'camera'].includes(body.kind) ||
           !['input-1', 'input-2', 'input-3', 'input-4'].includes(body.slot)

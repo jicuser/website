@@ -13,7 +13,7 @@ export default function SessionOutput({ screenId }) {
   async function openTv() {
     const tab = window.open('about:blank', '_blank');
     if (!tab) {
-      setMessage('Allow a new tab to open the TV view.');
+      setMessage('Allow a new tab to open the display view.');
       return;
     }
     tab.opener = null;
@@ -32,27 +32,27 @@ export default function SessionOutput({ screenId }) {
     <details className="admin-panel">
       <summary>Go live on YouTube / TikTok</summary>
       <p>
-        This sends the finished TV picture and sound to your channel. Camera and screen sharing
+        This sends the finished display picture and sound to your channel. Camera and screen sharing
         inside the mosque do not need a stream key. Keep your broadcasting laptop running.
       </p>
       <div className="admin-actions">
         <button className="admin-button" onClick={openTv}>
-          Open finished TV view
+          Open finished display view
         </button>
       </div>
       <p>
-        Use a desktop browser: open the TV view, enable its sound, then select that tab and share
-        its audio when going live. Do not add the same outgoing YouTube broadcast back into the
-        scene, because it would repeat its own picture and sound.
+        Use a desktop browser: open the display view, enable its sound, then select that tab and
+        share its audio when going live. Do not add the same outgoing YouTube broadcast back into
+        the scene, because it would repeat its own picture and sound.
       </p>
       <p role="status">{message}</p>
       <h4>YouTube / TikTok broadcast</h4>
       {!relay ? (
         <p>
           Website broadcasting is not connected yet. A relay is the sending service that converts
-          the TV picture and forwards it to YouTube or TikTok. It needs to be installed before “Go
-          live” can work. Your existing OBS computer can also capture the finished TV view and send
-          it directly to YouTube.
+          the display picture and forwards it to YouTube or TikTok. It needs to be installed before
+          “Go live” can work. Your existing OBS computer can also capture the finished display view
+          and send it directly to YouTube.
         </p>
       ) : (
         <>
@@ -117,7 +117,7 @@ export default function SessionOutput({ screenId }) {
                     })
               }
             >
-              {broadcast.live ? 'Stop broadcast' : 'Choose TV tab & go live'}
+              {broadcast.live ? 'Stop broadcast' : 'Choose display tab & go live'}
             </button>
           </div>
           <p role="status">{broadcast.message}</p>

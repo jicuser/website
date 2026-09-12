@@ -24,7 +24,7 @@ begin
  if not rejected then raise exception 'Delegated manager changed owner'; end if;
  select settings,updated_at into conf,stamp from public.tv_screens where id='mens-main';
  conf=conf||'{"scene_mode":"teaching","class_until":"","active_scene_id":"test-scene","scenes":[{"id":"test-scene","name":"Test","overlap":false,"layers":[{"id":"pc","type":"input","slot":"input-1","audio":false,"x":0,"y":0,"width":50,"height":100},{"id":"phone","type":"input","slot":"input-2","audio":true,"x":50,"y":0,"width":50,"height":100}]}]}'::jsonb;
- stamp=public.save_tv_scene(manager_id,'mens-main',conf,stamp);
+ stamp=(public.save_tv_presentation(manager_id,'mens-main',conf,stamp,'11223344',true)->>'updated_at')::timestamptz;
  if has_function_privilege('authenticated', 'public.start_named_tv_input(uuid,text,text,text,text)', 'execute')
     or has_function_privilege('anon', 'public.start_named_tv_input(uuid,text,text,text,text)', 'execute') then
    raise exception 'Named source start exposed';
@@ -37,9 +37,9 @@ begin
  if first_session=second_session or (select count(*) from public.tv_inputs where screen_id='mens-main')<>2 then raise exception 'Separate devices did not get separate inputs'; end if;
  rejected=false;begin perform public.start_named_tv_input(helper_id,'mens-main','input-1','camera','Another phone'); exception when raise_exception then rejected=true; end;
  if not rejected then raise exception 'A second publisher replaced a live input'; end if;
- rejected=false;begin perform public.save_tv_scene(manager_id,'mens-main',conf,stamp-interval '1 second'); exception when raise_exception then rejected=true; end;
+ rejected=false;begin perform public.save_tv_presentation(manager_id,'mens-main',conf,stamp-interval '1 second','11223344'); exception when raise_exception then rejected=true; end;
  if not rejected then raise exception 'Stale draft overwrote saved scene'; end if;
- stamp=public.save_tv_scene(manager_id,'mens-main',conf||'{"scene_mode":"normal"}'::jsonb,stamp);
+ stamp=(public.save_tv_presentation(manager_id,'mens-main',conf||'{"scene_mode":"normal"}'::jsonb,stamp,null)->>'updated_at')::timestamptz;
  if exists(select 1 from public.tv_inputs where screen_id='mens-main') then raise exception 'Normal left private inputs active'; end if;
  rejected=false;begin perform public.start_tv_input(helper_id,'mens-main','input-2','camera'); exception when raise_exception then rejected=true; end;
  if not rejected then raise exception 'Normal allowed a camera input'; end if;
