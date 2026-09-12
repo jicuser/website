@@ -63,23 +63,20 @@ export default function DisplayConnection({ screenId, tv }) {
   if (tv.preview || screenId === 'shoe-area') return null;
   const remaining = displayCodeRemaining(connection?.expiresAt, now);
   const code = remaining && connection ? connection.code : '';
-  const countdown = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
   return (
     <aside
       className="display-connection"
       aria-label="Display connection code"
       onDoubleClick={(event) => event.stopPropagation()}
     >
-      <div className="display-code-card">
-        <span className="display-code-label">Display code</span>
-        <strong
-          aria-label={code ? `Display code ${code.split('').join(' ')}` : 'Loading display code'}
+      {code && (
+        <span
+          className="display-code-number"
+          aria-label={`Connection code ${code.split('').join(' ')}`}
         >
-          {code ? `${code.slice(0, 3)} ${code.slice(3)}` : '··· ···'}
-        </strong>
-        <small>{code ? `Refreshes in ${countdown}` : 'Refreshing code…'}</small>
-        {tv.paired && <small className="display-code-connected">Connected</small>}
-      </div>
+          {code}
+        </span>
+      )}
       {tv.linkError && (
         <div className="display-code-error" role="status">
           <p>{tv.linkError}</p>
