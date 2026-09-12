@@ -6,16 +6,16 @@ Each hall has one permanent `/tv179/<hall>` webpage. The address stays the same 
 
 1. In **Hall streams**, choose the hall and press **Next**.
 2. Choose one to six scenes and press **Next · arrange content**.
-3. In each scene choose one to four areas. Pick a side-by-side, grid, sidebar or picture-in-picture arrangement. Each blank area displays **+ Add content**.
-4. Press an area to choose screen sharing, a device camera, CCTV, a YouTube link, a saved video URL, posters, prayer times, next prayer, a clock or text. Complete the fields in its dialog. Required fields show an error beside the field and receive focus.
-5. Save the content, then move or resize its area in the preview. Areas can overlap; snapping aligns edges. Bring forward and Send back change stacking. Removing content keeps a blank area ready to use again.
+3. In each scene choose one to four inputs. Pick a side-by-side, grid, sidebar or picture-in-picture arrangement. Each blank input displays **+ Select input type**.
+4. Press an input to choose screen sharing, a device camera, CCTV, a YouTube link, a saved video URL, posters, prayer times, next prayer, a clock or text. Complete the fields in its dialog. Required fields show an error beside the field and receive focus.
+5. Save the content, then move or resize its input in the preview. Inputs can overlap; snapping aligns edges. Bring forward and Send back change stacking. Removing content keeps a blank input ready to use again.
 6. Press **Start stream**. Prepared camera/screen inputs begin publishing. **Save & update stream** applies later changes and scene selection to connected displays.
 
 A camera or screen has one reusable name, with a default if no custom name is needed. Saving its content keeps the dialog open so the operator can prepare local capture or copy its contributor link. Closing the dialog keeps capture running and visible in the canvas. Preview sound is muted to avoid feedback; source audio and the display's master mute are separate controls.
 
 **Saved scenes** stores layouts and settings in the shared database. Load one explicitly into the selected scene. Live browser captures and permissions are not stored in templates. **New setup** starts empty and stops this browser's captures; an existing stream keeps its saved layout until replaced or ended. Merely opening Admin or joining as a contributor never clears another operator's setup.
 
-An in-progress setup survives refresh in the same browser tab. Capture itself stops on reload, so reopen the input and restart it. Login remains active. **End stream**, or saving a selected scene whose areas are all empty, returns viewers to the background schedule. The separate **Background posters & prayer notices** settings are available before scene setup, and do not replace an active stream.
+An in-progress setup survives refresh in the same browser tab. Capture itself stops on reload, so reopen the input and restart it. Login remains active. **End stream**, or saving a selected scene whose inputs are all empty, returns viewers to the background schedule. The separate **Background posters & prayer notices** settings are available before scene setup, and do not replace an active stream.
 
 ## Connect a display or share a watching link
 
@@ -29,7 +29,7 @@ The shoe-area webpage remains a public timetable/poster display and does not run
 
 ## Contributing from another device
 
-In a camera or screen area's dialog, choose **Use another device**. Copy its device sharing link to the contributing phone or laptop. Start the stream, then open that link and sign in on the contributing device. This dedicated page controls the selected source without opening the scene editor or resetting other devices.
+In a camera or screen input's dialog, choose **Use another device**. Copy its device sharing link to the contributing phone or laptop. Start the stream, then open that link and sign in on the contributing device. This dedicated page controls the selected source without opening the scene editor or resetting other devices.
 
 Keep contributing pages open. Browser permission is required for camera/screen capture. Refreshing stops local capture, while tab authentication survives. Restart releases only that tab's leftover source lease. Closing the content dialog is safe; closing the browser page ends capture. Phones may suspend cameras when backgrounded or locked, regardless of the website. Check the receiving picture and sound before relying on it.
 
@@ -58,4 +58,4 @@ Apply the migrations through `20260912114647_display_codes_and_scene_templates.s
 
 Run `npm run validate`. Database suites use isolated fixtures and roll back: `tests/display-connections.sql`, `tests/tv-presentation-sessions.sql`, `tests/tv-receiver.sql` and `tests/staff-tv-permissions.sql`. They cover code rotation, expiry, rate limits, permissions, template privacy, stale saves, stream isolation and receiver independence.
 
-For acceptance, open one display webpage, build a two-area scene with a laptop screen and phone camera, then Start stream and approve the displayed six-digit code. Check picture and audio, resize and save, close/reopen the content dialog, refresh each device separately, load a saved scene, and end the stream. Confirm old watching links no longer work. Automated checks do not establish physical browser codec support or camera/network delivery.
+For acceptance, open one display webpage, build a two-input scene with a laptop screen and phone camera, then Start stream and approve the displayed six-digit code. Check picture and audio, resize and save, close/reopen the content dialog, refresh each device separately, load a saved scene, and end the stream. Confirm old watching links no longer work. Automated checks do not establish physical browser codec support or camera/network delivery.

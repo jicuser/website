@@ -117,7 +117,7 @@ export default function ContentEditorDialog({
     if (disabled || !draft) return;
     const next = { ...draft };
     const invalid = {};
-    if (next.type === 'empty') invalid.type = 'Choose what to show in this area.';
+    if (next.type === 'empty') invalid.type = 'Select an input type.';
     if (['youtube', 'camera', 'video'].includes(next.type)) {
       try {
         next.url = next.type === 'youtube' ? youtubeUrl(next.url) : secureStreamUrl(next.url);
@@ -195,7 +195,7 @@ export default function ContentEditorDialog({
         <>
           <header className="scene-heading">
             <h3 id={`${editorId}-dialog-title`}>
-              {draft.type === 'empty' ? 'Add content' : 'Edit content'}
+              {draft.type === 'empty' ? 'Select input type' : 'Edit content'}
             </h3>
             <button
               className="admin-button"
@@ -208,7 +208,7 @@ export default function ContentEditorDialog({
           </header>
           <form ref={form} className="scene-dialog-form" onSubmit={saveContent} noValidate>
             <fieldset className="scene-content-types" disabled={disabled}>
-              <legend>What should this area show?</legend>
+              <legend>What should this input show?</legend>
               {contentTypes.map(([type, name]) => (
                 <button
                   key={type}
@@ -409,7 +409,7 @@ export default function ContentEditorDialog({
               </label>
             )}
             {draft.type === 'schedule' && (
-              <p>This area uses the live video saved in the website’s livestream settings.</p>
+              <p>This input uses the live video saved in the website’s livestream settings.</p>
             )}
             {'audio' in draft && (
               <label className="admin-check">

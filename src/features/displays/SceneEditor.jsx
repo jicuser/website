@@ -14,7 +14,7 @@ import { SCENE_LAYOUTS, arrangeScene, layoutRegions, snapRect } from '@/lib/scen
 
 const sourceLabel = (layer) =>
   layer.type === 'empty'
-    ? 'Add content'
+    ? 'Select input type'
     : layer.type === 'input'
       ? inputLabel(layer)
       : SOURCE_TYPES.find(([type]) => type === layer.type)?.[1] || 'Posters';
@@ -80,7 +80,7 @@ export default function SceneEditor({
       count < scene.layers.length &&
       scene.layers.slice(count).some((item) => item.type !== 'empty') &&
       !window.confirm(
-        `Keep the first ${count} areas and remove the remaining content from this scene?`,
+        `Keep the first ${count} ${count === 1 ? 'input' : 'inputs'} and remove the remaining content from this scene?`,
       )
     )
       return;
@@ -150,7 +150,7 @@ export default function SceneEditor({
       <div className="scene-heading">
         <div>
           <h3 id={`${editorId}-heading`}>Arrange your scene</h3>
-          <p>Choose areas, then tap each + to add content. Drag to move or resize.</p>
+          <p>Choose how many inputs, then tap each + to select its type. Drag to move or resize.</p>
         </div>
         <span className="scene-count">Draft preview</span>
       </div>
@@ -183,7 +183,7 @@ export default function SceneEditor({
           />
         </label>
         <label>
-          How many areas?
+          How many inputs?
           <select
             disabled={disabled}
             value={scene.layers.length}
@@ -192,11 +192,11 @@ export default function SceneEditor({
             {!scene.layers.length && <option value="0">Choose a number</option>}
             {[1, 2, 3, 4].map((count) => (
               <option key={count} value={count}>
-                {count} {count === 1 ? 'area' : 'areas'}
+                {count} {count === 1 ? 'input' : 'inputs'}
               </option>
             ))}
             {scene.layers.length > 4 && (
-              <option value={scene.layers.length}>{scene.layers.length} saved areas</option>
+              <option value={scene.layers.length}>{scene.layers.length} saved inputs</option>
             )}
           </select>
         </label>
@@ -243,7 +243,7 @@ export default function SceneEditor({
           </div>
           {!scene.layers.length && (
             <div className="scene-empty">
-              <strong>Choose how many areas you need above</strong>
+              <strong>Choose how many inputs you need above</strong>
               <span>Your blank layout will appear here.</span>
             </div>
           )}
@@ -253,7 +253,7 @@ export default function SceneEditor({
               tabIndex={disabled ? -1 : 0}
               role="button"
               aria-pressed={selected === item.id}
-              aria-label={`Area ${index + 1}: ${sourceLabel(item)}. Press Enter to edit; arrow keys move; Shift and arrows resize.`}
+              aria-label={`Input ${index + 1}: ${sourceLabel(item)}. Press Enter to edit; arrow keys move; Shift and arrows resize.`}
               className={`scene-layer scene-edit-layer ${item.type === 'empty' ? 'is-empty' : ''} ${selected === item.id ? 'is-selected' : ''}`}
               style={{ ...layerStyle(item), zIndex: index + 1 }}
               onPointerDown={(event) => begin(event, item)}
@@ -310,10 +310,10 @@ export default function SceneEditor({
             />
             Snap to edges and grid
           </label>
-          <small>Areas can overlap. Preview sound is muted.</small>
+          <small>Inputs can overlap. Preview sound is muted.</small>
         </div>
         {layer && (
-          <div className="scene-selected-source" aria-label="Selected area controls">
+          <div className="scene-selected-source" aria-label="Selected input controls">
             <strong>{sourceLabel(layer)}</strong>
             <div className="scene-source-actions">
               <button
@@ -322,7 +322,7 @@ export default function SceneEditor({
                 disabled={disabled}
                 onClick={() => edit(layer)}
               >
-                {layer.type === 'empty' ? 'Add content' : 'Edit content'}
+                {layer.type === 'empty' ? 'Select input type' : 'Edit content'}
               </button>
               <button
                 type="button"

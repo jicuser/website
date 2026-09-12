@@ -120,7 +120,7 @@ export default function useStreamSetup(screenId, userId) {
     });
     setRevision(data.updated_at);
     setStage(3);
-    setMessage('Choose the number of areas in each scene, then press + Add content.');
+    setMessage('Choose the number of inputs in each scene, then press + Select input type.');
   };
   const newSetup = () => {
     discard();
@@ -145,7 +145,7 @@ export default function useStreamSetup(screenId, userId) {
     if (inFlight.current || !form) return;
     const scene = form.scenes.find((item) => item.id === form.active_scene_id);
     if (!hasSceneContent(scene) && !started)
-      throw new Error('Add content to the selected scene before starting the stream.');
+      throw new Error('Select an input type in the selected scene before starting the stream.');
     if (
       !started &&
       data.presentation &&

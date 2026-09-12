@@ -3,7 +3,7 @@ import { fitRect } from '../../supabase/functions/_shared/tv-scenes.js';
 export const SCENE_LAYOUTS = [
   ['columns', 'Side by side'],
   ['grid', 'Grid'],
-  ['focus', 'Large area with sidebar'],
+  ['focus', 'Large input with sidebar'],
   ['pip', 'Picture in picture'],
 ];
 
