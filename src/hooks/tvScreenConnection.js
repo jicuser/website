@@ -60,9 +60,10 @@ export function initialDisplayState() {
 export function receivedDisplayState(data, token) {
   if (!['normal', 'teaching'].includes(data?.displayMode))
     throw new Error('Unable to confirm the current hall stream. Retrying…');
-  const paired = data.paired === true && validDeviceToken(token);
+  const paired = data.displayMode === 'teaching' && data.paired === true && validDeviceToken(token);
   return {
     ...data,
+    displayMode: paired ? 'teaching' : 'normal',
     settings: publicSettings(data.settings, paired),
     inputs: paired ? data.inputs || [] : [],
     paired,
@@ -76,6 +77,7 @@ export function receivedDisplayState(data, token) {
 export function interruptedDisplayState(previous, message) {
   return {
     ...previous,
+    displayMode: previous.displayMode ? 'normal' : null,
     settings: publicSettings(previous.settings),
     inputs: [],
     paired: false,

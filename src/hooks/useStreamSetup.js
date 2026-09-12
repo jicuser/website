@@ -15,7 +15,10 @@ export default function useStreamSetup(screenId, userId) {
   const [revision, setRevision] = useState(null);
   const [baseline, setBaseline] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [operation, setOperation] = useState('');
   const [message, setMessage] = useState('');
+  const [savedTemplate, setSavedTemplate] = useState(null);
+  const [pendingSave, setPendingSave] = useState(null);
   const loaded = useRef(false);
   const inFlight = useRef(false);
   const mounted = useRef(true);
@@ -57,7 +60,9 @@ export default function useStreamSetup(screenId, userId) {
           setRevision(next.updated_at);
           try {
             const draft = JSON.parse(sessionStorage.getItem(key));
+            if (draft?.pendingSave?.settings?.scenes?.length) setPendingSave(draft.pendingSave);
             if (draft?.form && draft.stage === 3) {
+              setSavedTemplate(draft.savedTemplate || null);
               const restored = normaliseTvSettings(draft.form);
               if (restored.scenes?.length && restored.scenes.length <= 6) {
                 setForm(restored);
@@ -89,13 +94,20 @@ export default function useStreamSetup(screenId, userId) {
   }, [refresh, key]);
 
   useEffect(() => {
-    if (!form || stage !== 3) return;
+    if (!loaded.current) return;
     try {
-      sessionStorage.setItem(key, JSON.stringify({ form, stage, revision, managedId, baseline }));
+      if ((!form || stage !== 3) && !pendingSave) {
+        sessionStorage.removeItem(key);
+        return;
+      }
+      sessionStorage.setItem(
+        key,
+        JSON.stringify({ form, stage, revision, managedId, baseline, savedTemplate, pendingSave }),
+      );
     } catch {
       setMessage('Your browser could not keep this draft. Save the scene before leaving.');
     }
-  }, [form, stage, revision, managedId, baseline, key]);
+  }, [form, stage, revision, managedId, baseline, savedTemplate, pendingSave, key]);
 
   useEffect(() => {
     if (managedId && data && data.presentation?.id !== managedId) {
@@ -130,7 +142,9 @@ export default function useStreamSetup(screenId, userId) {
     setStage(3);
     setMessage('Choose the number of inputs in each scene, then press + Select input type.');
   };
-  const loadSettings = (settings) => {
+  const loadSettings = (settings, template = null) => {
+    setSavedTemplate(template);
+    setStage(3);
     setWorkspaceId(crypto.randomUUID());
     setForm(settings);
     setCount(settings.scenes.length);
@@ -138,6 +152,8 @@ export default function useStreamSetup(screenId, userId) {
   };
   const newSetup = () => {
     discard();
+    setSavedTemplate(null);
+    setPendingSave(null);
     setWorkspaceId(crypto.randomUUID());
     setManagedId(null);
     setForm(null);
@@ -147,6 +163,7 @@ export default function useStreamSetup(screenId, userId) {
     setMessage('Clean setup ready. Saved scenes are available in the editor.');
   };
   const manageLive = () => {
+    setSavedTemplate(null);
     setForm(data.settings);
     setBaseline(data.settings);
     setCount(data.settings.scenes.length);
@@ -175,6 +192,7 @@ export default function useStreamSetup(screenId, userId) {
     inFlight.current = true;
     ++requestOrder.current;
     setBusy(true);
+    setOperation(started ? 'save' : 'start');
     setMessage('');
     try {
       const next = await tvRequest(
@@ -203,14 +221,15 @@ export default function useStreamSetup(screenId, userId) {
             ? 'Stream updated. Connected displays are receiving your changes.'
             : 'Stream started. Connect a display with its code, or share the watching link.',
       );
-      await refresh();
     } finally {
       ++requestOrder.current;
       inFlight.current = false;
       setBusy(false);
+      setOperation('');
     }
-  }, [form, started, data, screenId, revision, refresh]);
+  }, [form, started, data, screenId, revision]);
   async function end() {
+    const snapshot = { settings: structuredClone(form || data.settings), template: savedTemplate };
     const next = await tvRequest(
       'normal',
       screenId,
@@ -219,13 +238,15 @@ export default function useStreamSetup(screenId, userId) {
     );
     setData((previous) => ({ ...previous, ...next, devices: [], inputs: [] }));
     newSetup();
-    setMessage('Stream ended. The display webpage is showing its background schedule.');
+    setPendingSave(snapshot);
+    setMessage('Stream ended. Screens are returning to the normal display.');
   }
-  async function run(task) {
+  async function run(task, action = '') {
     if (inFlight.current) return;
     inFlight.current = true;
     ++requestOrder.current;
     setBusy(true);
+    setOperation(action);
     try {
       await task();
     } catch (error) {
@@ -234,6 +255,7 @@ export default function useStreamSetup(screenId, userId) {
       ++requestOrder.current;
       inFlight.current = false;
       setBusy(false);
+      setOperation('');
     }
   }
   return {
@@ -248,8 +270,13 @@ export default function useStreamSetup(screenId, userId) {
     dirty,
     workspaceId,
     busy,
+    operation,
     message,
     setMessage,
+    savedTemplate,
+    setSavedTemplate,
+    pendingSave,
+    setPendingSave,
     refresh,
     build,
     loadSettings,

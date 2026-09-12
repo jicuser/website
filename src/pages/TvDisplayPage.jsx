@@ -208,10 +208,7 @@ function ScreenDisplay({ screenId }) {
 
   const connectionControl = !normalPreview && <DisplayConnection screenId={screenId} tv={tv} />;
 
-  if (
-    tv.status !== 'ready' ||
-    (tv.displayMode === 'teaching' && (!tv.paired || scene !== 'teaching'))
-  )
+  if (!tv.displayMode || (tv.displayMode === 'teaching' && (!tv.paired || scene !== 'teaching')))
     return (
       <div ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
         <Helmet>

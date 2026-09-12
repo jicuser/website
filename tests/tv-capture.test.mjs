@@ -20,13 +20,20 @@ test('capture invokes the browser chooser synchronously and keeps camera and scr
     },
   });
   const stream = requestCapture('screen', true, browser);
-  assert.deepEqual(calls, [['screen', { video: true, audio: true }]]);
+  assert.equal(calls[0][0], 'screen');
+  assert.equal(calls[0][1].audio, true);
+  assert.equal(calls[0][1].video.frameRate.max, 30);
+  assert.equal(calls[0][1].video.width.max, 1920);
+  assert.equal(calls[0][1].video.height.max, 1080);
   assert.equal(await stream, 'screen stream');
   assert.equal(await requestCapture('camera', false, browser), 'camera stream');
-  assert.deepEqual(calls[1], [
-    'camera',
-    { video: { facingMode: { ideal: 'environment' } }, audio: false },
-  ]);
+  assert.equal(calls[1][0], 'camera');
+  const camera = calls[1][1];
+  assert.equal(camera.audio, false);
+  assert.equal(camera.video.facingMode.ideal, 'environment');
+  assert.equal(camera.video.width.ideal, 1280);
+  assert.equal(camera.video.height.ideal, 720);
+  assert.equal(camera.video.frameRate.max, 30);
 });
 test('capabilities and known policy blocks explain why capture cannot start', () => {
   const browser = environment({ getDisplayMedia() {}, getUserMedia() {} });

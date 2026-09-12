@@ -23,8 +23,19 @@ export function requestCapture(kind, audio, environment = globalThis) {
   // Call synchronously from the user's click, before authentication/network awaits.
   const media = environment.navigator.mediaDevices;
   return kind === 'screen'
-    ? media.getDisplayMedia({ video: true, audio })
-    : media.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio });
+    ? media.getDisplayMedia({
+        video: { width: { max: 1920 }, height: { max: 1080 }, frameRate: { max: 30 } },
+        audio,
+      })
+    : media.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 24, max: 30 },
+        },
+        audio,
+      });
 }
 
 export function captureError(error, kind) {

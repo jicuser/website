@@ -210,7 +210,7 @@ export default function PrivateTvPlayer({
             video.current
               ?.play()
               .then(() => setBlocked(false))
-              .catch(() => setMessage('Enable playback on this TV.'))
+              .catch(() => setMessage('Enable playback on this display.'))
           }
         >
           Start video and audio

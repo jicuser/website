@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone } from 'lucide-react';
 import { SITE } from '@/content/site';
+import { currentPrayer } from '@/lib/currentPrayer';
 import { nextPrayer } from '@/lib/nextPrayer';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +33,7 @@ export default function PrayerTimeBar({
   showNext = true,
 }) {
   const next = nextPrayer(todaysTimes, currentDate);
+  const current = currentPrayer(todaysTimes, currentDate);
   const Item = interactive ? Link : 'div';
   const destination = (path) => (interactive ? { to: path } : {});
 
@@ -88,7 +90,8 @@ export default function PrayerTimeBar({
                 <Item
                   key={key}
                   {...destination('/prayer-times')}
-                  className={cn('jic-today-prayer', next?.name === label && 'is-next')}
+                  className={cn('jic-today-prayer', current?.key === key && 'is-current')}
+                  aria-current={current?.key === key ? 'time' : undefined}
                   aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}
                 >
                   <span>{label}</span>

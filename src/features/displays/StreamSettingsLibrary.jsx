@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { tvRequest } from '@/lib/tvControl';
-import {
-  streamSetupProblem,
-  streamTemplateSettings,
-} from '../../../supabase/functions/_shared/stream-template.js';
+import { streamSetupProblem } from '../../../supabase/functions/_shared/stream-template.js';
+import StreamSaveDialog from './StreamSaveDialog';
 import { streamSettings, loadSceneTemplate } from '@/lib/streamWorkspace';
 
 export default function StreamSettingsLibrary({
@@ -13,45 +11,19 @@ export default function StreamSettingsLibrary({
   templates = [],
   onRefresh,
   disabled,
+  savedTemplate,
+  onRemember,
 }) {
-  const [selected, setSelected] = useState('');
+  const [selected, setSelected] = useState(savedTemplate?.id || '');
+  const [savePrompt, setSavePrompt] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const problem = streamSetupProblem(value);
   const template = templates.find((item) => item.id === selected);
-  async function save(replace = false) {
-    setBusy(true);
-    setMessage('');
-    try {
-      await tvRequest(
-        'save-template',
-        screenId,
-        {
-          name: value.scenes[0].name.trim(),
-          settings: streamTemplateSettings(value, screenId),
-          ...(replace && template
-            ? { templateId: template.id, expectedUpdatedAt: template.updated_at }
-            : {}),
-        },
-        { staff: true },
-      );
-      await onRefresh();
-      setMessage(
-        'All stream settings saved, including scenes, input details, layouts and audio. Reconnect live devices when reusing them.',
-      );
-    } catch (error) {
-      setMessage(error.message);
-    } finally {
-      setBusy(false);
-    }
-  }
   return (
     <section className="scene-template-library admin-panel">
       <h3>Saved stream settings</h3>
-      <p>
-        Save all scenes and their input details together. The first scene’s name identifies these
-        settings.
-      </p>
+      <p>Save all scenes and their input details together. Choose a stream name when saving.</p>
       {problem && <p>{problem}</p>}
       <div className="admin-actions">
         <label>
@@ -86,6 +58,7 @@ export default function StreamSettingsLibrary({
                 template.settings
                   ? streamSettings(value, structuredClone(template.settings))
                   : loadSceneTemplate(value, template.scene),
+                template,
               );
               setMessage('Saved settings loaded. Reconnect any camera or screen when ready.');
             } catch (error) {
@@ -97,23 +70,20 @@ export default function StreamSettingsLibrary({
         </button>
         <>
           {!problem && (
-            <button className="admin-button" disabled={disabled || busy} onClick={() => save()}>
+            <button
+              className="admin-button primary"
+              disabled={disabled || busy}
+              onClick={() => setSavePrompt({ template: savedTemplate })}
+            >
               Save stream settings
             </button>
           )}
         </>
         {template && !problem && (
           <button
-            className="admin-button"
+            className="admin-button primary"
             disabled={disabled || busy}
-            onClick={() => {
-              if (
-                window.confirm(
-                  `Replace saved settings “${template.name}” with all current stream settings?`,
-                )
-              )
-                save(true);
-            }}
+            onClick={() => setSavePrompt({ template })}
           >
             Update saved settings
           </button>
@@ -138,6 +108,7 @@ export default function StreamSettingsLibrary({
                   { staff: true },
                 );
                 setSelected('');
+                if (savedTemplate?.id === template.id) onRemember(null);
                 await onRefresh();
               } catch (error) {
                 setMessage(error.message);
@@ -151,6 +122,21 @@ export default function StreamSettingsLibrary({
         )}
       </div>
       {message && <p role="status">{message}</p>}
+      {savePrompt && (
+        <StreamSaveDialog
+          screenId={screenId}
+          settings={value}
+          template={savePrompt.template}
+          onDismiss={() => setSavePrompt(null)}
+          onSaved={(saved) => {
+            onRemember(saved);
+            setSelected(saved.id);
+            setSavePrompt(null);
+            setMessage('All stream settings saved. Reconnect live devices when reusing them.');
+            onRefresh().catch((error) => setMessage(`Settings saved. ${error.message}`));
+          }}
+        />
+      )}
     </section>
   );
 }

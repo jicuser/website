@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TV_SCREENS, deviceKey, tvRequest } from '@/lib/tvControl';
+import { supabase } from '@/lib/supabaseClient';
+import { subscribeDisplayRefresh } from '@/lib/displayRefresh';
 import {
   readDisplayIdentity,
   initialDisplayState,
@@ -76,7 +78,7 @@ export default function useTvScreen(screenId, { normalPreview = false } = {}) {
           'status',
           screenId,
           { deviceToken: token, seenRevision: seenRevision.current },
-          { signal: controller.signal },
+          { signal: controller.signal, timeoutMs: 6000 },
         );
         if (controller.signal.aborted) return;
         seenRevision.current = data.revision || '';
@@ -131,12 +133,14 @@ export default function useTvScreen(screenId, { normalPreview = false } = {}) {
       if (!joining && document.visibilityState !== 'hidden') poll();
     };
     open();
+    const unsubscribe = subscribeDisplayRefresh(supabase, screenId, resume);
     window.addEventListener('online', resume);
     window.addEventListener('focus', resume);
     document.addEventListener('visibilitychange', resume);
     return () => {
       controller.abort();
       clearTimeout(timer);
+      unsubscribe();
       window.removeEventListener('online', resume);
       window.removeEventListener('focus', resume);
       document.removeEventListener('visibilitychange', resume);

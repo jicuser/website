@@ -1,5 +1,6 @@
 import React from 'react';
 import { displayTime } from '@/lib/timetable';
+import { currentPrayer } from '@/lib/currentPrayer';
 import { nextPrayer } from '@/lib/nextPrayer';
 const prayers = [
   ['Fajr', 'fajr'],
@@ -32,10 +33,15 @@ export default function PrayerWidget({ kind, prayers: data, now }) {
       </div>
     );
   }
+  const current = currentPrayer(data.todaysTimes, now);
   return (
     <div className="scene-timetable">
       {prayers.map(([name, key]) => (
-        <div key={key}>
+        <div
+          key={key}
+          className={current?.key === key ? 'is-current' : ''}
+          aria-current={current?.key === key ? 'time' : undefined}
+        >
           <span>{name}</span>
           <strong>{displayTime(data.todaysTimes?.[key])}</strong>
           <small>

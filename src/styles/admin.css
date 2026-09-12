@@ -386,6 +386,14 @@ html:not(.dark) .admin-eyebrow {
   color: #192633 !important;
   border-color: #d2b054;
 }
+.admin-button.stream-start {
+  --admin-button-bg: #18733d;
+  --admin-button-ink: #fff;
+}
+.admin-button.stream-end {
+  --admin-button-bg: #b42332;
+  --admin-button-ink: #fff;
+}
 .admin-button:disabled {
   opacity: 0.5;
   cursor: default;
@@ -1783,4 +1791,27 @@ html:not(.dark) .managed-page-section-copy {
 }
 html.dark .admin-console .admin-field-error {
   color: #fca5a5;
+}
+
+.stream-save-dialog.admin-edit-dialog {
+  width: min(540px, 94vw);
+  height: auto;
+  color: var(--jic-text);
+  background: var(--jic-surface);
+}
+.stream-save-dialog h3 {
+  margin: 0 0 12px;
+}
+.stream-save-dialog form {
+  display: grid;
+  gap: 12px;
+}
+.stream-save-dialog .admin-actions {
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .stream-save-dialog .admin-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
 }

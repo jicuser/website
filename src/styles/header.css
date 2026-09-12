@@ -121,7 +121,7 @@
 .jic-today-prayer small {
   display: none;
 }
-.jic-today-prayer.is-next {
+.jic-today-prayer.is-current {
   border-bottom-color: var(--jic-gold);
   background: color-mix(in srgb, var(--jic-gold) 9%, transparent);
 }

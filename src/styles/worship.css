@@ -191,6 +191,10 @@ html:not(.dark) .worship-reading-card p {
   display: flex;
   flex-direction: column;
 }
+html[data-theme] .worship-salah-grid > article.is-current {
+  background: color-mix(in srgb, var(--jic-gold) 16%, var(--jic-surface));
+  box-shadow: inset 0 -3px var(--jic-gold-strong);
+}
 .worship-salah-grid svg {
   color: var(--jic-gold);
   margin-bottom: auto;

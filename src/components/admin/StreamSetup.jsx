@@ -9,6 +9,7 @@ import { safeWebUrl } from '@/lib/video';
 import { londonDate } from '@/lib/timetable';
 import SceneEditor from '@/features/displays/SceneEditor';
 import StreamSettingsLibrary from '@/features/displays/StreamSettingsLibrary';
+import StreamSaveDialog from '@/features/displays/StreamSaveDialog';
 import { nameProblem } from '../../../supabase/functions/_shared/tv-scenes.js';
 import BackgroundSettings from '@/features/displays/BackgroundSettings';
 import DeviceInputs from '@/features/displays/DeviceInputs';
@@ -140,6 +141,24 @@ function HallWorkspace({ screenId, userId, onBack }) {
         <p className="stream-feedback" role="status">
           {setup.message}
         </p>
+      )}
+      {setup.pendingSave && (
+        <StreamSaveDialog
+          screenId={screenId}
+          ended
+          settings={setup.pendingSave.settings}
+          template={setup.pendingSave.template}
+          onDismiss={() => setup.setPendingSave(null)}
+          onEdit={() => {
+            setup.loadSettings(setup.pendingSave.settings, setup.pendingSave.template);
+            setup.setPendingSave(null);
+          }}
+          onSaved={() => {
+            setup.setPendingSave(null);
+            setup.setMessage('Stream ended and settings saved. Screens show the normal display.');
+            setup.refresh().catch((error) => setup.setMessage(`Settings saved. ${error.message}`));
+          }}
+        />
       )}
       {!data ? (
         <p>Loading stream settings…</p>
@@ -300,6 +319,8 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   value={form}
                   onChange={setup.loadSettings}
                   templates={data.templates}
+                  savedTemplate={setup.savedTemplate}
+                  onRemember={setup.setSavedTemplate}
                   onRefresh={setup.refresh}
                   disabled={busy}
                 />
@@ -326,28 +347,34 @@ function HallWorkspace({ screenId, userId, onBack }) {
                     New setup
                   </button>
                   <button
-                    className="admin-button primary"
+                    className={`admin-button ${setup.started ? 'stream-end' : 'stream-start'}`}
                     disabled={busy}
+                    aria-busy={busy}
                     onClick={() =>
-                      setup.publish().catch((error) => setup.setMessage(error.message))
+                      setup.started
+                        ? setup.run(setup.end, 'end')
+                        : setup.publish().catch((error) => setup.setMessage(error.message))
                     }
                   >
                     {busy
-                      ? 'Please wait…'
+                      ? setup.operation === 'end'
+                        ? 'Ending stream…'
+                        : setup.operation === 'start'
+                          ? 'Starting stream…'
+                          : 'Please wait…'
                       : setup.started
-                        ? 'Save & update stream'
+                        ? 'End stream'
                         : 'Start stream'}
                   </button>
-                  {setup.started && (
+                  {setup.started && setup.dirty && (
                     <button
-                      className="admin-button"
+                      className="admin-button primary"
                       disabled={busy}
-                      onClick={() => {
-                        if (window.confirm('End this stream and return to the background display?'))
-                          setup.run(setup.end);
-                      }}
+                      onClick={() =>
+                        setup.publish().catch((error) => setup.setMessage(error.message))
+                      }
                     >
-                      End stream
+                      Save changes
                     </button>
                   )}
                   {setup.started && (
@@ -375,6 +402,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
               screenId={screenId}
               data={data}
               setData={setup.setData}
+              onRefresh={setup.refresh}
               run={setup.run}
               busy={busy}
             />

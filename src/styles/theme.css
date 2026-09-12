@@ -251,16 +251,16 @@ html:not(.dark) .jic-home-footer-strip small {
   box-shadow: none !important;
 }
 .admin-button {
-  background: var(--jic-surface) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-border) !important;
+  background: var(--admin-button-bg, var(--jic-surface)) !important;
+  color: var(--admin-button-ink, var(--jic-text)) !important;
+  border-color: var(--admin-button-bg, var(--jic-border)) !important;
 }
 .admin-button.primary,
 .admin-button.active,
 .admin-global-save {
-  background: var(--jic-action) !important;
-  color: #0c1930 !important;
-  border-color: var(--jic-action) !important;
+  background: var(--admin-button-bg, var(--jic-action)) !important;
+  color: var(--admin-button-ink, #0c1930) !important;
+  border-color: var(--admin-button-bg, var(--jic-action)) !important;
 }
 .admin-eyebrow,
 .admin-section-title > svg,

@@ -2,6 +2,7 @@
  * Layout stays with each component. Only the legacy utility bridge needs !important. */
 html[data-theme] {
   --jic-glass-clear: rgba(250, 251, 253, 0.26);
+  --jic-glass-tile: rgba(250, 251, 253, 0.16);
   --jic-glass-surface: rgba(250, 251, 253, 0.54);
   --jic-glass-surface-strong: rgba(250, 251, 253, 0.86);
   --jic-glass-inset: rgba(255, 255, 255, 0.16);
@@ -20,6 +21,7 @@ html[data-theme] {
 }
 html[data-theme='dark'] {
   --jic-glass-clear: rgba(15, 26, 43, 0.28);
+  --jic-glass-tile: rgba(15, 26, 43, 0.14);
   --jic-glass-surface: rgba(15, 26, 43, 0.58);
   --jic-glass-surface-strong: rgba(15, 26, 43, 0.9);
   --jic-glass-inset: rgba(235, 242, 255, 0.08);
@@ -124,6 +126,10 @@ html[data-theme][data-surface]
   ) {
   --glass-fill: var(--jic-glass-surface-strong);
   --glass-filter: var(--jic-glass-dense-filter);
+}
+html[data-theme][data-surface] .jic-public-route .jic-feature-card.is-glass-only {
+  --glass-fill: var(--jic-glass-tile);
+  --glass-filter: var(--jic-glass-clear-filter);
 }
 /* Dialog roots are outside the route; nested inputs use tint without another blur pass. */
 html[data-theme][data-surface] :is(.jic-popup-panel, .jic-image-viewer) {
@@ -312,6 +318,7 @@ html[data-theme][data-surface] .jic-footer-socials a svg {
 }
 html[data-theme][data-surface='solid'] {
   --jic-glass-clear: var(--jic-surface);
+  --jic-glass-tile: var(--jic-surface);
   --jic-glass-surface: var(--jic-surface);
   --jic-glass-surface-strong: var(--jic-surface);
   --jic-glass-inset: var(--jic-surface);
@@ -326,6 +333,7 @@ html[data-theme][data-surface='solid'] {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   html[data-theme] {
     --jic-glass-clear: var(--jic-surface);
+    --jic-glass-tile: var(--jic-surface);
     --jic-glass-surface: var(--jic-surface);
     --jic-glass-surface-strong: var(--jic-surface);
     --jic-glass-inset: var(--jic-surface);
@@ -341,6 +349,7 @@ html[data-theme][data-surface='solid'] {
 @media (prefers-reduced-transparency: reduce) {
   html[data-theme][data-surface] {
     --jic-glass-clear: var(--jic-surface);
+    --jic-glass-tile: var(--jic-surface);
     --jic-glass-surface: var(--jic-surface);
     --jic-glass-surface-strong: var(--jic-surface);
     --jic-glass-inset: var(--jic-surface);

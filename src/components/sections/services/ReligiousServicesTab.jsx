@@ -1,3 +1,4 @@
+import { currentPrayer } from '@/lib/currentPrayer';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -42,8 +43,11 @@ const religiousServices = [
   },
 ];
 
-const PrayerTimeRow = ({ label, begins, jamaah }) => (
-  <tr className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+const PrayerTimeRow = ({ label, begins, jamaah, current }) => (
+  <tr
+    aria-current={current ? 'time' : undefined}
+    className={`jic-service-prayer border-b border-gray-200 dark:border-gray-700 transition-colors ${current ? 'is-current' : ''}`}
+  >
     <td className="p-3 font-medium">{label}</td>
     <td className="p-3">{begins || 'N/A'}</td>
     <td className="p-3">{jamaah || 'N/A'}</td>
@@ -51,7 +55,8 @@ const PrayerTimeRow = ({ label, begins, jamaah }) => (
 );
 
 const ReligiousServicesTab = () => {
-  const { todaysTimes, isLoadingPrayerTimes } = usePrayerTimes();
+  const { todaysTimes, currentDate, isLoadingPrayerTimes } = usePrayerTimes();
+  const current = currentPrayer(todaysTimes, currentDate);
 
   return (
     <>
@@ -96,26 +101,31 @@ const ReligiousServicesTab = () => {
               <tbody>
                 <PrayerTimeRow
                   label="Fajr"
+                  current={current?.name === 'Fajr'}
                   begins={todaysTimes.fajr}
                   jamaah={todaysTimes.jamaah_fajr}
                 />
                 <PrayerTimeRow
                   label="Dhuhr"
+                  current={current?.name === 'Dhuhr'}
                   begins={todaysTimes.dhuhr}
                   jamaah={todaysTimes.jamaah_dhuhr}
                 />
                 <PrayerTimeRow
                   label="Asr"
+                  current={current?.name === 'Asr'}
                   begins={todaysTimes.asr}
                   jamaah={todaysTimes.jamaah_asr}
                 />
                 <PrayerTimeRow
                   label="Maghrib"
+                  current={current?.name === 'Maghrib'}
                   begins={todaysTimes.maghrib}
                   jamaah={todaysTimes.jamaah_maghrib}
                 />
                 <PrayerTimeRow
                   label="Isha"
+                  current={current?.name === 'Isha'}
                   begins={todaysTimes.isha}
                   jamaah={todaysTimes.jamaah_isha}
                 />

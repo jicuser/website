@@ -102,6 +102,7 @@ export function createPublisherController({
         deviceName: current.deviceName,
       });
       connection.sessionId = started.sessionId;
+      connection.heartbeat = Date.now();
       if (!isCurrent()) {
         await release(connection);
         return;

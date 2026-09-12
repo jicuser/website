@@ -1,9 +1,15 @@
 /* The photo veil guarantees contrast under clear glass and unboxed text. */
 html[data-theme] {
-  --jic-photo-veil: rgba(250, 251, 253, 0.7);
+  --jic-photo-veil: rgba(250, 251, 253, 0.78);
 }
 html[data-theme='dark'] {
   --jic-photo-veil: rgba(3, 9, 15, 0.66);
+}
+html[data-theme='light'] .jic-inner-route {
+  --jic-photo-veil: rgba(250, 251, 253, 0.84);
+}
+html[data-theme='dark'] .jic-inner-route {
+  --jic-photo-veil: rgba(3, 9, 15, 0.6);
 }
 /* One approved photograph across public routes. Admin has a separate layout. */
 .jic-public-route {
@@ -32,7 +38,10 @@ html[data-theme='dark'] {
   background: var(--jic-photo-veil);
 }
 html[data-theme='light'] .jic-page-backdrop img {
-  filter: brightness(1.12) saturate(0.75);
+  filter: brightness(1.2) saturate(0.75);
+}
+html[data-theme='dark'] .jic-inner-route .jic-page-backdrop img {
+  filter: brightness(1.12) saturate(0.9);
 }
 html[data-theme] .jic-public-route :is(.jic-public-main, .page-transition) {
   background: transparent !important;

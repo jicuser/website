@@ -1,3 +1,4 @@
+import { currentPrayer } from '@/lib/currentPrayer';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   BookOpen,
@@ -140,7 +141,8 @@ function QuranReader() {
 }
 
 function DailySalah() {
-  const { todaysTimes } = usePrayerTimes();
+  const { todaysTimes, currentDate } = usePrayerTimes();
+  const current = currentPrayer(todaysTimes, currentDate);
   const prayers = useMemo(
     () => [
       ['Fajr', todaysTimes?.fajr, todaysTimes?.jamaah_fajr],
@@ -156,7 +158,11 @@ function DailySalah() {
   return (
     <div className="worship-salah-grid">
       {prayers.map(([name, start, jamaah]) => (
-        <article key={name}>
+        <article
+          key={name}
+          className={current?.name === name ? 'is-current' : ''}
+          aria-current={current?.name === name ? 'time' : undefined}
+        >
           <MoonStar />
           <strong>{name}</strong>
           <span>Start {start || '—'}</span>

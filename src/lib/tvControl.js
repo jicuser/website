@@ -3,7 +3,12 @@ import { withRequestTimeout } from './requestTimeout';
 export { waitForIce } from './tvPeer';
 export { TV_SCREENS, DEFAULT_TV_SETTINGS } from '../../supabase/functions/_shared/tv.js';
 
-export async function tvRequest(action, screenId, values = {}, { staff = false, signal } = {}) {
+export async function tvRequest(
+  action,
+  screenId,
+  values = {},
+  { staff = false, signal, timeoutMs } = {},
+) {
   return withRequestTimeout(
     async (requestSignal) => {
       const headers = {
@@ -51,6 +56,7 @@ export async function tvRequest(action, screenId, values = {}, { staff = false, 
     },
     {
       signal,
+      timeoutMs,
       message: 'The hall stream connection timed out. Check your internet connection and retry.',
     },
   );

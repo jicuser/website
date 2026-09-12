@@ -1,5 +1,6 @@
 import { validateDeviceName, nameProblem } from '../_shared/tv-scenes.js';
 import { streamTemplateSettings } from '../_shared/stream-template.js';
+import { broadcastDisplayRefresh, displayChanges } from '../_shared/display-refresh.js';
 import { createSessionCode, isActivePresentation } from '../_shared/tv-session.js';
 import { hasPermission } from '../_shared/access.js';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
@@ -198,7 +199,7 @@ Deno.serve(async (req) => {
       }
       response = {
         id: screen.id, label: screen.label, revision: screen.updated_at,
-        displayMode, presentationId: presentation?.id || null,
+        displayMode: paired ? displayMode : 'normal', presentationId: presentation?.id || null,
         settings: publicSettings({ ...screen.settings, scene_mode: displayMode }, paired),
         paired,
         inputs: paired ? (await liveInputs()).map(({ slot, session_id, kind }: any) => ({
@@ -484,6 +485,14 @@ Deno.serve(async (req) => {
           response = { ok: true };
         }
       } else fail('Unknown action.');
+    }
+    if (displayChanges.has(action) && typeof EdgeRuntime !== 'undefined') {
+      // Do not delay End stream while notifying displays. Polling covers missed hints.
+      EdgeRuntime.waitUntil(
+        broadcastDisplayRefresh(
+          Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, screenId,
+        ).catch(() => console.warn('Display refresh notification failed; polling remains active.')),
+      );
     }
     return new Response(JSON.stringify(response), { headers });
   } catch (error) {

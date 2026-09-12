@@ -91,6 +91,8 @@ function harness({
     profiles: [staffProfile],
   };
   const calls = [];
+  const broadcasts = [];
+  const background = [];
   const database = {
     auth: {
       getUser: async (bearer) => {
@@ -183,6 +185,14 @@ function harness({
     Response,
     URL,
     console,
+    AbortController,
+    setTimeout,
+    clearTimeout,
+    fetch: async (url, options) => {
+      broadcasts.push(JSON.parse(options.body));
+      return new Response(null, { status: 202 });
+    },
+    EdgeRuntime: { waitUntil: (task) => background.push(task) },
     Deno: {
       env: { get: () => undefined },
       serve: (callback) => {
@@ -192,6 +202,8 @@ function harness({
   });
   return {
     calls,
+    broadcasts,
+    background,
     rows,
     async request(action, values = {}, bearer) {
       const response = await handler(
@@ -218,6 +230,19 @@ const viewer = (extra = {}) => ({
   expires_at: future(),
   is_preview: false,
   ...extra,
+});
+
+test('ending broadcasts a refresh only after an authorised successful mutation', async () => {
+  const api = harness({ rpcResult: { settings: DEFAULT_TV_SETTINGS, presentation: null } });
+  const denied = await api.request('normal', {}, 'invalid-token');
+  assert.equal(denied.status, 401);
+  assert.equal(api.broadcasts.length, 0);
+  const ended = await api.request('normal', {}, 'staff-token');
+  assert.equal(ended.status, 200);
+  await Promise.all(api.background);
+  assert.deepEqual(api.broadcasts, [
+    { messages: [{ topic: `display-state:${hall}`, event: 'refresh', payload: {} }] },
+  ]);
 });
 
 test('session codes have eight digits and reject the biased end of the random range', () => {
@@ -253,11 +278,11 @@ test('a presentation needs a nonempty active scene and an unexpired session and 
   assert.equal(isActivePresentation(presentation, DEFAULT_TV_SETTINGS, now), false);
 });
 
-test('public status reports Present without revealing its scene, media inputs, or session code', async () => {
+test('an unapproved display stays on normal posters during a presentation', async () => {
   const api = harness();
   const { status, data } = await api.request('status');
   assert.equal(status, 200);
-  assert.equal(data.displayMode, 'teaching');
+  assert.equal(data.displayMode, 'normal');
   assert.equal(data.paired, false);
   assert.deepEqual(data.inputs, []);
   assert.deepEqual(data.settings.scenes[0].layers, []);
@@ -274,6 +299,7 @@ test('only a credential for this hall and this presentation receives private con
   const { status, data } = await api.request('status', { deviceToken: token });
   assert.equal(status, 200);
   assert.equal(data.paired, true);
+  assert.equal(data.displayMode, 'teaching');
   assert.equal(data.settings.scenes[0].layers[0].text, 'Private lesson text');
   assert.equal(data.inputs[0].slot, 'input-1');
   assert.equal(JSON.stringify(data).includes('12345678'), false);
@@ -285,12 +311,12 @@ test('only a credential for this hall and this presentation receives private con
   }
 });
 
-test('expired or malformed viewer credentials retain the known mode but lose private access', async () => {
+test('expired or malformed viewer credentials return to the normal display', async () => {
   for (const credential of [token, 'malformed']) {
     const api = harness({ devices: [viewer({ expires_at: past() })] });
     const response = await api.request('status', { deviceToken: credential });
     assert.equal(response.status, 200);
-    assert.equal(response.data.displayMode, 'teaching');
+    assert.equal(response.data.displayMode, 'normal');
     assert.equal(response.data.paired, false);
     assert.deepEqual(response.data.inputs, []);
     assert.deepEqual(response.data.settings.scenes[0].layers, []);

@@ -59,7 +59,7 @@ test('a valid remembered session restores its private scene without becoming Nor
   assert.equal(ready.status, 'ready');
 });
 
-test('a new presentation or rejected approval drops private players and source data', () => {
+test('a new presentation or rejected approval returns to posters without private source data', () => {
   for (const badToken of ['', 'short', token.toUpperCase()]) {
     const invalid = receivedDisplayState(privateDisplay, badToken);
     assert.equal(invalid.paired, false);
@@ -70,7 +70,7 @@ test('a new presentation or rejected approval drops private players and source d
     { ...privateDisplay, paired: false, presentationId: 'new-presentation' },
     token,
   );
-  assert.equal(locked.displayMode, 'teaching');
+  assert.equal(locked.displayMode, 'normal');
   assert.equal(locked.paired, false);
   assert.equal(locked.deviceToken, '');
   assert.deepEqual(locked.inputs, []);
@@ -81,7 +81,7 @@ test('status failure stops private playback but preserves the credential for rec
   const ready = receivedDisplayState(privateDisplay, token);
   const interrupted = interruptedDisplayState(ready, 'Network interrupted');
   assert.equal(interrupted.status, 'error');
-  assert.equal(interrupted.displayMode, 'teaching');
+  assert.equal(interrupted.displayMode, 'normal');
   assert.equal(interrupted.deviceToken, token);
   assert.equal(interrupted.paired, false);
   assert.deepEqual(interrupted.inputs, []);

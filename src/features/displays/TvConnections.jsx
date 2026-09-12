@@ -3,7 +3,7 @@ import { Copy, Monitor, Pencil, X } from 'lucide-react';
 import { nameProblem } from '../../../supabase/functions/_shared/tv-scenes.js';
 import { tvRequest } from '@/lib/tvControl';
 
-export default function TvConnections({ screenId, data, setData, run, busy }) {
+export default function TvConnections({ screenId, data, setData, onRefresh, run, busy }) {
   const fieldId = useId();
   const [code, setCode] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -69,7 +69,9 @@ export default function TvConnections({ screenId, data, setData, run, busy }) {
       setCode('');
       setDisplayName('');
       setMessage(`${connected.name || 'Display'} connected to this stream.`);
-      setData(await tvRequest('admin', screenId, {}, { staff: true }));
+      onRefresh().catch(() =>
+        setMessage('Display connected. The device list will refresh shortly.'),
+      );
     });
   }
 

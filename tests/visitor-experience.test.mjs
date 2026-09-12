@@ -125,45 +125,51 @@ test('glass text retains 4.5:1 contrast over the page veil at both photo extreme
     const tokens = Object.fromEntries(
       rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]),
     );
-    const veilRule = postcss
-      .parse(readFileSync(new URL('../src/styles/home.css', import.meta.url), 'utf8'))
-      .nodes.find(
-        (node) => node.type === 'rule' && node.selector.replace(/[\"']/g, '') === selector,
-      );
-    const veil = veilRule.nodes
-      .find((node) => node.prop === '--jic-photo-veil')
-      .value.match(/[\d.]+/g)
-      .map(Number);
-    for (const material of [
-      '--jic-glass-clear',
-      '--jic-glass-surface',
-      '--jic-glass-surface-strong',
-    ]) {
-      const [r, g, b, alpha] = tokens[material].match(/[\d.]+/g).map(Number);
-      const colours = ['ink', 'secondary', 'accent'].map((role) => tokens[`--jic-glass-${role}`]);
-      const sheenAlpha =
-        parseInt(tokens['--jic-glass-sheen'].match(/#ffffff([a-f0-9]{2})/i)[1], 16) / 255;
-      for (const sheen of [0, sheenAlpha]) {
-        for (const background of [0, 255]) {
-          const composite =
-            '#' +
-            [r, g, b]
-              .map((channel, index) =>
-                Math.round(
-                  (Number(channel) * Number(alpha) +
-                    (veil[index] * veil[3] + background * (1 - veil[3])) * (1 - Number(alpha))) *
-                    (1 - sheen) +
-                    255 * sheen,
+    for (const route of ['', ' .jic-inner-route']) {
+      const veilSelector =
+        route && selector === 'html[data-theme]' ? 'html[data-theme=light]' : selector;
+      const veilRule = postcss
+        .parse(readFileSync(new URL('../src/styles/home.css', import.meta.url), 'utf8'))
+        .nodes.find(
+          (node) =>
+            node.type === 'rule' && node.selector.replace(/[\"']/g, '') === veilSelector + route,
+        );
+      const veil = veilRule.nodes
+        .find((node) => node.prop === '--jic-photo-veil')
+        .value.match(/[\d.]+/g)
+        .map(Number);
+      for (const material of [
+        '--jic-glass-clear',
+        '--jic-glass-tile',
+        '--jic-glass-surface',
+        '--jic-glass-surface-strong',
+      ]) {
+        const [r, g, b, alpha] = tokens[material].match(/[\d.]+/g).map(Number);
+        const colours = ['ink', 'secondary', 'accent'].map((role) => tokens[`--jic-glass-${role}`]);
+        const sheenAlpha =
+          parseInt(tokens['--jic-glass-sheen'].match(/#ffffff([a-f0-9]{2})/i)[1], 16) / 255;
+        for (const sheen of [0, sheenAlpha]) {
+          for (const background of [0, 255]) {
+            const composite =
+              '#' +
+              [r, g, b]
+                .map((channel, index) =>
+                  Math.round(
+                    (Number(channel) * Number(alpha) +
+                      (veil[index] * veil[3] + background * (1 - veil[3])) * (1 - Number(alpha))) *
+                      (1 - sheen) +
+                      255 * sheen,
+                  )
+                    .toString(16)
+                    .padStart(2, '0'),
                 )
-                  .toString(16)
-                  .padStart(2, '0'),
-              )
-              .join('');
-          for (const colour of colours)
-            assert.ok(
-              contrast(colour, composite) >= 4.5,
-              `${selector}: ${colour} over ${composite}`,
-            );
+                .join('');
+            for (const colour of colours)
+              assert.ok(
+                contrast(colour, composite) >= 4.5,
+                `${selector}: ${colour} over ${composite}`,
+              );
+          }
         }
       }
     }
