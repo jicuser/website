@@ -37,6 +37,14 @@ html[data-theme][data-surface='glass'] :is(.jic-footer-donate, .jic-menu-trigger
   transform: scale(0.97);
 }
 
+/* Header-only alignment: lower the top Menu to the wordmark's
+   "ISLAMIC CENTRE" line without changing document flow or banner position. */
+@media (max-width: 767px) {
+  .jic-mobile-quick-nav {
+    transform: translateY(22px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html[data-theme][data-surface='glass'] :is(.jic-footer-donate, .jic-menu-trigger, .jic-bottom-menu-trigger, .jic-menu-word) {
     transition: none;
