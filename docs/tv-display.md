@@ -84,10 +84,18 @@ External YouTube/TikTok output needs the separately hosted media relay in `servi
 The relay has not been deployed or tested with the mosque's platform credentials. Its UI remains unavailable until `VITE_MEDIA_RELAY_URL` is configured. See `services/media-relay/README.md`.
 
 
-## Named devices and idle sessions rollout
+## Named devices rollout
 
 Apply `supabase/migrations/20260912092802_tv_device_names.sql`, deploy `tv-control`, then publish the website. Device names are separate from credentials and the four stable input slots. The service-only named approval/start functions reuse the existing locking and access checks, and save each name atomically. Older clients can still use the original endpoints; no existing TV approval is reset. Name edits are scoped to the selected hall. The shared scene JSON contains each input's optional `name`; Flutter should use it for presentation and retain `slot` for identity.
 
-Admin signs this browser out after 15 minutes without interaction, with a one-minute warning and **Stay signed in** button. Activity is shared between tabs in the same browser. Active camera/screen capture and outgoing broadcasting count as ongoing use; background API polling and token refresh do not. Idle protection locks the interface if sign-out cannot reach the server. It is browser-side inactivity protection, not a server-enforced JWT lifetime. Sign-out uses local session scope so another staff device keeps working. The permission checks and private-table policies remain in force.
+`tests/tv-capture.test.mjs` covers capture capability/gesture handling; `tests/tv-control.test.mjs` checks saved source names. The rolled-back SQL tests also check named approval, invalid names without consuming codes, publisher names and occupied input protection. A build or simulated capture test does not confirm video delivery on a physical laptop/TV.
 
-`tests/tv-capture.test.mjs` covers capture capability/gesture handling and idle timing; `tests/tv-control.test.mjs` checks saved source names. The rolled-back SQL tests also check named approval, invalid names without consuming codes, publisher names and occupied input protection. A build or simulated capture test does not confirm video delivery on a physical laptop/TV.
+## Staff login in a browser tab
+
+There is no inactivity logout. Staff stay signed in when refreshing, switching apps or moving between Admin and the website in the same tab. The website staff bar includes **Log out** beside **Admin** and **Edit page**. Explicit sign-out uses Supabase's local session scope so separately signed-in staff devices keep working.
+
+`src/lib/tabAuthStorage.js` stores Supabase login in `sessionStorage`. Normal tab closure clears it. Browser tab restore and duplicated tabs may preserve/copy that storage; closing a tab is not a server-side token revocation. Use **Log out** to explicitly end the session. Browsers that block storage use memory and require sign-in after reloading. See [browser session storage behaviour](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
+
+Each running Supabase client has its own notification channel, while its storage adapter uses stable per-project keys across reloads. This prevents another tab's auth events from displaying an account whose session is absent here. A duplicated tab can still share the original server session; logging out either copy ends that shared session.
+
+On deployment, old persistent localStorage login keys are discarded, so existing staff must sign in once again. TV approvals, device names, drafts and preferences remain intact. This change needs a website deployment only; no database migration or permission changes. `tests/tab-auth.test.mjs` checks reload/new-tab behaviour, storage restrictions, legacy cleanup and explicit sign-out with the installed Supabase client.

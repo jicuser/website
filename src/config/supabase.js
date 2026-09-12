@@ -1,12 +1,5 @@
-/**
- * ============================================================
- *  SUPABASE CONFIG  —  src/config/supabase.js
- * ============================================================
- *  Credentials come from the .env file — never hardcode them here.
- *  Copy .env.example → .env and fill in your values.
- * ============================================================
- */
 import { createClient } from '@supabase/supabase-js';
+import { createTabAuthOptions } from '@/lib/tabAuthStorage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -17,4 +10,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: createTabAuthOptions(supabaseUrl),
+});

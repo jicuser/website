@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { trackActiveCapture } from '@/lib/adminActivity';
 
 export default function useBroadcast(screenId) {
   const current = useRef(null);
@@ -30,7 +29,6 @@ export default function useBroadcast(screenId) {
     clearInterval(active.health);
     if (active.recorder && active.recorder.state !== 'inactive') active.recorder.stop();
     active.stream?.getTracks().forEach((t) => t.stop());
-    active.releaseActivity?.();
     if (active.id) await request(`/sessions/${active.id}`, { method: 'DELETE' }).catch(() => {});
     update({ live: false, busy: false, message });
   }
@@ -57,7 +55,6 @@ export default function useBroadcast(screenId) {
         active.stream.getTracks().forEach((t) => t.stop());
         return false;
       }
-      active.releaseActivity = trackActiveCapture(active.stream);
       const started = await request('/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

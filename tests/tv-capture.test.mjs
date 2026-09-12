@@ -1,12 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { captureProblem, requestCapture, captureError } from '../src/lib/tvCapture.js';
-import {
-  ADMIN_IDLE_MS,
-  idleSecondsLeft,
-  trackActiveCapture,
-  hasActiveCapture,
-} from '../src/lib/adminActivity.js';
 
 const environment = (mediaDevices = {}) => ({
   isSecureContext: true,
@@ -56,24 +50,4 @@ test('errors distinguish OS capture restrictions, focus, permission and occupied
     captureError({ status: 409, message: 'This source is occupied.' }, 'screen'),
     'This source is occupied.',
   );
-});
-test('admin warns in the final minute and expires after fifteen minutes, including after sleep', () => {
-  const last = 1000;
-  assert.equal(idleSecondsLeft(last, last + ADMIN_IDLE_MS - 61000), null);
-  assert.equal(idleSecondsLeft(last, last + ADMIN_IDLE_MS - 45000), 45);
-  assert.equal(idleSecondsLeft(last, last + ADMIN_IDLE_MS), 0);
-  assert.equal(idleSecondsLeft(last, last + ADMIN_IDLE_MS * 2), 0);
-  assert.equal(idleSecondsLeft(last, last + ADMIN_IDLE_MS * 2, true), null);
-});
-test('only live video tracks keep the admin session active and cleanup releases them', () => {
-  const track = { readyState: 'live' };
-  const release = trackActiveCapture({ getVideoTracks: () => [track] });
-  assert.equal(hasActiveCapture(), true);
-  track.readyState = 'ended';
-  assert.equal(hasActiveCapture(), false);
-  release();
-  const stop = trackActiveCapture({ getVideoTracks: () => [{ readyState: 'live' }] });
-  assert.equal(hasActiveCapture(), true);
-  stop();
-  assert.equal(hasActiveCapture(), false);
 });

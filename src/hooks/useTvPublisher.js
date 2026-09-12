@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { tvRequest, waitForIce } from '@/lib/tvControl';
 import { descriptionJson, publisherMessage } from '@/lib/tvPeer';
 import { requestCapture, captureError } from '@/lib/tvCapture';
-import { trackActiveCapture } from '@/lib/adminActivity';
 
 export default function useTvPublisher(screenId, slot) {
   const active = useRef(null);
@@ -18,7 +17,6 @@ export default function useTvPublisher(screenId, slot) {
       clearTimeout(current.timer);
       current.peers.forEach((entry) => entry.pc.close());
       current.stream?.getTracks().forEach((track) => track.stop());
-      current.releaseActivity?.();
       if (mounted.current)
         setState({ busy: false, stream: null, sessionId: '', message: 'Sharing stopped.' });
       if (current.sessionId) {
@@ -70,7 +68,6 @@ export default function useTvPublisher(screenId, slot) {
           current.stream.getTracks().forEach((track) => track.stop());
           return;
         }
-        current.releaseActivity = trackActiveCapture(current.stream);
         const started = await call('start', { kind, slot, deviceName });
         current.sessionId = started.sessionId;
         if (active.current !== current) {

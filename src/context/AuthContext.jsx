@@ -9,8 +9,6 @@ import React, {
 } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { hasPermission, hasAdminAccess } from '../../supabase/functions/_shared/access.js';
-import useAdminIdle from '@/hooks/useAdminIdle';
-import { adminActivityKey } from '@/lib/adminActivity';
 
 const AuthContext = createContext(null);
 
@@ -18,7 +16,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [idleLocked, setIdleLocked] = useState(false);
   const profileRequest = useRef(0);
   const signInInProgress = useRef(false);
   const currentUserId = useRef(null);
@@ -167,24 +164,17 @@ export function AuthProvider({ children }) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      setIdleLocked(false);
-      try {
-        localStorage.setItem(adminActivityKey(data.user.id), String(Date.now()));
-      } catch {
-        /* Idle tracking also works in memory. */
-      }
-
       currentUserId.current = data.user.id;
       setUser(data.user);
 
       const nextProfile = await loadProfile(data.user);
       if (!nextProfile) {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: 'local' });
         throw new Error('Your JIC staff profile could not be loaded. Please try again.');
       }
 
       if (!hasAdminAccess(nextProfile)) {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: 'local' });
         throw new Error('This account does not have JIC administration access.');
       }
 
@@ -210,23 +200,11 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const idle = useAdminIdle(user?.id, !loading && !idleLocked && hasAdminAccess(profile), () => {
-    setIdleLocked(true);
-    try {
-      sessionStorage.setItem('jic-idle-signout', '1');
-    } catch {
-      /* Optional login notice. */
-    }
-    signOut().catch(() => {
-      /* The UI stays locked if the network is unavailable. */
-    });
-  });
-
-  const isAdmin = Boolean(user && !idleLocked && hasAdminAccess(profile));
+  const isAdmin = Boolean(user && hasAdminAccess(profile));
   const isOwner = Boolean(isAdmin && profile?.is_owner);
   const can = useCallback(
-    (permission) => Boolean(user && !idleLocked && hasPermission(profile, permission)),
-    [user, profile, idleLocked],
+    (permission) => Boolean(user && hasPermission(profile, permission)),
+    [user, profile],
   );
 
   const value = useMemo(
@@ -244,27 +222,7 @@ export function AuthProvider({ children }) {
     [user, profile, isAdmin, isOwner, loading, can, loadProfile, signOut],
   );
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-      {isAdmin && idle.secondsLeft !== null && idle.secondsLeft > 0 && (
-        <aside
-          className="admin-idle-notice"
-          role="alertdialog"
-          aria-labelledby="idle-title"
-          aria-describedby="idle-description"
-        >
-          <strong id="idle-title">Still using Admin?</strong>
-          <p id="idle-description">
-            You’ll be signed out in {idle.secondsLeft} seconds because Admin has been inactive.
-          </p>
-          <button type="button" onClick={idle.staySignedIn}>
-            Stay signed in
-          </button>
-        </aside>
-      )}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
