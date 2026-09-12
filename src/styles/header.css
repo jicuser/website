@@ -476,13 +476,12 @@ html {
   flex: 0 0 auto;
 }
 
-/* Mobile controls have one fixed location, separate from the scrolling brand. */
+/* Mobile: an inline compact menu and a separate full directory in the bottom bar. */
 .jic-mobile-controls,
-.jic-mobile-menu-trigger {
+.jic-mobile-quick-nav {
   display: none;
 }
-.jic-free-actions .jic-menu-trigger,
-.jic-mobile-menu-trigger {
+.jic-free-actions .jic-menu-trigger {
   background: #0f766e;
   color: #fff;
   border: 1px solid #0f766e;
@@ -496,15 +495,95 @@ html {
   .jic-free-actions {
     display: none;
   }
-  .jic-mobile-menu-trigger {
-    display: grid;
-    place-items: center;
-    position: fixed;
-    top: calc(var(--jic-prayer-sticky-offset) + 8px);
-    right: max(12px, env(safe-area-inset-right));
-    width: 44px;
-    height: 44px;
-    z-index: 50;
+  .jic-mobile-quick-nav {
+    display: block;
+    position: relative;
+    flex: 0 0 auto;
+    z-index: 40;
+  }
+  .jic-menu-word {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 4px 0 4px 10px;
+    border: 0;
+    background: transparent;
+    color: var(--jic-text);
+    font-family: 'Snell Roundhand', 'Segoe Script', 'Brush Script MT', cursive;
+    font-style: italic;
+    font-size: clamp(1.75rem, 7vw, 2.2rem);
+    line-height: 1.25;
+  }
+  .jic-menu-word[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
+  .jic-quick-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: min(260px, calc(100vw - 32px));
+    max-height: min(440px, 55vh);
+    max-height: min(440px, 55dvh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 6px 12px;
+    border: 1px solid var(--jic-border);
+    border-radius: 8px;
+    background: var(--jic-glass-surface-strong);
+    box-shadow: var(--jic-glass-shadow);
+    color: var(--jic-text);
+  }
+  .jic-quick-menu a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-left: 2px solid transparent;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+  }
+  .jic-quick-menu a[aria-current='page'] {
+    border-left-color: currentColor;
+    font-weight: 650;
+  }
+  .jic-unified-menu {
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    --jic-glass-surface-strong: var(--jic-bg);
+    --jic-glass-sheen: linear-gradient(transparent, transparent);
+    --jic-glass-shadow: none;
+    --jic-glass-dense-filter: none;
+  }
+  .jic-unified-menu-head {
+    padding: max(10px, env(safe-area-inset-top)) 20px 6px;
+    border-bottom: 0;
+  }
+  .jic-unified-menu-head button {
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+  .jic-unified-menu-scroll {
+    padding: 8px 24px calc(20px + env(safe-area-inset-bottom));
+  }
+  .jic-unified-menu-row > a {
+    min-height: 52px;
+    padding-block: 10px;
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+  .jic-unified-menu
+    :is(.jic-menu-appearance button, .jic-unified-admin-link, .jic-unified-menu-donate) {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
   }
   .jic-public-route {
     padding-bottom: calc(72px + env(safe-area-inset-bottom));
@@ -514,7 +593,7 @@ html {
     inset: auto 0 0;
     z-index: 50;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom))
       max(8px, env(safe-area-inset-left));
     background: var(--jic-glass-surface-strong);
@@ -534,6 +613,9 @@ html {
     color: inherit;
     font-size: 0.75rem;
   }
+  .jic-bottom-menu-trigger svg {
+    color: var(--jic-gold);
+  }
   .jic-mobile-controls button:focus-visible {
     outline: 2px solid var(--jic-gold);
     outline-offset: -2px;
@@ -543,9 +625,8 @@ html {
   }
   .jic-daily-reminder {
     position: sticky;
-    width: calc(100% - 88px);
-    margin-left: 16px;
-    margin-right: 72px;
+    width: calc(100% - 32px);
+    margin-inline: auto;
     top: calc(var(--jic-prayer-sticky-offset) + 6px);
     z-index: 30;
     transition: opacity 650ms ease;

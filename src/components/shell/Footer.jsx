@@ -31,6 +31,9 @@ const QUICK_LINKS = [
 export default function Footer() {
   const whatsapp = useCommunityLink();
   const year = new Date().getFullYear();
+  const iconCount =
+    4 +
+    ['facebook', 'x', 'instagram', 'youtube', 'tiktok'].filter((key) => SITE.socials[key]).length;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${SITE.name}, ${SITE.address.full}`)}`;
   const phoneUrl = `tel:${SITE.phone.replace(/[^\d+]/g, '').replace(/^0/, '+44')}`;
   const openDonation = () => window.dispatchEvent(new CustomEvent('jic-open-donation'));
@@ -56,7 +59,10 @@ export default function Footer() {
               </Link>
             ))}
           </nav>
-          <div className="jic-footer-actions-compact">
+          <div
+            className="jic-footer-actions-compact"
+            style={{ '--jic-footer-icon-count': iconCount }}
+          >
             <nav className="jic-footer-socials" aria-label="Social media and contact links">
               <a href={whatsapp} aria-label="WhatsApp Community">
                 <WhatsAppIcon size={22} />

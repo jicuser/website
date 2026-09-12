@@ -26,6 +26,11 @@ import { cn } from '@/lib/utils';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
+const MENU_GROUPS = [
+  ...NAV_GROUPS,
+  { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
+];
+
 // Related routes share one group of section links.
 function activeNavigation(pathname) {
   if (pathname === '/madrassah' || pathname.startsWith('/madrassah/'))
@@ -53,6 +58,8 @@ export default function UnifiedHeader() {
   const prayerDockRef = useRef(null),
     audioRef = useRef(null),
     menuRef = useRef(null),
+    quickMenuRef = useRef(null),
+    quickMenuButtonRef = useRef(null),
     menuCloseRef = useRef(null),
     subnavRef = useRef(null);
   const [playing, setPlaying] = useState(false),
@@ -60,6 +67,7 @@ export default function UnifiedHeader() {
     [radioError, setRadioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false),
     [donationOpen, setDonationOpen] = useState(false);
+  const [quickMenuOpen, setQuickMenuOpen] = useState(false);
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
   const navigation = useMemo(() => activeNavigation(pathname), [pathname]);
   const subtabs = navigation?.children || [];
@@ -72,7 +80,35 @@ export default function UnifiedHeader() {
 
   useEffect(() => {
     setMenuOpen(false);
+    setQuickMenuOpen(false);
   }, [pathname]);
+  useEffect(() => {
+    if (menuOpen || donationOpen) setQuickMenuOpen(false);
+  }, [menuOpen, donationOpen]);
+  useEffect(() => {
+    if (!quickMenuOpen) return undefined;
+    const closeOutside = (event) => {
+      if (!quickMenuRef.current?.contains(event.target)) setQuickMenuOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setQuickMenuOpen(false);
+      quickMenuButtonRef.current?.focus();
+    };
+    const desktop = window.matchMedia('(min-width: 768px)');
+    const closeOnDesktop = () => {
+      if (desktop.matches) setQuickMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOutside);
+    document.addEventListener('keydown', closeOnEscape);
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside);
+      document.removeEventListener('keydown', closeOnEscape);
+      desktop.removeEventListener('change', closeOnDesktop);
+    };
+  }, [quickMenuOpen]);
   useEffect(() => {
     const openDonation = () => {
       setMenuOpen(false);
@@ -229,6 +265,32 @@ export default function UnifiedHeader() {
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
               <JamatiaLogo variant="wordmark" />
             </Link>
+            <div className="jic-mobile-quick-nav" ref={quickMenuRef}>
+              <button
+                ref={quickMenuButtonRef}
+                type="button"
+                className="jic-menu-word"
+                aria-expanded={quickMenuOpen}
+                aria-controls="jic-quick-menu"
+                onClick={() => setQuickMenuOpen((open) => !open)}
+              >
+                Menu <ChevronDown size={16} aria-hidden="true" />
+              </button>
+              {quickMenuOpen && (
+                <nav id="jic-quick-menu" className="jic-quick-menu" aria-label="Main pages">
+                  {MENU_GROUPS.map(({ name, path }) => (
+                    <NavLink
+                      key={path}
+                      to={path}
+                      end={path === '/'}
+                      onClick={() => setQuickMenuOpen(false)}
+                    >
+                      {name}
+                    </NavLink>
+                  ))}
+                </nav>
+              )}
+            </div>
             <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">
               {NAV_GROUPS.map(({ name, path }) => (
                 <div className="jic-desktop-nav-group" key={path}>
@@ -292,6 +354,17 @@ export default function UnifiedHeader() {
           <ArrowLeft size={21} aria-hidden="true" />
           <span>Back</span>
         </button>
+        <button
+          type="button"
+          className="jic-bottom-menu-trigger"
+          onClick={() => setMenuOpen(true)}
+          aria-expanded={menuOpen}
+          aria-controls="jic-site-menu"
+          aria-haspopup="dialog"
+        >
+          <Menu size={22} aria-hidden="true" />
+          <span>Menu</span>
+        </button>
         <button type="button" onClick={() => setDonationOpen(true)}>
           <Heart className="jic-donate-heart" size={21} aria-hidden="true" />
           <span>Donate</span>
@@ -309,16 +382,6 @@ export default function UnifiedHeader() {
           <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
         </button>
       </nav>
-      <button
-        type="button"
-        className="jic-mobile-menu-trigger jic-menu-trigger"
-        onClick={() => setMenuOpen(true)}
-        aria-label="Open navigation menu"
-        aria-expanded={menuOpen}
-        aria-controls="jic-site-menu"
-      >
-        <Menu size={23} aria-hidden="true" />
-      </button>
       {radioError && (
         <span className="sr-only" role="status">
           Radio could not start. Press Radio to retry.
@@ -357,10 +420,7 @@ export default function UnifiedHeader() {
           <div className="jic-unified-menu-scroll">
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
-                {[
-                  ...NAV_GROUPS,
-                  { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
-                ].map(({ name, path, children }) => {
+                {MENU_GROUPS.map(({ name, path, children }) => {
                   const subpages = children.filter((child) => child.path !== path);
                   const expanded = Boolean(expandedMenuGroups[path]);
                   const childrenId = `jic-menu-${path.slice(1) || 'home'}-children`;

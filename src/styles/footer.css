@@ -143,6 +143,17 @@
 .jic-footer-legal a:hover {
   text-decoration: underline;
 }
+/* Match the complete rendered icon row, including optional social links. */
+@media (max-width: 767px) {
+  .jic-footer-actions-compact {
+    width: min(100%, calc(var(--jic-footer-icon-count) * 48px - 4px));
+    margin-inline: auto;
+  }
+  .jic-footer-actions-compact :is(.jic-footer-socials, .jic-footer-donate) {
+    width: 100%;
+    max-width: none;
+  }
+}
 @media (min-width: 768px) {
   .jic-footer-links-inline {
     display: flex;
