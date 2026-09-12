@@ -1,108 +1,102 @@
 import React, { useState } from 'react';
 import { tvRequest } from '@/lib/tvControl';
-const button = 'admin-button';
-export default function TvConnections({ screenId, data, setData, form, update, run, busy, copy }) {
-  const hall = screenId !== 'shoe-area';
-  const screenUrl = `${window.location.origin}/tv179/${screenId}`;
-  const [pairing, setPairing] = useState(null);
+
+export default function TvConnections({ screenId, data, setData, form, update, run, busy }) {
+  const [code, setCode] = useState('');
+  const [message, setMessage] = useState('');
+  // Short previews are not physical TVs and should not clutter the connection list.
+  const devices = data.devices.filter(
+    (device) => Date.parse(device.expires_at) - Date.parse(device.created_at) > 86400000,
+  );
   return (
-    <details className="admin-panel">
-      <summary>Connect TV & sound</summary>
-      <a className={button} href={screenUrl} target="_blank" rel="noreferrer">
-        Open TV display ↗
-      </a>
-      <p>Use landscape orientation on the TV. Posters and video fit without cropping.</p>
-      <label className="admin-check">
-        <input
-          type="checkbox"
-          checked={form.muted}
-          onChange={(event) => update('muted', event.target.checked)}
-        />
-        Mute TV audio
-      </label>
-      {hall && (
-        <>
-          <h4>Approve a TV browser for Class / Teach</h4>
-          <p>
-            The plain TV address shows public posters and times. Each TV browser needs its own
-            approval to show your saved class scene, screen sharing and cameras.
-          </p>
-          <ol>
-            <li>Create an approval link below and copy it.</li>
-            <li>Open that link in the TV’s browser within 10 minutes.</li>
-            <li>Keep that browser open. Save your scene here to update the TV.</li>
-          </ol>
-          <p>
-            Each link works once. That browser stays approved for 90 days; afterwards you can use
-            the plain TV address there. For another TV or browser, create a fresh link.
-          </p>
-          <button
-            className={button}
+    <details className="admin-panel" id="tv-connection">
+      <summary>
+        Connect TV · {devices.length ? `${devices.length} saved` : 'not connected yet'}
+      </summary>
+      <p>
+        Use the same TV address every time. On the TV, choose Connect TV and enter its code here
+        once. A second phone can connect in the same way for testing.
+      </p>
+      <div className="admin-actions">
+        <label>
+          Code shown on the TV
+          <input
+            inputMode="numeric"
+            autoComplete="off"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            value={code}
+            placeholder="123456"
             disabled={busy}
-            onClick={() =>
-              run(async () =>
-                setPairing(await tvRequest('pair-code', screenId, {}, { staff: true })),
-              )
-            }
-          >
-            Create TV approval link
-          </button>
-          {pairing && (
-            <div className="admin-actions">
-              <input
-                readOnly
-                aria-label="Private TV approval link"
-                value={`${screenUrl}#pair=${pairing.code}`}
-                onFocus={(event) => event.target.select()}
-              />
-              <button className={button} onClick={() => copy(`${screenUrl}#pair=${pairing.code}`)}>
-                Copy approval link
+            onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
+          />
+        </label>
+        <button
+          className="admin-button primary"
+          disabled={busy || code.length !== 6}
+          onClick={() =>
+            run(async () => {
+              await tvRequest('approve-setup', screenId, { code }, { staff: true });
+              setCode('');
+              setMessage(
+                'TV connected. Keep its browser open; saved changes appear automatically.',
+              );
+              setData(await tvRequest('admin', screenId, {}, { staff: true }));
+            })
+          }
+        >
+          Connect this TV
+        </button>
+      </div>
+      {message && <p role="status">{message}</p>}
+      <p>
+        Saving or clearing a scene never changes the address. Reconnect only if browser storage is
+        cleared, access is removed, or its approval expires.
+      </p>
+      <ul className="admin-device-list">
+        {devices.map((device, index) => {
+          const online = Date.now() - Date.parse(device.last_seen_at) < 90000;
+          const current = Date.parse(device.applied_revision) === Date.parse(data.updated_at);
+          return (
+            <li key={device.id}>
+              <span>
+                TV {index + 1}
+                <small className="block">
+                  {online
+                    ? current
+                      ? 'Online · latest save received'
+                      : 'Online · waiting for latest save'
+                    : 'Browser not seen recently'}
+                </small>
+              </span>
+              <button
+                className="admin-button"
+                disabled={busy}
+                onClick={() =>
+                  run(async () => {
+                    await tvRequest('revoke', screenId, { deviceId: device.id }, { staff: true });
+                    setData((previous) => ({
+                      ...previous,
+                      devices: previous.devices.filter((item) => item.id !== device.id),
+                    }));
+                  })
+                }
+              >
+                Disconnect
               </button>
-            </div>
-          )}
-          <ul className="admin-device-list">
-            {data.devices
-              .filter(
-                (device) => Date.parse(device.expires_at) - Date.parse(device.created_at) > 3600000,
-              )
-              .map((device, index) => (
-                <li key={device.id}>
-                  TV {index + 1}
-                  <button
-                    className={button}
-                    disabled={busy}
-                    onClick={() =>
-                      run(async () => {
-                        await tvRequest(
-                          'revoke',
-                          screenId,
-                          { deviceId: device.id },
-                          { staff: true },
-                        );
-                        setData((previous) => ({
-                          ...previous,
-                          devices: previous.devices.filter((item) => item.id !== device.id),
-                        }));
-                      })
-                    }
-                  >
-                    Disconnect
-                  </button>
-                </li>
-              ))}
-          </ul>
-          <button
-            className={button}
-            disabled={busy}
-            onClick={() =>
-              run(async () => {
-                setData(await tvRequest('admin', screenId, {}, { staff: true }));
-              })
-            }
-          >
-            Refresh connections
-          </button>
-        </>
+            </li>
+          );
+        })}
+      </ul>
+      {form.scene_mode === 'teaching' && (
+        <label className="admin-check">
+          <input
+            type="checkbox"
+            checked={form.muted}
+            onChange={(event) => update('muted', event.target.checked)}
+          />
+          Mute TV audio
+        </label>
       )}
     </details>
   );

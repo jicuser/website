@@ -6,6 +6,11 @@ import {
   validateSettings,
   isTvStaff,
 } from '../supabase/functions/_shared/tv.js';
+const teaching = {
+  scene_mode: 'teaching',
+  active_scene_id: 'lesson',
+  scenes: [{ id: 'lesson', layers: [{ type: 'clock' }] }],
+};
 const times = {
   d_date: '2026-09-12',
   jamaah_fajr: '6:00 AM',
@@ -31,12 +36,9 @@ test('Maghrib uses ten minutes and never treats the prayer beginning as Jamaah',
   assert.equal(run('18:00:00', {}, { ...times, jamaah_asr: '—', asr: '6:00 PM' }), null);
 });
 test('class mode, shoe-area and stale timetables suppress automatic notices', () => {
+  assert.equal(run('18:05:00', { ...teaching, class_until: '2026-09-12T17:10:00Z' }), null);
   assert.equal(
-    run('18:05:00', { scene_mode: 'teaching', class_until: '2026-09-12T17:10:00Z' }),
-    null,
-  );
-  assert.equal(
-    run('18:10:00', { scene_mode: 'teaching', class_until: '2026-09-12T17:10:00Z' }).phase,
+    run('18:10:00', { ...teaching, class_until: '2026-09-12T17:10:00Z' }).phase,
     'dhikr',
   );
   assert.equal(run('18:05:00', { prayer_enabled: false }), null);
@@ -89,7 +91,7 @@ test('seasonal notices are limited to hall screens and yield to class mode', () 
   assert.equal(
     tvSpecialNotice(now, {
       notice_mode: 'jummah',
-      scene_mode: 'teaching',
+      ...teaching,
       class_until: '2026-09-12T13:00:00Z',
     }),
     null,
@@ -113,15 +115,25 @@ import { ramadanScene, fastingTimes, automaticTvNotice } from '../src/lib/tvPray
 import { tvScene } from '../supabase/functions/_shared/tv.js';
 test('Teaching expires exactly and pauses every automatic notice', () => {
   const end = '2026-09-12T18:00:00Z';
-  assert.equal(
-    tvScene({ scene_mode: 'teaching', class_until: end }, Date.parse(end) - 1),
-    'teaching',
-  );
-  assert.equal(tvScene({ scene_mode: 'teaching', class_until: end }, Date.parse(end)), 'normal');
-  assert.equal(tvScene({ scene_mode: 'teaching', class_until: '' }), 'teaching');
-  assert.equal(run('18:05:00', { scene_mode: 'teaching', class_until: end }), null);
+  assert.equal(tvScene({ ...teaching, class_until: end }, Date.parse(end) - 1), 'teaching');
+  assert.equal(tvScene({ ...teaching, class_until: end }, Date.parse(end)), 'normal');
+  assert.equal(tvScene({ ...teaching, class_until: '' }), 'teaching');
+  assert.equal(run('18:05:00', { ...teaching, class_until: end }), null);
   assert.throws(() => validateSettings({ scene_mode: 'speech' }));
   assert.throws(() => validateSettings({ scene_mode: 'ramadan' }));
+});
+test('cleared Class resumes Normal prayer notices even when another scene has content', () => {
+  const settings = {
+    ...teaching,
+    active_scene_id: 'cleared',
+    scenes: [...teaching.scenes, { id: 'cleared', layers: [] }],
+  };
+  assert.equal(tvScene(settings), 'normal');
+  assert.equal(run('18:05:00', settings).phase, 'dhikr');
+  assert.equal(
+    tvSpecialNotice(new Date('2026-09-12T12:00:00Z'), { ...settings, notice_mode: 'jummah' }),
+    'jummah',
+  );
 });
 test('Ramadan du‘a starts after Isha dhikr and lasts twenty minutes', () => {
   const at = (time) => ramadanScene(new Date(`2026-09-12T${time}+01:00`), times);
@@ -181,7 +193,12 @@ test('seasonal automation never replaces Class / Teach scenes before expiry', ()
   const record = { ...times, d_date: '2026-02-20' };
   const jummah = [{ prayer: '1:30 PM' }];
   for (const scene_mode of ['teaching']) {
-    const settings = { scene_mode, class_until: '2026-02-20T13:00:00Z', ramadan_calendar: 'on' };
+    const settings = {
+      ...teaching,
+      scene_mode,
+      class_until: '2026-02-20T13:00:00Z',
+      ramadan_calendar: 'on',
+    };
     assert.equal(automaticTvNotice(now, record, jummah, settings), null);
     assert.equal(
       automaticTvNotice(new Date(settings.class_until), record, jummah, settings),

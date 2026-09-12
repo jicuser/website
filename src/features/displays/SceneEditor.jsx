@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   SOURCE_TYPES,
   INPUT_SLOTS,
@@ -12,10 +12,17 @@ import {
 import SceneCanvas from './SceneCanvas';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
-import { useEffect } from 'react';
+import { availableInputSlot, updateInputCapture } from '@/lib/tvSceneState';
 
 const uid = () => crypto.randomUUID();
-const label = (type) => SOURCE_TYPES.find(([id]) => id === type)?.[1] || type;
+const label = (layer) =>
+  layer.type === 'input'
+    ? layer.capture === 'camera'
+      ? 'Device camera'
+      : layer.capture === 'screen'
+        ? 'Screen share'
+        : 'Device input'
+    : SOURCE_TYPES.find(([id]) => id === layer.type)?.[1] || layer.type;
 export default function SceneEditor({ value, onChange, disabled, posters = [], screenId }) {
   const prayers = usePrayerTimes();
   const { livestream } = useHomeLiveContent();
@@ -33,8 +40,11 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
   const canvas = useRef(null);
   const drag = useRef(null);
   const layer = scene.layers.find((item) => item.id === selected);
+  function settingsWithScene(next) {
+    return { ...value, scenes: value.scenes.map((s) => (s.id === scene.id ? next : s)) };
+  }
   function updateScene(next) {
-    onChange({ ...value, scenes: value.scenes.map((s) => (s.id === scene.id ? next : s)) });
+    onChange(settingsWithScene(next));
   }
   function updateLayer(next) {
     if (!canPlace(scene, next)) {
@@ -60,10 +70,13 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
     if (next.type === 'input') {
       next.audio = false;
       next.capture = source === 'input-camera' ? 'camera' : 'screen';
-      next.slot =
-        INPUT_SLOTS.find(
-          (slot) => !scene.layers.some((l) => l.type === 'input' && l.slot === slot),
-        ) || 'input-1';
+      next.slot = availableInputSlot(value, next.capture);
+      if (!next.slot) {
+        setMessage(
+          'All four device inputs are in use. Remove an input or reuse one with the same source type.',
+        );
+        return;
+      }
     }
     if (source === 'text') next.text = '';
     if (source === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
@@ -78,7 +91,10 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
       setMessage('Enable overlap to add here, then move the source.');
       return;
     }
-    updateScene({ ...scene, layers: [...scene.layers, next] });
+    const updated = settingsWithScene({ ...scene, layers: [...scene.layers, next] });
+    onChange(
+      next.type === 'input' ? updateInputCapture(updated, next.slot, next.capture) : updated,
+    );
     setSelected(next.id);
   }
   function begin(event, item, resize = false) {
@@ -131,7 +147,11 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
           className="admin-button"
           disabled={disabled || !scene.layers.length}
           onClick={() => {
-            if (!window.confirm('Clear all items from this scene? The TV changes only after Save.'))
+            if (
+              !window.confirm(
+                'Clear this scene? Saving an empty scene returns the TV to Normal. Other scenes are kept.',
+              )
+            )
               return;
             updateScene({ ...scene, layers: [] });
             setSelected('');
@@ -227,7 +247,7 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
             key={item.id}
             tabIndex={disabled ? -1 : 0}
             role="button"
-            aria-label={`${label(item.type)}, layer ${index + 1}. Arrow keys move. Shift and arrows resize.`}
+            aria-label={`${label(item)}, layer ${index + 1}. Arrow keys move. Shift and arrows resize.`}
             className={`scene-layer scene-edit-layer ${selected === item.id ? 'is-selected' : ''}`}
             style={{ ...layerStyle(item), zIndex: index + 1 }}
             onFocus={() => setSelected(item.id)}
@@ -258,7 +278,7 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
                 />
               )}
             <span>
-              {label(item.type)}
+              {label(item)}
               {item.type === 'input' ? ` · ${item.slot.replace('input-', 'Input ')}` : ''}
             </span>
             {selected === item.id && (
@@ -278,7 +298,10 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
         list appear on top.
       </p>
       {!scene.layers.length && (
-        <p>Empty scene. Add an item above, then fill in its options below.</p>
+        <p>
+          Add a source to build this scene. If you save it empty, the TV returns to Normal. Your
+          other scenes are kept.
+        </p>
       )}
       <button type="button" className="admin-button" onClick={() => setPreview(!preview)}>
         {preview ? 'Close draft preview' : 'Preview draft'}
@@ -310,13 +333,13 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
             key={item.id}
             onClick={() => setSelected(item.id)}
           >
-            {label(item.type)}
+            {label(item)}
           </button>
         ))}
       </div>
       {layer && (
         <fieldset disabled={disabled} className="scene-properties">
-          <legend>{label(layer.type)}</legend>
+          <legend>{label(layer)}</legend>
           {['poster', 'poster-next'].includes(layer.type) && (
             <>
               <h4>Choose posters</h4>
@@ -411,25 +434,53 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
             </>
           )}
           {layer.type === 'input' && (
-            <label>
-              Device input
-              <select
-                value={layer.slot}
-                onChange={(e) => updateLayer({ ...layer, slot: e.target.value })}
-              >
-                {INPUT_SLOTS.map((slot, i) => (
-                  <option
-                    key={slot}
-                    disabled={scene.layers.some(
-                      (l) => l.id !== layer.id && l.type === 'input' && l.slot === slot,
-                    )}
-                    value={slot}
-                  >
-                    Input {i + 1}
+            <>
+              <label>
+                Capture source
+                <select
+                  value={layer.capture || ''}
+                  onChange={(e) => onChange(updateInputCapture(value, layer.slot, e.target.value))}
+                >
+                  <option value="" disabled>
+                    Choose a source
                   </option>
-                ))}
-              </select>
-            </label>
+                  <option value="screen">Screen share from a laptop</option>
+                  <option value="camera">Camera from a phone or laptop</option>
+                </select>
+              </label>
+              <p>
+                This source type applies to {layer.slot.replace('input-', 'Input ')} in every scene.
+                Stop a running input before changing its source.
+              </p>
+              <label>
+                Device input
+                <select
+                  value={layer.slot}
+                  onChange={(e) => {
+                    const slot = e.target.value;
+                    const updated = settingsWithScene({
+                      ...scene,
+                      layers: scene.layers.map((l) => (l.id === layer.id ? { ...layer, slot } : l)),
+                    });
+                    onChange(
+                      layer.capture ? updateInputCapture(updated, slot, layer.capture) : updated,
+                    );
+                  }}
+                >
+                  {INPUT_SLOTS.map((slot, i) => (
+                    <option
+                      key={slot}
+                      disabled={scene.layers.some(
+                        (l) => l.id !== layer.id && l.type === 'input' && l.slot === slot,
+                      )}
+                      value={slot}
+                    >
+                      Input {i + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
           )}
           {layer.type === 'text' && (
             <label>

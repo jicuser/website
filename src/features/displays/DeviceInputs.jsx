@@ -2,20 +2,27 @@ import React, { useEffect, useRef, useState } from 'react';
 import useTvPublisher from '@/hooks/useTvPublisher';
 import { tvRequest } from '@/lib/tvControl';
 import { tvScene } from '../../../supabase/functions/_shared/tv.js';
-import { usedInputSlots } from '../../../supabase/functions/_shared/tv-scenes.js';
+import { tvInputSources } from '@/lib/tvSceneState';
 
-function DeviceInput({ screenId, slot, capture, remote, disabled, onRefresh }) {
+function DeviceInput({ screenId, slot, capture, active, conflict, remote, disabled, onRefresh }) {
   const sharing = useTvPublisher(screenId, slot);
   const [audio, setAudio] = useState(false);
   const [error, setError] = useState('');
   const video = useRef(null);
+  const canShareScreen = Boolean(navigator.mediaDevices?.getDisplayMedia);
+  const canUseCamera = Boolean(navigator.mediaDevices?.getUserMedia);
   useEffect(() => {
     if (video.current) video.current.srcObject = sharing.stream;
   }, [sharing.stream]);
   return (
     <article className="device-input">
       <h4>
-        {slot.replace('input-', 'Input ')}{' '}
+        {slot.replace('input-', 'Input ')} ·{' '}
+        {capture === 'camera'
+          ? 'Device camera'
+          : capture === 'screen'
+            ? 'Screen share'
+            : 'Device source'}{' '}
         <small>
           {sharing.stream
             ? 'This device'
@@ -24,6 +31,33 @@ function DeviceInput({ screenId, slot, capture, remote, disabled, onRefresh }) {
               : 'Available'}
         </small>
       </h4>
+      {!active && (
+        <p>Used in another saved scene. Keep this feed running to use it when you switch scenes.</p>
+      )}
+      {conflict && (
+        <p role="alert">
+          This input has different source types in your scenes. Choose Camera or Screen share in its
+          scene options, then save.
+        </p>
+      )}
+      {capture && remote && remote.kind !== capture && (
+        <p role="status">
+          The running input uses {remote.kind === 'camera' ? 'a camera' : 'screen sharing'}. Stop
+          it, then start the selected source.
+        </p>
+      )}
+      {capture !== 'camera' && !canShareScreen && (
+        <p>
+          This browser cannot share its screen. Open this hall in a supported laptop browser to
+          share a tab or screen. On this phone, choose a Device camera source instead.
+        </p>
+      )}
+      {capture !== 'screen' && !canUseCamera && (
+        <p>
+          Camera capture is unavailable in this browser. Open the HTTPS admin page in Safari or
+          Chrome and allow camera access.
+        </p>
+      )}
       <label className="admin-check">
         <input
           type="checkbox"
@@ -42,7 +76,8 @@ function DeviceInput({ screenId, slot, capture, remote, disabled, onRefresh }) {
               sharing.busy ||
               Boolean(sharing.stream) ||
               Boolean(remote) ||
-              !navigator.mediaDevices?.getDisplayMedia
+              conflict ||
+              !canShareScreen
             }
             onClick={() => sharing.start('screen', audio)}
           >
@@ -57,7 +92,8 @@ function DeviceInput({ screenId, slot, capture, remote, disabled, onRefresh }) {
               sharing.busy ||
               Boolean(sharing.stream) ||
               Boolean(remote) ||
-              !navigator.mediaDevices?.getUserMedia
+              conflict ||
+              !canUseCamera
             }
             onClick={() => sharing.start('camera', audio)}
           >
@@ -102,8 +138,8 @@ function DeviceInput({ screenId, slot, capture, remote, disabled, onRefresh }) {
   );
 }
 export default function DeviceInputs({ screenId, settings, inputs, disabled, onRefresh }) {
-  const slots = [...usedInputSlots(settings)];
-  if (!slots.length || tvScene(settings) !== 'teaching') return null;
+  const sources = tvInputSources(settings);
+  if (!sources.length || tvScene(settings) !== 'teaching') return null;
   return (
     <section className="admin-panel">
       <h3>Device inputs</h3>
@@ -112,17 +148,12 @@ export default function DeviceInputs({ screenId, settings, inputs, disabled, onR
         choose a different input for its camera. Keep both pages open.
       </p>
       {disabled && <p>Save Class / Teach and the device sources before starting them.</p>}
-      {slots.map((slot) => (
+      {sources.map((source) => (
         <DeviceInput
-          key={slot}
+          key={source.slot}
           screenId={screenId}
-          slot={slot}
-          capture={
-            settings.scenes
-              .flatMap((s) => s.layers)
-              .find((l) => l.type === 'input' && l.slot === slot)?.capture
-          }
-          remote={inputs.find((i) => i.slot === slot)}
+          {...source}
+          remote={inputs.find((i) => i.slot === source.slot)}
           disabled={disabled}
           onRefresh={onRefresh}
         />

@@ -37,7 +37,9 @@ export default function TvScreenEditor({ screenId }) {
   const dirty = Boolean(form && JSON.stringify(form) !== JSON.stringify(baseline?.settings));
   editing.current = dirty || busy;
   const accept = useCallback((next) => {
-    next.settings = normaliseTvSettings(next.settings);
+    const settings = normaliseTvSettings(next.settings);
+    // Saved empty or expired classes are Normal; unsaved scene drafts stay editable.
+    next = { ...next, settings: { ...settings, scene_mode: tvScene(settings) } };
     setData(next);
     setForm(next.settings);
     setBaseline(next);
@@ -113,7 +115,9 @@ export default function TvScreenEditor({ screenId }) {
         { staff: true },
       );
       accept({ ...data, ...next });
-      setMessage('Saved. The TV browser will update within a few seconds.');
+      setMessage(
+        `Saved ${tvScene(next.settings) === 'teaching' ? 'Class / Teach' : 'Normal'}. Connected browsers update within a few seconds; check their status in Connect TV.`,
+      );
     } catch (e) {
       setMessage(e.message);
       throw e;
@@ -158,11 +162,14 @@ export default function TvScreenEditor({ screenId }) {
       </div>
       <p>
         {hall
-          ? 'This address shows Normal posters and times until you approve that TV browser. For Class / Teach, open “Connect TV & sound” below and approve it once. Then Save & update TV sends your selected scene to that browser.'
+          ? 'Open this permanent address in the TV browser. Connect it once using the code shown on the TV, then Save & update TV sends your selected scene to it.'
           : 'Open this address in the TV’s browser for posters and times. Save & update TV applies your changes.'}
       </p>
       {hall && (
-        <p>“View TV” opens a private live preview here; it does not approve another browser.</p>
+        <p>
+          Normal shows posters and prayer notices. Class / Teach shows your scene. Saving an empty
+          scene returns the TV to Normal.
+        </p>
       )}
       <div className="admin-actions admin-tv-address">
         <a href={screenUrl} target="_blank" rel="noreferrer">
@@ -180,6 +187,17 @@ export default function TvScreenEditor({ screenId }) {
         </button>
       ) : (
         <>
+          {hall && (
+            <TvConnections
+              screenId={screenId}
+              data={data}
+              setData={setData}
+              form={form}
+              update={update}
+              run={run}
+              busy={busy}
+            />
+          )}
           <section className="admin-panel">
             <h3>Display</h3>
             <p>
@@ -294,18 +312,6 @@ export default function TvScreenEditor({ screenId }) {
                 hall={hall}
               />
             </section>
-          )}
-          {hall && form.scene_mode === 'teaching' && (
-            <TvConnections
-              screenId={screenId}
-              data={data}
-              setData={setData}
-              form={form}
-              update={update}
-              run={run}
-              busy={busy}
-              copy={copy}
-            />
           )}
           {hall && form.scene_mode === 'teaching' && <SessionOutput screenId={screenId} />}
           <div className="admin-tv-save">

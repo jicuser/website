@@ -12,8 +12,10 @@ Invites use `/admin/setup`. In Supabase **Authentication → URL Configuration**
 
 1. Connect it to the mosque network and open its browser.
 2. Open the hall address shown in **Admin → TV screens**. Times and posters work immediately.
-3. For private cameras and device sharing, open the **private TV link** once in that browser. This authorises that browser for 90 days. It is not Bluetooth pairing and does not require an app. The approval link expires after 10 minutes and works once.
+3. For Class / Teach, choose **Connect TV** on that page. Enter its six-digit code in **Admin → TV screens → your hall → Connect TV**. The code lasts ten minutes; the browser remembers approval. The address never changes when saving, clearing or switching scenes. Active TVs renew their approval; approval lasts up to 90 days from issue or renewal. A cleared, expired or disconnected browser needs approval again.
 4. Leave the page open in landscape. Double-click or press F to request fullscreen if supported. Admin controls what it displays.
+
+A second phone can receive the output for testing: open the same address and connect it using its own code. Admin shows whether that browser was seen recently and received the latest save. This acknowledges settings delivery, not successful video playback.
 
 There are four addresses: `/tv179/mens-main`, `/tv179/mens-upstairs`, `/tv179/ladies-upstairs`, `/tv179/shoe-area`. The shoe area stays on times and posters.
 
@@ -31,13 +33,13 @@ Normal alone runs prayer reminders, Jummah and Ramadan notices. At Jama‘ah it 
 4. Drag sources, resize using the corner, or edit the percentage fields. Use **Bring to front** and **Send to back** for layering. Disable overlap after arranging sources apart if wanted.
 5. Press **Save & update TV**. This saves the layout and selects that scene on the TV. Choosing a different scene also needs Save.
 
-Class / Teach hides Normal settings and pauses all automatic seasonal and prayer notices. Optional timetable and next-prayer elements still work as chosen. Return to Normal manually and save, or choose a timed return. Drafts are stored per account and hall on the current browser, including after switching sections. Clear draft restores the published version; Clear scene removes items only from the draft. A stale draft is rejected if another staff device saved first; clear the stale draft before editing the latest version.
+Class / Teach hides Normal settings and pauses all automatic seasonal and prayer notices. Optional timetable and next-prayer elements still work as chosen. Return to Normal manually and save, or choose a timed return. Drafts are stored per account and hall on the current browser, including after switching sections. Clear draft restores the published version; Clear scene removes items only from the draft. Saving an empty selected scene returns the TV to Normal and retains other scenes. A stale draft is rejected if another staff device saved first; clear the stale draft before editing the latest version.
 
 The editor and TV share a 16:9 coordinate system. The TV letterboxes other aspect ratios. Each scene supports twelve layers. The bottom-left pillar logo stays visible. Preview draft renders unsaved posters, YouTube, text and times; View TV opens the actual saved TV route, including approved private feeds. Neither proves playback on the physical TV. `/tv179` and hall URLs remain supported because installed TVs use them; `/tv` is just a redirect, not a second player.
 
 ## Laptop presentation and phone camera together
 
-Add **Device input 1** and **Device input 2** to a scene, arrange them and save. On the laptop choose Input 1 → Share this screen. On the phone, sign in to Admin, choose the same hall and Input 2 → Use this camera. Enable the microphone before starting when audio is needed. Keep both pages open. Up to four independent devices can supply inputs. A live input cannot be replaced by another device until it is stopped or expires.
+Add **Screen share** and **Device camera** to a scene, arrange them and save. The source properties let you correct the camera/screen choice for each input. On the laptop choose Input 1 → Share this screen. On the phone, sign in to Admin, choose the same hall and Input 2 → Use this camera. Enable the microphone before starting when audio is needed. Keep both pages open. Up to four independent devices can supply inputs. A live input cannot be replaced by another device until it is stopped or expires.
 
 Device inputs can be reused across scenes, but only once in each scene. Removing an input from every scene or saving Normal ends it. Capture permission is requested by the browser; the website cannot bypass it. Whole-screen capture is not generally available in phone browsers. Camera capture requires HTTPS and a supported browser. Screen audio depends on the browser and the selected tab. To hear a source on the TV, enable that layer's audio and turn off **Mute TV audio**. A TV may require one playback click before unmuted autoplay.
 
@@ -50,6 +52,12 @@ Apply `supabase/migrations/20260912074952_tv_receiver_lifecycle.sql` first, then
 Each mounted receiver now gets a separate peer, including multiple tabs from one approved browser. Closing it sends an authenticated leave request. Receivers unseen for 90 seconds are excluded from publisher polling, and stale rows for a device are removed when it joins again. A device may have at most eight active receiver rows. New answers reference the offer they processed to reject stale negotiation responses. Older browser clients remain supported by the updated Edge function; refresh them after deployment for cleanup and reconnection improvements. Diagnostic states contain only fixed status/error names, never camera details, SDP or arbitrary browser messages.
 
 `npm test` includes negotiation retries, browser SDP normalisation, simultaneous input handlers and ICE cancellation. `tests/tv-receiver.sql` checks independent receivers, stale cleanup, limits and access grants in a rolled-back transaction. These checks do not replace a real browser/media test. Use **View TV** first, then test a separately approved TV; the status distinguishes no receiver, an unanswered offer, and a connected display. Keep source devices awake with their admin pages open. Testing from mobile data may require TURN; a successful local camera preview alone does not prove delivery to another device.
+
+### Permanent browser setup rollout
+
+Apply `supabase/migrations/20260912083609_tv_browser_setup.sql`, deploy `tv-control`, then publish the website. The setup table and approval functions are service-only. Browser credentials are hashed before storage; setup codes do not grant public access. Existing approved browsers and old one-use links continue working during rollout.
+
+`tests/tv-browser-setup.sql` verifies grants, expiry, idempotency, hall boundaries, atomic approval and queue limits in a rolled-back transaction. The Edge status response includes a revision; the browser acknowledges it on its next poll. Only an exact current revision is accepted as received. Physical TVs report contact at most every 30 seconds; this does not indicate that audio or video decoded successfully.
 
 ## Installed cameras
 

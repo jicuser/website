@@ -73,7 +73,7 @@ export function publisherMessage(peers, connected) {
   if (connected)
     return `Sharing to ${connected} display${connected > 1 ? 's' : ''}. Keep this page open.`;
   if (!peers.length)
-    return 'Waiting for a TV. Open View TV to test, or approve the TV browser once.';
+    return 'Waiting for a TV. Open View TV to test, or connect the TV using its on-screen code.';
   if (
     peers.some((p) =>
       ['NotSupportedError', 'OperationError', 'InvalidStateError'].includes(p.receiver_state),

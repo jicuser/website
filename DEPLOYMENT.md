@@ -77,4 +77,8 @@ The migrations `20260912021743_explicit_staff_permissions.sql` and `202609120218
 
 Keep Node 24 for installs/builds. The router and Vite versions are pinned with the lockfile. Optional `VITE_MEDIA_RELAY_URL` enables the external broadcasting controls only after a separate HTTPS media relay is deployed. See [relay deployment](services/media-relay/README.md) and [Flutter contracts](docs/flutter-shared-backend.md).
 
-The connected Supabase project's security advisor still reports leaked-password protection disabled. Enable it in Supabase Auth settings where supported. The five TV tables intentionally have RLS and no browser grants/policies: only the authenticated Edge service can read them. See [Supabase explanation](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy).
+The connected Supabase project's security advisor still reports leaked-password protection disabled. Enable it in Supabase Auth settings where supported. The six TV tables intentionally have RLS and no browser grants/policies: only the authenticated Edge service can read them. See [Supabase explanation](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy).
+
+## Permanent TV address and setup code
+
+Apply `supabase/migrations/20260912083609_tv_browser_setup.sql` before the matching `tv-control` function and frontend. It adds private browser setup and saved-layout acknowledgements. Existing approved TVs keep working; new TVs enter their six-digit code in Admin. See [TV operation](docs/tv-display.md). Normal and Class / Teach are the only modes; an empty or expired class resolves to Normal.

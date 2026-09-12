@@ -8,6 +8,9 @@ import {
   validDescription,
   secureStreamUrl,
   youtubeUrl,
+  tvScene,
+  activeTvScene,
+  normaliseTvSettings,
 } from '../supabase/functions/_shared/tv.js';
 import {
   newScene,
@@ -15,6 +18,7 @@ import {
   canPlace,
   usedInputSlots,
 } from '../supabase/functions/_shared/tv-scenes.js';
+import { tvInputSources, availableInputSlot, updateInputCapture } from '../src/lib/tvSceneState.js';
 const layer = (type, props = {}) => ({
   id: 'source',
   type,
@@ -197,4 +201,83 @@ test('empty class scenes and named poster rotations survive saving', () => {
     }),
   );
   assert.equal(publicSettings({ scene_mode: 'teaching', scenes: [scene] }).scene_mode, 'normal');
+});
+
+test('saving a cleared active scene returns to Normal and preserves every other layout', () => {
+  const savedScene = {
+    ...newScene('scene-2', 'Lesson'),
+    layers: [layer('text', { text: 'Class notes' })],
+  };
+  const draft = {
+    ...config([], {
+      scene_mode: 'teaching',
+      class_until: new Date(Date.now() + 3600000).toISOString(),
+    }),
+    scenes: [newScene(), savedScene],
+  };
+  assert.equal(tvScene(draft), 'normal');
+  const saved = validateSettings(draft);
+  assert.equal(saved.scene_mode, 'normal');
+  assert.equal(saved.class_until, '');
+  assert.deepEqual(saved.scenes, draft.scenes);
+  assert.equal(draft.scene_mode, 'teaching');
+  assert.equal(normaliseTvSettings(draft).scene_mode, 'teaching');
+  assert.equal(publicSettings(draft, true).scene_mode, 'normal');
+
+  const selectedLesson = { ...draft, active_scene_id: 'scene-2' };
+  assert.equal(activeTvScene(selectedLesson).name, 'Lesson');
+  assert.equal(validateSettings(selectedLesson).scene_mode, 'teaching');
+});
+
+test('expired Class returns to Normal without deleting its sources', () => {
+  const settings = config([layer('clock')], {
+    scene_mode: 'teaching',
+    class_until: new Date(Date.now() - 1000).toISOString(),
+  });
+  const saved = validateSettings(settings);
+  assert.equal(saved.scene_mode, 'normal');
+  assert.equal(saved.class_until, '');
+  assert.deepEqual(saved.scenes, settings.scenes);
+  assert.equal(publicSettings(settings, true).scene_mode, 'normal');
+  assert.equal(tvScene({ ...settings, active_scene_id: 'missing' }), 'normal');
+});
+
+test('selected scene controls capture type and conflicting slot types cannot be saved', () => {
+  const settings = {
+    ...config([layer('input', { slot: 'input-1', capture: 'screen', audio: false })]),
+    active_scene_id: 'scene-2',
+  };
+  settings.scenes.push({
+    ...newScene('scene-2'),
+    layers: [layer('input', { slot: 'input-1', capture: 'camera', audio: false })],
+  });
+  assert.deepEqual(tvInputSources(settings), [
+    { slot: 'input-1', capture: 'camera', active: true, conflict: true },
+  ]);
+  assert.throws(() => validateSettings(settings), /same source in every scene/);
+  const resolved = updateInputCapture(settings, 'input-1', 'camera');
+  assert.deepEqual(
+    resolved.scenes.map((scene) => scene.layers[0].capture),
+    ['camera', 'camera'],
+  );
+  assert.doesNotThrow(() => validateSettings(resolved));
+  assert.equal(settings.scenes[0].layers[0].capture, 'screen');
+});
+
+test('adding device sources reuses compatible slots and keeps inactive feeds available', () => {
+  const settings = config([
+    layer('input', { slot: 'input-1', capture: 'screen', audio: false }),
+    layer('input', { id: 'camera', slot: 'input-2', capture: 'camera', audio: false }),
+  ]);
+  settings.scenes.push(newScene('scene-2'));
+  settings.active_scene_id = 'scene-2';
+  assert.equal(availableInputSlot(settings, 'camera'), 'input-2');
+  assert.equal(availableInputSlot(settings, 'screen'), 'input-1');
+  assert.deepEqual(
+    tvInputSources(settings).map(({ slot, active }) => ({ slot, active })),
+    [
+      { slot: 'input-1', active: false },
+      { slot: 'input-2', active: false },
+    ],
+  );
 });

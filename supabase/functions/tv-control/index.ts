@@ -69,18 +69,50 @@ async function staff(req: Request) {
   if (!isTvStaff(profile)) fail('You do not have permission to manage TV screens.', 403);
   return user.id;
 }
-async function device(screenId: string, token: unknown) {
-  if (typeof token !== 'string' || !/^[a-f0-9]{64}$/.test(token)) fail('Pair this TV again.', 401);
+const validToken = (token: unknown): token is string =>
+  typeof token === 'string' && /^[a-f0-9]{64}$/.test(token);
+async function device(
+  screenId: string,
+  token: unknown,
+  acknowledgement?: { seenRevision: unknown; revision: string },
+) {
+  if (!validToken(token)) fail('Approve this TV in Admin.', 401);
+  const now = Date.now();
   const row = await result(
     db
       .from('tv_devices')
-      .select('id')
+      .select('id,created_at,expires_at,last_seen_at,applied_revision')
       .eq('screen_id', screenId)
       .eq('token_hash', await hash(token))
-      .gt('expires_at', new Date().toISOString())
+      .gt('expires_at', new Date(now).toISOString())
       .maybeSingle(),
   );
-  if (!row) fail('This TV pairing has expired or was revoked.', 401);
+  if (!row) fail('This TV approval has expired or was removed. Approve it again in Admin.', 401);
+  const changes: Record<string, string> = {};
+  const remaining = Date.parse(row.expires_at) - now;
+  const lifetime = Date.parse(row.expires_at) - Date.parse(row.created_at);
+  // Keep a regularly used TV approved. Short-lived previews must still expire.
+  if (lifetime > 86400000 && remaining < 30 * 86400000) changes.expires_at = expires(90 * 86400);
+  if (acknowledgement) {
+    if (!row.last_seen_at || now - Date.parse(row.last_seen_at) >= 30000)
+      changes.last_seen_at = new Date(now).toISOString();
+    if (
+      acknowledgement.seenRevision === acknowledgement.revision &&
+      row.applied_revision !== acknowledgement.revision
+    ) {
+      changes.applied_revision = acknowledgement.revision;
+      changes.last_seen_at = new Date(now).toISOString();
+    }
+  }
+  if (Object.keys(changes).length) {
+    await result(
+      db.from('tv_devices')
+        .update(changes)
+        .eq('id', row.id)
+        .eq('screen_id', screenId)
+        .gt('expires_at', new Date().toISOString()),
+    );
+  }
   return row.id;
 }
 function iceServers() {
@@ -112,9 +144,8 @@ Deno.serve(async (req) => {
     if (screenId === 'shoe-area') {
       screen.settings = validateSettings(screen.settings, screenId);
       if (
-        ['start', 'join', 'receive', 'answer', 'offer', 'heartbeat', 'pair', 'pair-code'].includes(
-          action,
-        )
+        ['start', 'join', 'receive', 'answer', 'offer', 'heartbeat', 'pair', 'pair-code',
+          'begin-setup', 'setup-status', 'approve-setup'].includes(action)
       )
         fail('The shoe-area screen shows times and posters only.', 403);
     }
@@ -152,10 +183,16 @@ Deno.serve(async (req) => {
     let response: any;
 
     if (action === 'status') {
-      const paired = body.deviceToken ? Boolean(await device(screenId, body.deviceToken)) : false;
+      const paired = body.deviceToken
+        ? Boolean(await device(screenId, body.deviceToken, {
+            seenRevision: body.seenRevision,
+            revision: screen.updated_at,
+          }))
+        : false;
       response = {
         id: screen.id,
         label: screen.label,
+        revision: screen.updated_at,
         settings: publicSettings(screen.settings, paired),
         paired,
         inputs:
@@ -167,6 +204,36 @@ Deno.serve(async (req) => {
               }))
             : [],
       };
+    } else if (action === 'begin-setup' || action === 'setup-status') {
+      if (!validToken(body.setupToken)) fail('This TV could not start setup. Reload its page.', 400);
+      const token_hash = await hash(body.setupToken);
+      if (action === 'begin-setup') {
+        const { data, error } = await db.rpc('begin_tv_browser_setup', {
+          hall: screenId,
+          token_digest: token_hash,
+        });
+        if (error?.code === 'P0001')
+          fail('Too many TVs are waiting for approval. Try again in ten minutes.', 429);
+        if (error) fail('This TV could not start setup. Reload its page.', 409);
+        response = data;
+      } else {
+        const approved = await result(
+          db.from('tv_devices').select('id')
+            .eq('screen_id', screenId).eq('token_hash', token_hash)
+            .gt('expires_at', new Date().toISOString()).maybeSingle(),
+        );
+        if (approved) response = { approved: true };
+        else {
+          const pending = await result(
+            db.from('tv_browser_setup').select('code,expires_at')
+              .eq('screen_id', screenId).eq('token_hash', token_hash)
+              .gt('expires_at', new Date().toISOString()).maybeSingle(),
+          );
+          if (!pending)
+            fail('This setup code has expired. Reload the TV page for a new code.', 410);
+          response = { approved: false, ...pending };
+        }
+      }
     } else if (action === 'pair') {
       if (typeof body.code !== 'string' || !/^[a-f0-9]{64}$/.test(body.code))
         fail('Invalid pairing code.', 401);
@@ -253,7 +320,7 @@ Deno.serve(async (req) => {
         const devices = await result(
           db
             .from('tv_devices')
-            .select('id,created_at,expires_at')
+            .select('id,created_at,expires_at,last_seen_at,applied_revision')
             .eq('screen_id', screenId)
             .gt('expires_at', new Date().toISOString())
             .order('created_at'),
@@ -296,6 +363,15 @@ Deno.serve(async (req) => {
             .single(),
         );
         response = { deviceToken: token, deviceId: preview.id };
+      } else if (action === 'approve-setup') {
+        if (typeof body.code !== 'string' || !/^[0-9]{6}$/.test(body.code))
+          fail('Enter the six-digit code shown on the TV.', 400);
+        const { data: deviceId, error } = await db.rpc('approve_tv_browser_setup', {
+          hall: screenId,
+          setup_code: body.code,
+        });
+        if (error) fail('That code has expired or belongs to another TV. Check the code on this TV.', 409);
+        response = { ok: true, deviceId };
       } else if (action === 'pair-code') {
         const code = randomToken();
         const expires_at = expires(600);

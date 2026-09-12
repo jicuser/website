@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { DEFAULT_TV_SETTINGS, TV_SCREENS, deviceKey, tvRequest } from '@/lib/tvControl';
 
 export default function useTvScreen(screenId) {
@@ -13,7 +13,8 @@ export default function useTvScreen(screenId) {
   // Keep the short-lived preview credential through effect restarts after clearing the URL.
   // It stays in this component only: other tabs and future visits still need approval.
   const previewCredential = useRef(null);
-  const refresh = () => setRevision((value) => value + 1);
+  const seenRevision = useRef('');
+  const refresh = useCallback(() => setRevision((value) => value + 1), []);
   useEffect(() => {
     const controller = new AbortController();
     let timer;
@@ -25,10 +26,13 @@ export default function useTvScreen(screenId) {
         const data = await tvRequest(
           'status',
           screenId,
-          { deviceToken: token },
+          { deviceToken: token, seenRevision: seenRevision.current },
           { signal: controller.signal },
         );
-        if (!controller.signal.aborted) setState({ ...data, deviceToken: token, error: pairError });
+        if (!controller.signal.aborted) {
+          seenRevision.current = data.revision || '';
+          setState({ ...data, deviceToken: token, error: pairError });
+        }
       } catch (error) {
         if (controller.signal.aborted) return;
         if (error.status === 401) {
@@ -45,6 +49,7 @@ export default function useTvScreen(screenId) {
           ...previous,
           settings: {
             ...previous.settings,
+            scene_mode: 'normal',
             scenes: DEFAULT_TV_SETTINGS.scenes,
             active_scene_id: 'scene-1',
           },

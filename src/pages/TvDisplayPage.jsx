@@ -5,6 +5,7 @@ import TvMediaPanel from '@/components/tv/TvMediaPanel';
 import SceneCanvas from '@/features/displays/SceneCanvas';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
+import TvBrowserSetup from '@/components/tv/TvBrowserSetup';
 import {
   tvPrayerSequence,
   tvSpecialNotice,
@@ -181,7 +182,7 @@ function ScreenDisplay({ screenId }) {
 
   if (scene === 'teaching')
     return (
-      <div ref={screen} className="jic-tv-teaching" onDoubleClick={enterFullscreen}>
+      <div ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
         <Helmet>
           <title>JIC · {tv.label}</title>
           <meta name="robots" content="noindex, nofollow" />
@@ -200,120 +201,125 @@ function ScreenDisplay({ screenId }) {
     );
 
   return (
-    <div ref={screen} className="jic-tv-display" onDoubleClick={enterFullscreen}>
+    <div ref={screen} className="jic-tv-shell" onDoubleClick={enterFullscreen}>
       <Helmet>
         <title>JIC · {tv.label}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      <header className="jic-tv-header">
-        {(tv.settings.show_times !== false || tv.settings.show_next !== false) && (
-          <PrayerTimeBar
-            {...prayers}
-            currentDate={now}
-            interactive={false}
-            showContact={false}
-            showTimes={tv.settings.show_times !== false}
-            showNext={tv.settings.show_next !== false}
-          />
-        )}
-        {(tv.settings.show_times !== false || tv.settings.show_next !== false) &&
-          (prayers.error || (!prayers.isLoadingPrayerTimes && !prayers.todaysTimes)) && (
-            <p className="jic-tv-notice" role="status">
-              Prayer timetable unavailable · reconnecting
+      <div className="jic-tv-display">
+        <header className="jic-tv-header">
+          {(tv.settings.show_times !== false || tv.settings.show_next !== false) && (
+            <PrayerTimeBar
+              {...prayers}
+              currentDate={now}
+              interactive={false}
+              showContact={false}
+              showTimes={tv.settings.show_times !== false}
+              showNext={tv.settings.show_next !== false}
+            />
+          )}
+          {(tv.settings.show_times !== false || tv.settings.show_next !== false) &&
+            (prayers.error || (!prayers.isLoadingPrayerTimes && !prayers.todaysTimes)) && (
+              <p className="jic-tv-notice" role="status">
+                Prayer timetable unavailable · reconnecting
+              </p>
+            )}
+        </header>
+        <main className="jic-tv-stage" aria-label="TV content">
+          {sequence && (
+            <TvPrayerScene sequence={sequence} jummahNotice={tv.settings.jummah_notice} />
+          )}
+          {!sequence && specialNotice && (
+            <TvSpecialNotice
+              mode={specialNotice}
+              settings={tv.settings}
+              fasting={fastingTimes(now, prayers.todaysTimes, prayers.tomorrowsTimes)}
+            />
+          )}
+          {!noticeVisible && (
+            <>
+              <div
+                className="tv-panel-layout jic-tv-panels"
+                data-layout="columns"
+                data-count={panels.length}
+                style={{
+                  '--panel-count': panels.length,
+                  '--panel-rows': Math.ceil(panels.length / 2),
+                }}
+              >
+                {panels.map((source, index) => (
+                  <TvMediaPanel
+                    key={source}
+                    source={source}
+                    screenId={screenId}
+                    tv={tv}
+                    now={now}
+                    livestream={livestream}
+                    poster={
+                      posters[
+                        (slide + (source === 'poster-next' ? 1 : source === 'poster' ? 0 : index)) %
+                          posters.length
+                      ]
+                    }
+                    onImageError={onImageError}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </main>
+        <footer className="jic-tv-status">
+          <div className="jic-tv-logo">
+            <JamatiaLogo variant="pillars" />
+          </div>
+          {tv.settings.show_clock !== false && (
+            <div className="jic-tv-clock">
+              <time dateTime={now.toISOString()}>
+                {now.toLocaleTimeString('en-GB', {
+                  timeZone: 'Europe/London',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hourCycle: 'h12',
+                })}
+              </time>
+              <span>
+                {now.toLocaleDateString('en-GB', {
+                  timeZone: 'Europe/London',
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </span>
+            </div>
+          )}
+
+          {screenId !== 'shoe-area' && !noticeVisible && (
+            <p className="jic-tv-manners">
+              {TV_REMINDERS[Math.floor(now.getTime() / 45000) % TV_REMINDERS.length]}
             </p>
           )}
-      </header>
-      <main className="jic-tv-stage" aria-label="TV content">
-        {sequence && <TvPrayerScene sequence={sequence} jummahNotice={tv.settings.jummah_notice} />}
-        {!sequence && specialNotice && (
-          <TvSpecialNotice
-            mode={specialNotice}
-            settings={tv.settings}
-            fasting={fastingTimes(now, prayers.todaysTimes, prayers.tomorrowsTimes)}
-          />
-        )}
-        {!noticeVisible && (
-          <>
-            <div
-              className="tv-panel-layout jic-tv-panels"
-              data-layout="columns"
-              data-count={panels.length}
-              style={{
-                '--panel-count': panels.length,
-                '--panel-rows': Math.ceil(panels.length / 2),
-              }}
-            >
-              {panels.map((source, index) => (
-                <TvMediaPanel
-                  key={source}
-                  source={source}
-                  screenId={screenId}
-                  tv={tv}
-                  now={now}
-                  livestream={livestream}
-                  poster={
-                    posters[
-                      (slide + (source === 'poster-next' ? 1 : source === 'poster' ? 0 : index)) %
-                        posters.length
-                    ]
-                  }
-                  onImageError={onImageError}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </main>
-      <footer className="jic-tv-status">
-        <div className="jic-tv-logo">
-          <JamatiaLogo variant="pillars" />
-        </div>
-        {tv.settings.show_clock !== false && (
-          <div className="jic-tv-clock">
-            <time dateTime={now.toISOString()}>
-              {now.toLocaleTimeString('en-GB', {
-                timeZone: 'Europe/London',
-                hour: 'numeric',
-                minute: '2-digit',
-                hourCycle: 'h12',
-              })}
-            </time>
+          <span>{tv.label}</span>
+          {tv.error && <span role="status">Display update delayed</span>}
+          {stale ? (
+            'Content update delayed · reconnecting'
+          ) : (
             <span>
-              {now.toLocaleDateString('en-GB', {
-                timeZone: 'Europe/London',
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
+              {sequence
+                ? sequence.phase === 'jamaah'
+                  ? 'Jama‘ah time'
+                  : 'Dhikr after salah'
+                : specialNotice
+                  ? specialNotice === 'jummah'
+                    ? 'Jummah notice'
+                    : 'Ramadan · Taraweeh'
+                  : 'Community notices'}
+              {posters.length > 1 && ` · ${(slide % posters.length) + 1} / ${posters.length}`}
             </span>
-          </div>
-        )}
-
-        {screenId !== 'shoe-area' && !noticeVisible && (
-          <p className="jic-tv-manners">
-            {TV_REMINDERS[Math.floor(now.getTime() / 45000) % TV_REMINDERS.length]}
-          </p>
-        )}
-        <span>{tv.label}</span>
-        {tv.error && <span role="status">Display update delayed</span>}
-        {stale ? (
-          'Content update delayed · reconnecting'
-        ) : (
-          <span>
-            {sequence
-              ? sequence.phase === 'jamaah'
-                ? 'Jama‘ah time'
-                : 'Dhikr after salah'
-              : specialNotice
-                ? specialNotice === 'jummah'
-                  ? 'Jummah notice'
-                  : 'Ramadan · Taraweeh'
-                : 'Community notices'}
-            {posters.length > 1 && ` · ${(slide % posters.length) + 1} / ${posters.length}`}
-          </span>
-        )}
-      </footer>
+          )}
+        </footer>
+      </div>
+      <TvBrowserSetup key={screenId} screenId={screenId} paired={tv.paired} onConnected={tv.refresh} />
     </div>
   );
 }

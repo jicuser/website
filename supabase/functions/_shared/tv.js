@@ -37,15 +37,26 @@ export const DEFAULT_TV_SETTINGS = {
 export function normaliseTvSettings(settings = {}) {
   const next = { ...DEFAULT_TV_SETTINGS, ...settings };
   // Remove only the exact old generated starter layout. Custom scenes are preserved.
-  const starter = [['poster', 'poster', 0, 18, 50, 75], ['poster2', 'poster-next', 50, 18, 50, 75], ['times', 'times', 0, 0, 100, 18], ['clock', 'clock', 76, 93, 24, 7]];
-  if (Array.isArray(next.scenes)) next.scenes = next.scenes.map((scene) => {
-    const oldStarter = scene.layers?.length === 4 && starter.every(([suffix, type, x, y, width, height], i) => {
-      const expected = { id: `${scene.id}-${suffix}`, type, x, y, width, height };
-      const layer = scene.layers[i];
-      return Object.keys(layer).length === Object.keys(expected).length && Object.entries(expected).every(([key, val]) => layer[key] === val);
+  const starter = [
+    ['poster', 'poster', 0, 18, 50, 75],
+    ['poster2', 'poster-next', 50, 18, 50, 75],
+    ['times', 'times', 0, 0, 100, 18],
+    ['clock', 'clock', 76, 93, 24, 7],
+  ];
+  if (Array.isArray(next.scenes))
+    next.scenes = next.scenes.map((scene) => {
+      const oldStarter =
+        scene.layers?.length === 4 &&
+        starter.every(([suffix, type, x, y, width, height], i) => {
+          const expected = { id: `${scene.id}-${suffix}`, type, x, y, width, height };
+          const layer = scene.layers[i];
+          return (
+            Object.keys(layer).length === Object.keys(expected).length &&
+            Object.entries(expected).every(([key, val]) => layer[key] === val)
+          );
+        });
+      return oldStarter ? { ...scene, layers: [] } : scene;
     });
-    return oldStarter ? { ...scene, layers: [] } : scene;
-  });
   return next;
 }
 export function screenExists(id) {
@@ -123,7 +134,11 @@ export function validateSettings(input, screenId = '') {
   )
     throw new Error('Choose an end within eight hours, or return to Normal manually.');
   result.class_until = values.class_until;
-  if (!Array.isArray(values.poster_ids) || values.poster_ids.length > 100 || values.poster_ids.some((id) => typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(id)))
+  if (
+    !Array.isArray(values.poster_ids) ||
+    values.poster_ids.length > 100 ||
+    values.poster_ids.some((id) => typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(id))
+  )
     throw new Error('Unknown poster.');
   result.poster_ids = [...new Set(values.poster_ids)];
   if (
@@ -134,9 +149,23 @@ export function validateSettings(input, screenId = '') {
     throw new Error('Use 5–300 seconds between posters.');
   result.rotation_seconds = values.rotation_seconds;
   result.scenes = validateScenes(values.scenes, secureStreamUrl, youtubeUrl);
+  const captures = new Map();
+  for (const scene of result.scenes) {
+    for (const layer of scene.layers) {
+      if (layer.type !== 'input' || !layer.capture) continue;
+      if (captures.has(layer.slot) && captures.get(layer.slot) !== layer.capture)
+        throw new Error(
+          `${layer.slot.replace('input-', 'Input ')} must use the same source in every scene. Choose Camera or Screen share in its options.`,
+        );
+      captures.set(layer.slot, layer.capture);
+    }
+  }
   if (!result.scenes.some((s) => s.id === values.active_scene_id))
     throw new Error('Choose a saved scene.');
   result.active_scene_id = values.active_scene_id;
+  // Clearing the selected scene returns the display to Normal without discarding other layouts.
+  result.scene_mode = tvScene(result);
+  if (result.scene_mode === 'normal') result.class_until = '';
   if (screenId === 'shoe-area')
     Object.assign(result, {
       scene_mode: 'normal',
@@ -156,11 +185,16 @@ export function publicSettings(input, paired = false) {
     Object.keys(DEFAULT_TV_SETTINGS).map((key) => [key, normalised[key]]),
   );
   // The unapproved page gets public posters only. Private class text, links and input IDs never leak.
-  if (!paired) return { ...settings, scene_mode: 'normal', scenes: [newScene()], active_scene_id: 'scene-1' };
-  return settings;
+  if (!paired)
+    return { ...settings, scene_mode: 'normal', scenes: [newScene()], active_scene_id: 'scene-1' };
+  return { ...settings, scene_mode: tvScene(settings) };
+}
+export function activeTvScene(settings = {}) {
+  return settings.scenes?.find((scene) => scene.id === settings.active_scene_id) || null;
 }
 export function tvScene(settings = {}, now = Date.now()) {
   return settings.scene_mode === 'teaching' &&
+    Boolean(activeTvScene(settings)?.layers?.length) &&
     (!settings.class_until || Date.parse(settings.class_until) > now)
     ? 'teaching'
     : 'normal';

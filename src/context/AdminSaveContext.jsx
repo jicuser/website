@@ -12,6 +12,7 @@ const AdminSaveContext = createContext(null);
 
 export function AdminSaveProvider({ children }) {
   const entriesRef = useRef(new Map());
+  const saveInFlight = useRef(false);
   const [summary, setSummary] = useState({ dirtyCount: 0, label: 'Save to database' });
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
@@ -62,18 +63,19 @@ export function AdminSaveProvider({ children }) {
   );
 
   const saveCurrent = useCallback(async () => {
-    if (saving) return false;
+    if (saveInFlight.current) return false;
     const dirtyEntries = [...entriesRef.current.entries()].filter(([, entry]) => entry.dirty);
     if (!dirtyEntries.length) return false;
 
+    saveInFlight.current = true;
     setSaving(true);
     setStatus('');
     try {
-      for (const [id, entry] of dirtyEntries) {
+      for (const [, entry] of dirtyEntries) {
         await entry.handler();
-        const latest = entriesRef.current.get(id);
-        if (latest) entriesRef.current.set(id, { ...latest, dirty: false });
       }
+      // Editors own their saved baseline. They may still contain edits made
+      // during a request, so completing a request cannot mark them clean here.
       refreshSummary();
       setStatus('Saved');
       window.setTimeout(() => setStatus(''), 1800);
@@ -83,9 +85,10 @@ export function AdminSaveProvider({ children }) {
       setStatus(error?.message || 'Save failed');
       throw error;
     } finally {
+      saveInFlight.current = false;
       setSaving(false);
     }
-  }, [saving, refreshSummary]);
+  }, [refreshSummary]);
 
   const value = useMemo(
     () => ({

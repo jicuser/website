@@ -34,6 +34,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useAppearance } from '@/context/AppearanceContext';
 import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { displayTime } from '@/lib/timetable';
+import { fromDateTimeLocal, toDateTimeLocal } from '@/lib/dateTime';
 
 const input =
   'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-amber-500';
@@ -479,7 +480,7 @@ function AnnouncementsSection() {
     body: '',
     kind: 'info',
     published: true,
-    starts_at: new Date().toISOString().slice(0, 16),
+    starts_at: toDateTimeLocal(),
     expires_at: '',
   });
   const [form, setForm] = useState(makeBlank);
@@ -610,6 +611,7 @@ function LivestreamSection() {
   };
   const [form, setForm] = useState(blank);
   const [saved, setSaved] = useState(blank);
+  const [savedScheduledAt, setSavedScheduledAt] = useState(null);
   const [msg, setMsg] = useState('');
   useEffect(() => {
     supabase
@@ -621,12 +623,11 @@ function LivestreamSection() {
         if (!data) return;
         const next = {
           ...data,
-          scheduled_at: data.scheduled_at
-            ? new Date(data.scheduled_at).toISOString().slice(0, 16)
-            : '',
+          scheduled_at: toDateTimeLocal(data.scheduled_at),
         };
         setForm(next);
         setSaved(next);
+        setSavedScheduledAt(data.scheduled_at);
       });
   }, []);
   const dirty = JSON.stringify(form) !== JSON.stringify(saved);
@@ -651,7 +652,7 @@ function LivestreamSection() {
     const payload = {
       ...form,
       stream_url: url || null,
-      scheduled_at: form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null,
+      scheduled_at: fromDateTimeLocal(form.scheduled_at, savedScheduledAt),
     };
     const { error } = await supabase.from('livestream_settings').update(payload).eq('id', 1);
     if (error) {
@@ -659,8 +660,9 @@ function LivestreamSection() {
       throw error;
     }
     setSaved(form);
+    setSavedScheduledAt(payload.scheduled_at);
     setMsg('Livestream saved.');
-  }, [form]);
+  }, [form, savedScheduledAt]);
   useRegisterAdminSave(save, dirty, 'Save livestream');
   return (
     <div>

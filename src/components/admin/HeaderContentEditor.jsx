@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
@@ -41,6 +41,8 @@ export default function HeaderContentEditor() {
   const [saved, setSaved] = useState({ ticker: DEFAULT_TICKER, reminders: DEFAULT_REMINDERS });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const saveInFlight = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -89,6 +91,7 @@ export default function HeaderContentEditor() {
 
   const save = useCallback(async () => {
     if (!dirty || loading) return;
+    if (saveInFlight.current) throw new Error('Header content is already saving.');
     const cleanTicker = ticker
       .filter((item) => item.text?.trim())
       .map((item) => ({ label: item.label?.trim() || 'UPDATE', text: item.text.trim() }));
@@ -113,18 +116,26 @@ export default function HeaderContentEditor() {
         page: 'header',
       },
     ];
-    const { error } = await supabase
-      .from('page_content')
-      .upsert(rows, { onConflict: 'content_key' });
-    if (error) throw error;
-    setTicker(cleanTicker);
-    setReminders(cleanReminders);
-    setSaved({ ticker: clone(cleanTicker), reminders: clone(cleanReminders) });
-    setMessage('Header content saved.');
-    window.dispatchEvent(new Event('jic-content-updated'));
+    saveInFlight.current = true;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('page_content')
+        .upsert(rows, { onConflict: 'content_key' });
+      if (error) throw error;
+      // Normalise the submitted snapshot only if it has not been edited since.
+      setTicker((current) => (current === ticker ? cleanTicker : current));
+      setReminders((current) => (current === reminders ? cleanReminders : current));
+      setSaved({ ticker: clone(cleanTicker), reminders: clone(cleanReminders) });
+      setMessage('Header content saved.');
+      window.dispatchEvent(new Event('jic-content-updated'));
+    } finally {
+      saveInFlight.current = false;
+      setSaving(false);
+    }
   }, [dirty, loading, ticker, reminders]);
 
-  useRegisterAdminSave(save, dirty && !loading, 'Save header content');
+  useRegisterAdminSave(save, dirty && !loading && !saving, 'Save header content');
 
   const changeTicker = (index, key, value) =>
     setTicker((items) =>
@@ -236,12 +247,12 @@ export default function HeaderContentEditor() {
       <div className="admin-actions mt-5">
         <button
           type="button"
-          disabled={!dirty || loading}
+          disabled={!dirty || loading || saving}
           className="admin-button primary"
           onClick={() => save().catch((error) => setMessage(error.message))}
         >
           <Save size={16} />
-          Save header content
+          {saving ? 'Saving…' : 'Save header content'}
         </button>
         <small>{dirty ? 'Unsaved changes' : 'Saved'}</small>
       </div>
