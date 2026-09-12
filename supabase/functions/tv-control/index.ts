@@ -40,6 +40,13 @@ async function result(query: any) {
   return data;
 }
 const expires = (seconds: number) => new Date(Date.now() + seconds * 1000).toISOString();
+const receiverStates = new Set([
+  'waiting', 'answering', 'answered', 'connected', 'failed', 'NotSupportedError',
+  'OperationError', 'InvalidStateError', 'NetworkError', 'TimeoutError',
+]);
+const validId = (value: unknown) =>
+  typeof value === 'string' &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 const randomToken = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) =>
     b.toString(16).padStart(2, '0'),
@@ -183,43 +190,61 @@ Deno.serve(async (req) => {
         }),
       );
       response = { deviceToken: token };
-    } else if (['join', 'receive', 'answer'].includes(action)) {
+    } else if (action === 'leave') {
+      // Cleanup is safe even when the publisher has stopped or the scene has changed.
+      const deviceId = await device(screenId, body.deviceToken);
+      if (!validId(body.peerId) || !validId(body.sessionId)) fail('Unknown receiver.', 400);
+      await result(
+        db.from('tv_peers').delete()
+          .eq('id', body.peerId)
+          .eq('device_id', deviceId)
+          .eq('session_id', body.sessionId)
+          .eq('screen_id', screenId),
+      );
+      response = { ok: true };
+    } else if (['join', 'receive', 'answer', 'receiver-state'].includes(action)) {
       const deviceId = await device(screenId, body.deviceToken);
       const input = await getInput();
       if (action === 'join') {
-        const peer = await result(
-          db
-            .from('tv_peers')
-            .upsert(
-              {
-                screen_id: screenId,
-                session_id: input.session_id,
-                device_id: deviceId,
-                offer: null,
-                answer: null,
-              },
-              { onConflict: 'session_id,device_id' },
-            )
-            .select('id')
-            .single(),
-        );
-        response = { peerId: peer.id, iceServers: iceServers() };
+        // Each mounted player gets its own peer; opening another tab cannot reset its SDP.
+        const { data: peerId, error } = await db.rpc('join_tv_receiver', {
+          hall: screenId,
+          input_session: input.session_id,
+          receiver_device: deviceId,
+        });
+        if (error) fail('This TV has too many open receivers, or the input ended. Close an unused TV tab and try again.', 409);
+        response = { peerId, iceServers: iceServers() };
       } else {
-        let query = db.from('tv_peers');
+        if (!validId(body.peerId)) fail('Unknown receiver.', 400);
+        const changes: Record<string, unknown> = { last_seen_at: new Date().toISOString() };
         if (action === 'answer') {
           if (!validDescription(body.description, 'answer')) fail('Invalid answer.');
-          query = query.update({ answer: body.description });
+          if (body.offerSdp !== undefined && !validDescription({ type: 'offer', sdp: body.offerSdp }, 'offer'))
+            fail('Invalid offer reference.');
+          Object.assign(changes, { answer: body.description, receiver_state: 'answered' });
         }
+        if (action === 'receiver-state') {
+          if (!receiverStates.has(body.state)) fail('Unknown receiver state.');
+          changes.receiver_state = body.state;
+        }
+        let query = db.from('tv_peers').update(changes)
+          .eq('id', body.peerId)
+          .eq('device_id', deviceId)
+          .eq('session_id', input.session_id)
+          .eq('screen_id', screenId);
+        // New receivers tie their answer to the offer they processed; older clients remain valid.
+        if (action === 'answer' && body.offerSdp !== undefined)
+          query = query.eq('offer->>sdp', body.offerSdp);
         const peer = await result(
           query
             .select('id,offer')
-            .eq('id', body.peerId)
-            .eq('device_id', deviceId)
-            .eq('session_id', input.session_id)
-            .eq('screen_id', screenId)
             .maybeSingle(),
         );
-        if (!peer) fail('Receiver not found.', 404);
+        if (!peer) {
+          if (action === 'answer' && body.offerSdp !== undefined)
+            fail('The offer changed. Read the current offer and answer again.', 409);
+          fail('Receiver not found.', 404);
+        }
         response = peer;
       }
     } else {
@@ -324,9 +349,11 @@ Deno.serve(async (req) => {
             peers: await result(
               db
                 .from('tv_peers')
-                .select('id,offer,answer')
+                .select('id,offer,answer,receiver_state')
                 .eq('screen_id', screenId)
                 .eq('session_id', body.sessionId)
+                .gt('last_seen_at', expires(-90))
+                .order('last_seen_at', { ascending: false })
                 .limit(16),
             ),
           };
@@ -335,7 +362,7 @@ Deno.serve(async (req) => {
           const updated = await result(
             db
               .from('tv_peers')
-              .update({ offer: body.description, answer: null })
+              .update({ offer: body.description, answer: null, receiver_state: 'waiting' })
               .eq('id', body.peerId)
               .eq('screen_id', screenId)
               .eq('session_id', body.sessionId)

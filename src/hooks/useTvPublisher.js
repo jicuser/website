@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { tvRequest, waitForIce } from '@/lib/tvControl';
+import { descriptionJson, publisherMessage } from '@/lib/tvPeer';
 
 export default function useTvPublisher(screenId, slot) {
   const active = useRef(null);
@@ -100,7 +101,15 @@ export default function useTvPublisher(screenId, slot) {
               peers.map(async (peer) => {
                 let entry = current.peers.get(peer.id);
                 try {
-                  if (entry && !peer.offer) {
+                  const state = entry?.pc.connectionState;
+                  if (entry && ['failed', 'disconnected'].includes(state)) {
+                    entry.disconnectedAt ||= Date.now();
+                  } else if (entry) entry.disconnectedAt = 0;
+                  if (
+                    entry &&
+                    (!peer.offer ||
+                      (entry.disconnectedAt && Date.now() - entry.disconnectedAt > 15000))
+                  ) {
                     entry.pc.close();
                     current.peers.delete(peer.id);
                     entry = null;
@@ -116,7 +125,7 @@ export default function useTvPublisher(screenId, slot) {
                     await waitForIce(pc, current.controller.signal);
                     await call('offer', {
                       peerId: peer.id,
-                      description: pc.localDescription.toJSON(),
+                      description: descriptionJson(pc.localDescription),
                     });
                   } else if (peer.answer && !entry.pc.remoteDescription) {
                     await entry.pc.setRemoteDescription(peer.answer);
@@ -134,9 +143,7 @@ export default function useTvPublisher(screenId, slot) {
             if (active.current === current)
               setState((previous) => ({
                 ...previous,
-                message: connected
-                  ? `Sharing to ${connected} TV${connected > 1 ? 's' : ''}. Keep this page open.`
-                  : 'Connecting… keep the approved TV browser open on the mosque network.',
+                message: publisherMessage(peers, connected),
               }));
           } catch (error) {
             if (active.current !== current) return;
@@ -146,7 +153,10 @@ export default function useTvPublisher(screenId, slot) {
             }
             setState((previous) => ({
               ...previous,
-              message: 'Connection interrupted. Reconnecting…',
+              message:
+                error.name === 'TimeoutError'
+                  ? 'The network connection timed out. Check Wi-Fi; connections across networks may need a relay.'
+                  : 'Connection interrupted. Reconnecting…',
             }));
           }
           if (active.current === current) current.timer = setTimeout(poll, 2000);

@@ -14,11 +14,17 @@ export default function TvMediaPanel({
   livestream,
   now,
 }) {
-  const [failed, setFailed] = useState(false);
-  const unavailable = useCallback(() => setFailed(true), []);
+  const [failed, setFailed] = useState('');
+  const unavailable = useCallback(
+    (reason) =>
+      setFailed(
+        typeof reason === 'string' ? reason : 'Video is temporarily unavailable. Retrying…',
+      ),
+    [],
+  );
   useEffect(() => {
     if (!failed) return undefined;
-    const timer = setTimeout(() => setFailed(false), 30000);
+    const timer = setTimeout(() => setFailed(''), 10000);
     return () => clearTimeout(timer);
   }, [failed]);
   const scheduled = livestream?.scheduled_at ? Date.parse(livestream.scheduled_at) : null;
@@ -71,6 +77,11 @@ export default function TvMediaPanel({
       <figcaption>{poster.title}</figcaption>
     </figure>
   ) : (
-    <div className="jic-tv-empty" aria-label="Waiting for selected content" />
+    <div className="jic-tv-empty" role="status">
+      {failed ||
+        (source === 'share'
+          ? 'Waiting for the shared screen or camera…'
+          : 'Waiting for selected content…')}
+    </div>
   );
 }

@@ -7,7 +7,7 @@ export default function TvConnections({ screenId, data, setData, form, update, r
   const [pairing, setPairing] = useState(null);
   return (
     <details className="admin-panel">
-      <summary>TV sound & private video access</summary>
+      <summary>Connect TV & sound</summary>
       <a className={button} href={screenUrl} target="_blank" rel="noreferrer">
         Open TV display ↗
       </a>
@@ -22,11 +22,19 @@ export default function TvConnections({ screenId, data, setData, form, update, r
       </label>
       {hall && (
         <>
-          <h4>Enable camera & sharing on this TV</h4>
+          <h4>Approve a TV browser for Class / Teach</h4>
           <p>
-            For private video, open the approval link once in the TV’s browser. It approves this
-            browser for 90 days; there is no Bluetooth connection or app to install. The link works
-            once and expires in 10 minutes.
+            The plain TV address shows public posters and times. Each TV browser needs its own
+            approval to show your saved class scene, screen sharing and cameras.
+          </p>
+          <ol>
+            <li>Create an approval link below and copy it.</li>
+            <li>Open that link in the TV’s browser within 10 minutes.</li>
+            <li>Keep that browser open. Save your scene here to update the TV.</li>
+          </ol>
+          <p>
+            Each link works once. That browser stays approved for 90 days; afterwards you can use
+            the plain TV address there. For another TV or browser, create a fresh link.
           </p>
           <button
             className={button}
@@ -37,7 +45,7 @@ export default function TvConnections({ screenId, data, setData, form, update, r
               )
             }
           >
-            Create private TV link
+            Create TV approval link
           </button>
           {pairing && (
             <div className="admin-actions">
@@ -48,7 +56,7 @@ export default function TvConnections({ screenId, data, setData, form, update, r
                 onFocus={(event) => event.target.select()}
               />
               <button className={button} onClick={() => copy(`${screenUrl}#pair=${pairing.code}`)}>
-                Copy link
+                Copy approval link
               </button>
             </div>
           )}

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
+export { waitForIce } from './tvPeer';
 export { TV_SCREENS, DEFAULT_TV_SETTINGS } from '../../supabase/functions/_shared/tv.js';
 
 export async function tvRequest(action, screenId, values = {}, { staff = false, signal } = {}) {
@@ -36,25 +37,3 @@ export async function tvRequest(action, screenId, values = {}, { staff = false, 
   }
 }
 export const deviceKey = (id) => `jic-tv-device-${id}`;
-
-// Send a complete SDP after gathering candidates; no public broadcast channel is used.
-export function waitForIce(peer, signal) {
-  if (peer.iceGatheringState === 'complete') return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    let timer;
-    const finish = (error) => {
-      clearTimeout(timer);
-      peer.removeEventListener('icegatheringstatechange', changed);
-      signal?.removeEventListener('abort', aborted);
-      error ? reject(error) : resolve();
-    };
-    const changed = () => {
-      if (peer.iceGatheringState === 'complete') finish();
-    };
-    const aborted = () => finish(new DOMException('Sharing stopped', 'AbortError'));
-    peer.addEventListener('icegatheringstatechange', changed);
-    signal?.addEventListener('abort', aborted, { once: true });
-    timer = setTimeout(() => finish(), 8000);
-    if (signal?.aborted) aborted();
-  });
-}

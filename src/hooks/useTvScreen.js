@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_TV_SETTINGS, TV_SCREENS, deviceKey, tvRequest } from '@/lib/tvControl';
 
 export default function useTvScreen(screenId) {
@@ -10,13 +10,16 @@ export default function useTvScreen(screenId) {
     error: '',
   });
   const [revision, setRevision] = useState(0);
+  // Keep the short-lived preview credential through effect restarts after clearing the URL.
+  // It stays in this component only: other tabs and future visits still need approval.
+  const previewCredential = useRef(null);
   const refresh = () => setRevision((value) => value + 1);
   useEffect(() => {
     const controller = new AbortController();
     let timer;
-    let token = '';
+    let isPreview = previewCredential.current?.screenId === screenId;
+    let token = isPreview ? previewCredential.current.token : '';
     let pairError = '';
-    let isPreview = false;
     async function poll() {
       try {
         const data = await tvRequest(
@@ -30,6 +33,7 @@ export default function useTvScreen(screenId) {
         if (controller.signal.aborted) return;
         if (error.status === 401) {
           token = '';
+          if (isPreview) previewCredential.current = null;
           try {
             if (!isPreview) localStorage.removeItem(deviceKey(screenId));
           } catch {
@@ -52,16 +56,19 @@ export default function useTvScreen(screenId) {
       if (!controller.signal.aborted) timer = setTimeout(poll, 8000);
     }
     async function start() {
-      try {
-        token = localStorage.getItem(deviceKey(screenId)) || '';
-      } catch {
-        /* Public posters still work. */
+      if (!isPreview) {
+        try {
+          token = localStorage.getItem(deviceKey(screenId)) || '';
+        } catch {
+          /* Public posters still work. */
+        }
       }
       const hash = new URLSearchParams(window.location.hash.slice(1));
       const previewToken = hash.get('preview');
       if (previewToken && /^[a-f0-9]{64}$/.test(previewToken)) {
         isPreview = true;
         token = previewToken;
+        previewCredential.current = { screenId, token };
         history.replaceState(null, '', window.location.pathname + window.location.search);
       }
       const code = hash.get('pair');

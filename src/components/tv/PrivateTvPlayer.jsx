@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { tvRequest, waitForIce } from '@/lib/tvControl';
+import { createReceiverNegotiator, receiverErrorState } from '@/lib/tvPeer';
 
 export default function PrivateTvPlayer({
   screenId,
@@ -21,8 +22,9 @@ export default function PrivateTvPlayer({
     let timer;
     let resourceUrl;
     let disconnectedTimer;
-    let answerSent = false;
+    let negotiator;
     let peerId;
+    let lastReportedState;
     const call = (action, values = {}) =>
       tvRequest(
         action,
@@ -30,22 +32,36 @@ export default function PrivateTvPlayer({
         { deviceToken, sessionId, ...values },
         { signal: controller.signal },
       );
+    const report = (state) => {
+      if (!peerId || controller.signal.aborted || state === lastReportedState) return;
+      lastReportedState = state;
+      call('receiver-state', { peerId, state }).catch(() => {});
+    };
+    const leave = () =>
+      peerId &&
+      tvRequest('leave', screenId, {
+        deviceToken,
+        sessionId,
+        peerId,
+      }).catch(() => {});
     const play = () => {
-      setMessage('');
       element
         .play()
         .then(() => setBlocked(false))
         .catch(() => setBlocked(true));
     };
-    const unavailable = () => {
-      if (!controller.signal.aborted) onUnavailable();
+    const unavailable = (reason = 'Video connection interrupted. Retrying…', state = 'failed') => {
+      if (!controller.signal.aborted) {
+        report(state);
+        onUnavailable(typeof reason === 'string' ? reason : 'Video could not play. Retrying…');
+      }
     };
     const connection = () => {
       if (peer.connectionState === 'connected') {
         clearTimeout(disconnectedTimer);
-        setMessage('');
+        report('connected');
       }
-      if (peer.connectionState === 'failed') unavailable();
+      if (peer.connectionState === 'failed') unavailable('Devices could not connect. Retrying…');
       if (peer.connectionState === 'disconnected') {
         setMessage('Reconnecting…');
         clearTimeout(disconnectedTimer);
@@ -53,6 +69,8 @@ export default function PrivateTvPlayer({
       }
     };
     function createPeer(iceServers) {
+      if (typeof RTCPeerConnection === 'undefined')
+        throw new DOMException('WebRTC is unavailable', 'NotSupportedError');
       peer = new RTCPeerConnection({ iceServers });
       peer.onconnectionstatechange = connection;
       const incoming = new MediaStream();
@@ -61,50 +79,55 @@ export default function PrivateTvPlayer({
         element.srcObject = incoming;
         play();
       };
+      return peer;
     }
-    const startup = setTimeout(unavailable, 45000);
-    element.addEventListener('playing', () => clearTimeout(startup), {
-      once: true,
-      signal: controller.signal,
-    });
+    const startup = setTimeout(() => unavailable('Still waiting for video. Retrying…'), 60000);
+    element.addEventListener(
+      'playing',
+      () => {
+        clearTimeout(startup);
+        setMessage('');
+        setBlocked(false);
+      },
+      {
+        signal: controller.signal,
+      },
+    );
     element.addEventListener('error', unavailable, { signal: controller.signal });
     async function start() {
       try {
         setMessage('Connecting…');
         if (sessionId) {
           const joined = await call('join');
-          if (controller.signal.aborted) return;
           peerId = joined.peerId;
-          createPeer(joined.iceServers);
+          if (controller.signal.aborted) {
+            leave();
+            return;
+          }
+          negotiator = createReceiverNegotiator({
+            createPeer: () => createPeer(joined.iceServers),
+            sendAnswer: (description, offerSdp) =>
+              call('answer', { peerId, description, offerSdp }),
+            signal: controller.signal,
+            onStage: report,
+          });
           const receive = async () => {
             try {
               const state = await call('receive', { peerId });
               if (controller.signal.aborted) return;
-              if (
-                state.offer &&
-                peer.remoteDescription &&
-                state.offer.sdp !== peer.remoteDescription.sdp
-              ) {
-                peer.close();
-                createPeer(joined.iceServers);
-                answerSent = false;
-              }
-              if (state.offer && !peer.remoteDescription) {
-                await peer.setRemoteDescription(state.offer);
-                await peer.setLocalDescription(await peer.createAnswer());
-                await waitForIce(peer, controller.signal);
-              }
-              if (peer.localDescription && !answerSent) {
-                await call('answer', { peerId, description: peer.localDescription.toJSON() });
-                answerSent = true;
-              }
+              await negotiator.accept(state.offer);
             } catch (error) {
               if (controller.signal.aborted) return;
-              if ([401, 404, 409].includes(error.status)) {
+              if ([401, 404].includes(error.status)) {
                 unavailable();
                 return;
               }
-              setMessage('Reconnecting…');
+              report(receiverErrorState(error));
+              setMessage(
+                error.name === 'NotSupportedError'
+                  ? 'This browser cannot play the shared video.'
+                  : 'Video connection interrupted. Retrying…',
+              );
             }
             if (!controller.signal.aborted) timer = setTimeout(receive, 2000);
           };
@@ -141,8 +164,13 @@ export default function PrivateTvPlayer({
           hls.loadSource(url);
           hls.attachMedia(element);
         }
-      } catch {
-        unavailable();
+      } catch (error) {
+        unavailable(
+          error.name === 'NotSupportedError'
+            ? 'This browser cannot play the shared video.'
+            : 'Video could not connect. Retrying…',
+          receiverErrorState(error),
+        );
       }
     }
     start();
@@ -151,7 +179,9 @@ export default function PrivateTvPlayer({
       clearTimeout(timer);
       clearTimeout(startup);
       clearTimeout(disconnectedTimer);
+      negotiator?.close();
       peer?.close();
+      leave();
       hls?.destroy();
       element.pause();
       element.srcObject = null;
@@ -172,7 +202,7 @@ export default function PrivateTvPlayer({
         muted={muted}
         aria-label={sessionId ? 'Shared screen or camera' : 'Hall camera'}
       />
-      {message && <p role="status">{message}</p>}
+      {message && !blocked && <p role="status">{message}</p>}
       {blocked && (
         <button
           type="button"

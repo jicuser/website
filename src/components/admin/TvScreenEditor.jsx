@@ -157,9 +157,13 @@ export default function TvScreenEditor({ screenId }) {
         </button>
       </div>
       <p>
-        Open this address in the TV’s browser. Arrange and save here; the TV displays your saved
-        choice.
+        {hall
+          ? 'This address shows Normal posters and times until you approve that TV browser. For Class / Teach, open “Connect TV & sound” below and approve it once. Then Save & update TV sends your selected scene to that browser.'
+          : 'Open this address in the TV’s browser for posters and times. Save & update TV applies your changes.'}
       </p>
+      {hall && (
+        <p>“View TV” opens a private live preview here; it does not approve another browser.</p>
+      )}
       <div className="admin-actions admin-tv-address">
         <a href={screenUrl} target="_blank" rel="noreferrer">
           {screenUrl}

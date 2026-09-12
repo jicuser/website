@@ -43,6 +43,14 @@ Device inputs can be reused across scenes, but only once in each scene. Removing
 
 Private input signalling is authenticated and hall-scoped. The TV browser polls saved settings every eight seconds, input signalling every two seconds. Publisher heartbeats expire after ninety seconds without renewal. TURN may be required when direct WebRTC cannot connect. Set `TV_ICE_SERVERS` only in Edge secrets.
 
+### Receiver lifecycle rollout
+
+Apply `supabase/migrations/20260912074952_tv_receiver_lifecycle.sql` first, then deploy `tv-control`, then publish the website. The schema adds `last_seen_at`, allowlisted `receiver_state`, and the service-only `join_tv_receiver` function, and removes the old shared-peer uniqueness constraint. Publish the Edge function immediately after the migration: old Edge join requests use that constraint and can fail during this short gap. Existing connected peer rows and live inputs are preserved.
+
+Each mounted receiver now gets a separate peer, including multiple tabs from one approved browser. Closing it sends an authenticated leave request. Receivers unseen for 90 seconds are excluded from publisher polling, and stale rows for a device are removed when it joins again. A device may have at most eight active receiver rows. New answers reference the offer they processed to reject stale negotiation responses. Older browser clients remain supported by the updated Edge function; refresh them after deployment for cleanup and reconnection improvements. Diagnostic states contain only fixed status/error names, never camera details, SDP or arbitrary browser messages.
+
+`npm test` includes negotiation retries, browser SDP normalisation, simultaneous input handlers and ICE cancellation. `tests/tv-receiver.sql` checks independent receivers, stale cleanup, limits and access grants in a rolled-back transaction. These checks do not replace a real browser/media test. Use **View TV** first, then test a separately approved TV; the status distinguishes no receiver, an unanswered offer, and a connected display. Keep source devices awake with their admin pages open. Testing from mobile data may require TURN; a successful local camera preview alone does not prove delivery to another device.
+
 ## Installed cameras
 
 Enter an HTTPS HLS (`.m3u8`) or WebRTC WHEP stream URL for a CCTV layer. A local IP by itself is not a browser stream. RTSP cameras usually need a local relay to convert video and provide trusted HTTPS/CORS. TVs and viewers must be able to reach that relay on the mosque LAN; guest Wi-Fi isolation can prevent it. Port 4455 in the earlier OBS screenshot is the OBS remote-control service, not a camera video URL.
