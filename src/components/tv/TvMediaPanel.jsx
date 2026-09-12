@@ -3,6 +3,7 @@ import PrivateTvPlayer from './PrivateTvPlayer';
 import YouTubeScreenPlayer from './YouTubeScreenPlayer';
 import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
 import { youtubeVideoId } from '@/lib/video';
+import { inputLabel } from '@/lib/tvSceneState';
 
 // Each source fails independently, keeping the other panels visible.
 export default function TvMediaPanel({
@@ -44,7 +45,7 @@ export default function TvMediaPanel({
     return (
       <section
         className="jic-tv-video"
-        aria-label={source === 'share' ? 'Lesson screen' : 'Live camera'}
+        aria-label={source === 'share' ? inputLabel(layer) : 'Live camera'}
       >
         <PrivateTvPlayer
           screenId={screenId}
@@ -82,7 +83,7 @@ export default function TvMediaPanel({
     <div className="jic-tv-empty" role="status">
       {failed ||
         (source === 'share'
-          ? 'Waiting for the shared screen or camera…'
+          ? `Waiting for ${inputLabel(layer)}. Start sharing from that device’s Admin page.`
           : 'Waiting for selected content…')}
     </div>
   );

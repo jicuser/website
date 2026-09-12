@@ -2,32 +2,57 @@ import React, { useEffect, useRef, useState } from 'react';
 import useTvPublisher from '@/hooks/useTvPublisher';
 import { tvRequest } from '@/lib/tvControl';
 import { tvScene } from '../../../supabase/functions/_shared/tv.js';
-import { tvInputSources } from '@/lib/tvSceneState';
+import { tvInputSources, inputLabel } from '@/lib/tvSceneState';
+import { captureProblem } from '@/lib/tvCapture';
 
-function DeviceInput({ screenId, slot, capture, active, conflict, remote, disabled, onRefresh }) {
+function DeviceInput({
+  screenId,
+  slot,
+  name,
+  capture,
+  active,
+  conflict,
+  remote,
+  disabled,
+  deviceName,
+  onRefresh,
+}) {
   const sharing = useTvPublisher(screenId, slot);
   const [audio, setAudio] = useState(false);
   const [error, setError] = useState('');
   const video = useRef(null);
-  const canShareScreen = Boolean(navigator.mediaDevices?.getDisplayMedia);
-  const canUseCamera = Boolean(navigator.mediaDevices?.getUserMedia);
+  const screenProblem = captureProblem('screen');
+  const cameraProblem = captureProblem('camera');
+  const sourceName = inputLabel({ slot, name, capture });
+  const busyMessage = disabled
+    ? 'Please wait for the TV update to finish.'
+    : sharing.busy
+      ? 'Waiting for capture to start. Check the browser’s permission window.'
+      : sharing.stream
+        ? 'Sharing from this device. Stop sharing before changing the source.'
+        : remote
+          ? `Already sharing from ${remote.device_name || 'another device'}. Stop that source below before using this device, or add a separate source for another camera or screen.`
+          : conflict
+            ? 'Choose the same source type in each scene, then save.'
+            : !deviceName.trim()
+              ? 'Enter a name for this laptop or phone above before sharing.'
+              : '';
+  const start = (kind) => {
+    setError('');
+    sharing.start(kind, audio, deviceName.trim());
+  };
   useEffect(() => {
     if (video.current) video.current.srcObject = sharing.stream;
   }, [sharing.stream]);
   return (
     <article className="device-input">
       <h4>
-        {slot.replace('input-', 'Input ')} ·{' '}
-        {capture === 'camera'
-          ? 'Device camera'
-          : capture === 'screen'
-            ? 'Screen share'
-            : 'Device source'}{' '}
+        {sourceName}
         <small>
           {sharing.stream
             ? 'This device'
             : remote
-              ? `${remote.kind === 'camera' ? 'Camera' : 'Screen'} · another device`
+              ? `From ${remote.device_name || 'an unnamed device'}`
               : 'Available'}
         </small>
       </h4>
@@ -46,18 +71,9 @@ function DeviceInput({ screenId, slot, capture, active, conflict, remote, disabl
           it, then start the selected source.
         </p>
       )}
-      {capture !== 'camera' && !canShareScreen && (
-        <p>
-          This browser cannot share its screen. Open this hall in a supported laptop browser to
-          share a tab or screen. On this phone, choose a Device camera source instead.
-        </p>
-      )}
-      {capture !== 'screen' && !canUseCamera && (
-        <p>
-          Camera capture is unavailable in this browser. Open the HTTPS admin page in Safari or
-          Chrome and allow camera access.
-        </p>
-      )}
+      {busyMessage && <p role="status">{busyMessage}</p>}
+      {capture !== 'camera' && screenProblem && <p>{screenProblem}</p>}
+      {capture !== 'screen' && cameraProblem && <p>{cameraProblem}</p>}
       <label className="admin-check">
         <input
           type="checkbox"
@@ -71,15 +87,8 @@ function DeviceInput({ screenId, slot, capture, active, conflict, remote, disabl
         {capture !== 'camera' && (
           <button
             className="admin-button"
-            disabled={
-              disabled ||
-              sharing.busy ||
-              Boolean(sharing.stream) ||
-              Boolean(remote) ||
-              conflict ||
-              !canShareScreen
-            }
-            onClick={() => sharing.start('screen', audio)}
+            disabled={Boolean(busyMessage || screenProblem)}
+            onClick={() => start('screen')}
           >
             Share this screen
           </button>
@@ -87,15 +96,8 @@ function DeviceInput({ screenId, slot, capture, active, conflict, remote, disabl
         {capture !== 'screen' && (
           <button
             className="admin-button"
-            disabled={
-              disabled ||
-              sharing.busy ||
-              Boolean(sharing.stream) ||
-              Boolean(remote) ||
-              conflict ||
-              !canUseCamera
-            }
-            onClick={() => sharing.start('camera', audio)}
+            disabled={Boolean(busyMessage || cameraProblem)}
+            onClick={() => start('camera')}
           >
             Use this camera
           </button>
@@ -104,6 +106,7 @@ function DeviceInput({ screenId, slot, capture, active, conflict, remote, disabl
           <button
             className="admin-button"
             onClick={async () => {
+              setError('');
               try {
                 if (sharing.stream || sharing.busy) await sharing.stop();
                 else
@@ -113,13 +116,13 @@ function DeviceInput({ screenId, slot, capture, active, conflict, remote, disabl
                     { sessionId: remote.session_id },
                     { staff: true },
                   );
-                onRefresh();
+                await onRefresh();
               } catch (e) {
                 setError(e.message);
               }
             }}
           >
-            Stop input
+            {sharing.stream || sharing.busy ? 'Stop sharing' : 'Stop other device'}
           </button>
         )}
       </div>
@@ -130,24 +133,78 @@ function DeviceInput({ screenId, slot, capture, active, conflict, remote, disabl
           autoPlay
           muted
           playsInline
-          aria-label={`${slot} local preview`}
+          aria-label={`${sourceName} local preview`}
         />
       )}
       <p role="status">{error || sharing.message}</p>
     </article>
   );
 }
-export default function DeviceInputs({ screenId, settings, inputs, disabled, onRefresh }) {
+export default function DeviceInputs({
+  screenId,
+  settings,
+  inputs,
+  disabled,
+  hasDraft,
+  relayConfigured,
+  onRefresh,
+}) {
+  const [deviceName, setDeviceName] = useState(() => {
+    try {
+      return localStorage.getItem('jic-publisher-name') || '';
+    } catch {
+      return '';
+    }
+  });
   const sources = tvInputSources(settings);
-  if (!sources.length || tvScene(settings) !== 'teaching') return null;
+  if (!sources.length || tvScene(settings) !== 'teaching')
+    return (
+      <section className="admin-panel">
+        <h3>Share from a device</h3>
+        <p>
+          Add a named camera or screen source above and save Class / Teach first. Then open this
+          hall in Admin on the device you want to share from.
+        </p>
+      </section>
+    );
   return (
     <section className="admin-panel">
-      <h3>Device inputs</h3>
+      <h3>Share from a device</h3>
       <p>
-        On the laptop, choose one input for its screen. On the phone, sign in, open this hall and
-        choose a different input for its camera. Keep both pages open.
+        Open this hall in Admin on each laptop or phone. Name the device, then start its saved
+        source below. A TV connection code is for watching the output, not for sending a camera or
+        screen. Keep each sharing device’s Admin page open.
       </p>
-      {disabled && <p>Save Class / Teach and the device sources before starting them.</p>}
+      <label>
+        Name of this laptop or phone
+        <input
+          value={deviceName}
+          maxLength={60}
+          placeholder="e.g. Office laptop or Ahmed’s phone"
+          onChange={(event) => {
+            const name = event.target.value;
+            setDeviceName(name);
+            try {
+              localStorage.setItem('jic-publisher-name', name);
+            } catch {
+              /* This session can still share. */
+            }
+          }}
+        />
+      </label>
+      {hasDraft && (
+        <p>
+          These are the sources currently saved on the TV. You can start them now; new sources and
+          layout changes need Save & update TV.
+        </p>
+      )}
+      <p>
+        {relayConfigured === true
+          ? 'A relay is configured for connections between different networks. Both devices still need an internet connection.'
+          : relayConfigured === false
+            ? 'No relay is configured. Connect the laptop, phone and TV to the same Wi-Fi for testing. Guest Wi-Fi may block devices from reaching each other.'
+            : 'Use the same Wi-Fi for testing. Connections between different networks may need a relay.'}
+      </p>
       {sources.map((source) => (
         <DeviceInput
           key={source.slot}
@@ -155,6 +212,7 @@ export default function DeviceInputs({ screenId, settings, inputs, disabled, onR
           {...source}
           remote={inputs.find((i) => i.slot === source.slot)}
           disabled={disabled}
+          deviceName={deviceName}
           onRefresh={onRefresh}
         />
       ))}

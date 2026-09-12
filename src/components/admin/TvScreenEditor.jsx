@@ -147,7 +147,9 @@ export default function TvScreenEditor({ screenId }) {
     }
   }
   const screenUrl = `${window.location.origin}/tv179/${screenId}`;
-  const sourceSettings = baseline?.settings || form;
+  // Publishing uses the latest saved server state, even when this browser has an
+  // unrelated draft. The draft's baseline is only for detecting save conflicts.
+  const sourceSettings = data?.settings;
   return (
     <div className="admin-tv-editor">
       <div className="admin-heading">
@@ -155,10 +157,12 @@ export default function TvScreenEditor({ screenId }) {
           <span className="admin-eyebrow">TV SCREENS</span>
           <h2>{screen.label}</h2>
         </div>
-        <button className="admin-button" onClick={() => setShowPreview((v) => !v)}>
-          <Eye size={18} />
-          {showPreview ? 'Close preview' : 'View TV'}
-        </button>
+        {form?.scene_mode === 'normal' && (
+          <button className="admin-button" onClick={() => setShowPreview((v) => !v)}>
+            <Eye size={18} />
+            {showPreview ? 'Close preview' : 'View TV'}
+          </button>
+        )}
       </div>
       <p>
         {hall
@@ -179,7 +183,9 @@ export default function TvScreenEditor({ screenId }) {
           Copy TV address
         </button>
       </div>
-      {showPreview && <TvPreview screenId={screenId} label={screen.label} />}
+      {showPreview && form?.scene_mode === 'normal' && (
+        <TvPreview screenId={screenId} label={screen.label} />
+      )}
       {message && <p role="status">{message}</p>}
       {!form ? (
         <button className="admin-button" onClick={load}>
@@ -295,7 +301,9 @@ export default function TvScreenEditor({ screenId }) {
               screenId={screenId}
               settings={sourceSettings}
               inputs={data.inputs || []}
-              disabled={dirty || busy || tvScene(sourceSettings) !== 'teaching'}
+              disabled={busy}
+              hasDraft={dirty}
+              relayConfigured={data.relayConfigured}
               onRefresh={() =>
                 tvRequest('admin', screenId, {}, { staff: true })
                   .then(setData)

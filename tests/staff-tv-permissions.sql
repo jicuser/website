@@ -25,10 +25,17 @@ begin
  select settings,updated_at into conf,stamp from public.tv_screens where id='mens-main';
  conf=conf||'{"scene_mode":"teaching","class_until":"","active_scene_id":"test-scene","scenes":[{"id":"test-scene","name":"Test","overlap":false,"layers":[{"id":"pc","type":"input","slot":"input-1","audio":false,"x":0,"y":0,"width":50,"height":100},{"id":"phone","type":"input","slot":"input-2","audio":true,"x":50,"y":0,"width":50,"height":100}]}]}'::jsonb;
  stamp=public.save_tv_scene(manager_id,'mens-main',conf,stamp);
- first_session=public.start_tv_input(manager_id,'mens-main','input-1','screen');
+ if has_function_privilege('authenticated', 'public.start_named_tv_input(uuid,text,text,text,text)', 'execute')
+    or has_function_privilege('anon', 'public.start_named_tv_input(uuid,text,text,text,text)', 'execute') then
+   raise exception 'Named source start exposed';
+ end if;
+ first_session=public.start_named_tv_input(manager_id,'mens-main','input-1','screen','Office laptop');
+ if (select device_name from public.tv_inputs where session_id=first_session) <> 'Office laptop' then
+   raise exception 'Publisher name was not saved';
+ end if;
  second_session=public.start_tv_input(helper_id,'mens-main','input-2','camera');
  if first_session=second_session or (select count(*) from public.tv_inputs where screen_id='mens-main')<>2 then raise exception 'Separate devices did not get separate inputs'; end if;
- rejected=false;begin perform public.start_tv_input(helper_id,'mens-main','input-1','camera'); exception when raise_exception then rejected=true; end;
+ rejected=false;begin perform public.start_named_tv_input(helper_id,'mens-main','input-1','camera','Another phone'); exception when raise_exception then rejected=true; end;
  if not rejected then raise exception 'A second publisher replaced a live input'; end if;
  rejected=false;begin perform public.save_tv_scene(manager_id,'mens-main',conf,stamp-interval '1 second'); exception when raise_exception then rejected=true; end;
  if not rejected then raise exception 'Stale draft overwrote saved scene'; end if;

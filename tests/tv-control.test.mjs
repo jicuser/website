@@ -281,3 +281,28 @@ test('adding device sources reuses compatible slots and keeps inactive feeds ava
     ],
   );
 });
+
+test('device names survive saving and renaming keeps every scene on the same named source', async () => {
+  const { inputLabel, updateInputName } = await import('../src/lib/tvSceneState.js');
+  const source = layer('input', {
+    slot: 'input-1',
+    capture: 'screen',
+    audio: false,
+    name: '  Office laptop  ',
+  });
+  const settings = config([source], { scene_mode: 'teaching' });
+  settings.scenes.push({ ...newScene('scene-2'), layers: [{ ...source, x: 40 }] });
+  const named = validateSettings(settings);
+  assert.equal(named.scenes[0].layers[0].name, 'Office laptop');
+  const updated = validateSettings(updateInputName(named, 'input-1', 'Teaching laptop'));
+  assert.deepEqual(
+    updated.scenes.map((scene) => scene.layers[0].name),
+    ['Teaching laptop', 'Teaching laptop'],
+  );
+  assert.equal(updated.scenes[1].layers[0].x, 40);
+  assert.equal(inputLabel(tvInputSources(updated)[0]), 'Teaching laptop');
+  assert.equal(JSON.stringify(publicSettings(updated)).includes('Teaching laptop'), false);
+  for (const name of ['', '   ', 'a'.repeat(61), 5])
+    assert.throws(() => validateSettings(config([{ ...source, name }])));
+  assert.match(inputLabel({ slot: 'input-1', capture: 'screen' }), /unnamed/);
+});

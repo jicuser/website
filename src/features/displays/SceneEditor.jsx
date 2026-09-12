@@ -12,21 +12,25 @@ import {
 import SceneCanvas from './SceneCanvas';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
-import { availableInputSlot, updateInputCapture } from '@/lib/tvSceneState';
+import useTvPreview from '@/hooks/useTvPreview';
+import {
+  availableInputSlot,
+  updateInputCapture,
+  updateInputName,
+  inputLabel,
+  tvInputSources,
+} from '@/lib/tvSceneState';
 
 const uid = () => crypto.randomUUID();
 const label = (layer) =>
   layer.type === 'input'
-    ? layer.capture === 'camera'
-      ? 'Device camera'
-      : layer.capture === 'screen'
-        ? 'Screen share'
-        : 'Device input'
+    ? inputLabel(layer)
     : SOURCE_TYPES.find(([id]) => id === layer.type)?.[1] || layer.type;
 export default function SceneEditor({ value, onChange, disabled, posters = [], screenId }) {
   const prayers = usePrayerTimes();
   const { livestream } = useHomeLiveContent();
   const [preview, setPreview] = useState(false);
+  const previewTv = useTvPreview(screenId, preview);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     if (!preview) return;
@@ -36,10 +40,12 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
   const scene = value.scenes.find((s) => s.id === value.active_scene_id) || value.scenes[0];
   const [selected, setSelected] = useState('');
   const [source, setSource] = useState('poster');
+  const [deviceName, setDeviceName] = useState('');
   const [message, setMessage] = useState('');
   const canvas = useRef(null);
   const drag = useRef(null);
   const layer = scene.layers.find((item) => item.id === selected);
+  const deviceSources = tvInputSources(value);
   function settingsWithScene(next) {
     return { ...value, scenes: value.scenes.map((s) => (s.id === scene.id ? next : s)) };
   }
@@ -68,6 +74,11 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
     if (['youtube', 'camera'].includes(source)) next.url = '';
     if (source === 'camera') next.protocol = 'hls';
     if (next.type === 'input') {
+      if (!deviceName.trim()) {
+        setMessage('Name this device first, for example Office laptop or Lectern phone.');
+        return;
+      }
+      next.name = deviceName.trim();
       next.audio = false;
       next.capture = source === 'input-camera' ? 'camera' : 'screen';
       next.slot = availableInputSlot(value, next.capture);
@@ -93,7 +104,13 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
     }
     const updated = settingsWithScene({ ...scene, layers: [...scene.layers, next] });
     onChange(
-      next.type === 'input' ? updateInputCapture(updated, next.slot, next.capture) : updated,
+      next.type === 'input'
+        ? updateInputName(
+            updateInputCapture(updated, next.slot, next.capture),
+            next.slot,
+            next.name,
+          )
+        : updated,
     );
     setSelected(next.id);
   }
@@ -199,11 +216,20 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
         </label>
         <label>
           Source
-          <select disabled={disabled} value={source} onChange={(e) => setSource(e.target.value)}>
+          <select
+            disabled={disabled}
+            value={source}
+            onChange={(e) => {
+              const type = e.target.value;
+              setSource(type);
+              const slot = availableInputSlot(value, type === 'input-camera' ? 'camera' : 'screen');
+              setDeviceName(deviceSources.find((item) => item.slot === slot)?.name || '');
+            }}
+          >
             {[
               ...SOURCE_TYPES.filter(([id]) => !['schedule', 'input'].includes(id)),
               ['input-screen', 'Screen share (laptop)'],
-              ['input-camera', 'Camera from this device'],
+              ['input-camera', 'Camera from a phone or laptop'],
             ].map(([id, name]) => (
               <option key={id} value={id}>
                 {name}
@@ -211,6 +237,19 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
             ))}
           </select>
         </label>
+        {source.startsWith('input-') && (
+          <label>
+            Device name
+            <input
+              value={deviceName}
+              disabled={disabled}
+              maxLength={60}
+              required
+              placeholder={source === 'input-camera' ? 'e.g. Lectern phone' : 'e.g. Office laptop'}
+              onChange={(event) => setDeviceName(event.target.value)}
+            />
+          </label>
+        )}
         <button
           type="button"
           className="admin-button"
@@ -237,11 +276,34 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
         />
         Allow sources to overlap
       </label>
+      <label className="admin-check">
+        <input
+          type="checkbox"
+          checked={preview}
+          onChange={(event) => setPreview(event.target.checked)}
+        />
+        Show picture while arranging
+      </label>
+      {previewTv.error && <p role="status">{previewTv.error}</p>}
       <div
         ref={canvas}
-        className="scene-canvas scene-edit-canvas"
+        className={`scene-canvas scene-edit-canvas ${preview ? 'has-preview' : ''}`}
         aria-label="Landscape scene, 16 by 9"
       >
+        {preview && (
+          <div className="scene-preview-content" aria-hidden="true">
+            <SceneCanvas
+              tv={{ ...previewTv, settings: { ...value, muted: true } }}
+              screenId={screenId}
+              now={now}
+              prayers={prayers}
+              posters={posters}
+              slide={0}
+              onImageError={() => {}}
+              livestream={livestream}
+            />
+          </div>
+        )}
         {scene.layers.map((item, index) => (
           <div
             key={item.id}
@@ -277,10 +339,7 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
                   src={posters.find((p) => item.poster_ids?.includes(p.id))?.image}
                 />
               )}
-            <span>
-              {label(item)}
-              {item.type === 'input' ? ` · ${item.slot.replace('input-', 'Input ')}` : ''}
-            </span>
+            <span>{label(item)}</span>
             {selected === item.id && (
               <span
                 className="scene-resize"
@@ -294,35 +353,15 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
         ))}
       </div>
       <p className="admin-tv-help">
-        This is the layout preview. Open “View TV” for the saved live picture. Layers later in the
-        list appear on top.
+        Arrange and preview here. Save sends this layout to the TV. Camera and screen previews use
+        sources already saved and sharing. Preview sound is muted. Layers later in the list appear
+        on top.
       </p>
       {!scene.layers.length && (
         <p>
           Add a source to build this scene. If you save it empty, the TV returns to Normal. Your
           other scenes are kept.
         </p>
-      )}
-      <button type="button" className="admin-button" onClick={() => setPreview(!preview)}>
-        {preview ? 'Close draft preview' : 'Preview draft'}
-      </button>
-      {preview && (
-        <>
-          <p>
-            Unsaved preview: posters, YouTube, text and times. Private device feeds appear in View
-            TV after saving and starting the input.
-          </p>
-          <SceneCanvas
-            tv={{ settings: { ...value, muted: true }, paired: false }}
-            screenId={screenId}
-            now={now}
-            prayers={prayers}
-            posters={posters}
-            slide={0}
-            onImageError={() => {}}
-            livestream={livestream}
-          />
-        </>
       )}
       <div className="scene-layer-list" aria-label="Select a source">
         {scene.layers.map((item) => (
@@ -442,6 +481,17 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
           {layer.type === 'input' && (
             <>
               <label>
+                Device name
+                <input
+                  value={layer.name || ''}
+                  maxLength={60}
+                  placeholder="e.g. Office laptop"
+                  onChange={(event) =>
+                    onChange(updateInputName(value, layer.slot, event.target.value))
+                  }
+                />
+              </label>
+              <label>
                 Capture source
                 <select
                   value={layer.capture || ''}
@@ -455,22 +505,25 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
                 </select>
               </label>
               <p>
-                This source type applies to {layer.slot.replace('input-', 'Input ')} in every scene.
-                Stop a running input before changing its source.
+                This name and source type apply in every scene using this device. Stop a running
+                source before changing its type.
               </p>
               <label>
-                Device input
+                Device connection
                 <select
                   value={layer.slot}
                   onChange={(e) => {
                     const slot = e.target.value;
+                    const existing = deviceSources.find((item) => item.slot === slot);
+                    const name = existing?.name || layer.name;
+                    const capture = existing?.capture || layer.capture;
                     const updated = settingsWithScene({
                       ...scene,
-                      layers: scene.layers.map((l) => (l.id === layer.id ? { ...layer, slot } : l)),
+                      layers: scene.layers.map((l) =>
+                        l.id === layer.id ? { ...layer, slot, name, capture } : l,
+                      ),
                     });
-                    onChange(
-                      layer.capture ? updateInputCapture(updated, slot, layer.capture) : updated,
-                    );
+                    onChange(capture ? updateInputCapture(updated, slot, capture) : updated);
                   }}
                 >
                   {INPUT_SLOTS.map((slot, i) => (
@@ -481,7 +534,9 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
                       )}
                       value={slot}
                     >
-                      Input {i + 1}
+                      {deviceSources.some((item) => item.slot === slot)
+                        ? inputLabel(deviceSources.find((item) => item.slot === slot))
+                        : `Unused connection ${i + 1}`}
                     </option>
                   ))}
                 </select>

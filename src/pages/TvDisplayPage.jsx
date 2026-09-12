@@ -175,6 +175,31 @@ function ScreenDisplay({ screenId }) {
     }
   };
 
+  if (tv.displayMode === 'teaching' && scene !== 'teaching')
+    return (
+      <div ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
+        <Helmet>
+          <title>JIC · {tv.label}</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <main className="tv-class-waiting" role="status">
+          <h1>Class / Teach</h1>
+          <p>
+            {tv.needsApproval
+              ? 'Connect this browser in Admin to show the presentation here.'
+              : 'Reconnecting to the saved presentation…'}
+          </p>
+          {tv.error && <p>{tv.error}</p>}
+          <button type="button" onClick={tv.refresh}>
+            Check connection
+          </button>
+        </main>
+        {tv.needsApproval && (
+          <TvBrowserSetup screenId={screenId} paired={false} onConnected={tv.refresh} />
+        )}
+      </div>
+    );
+
   if (scene === 'teaching')
     return (
       <div ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>

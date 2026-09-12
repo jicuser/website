@@ -1,33 +1,41 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { tvRequest, waitForIce } from '@/lib/tvControl';
 import { descriptionJson, publisherMessage } from '@/lib/tvPeer';
+import { requestCapture, captureError } from '@/lib/tvCapture';
+import { trackActiveCapture } from '@/lib/adminActivity';
 
 export default function useTvPublisher(screenId, slot) {
   const active = useRef(null);
   const mounted = useRef(true);
   const [state, setState] = useState({ busy: false, stream: null, sessionId: '', message: '' });
-  const stop = useCallback(async () => {
-    const current = active.current;
-    active.current = null;
-    if (!current) return;
-    current.controller.abort();
-    clearTimeout(current.timer);
-    current.peers.forEach((entry) => entry.pc.close());
-    current.stream?.getTracks().forEach((track) => track.stop());
-    if (mounted.current)
-      setState({ busy: false, stream: null, sessionId: '', message: 'Sharing stopped.' });
-    if (current.sessionId) {
-      try {
-        await tvRequest('stop', screenId, { sessionId: current.sessionId }, { staff: true });
-      } catch {
-        if (mounted.current)
-          setState((previous) => ({
-            ...previous,
-            message: 'Capture stopped. The TV will return to posters when the connection expires.',
-          }));
+  const stop = useCallback(
+    async (expected = active.current) => {
+      const current = active.current;
+      if (current !== expected) return;
+      active.current = null;
+      if (!current) return;
+      current.controller.abort();
+      clearTimeout(current.timer);
+      current.peers.forEach((entry) => entry.pc.close());
+      current.stream?.getTracks().forEach((track) => track.stop());
+      current.releaseActivity?.();
+      if (mounted.current)
+        setState({ busy: false, stream: null, sessionId: '', message: 'Sharing stopped.' });
+      if (current.sessionId) {
+        try {
+          await tvRequest('stop', screenId, { sessionId: current.sessionId }, { staff: true });
+        } catch {
+          if (mounted.current && !active.current)
+            setState((previous) => ({
+              ...previous,
+              message:
+                'Capture stopped. Its connection will expire shortly. Class / Teach stays selected.',
+            }));
+        }
       }
-    }
-  }, [screenId]);
+    },
+    [screenId],
+  );
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -36,7 +44,7 @@ export default function useTvPublisher(screenId, slot) {
     };
   }, [stop]);
   const start = useCallback(
-    async (kind, audio = false) => {
+    async (kind, audio = false, deviceName = '') => {
       if (active.current) return;
       const current = {
         controller: new AbortController(),
@@ -57,18 +65,13 @@ export default function useTvPublisher(screenId, slot) {
         );
       try {
         // Capture starts in the click handler to preserve the browser's user gesture.
-        current.stream =
-          kind === 'screen'
-            ? await navigator.mediaDevices.getDisplayMedia({ video: true, audio })
-            : await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { ideal: 'environment' } },
-                audio,
-              });
+        current.stream = await requestCapture(kind, audio);
         if (active.current !== current) {
           current.stream.getTracks().forEach((track) => track.stop());
           return;
         }
-        const started = await call('start', { kind, slot });
+        current.releaseActivity = trackActiveCapture(current.stream);
+        const started = await call('start', { kind, slot, deviceName });
         current.sessionId = started.sessionId;
         if (active.current !== current) {
           await tvRequest('stop', screenId, { sessionId: started.sessionId }, { staff: true });
@@ -76,7 +79,7 @@ export default function useTvPublisher(screenId, slot) {
         }
         current.stream
           .getVideoTracks()
-          .forEach((track) => track.addEventListener('ended', stop, { once: true }));
+          .forEach((track) => track.addEventListener('ended', () => stop(current), { once: true }));
         setState({
           busy: false,
           stream: current.stream,
@@ -148,7 +151,9 @@ export default function useTvPublisher(screenId, slot) {
           } catch (error) {
             if (active.current !== current) return;
             if (error.status === 401 || error.status === 403 || error.status === 409) {
-              await stop();
+              await stop(current);
+              if (mounted.current && !active.current)
+                setState((previous) => ({ ...previous, message: error.message }));
               return;
             }
             setState((previous) => ({
@@ -163,16 +168,13 @@ export default function useTvPublisher(screenId, slot) {
         };
         poll();
       } catch (error) {
-        await stop();
-        if (mounted.current)
+        await stop(current);
+        if (mounted.current && !active.current)
           setState({
             busy: false,
             stream: null,
             sessionId: '',
-            message:
-              error.name === 'NotAllowedError'
-                ? 'Sharing was cancelled or permission was denied.'
-                : error.message,
+            message: captureError(error, kind),
           });
       }
     },

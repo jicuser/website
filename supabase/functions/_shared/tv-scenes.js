@@ -13,6 +13,11 @@ export const SOURCE_TYPES = [
 export const INPUT_SLOTS = ['input-1', 'input-2', 'input-3', 'input-4'];
 export const MAX_SCENES = 6;
 export const MAX_LAYERS = 12;
+export function validateDeviceName(name) {
+  if (typeof name !== 'string' || !name.trim() || name.length > 60)
+    throw new Error('Give the device a name using up to 60 characters.');
+  return name.trim();
+}
 export const newScene = (id = 'scene-1', name = 'Scene 1') => ({
   id,
   name,
@@ -106,6 +111,8 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
         if (layer.type === 'input') {
           if (!INPUT_SLOTS.includes(layer.slot)) throw new Error('Choose a device input.');
           item.slot = layer.slot;
+          // Older saved scenes have no name; keep them usable until staff name them.
+          if (layer.name !== undefined) item.name = validateDeviceName(layer.name);
           if (layer.capture !== undefined) {
             if (!['camera', 'screen'].includes(layer.capture)) throw new Error('Choose camera or screen sharing.');
             item.capture = layer.capture;

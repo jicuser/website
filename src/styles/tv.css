@@ -389,6 +389,18 @@ html[data-theme] .jic-tv-stage {
 .jic-tv-teaching {
   color: #f5f7fa;
 }
+.tv-class-waiting {
+  margin: auto;
+  max-width: 60ch;
+  padding: 24px;
+  text-align: center;
+}
+.tv-class-waiting button {
+  padding: 12px 20px;
+  margin-top: 20px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+}
 .scene-player {
   width: 100%;
   height: 100%;

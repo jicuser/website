@@ -6,6 +6,7 @@ export default function useTvScreen(screenId) {
     settings: DEFAULT_TV_SETTINGS,
     inputs: [],
     paired: false,
+    displayMode: 'normal',
     deviceToken: '',
     error: '',
   });
@@ -31,7 +32,7 @@ export default function useTvScreen(screenId) {
         );
         if (!controller.signal.aborted) {
           seenRevision.current = data.revision || '';
-          setState({ ...data, deviceToken: token, error: pairError });
+          setState({ ...data, deviceToken: token, needsApproval: !data.paired, error: pairError });
         }
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -55,6 +56,8 @@ export default function useTvScreen(screenId) {
           },
           inputs: [],
           paired: false,
+          deviceToken: token,
+          needsApproval: !token,
           error: error.message,
         }));
       }

@@ -1216,6 +1216,12 @@ html:not(.dark) .managed-page-section-copy {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.admin-device-list li > span {
+  flex: 1 1 180px;
+  overflow-wrap: anywhere;
 }
 .admin-tv-preview {
   position: relative;
@@ -1400,6 +1406,27 @@ html:not(.dark) .managed-page-section-copy {
 }
 
 /* Scene controls share geometry with the TV while keeping edit handles local to Admin. */
+.admin-idle-notice {
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(420px, calc(100% - 32px));
+  padding: 20px;
+  border: 1px solid #d4b56b;
+  border-radius: 12px;
+  background: #142238;
+  color: #fff;
+  box-shadow: 0 8px 30px #0004;
+}
+.admin-idle-notice button {
+  margin-top: 12px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #d4b56b;
+  color: #142238;
+}
 .scene-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -1424,6 +1451,23 @@ html:not(.dark) .managed-page-section-copy {
   touch-action: none;
   user-select: none;
   cursor: move;
+}
+.scene-preview-content {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.scene-preview-content .scene-player .scene-canvas {
+  width: 100%;
+}
+.has-preview .scene-edit-layer {
+  background: transparent;
+}
+.has-preview .scene-edit-layer > img {
+  display: none;
+}
+.has-preview .scene-edit-layer:not(.is-selected) > span:not(.scene-resize) {
+  visibility: hidden;
 }
 .scene-edit-layer img {
   position: absolute;

@@ -3,6 +3,8 @@ import { tvRequest } from '@/lib/tvControl';
 
 export default function TvConnections({ screenId, data, setData, form, update, run, busy }) {
   const [code, setCode] = useState('');
+  const [name, setName] = useState('');
+  const [editingDevice, setEditingDevice] = useState(null);
   const [message, setMessage] = useState('');
   // Short previews are not physical TVs and should not clutter the connection list.
   const devices = data.devices.filter(
@@ -19,6 +21,17 @@ export default function TvConnections({ screenId, data, setData, form, update, r
       </p>
       <div className="admin-actions">
         <label>
+          Name of TV or test device
+          <input
+            value={name}
+            maxLength={60}
+            required
+            disabled={busy}
+            placeholder="e.g. Main hall TV or Test phone"
+            onChange={(event) => setName(event.target.value)}
+          />
+        </label>
+        <label>
           Code shown on the TV
           <input
             inputMode="numeric"
@@ -33,11 +46,17 @@ export default function TvConnections({ screenId, data, setData, form, update, r
         </label>
         <button
           className="admin-button primary"
-          disabled={busy || code.length !== 6}
+          disabled={busy || code.length !== 6 || !name.trim()}
           onClick={() =>
             run(async () => {
-              await tvRequest('approve-setup', screenId, { code }, { staff: true });
+              await tvRequest(
+                'approve-setup',
+                screenId,
+                { code, name: name.trim() },
+                { staff: true },
+              );
               setCode('');
+              setName('');
               setMessage(
                 'TV connected. Keep its browser open; saved changes appear automatically.',
               );
@@ -54,13 +73,14 @@ export default function TvConnections({ screenId, data, setData, form, update, r
         cleared, access is removed, or its approval expires.
       </p>
       <ul className="admin-device-list">
-        {devices.map((device, index) => {
+        {devices.map((device) => {
           const online = Date.now() - Date.parse(device.last_seen_at) < 90000;
           const current = Date.parse(device.applied_revision) === Date.parse(data.updated_at);
           return (
             <li key={device.id}>
               <span>
-                TV {index + 1}
+                {device.name ||
+                  `Unnamed TV · ${new Date(device.created_at).toLocaleString('en-GB')}`}
                 <small className="block">
                   {online
                     ? current
@@ -69,6 +89,13 @@ export default function TvConnections({ screenId, data, setData, form, update, r
                     : 'Browser not seen recently'}
                 </small>
               </span>
+              <button
+                className="admin-button"
+                disabled={busy}
+                onClick={() => setEditingDevice({ id: device.id, name: device.name || '' })}
+              >
+                Rename
+              </button>
               <button
                 className="admin-button"
                 disabled={busy}
@@ -88,6 +115,54 @@ export default function TvConnections({ screenId, data, setData, form, update, r
           );
         })}
       </ul>
+      {editingDevice && (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            run(async () => {
+              await tvRequest(
+                'rename-device',
+                screenId,
+                { deviceId: editingDevice.id, name: editingDevice.name.trim() },
+                { staff: true },
+              );
+              setData((previous) => ({
+                ...previous,
+                devices: previous.devices.map((item) =>
+                  item.id === editingDevice.id
+                    ? { ...item, name: editingDevice.name.trim() }
+                    : item,
+                ),
+              }));
+              setEditingDevice(null);
+            });
+          }}
+        >
+          <label>
+            Device name
+            <input
+              value={editingDevice.name}
+              required
+              maxLength={60}
+              disabled={busy}
+              onChange={(event) => setEditingDevice({ ...editingDevice, name: event.target.value })}
+            />
+          </label>
+          <div className="admin-actions">
+            <button className="admin-button" disabled={busy || !editingDevice.name.trim()}>
+              Save name
+            </button>
+            <button
+              type="button"
+              className="admin-button"
+              disabled={busy}
+              onClick={() => setEditingDevice(null)}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
       {form.scene_mode === 'teaching' && (
         <label className="admin-check">
           <input

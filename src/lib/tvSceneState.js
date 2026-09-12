@@ -1,6 +1,13 @@
 import { activeTvScene } from '../../supabase/functions/_shared/tv.js';
 import { INPUT_SLOTS } from '../../supabase/functions/_shared/tv-scenes.js';
 
+export function inputLabel(source) {
+  if (source.name?.trim()) return source.name.trim();
+  const kind =
+    source.capture === 'camera' ? 'Camera' : source.capture === 'screen' ? 'Screen' : 'Device';
+  return `${kind} ${INPUT_SLOTS.indexOf(source.slot) + 1} (unnamed)`;
+}
+
 // Keep inputs mounted when switching scenes so an ongoing camera feed is not stopped.
 // The selected scene determines which capture controls the operator sees first.
 export function tvInputSources(settings) {
@@ -17,6 +24,7 @@ export function tvInputSources(settings) {
         sources.set(layer.slot, {
           slot: layer.slot,
           capture: layer.capture,
+          ...(layer.name ? { name: layer.name } : {}),
           active: scene === active,
           conflict: false,
         });
@@ -26,6 +34,18 @@ export function tvInputSources(settings) {
     }
   }
   return [...sources.values()];
+}
+
+export function updateInputName(settings, slot, name) {
+  return {
+    ...settings,
+    scenes: settings.scenes.map((scene) => ({
+      ...scene,
+      layers: scene.layers.map((layer) =>
+        layer.type === 'input' && layer.slot === slot ? { ...layer, name } : layer,
+      ),
+    })),
+  };
 }
 
 export function updateInputCapture(settings, slot, capture) {

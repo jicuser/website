@@ -42,7 +42,21 @@ begin
   end;
   if not rejected then raise exception 'Code approved in another hall'; end if;
 
-  device_id := public.approve_tv_browser_setup('mens-upstairs', first_request->>'code');
+  rejected := false;
+  begin perform public.approve_named_tv_browser('mens-upstairs', first_request->>'code', '');
+  exception when invalid_parameter_value then rejected := true;
+  end;
+  if not rejected or not exists(select 1 from public.tv_browser_setup where token_hash = token_digest) then
+    raise exception 'Invalid device name consumed its code';
+  end if;
+  if has_function_privilege('anon', 'public.approve_named_tv_browser(text,text,text)', 'execute')
+     or has_function_privilege('authenticated', 'public.approve_named_tv_browser(text,text,text)', 'execute') then
+    raise exception 'Named TV approval exposed';
+  end if;
+  device_id := public.approve_named_tv_browser('mens-upstairs', first_request->>'code', '  Upstairs TV  ');
+  if (select name from public.tv_devices where id = device_id) <> 'Upstairs TV' then
+    raise exception 'TV name was not saved';
+  end if;
   if not exists(select 1 from public.tv_devices where id = device_id and token_hash = token_digest
       and screen_id = 'mens-upstairs' and expires_at = now() + interval '90 days')
      or exists(select 1 from public.tv_browser_setup where token_hash = token_digest) then

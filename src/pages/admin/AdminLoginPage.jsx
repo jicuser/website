@@ -11,6 +11,13 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [idleNotice] = useState(() => {
+    try {
+      return sessionStorage.getItem('jic-idle-signout') === '1';
+    } catch {
+      return false;
+    }
+  });
 
   const submit = async (event) => {
     event.preventDefault();
@@ -19,6 +26,11 @@ export default function AdminLoginPage() {
     setError('');
     try {
       await signIn(email.trim(), password);
+      try {
+        sessionStorage.removeItem('jic-idle-signout');
+      } catch {
+        /* Optional notice. */
+      }
       navigate('/admin', { replace: true });
     } catch (err) {
       setError(err?.message || 'Unable to sign in.');
@@ -53,6 +65,9 @@ export default function AdminLoginPage() {
           </div>
         </div>
         {error && <div className="admin-login-error">{error}</div>}
+        {idleNotice && (
+          <p role="status">Signed out after 15 minutes of inactivity. Sign in to continue.</p>
+        )}
         <form onSubmit={submit} className="admin-login-form">
           <label>
             <span>Email address</span>

@@ -1,3 +1,4 @@
+import { validateDeviceName } from '../_shared/tv-scenes.js';
 import { hasPermission } from '../_shared/access.js';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import {
@@ -81,7 +82,7 @@ async function device(
   const row = await result(
     db
       .from('tv_devices')
-      .select('id,created_at,expires_at,last_seen_at,applied_revision')
+      .select('id,name,created_at,expires_at,last_seen_at,applied_revision')
       .eq('screen_id', screenId)
       .eq('token_hash', await hash(token))
       .gt('expires_at', new Date(now).toISOString())
@@ -153,7 +154,7 @@ Deno.serve(async (req) => {
       result(
         db
           .from('tv_inputs')
-          .select('slot,session_id,kind,owner_id,expires_at')
+          .select('slot,session_id,kind,owner_id,expires_at,device_name')
           .eq('screen_id', screenId)
           .gt('expires_at', new Date().toISOString()),
       );
@@ -187,12 +188,14 @@ Deno.serve(async (req) => {
         ? Boolean(await device(screenId, body.deviceToken, {
             seenRevision: body.seenRevision,
             revision: screen.updated_at,
+        displayMode: tvScene(screen.settings),
           }))
         : false;
       response = {
         id: screen.id,
         label: screen.label,
         revision: screen.updated_at,
+        displayMode: tvScene(screen.settings),
         settings: publicSettings(screen.settings, paired),
         paired,
         inputs:
@@ -320,12 +323,16 @@ Deno.serve(async (req) => {
         const devices = await result(
           db
             .from('tv_devices')
-            .select('id,created_at,expires_at,last_seen_at,applied_revision')
+            .select('id,name,created_at,expires_at,last_seen_at,applied_revision')
             .eq('screen_id', screenId)
             .gt('expires_at', new Date().toISOString())
             .order('created_at'),
         );
-        response = { ...screen, devices, inputs: await liveInputs() };
+        response = {
+          ...screen, devices, inputs: await liveInputs(),
+          relayConfigured: iceServers().some((server: any) =>
+            [server.urls].flat().some((url: unknown) => typeof url === 'string' && /^turns?:/.test(url))),
+        };
       } else if (action === 'normal' || action === 'save') {
         const settings = validateSettings(
           action === 'normal'
@@ -366,9 +373,11 @@ Deno.serve(async (req) => {
       } else if (action === 'approve-setup') {
         if (typeof body.code !== 'string' || !/^[0-9]{6}$/.test(body.code))
           fail('Enter the six-digit code shown on the TV.', 400);
-        const { data: deviceId, error } = await db.rpc('approve_tv_browser_setup', {
+        const name = body.name === undefined ? null : validateDeviceName(body.name);
+        const { data: deviceId, error } = await db.rpc(name ? 'approve_named_tv_browser' : 'approve_tv_browser_setup', {
           hall: screenId,
           setup_code: body.code,
+          ...(name ? { device_name: name } : {}),
         });
         if (error) fail('That code has expired or belongs to another TV. Check the code on this TV.', 409);
         response = { ok: true, deviceId };
@@ -381,6 +390,15 @@ Deno.serve(async (req) => {
             .upsert({ screen_id: screenId, code_hash: await hash(code), expires_at }),
         );
         response = { code, expires_at };
+      } else if (action === 'rename-device') {
+        if (!validId(body.deviceId)) fail('Choose a connected TV.', 400);
+        const renamed = await result(
+          db.from('tv_devices').update({ name: validateDeviceName(body.name) })
+            .eq('screen_id', screenId).eq('id', body.deviceId)
+            .gt('expires_at', new Date().toISOString()).select('id').maybeSingle(),
+        );
+        if (!renamed) fail('This TV is no longer connected to this hall.', 404);
+        response = { ok: true };
       } else if (action === 'revoke') {
         await result(
           db.from('tv_devices').delete().eq('screen_id', screenId).eq('id', body.deviceId),
@@ -392,11 +410,13 @@ Deno.serve(async (req) => {
           !['input-1', 'input-2', 'input-3', 'input-4'].includes(body.slot)
         )
           fail('Choose a device input and camera or screen.');
-        const { data: sessionId, error } = await db.rpc('start_tv_input', {
+        const name = body.deviceName === undefined ? null : validateDeviceName(body.deviceName);
+        const { data: sessionId, error } = await db.rpc(name ? 'start_named_tv_input' : 'start_tv_input', {
           actor: userId,
           hall: screenId,
           input_slot: body.slot,
           input_kind: body.kind,
+          ...(name ? { device_name: name } : {}),
         });
         if (error) fail(error.message, 409);
         response = { sessionId, iceServers: iceServers() };
