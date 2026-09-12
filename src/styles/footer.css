@@ -50,7 +50,7 @@
   gap: 10px;
   min-width: 0;
   width: min(100% - 32px, 396px);
-  margin: 10px auto 6px;
+  margin: 10px auto 16px;
 }
 .jic-footer-socials {
   display: flex;

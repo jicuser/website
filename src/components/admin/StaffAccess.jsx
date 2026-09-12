@@ -166,6 +166,15 @@ export default function StaffAccess() {
     });
   };
 
+  const sendSetupEmail = (row) => {
+    runRequest(`setup-${row.id}`, async () => {
+      await invoke({ action: 'send_setup', user_id: row.id });
+      setNotice({
+        text: `Setup email sent to ${row.display_name || 'the staff member'}. Use the newest email link to choose a password.`,
+      });
+    });
+  };
+
   return (
     <div className="min-w-0">
       <h2 className="text-2xl font-bold">Staff access</h2>
@@ -262,6 +271,14 @@ export default function StaffAccess() {
                       Your own account stays enabled with full access.
                     </p>
                   )}
+                  <button
+                    type="button"
+                    className="mt-2 min-h-11 text-sm font-semibold underline underline-offset-4 disabled:opacity-50"
+                    disabled={Boolean(busy) || !row.is_active}
+                    onClick={() => sendSetupEmail(row)}
+                  >
+                    {busy === `setup-${row.id}` ? 'Sending…' : 'Send setup email'}
+                  </button>
                 </div>
                 <div className="min-w-0">
                   <select

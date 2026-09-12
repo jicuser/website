@@ -27,3 +27,18 @@ Apply the migration once, then deploy `supabase functions deploy submit-form` be
 The old optional spreadsheet submission path was removed. New submissions go to this inbox. No existing external spreadsheet records are imported or deleted. Saving a form does **not** send an email notification; staff should check the inbox. Submissions remain until an authorised database administrator removes them under the centre’s retention process.
 
 Use a separate test project for end-to-end form submissions and email invitations. Production permission checks can use a transaction that is rolled back; do not leave test registrations or real medical details in logs.
+
+## Invitation and password setup links
+
+Staff email links return to `/admin/setup`, where the recipient chooses their own password. **Send setup email** on an enabled account sends a fresh password-setup link; use it when an invitation expired or went to the old deployment. Passwords are never shown to administrators.
+
+In Supabase **Authentication → URL Configuration**, set:
+
+- **Site URL:** `https://lawngreen-kangaroo-881113.hostingersite.com`
+- **Redirect URLs:** add the exact `https://lawngreen-kangaroo-881113.hostingersite.com/admin/setup`
+
+Keep other redirects only if they are still intentionally used. An invite destination must be on this allowlist; otherwise Supabase can fall back to Site URL. The deployed `manage-user` function now specifies the setup destination explicitly for both invitations and setup emails. Its optional server-only `JIC_SITE_URL` setting supports a future production-domain change; update the Supabase URL settings at the same time. Never accept an invitation destination from a browser request.
+
+Already-sent email links cannot be rewritten. Finish the URL configuration, then send a fresh setup email from the existing staff account. Opening that email and choosing a password must be done by its recipient.
+
+References: [Supabase redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls) and [updating a password](https://supabase.com/docs/reference/javascript/auth-updateuser).

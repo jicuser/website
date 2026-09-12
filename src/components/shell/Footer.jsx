@@ -49,23 +49,6 @@ export default function Footer() {
           </nav>
         </div>
       </div>
-      <div className="jic-footer-bottom">
-        <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home">
-          <JamatiaLogo variant="compact" />
-        </Link>
-        <div className="jic-footer-donation-copy">
-          <button type="button" onClick={openDonation} className="jic-footer-donate">
-            Donate
-          </button>
-          <p className="jic-footer-legal">
-            <span>
-              © {year} {SITE.name}
-            </span>
-            <span aria-hidden="true">·</span>
-            <Link to="/privacy">Privacy</Link>
-          </p>
-        </div>
-      </div>
       <div className="jic-footer-actions-compact">
         <nav className="jic-footer-socials" aria-label="Social media and contact links">
           <a href={whatsapp} aria-label="WhatsApp Community">
@@ -99,6 +82,23 @@ export default function Footer() {
             <Mail size={20} aria-hidden="true" />
           </a>
         </nav>
+      </div>
+      <div className="jic-footer-bottom">
+        <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home">
+          <JamatiaLogo variant="compact" />
+        </Link>
+        <div className="jic-footer-donation-copy">
+          <button type="button" onClick={openDonation} className="jic-footer-donate">
+            Donate
+          </button>
+          <p className="jic-footer-legal">
+            <span>
+              © {year} {SITE.name}
+            </span>
+            <span aria-hidden="true">·</span>
+            <Link to="/privacy">Privacy</Link>
+          </p>
+        </div>
       </div>
     </footer>
   );

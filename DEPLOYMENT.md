@@ -66,3 +66,7 @@ The function uses Supabase's built-in server environment variables; no new brows
 ## Website forms and staff access
 
 Apply `supabase/migrations/20260912010000_website_forms.sql` once, then deploy `supabase functions deploy submit-form` before this frontend. Messages and registrations go to Admin → Forms inbox. No mail provider or extra browser environment variables are required; email notifications are not enabled. See [Forms and staff access](docs/forms-and-staff.md) for role permissions and operation.
+
+## Staff email return address
+
+Before sending staff invitations, configure the production Site URL and exact `/admin/setup` redirect in Supabase Authentication → URL Configuration. Deploy `manage-user` with its `site-url.mjs` dependency. See [invitation setup](docs/forms-and-staff.md#invitation-and-password-setup-links). The website includes the password-setup page; administrators can send a replacement setup email from Users & roles.

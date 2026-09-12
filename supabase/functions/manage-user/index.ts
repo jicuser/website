@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
+import { accountSetupUrl } from './site-url.mjs';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -73,6 +74,7 @@ Deno.serve(async (req) => {
 
       const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
         data: { display_name: displayName || email.split('@')[0] },
+        redirectTo: accountSetupUrl(Deno.env.get('JIC_SITE_URL')),
       });
       if (error) throw error;
 
@@ -89,6 +91,23 @@ Deno.serve(async (req) => {
         });
       }
       return Response.json({ ok: true, user_id: data.user?.id }, { headers: corsHeaders });
+    }
+
+    if (body.action === 'send_setup') {
+      const { data: target, error: targetError } = await adminClient
+        .from('profiles')
+        .select('id,is_active')
+        .eq('id', body.user_id)
+        .single();
+      if (targetError || !target?.is_active) throw new Error('Choose an enabled staff account.');
+      const { data, error } = await adminClient.auth.admin.getUserById(target.id);
+      if (error || !data.user?.email) throw new Error('The staff account has no email address.');
+      const { error: sendError } = await adminClient.auth.resetPasswordForEmail(data.user.email, {
+        redirectTo: accountSetupUrl(Deno.env.get('JIC_SITE_URL')),
+      });
+      if (sendError) throw sendError;
+      await audit('SEND_SETUP', target.id, null, null);
+      return Response.json({ ok: true }, { headers: corsHeaders });
     }
 
     if (body.action === 'set_role') {
