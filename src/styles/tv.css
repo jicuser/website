@@ -333,6 +333,7 @@ html[data-theme] .jic-tv-stage {
   overflow: hidden;
   background: #0b1524;
   container-type: inline-size;
+  color: #f5f7fa;
 }
 .scene-player .scene-canvas {
   width: min(100vw, 177.7778vh);

@@ -30,11 +30,19 @@ export const londonDate = () =>
     month: '2-digit',
     day: '2-digit',
   }).format(new Date());
+// Database values can be 24-hour times; public prayer data may already include AM/PM.
 export function displayTime(value) {
-  if (!value) return '—';
-  const [h, m] = value.split(':');
-  return `${Number(h) % 12 || 12}:${m} ${Number(h) >= 12 ? 'PM' : 'AM'}`;
+  const match = String(value || '')
+    .trim()
+    .match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
+  if (!match) return '—';
+  const hour = Number(match[1]),
+    minute = Number(match[2]);
+  if (minute > 59 || hour > 23 || (match[3] && (hour < 1 || hour > 12))) return '—';
+  const suffix = match[3]?.toUpperCase() || (hour >= 12 ? 'PM' : 'AM');
+  return `${hour % 12 || 12}:${match[2]} ${suffix}`;
 }
+
 function cells(text) {
   const rows = [];
   let row = [],

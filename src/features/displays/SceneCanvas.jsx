@@ -2,7 +2,6 @@ import React from 'react';
 import { layerStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
 import TvMediaPanel from '@/components/tv/TvMediaPanel';
 import PrayerWidget from './PrayerWidget';
-import JamatiaLogo from '@/components/shell/JamatiaLogo';
 
 export default function SceneCanvas({
   tv,
@@ -55,7 +54,7 @@ export default function SceneCanvas({
           </div>
         ))}
         <div className="scene-brand">
-          <JamatiaLogo variant="pillars" />
+          <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
         </div>
       </div>
     </main>
