@@ -287,14 +287,6 @@ html[data-theme] .jic-home-footer-strip {
   font-size: 16px;
   font-weight: 650;
 }
-.jic-home-route
-  :is(.jic-event-strip, .jic-live-section, .jic-home-footer-strip, .jic-event-card, footer) {
-  background: var(--jic-glass-surface-strong) !important;
-  color: var(--jic-text) !important;
-  border: 1px solid var(--jic-glass-border);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-}
 .jic-upcoming-events h2 {
   color: #fff;
   font-size: 24px;
@@ -331,13 +323,6 @@ html[data-theme] .jic-home-footer-strip {
   gap: 8px;
   border-radius: 12px;
   background: var(--jic-surface);
-}
-html[data-theme][data-surface='solid']
-  .jic-home-route
-  :is(.jic-event-strip, .jic-home-footer-strip, .jic-live-section, footer) {
-  background: var(--jic-surface) !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 /* Desktop navigation already exposes these destinations; leave space for the posters. */
 @media (min-width: 1024px) {

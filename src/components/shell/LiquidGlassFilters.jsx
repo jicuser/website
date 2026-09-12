@@ -8,6 +8,9 @@ function channelMap(vertical = false) {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
+const HORIZONTAL_MAP = channelMap();
+const VERTICAL_MAP = channelMap(true);
+
 export default function LiquidGlassFilters() {
   return (
     <svg
@@ -27,7 +30,7 @@ export default function LiquidGlassFilters() {
           colorInterpolationFilters="sRGB"
         >
           <feImage
-            href={channelMap()}
+            href={HORIZONTAL_MAP}
             x="0"
             y="0"
             width="100%"
@@ -36,7 +39,7 @@ export default function LiquidGlassFilters() {
             result="horizontal"
           />
           <feImage
-            href={channelMap(true)}
+            href={VERTICAL_MAP}
             x="0"
             y="0"
             width="100%"
@@ -55,7 +58,7 @@ export default function LiquidGlassFilters() {
           <feDisplacementMap
             in="SourceGraphic"
             in2="edges"
-            scale="18"
+            scale="12"
             xChannelSelector="R"
             yChannelSelector="G"
           />

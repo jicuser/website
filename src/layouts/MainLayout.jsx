@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ManagedPageContent from '@/components/ManagedPageContent';
@@ -35,7 +35,15 @@ export default function MainLayout() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
         >
-          <Outlet />
+          <Suspense
+            fallback={
+              <p className="jic-page-loading" role="status">
+                Loading page…
+              </p>
+            }
+          >
+            <Outlet />
+          </Suspense>
           {overviewPaths.has(pathname) && (
             <div className="mx-auto max-w-5xl px-4 py-8">
               <ManagedPageContent optional />

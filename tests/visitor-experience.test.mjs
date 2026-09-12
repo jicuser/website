@@ -120,20 +120,37 @@ test('glass text retains 4.5:1 contrast at both background extremes', () => {
     const tokens = Object.fromEntries(
       rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]),
     );
-    const [r, g, b, alpha] = tokens['--jic-glass-surface'].match(/[\d.]+/g).map(Number);
-    const colours = ['ink', 'secondary', 'accent'].map((role) => tokens[`--jic-glass-${role}`]);
-    for (const background of [0, 255]) {
-      const composite =
-        '#' +
-        [r, g, b]
-          .map((channel) =>
-            Math.round(Number(channel) * Number(alpha) + background * (1 - Number(alpha)))
-              .toString(16)
-              .padStart(2, '0'),
-          )
-          .join('');
-      for (const colour of colours)
-        assert.ok(contrast(colour, composite) >= 4.5, `${selector}: ${colour} over ${composite}`);
+    for (const material of [
+      '--jic-glass-clear',
+      '--jic-glass-surface',
+      '--jic-glass-surface-strong',
+    ]) {
+      const [r, g, b, alpha] = tokens[material].match(/[\d.]+/g).map(Number);
+      const colours = ['ink', 'secondary', 'accent'].map((role) => tokens[`--jic-glass-${role}`]);
+      const sheenAlpha =
+        parseInt(tokens['--jic-glass-sheen'].match(/#ffffff([a-f0-9]{2})/i)[1], 16) / 255;
+      for (const sheen of [0, sheenAlpha]) {
+        for (const background of [0, 255]) {
+          const composite =
+            '#' +
+            [r, g, b]
+              .map((channel) =>
+                Math.round(
+                  (Number(channel) * Number(alpha) + background * (1 - Number(alpha))) *
+                    (1 - sheen) +
+                    255 * sheen,
+                )
+                  .toString(16)
+                  .padStart(2, '0'),
+              )
+              .join('');
+          for (const colour of colours)
+            assert.ok(
+              contrast(colour, composite) >= 4.5,
+              `${selector}: ${colour} over ${composite}`,
+            );
+        }
+      }
     }
   }
 });

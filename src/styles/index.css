@@ -112,3 +112,20 @@ body.edit-mode-active {
 .jic-startup-status h1 {
   font-size: 1.25rem;
 }
+
+.jic-page-loading {
+  display: grid;
+  place-content: center;
+  gap: 16px;
+  min-height: 180px;
+  padding: 24px;
+  text-align: center;
+  color: var(--jic-text);
+  background: var(--jic-surface);
+}
+.jic-page-loading button {
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+}
