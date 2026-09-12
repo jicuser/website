@@ -31,8 +31,14 @@ test('Maghrib uses ten minutes and never treats the prayer beginning as Jamaah',
   assert.equal(run('18:00:00', {}, { ...times, jamaah_asr: '—', asr: '6:00 PM' }), null);
 });
 test('class mode, shoe-area and stale timetables suppress automatic notices', () => {
-  assert.equal(run('18:05:00', { class_until: '2026-09-12T17:10:00Z' }), null);
-  assert.equal(run('18:10:00', { class_until: '2026-09-12T17:10:00Z' }).phase, 'dhikr');
+  assert.equal(
+    run('18:05:00', { scene_mode: 'teaching', class_until: '2026-09-12T17:10:00Z' }),
+    null,
+  );
+  assert.equal(
+    run('18:10:00', { scene_mode: 'teaching', class_until: '2026-09-12T17:10:00Z' }).phase,
+    'dhikr',
+  );
   assert.equal(run('18:05:00', { prayer_enabled: false }), null);
   assert.equal(run('18:05:00', {}, times, [], 'shoe-area'), null);
   assert.equal(run('18:05:00', {}, { ...times, d_date: '2026-09-11' }), null);
@@ -60,14 +66,13 @@ test('London winter time and invalid clock values are handled', () => {
 });
 test('shoe-area settings cannot enable live feeds and TV operators require active profiles', () => {
   const settings = validateSettings(
-    { ...DEFAULT_TV_SETTINGS, mode: 'camera', camera_url: 'https://camera.local/live.m3u8' },
+    { ...DEFAULT_TV_SETTINGS, scene_mode: 'teaching' },
     'shoe-area',
   );
-  assert.equal(settings.mode, 'posters');
-  assert.equal(settings.camera_url, '');
+  assert.equal(settings.scene_mode, 'normal');
   assert.equal(settings.prayer_enabled, false);
-  assert.equal(isTvStaff({ role: 'tv_operator', is_active: true }), true);
-  assert.equal(isTvStaff({ role: 'tv_operator', is_active: false }), false);
+  assert.equal(isTvStaff({ permissions: ['tv'], is_active: true }), true);
+  assert.equal(isTvStaff({ permissions: ['tv'], is_active: false }), false);
   assert.throws(() => validateSettings({ ...DEFAULT_TV_SETTINGS, class_until: 'invalid' }));
   assert.throws(() =>
     validateSettings({
@@ -82,7 +87,11 @@ test('seasonal notices are limited to hall screens and yield to class mode', () 
   assert.equal(tvSpecialNotice(now, { notice_mode: 'taraweeh' }, 'mens-main'), 'taraweeh');
   assert.equal(tvSpecialNotice(now, { notice_mode: 'jummah' }, 'shoe-area'), null);
   assert.equal(
-    tvSpecialNotice(now, { notice_mode: 'jummah', class_until: '2026-09-12T13:00:00Z' }),
+    tvSpecialNotice(now, {
+      notice_mode: 'jummah',
+      scene_mode: 'teaching',
+      class_until: '2026-09-12T13:00:00Z',
+    }),
     null,
   );
   assert.equal(tvSpecialNotice(now, { notice_mode: 'unknown' }), null);
@@ -93,7 +102,7 @@ test('notice settings reject malformed and oversized input without evaluating te
     { notice_mode: 'html' },
     { taraweeh_dua: [] },
     { jummah_notice: 'x'.repeat(1201) },
-    { class_until: 12 },
+    { scene_mode: 'teaching', class_until: 12 },
   ])
     assert.throws(() => validateSettings(input));
   const text = "<script>alert(1)</script>'; DROP TABLE profiles; --";
@@ -102,17 +111,17 @@ test('notice settings reject malformed and oversized input without evaluating te
 
 import { ramadanScene, fastingTimes, automaticTvNotice } from '../src/lib/tvPrayerSequence.js';
 import { tvScene } from '../supabase/functions/_shared/tv.js';
-test('Class and Speech expire exactly; only Class suspends prayer notices', () => {
+test('Teaching expires exactly and pauses every automatic notice', () => {
   const end = '2026-09-12T18:00:00Z';
-  for (const scene_mode of ['class', 'speech']) {
-    assert.equal(tvScene({ scene_mode, class_until: end }, Date.parse(end) - 1), scene_mode);
-    assert.equal(tvScene({ scene_mode, class_until: end }, Date.parse(end)), 'normal');
-  }
-  assert.equal(run('18:05:00', { scene_mode: 'speech', class_until: end }).phase, 'dhikr');
-  assert.equal(run('18:05:00', { scene_mode: 'class', class_until: end }), null);
-  assert.equal(tvScene({ scene_mode: 'ramadan' }), 'ramadan');
-  assert.throws(() => validateSettings({ scene_mode: 'random' }));
-  assert.throws(() => validateSettings({ event_title: 'x'.repeat(121) }));
+  assert.equal(
+    tvScene({ scene_mode: 'teaching', class_until: end }, Date.parse(end) - 1),
+    'teaching',
+  );
+  assert.equal(tvScene({ scene_mode: 'teaching', class_until: end }, Date.parse(end)), 'normal');
+  assert.equal(tvScene({ scene_mode: 'teaching', class_until: '' }), 'teaching');
+  assert.equal(run('18:05:00', { scene_mode: 'teaching', class_until: end }), null);
+  assert.throws(() => validateSettings({ scene_mode: 'speech' }));
+  assert.throws(() => validateSettings({ scene_mode: 'ramadan' }));
 });
 test('Ramadan du‘a starts after Isha dhikr and lasts twenty minutes', () => {
   const at = (time) => ramadanScene(new Date(`2026-09-12T${time}+01:00`), times);
@@ -167,11 +176,11 @@ test('Ramadan follows the Islamic month, local adjustment and staff override', (
   assert.equal(automaticTvNotice(now, record, [], {}, 'shoe-area'), null);
 });
 
-test('seasonal automation never replaces Class or Speech panels before expiry', () => {
+test('seasonal automation never replaces Class / Teach scenes before expiry', () => {
   const now = new Date('2026-02-20T12:30:00Z');
   const record = { ...times, d_date: '2026-02-20' };
   const jummah = [{ prayer: '1:30 PM' }];
-  for (const scene_mode of ['class', 'speech']) {
+  for (const scene_mode of ['teaching']) {
     const settings = { scene_mode, class_until: '2026-02-20T13:00:00Z', ramadan_calendar: 'on' };
     assert.equal(automaticTvNotice(now, record, jummah, settings), null);
     assert.equal(

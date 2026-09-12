@@ -57,3 +57,11 @@ npm run validate
 - [Deployment](DEPLOYMENT.md)
 - [TV setup](docs/tv-display.md)
 - [Earlier handovers](docs/history/README.md)
+
+## Staff and scenes
+
+- [Simple staff and TV guide](docs/tv-display.md)
+- [Shared backend contract for Flutter](docs/flutter-shared-backend.md)
+- [Optional broadcasting relay](services/media-relay/README.md)
+
+Scene editing, device inputs and recording live in `src/features/displays/`. Permission checkboxes live in `src/features/access/`; shared validation is in `supabase/functions/_shared/`. Historical migrations are retained so deployments remain reproducible; obsolete role and fixed-panel runtime code has been removed.

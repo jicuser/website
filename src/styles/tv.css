@@ -108,58 +108,13 @@ html[data-theme] .jic-tv-stage {
   padding: 0 !important;
   gap: 16px;
 }
-/* Shared geometry keeps the admin arrangement diagram and TV player in sync. */
+/* Normal mode always uses two poster columns. Teaching scenes use percentage coordinates. */
 .tv-panel-layout {
   display: grid;
-  grid-template-columns: repeat(var(--panel-count), minmax(0, 1fr));
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   min-width: 0;
   min-height: 0;
-}
-.tv-panel-layout[data-layout='rows'] {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: repeat(var(--panel-count), minmax(0, 1fr));
-}
-.tv-panel-layout[data-layout='grid'] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(var(--panel-rows), minmax(0, 1fr));
-}
-.tv-panel-layout[data-layout='focus-left'],
-.tv-panel-layout[data-layout='focus-right'] {
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  grid-template-rows: repeat(calc(var(--panel-count) - 1), minmax(0, 1fr));
-}
-.tv-panel-layout[data-layout='focus-right'] {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-}
-.tv-panel-layout[data-layout='focus-left'] > :first-child {
-  grid-column: 1;
-  grid-row: 1 / -1;
-}
-.tv-panel-layout[data-layout='focus-right'] > :first-child {
-  grid-column: 2;
-  grid-row: 1 / -1;
-}
-.tv-panel-layout[data-count='1'] {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
-}
-.tv-panel-layout[data-count='1'] > :first-child {
-  grid-column: 1;
-}
-html[data-theme] .jic-tv-stage.has-event-heading {
-  grid-template-rows: auto minmax(0, 1fr);
-}
-.jic-tv-event-heading {
-  text-align: center;
-}
-.jic-tv-event-heading h1 {
-  font-size: clamp(18px, 2vw, 32px);
-  font-weight: 650;
-}
-.jic-tv-event-heading p {
-  font-size: clamp(14px, 1.4vw, 24px);
 }
 .jic-tv-poster {
   display: flex;
@@ -355,4 +310,112 @@ html[data-theme] .jic-tv-stage.has-event-heading {
 }
 .jic-tv-fasting strong {
   font-size: clamp(32px, 5vw, 80px);
+}
+
+/* Saved scenes keep the same 16:9 coordinate system on every TV and preview. */
+.jic-tv-teaching {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: #050b12;
+  color: #f5f7fa;
+}
+.scene-player {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.scene-canvas {
+  position: relative;
+  aspect-ratio: 16/9;
+  width: 100%;
+  overflow: hidden;
+  background: #0b1524;
+  container-type: inline-size;
+}
+.scene-player .scene-canvas {
+  width: min(100vw, 177.7778vh);
+  width: min(100vw, 177.7778dvh);
+}
+.scene-layer {
+  position: absolute;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.scene-layer > .jic-tv-poster,
+.scene-layer > .jic-tv-video,
+.scene-layer > .jic-tv-empty {
+  width: 100%;
+  height: 100%;
+}
+.scene-layer figcaption {
+  font-size: 1.3cqw;
+}
+.scene-brand {
+  position: absolute;
+  bottom: 0.5%;
+  left: 0.5%;
+  width: 8%;
+  height: 6%;
+  z-index: 20;
+  pointer-events: none;
+}
+.scene-brand img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.scene-clock,
+.scene-text,
+.scene-next {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2cqw;
+  line-height: 1.3;
+  text-align: center;
+  padding: 1%;
+  margin: 0;
+  background: #101f31;
+  color: #f5f7fa;
+}
+.scene-clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.scene-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 2cqw;
+}
+.scene-next {
+  flex-direction: column;
+  font-size: 1.5cqw;
+}
+.scene-timetable {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  width: 100%;
+  height: 100%;
+  background: #101f31;
+}
+.scene-timetable > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3%;
+  border-right: 1px solid #3d4f63;
+  font-size: 1.6cqw;
+}
+.scene-timetable strong {
+  font-size: 2.4cqw;
+  color: #f0d791;
+}
+.scene-timetable small {
+  font-size: 1.2cqw;
 }

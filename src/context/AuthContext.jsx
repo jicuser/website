@@ -8,16 +8,9 @@ import React, {
   useState,
 } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { hasPermission, hasAdminAccess } from '../../supabase/functions/_shared/access.js';
 
 const AuthContext = createContext(null);
-const ADMIN_ROLES = new Set([
-  'super_admin',
-  'admin',
-  'content_editor',
-  'events_manager',
-  'teacher',
-  'tv_operator',
-]);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -180,7 +173,7 @@ export function AuthProvider({ children }) {
         throw new Error('Your JIC staff profile could not be loaded. Please try again.');
       }
 
-      if (!nextProfile.is_active || !ADMIN_ROLES.has(nextProfile.role)) {
+      if (!hasAdminAccess(nextProfile)) {
         await supabase.auth.signOut();
         throw new Error('This account does not have JIC administration access.');
       }
@@ -206,49 +199,26 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }
 
-  const role = profile?.role ?? 'viewer';
-  const isAdmin = Boolean(user && profile?.is_active && ADMIN_ROLES.has(role));
-  const isSuperAdmin = Boolean(isAdmin && role === 'super_admin');
-
+  const isAdmin = Boolean(user && hasAdminAccess(profile));
+  const isOwner = Boolean(isAdmin && profile?.is_owner);
   const can = useCallback(
-    (permission) => {
-      if (!isAdmin) return false;
-      if (role === 'super_admin') return true;
-
-      const matrix = {
-        dashboard: ['admin', 'content_editor', 'events_manager', 'teacher'],
-        content: ['admin', 'content_editor'],
-        events: ['admin', 'content_editor', 'events_manager'],
-        prayer_times: ['admin'],
-        announcements: ['admin', 'content_editor', 'events_manager', 'teacher'],
-        livestream: ['admin', 'content_editor'],
-        tv: ['admin', 'content_editor', 'tv_operator'],
-        team: ['admin', 'content_editor'],
-        media: ['admin', 'content_editor', 'events_manager', 'teacher'],
-        forms: ['admin', 'events_manager', 'teacher'],
-        users: [],
-        audit: ['admin'],
-      };
-
-      return matrix[permission]?.includes(role) ?? false;
-    },
-    [isAdmin, role],
+    (permission) => Boolean(user && hasPermission(profile, permission)),
+    [user, profile],
   );
 
   const value = useMemo(
     () => ({
       user,
       profile,
-      role,
       isAdmin,
-      isSuperAdmin,
+      isOwner,
       loading,
       signIn,
       signOut,
       can,
       refreshProfile: () => loadProfile(user),
     }),
-    [user, profile, role, isAdmin, isSuperAdmin, loading, can, loadProfile],
+    [user, profile, isAdmin, isOwner, loading, can, loadProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

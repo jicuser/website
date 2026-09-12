@@ -4,14 +4,14 @@ do $$
 declare
   fixture_user uuid := gen_random_uuid();
   fixture_ids uuid[];
-  staff_role text;
+  staff_permission text;
   visible_count integer;
   changed_count integer;
   expected integer;
   fingerprint text := replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', '');
 begin
   insert into auth.users(id, email) values (fixture_user, fixture_user::text || '@example.invalid');
-  insert into public.profiles(id, role, is_active) values (fixture_user, 'viewer', true)
+  insert into public.profiles(id, is_active) values (fixture_user, true)
     on conflict(id) do nothing;
   with fixtures as (
     insert into public.form_submissions(kind, payload)
@@ -20,17 +20,17 @@ begin
   ) select array_agg(id) into fixture_ids from fixtures;
   perform set_config('request.jwt.claim.sub', fixture_user::text, true);
 
-  foreach staff_role in array array['viewer','tv_operator','content_editor','teacher','events_manager','admin','super_admin'] loop
-    update public.profiles set role = staff_role, is_active = true where id = fixture_user;
-    expected := case when staff_role in ('admin','super_admin') then 3 when staff_role in ('teacher','events_manager') then 1 else 0 end;
+  foreach staff_permission in array array['tv','content','forms_contact','forms_madrassah','forms_itikaaf'] loop
+    update public.profiles set permissions = array[staff_permission], is_active = true where id = fixture_user;
+    expected := case when staff_permission like 'forms_%' then 1 else 0 end;
     set local role authenticated;
     select count(*) into visible_count from public.form_submissions where id = any(fixture_ids);
-    if visible_count <> expected then raise exception 'Wrong form access for %', staff_role; end if;
-    if staff_role = 'teacher' and exists(select 1 from public.form_submissions where id = any(fixture_ids) and kind <> 'madrassah') then raise exception 'Teacher saw an unrelated form'; end if;
-    if staff_role = 'events_manager' and exists(select 1 from public.form_submissions where id = any(fixture_ids) and kind <> 'itikaaf') then raise exception 'Events manager saw an unrelated form'; end if;
+    if visible_count <> expected then raise exception 'Wrong form access for %', staff_permission; end if;
+    if staff_permission = 'forms_madrassah' and exists(select 1 from public.form_submissions where id = any(fixture_ids) and kind <> 'madrassah') then raise exception 'Teacher saw an unrelated form'; end if;
+    if staff_permission = 'forms_itikaaf' and exists(select 1 from public.form_submissions where id = any(fixture_ids) and kind <> 'itikaaf') then raise exception 'Events manager saw an unrelated form'; end if;
     update public.form_submissions set status = 'done' where id = any(fixture_ids);
     get diagnostics changed_count = row_count;
-    if changed_count <> expected then raise exception 'Wrong update access for %', staff_role; end if;
+    if changed_count <> expected then raise exception 'Wrong update access for %', staff_permission; end if;
     begin
       update public.form_submissions set payload = '{}' where id = any(fixture_ids);
       raise exception 'Staff could alter a submitted form';

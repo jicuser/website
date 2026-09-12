@@ -2,16 +2,14 @@
 
 Open **Admin → Forms inbox** to read contact messages, Madrassah enquiries and I’tikaf registrations. Expand a submission to see its details. Reply using your normal contact process, then choose **Mark completed**. Completed forms can be reopened.
 
-| Staff role                                     | Forms visible         |
-| ---------------------------------------------- | --------------------- |
-| Super administrator / Administrator            | All three forms       |
-| Teacher                                        | Madrassah enquiries   |
-| Events manager                                 | I’tikaf registrations |
-| Website editor / TV operator / No admin access | None                  |
+| Permission checkbox   | Forms visible         |
+| --------------------- | --------------------- |
+| Contact messages      | Contact enquiries     |
+| Madrassah enquiries   | Madrassah submissions |
+| I’tikaf registrations | I’tikaf submissions   |
+| Owner                 | All submissions       |
 
-These permissions are enforced by database Row Level Security. Hidden menu items alone do not provide security. Disabled profiles lose database access to forms even if their browser session remains open.
-
-**Admin → Users & roles** lets a super administrator invite staff, select a role and enable or disable access. The descriptions explain each role. Access switches save immediately; role changes use the Save button at the top. Your own account cannot be disabled or demoted through this screen. No invitation is sent until you press **Send invitation**.
+**Admin → Staff & access** uses separate staff-label and editing-permission checkboxes. No permission is selected automatically. Labels never grant access. Account enable/disable switches save immediately; permission changes use Save. Delegated managers can only grant permissions they hold and cannot change an owner or their own access. Invitations are sent only when you press **Send invitation**. See [the staff and TV guide](tv-display.md).
 
 ## Code and setup
 
@@ -20,7 +18,7 @@ These permissions are enforced by database Row Level Security. Hidden menu items
 - `supabase/functions/submit-form/index.ts`: bounded JSON input, daily salted network fingerprint and generic database errors.
 - `supabase/migrations/20260912010000_website_forms.sql`: private inbox permissions and atomic rate limit of ten successful submissions per ten-minute network bucket. Rate fingerprints expire after one day.
 - `src/components/admin/FormsInbox.jsx`: paginated inbox, with text rendered by React rather than inserted as HTML.
-- `src/components/admin/StaffAccess.jsx`: staff invitations, role descriptions and access switches.
+- `src/components/admin/StaffAccess.jsx`: staff invitations, explicit permission checkboxes and access switches.
 
 Apply the migration once, then deploy `supabase functions deploy submit-form` before publishing this frontend. The public Supabase anon JWT permits anonymous form submission through the function; visitors cannot read or write the table directly. The service-role key stays in Supabase. There is no SQL constructed from form fields. Basic rate limits reduce repeated submissions; they are not a complete bot-prevention service.
 

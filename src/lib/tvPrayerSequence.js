@@ -16,7 +16,7 @@ export function tvPrayerSequence(now, times, jummah = [], settings = {}, screenI
     screenId === 'shoe-area' ||
     !times ||
     settings.prayer_enabled === false ||
-    tvScene(settings, now.getTime()) === 'class'
+    tvScene(settings, now.getTime()) === 'teaching'
   )
     return null;
   const parts = Object.fromEntries(
@@ -66,7 +66,7 @@ export function tvPrayerSequence(now, times, jummah = [], settings = {}, screenI
 
 // Manual seasonal notices yield to class mode and never appear in the shoe area.
 export function tvSpecialNotice(now, settings = {}, screenId = '') {
-  if (screenId === 'shoe-area' || tvScene(settings, now.getTime()) === 'class') return null;
+  if (screenId === 'shoe-area' || tvScene(settings, now.getTime()) === 'teaching') return null;
   return ['jummah', 'taraweeh'].includes(settings.notice_mode) ? settings.notice_mode : null;
 }
 
@@ -94,7 +94,7 @@ export function ramadanScene(now, times, screenId = '') {
 // Normal follows the mosque's London date. Staff can adjust the lunar calendar locally.
 export function automaticTvNotice(now, times, jummah = [], settings = {}, screenId = '') {
   const scene = tvScene(settings, now.getTime());
-  if (screenId === 'shoe-area' || !['normal', 'ramadan'].includes(scene)) return null;
+  if (screenId === 'shoe-area' || scene !== 'normal') return null;
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Europe/London',
@@ -126,7 +126,7 @@ export function automaticTvNotice(now, times, jummah = [], settings = {}, screen
   })
     .formatToParts(adjusted)
     .find((part) => part.type === 'month')?.value;
-  if (calendar === 'on' || (calendar !== 'off' && (Number(month) === 9 || scene === 'ramadan')))
+  if (calendar === 'on' || (calendar !== 'off' && Number(month) === 9))
     return ramadanScene(now, times, screenId);
   return null;
 }

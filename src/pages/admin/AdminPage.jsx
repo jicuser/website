@@ -53,7 +53,7 @@ const SECTIONS = [
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
   ['forms', 'Forms inbox', FileText, 'forms'],
-  ['users', 'Users & roles', ShieldCheck, 'users'],
+  ['users', 'Staff & access', ShieldCheck, 'users'],
   ['audit', 'Audit log', Activity, 'audit'],
 ];
 
@@ -108,7 +108,7 @@ async function uploadImage(file, folder = 'admin') {
 }
 
 function DashboardSection({ onChoose }) {
-  const { can, isSuperAdmin } = useAuth();
+  const { can } = useAuth();
   const tasks = [
     ['tv', 'TV screens', 'Choose a hall, show a class or return to posters.', Monitor, 'tv'],
     [
@@ -129,7 +129,7 @@ function DashboardSection({ onChoose }) {
       'forms',
     ],
     ['users', 'Staff access', 'Choose who can edit and control TVs.', Users, 'users'],
-  ].filter(([, , , , permission]) => (permission === 'users' ? isSuperAdmin : can(permission)));
+  ].filter(([, , , , permission]) => can(permission));
   return (
     <div>
       <div className="admin-heading">
@@ -963,16 +963,10 @@ function AuditSection() {
 }
 
 export default function AdminPage() {
-  const { user, profile, role, signOut, can, isSuperAdmin } = useAuth();
+  const { user, profile, signOut, can } = useAuth();
   const { theme, toggleTheme } = useAppearance();
   const { saveCurrent, dirty, saving, label: saveLabel, status } = useAdminSave();
-  const allowed = useMemo(
-    () =>
-      SECTIONS.filter(([key, , , permission]) =>
-        key === 'users' ? isSuperAdmin : can(permission),
-      ),
-    [can, isSuperAdmin],
-  );
+  const allowed = useMemo(() => SECTIONS.filter(([, , , permission]) => can(permission)), [can]);
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const active = allowed.some((item) => item[0] === params.get('section'))
@@ -1012,7 +1006,8 @@ export default function AdminPage() {
         <div className="admin-toolbar-title">
           <strong>JIC Admin</strong>
           <small>
-            {auditName} · {role.replaceAll('_', ' ')}
+            {auditName}
+            {profile?.is_owner ? ' · Owner' : ''}
           </small>
         </div>
         <div className="admin-toolbar-actions">

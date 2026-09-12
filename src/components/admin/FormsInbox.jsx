@@ -17,7 +17,7 @@ export default function FormsInbox() {
     let active = true;
     setLoading(true);
     setError('');
-    // RLS returns only forms assigned to the signed-in staff role.
+    // RLS returns only forms allowed by the signed-in staff permissions.
     supabase
       .from('form_submissions')
       .select('id,kind,payload,status,created_at')
@@ -67,7 +67,7 @@ export default function FormsInbox() {
       <div className="admin-heading">
         <div>
           <h2>Forms inbox</h2>
-          <p>Messages and registrations assigned to your role.</p>
+          <p>Messages and registrations you have permission to manage.</p>
         </div>
         <button
           className="admin-button"

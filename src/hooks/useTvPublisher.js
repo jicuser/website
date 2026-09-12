@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { tvRequest, waitForIce } from '@/lib/tvControl';
 
-export default function useTvPublisher(screenId) {
+export default function useTvPublisher(screenId, slot) {
   const active = useRef(null);
   const mounted = useRef(true);
   const [state, setState] = useState({ busy: false, stream: null, sessionId: '', message: '' });
@@ -35,7 +35,7 @@ export default function useTvPublisher(screenId) {
     };
   }, [stop]);
   const start = useCallback(
-    async (kind) => {
+    async (kind, audio = false) => {
       if (active.current) return;
       const current = {
         controller: new AbortController(),
@@ -58,16 +58,16 @@ export default function useTvPublisher(screenId) {
         // Capture starts in the click handler to preserve the browser's user gesture.
         current.stream =
           kind === 'screen'
-            ? await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+            ? await navigator.mediaDevices.getDisplayMedia({ video: true, audio })
             : await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: { ideal: 'environment' } },
-                audio: false,
+                audio,
               });
         if (active.current !== current) {
           current.stream.getTracks().forEach((track) => track.stop());
           return;
         }
-        const started = await call('start', { kind });
+        const started = await call('start', { kind, slot });
         current.sessionId = started.sessionId;
         if (active.current !== current) {
           await tvRequest('stop', screenId, { sessionId: started.sessionId }, { staff: true });
@@ -166,7 +166,7 @@ export default function useTvPublisher(screenId) {
           });
       }
     },
-    [screenId, stop],
+    [screenId, slot, stop],
   );
   return { ...state, start, stop };
 }

@@ -6,6 +6,7 @@ import { youtubeVideoId } from '@/lib/video';
 // Each source fails independently, keeping the other panels visible.
 export default function TvMediaPanel({
   source,
+  layer = {},
   tv,
   screenId,
   poster,
@@ -23,14 +24,15 @@ export default function TvMediaPanel({
   const scheduled = livestream?.scheduled_at ? Date.parse(livestream.scheduled_at) : null;
   const videoId =
     source === 'youtube'
-      ? youtubeVideoId(tv.settings.youtube_url)
+      ? youtubeVideoId(layer.url)
       : source === 'schedule' && livestream?.enabled && (!scheduled || scheduled <= now.getTime())
         ? youtubeVideoId(livestream.stream_url)
         : '';
   const privateReady =
     tv.paired &&
     screenId !== 'shoe-area' &&
-    ((source === 'camera' && tv.settings.camera_url) || (source === 'share' && tv.session?.id));
+    ((source === 'camera' && layer.url) ||
+      (source === 'share' && tv.inputs?.find((input) => input.slot === layer.slot)?.id));
   if (!failed && privateReady)
     return (
       <section
@@ -40,10 +42,14 @@ export default function TvMediaPanel({
         <PrivateTvPlayer
           screenId={screenId}
           deviceToken={tv.deviceToken}
-          sessionId={source === 'share' ? tv.session?.id : undefined}
-          url={source === 'camera' ? tv.settings.camera_url : undefined}
-          protocol={tv.settings.camera_protocol}
-          muted={tv.settings.muted}
+          sessionId={
+            source === 'share'
+              ? tv.inputs?.find((input) => input.slot === layer.slot)?.id
+              : undefined
+          }
+          url={source === 'camera' ? layer.url : undefined}
+          protocol={layer.protocol}
+          muted={tv.settings.muted || !layer.audio}
           onUnavailable={unavailable}
         />
       </section>
@@ -54,7 +60,7 @@ export default function TvMediaPanel({
         <YouTubeScreenPlayer
           videoId={videoId}
           title={tv.settings.event_title || tv.label}
-          muted={tv.settings.muted}
+          muted={tv.settings.muted || !layer.audio}
           onUnavailable={unavailable}
         />
       </section>

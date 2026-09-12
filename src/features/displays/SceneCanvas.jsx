@@ -1,0 +1,63 @@
+import React from 'react';
+import { layerStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
+import TvMediaPanel from '@/components/tv/TvMediaPanel';
+import PrayerWidget from './PrayerWidget';
+import JamatiaLogo from '@/components/shell/JamatiaLogo';
+
+export default function SceneCanvas({
+  tv,
+  screenId,
+  now,
+  prayers,
+  posters,
+  slide,
+  onImageError,
+  livestream,
+}) {
+  const scene =
+    tv.settings.scenes.find((s) => s.id === tv.settings.active_scene_id) || tv.settings.scenes[0];
+  return (
+    <main className="scene-player">
+      <div className="scene-canvas" aria-label={scene.name}>
+        {scene.layers.map((layer, index) => (
+          <div
+            className={`scene-layer scene-source-${layer.type}`}
+            key={layer.id}
+            style={{ ...layerStyle(layer), zIndex: index + 1 }}
+          >
+            {['times', 'next'].includes(layer.type) ? (
+              <PrayerWidget prayers={prayers} now={now} kind={layer.type} />
+            ) : layer.type === 'clock' ? (
+              <time className="scene-clock" dateTime={now.toISOString()}>
+                {now.toLocaleTimeString('en-GB', {
+                  timeZone: 'Europe/London',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                })}
+              </time>
+            ) : layer.type === 'text' ? (
+              <p className="scene-text" dir="auto">
+                {layer.text}
+              </p>
+            ) : (
+              <TvMediaPanel
+                source={layer.type === 'input' ? 'share' : layer.type}
+                layer={layer}
+                tv={tv}
+                screenId={screenId}
+                now={now}
+                livestream={livestream}
+                poster={posters[(slide + (layer.type === 'poster-next' ? 1 : 0)) % posters.length]}
+                onImageError={onImageError}
+              />
+            )}
+          </div>
+        ))}
+        <div className="scene-brand">
+          <JamatiaLogo variant="pillars" />
+        </div>
+      </div>
+    </main>
+  );
+}

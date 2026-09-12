@@ -1,122 +1,58 @@
-# Mosque TV screens
+# Staff access and TV scenes
 
-Open **Admin → TV screens**, then choose a hall from the selector. Each hall keeps its own settings.
+## Invite a colleague
 
-| Admin entry           | TV address               |
-| --------------------- | ------------------------ |
-| Men’s Main Hall       | `/tv179/mens-main`       |
-| Men’s Upstairs Hall   | `/tv179/mens-upstairs`   |
-| Ladies’ Upstairs Hall | `/tv179/ladies-upstairs` |
-| Shoe Area             | `/tv179/shoe-area`       |
+Open **Admin → Staff & access**. Enter their name and email, tick optional staff labels, then tick the specific editing permissions. Nothing is selected automatically. Being a teacher or volunteer does not grant access. TV operators need **TV scenes and device inputs**; recording and external broadcasting additionally need **Recording and broadcasting**.
 
-`/tv179` still opens Men’s Main Hall. `/tv` redirects there. Add the website domain before these paths when entering them on a TV.
+Invited accounts without permissions can complete account setup but cannot open Admin. An owner can grant access later. A delegated staff manager can only grant permissions they hold and cannot change an owner or their own access. Picture uploads require the upload permission plus access to the relevant editor. Delete permission applies only inside permitted sections.
 
-## Choose what each TV shows
+Invites use `/admin/setup`. In Supabase **Authentication → URL Configuration**, the public JIC website must be the Site URL and its exact `/admin/setup` URL must be allowlisted. Do not use a Vercel dashboard or protected deployment address. Existing incorrect emails need a new setup email after this configuration is corrected. No automatic test invitations are sent.
 
-Choose **Normal**, **Class** or **Speech**. Mode buttons apply immediately. Panel selection, position, text and display switches use **Update this TV**. Updates reach TVs within eight seconds.
+## Put a TV on the wall
 
-| Mode   | Display                                                         | Prayer sequence             |
-| ------ | --------------------------------------------------------------- | --------------------------- |
-| Normal | Two rotating posters, with automatic Jummah and Ramadan notices | Automatic when enabled      |
-| Class  | Your selected sources and layout                                | Paused until the class ends |
-| Speech | Your selected sources and layout                                | Continues when enabled      |
+1. Connect it to the mosque network and open its browser.
+2. Open the hall address shown in **Admin → TV screens**. Times and posters work immediately.
+3. For private cameras and device sharing, open the **private TV link** once in that browser. This authorises that browser for 90 days. It is not Bluetooth pairing and does not require an app. The approval link expires after 10 minutes and works once.
+4. Leave the page open in landscape. Double-click or press F to request fullscreen if supported. Admin controls what it displays.
 
-For Class or Speech, tick up to four panels: **Poster / slide 1**, **Poster / slide 2**, **YouTube**, **CCTV / installed camera**, **Shared screen / device camera**, or **Website livestream**. Sources can play together. The two poster panels show consecutive posters from the selected list. A source that cannot play falls back to a poster independently of the other panels and retries after 30 seconds.
+There are four addresses: `/tv179/mens-main`, `/tv179/mens-upstairs`, `/tv179/ladies-upstairs`, `/tv179/shoe-area`. The shoe area stays on times and posters.
 
-Choose **Side by side**, **Top and bottom**, **Grid**, **Large panel on left** or **Large panel on right**. The numbered landscape diagram shows their positions. Use the arrow buttons to change panel order; the first source occupies the large area in either large-panel layout. This is a diagram of your draft; **Preview TV** shows the saved live output.
+## Normal
 
-**Salah timetable**, **Next prayer reminder** and **Current clock** have separate switches under **What stays visible**. They apply to the selected TV in every mode. Clock and prayer time displays use 12-hour time and Europe/London dates. Posters and video fit without cropping.
+Normal rotates selected programme posters and published upcoming event posters. Programme poster definitions live in `src/content/programmes.js`; event posters are edited in **Admin → Events**. Its timetable, next-prayer line and clock have separate switches.
 
-Class and Speech return to Normal after the selected duration. **Back to normal** stops sharing and clears temporary event text and notice overrides. It retains the source arrangement for the next class, plus your calendar and visibility settings. Removing the shared-screen panel also stops its session; rearranging sources does not. The shoe area has no Class/Speech or private feeds and keeps its poster-only content.
+Normal alone runs prayer reminders, Jummah and Ramadan notices. At Jama‘ah it shows the phone reminder, then dhikr after five minutes (ten for Maghrib). Posters return twenty minutes after Jama‘ah. Jummah welcome runs from one hour before the first congregation until twenty minutes after the last. Ramadan follows the Islamic calendar with an optional local offset or explicit on/off setting. After Isha it shows the configured du‘a twenty to forty minutes after Jama‘ah, then fasting times among posters.
 
-Open the hall address in the smart TV browser and leave it open. The browser follows the saved settings; there are no mode or layout controls on the TV itself. Use landscape orientation. Double-click requests fullscreen and landscape locking when supported; the TV browser can also enter fullscreen. Wake Lock is requested where available.
+## Class / Teach
 
-**Preview TV** opens the real TV page at 1280×720 inside Admin. It can receive the active shared source. Its separate credential expires after ten minutes and is revoked on closing; it does not replace the physical TV’s pairing. Local feeds require the previewing device to reach the mosque network. A working preview is not confirmation that the physical TV is playing.
+1. Choose **Class / Teach**.
+2. Add scenes with **+ Scene**, up to six. Choose a scene to work on.
+3. Add sources: two separate poster slides, YouTube, CCTV, device inputs, website livestream, timetable, next prayer, clock or a text notice.
+4. Drag sources, resize using the corner, or edit the percentage fields. Use **Bring to front** and **Send to back** for layering. Disable overlap after arranging sources apart if wanted.
+5. Press **Save & update TV**. This saves the layout and selects that scene on the TV. Choosing a different scene also needs Save.
 
-YouTube links must identify an embeddable video or live video, not a channel homepage. Audio is muted by default; browsers may require a playback gesture when sound is enabled. Setup controls do not appear on TV pages.
+Class / Teach pauses all automatic seasonal and prayer notices. Optional timetable and next-prayer elements still work as chosen. Return to Normal manually and save, or choose a timed return. A stale draft is rejected if another staff device saved first; reload before editing again.
 
-## Approve a TV browser for private feeds
+The editor and TV share a 16:9 coordinate system. The TV letterboxes other aspect ratios. Each scene supports twelve layers. The bottom-left pillar logo stays visible. The embedded preview is the actual saved TV route, not a simulation; it cannot prove playback on the physical TV.
 
-1. Choose the hall in Admin, expand **TV sound & private video access**, and press **Create private TV link**.
-2. Open that link in the TV browser.
-3. Press **Refresh connections** in Admin to check that it appears.
+## Laptop presentation and phone camera together
 
-This approves the web browser; it is not Bluetooth pairing or casting. Approval links work once and expire after ten minutes. A paired browser remembers its credential for 90 days. Clearing browser storage requires pairing again. Use **Disconnect** to remove a TV's private access. Public poster and YouTube displays continue to work without pairing.
+Add **Device input 1** and **Device input 2** to a scene, arrange them and save. On the laptop choose Input 1 → Share this screen. On the phone, sign in to Admin, choose the same hall and Input 2 → Use this camera. Enable the microphone before starting when audio is needed. Keep both pages open. Up to four independent devices can supply inputs. A live input cannot be replaced by another device until it is stopped or expires.
 
-Treat an unused pairing link as access to that room's private feed. It is removed from the TV address after use. No staff login is saved on the TV. Camera URLs and screen-sharing connection details are withheld from public visitors.
+Device inputs can be reused across scenes, but only once in each scene. Removing an input from every scene or saving Normal ends it. Capture permission is requested by the browser; the website cannot bypass it. Whole-screen capture is not generally available in phone browsers. Camera capture requires HTTPS and a supported browser. Screen audio depends on the browser and the selected tab. To hear a source on the TV, enable that layer's audio and turn off **Mute TV audio**. A TV may require one playback click before unmuted autoplay.
 
-## Share a laptop screen or phone camera
+Private input signalling is authenticated and hall-scoped. The TV browser polls saved settings every eight seconds, input signalling every two seconds. Publisher heartbeats expire after ninety seconds without renewal. TURN may be required when direct WebRTC cannot connect. Set `TV_ICE_SERVERS` only in Edge secrets.
 
-Open the room in Admin on the sending device. Choose Class or Speech, tick **Shared screen / device camera**, arrange the panels and press **Update this TV**. Then press **Share screen** or **This device’s camera** and approve the browser’s capture request. The selected source appears in its chosen panel on approved TVs for that room. It can appear alongside CCTV, YouTube and a poster.
+## Installed cameras
 
-Keep the sending admin page open and the phone awake. Stop with **Stop sharing**, the browser's sharing control, or by leaving that admin screen. The saved source resumes; **Back to normal** restores posters. If the sender loses its connection, the session expires within 90 seconds, followed by the TV's next status check. A different authorised staff member can refresh the room and stop its existing session.
+Enter an HTTPS HLS (`.m3u8`) or WebRTC WHEP stream URL for a CCTV layer. A local IP by itself is not a browser stream. RTSP cameras usually need a local relay to convert video and provide trusted HTTPS/CORS. TVs and viewers must be able to reach that relay on the mosque LAN; guest Wi-Fi isolation can prevent it. Port 4455 in the earlier OBS screenshot is the OBS remote-control service, not a camera video URL.
 
-Laptop screen capture can include audio when the selected browser/source supports it. The camera button sends video without microphone audio. Whole-phone screen capture is not supported by current iPhone/Android browsers; native AirPlay/Cast is separate and takes over the TV display rather than appearing inside this prayer layout. See [browser screen capture](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) and [camera capture](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
+The website does not scan the LAN or expose cameras publicly. Private camera URLs are only returned to authorised TV browsers. Do not put camera passwords or platform stream keys into public site content. Obtain the actual camera/NVR model and stream URL before on-site testing.
 
-Both devices need internet access to the site and Supabase for pairing and connection setup, even on the same Wi-Fi. Media uses WebRTC. A shared network usually helps, but guest/client isolation, firewalls and TV browser support can prevent a direct connection. An optional TURN relay can help when direct connections fail.
+## Record or broadcast
 
-## Connect a local Wi-Fi/IP camera
+A phone can record its active camera input, including microphone audio if selected. A desktop can open the separate TV view and record that tab with sound. The separate recording view has an eight-hour credential; close it when finished or revoke it under TV connections. Recordings are kept locally, then downloaded as WebM or MP4 according to browser support. Each recording part stops at approximately 256 MB to limit mobile memory; download it before starting another part.
 
-The TV player accepts:
+External YouTube/TikTok output needs the separately hosted media relay in `services/media-relay`. Static website hosting and Supabase Edge Functions do not run its persistent encoder. No external stream is started until an operator enters destination details and explicitly chooses **Go live**. Platform passwords are not collected. Enter the stream server and key from the platform's Live Studio; TikTok streaming access depends on the account.
 
-- An **HTTPS HLS** stream, normally ending in `.m3u8`.
-- An **HTTPS WebRTC/WHEP** endpoint.
-
-A raw `rtsp://` camera URL cannot play in a browser. Use a local relay such as MediaMTX to read the camera and expose HLS or WHEP. The relay must remain running and reachable from the TV. Configure trusted HTTPS, CORS for the website origin, and a video codec the TV supports. HLS is usually more compatible but has more delay; WebRTC is usually faster. Do not place camera usernames/passwords in website URLs. See the [MediaMTX browser playback guide](https://mediamtx.org/docs/read/web-browsers).
-
-For WHEP, enter the complete endpoint and expose its `Location` response header through CORS so the player can close its session. The implementation sends a complete SDP offer and does not use trickle ICE. HLS uses native playback where available, otherwise the separately loaded `hls.js` player.
-
-No real camera address is preconfigured. The camera/TV models, network reachability, certificate and codec still need checking on site. A relay cannot correct an unsupported codec without transcoding.
-
-## Code and backend
-
-- `src/components/admin/TvScreenEditor.jsx`: four instances of one room editor.
-- `src/components/admin/TvLayoutEditor.jsx`: source selection, panel order and the landscape arrangement diagram.
-- `src/components/tv/TvMediaPanel.jsx`: independent media players and poster fallbacks.
-- `src/hooks/useTvPublisher.js`: capture, staff heartbeat and sending peers.
-- `src/hooks/useTvScreen.js`: TV pairing and room status.
-- `src/components/tv/PrivateTvPlayer.jsx`: receiving WebRTC and playing local camera streams.
-- `src/lib/tvControl.js`: API calls and ICE gathering.
-- `supabase/functions/_shared/tv.js`: room names, settings validation and public-data filtering.
-- `supabase/functions/tv-control/index.ts`: API authentication and signalling.
-- `supabase/migrations/20260911222221_tv_screens_and_sharing.sql`: four rooms, pairing codes, devices and peer records.
-
-New tables have RLS enabled and no browser-role grants or policies. This deliberately denies direct browser access; the Edge Function's service client performs checked operations. Supabase's [RLS-without-policy notice](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy) is expected for these tables. Staff actions verify the user JWT and the active role in `profiles`; metadata supplied by the user is never trusted. Device tokens and one-use pairing codes are stored as SHA-256 hashes. Peer requests are scoped to a device, room and current session. Starting/stopping a session clears its signalling records; revoking a device also removes its peers.
-
-The optional `TV_ICE_SERVERS` Edge secret accepts an `RTCIceServer[]` JSON array. It is returned only to authenticated staff and paired receivers; never put TURN credentials in `VITE_*` variables. Use dedicated relay credentials and rotate them when revoking access. Without this secret the application supplies a public STUN server and attempts a direct connection.
-
-## Verification and on-site check
-
-`npm run validate` checks the frontend, shared TV validation/privacy tests and the production build. The Edge Function can be type-checked with `npx deno check --node-modules-dir=manual supabase/functions/tv-control/index.ts` after installing dependencies.
-
-Before relying on the display during a service, pair one real TV and check each room's posters, 12-hour clock, sound, screen capture and camera feed. Confirm that Stop and Revoke return the TV to public content, then repeat in the remaining halls. Test Android Chrome and iPhone Safari in both themes. Software/API checks do not replace those hardware and local-network checks.
-
-## Prayer sequence and class staff
-
-The three hall screens support cameras, YouTube and paired screen/camera sharing. The shoe-area screen is restricted in both the player and API to times and posters; its live-feed and pairing controls are hidden. The two-pillar logo sits at bottom left and the prayer strip starts at the top of the screen.
-
-With automatic prayer display enabled, each congregation starts a silent phone/quiet-hall notice. Dhikr begins five minutes after Jama‘ah, or ten minutes for Maghrib. At twenty minutes after Jama‘ah, the saved display resumes (posters by default). Friday follows both configured Jummah congregation times instead of Dhuhr. Missing or stale daily data does not trigger a sequence. Ayat al-Kursi is shown in three consecutive parts, followed by short dhikr; each card remains for forty seconds. General mosque-etiquette reminders rotate beneath ordinary hall content. These are original reminders, not attributed hadith or specific reward claims.
-
-Class pauses prayer and manual notices until its expiry. Speech and Ramadan allow prayer notices to temporarily replace video. Capture remains active on the sender during that interruption; use Stop sharing to end capture itself.
-
-A Super Admin can choose **TV operator (TV controls only)** in **Staff access / Users & roles**, for an existing user or an invitation. This role can control the four TV panels but cannot edit website pages, timetable records or other users. Assigning it replaces that user's previous role. Existing administrators and content editors retain TV access. No users are promoted automatically. Apply the TV-operator migration and redeploy both `tv-control` and `manage-user` before deploying this frontend.
-
-Camera discovery must run on a device connected to the mosque network. The saved office-PC connection on port 4455 identifies OBS remote control, not a confirmed camera stream. Check the router's connected-device list or the camera source in OBS for the actual address and stream path. Do not assume all cameras share that subnet or add guessed IPs as streams.
-
-## Jummah and Ramadan notices
-
-Under **Automatic prayers, Jummah & Ramadan**, Normal uses London time and the current dated timetable:
-
-- Friday welcome runs from one hour before the first Jummah until 20 minutes after the last. The congregation/dhikr sequence has priority.
-- Ramadan follows the Umm al-Qura Islamic calendar. Set the local moon-calendar adjustment (−2 to +2 days), or choose **Ramadan is on/off** to match the mosque’s announced dates. A positive adjustment advances the Islamic date; it never changes prayer times.
-- During Ramadan, the du‘a screen runs 20–40 minutes after Isha Jama‘ah. Outside that window, fasting times appear for 20 seconds and posters for 40 seconds in each minute.
-- Class and Speech keep their selected sources regardless of the seasonal calendar. Speech can still show the enabled Jama‘ah/dhikr sequence.
-- **Notice override in Normal mode** can keep a Jummah or Taraweeh notice on until staff restore **Automatic**. Missing/stale timetable data prevents automatic seasonal notices.
-
-Edit the Jummah message for welcome information and local notices. It is also used at both Friday congregation times. Taraweeh accepts up to 1,200 characters of Arabic or English. Blank text displays the general Qur’anic supplication in [Al-Baqarah 2:201](https://quran.com/2/201); it is not presented as a prescribed Taraweeh formula. Text is displayed literally, never executed as HTML. Automatic Jama‘ah/dhikr takes priority over special notices; class mode suspends both. Shoe-area settings cannot enable either special notice.
-
-During Ramadan in Normal mode, fasting times use the dated mosque timetable. Before iftar the display shows today’s Fajr and Maghrib beginning times. At/after iftar it uses tomorrow’s record, including month and year boundaries. Missing data is labelled unavailable; times are never guessed. Class and Speech use their saved panels instead of these seasonal cards.
-
-## Streamerr video
-
-[Streamerr Video](https://streamerr.co/videostreaming) is a separate video service supporting OBS/RTMP input and website embedding. An existing radio URL is audio only. This implementation accepts browser-playable HLS/WHEP camera sources and YouTube video links; a Streamerr account’s embed/player must be checked before connecting that service. No video subscription is purchased or configured automatically.
+The relay has not been deployed or tested with the mosque's platform credentials. Its UI remains unavailable until `VITE_MEDIA_RELAY_URL` is configured. See `services/media-relay/README.md`.

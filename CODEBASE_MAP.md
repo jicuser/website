@@ -32,3 +32,7 @@ Start with [README.md](README.md) for setup and [docs/editing.md](docs/editing.m
 | GitHub environment and editor tasks  | `.devcontainer/`, `.vscode/`                                       |
 
 Admin fields are drafts until their explicit Save, Update, Add or Delete action. Formatting or layout edits must not introduce automatic database writes.
+
+## TV scene and access features
+
+`src/features/displays/SceneEditor.jsx` edits a percentage-based 16:9 canvas. `SceneCanvas.jsx` renders the same saved geometry on the TV. `DeviceInputs.jsx` coordinates independent publisher hooks; `SessionOutput.jsx` owns operator recording/broadcast controls. `NormalSettings.jsx` and `TvConnections.jsx` keep the TV settings page short. `src/features/access/AccessChecklist.jsx` renders explicit capabilities. Shared validation and stable IDs live in `supabase/functions/_shared/`, backed by versioned SQL and rollback-only integration tests.

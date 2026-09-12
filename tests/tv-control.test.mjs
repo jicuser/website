@@ -5,161 +5,161 @@ import {
   DEFAULT_TV_SETTINGS,
   validateSettings,
   publicSettings,
-  activeSession,
   validDescription,
-  isTvStaff,
-  normaliseTvSettings,
-  tvPanels,
+  secureStreamUrl,
+  youtubeUrl,
 } from '../supabase/functions/_shared/tv.js';
-
-test('four TV destinations have stable unique addresses', () => {
+import {
+  newScene,
+  fitRect,
+  canPlace,
+  usedInputSlots,
+} from '../supabase/functions/_shared/tv-scenes.js';
+const layer = (type, props = {}) => ({
+  id: 'source',
+  type,
+  x: 0,
+  y: 0,
+  width: 50,
+  height: 50,
+  ...props,
+});
+const config = (layers, extra = {}) => ({
+  ...DEFAULT_TV_SETTINGS,
+  scenes: [{ id: 'scene-1', name: 'Scene 1', overlap: true, layers }],
+  ...extra,
+});
+test('four stable halls and two display modes', () => {
   assert.deepEqual(
-    TV_SCREENS.map((screen) => screen.id),
+    TV_SCREENS.map((s) => s.id),
     ['mens-main', 'mens-upstairs', 'ladies-upstairs', 'shoe-area'],
   );
-  assert.equal(new Set(TV_SCREENS.map((screen) => screen.label)).size, 4);
-});
-
-test('multiple sources keep their order and independent overlay switches', () => {
-  const settings = validateSettings({
-    panels: ['camera', 'share', 'poster', 'poster-next'],
-    layout: 'focus-right',
-    camera_url: 'https://camera.local/live.m3u8',
-    show_times: false,
-    show_next: true,
-    show_clock: false,
-  });
-  assert.deepEqual(settings.panels, ['camera', 'share', 'poster', 'poster-next']);
-  const view = publicSettings(settings);
-  assert.equal(view.layout, 'focus-right');
-  assert.equal(view.show_times, false);
-  assert.equal(view.show_next, true);
-  assert.equal(view.show_clock, false);
-  assert.equal('camera_url' in view, false);
-  assert.equal(publicSettings(settings, true).camera_url, settings.camera_url);
-});
-
-test('invalid panel combinations and display options are rejected at the API boundary', () => {
-  for (const input of [
-    { panels: [] },
-    { panels: ['poster', 'poster'] },
-    { panels: ['html'] },
-    { panels: ['poster', 'poster-next', 'share', 'schedule', 'youtube'] },
-    { panels: ['camera'] },
-    { panels: ['youtube'] },
-    { panels: 'poster' },
-    { layout: 'javascript:alert(1)' },
-    { show_times: 'false' },
-    { show_next: 0 },
-    { show_clock: null },
-    { auto_jummah: 'yes' },
-    { ramadan_calendar: 'invalid' },
-    { calendar_offset: 3 },
-    { calendar_offset: 0.5 },
-  ])
-    assert.throws(() => validateSettings(input));
-});
-
-test('old sources migrate and timed modes return to two posters at expiry', () => {
-  const old = normaliseTvSettings({ mode: 'camera' });
-  assert.deepEqual(old.panels, ['camera', 'poster']);
-  const settings = { ...old, scene_mode: 'class', class_until: '2026-09-12T18:00:00Z' };
-  const end = Date.parse(settings.class_until);
-  assert.deepEqual(tvPanels(settings, end - 1), ['camera', 'poster']);
-  assert.deepEqual(tvPanels(settings, end), ['poster', 'poster-next']);
-  const shoe = validateSettings(
-    { panels: ['camera', 'share'], ramadan_calendar: 'on' },
-    'shoe-area',
-  );
-  assert.deepEqual(shoe.panels, ['poster', 'poster-next']);
-  assert.equal(shoe.ramadan_calendar, 'off');
-  assert.equal(shoe.auto_jummah, false);
-  assert.deepEqual(tvPanels(settings, end - 1, 'shoe-area'), ['poster', 'poster-next']);
-});
-test('screen settings validate modes, poster choices and rotation', () => {
   assert.deepEqual(validateSettings(DEFAULT_TV_SETTINGS), DEFAULT_TV_SETTINGS);
-  for (const change of [
-    { mode: 'other' },
-    { rotation_seconds: 4 },
-    { rotation_seconds: 301 },
-    { rotation_seconds: 5.5 },
-    { poster_ids: ['missing'] },
-    { poster_ids: [], include_events: false },
-    { muted: 'false' },
-    { mode: 'youtube' },
-    { mode: 'camera' },
-  ]) {
-    assert.throws(() => validateSettings({ ...DEFAULT_TV_SETTINGS, ...change }));
-  }
+  for (const mode of ['speech', 'class', 'ramadan', 'html'])
+    assert.throws(() => validateSettings({ scene_mode: mode }));
+  assert.equal(validateSettings({ scene_mode: 'teaching' }, 'shoe-area').scene_mode, 'normal');
 });
-test('camera URLs require HTTPS and reject embedded credentials', () => {
-  for (const url of [
-    'http://camera.local/live.m3u8',
-    'rtsp://camera.local/stream',
-    'javascript:alert(1)',
-    'https://admin:password@camera.local/stream',
-    'https://camera.local/live#secret',
-  ]) {
-    assert.throws(() =>
-      validateSettings({ ...DEFAULT_TV_SETTINGS, mode: 'camera', camera_url: url }),
-    );
-  }
-  assert.equal(
+test('scenes preserve layers, geometry, stacking and independent device inputs', () => {
+  const s = validateSettings(
+    config(
+      [
+        layer('input', { slot: 'input-1', audio: true }),
+        layer('input', { id: 'phone', slot: 'input-2', audio: false, x: 50 }),
+        layer('clock', { id: 'clock', x: 80, width: 20, height: 10 }),
+      ],
+      { scene_mode: 'teaching' },
+    ),
+  );
+  assert.deepEqual(
+    s.scenes[0].layers.map((l) => l.id),
+    ['source', 'phone', 'clock'],
+  );
+  assert.equal(s.scenes[0].layers[0].audio, true);
+  assert.deepEqual([...usedInputSlots(s)], ['input-1', 'input-2']);
+  const two = {
+    ...s,
+    scenes: [...s.scenes, newScene('scene-2', 'Scene 2')],
+    active_scene_id: 'scene-2',
+  };
+  assert.equal(validateSettings(two).active_scene_id, 'scene-2');
+});
+test('invalid layout, duplicate inputs and oversized scenes fail at the API boundary', () => {
+  for (const bad of [
+    layer('html'),
+    layer('poster', { x: -1 }),
+    layer('poster', { x: 90, width: 50 }),
+    layer('poster', { height: 0 }),
+    layer('poster', { width: NaN }),
+    layer('input', { slot: 'other', audio: false }),
+    layer('camera', { url: 'http://192.168.1.1', protocol: 'hls', audio: false }),
+    layer('youtube', { url: 'https://evil.example', audio: true }),
+    layer('text', { text: 'a'.repeat(1201) }),
+  ])
+    assert.throws(() => validateSettings(config([bad])));
+  assert.throws(() =>
+    validateSettings(
+      config([
+        layer('input', { slot: 'input-1', audio: false }),
+        layer('input', { id: 'second', slot: 'input-1', audio: false }),
+      ]),
+    ),
+  );
+  assert.throws(() =>
+    validateSettings(
+      config(Array.from({ length: 13 }, (_, i) => layer('poster', { id: `p${i}` }))),
+    ),
+  );
+  assert.throws(() => validateSettings({ ...DEFAULT_TV_SETTINGS, scenes: [] }));
+  assert.throws(() =>
     validateSettings({
       ...DEFAULT_TV_SETTINGS,
-      mode: 'camera',
-      camera_url: 'https://camera.local/live.m3u8',
-    }).camera_url,
-    'https://camera.local/live.m3u8',
+      scenes: Array.from({ length: 7 }, (_, i) => newScene(`s${i}`)),
+    }),
+  );
+  assert.throws(() => validateSettings({ ...DEFAULT_TV_SETTINGS, active_scene_id: 'missing' }));
+});
+test('overlap switch enforces layout both while dragging and saving', () => {
+  const first = layer('poster');
+  const second = layer('poster-next', { id: 'p2', x: 50 });
+  const scene = { id: 'scene-1', name: 'Test', overlap: false, layers: [first, second] };
+  assert.equal(canPlace(scene, { ...second, x: 25 }), false);
+  assert.equal(canPlace(scene, { ...second, x: 50 }), true);
+  assert.deepEqual(fitRect({ x: -20, y: 100, width: 30, height: 40 }), {
+    x: 0,
+    y: 60,
+    width: 30,
+    height: 40,
+  });
+  assert.doesNotThrow(() => validateSettings({ ...DEFAULT_TV_SETTINGS, scenes: [scene] }));
+  assert.throws(() =>
+    validateSettings({
+      ...DEFAULT_TV_SETTINGS,
+      scenes: [{ ...scene, layers: [first, { ...second, x: 25 }] }],
+    }),
   );
 });
-test('public screen data never contains camera URLs or extra private fields', () => {
-  const settings = {
-    ...DEFAULT_TV_SETTINGS,
-    mode: 'camera',
-    camera_url: 'https://camera.local/private.m3u8',
-    deviceToken: 'secret',
-    share_session: 'secret',
-  };
-  const publicView = publicSettings(settings);
-  assert.equal(publicView.mode, 'posters');
-  assert.equal(JSON.stringify(publicView).includes('secret'), false);
-  assert.equal('camera_url' in publicView, false);
-  const pairedView = publicSettings(settings, true);
-  assert.equal(pairedView.camera_url, settings.camera_url);
-  assert.equal('deviceToken' in pairedView, false);
+test('private class sources and extra fields never appear in public screen settings', () => {
+  const s = config(
+    [
+      layer('camera', { url: 'https://camera.local/private', protocol: 'hls', audio: true }),
+      layer('text', { id: 'text', text: 'Private lesson' }),
+    ],
+    { deviceToken: 'secret', stream_key: 'secret' },
+  );
+  const pub = JSON.stringify(publicSettings(s));
+  assert.equal(pub.includes('private'), false);
+  assert.equal(pub.includes('Private lesson'), false);
+  assert.equal(pub.includes('secret'), false);
+  const paired = publicSettings(s, true);
+  assert.equal(paired.scenes[0].layers[0].url, 'https://camera.local/private');
+  assert.equal('stream_key' in paired, false);
 });
-test('only active trusted staff roles can manage TV screens', () => {
-  for (const role of ['super_admin', 'admin', 'content_editor'])
-    assert.equal(isTvStaff({ role, is_active: true }), true);
-  for (const profile of [
-    null,
-    { role: 'viewer', is_active: true },
-    { role: 'admin', is_active: false },
-    { user_metadata: { role: 'admin' }, is_active: true },
+test('unsafe URLs, malformed SDP and invalid normal options are rejected', () => {
+  for (const url of [
+    'http://camera.local',
+    'rtsp://camera.local',
+    'javascript:alert(1)',
+    'https://a:b@camera.local/',
+    'https://camera.local/#x',
   ])
-    assert.equal(isTvStaff(profile), false);
-});
-test('expired sharing sessions and invalid SDP are rejected', () => {
-  const now = Date.parse('2026-09-11T12:00:00Z');
-  assert.equal(
-    activeSession({ share_session: 'id', share_expires: '2026-09-11T12:01:00Z' }, now),
-    true,
-  );
-  assert.equal(
-    activeSession({ share_session: 'id', share_expires: '2026-09-11T11:59:00Z' }, now),
-    false,
-  );
-  assert.equal(
-    activeSession({ share_session: null, share_expires: '2026-09-11T12:01:00Z' }, now),
-    false,
-  );
+    assert.throws(() => secureStreamUrl(url));
+  assert.equal(youtubeUrl('https://youtu.be/dQw4w9WgXcQ'), 'https://youtu.be/dQw4w9WgXcQ');
   assert.equal(validDescription({ type: 'offer', sdp: 'v=0\r\n' }, 'offer'), true);
-  for (const description of [
+  for (const d of [
     null,
     { type: 'answer', sdp: 'v=0' },
-    { type: 'offer', sdp: 'not sdp' },
+    { type: 'offer', sdp: 'bad' },
     { type: 'offer', sdp: 'v=0' + 'a'.repeat(65536) },
   ])
-    assert.equal(validDescription(description, 'offer'), false);
+    assert.equal(validDescription(d, 'offer'), false);
+  for (const options of [
+    { rotation_seconds: 4 },
+    { rotation_seconds: 301 },
+    { poster_ids: ['x'] },
+    { poster_ids: [], include_events: false },
+    { show_clock: 'no' },
+    { calendar_offset: 3 },
+    { ramadan_calendar: 'bad' },
+  ])
+    assert.throws(() => validateSettings(options));
 });

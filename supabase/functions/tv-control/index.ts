@@ -1,7 +1,7 @@
+import { hasPermission } from '../_shared/access.js';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import {
   normaliseTvSettings,
-  activeSession,
   isTvStaff,
   publicSettings,
   screenExists,
@@ -57,7 +57,7 @@ async function staff(req: Request) {
   } = await db.auth.getUser(token);
   if (error || !user) fail('Sign in to manage TV screens.', 401);
   const profile = await result(
-    db.from('profiles').select('role,is_active').eq('id', user.id).maybeSingle(),
+    db.from('profiles').select('is_owner,permissions,is_active').eq('id', user.id).maybeSingle(),
   );
   if (!isTvStaff(profile)) fail('You do not have permission to manage TV screens.', 403);
   return user.id;
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
   try {
     if (req.method !== 'POST') fail('Use POST.', 405);
     const raw = await req.text();
-    if (raw.length > 75000) fail('Request too large.', 413);
+    if (raw.length > 190000) fail('Request too large.', 413);
     let body;
     try {
       body = JSON.parse(raw);
@@ -103,20 +103,7 @@ Deno.serve(async (req) => {
     const screen = await result(db.from('tv_screens').select('*').eq('id', screenId).single());
     screen.settings = normaliseTvSettings(screen.settings);
     if (screenId === 'shoe-area') {
-      screen.settings = {
-        ...screen.settings,
-        mode: 'posters',
-        camera_url: '',
-        youtube_url: '',
-        prayer_enabled: false,
-        notice_mode: 'off',
-        class_until: '',
-        scene_mode: 'normal',
-        panels: ['poster', 'poster-next'],
-        ramadan_calendar: 'off',
-        auto_jummah: false,
-      };
-      screen.share_session = null;
+      screen.settings = validateSettings(screen.settings, screenId);
       if (
         ['start', 'join', 'receive', 'answer', 'offer', 'heartbeat', 'pair', 'pair-code'].includes(
           action,
@@ -124,6 +111,37 @@ Deno.serve(async (req) => {
       )
         fail('The shoe-area screen shows times and posters only.', 403);
     }
+    const liveInputs = () =>
+      result(
+        db
+          .from('tv_inputs')
+          .select('slot,session_id,kind,owner_id,expires_at')
+          .eq('screen_id', screenId)
+          .gt('expires_at', new Date().toISOString()),
+      );
+    const getInput = async () => {
+      if (typeof body.sessionId !== 'string' || !/^[a-f0-9-]{36}$/i.test(body.sessionId))
+        fail('Unknown input.', 409);
+      const input = await result(
+        db
+          .from('tv_inputs')
+          .select('*')
+          .eq('screen_id', screenId)
+          .eq('session_id', body.sessionId)
+          .gt('expires_at', new Date().toISOString())
+          .maybeSingle(),
+      );
+      if (!input || tvScene(screen.settings) !== 'teaching') fail('This input has ended.', 409);
+      const owner = await result(
+        db
+          .from('profiles')
+          .select('is_owner,is_active,permissions')
+          .eq('id', input.owner_id)
+          .maybeSingle(),
+      );
+      if (!isTvStaff(owner)) fail('This input is no longer authorised.', 409);
+      return input;
+    };
     let response: any;
 
     if (action === 'status') {
@@ -133,10 +151,14 @@ Deno.serve(async (req) => {
         label: screen.label,
         settings: publicSettings(screen.settings, paired),
         paired,
-        session:
-          paired && tvScene(screen.settings) !== 'normal' && activeSession(screen)
-            ? { id: screen.share_session, kind: screen.share_kind }
-            : null,
+        inputs:
+          paired && tvScene(screen.settings) === 'teaching'
+            ? (await liveInputs()).map(({ slot, session_id, kind }: any) => ({
+                slot,
+                id: session_id,
+                kind,
+              }))
+            : [],
       };
     } else if (action === 'pair') {
       if (typeof body.code !== 'string' || !/^[a-f0-9]{64}$/.test(body.code))
@@ -163,12 +185,7 @@ Deno.serve(async (req) => {
       response = { deviceToken: token };
     } else if (['join', 'receive', 'answer'].includes(action)) {
       const deviceId = await device(screenId, body.deviceToken);
-      if (
-        tvScene(screen.settings) === 'normal' ||
-        !activeSession(screen) ||
-        body.sessionId !== screen.share_session
-      )
-        fail('Sharing has ended.', 409);
+      const input = await getInput();
       if (action === 'join') {
         const peer = await result(
           db
@@ -176,7 +193,7 @@ Deno.serve(async (req) => {
             .upsert(
               {
                 screen_id: screenId,
-                session_id: screen.share_session,
+                session_id: input.session_id,
                 device_id: deviceId,
                 offer: null,
                 answer: null,
@@ -198,7 +215,7 @@ Deno.serve(async (req) => {
             .select('id,offer')
             .eq('id', body.peerId)
             .eq('device_id', deviceId)
-            .eq('session_id', screen.share_session)
+            .eq('session_id', input.session_id)
             .eq('screen_id', screenId)
             .maybeSingle(),
         );
@@ -216,56 +233,31 @@ Deno.serve(async (req) => {
             .gt('expires_at', new Date().toISOString())
             .order('created_at'),
         );
-        response = { ...screen, devices };
-      } else if (action === 'normal') {
+        response = { ...screen, devices, inputs: await liveInputs() };
+      } else if (action === 'normal' || action === 'save') {
         const settings = validateSettings(
-          {
-            ...screen.settings,
-            scene_mode: 'normal',
-            mode: 'posters',
-            class_until: '',
-            notice_mode: 'off',
-            event_title: '',
-            event_message: '',
-          },
+          action === 'normal'
+            ? { ...screen.settings, scene_mode: 'normal', class_until: '' }
+            : body.settings,
           screenId,
         );
-        await result(
-          db
-            .from('tv_screens')
-            .update({
-              settings,
-              share_session: null,
-              share_owner: null,
-              share_kind: null,
-              share_expires: null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', screenId),
-        );
-        await result(db.from('tv_peers').delete().eq('screen_id', screenId));
-        response = { settings };
-      } else if (action === 'save') {
-        const settings = validateSettings(body.settings, screenId);
-        const stopSharing =
-          body.stopSharing === true ||
-          tvScene(settings) === 'normal' ||
-          !settings.panels.includes('share');
-        await result(
-          db
-            .from('tv_screens')
-            .update({
-              settings,
-              ...(stopSharing
-                ? { share_session: null, share_owner: null, share_kind: null, share_expires: null }
-                : {}),
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', screenId),
-        );
-        if (stopSharing) await result(db.from('tv_peers').delete().eq('screen_id', screenId));
-        response = { settings };
+        const { data: updated_at, error } = await db.rpc('save_tv_scene', {
+          actor: userId,
+          hall: screenId,
+          config: settings,
+          expected: body.expectedUpdatedAt,
+        });
+        if (error) fail(error.message, 409);
+        response = { settings, updated_at };
       } else if (action === 'preview') {
+        let duration = 600;
+        if (body.purpose === 'broadcast') {
+          const profile = await result(
+            db.from('profiles').select('is_owner,is_active,permissions').eq('id', userId).single(),
+          );
+          if (!hasPermission(profile, 'broadcast')) fail('Recording permission required.', 403);
+          duration = 8 * 3600;
+        }
         const token = randomToken();
         const preview = await result(
           db
@@ -273,7 +265,7 @@ Deno.serve(async (req) => {
             .insert({
               screen_id: screenId,
               token_hash: await hash(token),
-              expires_at: expires(600),
+              expires_at: expires(duration),
             })
             .select('id')
             .single(),
@@ -294,65 +286,38 @@ Deno.serve(async (req) => {
         );
         response = { ok: true };
       } else if (action === 'start') {
-        if (tvScene(screen.settings) === 'normal')
-          fail('Choose and save Class or Speech before sharing.');
-        if (!screen.settings.panels.includes('share'))
-          fail('Select Shared screen in the layout and update this TV first.');
-        if (!['screen', 'camera'].includes(body.kind)) fail('Choose screen or camera.');
-        const sessionId = crypto.randomUUID();
-        const started = await result(
-          db
-            .from('tv_screens')
-            .update({
-              share_session: sessionId,
-              share_owner: userId,
-              share_kind: body.kind,
-              share_expires: expires(90),
-            })
-            .eq('id', screenId)
-            .or(`share_session.is.null,share_expires.lt.${new Date().toISOString()}`)
-            .select('id'),
-        );
-        if (!started?.length)
-          fail('Someone is already sharing to this screen. Stop that session first.', 409);
-        await result(db.from('tv_peers').delete().eq('screen_id', screenId));
+        if (
+          !['screen', 'camera'].includes(body.kind) ||
+          !['input-1', 'input-2', 'input-3', 'input-4'].includes(body.slot)
+        )
+          fail('Choose a device input and camera or screen.');
+        const { data: sessionId, error } = await db.rpc('start_tv_input', {
+          actor: userId,
+          hall: screenId,
+          input_slot: body.slot,
+          input_kind: body.kind,
+        });
+        if (error) fail(error.message, 409);
         response = { sessionId, iceServers: iceServers() };
       } else if (action === 'stop') {
-        const stopped = await result(
-          db
-            .from('tv_screens')
-            .update({
-              share_session: null,
-              share_owner: null,
-              share_kind: null,
-              share_expires: null,
-            })
-            .eq('id', screenId)
-            .eq('share_session', body.sessionId)
-            .select('id'),
+        await result(
+          db.from('tv_inputs').delete().eq('screen_id', screenId).eq('session_id', body.sessionId),
         );
-        if (stopped?.length)
-          await result(db.from('tv_peers').delete().eq('session_id', body.sessionId));
         response = { ok: true };
       } else if (['heartbeat', 'peers', 'offer'].includes(action)) {
-        if (
-          tvScene(screen.settings) === 'normal' ||
-          !activeSession(screen) ||
-          screen.share_owner !== userId ||
-          screen.share_session !== body.sessionId
-        )
-          fail('This sharing session has ended.', 409);
+        const input = await getInput();
+        if (input.owner_id !== userId) fail('This input belongs to another staff device.', 403);
         if (action === 'heartbeat') {
           const updated = await result(
             db
-              .from('tv_screens')
-              .update({ share_expires: expires(90) })
-              .eq('id', screenId)
-              .eq('share_session', body.sessionId)
-              .eq('share_owner', userId)
-              .select('id'),
+              .from('tv_inputs')
+              .update({ expires_at: expires(90) })
+              .eq('screen_id', screenId)
+              .eq('session_id', body.sessionId)
+              .eq('owner_id', userId)
+              .select('slot'),
           );
-          if (!updated?.length) fail('This sharing session has ended.', 409);
+          if (!updated?.length) fail('This input has ended.', 409);
           response = { ok: true };
         } else if (action === 'peers') {
           response = {

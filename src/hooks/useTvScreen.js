@@ -4,7 +4,7 @@ import { DEFAULT_TV_SETTINGS, TV_SCREENS, deviceKey, tvRequest } from '@/lib/tvC
 export default function useTvScreen(screenId) {
   const [state, setState] = useState({
     settings: DEFAULT_TV_SETTINGS,
-    session: null,
+    inputs: [],
     paired: false,
     deviceToken: '',
     error: '',
@@ -39,8 +39,12 @@ export default function useTvScreen(screenId) {
         // A failed authorisation/status check must not leave a private feed playing.
         setState((previous) => ({
           ...previous,
-          settings: { ...previous.settings, mode: 'posters', camera_url: '' },
-          session: null,
+          settings: {
+            ...previous.settings,
+            scenes: DEFAULT_TV_SETTINGS.scenes,
+            active_scene_id: 'scene-1',
+          },
+          inputs: [],
           paired: false,
           error: error.message,
         }));

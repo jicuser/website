@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import useTvScreen from '@/hooks/useTvScreen';
 import TvMediaPanel from '@/components/tv/TvMediaPanel';
+import SceneCanvas from '@/features/displays/SceneCanvas';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
 import {
@@ -12,7 +13,7 @@ import {
 } from '@/lib/tvPrayerSequence';
 import { TV_REMINDERS } from '@/content/tvReminders';
 import { TV_SCREENS } from '@/lib/tvControl';
-import { tvScene, tvPanels } from '../../supabase/functions/_shared/tv.js';
+import { tvScene } from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
@@ -85,14 +86,15 @@ function ScreenDisplay({ screenId }) {
     screenId,
   );
   // Fasting notices rotate with posters; Jama‘ah and Taraweeh still take priority.
-  const specialNotice = ['normal', 'ramadan'].includes(scene)
-    ? tvSpecialNotice(now, tv.settings, screenId) ||
-      (automaticNotice === 'fasting' && Math.floor(now.getTime() / 20000) % 3 !== 0
-        ? null
-        : automaticNotice)
-    : null;
+  const specialNotice =
+    scene === 'normal'
+      ? tvSpecialNotice(now, tv.settings, screenId) ||
+        (automaticNotice === 'fasting' && Math.floor(now.getTime() / 20000) % 3 !== 0
+          ? null
+          : automaticNotice)
+      : null;
   const noticeVisible = Boolean(sequence || specialNotice);
-  const panels = tvPanels(tv.settings, now.getTime(), screenId);
+  const panels = ['poster', 'poster-next'];
   const onImageError = useCallback(
     (image) =>
       setFailedImages((previous) => (previous.includes(image) ? previous : [...previous, image])),
@@ -160,6 +162,26 @@ function ScreenDisplay({ screenId }) {
     }
   };
 
+  if (scene === 'teaching')
+    return (
+      <div ref={screen} className="jic-tv-teaching" onDoubleClick={enterFullscreen}>
+        <Helmet>
+          <title>JIC · {tv.label}</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <SceneCanvas
+          tv={tv}
+          screenId={screenId}
+          now={now}
+          prayers={prayers}
+          posters={posters}
+          slide={slide}
+          onImageError={onImageError}
+          livestream={livestream}
+        />
+      </div>
+    );
+
   return (
     <div ref={screen} className="jic-tv-display" onDoubleClick={enterFullscreen}>
       <Helmet>
@@ -184,10 +206,7 @@ function ScreenDisplay({ screenId }) {
             </p>
           )}
       </header>
-      <main
-        className={`jic-tv-stage ${!noticeVisible && scene !== 'normal' && (tv.settings.event_title || tv.settings.event_message) ? 'has-event-heading' : ''}`}
-        aria-label="TV content"
-      >
+      <main className="jic-tv-stage" aria-label="TV content">
         {sequence && <TvPrayerScene sequence={sequence} jummahNotice={tv.settings.jummah_notice} />}
         {!sequence && specialNotice && (
           <TvSpecialNotice
@@ -198,15 +217,9 @@ function ScreenDisplay({ screenId }) {
         )}
         {!noticeVisible && (
           <>
-            {scene !== 'normal' && (tv.settings.event_title || tv.settings.event_message) && (
-              <div className="jic-tv-event-heading">
-                {tv.settings.event_title && <h1>{tv.settings.event_title}</h1>}
-                {tv.settings.event_message && <p>{tv.settings.event_message}</p>}
-              </div>
-            )}
             <div
               className="tv-panel-layout jic-tv-panels"
-              data-layout={scene === 'normal' ? 'columns' : tv.settings.layout}
+              data-layout="columns"
               data-count={panels.length}
               style={{
                 '--panel-count': panels.length,
@@ -215,7 +228,7 @@ function ScreenDisplay({ screenId }) {
             >
               {panels.map((source, index) => (
                 <TvMediaPanel
-                  key={`${source}:${source === 'share' ? tv.session?.id : source === 'camera' ? tv.settings.camera_url : source === 'youtube' ? tv.settings.youtube_url : source === 'schedule' ? livestream?.stream_url : ''}`}
+                  key={source}
                   source={source}
                   screenId={screenId}
                   tv={tv}
@@ -279,11 +292,7 @@ function ScreenDisplay({ screenId }) {
                 ? specialNotice === 'jummah'
                   ? 'Jummah notice'
                   : 'Ramadan · Taraweeh'
-                : scene === 'class' || scene === 'speech'
-                  ? scene === 'class'
-                    ? 'Class'
-                    : 'Speech'
-                  : 'Community notices'}
+                : 'Community notices'}
             {posters.length > 1 && ` · ${(slide % posters.length) + 1} / ${posters.length}`}
           </span>
         )}
