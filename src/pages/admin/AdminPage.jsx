@@ -25,6 +25,7 @@ import {
 import FormsInbox from '@/components/admin/FormsInbox';
 import StaffAccess from '@/components/admin/StaffAccess';
 import TvScreenEditor from '@/components/admin/TvScreenEditor';
+import PostersEditor from '@/components/admin/PostersEditor';
 import { TV_SCREENS } from '@/lib/tvControl';
 import PrayerEditor from '@/components/admin/PrayerEditor';
 import PageEditor from '@/components/admin/PageEditor';
@@ -47,6 +48,7 @@ const SECTIONS = [
   ['dashboard', 'Overview', Activity, 'dashboard'],
   ['prayer', 'Timetable & Jummah', Clock3, 'prayer_times'],
   ['events', 'Events', CalendarDays, 'events'],
+  ['posters', 'Posters', FileText, 'content'],
   ['announcements', 'Announcements', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
   ['tv', 'TV screens', Monitor, 'tv'],
@@ -119,6 +121,13 @@ function DashboardSection({ onChoose }) {
       'prayer_times',
     ],
     ['events', 'Events & posters', 'Add a poster, date and event details.', CalendarDays, 'events'],
+    [
+      'posters',
+      'Current posters',
+      'Edit pictures, add posters and choose website pages.',
+      FileText,
+      'content',
+    ],
     ['announcements', 'Notices', 'Keep the community up to date.', Megaphone, 'announcements'],
     ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
     [
@@ -159,7 +168,6 @@ function DashboardSection({ onChoose }) {
 }
 function TvSection() {
   const [screenId, setScreenId] = useState('mens-main');
-  const { dirty } = useAdminSave();
   return (
     <div className="admin-tv-workspace">
       <label className="admin-tv-select">
@@ -167,8 +175,7 @@ function TvSection() {
         <select
           value={screenId}
           onChange={(event) => {
-            if (!dirty || window.confirm('Discard unsaved screen settings?'))
-              setScreenId(event.target.value);
+            setScreenId(event.target.value);
           }}
         >
           {TV_SCREENS.map((screen) => (
@@ -976,11 +983,12 @@ export default function AdminPage() {
 
   const chooseSection = (key) => {
     if (key === active || !allowed.some((item) => item[0] === key)) return;
-    if (dirty && !window.confirm('Discard unsaved changes?')) return;
+    if (dirty && active !== 'tv' && !window.confirm('Discard unsaved changes?')) return;
     setActive(key);
   };
   const safeSignOut = async () => {
-    if (dirty && !window.confirm('Sign out and discard unsaved changes?')) return;
+    if (dirty && active !== 'tv' && !window.confirm('Sign out and discard unsaved changes?'))
+      return;
     await signOut();
   };
 
@@ -989,6 +997,7 @@ export default function AdminPage() {
     dashboard: <DashboardSection onChoose={chooseSection} />,
     prayer: <PrayerEditor />,
     events: <EventsSection />,
+    posters: <PostersEditor />,
     announcements: <AnnouncementsSection />,
     livestream: <LivestreamSection />,
     content: <PageEditor initialPath={params.get('page') || '/'} />,
@@ -1021,7 +1030,8 @@ export default function AdminPage() {
           <button
             className="admin-button"
             onClick={() => {
-              if (!dirty || window.confirm('Discard unsaved changes?')) navigate('/');
+              if (!dirty || active === 'tv' || window.confirm('Discard unsaved changes?'))
+                navigate('/');
             }}
           >
             <Home size={18} />
@@ -1029,7 +1039,7 @@ export default function AdminPage() {
           </button>
           <button className="admin-button" onClick={safeSignOut} aria-label="Sign out">
             <LogOut size={18} />
-            <span className="admin-desktop-label">Sign out</span>
+            <span>Sign out</span>
           </button>
         </div>
         {dirty && (
@@ -1062,7 +1072,10 @@ export default function AdminPage() {
           </label>
           <nav aria-label="Admin sections">
             {[
-              ['Everyday', ['dashboard', 'tv', 'prayer', 'events', 'announcements', 'livestream']],
+              [
+                'Everyday',
+                ['dashboard', 'tv', 'prayer', 'posters', 'events', 'announcements', 'livestream'],
+              ],
               ['Website & people', ['content', 'forms', 'team', 'users', 'audit']],
             ].map(([group, keys]) => (
               <div key={group}>

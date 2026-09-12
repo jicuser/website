@@ -12,8 +12,13 @@ import NormalSettings from '@/features/displays/NormalSettings';
 import DeviceInputs from '@/features/displays/DeviceInputs';
 import TvConnections from '@/features/displays/TvConnections';
 import SessionOutput from '@/features/displays/SessionOutput';
+import { useAuth } from '@/context/AuthContext';
+import usePosters from '@/hooks/usePosters';
 
 export default function TvScreenEditor({ screenId }) {
+  const { user } = useAuth();
+  const programmes = usePosters();
+  const draftKey = `jic-tv-draft:${user.id}:${screenId}`;
   const hall = screenId !== 'shoe-area';
   const screen = TV_SCREENS.find((item) => item.id === screenId);
   const [data, setData] = useState(null),
@@ -39,12 +44,38 @@ export default function TvScreenEditor({ screenId }) {
   }, []);
   const load = useCallback(async () => {
     try {
-      accept(await tvRequest('admin', screenId, {}, { staff: true }));
-      setMessage('');
+      const next = await tvRequest('admin', screenId, {}, { staff: true });
+      accept(next);
+      try {
+        const draft = JSON.parse(localStorage.getItem(draftKey));
+        if (draft?.settings && draft?.baseline) {
+          setForm(normaliseTvSettings(draft.settings));
+          setBaseline(draft.baseline);
+          setMessage('Draft restored. Save to update the TV, or clear the draft.');
+        } else setMessage('');
+      } catch {
+        setMessage('');
+      }
     } catch (e) {
       setMessage(e.message);
     }
-  }, [screenId, accept]);
+  }, [screenId, accept, draftKey]);
+  useEffect(() => {
+    if (!form || !baseline) return;
+    try {
+      if (dirty)
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({
+            settings: form,
+            baseline: { settings: baseline.settings, updated_at: baseline.updated_at },
+          }),
+        );
+      else localStorage.removeItem(draftKey);
+    } catch {
+      setMessage('This browser could not keep the draft. Save before leaving this page.');
+    }
+  }, [form, baseline, dirty, draftKey]);
   useEffect(() => {
     load();
   }, [load]);
@@ -221,9 +252,23 @@ export default function TvScreenEditor({ screenId }) {
             )}
           </section>
           {hall && form.scene_mode === 'teaching' && (
-            <SceneEditor value={form} onChange={setForm} disabled={busy} />
+            <SceneEditor
+              value={form}
+              onChange={setForm}
+              disabled={busy}
+              screenId={screenId}
+              posters={[
+                ...programmes,
+                ...currentEvents.map((e) => ({
+                  id: `event-${e.id}`,
+                  title: e.title,
+                  image: e.poster_url,
+                  alt: e.title,
+                })),
+              ]}
+            />
           )}
-          {hall && sourceSettings && (
+          {hall && form.scene_mode === 'teaching' && sourceSettings && (
             <DeviceInputs
               screenId={screenId}
               settings={sourceSettings}
@@ -236,25 +281,43 @@ export default function TvScreenEditor({ screenId }) {
               }
             />
           )}
-          <details open={form.scene_mode === 'normal'} className="admin-panel">
-            <summary>Normal posters & automatic notices</summary>
-            <NormalSettings form={form} update={update} currentEvents={currentEvents} hall={hall} />
-          </details>
-          <TvConnections
-            screenId={screenId}
-            data={data}
-            setData={setData}
-            form={form}
-            update={update}
-            run={run}
-            busy={busy}
-            copy={copy}
-          />
-          {hall && <SessionOutput screenId={screenId} />}
+          {form.scene_mode === 'normal' && (
+            <section>
+              <NormalSettings
+                form={form}
+                update={update}
+                currentEvents={currentEvents}
+                hall={hall}
+              />
+            </section>
+          )}
+          {hall && form.scene_mode === 'teaching' && (
+            <TvConnections
+              screenId={screenId}
+              data={data}
+              setData={setData}
+              form={form}
+              update={update}
+              run={run}
+              busy={busy}
+              copy={copy}
+            />
+          )}
+          {hall && form.scene_mode === 'teaching' && <SessionOutput screenId={screenId} />}
           <div className="admin-tv-save">
-            <span>{dirty ? 'Changes are ready to save.' : 'All changes saved.'}</span>
-            <button className="admin-button" disabled={busy} onClick={load}>
-              Reload saved
+            <span>
+              {dirty ? 'Draft kept on this browser. Save to update the TV.' : 'All changes saved.'}
+            </span>
+            <button
+              className="admin-button"
+              disabled={busy}
+              onClick={() => {
+                if (!window.confirm('Clear your draft and restore the saved TV settings?')) return;
+                localStorage.removeItem(draftKey);
+                load();
+              }}
+            >
+              Clear draft
             </button>
             <button
               className="admin-button primary"

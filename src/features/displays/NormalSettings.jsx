@@ -1,6 +1,7 @@
 import React from 'react';
-import { PROGRAMMES } from '@/content/programmes';
+import usePosters from '@/hooks/usePosters';
 export default function NormalSettings({ form, update, currentEvents, hall }) {
+  const programmes = usePosters();
   return (
     <>
       <section className="admin-panel">
@@ -27,7 +28,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
           play.
         </p>
         <div className="admin-poster-picker">
-          {PROGRAMMES.map((item) => (
+          {programmes.map((item) => (
             <label key={item.id}>
               <img src={item.image} alt="" loading="lazy" />
               <span>

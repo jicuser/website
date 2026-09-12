@@ -19,7 +19,8 @@ import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
-import { PROGRAMMES } from '@/content/programmes';
+import usePosters from '@/hooks/usePosters';
+import { useContent } from '@/context/ContentContext';
 import { safeWebUrl } from '@/lib/video';
 import { londonDate } from '@/lib/timetable';
 
@@ -35,6 +36,12 @@ export default function TvDisplayPage() {
 }
 
 function ScreenDisplay({ screenId }) {
+  const programmes = usePosters();
+  const { refreshContent } = useContent();
+  useEffect(() => {
+    const timer = setInterval(() => refreshContent().catch(() => {}), 30000);
+    return () => clearInterval(timer);
+  }, [refreshContent]);
   const tv = useTvScreen(screenId);
   const screen = useRef(null);
   const prayers = usePrayerTimes({ includeTomorrow: true });
@@ -52,18 +59,20 @@ function ScreenDisplay({ screenId }) {
   );
   const scene = tvScene(tv.settings, now.getTime());
   const posters = useMemo(() => {
-    const programmePosters = PROGRAMMES.filter((item) =>
-      tv.settings.poster_ids.includes(item.id),
-    ).map((item) => ({
-      id: item.id,
-      title: item.title,
-      image: item.image,
-      alt: item.alt,
-    }));
+    const programmePosters = programmes
+      .filter((item) => scene === 'teaching' || tv.settings.poster_ids.includes(item.id))
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        image: item.image,
+        alt: item.alt,
+      }));
     const eventPosters = events
       .filter(
         (event) =>
-          tv.settings.include_events && event.event_date >= today && safeWebUrl(event.poster_url),
+          (scene === 'teaching' || tv.settings.include_events) &&
+          event.event_date >= today &&
+          safeWebUrl(event.poster_url),
       )
       .map((event) => ({
         id: `event-${event.id}`,
@@ -77,7 +86,15 @@ function ScreenDisplay({ screenId }) {
       seen.add(item.image);
       return true;
     });
-  }, [events, failedImages, today, tv.settings.poster_ids, tv.settings.include_events]);
+  }, [
+    programmes,
+    scene,
+    events,
+    failedImages,
+    today,
+    tv.settings.poster_ids,
+    tv.settings.include_events,
+  ]);
   const automaticNotice = automaticTvNotice(
     now,
     prayers.todaysTimes,

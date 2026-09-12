@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { tvRequest } from '@/lib/tvControl';
-import useRecording from './useRecording';
 import useBroadcast from './useBroadcast';
 
 export default function SessionOutput({ screenId }) {
   const { can } = useAuth();
-  const recording = useRecording(),
-    broadcast = useBroadcast(screenId);
+  const broadcast = useBroadcast(screenId);
   const [destinations, setDestinations] = useState([{ platform: 'youtube', url: '', key: '' }]);
   const [message, setMessage] = useState('');
   const relay = import.meta.env.VITE_MEDIA_RELAY_URL;
@@ -15,7 +13,7 @@ export default function SessionOutput({ screenId }) {
   async function openTv() {
     const tab = window.open('about:blank', '_blank');
     if (!tab) {
-      setMessage('Allow a new tab to open the recording view.');
+      setMessage('Allow a new tab to open the TV view.');
       return;
     }
     tab.opener = null;
@@ -32,38 +30,29 @@ export default function SessionOutput({ screenId }) {
   }
   return (
     <details className="admin-panel">
-      <summary>Record or broadcast this session</summary>
+      <summary>Go live on YouTube / TikTok</summary>
       <p>
-        Open the TV view in a separate tab, enable its audio, then choose that tab when recording or
-        broadcasting. The selected tab’s picture and sound become the output.
+        This sends the finished TV picture and sound to your channel. Camera and screen sharing
+        inside the mosque do not need a stream key. Keep your broadcasting laptop running.
       </p>
       <div className="admin-actions">
         <button className="admin-button" onClick={openTv}>
-          Open TV tab for recording
-        </button>
-        <button
-          className="admin-button"
-          disabled={!recording.recording && !navigator.mediaDevices?.getDisplayMedia}
-          onClick={() => (recording.recording ? recording.stop() : recording.recordTv())}
-        >
-          {recording.recording ? 'Stop recording' : 'Record TV tab'}
+          Open finished TV view
         </button>
       </div>
       <p>
-        On a phone, use “Record this input” under its camera. Recording the complete TV tab requires
-        a supported desktop browser. Recordings stay on your device until downloaded.
+        Use a desktop browser: open the TV view, enable its sound, then select that tab and share
+        its audio when going live. Do not add the same outgoing YouTube broadcast back into the
+        scene, because it would repeat its own picture and sound.
       </p>
-      {recording.url && (
-        <a className="admin-button" href={recording.url} download={recording.name}>
-          Download recording
-        </a>
-      )}
-      <p role="status">{message || recording.message}</p>
+      <p role="status">{message}</p>
       <h4>YouTube / TikTok broadcast</h4>
       {!relay ? (
         <p>
-          Broadcasting needs the media relay to be configured by your website maintainer. Camera
-          sharing and recording work separately.
+          Website broadcasting is not connected yet. A relay is the sending service that converts
+          the TV picture and forwards it to YouTube or TikTok. It needs to be installed before “Go
+          live” can work. Your existing OBS computer can also capture the finished TV view and send
+          it directly to YouTube.
         </p>
       ) : (
         <>
@@ -134,6 +123,14 @@ export default function SessionOutput({ screenId }) {
           <p role="status">{broadcast.message}</p>
         </>
       )}
+      <p>
+        A stream key is a private code supplied by YouTube or TikTok, not by this website. For
+        YouTube, open YouTube Studio → Create → Go live → Stream, then copy the stream URL and key.
+        Use it only for the outgoing broadcast.
+      </p>
+      <a href="https://support.google.com/youtube/answer/2907883" target="_blank" rel="noreferrer">
+        YouTube setup instructions ↗
+      </a>
     </details>
   );
 }

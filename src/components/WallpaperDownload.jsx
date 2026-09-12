@@ -72,7 +72,7 @@ export default function WallpaperDownload({ monthlyPrayerTimes, currentMonth }) 
   }
 
   return (
-    <div className="jic-wallpaper-control">
+    <div className="jic-wallpaper-control" id="phone-wallpaper">
       <button type="button" disabled={busy} onClick={prepare}>
         <Smartphone size={17} />
         {busy ? 'Preparing wallpaper…' : 'Download phone wallpaper'}

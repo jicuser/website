@@ -2,7 +2,7 @@
 
 ## Invite a colleague
 
-Open **Admin → Staff & access**. Enter their name and email, tick optional staff labels, then tick the specific editing permissions. Nothing is selected automatically. Being a teacher or volunteer does not grant access. TV operators need **TV scenes and device inputs**; recording and external broadcasting additionally need **Recording and broadcasting**.
+Open **Admin → Staff & access**. Enter their name and email, tick optional staff labels, then tick the specific editing permissions. Nothing is selected automatically. Being a teacher or volunteer does not grant access. TV operators need **TV scenes and device inputs**; external broadcasting additionally needs the broadcast permission.
 
 Invited accounts without permissions can complete account setup but cannot open Admin. An owner can grant access later. A delegated staff manager can only grant permissions they hold and cannot change an owner or their own access. Picture uploads require the upload permission plus access to the relevant editor. Delete permission applies only inside permitted sections.
 
@@ -19,7 +19,7 @@ There are four addresses: `/tv179/mens-main`, `/tv179/mens-upstairs`, `/tv179/la
 
 ## Normal
 
-Normal rotates selected programme posters and published upcoming event posters. Programme poster definitions live in `src/content/programmes.js`; event posters are edited in **Admin → Events**. Its timetable, next-prayer line and clock have separate switches.
+Normal rotates selected programme posters and published upcoming event posters. **Admin → Posters** shows current programme pictures: edit names, replace pictures, add posters and choose website destinations. The shared catalogue is `page_content.programme_posters`; bundled programme definitions are initial defaults only. TVs refresh the catalogue every 30 seconds. Dated event posters are edited in **Admin → Events**. Its timetable, next-prayer line and clock have separate switches. Normal has no broadcasting or device controls.
 
 Normal alone runs prayer reminders, Jummah and Ramadan notices. At Jama‘ah it shows the phone reminder, then dhikr after five minutes (ten for Maghrib). Posters return twenty minutes after Jama‘ah. Jummah welcome runs from one hour before the first congregation until twenty minutes after the last. Ramadan follows the Islamic calendar with an optional local offset or explicit on/off setting. After Isha it shows the configured du‘a twenty to forty minutes after Jama‘ah, then fasting times among posters.
 
@@ -27,13 +27,13 @@ Normal alone runs prayer reminders, Jummah and Ramadan notices. At Jama‘ah it 
 
 1. Choose **Class / Teach**.
 2. Add scenes with **+ Scene**, up to six. Choose a scene to work on.
-3. Add sources: two separate poster slides, YouTube, CCTV, device inputs, website livestream, timetable, next prayer, clock or a text notice.
+3. Start with an empty scene. Add Posters, YouTube, CCTV, screen share, device camera, timetable, next prayer, clock or text. Each item opens its own properties. For Posters, tick names and set rotation seconds; for YouTube, enter its link. Add more than one Posters item if you want separate rotating areas.
 4. Drag sources, resize using the corner, or edit the percentage fields. Use **Bring to front** and **Send to back** for layering. Disable overlap after arranging sources apart if wanted.
 5. Press **Save & update TV**. This saves the layout and selects that scene on the TV. Choosing a different scene also needs Save.
 
-Class / Teach pauses all automatic seasonal and prayer notices. Optional timetable and next-prayer elements still work as chosen. Return to Normal manually and save, or choose a timed return. A stale draft is rejected if another staff device saved first; reload before editing again.
+Class / Teach hides Normal settings and pauses all automatic seasonal and prayer notices. Optional timetable and next-prayer elements still work as chosen. Return to Normal manually and save, or choose a timed return. Drafts are stored per account and hall on the current browser, including after switching sections. Clear draft restores the published version; Clear scene removes items only from the draft. A stale draft is rejected if another staff device saved first; clear the stale draft before editing the latest version.
 
-The editor and TV share a 16:9 coordinate system. The TV letterboxes other aspect ratios. Each scene supports twelve layers. The bottom-left pillar logo stays visible. The embedded preview is the actual saved TV route, not a simulation; it cannot prove playback on the physical TV.
+The editor and TV share a 16:9 coordinate system. The TV letterboxes other aspect ratios. Each scene supports twelve layers. The bottom-left pillar logo stays visible. Preview draft renders unsaved posters, YouTube, text and times; View TV opens the actual saved TV route, including approved private feeds. Neither proves playback on the physical TV. `/tv179` and hall URLs remain supported because installed TVs use them; `/tv` is just a redirect, not a second player.
 
 ## Laptop presentation and phone camera together
 
@@ -49,9 +49,11 @@ Enter an HTTPS HLS (`.m3u8`) or WebRTC WHEP stream URL for a CCTV layer. A local
 
 The website does not scan the LAN or expose cameras publicly. Private camera URLs are only returned to authorised TV browsers. Do not put camera passwords or platform stream keys into public site content. Obtain the actual camera/NVR model and stream URL before on-site testing.
 
-## Record or broadcast
+## Broadcast the finished TV view
 
-A phone can record its active camera input, including microphone audio if selected. A desktop can open the separate TV view and record that tab with sound. The separate recording view has an eight-hour credential; close it when finished or revoke it under TV connections. Recordings are kept locally, then downloaded as WebM or MP4 according to browser support. Each recording part stops at approximately 256 MB to limit mobile memory; download it before starting another part.
+Local recording controls have been removed. On a desktop, open the finished TV view in a tab, enable its sound, then choose that tab with shared audio for the outgoing broadcast. Keep that laptop and the contributing phone camera open. Never put the same outgoing YouTube broadcast into its own TV scene: that creates repeating video/audio feedback. The broadcast view has an eight-hour credential; close or revoke it when finished.
+
+A stream key is the private destination code from the streaming platform. Screen sharing and phone/CCTV inputs do not need one. In YouTube Studio choose Create → Go live → Stream and copy the stream URL and key. A relay converts the finished browser picture/audio into the format YouTube accepts. The existing OBS computer can alternatively capture that TV view and stream directly to YouTube. See https://support.google.com/youtube/answer/2907883.
 
 External YouTube/TikTok output needs the separately hosted media relay in `services/media-relay`. Static website hosting and Supabase Edge Functions do not run its persistent encoder. No external stream is started until an operator enters destination details and explicitly chooses **Go live**. Platform passwords are not collected. Enter the stream server and key from the platform's Live Studio; TikTok streaming access depends on the account.
 

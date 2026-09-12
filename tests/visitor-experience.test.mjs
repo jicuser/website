@@ -206,8 +206,10 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
     assert.ok(calls.some(([text]) => text === 'SUNRISE'));
     assert.ok(calls.some(([text]) => text === 'October 2026 Prayer Times'));
     assert.ok(calls.some(([text]) => text === 'Thu 31'));
-    assert.ok(calls.some(([text]) => text === 'J —'));
-    assert.ok(!calls.some(([text]) => text === 'J 5:15'));
+    const fajrX = 46 + 150 + (1290 - 92 - 150) / 6 / 2;
+    const fajrCalls = calls.filter(([, x, y]) => x === fajrX && y > 599);
+    assert.equal(fajrCalls.filter(([text]) => text === '5:15').length, 31);
+    assert.equal(fajrCalls.filter(([text]) => text === '—').length, 31);
     assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1290 && y >= 300 && y < 2796));
   } finally {
     if (previous === undefined) delete globalThis.document;

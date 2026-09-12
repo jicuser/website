@@ -69,7 +69,7 @@ export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
     align: 'center',
     color: '#ffffff',
   });
-  drawText(ctx, 'Birmingham · Begins & Jama‘ah', 645, 459, {
+  drawText(ctx, 'Birmingham · Start above / Jama‘ah below · 12-hour times', 645, 459, {
     size: 24,
     align: 'center',
     color: '#9eabb7',
@@ -83,7 +83,7 @@ export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
   const rows = monthlyPrayerTimes.length;
   const availableRowsHeight = 2050;
   const rowH = Math.min(63, Math.floor(availableRowsHeight / Math.max(rows, 1)));
-  const dateW = 142;
+  const dateW = 150;
   const prayerW = (tableWidth - dateW) / 6;
   const prayers = [
     ['Fajr', 'fajr_begins', 'fajr_jamah'],
@@ -106,7 +106,7 @@ export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
   ctx.fill();
 
   drawText(ctx, 'DATE', left + dateW / 2, top + headerH / 2 + 2, {
-    size: 18,
+    size: 26,
     weight: 760,
     align: 'center',
     color: '#dfb650',
@@ -117,18 +117,19 @@ export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
       label.toUpperCase(),
       left + dateW + prayerW * index + prayerW / 2,
       top + headerH / 2 + 2,
-      { size: 18, weight: 760, align: 'center', color: '#dfb650' },
+      { size: 25, weight: 760, align: 'center', color: '#dfb650' },
     );
   });
 
   monthlyPrayerTimes.forEach((day, row) => {
     const y = top + headerH + row * rowH;
-    if (row % 2 === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,.025)';
+    const friday = day.dayName === 'Fri';
+    if (friday || row % 2 === 0) {
+      ctx.fillStyle = friday ? '#e9c760' : '#172b3d';
       ctx.fillRect(left + 10, y, tableWidth - 20, rowH);
     }
 
-    ctx.strokeStyle = 'rgba(255,255,255,.055)';
+    ctx.strokeStyle = 'rgba(255,255,255,.30)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(left + 18, y + rowH);
@@ -137,34 +138,44 @@ export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
 
     const dateLabel = `${day.dayName || ''} ${day.day ?? '—'}`.trim();
     drawText(ctx, dateLabel, left + dateW / 2, y + rowH / 2, {
-      size: 19,
-      weight: 650,
+      size: 28,
+      weight: 750,
       align: 'center',
-      color: '#f4f6f8',
+      color: friday ? '#101820' : '#ffffff',
     });
 
     prayers.forEach(([, beginsKey, jamahKey], index) => {
       const x = left + dateW + prayerW * index + prayerW / 2;
-      drawText(ctx, `B ${clean(day[beginsKey])}`, x, y + rowH * 0.35, {
-        size: 16,
-        weight: 560,
+      drawText(ctx, clean(day[beginsKey]), x, y + rowH * 0.27, {
+        size: 28,
+        weight: 650,
         align: 'center',
-        color: '#aeb8c2',
+        color: friday ? '#101820' : '#dce8f1',
       });
-      drawText(ctx, jamahKey ? `J ${clean(day[jamahKey])}` : '', x, y + rowH * 0.68, {
-        size: 18,
-        weight: 720,
+      drawText(ctx, jamahKey ? clean(day[jamahKey]) : '', x, y + rowH * 0.74, {
+        size: 29,
+        weight: 800,
         align: 'center',
-        color: '#ffffff',
+        color: friday ? '#101820' : '#ffffff',
       });
     });
   });
 
+  // Vertical rules and Friday bands make each date easy to follow across.
+  ctx.strokeStyle = 'rgba(255,255,255,.25)';
+  for (let col = 0; col < 6; col++) {
+    const x = left + dateW + prayerW * col;
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, top + headerH + rows * rowH);
+    ctx.stroke();
+  }
+
   const footerY = Math.min(2660, top + headerH + rows * rowH + 82);
-  drawText(ctx, 'B = Begins   ·   J = Jama‘ah', 645, footerY, {
-    size: 20,
+  drawText(ctx, 'Top: prayer starts · Bottom: Jama‘ah · Gold rows: Friday', 645, footerY, {
+    size: 27,
     align: 'center',
-    color: '#8796a3',
+    color: '#dce8f1',
   });
   drawText(ctx, 'jicmasjid.org', 645, footerY + 48, {
     size: 22,

@@ -3,13 +3,9 @@ import useTvPublisher from '@/hooks/useTvPublisher';
 import { tvRequest } from '@/lib/tvControl';
 import { tvScene } from '../../../supabase/functions/_shared/tv.js';
 import { usedInputSlots } from '../../../supabase/functions/_shared/tv-scenes.js';
-import { useAuth } from '@/context/AuthContext';
-import useRecording from './useRecording';
 
-function DeviceInput({ screenId, slot, remote, disabled, onRefresh }) {
+function DeviceInput({ screenId, slot, capture, remote, disabled, onRefresh }) {
   const sharing = useTvPublisher(screenId, slot);
-  const recording = useRecording();
-  const { can } = useAuth();
   const [audio, setAudio] = useState(false);
   const [error, setError] = useState('');
   const video = useRef(null);
@@ -38,38 +34,41 @@ function DeviceInput({ screenId, slot, remote, disabled, onRefresh }) {
         Include microphone / shared audio
       </label>
       <div className="admin-actions">
-        <button
-          className="admin-button"
-          disabled={
-            disabled ||
-            sharing.busy ||
-            Boolean(sharing.stream) ||
-            Boolean(remote) ||
-            !navigator.mediaDevices?.getDisplayMedia
-          }
-          onClick={() => sharing.start('screen', audio)}
-        >
-          Share this screen
-        </button>
-        <button
-          className="admin-button"
-          disabled={
-            disabled ||
-            sharing.busy ||
-            Boolean(sharing.stream) ||
-            Boolean(remote) ||
-            !navigator.mediaDevices?.getUserMedia
-          }
-          onClick={() => sharing.start('camera', audio)}
-        >
-          Use this camera
-        </button>
+        {capture !== 'camera' && (
+          <button
+            className="admin-button"
+            disabled={
+              disabled ||
+              sharing.busy ||
+              Boolean(sharing.stream) ||
+              Boolean(remote) ||
+              !navigator.mediaDevices?.getDisplayMedia
+            }
+            onClick={() => sharing.start('screen', audio)}
+          >
+            Share this screen
+          </button>
+        )}
+        {capture !== 'screen' && (
+          <button
+            className="admin-button"
+            disabled={
+              disabled ||
+              sharing.busy ||
+              Boolean(sharing.stream) ||
+              Boolean(remote) ||
+              !navigator.mediaDevices?.getUserMedia
+            }
+            onClick={() => sharing.start('camera', audio)}
+          >
+            Use this camera
+          </button>
+        )}
         {(sharing.stream || remote || sharing.busy) && (
           <button
             className="admin-button"
             onClick={async () => {
               try {
-                recording.stop();
                 if (sharing.stream || sharing.busy) await sharing.stop();
                 else
                   await tvRequest(
@@ -87,16 +86,6 @@ function DeviceInput({ screenId, slot, remote, disabled, onRefresh }) {
             Stop input
           </button>
         )}
-        {sharing.stream && can('broadcast') && (
-          <button
-            className="admin-button"
-            onClick={() =>
-              recording.recording ? recording.stop() : recording.start(sharing.stream)
-            }
-          >
-            {recording.recording ? 'Stop recording' : 'Record this input'}
-          </button>
-        )}
       </div>
       {sharing.stream && (
         <video
@@ -109,12 +98,6 @@ function DeviceInput({ screenId, slot, remote, disabled, onRefresh }) {
         />
       )}
       <p role="status">{error || sharing.message}</p>
-      {recording.message && <p role="status">{recording.message}</p>}
-      {recording.url && (
-        <a className="admin-button" href={recording.url} download={recording.name}>
-          Download recording
-        </a>
-      )}
     </article>
   );
 }
@@ -134,6 +117,11 @@ export default function DeviceInputs({ screenId, settings, inputs, disabled, onR
           key={slot}
           screenId={screenId}
           slot={slot}
+          capture={
+            settings.scenes
+              .flatMap((s) => s.layers)
+              .find((l) => l.type === 'input' && l.slot === slot)?.capture
+          }
           remote={inputs.find((i) => i.slot === slot)}
           disabled={disabled}
           onRefresh={onRefresh}

@@ -155,11 +155,46 @@ test('unsafe URLs, malformed SDP and invalid normal options are rejected', () =>
   for (const options of [
     { rotation_seconds: 4 },
     { rotation_seconds: 301 },
-    { poster_ids: ['x'] },
-    { poster_ids: [], include_events: false },
+    { poster_ids: ['../unsafe'] },
+    { poster_ids: [null] },
     { show_clock: 'no' },
     { calendar_offset: 3 },
     { ramadan_calendar: 'bad' },
   ])
     assert.throws(() => validateSettings(options));
+});
+
+test('empty class scenes and named poster rotations survive saving', () => {
+  const empty = newScene();
+  assert.deepEqual(validateSettings({ scenes: [empty] }).scenes[0].layers, []);
+  const scene = {
+    ...empty,
+    layers: [
+      {
+        id: 'posters',
+        type: 'poster',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        poster_ids: ['new-poster', 'event-123'],
+        rotation_seconds: 15,
+      },
+    ],
+  };
+  assert.deepEqual(validateSettings({ scenes: [scene] }).scenes[0].layers[0].poster_ids, [
+    'new-poster',
+    'event-123',
+  ]);
+  assert.throws(() =>
+    validateSettings({
+      scenes: [{ ...scene, layers: [{ ...scene.layers[0], poster_ids: ['https://unsafe'] }] }],
+    }),
+  );
+  assert.throws(() =>
+    validateSettings({
+      scenes: [{ ...scene, layers: [{ ...scene.layers[0], rotation_seconds: 0 }] }],
+    }),
+  );
+  assert.equal(publicSettings({ scene_mode: 'teaching', scenes: [scene] }).scene_mode, 'normal');
 });

@@ -1,11 +1,10 @@
 // Percent coordinates are the storage contract for every client, including Flutter.
 export const SOURCE_TYPES = [
-  ['poster', 'Poster 1'],
-  ['poster-next', 'Poster 2'],
+  ['poster', 'Posters'],
   ['youtube', 'YouTube'],
   ['camera', 'CCTV stream'],
   ['input', 'Phone camera / shared screen'],
-  ['schedule', 'Website livestream'],
+  ['schedule', 'Use website’s saved live video'],
   ['times', 'Salah timetable'],
   ['next', 'Next prayer'],
   ['clock', 'Current clock'],
@@ -18,12 +17,7 @@ export const newScene = (id = 'scene-1', name = 'Scene 1') => ({
   id,
   name,
   overlap: true,
-  layers: [
-    { id: `${id}-poster`, type: 'poster', x: 0, y: 18, width: 50, height: 75 },
-    { id: `${id}-poster2`, type: 'poster-next', x: 50, y: 18, width: 50, height: 75 },
-    { id: `${id}-times`, type: 'times', x: 0, y: 0, width: 100, height: 18 },
-    { id: `${id}-clock`, type: 'clock', x: 76, y: 93, width: 24, height: 7 },
-  ],
+  layers: [],
 });
 export function overlaps(a, b) {
   return (
@@ -73,17 +67,16 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
       throw new Error('Give each scene a name.');
     if (
       !Array.isArray(scene.layers) ||
-      scene.layers.length < 1 ||
       scene.layers.length > MAX_LAYERS ||
       new Set(scene.layers.map((l) => l?.id)).size !== scene.layers.length
     )
-      throw new Error('Keep one to twelve sources per scene.');
+      throw new Error('Keep up to twelve sources per scene.');
     const result = {
       id: scene.id,
       name: scene.name.trim(),
       overlap: scene.overlap,
       layers: scene.layers.map((layer) => {
-        if (!validId(layer?.id) || !SOURCE_TYPES.some(([id]) => id === layer.type))
+        if (!validId(layer?.id) || !(SOURCE_TYPES.some(([id]) => id === layer.type) || layer.type === 'poster-next'))
           throw new Error('Unknown scene source.');
         for (const key of ['x', 'y', 'width', 'height'])
           if (!Number.isFinite(layer[key])) throw new Error('Enter valid source positions.');
@@ -91,6 +84,18 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
         if (Object.keys(rect).some((key) => Math.abs(rect[key] - layer[key]) > 0.001))
           throw new Error('Sources must fit inside the landscape screen.');
         const item = { id: layer.id, type: layer.type, ...rect };
+        if (['poster', 'poster-next'].includes(layer.type)) {
+          if (layer.poster_ids !== undefined) {
+            if (!Array.isArray(layer.poster_ids) || layer.poster_ids.length > 100 || layer.poster_ids.some((id) => !validId(id)))
+              throw new Error('Choose valid posters.');
+            item.poster_ids = [...new Set(layer.poster_ids)];
+          }
+          if (layer.rotation_seconds !== undefined) {
+            if (!Number.isInteger(layer.rotation_seconds) || layer.rotation_seconds < 5 || layer.rotation_seconds > 300)
+              throw new Error('Use 5–300 seconds between posters.');
+            item.rotation_seconds = layer.rotation_seconds;
+          }
+        }
         if (layer.type === 'youtube') item.url = youtubeUrl(layer.url);
         if (layer.type === 'camera') {
           item.url = streamUrl(layer.url);
@@ -101,6 +106,10 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
         if (layer.type === 'input') {
           if (!INPUT_SLOTS.includes(layer.slot)) throw new Error('Choose a device input.');
           item.slot = layer.slot;
+          if (layer.capture !== undefined) {
+            if (!['camera', 'screen'].includes(layer.capture)) throw new Error('Choose camera or screen sharing.');
+            item.capture = layer.capture;
+          }
         }
         if (layer.type === 'text') {
           if (typeof layer.text !== 'string' || layer.text.length > 1200)

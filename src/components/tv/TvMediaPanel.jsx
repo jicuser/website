@@ -71,6 +71,6 @@ export default function TvMediaPanel({
       <figcaption>{poster.title}</figcaption>
     </figure>
   ) : (
-    <p className="jic-tv-empty">Community notices</p>
+    <div className="jic-tv-empty" aria-label="Waiting for selected content" />
   );
 }

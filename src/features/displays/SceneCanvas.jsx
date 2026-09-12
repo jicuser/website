@@ -47,7 +47,19 @@ export default function SceneCanvas({
                 screenId={screenId}
                 now={now}
                 livestream={livestream}
-                poster={posters[(slide + (layer.type === 'poster-next' ? 1 : 0)) % posters.length]}
+                poster={
+                  ['poster', 'poster-next'].includes(layer.type)
+                    ? (() => {
+                        const selected = layer.poster_ids
+                          ? posters.filter((p) => layer.poster_ids.includes(p.id))
+                          : posters;
+                        const index = layer.poster_ids
+                          ? Math.floor(now.getTime() / ((layer.rotation_seconds || 20) * 1000))
+                          : slide + (layer.type === 'poster-next' ? 1 : 0);
+                        return selected[index % selected.length];
+                      })()
+                    : undefined
+                }
                 onImageError={onImageError}
               />
             )}

@@ -9,11 +9,23 @@ import {
   canPlace,
   layerStyle,
 } from '../../../supabase/functions/_shared/tv-scenes.js';
-import { PROGRAMMES } from '@/content/programmes';
+import SceneCanvas from './SceneCanvas';
+import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
+import useHomeLiveContent from '@/hooks/useHomeLiveContent';
+import { useEffect } from 'react';
 
 const uid = () => crypto.randomUUID();
 const label = (type) => SOURCE_TYPES.find(([id]) => id === type)?.[1] || type;
-export default function SceneEditor({ value, onChange, disabled }) {
+export default function SceneEditor({ value, onChange, disabled, posters = [], screenId }) {
+  const prayers = usePrayerTimes();
+  const { livestream } = useHomeLiveContent();
+  const [preview, setPreview] = useState(false);
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    if (!preview) return;
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, [preview]);
   const scene = value.scenes.find((s) => s.id === value.active_scene_id) || value.scenes[0];
   const [selected, setSelected] = useState('');
   const [source, setSource] = useState('poster');
@@ -34,16 +46,27 @@ export default function SceneEditor({ value, onChange, disabled }) {
   }
   function addSource() {
     if (scene.layers.length >= MAX_LAYERS) return;
-    const next = { id: uid(), type: source, x: 10, y: 15, width: 50, height: 50 };
+    const next = {
+      id: uid(),
+      type: source.startsWith('input-') ? 'input' : source,
+      x: 10,
+      y: 15,
+      width: 50,
+      height: 50,
+    };
     if (['youtube', 'camera', 'schedule', 'input'].includes(source)) next.audio = false;
     if (['youtube', 'camera'].includes(source)) next.url = '';
     if (source === 'camera') next.protocol = 'hls';
-    if (source === 'input')
+    if (next.type === 'input') {
+      next.audio = false;
+      next.capture = source === 'input-camera' ? 'camera' : 'screen';
       next.slot =
         INPUT_SLOTS.find(
           (slot) => !scene.layers.some((l) => l.type === 'input' && l.slot === slot),
         ) || 'input-1';
+    }
     if (source === 'text') next.text = '';
+    if (source === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
     if (['times', 'next', 'clock'].includes(source))
       Object.assign(next, {
         y: 0,
@@ -103,6 +126,19 @@ export default function SceneEditor({ value, onChange, disabled }) {
     <section className="admin-panel scene-editor">
       <h3>Scenes</h3>
       <div className="admin-actions" aria-label="Scenes">
+        <button
+          type="button"
+          className="admin-button"
+          disabled={disabled || !scene.layers.length}
+          onClick={() => {
+            if (!window.confirm('Clear all items from this scene? The TV changes only after Save.'))
+              return;
+            updateScene({ ...scene, layers: [] });
+            setSelected('');
+          }}
+        >
+          Clear scene
+        </button>
         {value.scenes.map((s, i) => (
           <button
             type="button"
@@ -144,7 +180,11 @@ export default function SceneEditor({ value, onChange, disabled }) {
         <label>
           Source
           <select disabled={disabled} value={source} onChange={(e) => setSource(e.target.value)}>
-            {SOURCE_TYPES.map(([id, name]) => (
+            {[
+              ...SOURCE_TYPES.filter(([id]) => !['schedule', 'input'].includes(id)),
+              ['input-screen', 'Screen share (laptop)'],
+              ['input-camera', 'Camera from this device'],
+            ].map(([id, name]) => (
               <option key={id} value={id}>
                 {name}
               </option>
@@ -209,13 +249,14 @@ export default function SceneEditor({ value, onChange, disabled }) {
               updateLayer({ ...item, ...fitRect({ ...item, [key]: item[key] + amount }) });
             }}
           >
-            {['poster', 'poster-next'].includes(item.type) && (
-              <img
-                draggable="false"
-                alt=""
-                src={PROGRAMMES[item.type === 'poster' ? 0 : 1]?.image}
-              />
-            )}
+            {['poster', 'poster-next'].includes(item.type) &&
+              posters.some((p) => item.poster_ids?.includes(p.id)) && (
+                <img
+                  draggable="false"
+                  alt=""
+                  src={posters.find((p) => item.poster_ids?.includes(p.id))?.image}
+                />
+              )}
             <span>
               {label(item.type)}
               {item.type === 'input' ? ` · ${item.slot.replace('input-', 'Input ')}` : ''}
@@ -236,6 +277,30 @@ export default function SceneEditor({ value, onChange, disabled }) {
         This is the layout preview. Open “View TV” for the saved live picture. Layers later in the
         list appear on top.
       </p>
+      {!scene.layers.length && (
+        <p>Empty scene. Add an item above, then fill in its options below.</p>
+      )}
+      <button type="button" className="admin-button" onClick={() => setPreview(!preview)}>
+        {preview ? 'Close draft preview' : 'Preview draft'}
+      </button>
+      {preview && (
+        <>
+          <p>
+            Unsaved preview: posters, YouTube, text and times. Private device feeds appear in View
+            TV after saving and starting the input.
+          </p>
+          <SceneCanvas
+            tv={{ settings: { ...value, muted: true }, paired: false }}
+            screenId={screenId}
+            now={now}
+            prayers={prayers}
+            posters={posters}
+            slide={0}
+            onImageError={() => {}}
+            livestream={livestream}
+          />
+        </>
+      )}
       <div className="scene-layer-list" aria-label="Select a source">
         {scene.layers.map((item) => (
           <button
@@ -252,6 +317,49 @@ export default function SceneEditor({ value, onChange, disabled }) {
       {layer && (
         <fieldset disabled={disabled} className="scene-properties">
           <legend>{label(layer.type)}</legend>
+          {['poster', 'poster-next'].includes(layer.type) && (
+            <>
+              <h4>Choose posters</h4>
+              <p>Tick one picture to keep it on screen, or several to rotate.</p>
+              <a href="/admin?section=posters" target="_blank" rel="noreferrer">
+                Edit / add posters ↗
+              </a>
+              <div className="admin-poster-picker">
+                {posters.map((p) => (
+                  <label key={p.id}>
+                    <img src={p.image} alt="" loading="lazy" />
+                    <span>
+                      <input
+                        type="checkbox"
+                        checked={(layer.poster_ids || []).includes(p.id)}
+                        onChange={(e) =>
+                          updateLayer({
+                            ...layer,
+                            poster_ids: e.target.checked
+                              ? [...(layer.poster_ids || []), p.id]
+                              : layer.poster_ids.filter((id) => id !== p.id),
+                          })
+                        }
+                      />
+                      {p.title}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <label>
+                Seconds between posters
+                <input
+                  type="number"
+                  min="5"
+                  max="300"
+                  value={layer.rotation_seconds || 20}
+                  onChange={(e) =>
+                    updateLayer({ ...layer, rotation_seconds: Number(e.target.value) })
+                  }
+                />
+              </label>
+            </>
+          )}
           <div className="scene-dimensions">
             {[
               ['x', 'Left %'],
@@ -372,7 +480,6 @@ export default function SceneEditor({ value, onChange, disabled }) {
             <button
               type="button"
               className="admin-button"
-              disabled={scene.layers.length === 1}
               onClick={() => {
                 updateScene({ ...scene, layers: scene.layers.filter((l) => l.id !== layer.id) });
                 setSelected('');

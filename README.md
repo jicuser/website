@@ -64,4 +64,4 @@ npm run validate
 - [Shared backend contract for Flutter](docs/flutter-shared-backend.md)
 - [Optional broadcasting relay](services/media-relay/README.md)
 
-Scene editing, device inputs and recording live in `src/features/displays/`. Permission checkboxes live in `src/features/access/`; shared validation is in `supabase/functions/_shared/`. Historical migrations are retained so deployments remain reproducible; obsolete role and fixed-panel runtime code has been removed.
+Scene editing, device inputs and broadcasting live in `src/features/displays/`. Permission checkboxes live in `src/features/access/`; shared validation is in `supabase/functions/_shared/`. Historical migrations are retained so deployments remain reproducible; obsolete role and fixed-panel runtime code has been removed. Programme posters are managed in Admin → Posters and shared through the existing page content backend.
