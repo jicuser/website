@@ -9,6 +9,7 @@ import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import RelatedContent from '@/components/RelatedContent';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import DailyReminder from '@/components/shell/DailyReminder';
+import SpiritualOverlays from '@/components/shell/SpiritualOverlays';
 import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import AdminBar from '@/components/shell/AdminBar';
@@ -57,6 +58,7 @@ export default function MainLayout() {
       </main>
       <Footer />
       <ScrollToTop />
+      {!preview && <SpiritualOverlays />}
       {isAdmin && !preview && <AdminBar />}
     </div>
   );
