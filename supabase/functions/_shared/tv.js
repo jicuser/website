@@ -11,6 +11,14 @@ export const POSTER_IDS = [
   'seekers-gateway',
   'after-maghrib',
 ];
+export const TV_PANELS = [
+  ['poster', 'Poster / slide 1'],
+  ['poster-next', 'Poster / slide 2'],
+  ['youtube', 'YouTube'],
+  ['camera', 'CCTV / installed camera'],
+  ['share', 'Shared screen / device camera'],
+  ['schedule', 'Website livestream'],
+];
 export const DEFAULT_TV_SETTINGS = {
   mode: 'posters',
   scene_mode: 'normal',
@@ -29,7 +37,33 @@ export const DEFAULT_TV_SETTINGS = {
   jummah_notice:
     'Welcome to Jumu‘ah. Please silence your phone, make room for others and listen quietly during the khutbah.',
   taraweeh_dua: '',
+  panels: ['poster', 'poster-next'],
+  layout: 'columns',
+  show_times: true,
+  show_next: true,
+  show_clock: true,
+  ramadan_calendar: 'auto',
+  calendar_offset: 0,
+  auto_jummah: true,
 };
+// Read older saved screens without losing their chosen video source.
+export function normaliseTvSettings(settings = {}) {
+  return {
+    ...DEFAULT_TV_SETTINGS,
+    ...settings,
+    panels:
+      settings.panels ??
+      (['youtube', 'camera', 'schedule'].includes(settings.mode)
+        ? [settings.mode, 'poster']
+        : ['poster', 'poster-next']),
+  };
+}
+
+export function tvPanels(settings = {}, now = Date.now(), screenId = '') {
+  if (screenId === 'shoe-area' || tvScene(settings, now) === 'normal')
+    return ['poster', 'poster-next'];
+  return normaliseTvSettings(settings).panels;
+}
 export function screenExists(id) {
   return TV_SCREENS.some((screen) => screen.id === id);
 }
@@ -49,7 +83,7 @@ export function secureStreamUrl(raw) {
 }
 export function validateSettings(input, screenId = '') {
   if (!input || typeof input !== 'object') throw new Error('Screen settings are required.');
-  input = { ...DEFAULT_TV_SETTINGS, ...input };
+  input = normaliseTvSettings(input);
   if (screenId === 'shoe-area')
     input = {
       ...input,
@@ -62,9 +96,30 @@ export function validateSettings(input, screenId = '') {
       scene_mode: 'normal',
       event_title: '',
       event_message: '',
+      panels: ['poster', 'poster-next'],
+      ramadan_calendar: 'off',
+      auto_jummah: false,
     };
   if (!['normal', 'class', 'speech', 'ramadan'].includes(input.scene_mode))
     throw new Error('Choose Normal, Class, Speech or Ramadan.');
+  if (
+    !Array.isArray(input.panels) ||
+    input.panels.length < 1 ||
+    input.panels.length > 4 ||
+    new Set(input.panels).size !== input.panels.length ||
+    input.panels.some((id) => !TV_PANELS.some(([key]) => key === id))
+  )
+    throw new Error('Choose between one and four different screen panels.');
+  if (!['columns', 'rows', 'grid', 'focus-left', 'focus-right'].includes(input.layout))
+    throw new Error('Choose a screen layout.');
+  for (const key of ['show_times', 'show_next', 'show_clock', 'auto_jummah'])
+    if (typeof input[key] !== 'boolean') throw new Error('Invalid display switch.');
+  if (
+    !['auto', 'on', 'off'].includes(input.ramadan_calendar) ||
+    !Number.isInteger(input.calendar_offset) ||
+    Math.abs(input.calendar_offset) > 2
+  )
+    throw new Error('Choose a valid Ramadan calendar setting.');
   for (const [field, limit] of [
     ['event_title', 120],
     ['event_message', 500],
@@ -111,8 +166,10 @@ export function validateSettings(input, screenId = '') {
     )
       throw new Error('Enter a YouTube video or live link.');
   }
-  if (mode === 'youtube' && !youtube_url) throw new Error('Add a YouTube link.');
-  if (mode === 'camera' && !camera_url) throw new Error('Add a camera stream URL.');
+  if ((mode === 'youtube' || input.panels.includes('youtube')) && !youtube_url)
+    throw new Error('Add a YouTube link.');
+  if ((mode === 'camera' || input.panels.includes('camera')) && !camera_url)
+    throw new Error('Add a camera stream URL.');
   if (!poster_ids.length && !include_events)
     throw new Error('Keep at least one poster or upcoming events for the fallback display.');
   return {
@@ -132,9 +189,18 @@ export function validateSettings(input, screenId = '') {
     include_events,
     rotation_seconds,
     muted,
+    panels: [...input.panels],
+    layout: input.layout,
+    show_times: input.show_times,
+    show_next: input.show_next,
+    show_clock: input.show_clock,
+    ramadan_calendar: input.ramadan_calendar,
+    calendar_offset: input.calendar_offset,
+    auto_jummah: input.auto_jummah,
   };
 }
 export function publicSettings(settings, paired = false) {
+  settings = normaliseTvSettings(settings);
   // Never include private camera URLs in an unauthenticated response.
   const {
     mode,
@@ -161,6 +227,14 @@ export function publicSettings(settings, paired = false) {
     taraweeh_dua: settings.taraweeh_dua || '',
     prayer_enabled: settings.prayer_enabled !== false,
     class_until: settings.class_until || '',
+    panels: settings.panels,
+    layout: settings.layout,
+    show_times: settings.show_times,
+    show_next: settings.show_next,
+    show_clock: settings.show_clock,
+    ramadan_calendar: settings.ramadan_calendar,
+    calendar_offset: settings.calendar_offset,
+    auto_jummah: settings.auto_jummah,
     ...(paired ? { camera_url: settings.camera_url } : {}),
   };
 }

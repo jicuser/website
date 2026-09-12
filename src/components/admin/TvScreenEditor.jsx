@@ -1,17 +1,25 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Monitor, Camera, Presentation, Image, Radio, RotateCcw, Eye, X } from 'lucide-react';
+import { Camera, Presentation, Image, Radio, RotateCcw, Eye, X } from 'lucide-react';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { PROGRAMMES } from '@/content/programmes';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import useTvPublisher from '@/hooks/useTvPublisher';
 import TvPreview from './TvPreview';
-import { tvScene } from '../../../supabase/functions/_shared/tv.js';
+import TvLayoutEditor from './TvLayoutEditor';
+import useHomeLiveContent from '@/hooks/useHomeLiveContent';
+import { safeWebUrl } from '@/lib/video';
+import { londonDate } from '@/lib/timetable';
+import { tvScene, normaliseTvSettings } from '../../../supabase/functions/_shared/tv.js';
 
 const MODES = [
-  ['normal', 'Normal', Image, 'Posters, notices and automatic prayer reminders.'],
+  [
+    'normal',
+    'Normal',
+    Image,
+    'Posters and prayer reminders. Jummah and Ramadan notices follow the mosque calendar automatically.',
+  ],
   ['class', 'Class', Presentation, 'Share a lesson. Prayer notices pause until the class ends.'],
   ['speech', 'Speech', Radio, 'Show the speaker with event posters. Prayer notices continue.'],
-  ['ramadan', 'Ramadan', Monitor, 'Isha du‘a and fasting times, with optional live video.'],
 ];
 const button = 'admin-button';
 export default function TvScreenEditor({ screenId }) {
@@ -29,12 +37,17 @@ export default function TvScreenEditor({ screenId }) {
   const preview = useRef(null);
   const editing = useRef(false);
   const sharing = useTvPublisher(screenId);
+  const { events } = useHomeLiveContent({ eventLimit: 50 });
+  const currentEvents = events.filter(
+    (event) => event.event_date >= londonDate() && safeWebUrl(event.poster_url),
+  );
   const screenUrl = `${window.location.origin}/tv179/${screenId}`;
   const dirty = Boolean(form && JSON.stringify(form) !== saved);
   editing.current = dirty || busy || sharing.busy;
   const load = useCallback(async () => {
     try {
       const next = await tvRequest('admin', screenId, {}, { staff: true });
+      next.settings = normaliseTvSettings(next.settings);
       setData(next);
       setForm(next.settings);
       setSaved(JSON.stringify(next.settings));
@@ -52,6 +65,7 @@ export default function TvScreenEditor({ screenId }) {
     async function refresh() {
       try {
         const next = await tvRequest('admin', screenId, {}, { staff: true });
+        next.settings = normaliseTvSettings(next.settings);
         if (active) {
           setData(next);
           if (!editing.current) {
@@ -81,6 +95,7 @@ export default function TvScreenEditor({ screenId }) {
     async (settings, stopSharing = false) => {
       if (stopSharing) await sharing.stop();
       const result = await tvRequest('save', screenId, { settings, stopSharing }, { staff: true });
+      result.settings = normaliseTvSettings(result.settings);
       setForm(result.settings);
       setSaved(JSON.stringify(result.settings));
       setData((previous) => ({
@@ -94,13 +109,13 @@ export default function TvScreenEditor({ screenId }) {
   );
   const save = useCallback(async () => {
     try {
-      await persist(form, form.mode !== JSON.parse(saved).mode);
+      await persist({ ...form, mode: 'posters' }, !form.panels.includes('share'));
     } catch (error) {
       setMessage(error.message);
       throw error;
     }
-  }, [form, saved, persist]);
-  useRegisterAdminSave(save, dirty, `Save ${screen.label}`);
+  }, [form, persist]);
+  useRegisterAdminSave(save, dirty, `Update ${screen.label}`);
   const update = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
   async function run(task) {
     setBusy(true);
@@ -129,7 +144,8 @@ export default function TvScreenEditor({ screenId }) {
       setMessage('Select and copy the link below.');
     }
   }
-  const scene = form ? tvScene(form, now) : 'normal';
+  const resolvedScene = form ? tvScene(form, now) : 'normal';
+  const scene = resolvedScene === 'ramadan' ? 'normal' : resolvedScene;
   const liveSession =
     sharing.stream || (data?.share_session && Date.parse(data.share_expires) > now);
   return (
@@ -142,6 +158,18 @@ export default function TvScreenEditor({ screenId }) {
         <button className={button} onClick={() => setShowPreview((value) => !value)}>
           <Eye size={18} />
           {showPreview ? 'Close preview' : 'Preview TV'}
+        </button>
+      </div>
+      <p>
+        Open this address in the TV’s web browser. Choose what it shows here, then press Update this
+        TV.
+      </p>
+      <div className="admin-actions admin-tv-address">
+        <a href={screenUrl} target="_blank" rel="noreferrer">
+          {screenUrl}
+        </a>
+        <button className={button} onClick={() => copy(screenUrl)}>
+          Copy TV address
         </button>
       </div>
       {showPreview && <TvPreview key={screenId} screenId={screenId} label={screen.label} />}
@@ -159,7 +187,7 @@ export default function TvScreenEditor({ screenId }) {
           <section className="admin-panel">
             <div className="admin-heading">
               <div>
-                <h3>{hall ? '1. Choose the occasion' : 'Times & posters'}</h3>
+                <h3>{hall ? '1. Choose a mode' : 'Times & posters'}</h3>
                 <p>
                   {hall
                     ? `Current mode: ${MODES.find(([id]) => id === tvScene(data.settings, now))?.[1] || 'Normal'}`
@@ -250,34 +278,8 @@ export default function TvScreenEditor({ screenId }) {
           {hall && scene !== 'normal' && (
             <section className="admin-panel">
               <h3>2. What should appear?</h3>
-              <div className="admin-tv-sources">
-                {[
-                  ['posters', 'Posters', Image],
-                  ['camera', 'Installed camera', Camera],
-                  ['youtube', 'YouTube', Radio],
-                  ['schedule', 'Website live', Monitor],
-                ].map(([id, label, Icon]) => (
-                  <button
-                    key={id}
-                    className={button}
-                    aria-pressed={!liveSession && form.mode === id}
-                    disabled={busy || sharing.busy}
-                    onClick={() => {
-                      if (
-                        (id === 'camera' && !form.camera_url) ||
-                        (id === 'youtube' && !form.youtube_url)
-                      ) {
-                        update('mode', id);
-                        setMessage('Add the source below, then save.');
-                      } else run(() => persist({ ...form, mode: id, notice_mode: 'off' }, true));
-                    }}
-                  >
-                    <Icon size={18} />
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {form.mode === 'youtube' && (
+              <TvLayoutEditor value={form} onChange={update} disabled={busy || sharing.busy} />
+              {form.panels.includes('youtube') && (
                 <label>
                   YouTube link
                   <input
@@ -288,7 +290,7 @@ export default function TvScreenEditor({ screenId }) {
                   />
                 </label>
               )}
-              {form.mode === 'camera' && (
+              {form.panels.includes('camera') && (
                 <>
                   <label>
                     Installed camera stream
@@ -310,77 +312,81 @@ export default function TvScreenEditor({ screenId }) {
                     </select>
                   </label>
                   <p>
-                    Camera links stay private to paired TVs. A local RTSP camera needs an HTTPS
-                    browser stream from a relay.
+                    Camera links stay private to approved TV browsers. A local RTSP camera needs an
+                    HTTPS browser stream from a relay.
                   </p>
                 </>
               )}
-              <div className="admin-actions">
-                <button
-                  className={button}
-                  disabled={
-                    busy ||
-                    sharing.busy ||
-                    dirty ||
-                    Boolean(sharing.stream) ||
-                    !navigator.mediaDevices?.getDisplayMedia
-                  }
-                  onClick={() => sharing.start('screen')}
-                >
-                  <Presentation size={18} />
-                  Share screen
-                </button>
-                <button
-                  className={button}
-                  disabled={
-                    busy ||
-                    sharing.busy ||
-                    dirty ||
-                    Boolean(sharing.stream) ||
-                    !navigator.mediaDevices?.getUserMedia
-                  }
-                  onClick={() => sharing.start('camera')}
-                >
-                  <Camera size={18} />
-                  This device’s camera
-                </button>
-                {(liveSession || sharing.busy) && (
-                  <button
-                    className={button}
-                    onClick={() =>
-                      run(async () => {
-                        if (sharing.stream || sharing.busy) await sharing.stop();
-                        else
-                          await tvRequest(
-                            'stop',
-                            screenId,
-                            { sessionId: data.share_session },
-                            { staff: true },
-                          );
-                        setData((old) => ({ ...old, share_session: null }));
-                      })
-                    }
-                  >
-                    <X size={16} />
-                    Stop sharing
-                  </button>
-                )}
-              </div>
-              <p className="admin-tv-help">
-                Keep this page open while sharing. Save any source changes first.{' '}
-                {!navigator.mediaDevices?.getDisplayMedia &&
-                  'This browser supports camera sharing but cannot share the whole screen.'}
-              </p>
-              <p role="status">{sharing.message}</p>
-              {sharing.stream && (
-                <video
-                  ref={preview}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="admin-share-preview"
-                  aria-label="Your source preview"
-                />
+              {form.panels.includes('share') && (
+                <>
+                  <div className="admin-actions">
+                    <button
+                      className={button}
+                      disabled={
+                        busy ||
+                        sharing.busy ||
+                        dirty ||
+                        Boolean(sharing.stream) ||
+                        !navigator.mediaDevices?.getDisplayMedia
+                      }
+                      onClick={() => sharing.start('screen')}
+                    >
+                      <Presentation size={18} />
+                      Share screen
+                    </button>
+                    <button
+                      className={button}
+                      disabled={
+                        busy ||
+                        sharing.busy ||
+                        dirty ||
+                        Boolean(sharing.stream) ||
+                        !navigator.mediaDevices?.getUserMedia
+                      }
+                      onClick={() => sharing.start('camera')}
+                    >
+                      <Camera size={18} />
+                      This device’s camera
+                    </button>
+                    {(liveSession || sharing.busy) && (
+                      <button
+                        className={button}
+                        onClick={() =>
+                          run(async () => {
+                            if (sharing.stream || sharing.busy) await sharing.stop();
+                            else
+                              await tvRequest(
+                                'stop',
+                                screenId,
+                                { sessionId: data.share_session },
+                                { staff: true },
+                              );
+                            setData((old) => ({ ...old, share_session: null }));
+                          })
+                        }
+                      >
+                        <X size={16} />
+                        Stop sharing
+                      </button>
+                    )}
+                  </div>
+                  <p className="admin-tv-help">
+                    Keep this page open while sharing. Update this TV first, then start sharing.{' '}
+                    {!navigator.mediaDevices?.getDisplayMedia &&
+                      'This browser supports camera sharing but cannot share the whole screen.'}
+                  </p>
+                  <p role="status">{sharing.message}</p>
+                  {sharing.stream && (
+                    <video
+                      ref={preview}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="admin-share-preview"
+                      aria-label="Your source preview"
+                    />
+                  )}
+                </>
               )}
               <details>
                 <summary>Event title & message</summary>
@@ -404,8 +410,31 @@ export default function TvScreenEditor({ screenId }) {
               </details>
             </section>
           )}
+          <section className="admin-panel">
+            <h3>What stays visible</h3>
+            <div className="admin-tv-sources">
+              {[
+                ['show_times', 'Salah timetable'],
+                ['show_next', 'Next prayer reminder'],
+                ['show_clock', 'Current clock'],
+              ].map(([key, label]) => (
+                <label className="admin-check" key={key}>
+                  <input
+                    type="checkbox"
+                    checked={form[key] !== false}
+                    onChange={(event) => update(key, event.target.checked)}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </section>
           <details className="admin-panel" open={scene === 'normal'}>
             <summary>Posters & rotation</summary>
+            <p>
+              Tick the posters for this TV. They fill the poster panels and replace any feed that
+              cannot play.
+            </p>
             <div className="admin-poster-picker">
               {PROGRAMMES.map((item) => (
                 <label key={item.id}>
@@ -436,6 +465,19 @@ export default function TvScreenEditor({ screenId }) {
               />
               Include upcoming event posters
             </label>
+            {form.include_events &&
+              (currentEvents.length ? (
+                <div className="admin-poster-picker">
+                  {currentEvents.map((event) => (
+                    <div key={event.id}>
+                      <img src={event.poster_url} alt={event.title} loading="lazy" />
+                      <span>{event.title}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>No upcoming event posters are published.</p>
+              ))}
             <label>
               Change poster every
               <select
@@ -454,7 +496,7 @@ export default function TvScreenEditor({ screenId }) {
           </details>
           {hall && (
             <details className="admin-panel">
-              <summary>Prayer, Jummah & Ramadan notices</summary>
+              <summary>Automatic prayers, Jummah & Ramadan</summary>
               <label className="admin-check">
                 <input
                   type="checkbox"
@@ -467,15 +509,55 @@ export default function TvScreenEditor({ screenId }) {
                 At Jama‘ah: silence your phone. Dhikr begins 5 minutes later, or 10 minutes after
                 Maghrib. Posters return 20 minutes after Jama‘ah. Class mode pauses this sequence.
               </p>
+              <label className="admin-check">
+                <input
+                  type="checkbox"
+                  checked={form.auto_jummah !== false}
+                  onChange={(event) => update('auto_jummah', event.target.checked)}
+                />
+                Automatically show Friday’s Jummah welcome
+              </label>
+              <p>
+                In Normal mode: from one hour before the first Jummah until 20 minutes after the
+                last.
+              </p>
               <label>
-                Show a special notice
+                Ramadan calendar
+                <select
+                  value={form.ramadan_calendar}
+                  onChange={(event) => update('ramadan_calendar', event.target.value)}
+                >
+                  <option value="auto">Automatic — Islamic calendar</option>
+                  <option value="on">Ramadan is on</option>
+                  <option value="off">Ramadan is off</option>
+                </select>
+              </label>
+              {form.ramadan_calendar === 'auto' && (
+                <label>
+                  Local moon calendar adjustment
+                  <select
+                    value={form.calendar_offset}
+                    onChange={(event) => update('calendar_offset', Number(event.target.value))}
+                  >
+                    {[-2, -1, 0, 1, 2].map((value) => (
+                      <option key={value} value={value}>
+                        {value === 0
+                          ? 'No adjustment'
+                          : `${value > 0 ? '+' : ''}${value} day${Math.abs(value) > 1 ? 's' : ''}`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <label>
+                Notice override in Normal mode
                 <select
                   value={form.notice_mode || 'off'}
                   onChange={(event) => update('notice_mode', event.target.value)}
                 >
-                  <option value="off">Use the chosen occasion</option>
-                  <option value="jummah">Jummah welcome</option>
-                  <option value="taraweeh">Taraweeh du‘a</option>
+                  <option value="off">Automatic</option>
+                  <option value="jummah">Keep Jummah welcome on</option>
+                  <option value="taraweeh">Keep Taraweeh du‘a on</option>
                 </select>
               </label>
               <label>
@@ -498,14 +580,14 @@ export default function TvScreenEditor({ screenId }) {
                 />
               </label>
               <p>
-                Blank uses Qur’an 2:201. Ramadan mode shows du‘a 20–40 minutes after Isha Jama‘ah,
-                then fasting times. Live video takes its place; prayer reminders still take
-                priority.
+                Blank uses Qur’an 2:201. During Ramadan, Normal shows du‘a 20–40 minutes after Isha
+                Jama‘ah, then alternates fasting times and posters. Class and Speech use your
+                selected panels.
               </p>
             </details>
           )}
           <details className="admin-panel">
-            <summary>TV setup & sound</summary>
+            <summary>TV sound & private video access</summary>
             <a className={button} href={screenUrl} target="_blank" rel="noreferrer">
               Open TV display ↗
             </a>
@@ -520,9 +602,11 @@ export default function TvScreenEditor({ screenId }) {
             </label>
             {hall && (
               <>
-                <h4>Connect a TV once</h4>
+                <h4>Enable camera & sharing on this TV</h4>
                 <p>
-                  Create a link and open it on the TV. Links work once and expire in 10 minutes.
+                  For private video, open the approval link once in the TV’s browser. It approves
+                  this browser for 90 days; there is no Bluetooth connection or app to install. The
+                  link works once and expires in 10 minutes.
                 </p>
                 <button
                   className={button}
@@ -533,13 +617,13 @@ export default function TvScreenEditor({ screenId }) {
                     )
                   }
                 >
-                  Create TV link
+                  Create private TV link
                 </button>
                 {pairing && (
                   <div className="admin-actions">
                     <input
                       readOnly
-                      aria-label="TV pairing link"
+                      aria-label="Private TV approval link"
                       value={`${screenUrl}#pair=${pairing.code}`}
                       onFocus={(event) => event.target.select()}
                     />
@@ -603,9 +687,9 @@ export default function TvScreenEditor({ screenId }) {
               <button
                 className="admin-button primary"
                 disabled={busy || sharing.busy}
-                onClick={() => run(() => persist(form, form.mode !== JSON.parse(saved).mode))}
+                onClick={() => run(save)}
               >
-                Save changes
+                Update this TV
               </button>
             </div>
           )}

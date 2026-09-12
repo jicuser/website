@@ -28,6 +28,8 @@ export default function PrayerTimeBar({
   radio,
   interactive = true,
   showContact = true,
+  showTimes = true,
+  showNext = true,
 }) {
   const next = nextPrayer(todaysTimes, currentDate);
   const Item = interactive ? Link : 'div';
@@ -47,66 +49,78 @@ export default function PrayerTimeBar({
           </a>
         </div>
       )}
-      <div className="jic-prayer-legend">
-        <Item {...destination('/prayer-times')} className="jic-next-prayer-summary">
-          {next ? (
-            <>
-              <strong>Next: {next.name}</strong>
-              <span>
-                Start {shortTime(next.time)} · Jama’ah {shortTime(next.jamaah)}
-              </span>
-            </>
-          ) : (
-            'Prayer timetable'
-          )}
-          {interactive && <span aria-hidden="true">›</span>}
-        </Item>
-        {next && (
-          <span className="jic-prayer-countdown">
-            {Math.floor(next.minutesLeft / 60) > 0 ? `${Math.floor(next.minutesLeft / 60)}h ` : ''}
-            {next.minutesLeft % 60}m until {next.name} starts
-          </span>
-        )}
-      </div>
-      <div className="jic-prayer-table-scroll">
-        <div className="jic-today-prayer-row" aria-label="Today’s prayer times">
-          <span className="jic-prayer-row-label is-start" aria-hidden="true">
-            Start
-          </span>
-          <span className="jic-prayer-row-label is-jamaah" aria-hidden="true">
-            Jama’ah
-          </span>
-          {PRAYERS.map(([label, key, jamaah]) => (
-            <Item
-              key={key}
-              {...destination('/prayer-times')}
-              className={cn('jic-today-prayer', next?.name === label && 'is-next')}
-              aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}
-            >
-              <span>{label}</span>
-              <div>
-                <strong>
-                  <small>Start</small>
-                  {shortTime(todaysTimes?.[key])}
-                </strong>
-                <em>
-                  <small>{jamaah ? 'Jama’ah' : '—'}</small>
-                  {jamaah ? shortTime(todaysTimes?.[jamaah]) : '—'}
-                </em>
-              </div>
-            </Item>
-          ))}
-        </div>
-      </div>
-      <div className="jic-header-live-row">
-        {[0, 1].map((index) => (
-          <Item key={index} {...destination('/prayer-times/jummah')} className="jic-jummah-compact">
-            <b>Jummah {index + 1}</b>
-            <span>{shortTime(jummahTimes?.[index]?.prayer)}</span>
+      {showNext && (
+        <div className="jic-prayer-legend">
+          <Item {...destination('/prayer-times')} className="jic-next-prayer-summary">
+            {next ? (
+              <>
+                <strong>Next: {next.name}</strong>
+                <span>
+                  Start {shortTime(next.time)} · Jama’ah {shortTime(next.jamaah)}
+                </span>
+              </>
+            ) : (
+              'Prayer timetable'
+            )}
+            {interactive && <span aria-hidden="true">›</span>}
           </Item>
-        ))}
-        {radio}
-      </div>
+          {next && (
+            <span className="jic-prayer-countdown">
+              {Math.floor(next.minutesLeft / 60) > 0
+                ? `${Math.floor(next.minutesLeft / 60)}h `
+                : ''}
+              {next.minutesLeft % 60}m until {next.name} starts
+            </span>
+          )}
+        </div>
+      )}
+      {showTimes && (
+        <>
+          <div className="jic-prayer-table-scroll">
+            <div className="jic-today-prayer-row" aria-label="Today’s prayer times">
+              <span className="jic-prayer-row-label is-start" aria-hidden="true">
+                Start
+              </span>
+              <span className="jic-prayer-row-label is-jamaah" aria-hidden="true">
+                Jama’ah
+              </span>
+              {PRAYERS.map(([label, key, jamaah]) => (
+                <Item
+                  key={key}
+                  {...destination('/prayer-times')}
+                  className={cn('jic-today-prayer', next?.name === label && 'is-next')}
+                  aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}
+                >
+                  <span>{label}</span>
+                  <div>
+                    <strong>
+                      <small>Start</small>
+                      {shortTime(todaysTimes?.[key])}
+                    </strong>
+                    <em>
+                      <small>{jamaah ? 'Jama’ah' : '—'}</small>
+                      {jamaah ? shortTime(todaysTimes?.[jamaah]) : '—'}
+                    </em>
+                  </div>
+                </Item>
+              ))}
+            </div>
+          </div>
+          <div className="jic-header-live-row">
+            {[0, 1].map((index) => (
+              <Item
+                key={index}
+                {...destination('/prayer-times/jummah')}
+                className="jic-jummah-compact"
+              >
+                <b>Jummah {index + 1}</b>
+                <span>{shortTime(jummahTimes?.[index]?.prayer)}</span>
+              </Item>
+            ))}
+            {radio}
+          </div>
+        </>
+      )}
     </div>
   );
 }

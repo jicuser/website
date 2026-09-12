@@ -91,6 +91,46 @@ export function ramadanScene(now, times, screenId = '') {
   return isha !== null && minute >= isha + 20 && minute < isha + 40 ? 'taraweeh' : 'fasting';
 }
 
+// Normal follows the mosque's London date. Staff can adjust the lunar calendar locally.
+export function automaticTvNotice(now, times, jummah = [], settings = {}, screenId = '') {
+  const scene = tvScene(settings, now.getTime());
+  if (screenId === 'shoe-area' || !['normal', 'ramadan'].includes(scene)) return null;
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(now)
+      .map(({ type, value }) => [type, value]),
+  );
+  if (times?.d_date !== `${parts.year}-${parts.month}-${parts.day}`) return null;
+  const minute = Number(parts.hour) * 60 + Number(parts.minute);
+  if (settings.auto_jummah !== false && parts.weekday === 'Fri') {
+    const starts = jummah
+      .map((item) => prayerMinutes(item.prayer))
+      .filter((value) => value !== null);
+    if (starts.length && minute >= Math.min(...starts) - 60 && minute < Math.max(...starts) + 20)
+      return 'jummah';
+  }
+  const calendar = settings.ramadan_calendar || 'auto';
+  const adjusted = new Date(now.getTime() + (settings.calendar_offset || 0) * 86400000);
+  const month = new Intl.DateTimeFormat('en-GB-u-ca-islamic-umalqura', {
+    timeZone: 'Europe/London',
+    month: 'numeric',
+  })
+    .formatToParts(adjusted)
+    .find((part) => part.type === 'month')?.value;
+  if (calendar === 'on' || (calendar !== 'off' && (Number(month) === 9 || scene === 'ramadan')))
+    return ramadanScene(now, times, screenId);
+  return null;
+}
+
 // After iftar, display the next dated record, including month/year boundaries.
 export function fastingTimes(now, today, tomorrow) {
   const date = new Intl.DateTimeFormat('en-CA', {

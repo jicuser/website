@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import {
-  DEFAULT_TV_SETTINGS,
+  normaliseTvSettings,
   activeSession,
   isTvStaff,
   publicSettings,
@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
     if (!body || !screenExists(body.screenId)) fail('Unknown TV screen.', 404);
     const { action, screenId } = body;
     const screen = await result(db.from('tv_screens').select('*').eq('id', screenId).single());
-    screen.settings = { ...DEFAULT_TV_SETTINGS, ...screen.settings };
+    screen.settings = normaliseTvSettings(screen.settings);
     if (screenId === 'shoe-area') {
       screen.settings = {
         ...screen.settings,
@@ -112,6 +112,9 @@ Deno.serve(async (req) => {
         notice_mode: 'off',
         class_until: '',
         scene_mode: 'normal',
+        panels: ['poster', 'poster-next'],
+        ramadan_calendar: 'off',
+        auto_jummah: false,
       };
       screen.share_session = null;
       if (
@@ -244,20 +247,23 @@ Deno.serve(async (req) => {
         response = { settings };
       } else if (action === 'save') {
         const settings = validateSettings(body.settings, screenId);
+        const stopSharing =
+          body.stopSharing === true ||
+          tvScene(settings) === 'normal' ||
+          !settings.panels.includes('share');
         await result(
           db
             .from('tv_screens')
             .update({
               settings,
-              ...(body.stopSharing === true || tvScene(settings) === 'normal'
+              ...(stopSharing
                 ? { share_session: null, share_owner: null, share_kind: null, share_expires: null }
                 : {}),
               updated_at: new Date().toISOString(),
             })
             .eq('id', screenId),
         );
-        if (body.stopSharing === true || tvScene(settings) === 'normal')
-          await result(db.from('tv_peers').delete().eq('screen_id', screenId));
+        if (stopSharing) await result(db.from('tv_peers').delete().eq('screen_id', screenId));
         response = { settings };
       } else if (action === 'preview') {
         const token = randomToken();
@@ -289,7 +295,9 @@ Deno.serve(async (req) => {
         response = { ok: true };
       } else if (action === 'start') {
         if (tvScene(screen.settings) === 'normal')
-          fail('Choose and save Class, Speech or Ramadan mode before sharing.');
+          fail('Choose and save Class or Speech before sharing.');
+        if (!screen.settings.panels.includes('share'))
+          fail('Select Shared screen in the layout and update this TV first.');
         if (!['screen', 'camera'].includes(body.kind)) fail('Choose screen or camera.');
         const sessionId = crypto.randomUUID();
         const started = await result(

@@ -1132,7 +1132,7 @@ html:not(.dark) .managed-page-section-copy {
 }
 .admin-tv-modes {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 .admin-tv-modes button {
@@ -1150,10 +1150,60 @@ html:not(.dark) .managed-page-section-copy {
   color: #0c1930 !important;
 }
 .admin-tv-sources {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 8px;
   margin: 16px 0;
+}
+.admin-tv-layout-editor {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.admin-tv-layout-map {
+  aspect-ratio: 16/9;
+  padding: 8px;
+  margin: 16px 0;
+  border-radius: 10px;
+  background: #07111f;
+}
+.admin-tv-layout-map > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 4px;
+  background: #203550;
+  color: #fff;
+  border: 1px solid #7c96b2;
+  border-radius: 6px;
+  text-align: center;
+  font-size: clamp(10px, 2.5vw, 14px);
+  overflow-wrap: anywhere;
+}
+.admin-tv-layout-map > div > span {
+  color: #ecd381;
+  font-weight: 700;
+}
+.admin-tv-panel-order {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  list-style: none;
+  padding: 0;
+}
+.admin-tv-panel-order li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.admin-tv-panel-order li > span {
+  flex: 1;
+}
+.admin-tv-address {
+  overflow-wrap: anywhere;
 }
 .admin-tv-help {
   margin: 12px 0;

@@ -13,36 +13,41 @@ Open **Admin → TV screens**, then choose a hall from the selector. Each hall k
 
 ## Choose what each TV shows
 
-Choose **Normal**, **Class**, **Speech** or **Ramadan**. Occasion and source buttons save immediately. Poster, text and setup edits use **Save changes**. Updates reach TVs within eight seconds.
+Choose **Normal**, **Class** or **Speech**. Mode buttons apply immediately. Panel selection, position, text and display switches use **Update this TV**. Updates reach TVs within eight seconds.
 
-| Occasion | Default display                                      | Prayer sequence             | Live sources                                                     |
-| -------- | ---------------------------------------------------- | --------------------------- | ---------------------------------------------------------------- |
-| Normal   | Posters and notices                                  | Automatic                   | Off                                                              |
-| Class    | Posters until a source is chosen                     | Paused until the class ends | Screen, device camera, installed camera, YouTube or website live |
-| Speech   | Posters until a source is chosen                     | Continues                   | Same sources as Class                                            |
-| Ramadan  | Fasting times; du‘a 20–40 minutes after Isha Jama‘ah | Continues                   | Same sources as Class                                            |
+| Mode   | Display                                                         | Prayer sequence             |
+| ------ | --------------------------------------------------------------- | --------------------------- |
+| Normal | Two rotating posters, with automatic Jummah and Ramadan notices | Automatic when enabled      |
+| Class  | Your selected sources and layout                                | Paused until the class ends |
+| Speech | Your selected sources and layout                                | Continues when enabled      |
 
-Class and Speech return to Normal after the selected duration. **Back to normal** stops any active sharing session, clears temporary notices and restores posters. Changing a saved video source also stops sharing. The shoe area always shows times and posters.
+For Class or Speech, tick up to four panels: **Poster / slide 1**, **Poster / slide 2**, **YouTube**, **CCTV / installed camera**, **Shared screen / device camera**, or **Website livestream**. Sources can play together. The two poster panels show consecutive posters from the selected list. A source that cannot play falls back to a poster independently of the other panels and retries after 30 seconds.
 
-All screens retain prayer times and a 12-hour Europe/London clock. Posters and video fit without cropping. Use landscape orientation on the TV. Double-click requests fullscreen and landscape locking when supported; the TV browser can also enter fullscreen. Wake Lock is requested where available.
+Choose **Side by side**, **Top and bottom**, **Grid**, **Large panel on left** or **Large panel on right**. The numbered landscape diagram shows their positions. Use the arrow buttons to change panel order; the first source occupies the large area in either large-panel layout. This is a diagram of your draft; **Preview TV** shows the saved live output.
+
+**Salah timetable**, **Next prayer reminder** and **Current clock** have separate switches under **What stays visible**. They apply to the selected TV in every mode. Clock and prayer time displays use 12-hour time and Europe/London dates. Posters and video fit without cropping.
+
+Class and Speech return to Normal after the selected duration. **Back to normal** stops sharing and clears temporary event text and notice overrides. It retains the source arrangement for the next class, plus your calendar and visibility settings. Removing the shared-screen panel also stops its session; rearranging sources does not. The shoe area has no Class/Speech or private feeds and keeps its poster-only content.
+
+Open the hall address in the smart TV browser and leave it open. The browser follows the saved settings; there are no mode or layout controls on the TV itself. Use landscape orientation. Double-click requests fullscreen and landscape locking when supported; the TV browser can also enter fullscreen. Wake Lock is requested where available.
 
 **Preview TV** opens the real TV page at 1280×720 inside Admin. It can receive the active shared source. Its separate credential expires after ten minutes and is revoked on closing; it does not replace the physical TV’s pairing. Local feeds require the previewing device to reach the mosque network. A working preview is not confirmation that the physical TV is playing.
 
 YouTube links must identify an embeddable video or live video, not a channel homepage. Audio is muted by default; browsers may require a playback gesture when sound is enabled. Setup controls do not appear on TV pages.
 
-## Pair a TV for private feeds
+## Approve a TV browser for private feeds
 
-1. Choose the hall in Admin, expand **TV setup & sound**, and press **Create TV link**.
+1. Choose the hall in Admin, expand **TV sound & private video access**, and press **Create private TV link**.
 2. Open that link in the TV browser.
 3. Press **Refresh connections** in Admin to check that it appears.
 
-Pairing links work once and expire after ten minutes. A paired browser remembers its credential for 90 days. Clearing browser storage requires pairing again. Use **Disconnect** to remove a TV's private access. Public poster and YouTube displays continue to work without pairing.
+This approves the web browser; it is not Bluetooth pairing or casting. Approval links work once and expire after ten minutes. A paired browser remembers its credential for 90 days. Clearing browser storage requires pairing again. Use **Disconnect** to remove a TV's private access. Public poster and YouTube displays continue to work without pairing.
 
 Treat an unused pairing link as access to that room's private feed. It is removed from the TV address after use. No staff login is saved on the TV. Camera URLs and screen-sharing connection details are withheld from public visitors.
 
 ## Share a laptop screen or phone camera
 
-Open the room in Admin on the sending device. Choose Class, Speech or Ramadan, then **Share screen** or **This device’s camera**. Approve the browser's capture request. The selected screen or camera appears on paired TVs for that room, beside a poster and below prayer times.
+Open the room in Admin on the sending device. Choose Class or Speech, tick **Shared screen / device camera**, arrange the panels and press **Update this TV**. Then press **Share screen** or **This device’s camera** and approve the browser’s capture request. The selected source appears in its chosen panel on approved TVs for that room. It can appear alongside CCTV, YouTube and a poster.
 
 Keep the sending admin page open and the phone awake. Stop with **Stop sharing**, the browser's sharing control, or by leaving that admin screen. The saved source resumes; **Back to normal** restores posters. If the sender loses its connection, the session expires within 90 seconds, followed by the TV's next status check. A different authorised staff member can refresh the room and stop its existing session.
 
@@ -66,6 +71,8 @@ No real camera address is preconfigured. The camera/TV models, network reachabil
 ## Code and backend
 
 - `src/components/admin/TvScreenEditor.jsx`: four instances of one room editor.
+- `src/components/admin/TvLayoutEditor.jsx`: source selection, panel order and the landscape arrangement diagram.
+- `src/components/tv/TvMediaPanel.jsx`: independent media players and poster fallbacks.
 - `src/hooks/useTvPublisher.js`: capture, staff heartbeat and sending peers.
 - `src/hooks/useTvScreen.js`: TV pairing and room status.
 - `src/components/tv/PrivateTvPlayer.jsx`: receiving WebRTC and playing local camera streams.
@@ -98,11 +105,17 @@ Camera discovery must run on a device connected to the mosque network. The saved
 
 ## Jummah and Ramadan notices
 
-Under **Prayer, Jummah & Ramadan notices**, each hall has **Show a special notice** in its admin panel: Off, Jummah, or Ramadan · Taraweeh du‘a. Save to show it; switch Off and save to resume ordinary content. This manual choice is available year-round for setup and remains on until changed. It does not automatically follow an inferred Ramadan date.
+Under **Automatic prayers, Jummah & Ramadan**, Normal uses London time and the current dated timetable:
+
+- Friday welcome runs from one hour before the first Jummah until 20 minutes after the last. The congregation/dhikr sequence has priority.
+- Ramadan follows the Umm al-Qura Islamic calendar. Set the local moon-calendar adjustment (−2 to +2 days), or choose **Ramadan is on/off** to match the mosque’s announced dates. A positive adjustment advances the Islamic date; it never changes prayer times.
+- During Ramadan, the du‘a screen runs 20–40 minutes after Isha Jama‘ah. Outside that window, fasting times appear for 20 seconds and posters for 40 seconds in each minute.
+- Class and Speech keep their selected sources regardless of the seasonal calendar. Speech can still show the enabled Jama‘ah/dhikr sequence.
+- **Notice override in Normal mode** can keep a Jummah or Taraweeh notice on until staff restore **Automatic**. Missing/stale timetable data prevents automatic seasonal notices.
 
 Edit the Jummah message for welcome information and local notices. It is also used at both Friday congregation times. Taraweeh accepts up to 1,200 characters of Arabic or English. Blank text displays the general Qur’anic supplication in [Al-Baqarah 2:201](https://quran.com/2/201); it is not presented as a prescribed Taraweeh formula. Text is displayed literally, never executed as HTML. Automatic Jama‘ah/dhikr takes priority over special notices; class mode suspends both. Shoe-area settings cannot enable either special notice.
 
-In Ramadan mode, fasting times use the dated mosque timetable. Before iftar the display shows today’s Fajr and Maghrib beginning times. At/after iftar it uses tomorrow’s record, including month and year boundaries. Missing data is labelled unavailable; times are never guessed. Live video takes the place of Ramadan cards, while enabled automatic prayer notices retain priority.
+During Ramadan in Normal mode, fasting times use the dated mosque timetable. Before iftar the display shows today’s Fajr and Maghrib beginning times. At/after iftar it uses tomorrow’s record, including month and year boundaries. Missing data is labelled unavailable; times are never guessed. Class and Speech use their saved panels instead of these seasonal cards.
 
 ## Streamerr video
 

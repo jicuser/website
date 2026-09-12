@@ -80,7 +80,7 @@ export default function useTvPublisher(screenId) {
           busy: false,
           stream: current.stream,
           sessionId: current.sessionId,
-          message: 'Waiting for a paired TV…',
+          message: 'Waiting for the approved TV browser…',
         });
         const poll = async () => {
           try {
@@ -136,7 +136,7 @@ export default function useTvPublisher(screenId) {
                 ...previous,
                 message: connected
                   ? `Sharing to ${connected} TV${connected > 1 ? 's' : ''}. Keep this page open.`
-                  : 'Connecting… open the paired TV on the same network.',
+                  : 'Connecting… keep the approved TV browser open on the mosque network.',
               }));
           } catch (error) {
             if (active.current !== current) return;

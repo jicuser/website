@@ -1,26 +1,25 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useTvScreen from '@/hooks/useTvScreen';
-import PrivateTvPlayer from '@/components/tv/PrivateTvPlayer';
+import TvMediaPanel from '@/components/tv/TvMediaPanel';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
 import {
   tvPrayerSequence,
   tvSpecialNotice,
-  ramadanScene,
+  automaticTvNotice,
   fastingTimes,
 } from '@/lib/tvPrayerSequence';
 import { TV_REMINDERS } from '@/content/tvReminders';
 import { TV_SCREENS } from '@/lib/tvControl';
-import { tvScene } from '../../supabase/functions/_shared/tv.js';
+import { tvScene, tvPanels } from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
-import YouTubeScreenPlayer from '@/components/tv/YouTubeScreenPlayer';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { PROGRAMMES } from '@/content/programmes';
-import { safeWebUrl, youtubeVideoId } from '@/lib/video';
+import { safeWebUrl } from '@/lib/video';
 import { londonDate } from '@/lib/timetable';
 
 export default function TvDisplayPage() {
@@ -36,26 +35,12 @@ export default function TvDisplayPage() {
 
 function ScreenDisplay({ screenId }) {
   const tv = useTvScreen(screenId);
-  const [privateFailed, setPrivateFailed] = useState(false);
-  const privateSource =
-    tv.session?.id || (tv.settings.mode === 'camera' ? tv.settings.camera_url : '');
-
-  const privateUnavailable = useCallback(() => setPrivateFailed(true), []);
-  useEffect(() => {
-    setPrivateFailed(false);
-  }, [privateSource]);
-  useEffect(() => {
-    if (!privateFailed) return;
-    const timer = setTimeout(() => setPrivateFailed(false), 30000);
-    return () => clearTimeout(timer);
-  }, [privateFailed]);
   const screen = useRef(null);
   const prayers = usePrayerTimes({ includeTomorrow: true });
   const { events, livestream, stale } = useHomeLiveContent({ eventLimit: 50 });
   const [now, setNow] = useState(() => new Date());
   const [slide, setSlide] = useState(0);
   const [failedImages, setFailedImages] = useState([]);
-  const [failedVideo, setFailedVideo] = useState('');
   const today = londonDate();
   const sequence = tvPrayerSequence(
     now,
@@ -92,36 +77,27 @@ function ScreenDisplay({ screenId }) {
       return true;
     });
   }, [events, failedImages, today, tv.settings.poster_ids, tv.settings.include_events]);
-  const videoId = youtubeVideoId(
-    tv.settings.mode === 'youtube' ? tv.settings.youtube_url : livestream?.stream_url,
+  const automaticNotice = automaticTvNotice(
+    now,
+    prayers.todaysTimes,
+    prayers.jummahTimes,
+    tv.settings,
+    screenId,
   );
-  const scheduled = livestream?.scheduled_at ? new Date(livestream.scheduled_at).getTime() : null;
-  const liveAvailable = Boolean(
-    videoId &&
-    (tv.settings.mode === 'youtube' ||
-      (tv.settings.mode === 'schedule' &&
-        livestream?.enabled &&
-        (!scheduled || scheduled <= now.getTime()))),
-  );
-  const privateReady =
-    screenId !== 'shoe-area' && scene !== 'normal' && tv.paired && privateSource && !privateFailed;
-  const youtubeReady =
-    screenId !== 'shoe-area' && scene !== 'normal' && liveAvailable && failedVideo !== videoId;
-  const specialNotice =
-    !privateReady && !youtubeReady
-      ? tvSpecialNotice(now, tv.settings, screenId) ||
-        (scene === 'ramadan' ? ramadanScene(now, prayers.todaysTimes, screenId) : null)
-      : null;
+  // Fasting notices rotate with posters; Jama‘ah and Taraweeh still take priority.
+  const specialNotice = ['normal', 'ramadan'].includes(scene)
+    ? tvSpecialNotice(now, tv.settings, screenId) ||
+      (automaticNotice === 'fasting' && Math.floor(now.getTime() / 20000) % 3 !== 0
+        ? null
+        : automaticNotice)
+    : null;
   const noticeVisible = Boolean(sequence || specialNotice);
-  const showPrivate = !noticeVisible && privateReady;
-  const showYoutube = !noticeVisible && !showPrivate && youtubeReady;
-  const showLive = showPrivate || showYoutube;
-  const visiblePosters = posters.length
-    ? [
-        posters[slide % posters.length],
-        ...(posters.length > 1 && !showLive ? [posters[(slide + 1) % posters.length]] : []),
-      ]
-    : [];
+  const panels = tvPanels(tv.settings, now.getTime(), screenId);
+  const onImageError = useCallback(
+    (image) =>
+      setFailedImages((previous) => (previous.includes(image) ? previous : [...previous, image])),
+    [],
+  );
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -135,9 +111,6 @@ function ScreenDisplay({ screenId }) {
     );
     return () => window.clearInterval(timer);
   }, [posters.length, tv.settings.rotation_seconds]);
-  useEffect(() => {
-    setFailedVideo('');
-  }, [videoId, livestream?.enabled]);
   useEffect(() => {
     const fullscreenKey = (event) => {
       if (event.key.toLowerCase() === 'f' && !event.ctrlKey && !event.metaKey && !event.altKey) {
@@ -178,7 +151,6 @@ function ScreenDisplay({ screenId }) {
     };
   }, []);
 
-  const onUnavailable = useCallback(() => setFailedVideo(videoId), [videoId]);
   const enterFullscreen = async () => {
     try {
       await screen.current?.requestFullscreen?.();
@@ -195,16 +167,26 @@ function ScreenDisplay({ screenId }) {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <header className="jic-tv-header">
-        <PrayerTimeBar {...prayers} currentDate={now} interactive={false} showContact={false} />
-        {(prayers.error || (!prayers.isLoadingPrayerTimes && !prayers.todaysTimes)) && (
-          <p className="jic-tv-notice" role="status">
-            Prayer timetable unavailable · reconnecting
-          </p>
+        {(tv.settings.show_times !== false || tv.settings.show_next !== false) && (
+          <PrayerTimeBar
+            {...prayers}
+            currentDate={now}
+            interactive={false}
+            showContact={false}
+            showTimes={tv.settings.show_times !== false}
+            showNext={tv.settings.show_next !== false}
+          />
         )}
+        {(tv.settings.show_times !== false || tv.settings.show_next !== false) &&
+          (prayers.error || (!prayers.isLoadingPrayerTimes && !prayers.todaysTimes)) && (
+            <p className="jic-tv-notice" role="status">
+              Prayer timetable unavailable · reconnecting
+            </p>
+          )}
       </header>
       <main
-        className={`jic-tv-stage ${showLive ? 'is-live' : ''}`}
-        aria-label={showLive ? 'Livestream and posters' : 'Community posters'}
+        className={`jic-tv-stage ${!noticeVisible && scene !== 'normal' && (tv.settings.event_title || tv.settings.event_message) ? 'has-event-heading' : ''}`}
+        aria-label="TV content"
       >
         {sequence && <TvPrayerScene sequence={sequence} jummahNotice={tv.settings.jummah_notice} />}
         {!sequence && specialNotice && (
@@ -214,85 +196,69 @@ function ScreenDisplay({ screenId }) {
             fasting={fastingTimes(now, prayers.todaysTimes, prayers.tomorrowsTimes)}
           />
         )}
-        {showPrivate && (
-          <section className="jic-tv-video">
-            <h1>{tv.settings.event_title || tv.label}</h1>
-            {tv.settings.event_message && (
-              <p className="jic-tv-event-message">{tv.settings.event_message}</p>
-            )}
-            <PrivateTvPlayer
-              screenId={screenId}
-              deviceToken={tv.deviceToken}
-              sessionId={tv.session?.id}
-              url={tv.settings.camera_url}
-              protocol={tv.settings.camera_protocol}
-              muted={tv.settings.muted}
-              onUnavailable={privateUnavailable}
-            />
-          </section>
-        )}
-        {showYoutube && (
-          <section className="jic-tv-video">
-            <h1>
-              {tv.settings.event_title ||
-                (tv.settings.mode === 'youtube' ? tv.label : livestream?.title || 'JIC Livestream')}
-            </h1>
-            {tv.settings.event_message && (
-              <p className="jic-tv-event-message">{tv.settings.event_message}</p>
-            )}
-            <YouTubeScreenPlayer
-              videoId={videoId}
-              title={tv.settings.mode === 'youtube' ? tv.label : livestream?.title}
-              muted={tv.settings.muted}
-              onUnavailable={onUnavailable}
-            />
-          </section>
-        )}
         {!noticeVisible && (
-          <div className="jic-tv-posters">
-            {visiblePosters.map((item) => (
-              <figure key={item.id} className="jic-tv-poster">
-                <img
-                  src={item.image}
-                  alt={item.alt}
-                  onError={() =>
-                    setFailedImages((previous) =>
-                      previous.includes(item.image) ? previous : [...previous, item.image],
-                    )
+          <>
+            {scene !== 'normal' && (tv.settings.event_title || tv.settings.event_message) && (
+              <div className="jic-tv-event-heading">
+                {tv.settings.event_title && <h1>{tv.settings.event_title}</h1>}
+                {tv.settings.event_message && <p>{tv.settings.event_message}</p>}
+              </div>
+            )}
+            <div
+              className="tv-panel-layout jic-tv-panels"
+              data-layout={scene === 'normal' ? 'columns' : tv.settings.layout}
+              data-count={panels.length}
+              style={{
+                '--panel-count': panels.length,
+                '--panel-rows': Math.ceil(panels.length / 2),
+              }}
+            >
+              {panels.map((source, index) => (
+                <TvMediaPanel
+                  key={`${source}:${source === 'share' ? tv.session?.id : source === 'camera' ? tv.settings.camera_url : source === 'youtube' ? tv.settings.youtube_url : source === 'schedule' ? livestream?.stream_url : ''}`}
+                  source={source}
+                  screenId={screenId}
+                  tv={tv}
+                  now={now}
+                  livestream={livestream}
+                  poster={
+                    posters[
+                      (slide + (source === 'poster-next' ? 1 : source === 'poster' ? 0 : index)) %
+                        posters.length
+                    ]
                   }
+                  onImageError={onImageError}
                 />
-                <figcaption>{item.title}</figcaption>
-              </figure>
-            ))}
-          </div>
-        )}
-        {!noticeVisible && !posters.length && !showLive && (
-          <p className="jic-tv-empty">Posters will appear here when available.</p>
+              ))}
+            </div>
+          </>
         )}
       </main>
       <footer className="jic-tv-status">
         <div className="jic-tv-logo">
           <JamatiaLogo variant="pillars" />
         </div>
-        <div className="jic-tv-clock">
-          <time dateTime={now.toISOString()}>
-            {now.toLocaleTimeString('en-GB', {
-              timeZone: 'Europe/London',
-              hour: 'numeric',
-              minute: '2-digit',
-              hourCycle: 'h12',
-            })}
-          </time>
-          <span>
-            {now.toLocaleDateString('en-GB', {
-              timeZone: 'Europe/London',
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </span>
-        </div>
+        {tv.settings.show_clock !== false && (
+          <div className="jic-tv-clock">
+            <time dateTime={now.toISOString()}>
+              {now.toLocaleTimeString('en-GB', {
+                timeZone: 'Europe/London',
+                hour: 'numeric',
+                minute: '2-digit',
+                hourCycle: 'h12',
+              })}
+            </time>
+            <span>
+              {now.toLocaleDateString('en-GB', {
+                timeZone: 'Europe/London',
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+            </span>
+          </div>
+        )}
 
         {screenId !== 'shoe-area' && !noticeVisible && (
           <p className="jic-tv-manners">
@@ -301,7 +267,6 @@ function ScreenDisplay({ screenId }) {
         )}
         <span>{tv.label}</span>
         {tv.error && <span role="status">Display update delayed</span>}
-        {privateFailed && <span role="status">Live feed unavailable · retrying</span>}
         {stale ? (
           'Content update delayed · reconnecting'
         ) : (
@@ -314,8 +279,10 @@ function ScreenDisplay({ screenId }) {
                 ? specialNotice === 'jummah'
                   ? 'Jummah notice'
                   : 'Ramadan · Taraweeh'
-                : showLive
-                  ? 'Livestream'
+                : scene === 'class' || scene === 'speech'
+                  ? scene === 'class'
+                    ? 'Class'
+                    : 'Speech'
                   : 'Community notices'}
             {posters.length > 1 && ` · ${(slide % posters.length) + 1} / ${posters.length}`}
           </span>

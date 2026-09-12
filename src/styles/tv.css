@@ -108,13 +108,58 @@ html[data-theme] .jic-tv-stage {
   padding: 0 !important;
   gap: 16px;
 }
-.jic-tv-posters {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  gap: clamp(12px, 2vw, 40px);
+/* Shared geometry keeps the admin arrangement diagram and TV player in sync. */
+.tv-panel-layout {
+  display: grid;
+  grid-template-columns: repeat(var(--panel-count), minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  gap: 12px;
   min-width: 0;
   min-height: 0;
+}
+.tv-panel-layout[data-layout='rows'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(var(--panel-count), minmax(0, 1fr));
+}
+.tv-panel-layout[data-layout='grid'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(var(--panel-rows), minmax(0, 1fr));
+}
+.tv-panel-layout[data-layout='focus-left'],
+.tv-panel-layout[data-layout='focus-right'] {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-rows: repeat(calc(var(--panel-count) - 1), minmax(0, 1fr));
+}
+.tv-panel-layout[data-layout='focus-right'] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+}
+.tv-panel-layout[data-layout='focus-left'] > :first-child {
+  grid-column: 1;
+  grid-row: 1 / -1;
+}
+.tv-panel-layout[data-layout='focus-right'] > :first-child {
+  grid-column: 2;
+  grid-row: 1 / -1;
+}
+.tv-panel-layout[data-count='1'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+.tv-panel-layout[data-count='1'] > :first-child {
+  grid-column: 1;
+}
+html[data-theme] .jic-tv-stage.has-event-heading {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.jic-tv-event-heading {
+  text-align: center;
+}
+.jic-tv-event-heading h1 {
+  font-size: clamp(18px, 2vw, 32px);
+  font-weight: 650;
+}
+.jic-tv-event-heading p {
+  font-size: clamp(14px, 1.4vw, 24px);
 }
 .jic-tv-poster {
   display: flex;
@@ -140,12 +185,6 @@ html[data-theme] .jic-tv-stage {
   font-size: clamp(14px, 1.2vw, 22px);
   line-height: 1.3;
   text-align: center;
-}
-.jic-tv-stage.is-live {
-  grid-template-columns: minmax(0, 4fr) minmax(0, 1fr);
-}
-.jic-tv-stage.is-live .jic-tv-poster {
-  flex-basis: 100%;
 }
 .jic-tv-video {
   display: flex;
@@ -203,8 +242,8 @@ html[data-theme] .jic-tv-stage {
   font-size: 14px;
 }
 .jic-tv-empty {
-  position: absolute;
-  inset: 0;
+  min-width: 0;
+  min-height: 0;
   display: grid;
   place-items: center;
   text-align: center;
@@ -221,27 +260,8 @@ html[data-theme] .jic-tv-stage {
     flex-direction: column;
     gap: 4px;
   }
-  .jic-tv-poster {
-    flex-basis: 100%;
-  }
-  .jic-tv-poster:nth-child(2) {
-    display: none;
-  }
-  .jic-tv-stage.is-live {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-  }
 }
 @media (max-height: 550px) and (min-aspect-ratio: 1/1) {
-  .jic-tv-heading {
-    margin-bottom: 4px;
-  }
-  .jic-tv-logo {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 120px;
-  }
   html[data-theme] .jic-tv-display .jic-prayer-legend {
     padding-block: 4px;
   }
@@ -249,7 +269,11 @@ html[data-theme] .jic-tv-stage {
     padding: 4px;
   }
   .jic-tv-status {
-    display: none;
+    min-height: 44px;
+    font-size: 11px;
+  }
+  .jic-tv-logo img {
+    max-height: 40px;
   }
 }
 

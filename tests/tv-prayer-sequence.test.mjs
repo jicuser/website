@@ -100,7 +100,7 @@ test('notice settings reject malformed and oversized input without evaluating te
   assert.equal(validateSettings({ jummah_notice: text }).jummah_notice, text);
 });
 
-import { ramadanScene, fastingTimes } from '../src/lib/tvPrayerSequence.js';
+import { ramadanScene, fastingTimes, automaticTvNotice } from '../src/lib/tvPrayerSequence.js';
 import { tvScene } from '../supabase/functions/_shared/tv.js';
 test('Class and Speech expire exactly; only Class suspends prayer notices', () => {
   const end = '2026-09-12T18:00:00Z';
@@ -134,4 +134,49 @@ test('fasting times move to the next date after iftar, including month boundarie
   assert.equal(at('20:00:00', null), null);
   assert.equal(at('20:00:00', today), null);
   assert.equal(fastingTimes(new Date('2026-10-01T12:00:00Z'), today, tomorrow), null);
+});
+
+test('Normal automatically shows Friday welcome only during its London time window', () => {
+  const date = '2026-09-11';
+  const prayers = [{ prayer: '1:30 PM' }, { prayer: '2:30 PM' }];
+  const at = (time, settings = {}, record = { ...times, d_date: date }) =>
+    automaticTvNotice(new Date(`${date}T${time}+01:00`), record, prayers, settings);
+  assert.equal(at('12:29:59'), null);
+  assert.equal(at('12:30:00'), 'jummah');
+  assert.equal(at('14:49:59'), 'jummah');
+  assert.equal(at('14:50:00'), null);
+  assert.equal(at('13:00:00', { auto_jummah: false }), null);
+  assert.equal(at('13:00:00', {}, times), null);
+});
+
+test('Ramadan follows the Islamic month, local adjustment and staff override', () => {
+  const date = '2026-02-20';
+  const record = { ...times, d_date: date };
+  const now = new Date(`${date}T21:35:00Z`);
+  assert.equal(automaticTvNotice(now, record), 'taraweeh');
+  assert.equal(automaticTvNotice(now, record, [], { ramadan_calendar: 'off' }), null);
+  assert.equal(automaticTvNotice(new Date('2026-09-12T12:00:00Z'), times), null);
+  assert.equal(
+    automaticTvNotice(new Date('2026-09-12T12:00:00Z'), times, [], { ramadan_calendar: 'on' }),
+    'fasting',
+  );
+  const before = new Date('2026-02-17T12:00:00Z');
+  const beforeTimes = { ...times, d_date: '2026-02-17' };
+  assert.equal(automaticTvNotice(before, beforeTimes), null);
+  assert.equal(automaticTvNotice(before, beforeTimes, [], { calendar_offset: 1 }), 'fasting');
+  assert.equal(automaticTvNotice(now, record, [], {}, 'shoe-area'), null);
+});
+
+test('seasonal automation never replaces Class or Speech panels before expiry', () => {
+  const now = new Date('2026-02-20T12:30:00Z');
+  const record = { ...times, d_date: '2026-02-20' };
+  const jummah = [{ prayer: '1:30 PM' }];
+  for (const scene_mode of ['class', 'speech']) {
+    const settings = { scene_mode, class_until: '2026-02-20T13:00:00Z', ramadan_calendar: 'on' };
+    assert.equal(automaticTvNotice(now, record, jummah, settings), null);
+    assert.equal(
+      automaticTvNotice(new Date(settings.class_until), record, jummah, settings),
+      'jummah',
+    );
+  }
 });
