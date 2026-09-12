@@ -10,7 +10,9 @@ export const POSTER_IDS = [
   'open-quran-circle',
   'youth-islamic-studies',
   'seekers-gateway',
+  'community-announcements',
   'after-maghrib',
+  'adhan-iqamah-course',
 ];
 export const DEFAULT_TV_SETTINGS = {
   version: 2,

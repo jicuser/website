@@ -4,6 +4,7 @@ import { ArrowRight, Expand } from 'lucide-react';
 import usePosters from '@/hooks/usePosters';
 import ImageViewer from '@/components/ImageViewer';
 import SwipeRail from '@/components/SwipeRail';
+import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
 
 export default function ProgrammePosters() {
   const { pathname } = useLocation();
@@ -20,17 +21,23 @@ export default function ProgrammePosters() {
       >
         {posters.map((item) => (
           <article className="jic-programme-card" key={item.id}>
-            <button
-              type="button"
-              className="jic-poster-button"
-              onClick={() => setSelected(item)}
-              aria-label={`View ${item.title} poster`}
-            >
-              <img src={item.image} alt={item.alt} loading="lazy" width="1224" height="1730" />
-              <span>
-                <Expand size={16} /> View poster
-              </span>
-            </button>
+            {item.kind === 'announcement' ? (
+              <div className="poster-announcement-preview">
+                <AnnouncementPoster poster={item} />
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="jic-poster-button"
+                onClick={() => setSelected(item)}
+                aria-label={`View ${item.title} poster`}
+              >
+                <img src={item.image} alt={item.alt} loading="lazy" width="1224" height="1730" />
+                <span>
+                  <Expand size={16} /> View poster
+                </span>
+              </button>
+            )}
             <div className="jic-programme-copy">
               <p className="jic-programme-meta">{item.subtitle}</p>
               <h3>{item.title}</h3>

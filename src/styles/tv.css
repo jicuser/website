@@ -134,13 +134,36 @@ html[data-theme] .jic-tv-stage {
   padding: 0 !important;
   gap: calc(var(--tv-unit) * 0.833333);
 }
-/* Normal mode always uses two poster columns. Teaching scenes use percentage coordinates. */
-.jic-tv-display .tv-panel-layout {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: calc(var(--tv-unit) * 0.625);
+/* Four full-height portrait posters advance together by one position. */
+.tv-poster-rail {
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
+}
+.tv-poster-track {
+  --poster-gap: calc(var(--tv-unit) * 0.625);
+  display: flex;
+  height: 100%;
+  gap: var(--poster-gap);
+  transform: translateX(0);
+}
+.tv-poster-track.is-moving {
+  transform: translateX(calc(-1 * (100% + var(--poster-gap)) / var(--poster-slots)));
+  transition: transform 450ms ease-in-out;
+}
+.tv-poster-slot {
+  display: flex;
+  flex: 0 0 calc((100% - (var(--poster-slots) - 1) * var(--poster-gap)) / var(--poster-slots));
+  min-width: 0;
+  min-height: 0;
+}
+.tv-poster-slot > .jic-tv-poster {
+  flex: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tv-poster-track.is-moving {
+    transition: none;
+  }
 }
 .jic-tv-poster {
   display: flex;
@@ -263,12 +286,7 @@ html[data-theme] .jic-tv-stage {
   background: #152238;
   color: #fff;
 }
-.jic-tv-manners {
-  flex: 1 1 calc(var(--tv-unit) * 12.5);
-  max-width: calc(var(--tv-unit) * 33.854167);
-  font-size: calc(var(--tv-unit) * 1.145833);
-}
-.jic-tv-display .jic-tv-prayer-scene {
+.jic-tv-prayer-scene {
   display: flex;
   flex-direction: column;
   align-items: center;

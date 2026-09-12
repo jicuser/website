@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useTvScreen from '@/hooks/useTvScreen';
-import TvMediaPanel from '@/components/tv/TvMediaPanel';
+import TvPosterRail from '@/components/tv/TvPosterRail';
 import SceneCanvas from '@/features/displays/SceneCanvas';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
@@ -12,7 +12,6 @@ import {
   automaticTvNotice,
   fastingTimes,
 } from '@/lib/tvPrayerSequence';
-import { TV_REMINDERS } from '@/content/tvReminders';
 import { TV_SCREENS } from '@/lib/tvControl';
 import { tvScene } from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
@@ -60,14 +59,9 @@ function ScreenDisplay({ screenId }) {
   );
   const scene = tvScene(tv.settings, now.getTime());
   const posters = useMemo(() => {
-    const programmePosters = programmes
-      .filter((item) => scene === 'teaching' || tv.settings.poster_ids.includes(item.id))
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        image: item.image,
-        alt: item.alt,
-      }));
+    const programmePosters = programmes.filter(
+      (item) => scene === 'teaching' || tv.settings.poster_ids.includes(item.id),
+    );
     const eventPosters = events
       .filter(
         (event) =>
@@ -83,8 +77,10 @@ function ScreenDisplay({ screenId }) {
       }));
     const seen = new Set();
     return [...programmePosters, ...eventPosters].filter((item) => {
-      if (seen.has(item.image) || failedImages.includes(item.image)) return false;
-      seen.add(item.image);
+      const key = item.kind === 'announcement' ? item.id : item.image;
+      if (seen.has(key) || (item.kind !== 'announcement' && failedImages.includes(item.image)))
+        return false;
+      seen.add(key);
       return true;
     });
   }, [
@@ -112,7 +108,6 @@ function ScreenDisplay({ screenId }) {
           : automaticNotice)
       : null;
   const noticeVisible = Boolean(sequence || specialNotice);
-  const panels = ['poster', 'poster-next'];
   const onImageError = useCallback(
     (image) =>
       setFailedImages((previous) => (previous.includes(image) ? previous : [...previous, image])),
@@ -124,13 +119,13 @@ function ScreenDisplay({ screenId }) {
     return () => window.clearInterval(timer);
   }, []);
   useEffect(() => {
-    if (posters.length < 2) return undefined;
+    if (scene !== 'teaching' || posters.length < 2) return undefined;
     const timer = window.setInterval(
       () => setSlide((index) => (index + 1) % posters.length),
       tv.settings.rotation_seconds * 1000,
     );
     return () => window.clearInterval(timer);
-  }, [posters.length, tv.settings.rotation_seconds]);
+  }, [scene, posters.length, tv.settings.rotation_seconds]);
   useEffect(() => {
     const fullscreenKey = (event) => {
       if (event.key.toLowerCase() === 'f' && !event.ctrlKey && !event.metaKey && !event.altKey) {
@@ -237,35 +232,11 @@ function ScreenDisplay({ screenId }) {
             />
           )}
           {!noticeVisible && (
-            <>
-              <div
-                className="tv-panel-layout jic-tv-panels"
-                data-layout="columns"
-                data-count={panels.length}
-                style={{
-                  '--panel-count': panels.length,
-                  '--panel-rows': Math.ceil(panels.length / 2),
-                }}
-              >
-                {panels.map((source, index) => (
-                  <TvMediaPanel
-                    key={source}
-                    source={source}
-                    screenId={screenId}
-                    tv={tv}
-                    now={now}
-                    livestream={livestream}
-                    poster={
-                      posters[
-                        (slide + (source === 'poster-next' ? 1 : source === 'poster' ? 0 : index)) %
-                          posters.length
-                      ]
-                    }
-                    onImageError={onImageError}
-                  />
-                ))}
-              </div>
-            </>
+            <TvPosterRail
+              posters={posters}
+              seconds={tv.settings.rotation_seconds}
+              onImageError={onImageError}
+            />
           )}
         </main>
         <footer className="jic-tv-status">
@@ -294,32 +265,17 @@ function ScreenDisplay({ screenId }) {
             </div>
           )}
 
-          {screenId !== 'shoe-area' && !noticeVisible && (
-            <p className="jic-tv-manners">
-              {TV_REMINDERS[Math.floor(now.getTime() / 45000) % TV_REMINDERS.length]}
-            </p>
-          )}
           <span>{tv.label}</span>
           {tv.error && <span role="status">Display update delayed</span>}
-          {stale ? (
-            'Content update delayed · reconnecting'
-          ) : (
-            <span>
-              {sequence
-                ? sequence.phase === 'jamaah'
-                  ? 'Jama‘ah time'
-                  : 'Dhikr after salah'
-                : specialNotice
-                  ? specialNotice === 'jummah'
-                    ? 'Jummah notice'
-                    : 'Ramadan · Taraweeh'
-                  : 'Community notices'}
-              {posters.length > 1 && ` · ${(slide % posters.length) + 1} / ${posters.length}`}
-            </span>
-          )}
+          {stale && <span role="status">Content update delayed · reconnecting</span>}
         </footer>
       </div>
-      <TvBrowserSetup key={screenId} screenId={screenId} paired={tv.paired} onConnected={tv.refresh} />
+      <TvBrowserSetup
+        key={screenId}
+        screenId={screenId}
+        paired={tv.paired}
+        onConnected={tv.refresh}
+      />
     </div>
   );
 }

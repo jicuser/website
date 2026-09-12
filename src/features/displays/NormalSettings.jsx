@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import usePosters from '@/hooks/usePosters';
 export default function NormalSettings({ form, update, currentEvents, hall }) {
   const programmes = usePosters();
@@ -24,13 +25,20 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
       <details className="admin-panel" open={true}>
         <summary>Posters & rotation</summary>
         <p>
-          Tick the posters for this TV. They fill the poster panels and replace any feed that cannot
-          play.
+          Tick the posters for this TV. Up to four show across, moving one place each rotation.
+          Announcements rotate as a poster too.
         </p>
+        <Link to="/admin?section=posters">Edit posters & announcements →</Link>
         <div className="admin-poster-picker">
           {programmes.map((item) => (
             <label key={item.id}>
-              <img src={item.image} alt="" loading="lazy" />
+              <span>
+                {item.kind === 'announcement' ? (
+                  'Text & pictures'
+                ) : (
+                  <img src={item.image} alt="" loading="lazy" />
+                )}
+              </span>
               <span>
                 <input
                   type="checkbox"

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import PrivateTvPlayer from './PrivateTvPlayer';
 import YouTubeScreenPlayer from './YouTubeScreenPlayer';
+import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
 import { youtubeVideoId } from '@/lib/video';
 
 // Each source fails independently, keeping the other panels visible.
@@ -35,7 +36,7 @@ export default function TvMediaPanel({
         ? youtubeVideoId(livestream.stream_url)
         : '';
   const privateReady =
-    tv.paired &&
+    tv?.paired &&
     screenId !== 'shoe-area' &&
     ((source === 'camera' && layer.url) ||
       (source === 'share' && tv.inputs?.find((input) => input.slot === layer.slot)?.id));
@@ -71,6 +72,7 @@ export default function TvMediaPanel({
         />
       </section>
     );
+  if (poster?.kind === 'announcement') return <AnnouncementPoster poster={poster} />;
   return poster ? (
     <figure className="jic-tv-poster">
       <img src={poster.image} alt={poster.alt} onError={() => onImageError(poster.image)} />

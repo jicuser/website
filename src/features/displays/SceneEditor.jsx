@@ -350,7 +350,13 @@ export default function SceneEditor({ value, onChange, disabled, posters = [], s
               <div className="admin-poster-picker">
                 {posters.map((p) => (
                   <label key={p.id}>
-                    <img src={p.image} alt="" loading="lazy" />
+                    <span>
+                      {p.kind === 'announcement' ? (
+                        'Text & pictures'
+                      ) : (
+                        <img src={p.image} alt="" loading="lazy" />
+                      )}
+                    </span>
                     <span>
                       <input
                         type="checkbox"

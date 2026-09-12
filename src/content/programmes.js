@@ -46,4 +46,15 @@ export const PROGRAMMES = [
     to: '/worship',
     groups: ['home', 'education', 'worship'],
   },
+  {
+    id: 'adhan-iqamah-course',
+    title: 'Adhan & Iqamah Course',
+    subtitle: 'Six-week course',
+    schedule: 'Sundays after Dhuhr · Starting 9 August 2026',
+    detail: 'Learn to deliver the Adhan and Iqamah with correct tajwid, rulings and etiquette.',
+    image: '/posters/adhan-iqamah-course.jpg',
+    alt: 'Jamatia Islamic Centre Adhan and Iqamah six-week course, starting Sunday 9 August 2026 after Dhuhr.',
+    to: '/worship',
+    groups: [],
+  },
 ];
