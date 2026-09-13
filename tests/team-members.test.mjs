@@ -1,6 +1,68 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { groupPublishedTeamMembers } from '../src/lib/teamMembers.js';
+import {
+  groupPublishedTeamMembers,
+  teamMemberDraft,
+  teamMemberPayload,
+} from '../src/lib/teamMembers.js';
+
+test('profile drafts preserve editable details and leave database metadata behind', () => {
+  const draft = teamMemberDraft({
+    id: 'existing',
+    name: 'A member',
+    role_title: null,
+    bio: 'Introduction',
+    member_group: 'trustees',
+    image_url: 'https://example.com/photo.jpg',
+    sort_order: 4,
+    published: false,
+    updated_at: 'yesterday',
+    updated_by: 'someone',
+  });
+  assert.deepEqual(draft, {
+    name: 'A member',
+    role_title: '',
+    bio: 'Introduction',
+    member_group: 'trustees',
+    image_url: 'https://example.com/photo.jpg',
+    sort_order: 4,
+    published: false,
+  });
+  assert.equal(teamMemberDraft().image_url, '');
+});
+
+test('profile saves validate required details even when submitted from the global save button', () => {
+  assert.throws(() => teamMemberPayload(teamMemberDraft()), /name/);
+  assert.throws(() => teamMemberPayload({ name: 'A member', member_group: 'other' }), /section/);
+  for (const sort_order of [1.5, 'invalid', Infinity, 2147483648]) {
+    assert.throws(
+      () => teamMemberPayload({ name: 'A member', member_group: 'staff', sort_order }),
+      /whole number/,
+    );
+  }
+});
+
+test('profile save trims fields, supports removing a photo and does not change publication state', () => {
+  const payload = teamMemberPayload({
+    name: '  A member ',
+    role_title: ' Teacher ',
+    bio: ' About the teacher ',
+    image_url: '',
+    member_group: 'staff',
+    sort_order: '2',
+    published: false,
+    id: 'existing',
+  });
+  assert.deepEqual(payload, {
+    name: 'A member',
+    role_title: 'Teacher',
+    bio: 'About the teacher',
+    image_url: null,
+    member_group: 'staff',
+    sort_order: 2,
+    published: false,
+  });
+});
 
 test('team profiles use their assigned group and preserve the provided display order', () => {
   const members = [

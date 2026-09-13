@@ -6,7 +6,7 @@ Prepared for the existing website and Flutter app. This is a deployment runbook,
 
 Use the reviewed website release commit and project reference `pwhtguaevhlnzytneemp` only after confirming the dashboard says **JIC website**. First rehearse against a separate test project containing the existing website schema. Use test accounts and synthetic submissions there. Preserve the production backup/restore point, existing function versions, current Auth redirect settings and current website build before changing the live project.
 
-The repository includes historical SQL with legacy date names and a schema snapshot. **Do not run `production_schema.sql` or replay old migrations on production.** Compare the hosted migration ledger and schema against the release. A history mismatch must be reconciled from verified already-applied SQL, rather than using `--include-all` or marking unknown work as applied. Another website deployment may already have applied the team-group migration below.
+The repository includes historical SQL with legacy date names and a schema snapshot. **Do not run `production_schema.sql` or replay old migrations on production.** The read-only review found the later `20260913114724_team_member_groups` migration already applied and reconciled to the repository. The six workspace migrations below are missing and have earlier timestamps. This known gap needs `--include-all` after verifying the pending list; it is not a reason to rerun the team migration or mark unknown work as applied. Recheck the ledger immediately before deployment because another website release may have changed it.
 
 Discover commands in the installed CLI (`supabase --version`, then each command's `--help`). From the website checkout:
 
@@ -14,10 +14,10 @@ Discover commands in the installed CLI (`supabase --version`, then each command'
 supabase login
 supabase link --project-ref pwhtguaevhlnzytneemp
 supabase migration list --linked
-supabase db push --linked --dry-run --skip-vault
+supabase db push --linked --dry-run --include-all --skip-vault
 ```
 
-Stop if that preview proposes changes outside the reviewed, missing release migrations. After the history matches and the review is complete, the write command is `supabase db push --linked --skip-vault`. Do not pass `--include-seed`, `--include-roles` or `--prune`. A managed deployment tool may instead apply each exact missing version/file with migration history, one at a time, in the order below.
+That preview must propose exactly the six missing workspace migrations in the next table. Stop and reconcile any additional historical entries before proceeding. For this verified gap, the write command is `supabase db push --linked --include-all --skip-vault`. Both `--include-all` and `--skip-vault` were checked in the installed CLI help. Do not pass `--include-seed`, `--include-roles` or `--prune`. A managed deployment tool may instead apply each exact missing version/file with migration history, one at a time, in the order below. After the gap is filled, ordinary later migrations do not need `--include-all` unless a new reviewed gap exists.
 
 ## 2. Apply the missing migrations in this order
 
@@ -29,7 +29,6 @@ Stop if that preview proposes changes outside the reviewed, missing release migr
 | `20260913111741` | Linked guardians, department heads, marks, plans, course files | Community workspace |
 | `20260913113124` | Fee ledger, audited manual receipts, optional provider reconciliation | Custom forms and learning extensions |
 | `20260913113136` | Optional form email queue and reviewed inbound replies | Custom forms |
-| `20260913114724` | Team-page groups, if not already applied | Existing team table; separate website feature |
 
 The six workspace migrations are additive and explicitly grant APIs and enable RLS on exposed tables. The custom-form migration extends the allowed profile permissions without automatically granting them. Existing owners remain owners; users receive form or teaching access only through the relevant editor/assignment. Keep the `private` schema off the exposed Data API schema list. Keep all new file buckets private and retain their MIME/size allowlists. Global Storage limits must permit at least 25 MiB for course resources (forms stay capped at 10 MiB and sermon uploads at 24 MB).
 
@@ -54,6 +53,8 @@ Set server `JIC_SITE_URL` to the selected public website origin and put its exac
 ## 4. Verify before enabling clients
 
 Run the repository checks, then exercise the real test project's APIs and Storage with an owner, assigned form worker, assigned teacher, linked guardian, unrelated account and signed-out visitor. Required live checks are: public legacy/custom submission; conditional fields; signed image upload and download; staff-only note; reply; task assignment/completion; unrelated-account denial; revoked-user denial; register/marks/guardian isolation; manual fee receipt and duplicate retry. Confirm website prayer times, public content, login and TV display still work. Run Supabase security/performance advisors and inspect errors without logging answers, student data or credentials.
+
+The read-only production advisor check during this review returned nine existing informational TV findings for RLS enabled without client policies, plus the existing warning that leaked-password protection is disabled. These predate the workspace release. The TV tables are intentionally service-only: do not add broad client policies to remove those findings. Record and compare them after deployment. Review [Supabase password protection](https://supabase.com/docs/guides/auth/password-security) and enable the leaked-password check in Auth settings if supported by the account's plan (currently Pro and above). No Auth setting, subscription or RLS policy was changed by this review; these known findings are not evidence of a new workspace regression.
 
 Local verification commands (network/paid requests are mocked):
 

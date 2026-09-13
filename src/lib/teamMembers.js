@@ -23,6 +23,36 @@ export const TEAM_GROUPS = [
 
 const groupValues = new Set(TEAM_GROUPS.map(({ value }) => value));
 
+export function teamMemberDraft(member = {}) {
+  return {
+    name: member.name || '',
+    role_title: member.role_title || '',
+    bio: member.bio || '',
+    image_url: member.image_url || '',
+    member_group: member.member_group || '',
+    sort_order: member.sort_order ?? 0,
+    published: member.published ?? true,
+  };
+}
+
+export function teamMemberPayload(form) {
+  const draft = teamMemberDraft(form);
+  if (!draft.name.trim()) throw new Error('Add a name first.');
+  if (!groupValues.has(draft.member_group)) throw new Error('Choose a team section.');
+  const order = Number(draft.sort_order);
+  if (!Number.isSafeInteger(order) || order < -2147483648 || order > 2147483647) {
+    throw new Error('Display order must be a whole number.');
+  }
+  return {
+    ...draft,
+    name: draft.name.trim(),
+    role_title: draft.role_title.trim(),
+    bio: draft.bio.trim(),
+    image_url: draft.image_url || null,
+    sort_order: order,
+  };
+}
+
 export function groupPublishedTeamMembers(members) {
   const groups = Object.fromEntries(TEAM_GROUPS.map(({ value }) => [value, []]));
   const unassigned = [];

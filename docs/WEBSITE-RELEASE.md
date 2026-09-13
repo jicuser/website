@@ -7,7 +7,7 @@ This guide prepares a release; no hosting account, domain, live database or emai
 ## Release order
 
 1. Record the currently deployed website commit and retain its complete `dist` files for rollback. Check the live Supabase migration history and backup before applying changes.
-2. Apply the missing shared workspace migrations in their reviewed order, then deploy the matching functions/configuration. Existing migrations, including the already-applied team-group migration, must not be rerun. Use the backend release review for the exact pending list.
+2. If enabling the workspace, apply the six missing shared workspace migrations in their reviewed order, then deploy the matching functions/configuration. Existing migrations, including the already-applied team-group migration, must not be rerun. Use [the backend release guide](BACKEND-RELEASE.md) for the exact pending list and the verified migration gap. An ordinary website release with the workspace disabled does not need those new migrations, push, email or AI workers.
 3. Check active owner, assigned teacher, student, guardian and unrelated-account access using representative test accounts. Verify private uploads, one form response, a reply, an assigned action and a fee record in the intended test environment.
 4. Confirm the production website origin and Supabase email return settings below.
 5. Build this reviewed frontend with the correct public project settings. Enable the workspace only when steps 2–3 have passed.
