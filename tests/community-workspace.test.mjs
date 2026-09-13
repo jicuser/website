@@ -244,6 +244,68 @@ test('workspace RLS, transactional register, moderation, delegation and private 
     },
   );
   await t.test(
+    'token rotation replaces an owned device at capacity and rolls back on failure',
+    async () => {
+      const tokens = Array.from({ length: 10 }, (_, i) => `student-notification-token-000${i}`);
+      await as(student, async () => {
+        for (const token of tokens)
+          await db.query('select register_push_device($1,$2)', [token, 'android']);
+        await assert.rejects(
+          () =>
+            db.query('select register_push_device($1,$2)', [
+              'eleventh-student-device-token',
+              'android',
+            ]),
+          /Device limit/,
+        );
+        await db.query('select register_push_device($1,$2,$3)', [
+          'rotated-student-device-token',
+          'android',
+          tokens[0],
+        ]);
+        await assert.rejects(
+          () =>
+            db.query('select register_push_device($1,$2,$3)', [
+              'invalid-platform-replacement-token',
+              'invalid',
+              tokens[1],
+            ]),
+          /check constraint/,
+        );
+      });
+      const rows = (
+        await db.query('select token from push_devices where user_id=$1', [student])
+      ).rows.map((row) => row.token);
+      assert.equal(rows.length, 10);
+      assert.equal(rows.includes(tokens[0]), false);
+      assert.equal(rows.includes('rotated-student-device-token'), true);
+      assert.equal(rows.includes(tokens[1]), true);
+      await as(other, () =>
+        db.query('select register_push_device($1,$2)', ['another-account-private-token', 'ios']),
+      );
+      await as(student, () =>
+        assert.rejects(
+          () =>
+            db.query('select register_push_device($1,$2,$3)', [
+              'another-account-private-token',
+              'ios',
+              tokens[1],
+            ]),
+          /another account/,
+        ),
+      );
+      assert.equal(
+        (
+          await db.query('select token from push_devices where user_id=$1 and token=$2', [
+            student,
+            tokens[1],
+          ])
+        ).rows.length,
+        1,
+      );
+    },
+  );
+  await t.test(
     'owner form routing creates task, notification and outbox in one transaction',
     async () => {
       await as(owner, () =>

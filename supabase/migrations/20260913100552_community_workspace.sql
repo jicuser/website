@@ -228,15 +228,19 @@ create function private.submit_student_contribution(p_student_id uuid,p_course_i
  end; $$;
 create function public.submit_student_contribution(p_student_id uuid,p_course_id uuid,p_title text,p_body text,p_kind text default 'poetry') returns uuid language sql security invoker set search_path='' as $$ select private.submit_student_contribution(p_student_id,p_course_id,p_title,p_body,p_kind); $$;
 
-create function private.register_push_device(p_token text,p_platform text) returns void language plpgsql security definer set search_path='' as $$
+create function private.register_push_device(p_token text,p_platform text,p_previous_token text default null) returns void language plpgsql security definer set search_path='' as $$
  begin
  perform 1 from public.profiles where id=auth.uid() for no key update;
  if not private.active_account(auth.uid()) then raise exception 'Active account required'; end if;
  if exists(select 1 from public.push_devices where token=p_token and user_id<>auth.uid()) then raise exception 'Device belongs to another account; unregister before switching'; end if;
+ -- Replacement and insertion are one transaction; any error restores the old endpoint.
+ delete from public.push_devices where token=p_previous_token and token<>p_token and user_id=auth.uid();
  if not exists(select 1 from public.push_devices where token=p_token) and (select count(*) from public.push_devices where user_id=auth.uid())>=10 then raise exception 'Device limit reached'; end if;
  insert into public.push_devices(token,platform,user_id) values(p_token,p_platform,auth.uid()) on conflict(token) do update set updated_at=now(),platform=excluded.platform where public.push_devices.user_id=auth.uid();
+ -- A competing account may have registered this token after the initial check.
+ if not found then raise exception 'Device belongs to another account; unregister before switching'; end if;
  end; $$;
-create function public.register_push_device(p_token text,p_platform text) returns void language sql security invoker set search_path='' as $$ select private.register_push_device(p_token,p_platform); $$;
+create function public.register_push_device(p_token text,p_platform text,p_previous_token text default null) returns void language sql security invoker set search_path='' as $$ select private.register_push_device(p_token,p_platform,p_previous_token); $$;
 create function private.unregister_push_device(p_token text) returns void language plpgsql security definer set search_path='' as $$
  begin if auth.uid() is null then raise exception 'Login required'; end if; delete from public.push_devices where token=p_token and user_id=auth.uid(); end; $$;
 create function public.unregister_push_device(p_token text) returns void language sql security invoker set search_path='' as $$ select private.unregister_push_device(p_token); $$;
@@ -277,7 +281,7 @@ do $$ declare f record; begin
  end loop;
 end $$;
 grant usage on schema private to authenticated,service_role;
-grant execute on function private.active_account(uuid),private.workspace_owner(),private.account_permission(uuid,text),private.teaches(uuid),private.own_student(uuid,uuid),private.read_student(uuid),private.read_course(uuid),private.read_learning_item(uuid,uuid,boolean),private.read_task(uuid,uuid),private.can_receive_notification(uuid,text,uuid),private.create_work_task(text,uuid,uuid,timestamptz,text),private.task_assignees(uuid),private.mark_class_register(uuid,jsonb),private.request_learning_meeting(uuid,uuid,text,timestamptz),private.submit_student_contribution(uuid,uuid,text,text,text),private.register_push_device(text,text),private.unregister_push_device(text) to authenticated,service_role;
+grant execute on function private.active_account(uuid),private.workspace_owner(),private.account_permission(uuid,text),private.teaches(uuid),private.own_student(uuid,uuid),private.read_student(uuid),private.read_course(uuid),private.read_learning_item(uuid,uuid,boolean),private.read_task(uuid,uuid),private.can_receive_notification(uuid,text,uuid),private.create_work_task(text,uuid,uuid,timestamptz,text),private.task_assignees(uuid),private.mark_class_register(uuid,jsonb),private.request_learning_meeting(uuid,uuid,text,timestamptz),private.submit_student_contribution(uuid,uuid,text,text,text),private.register_push_device(text,text,text),private.unregister_push_device(text) to authenticated,service_role;
 revoke all on function public.claim_push_jobs(),public.push_recipient_allowed(uuid),public.finish_push_job(uuid,uuid,boolean,text) from public,anon,authenticated;
 grant execute on function public.claim_push_jobs(),public.push_recipient_allowed(uuid),public.finish_push_job(uuid,uuid,boolean,text) to service_role;
 commit;

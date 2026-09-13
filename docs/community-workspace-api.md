@@ -26,7 +26,7 @@ All IDs are UUIDs, dates ISO, and timestamp columns timestamptz. Select results 
 - create_work_task(p_title text,p_assigned_to uuid,p_form_id uuid=null,p_due_at timestamptz=null,p_description text="") → UUID. General delegation owner-only; self tasks allowed (maximum 100 task creations/account/hour). Linked form tasks require caller and recipient current kind access.
 - task_assignees(p_form_id uuid=null) → [{id,display_name}]. General: owner sees active people, others themselves. Form: eligible people only if caller can read form.
 - mark_class_register(p_session_id uuid,p_marks jsonb) → void. Marks [{student_id,status,note}]. Entire batch rolls back if any student is not actively enrolled.
-- register_push_device(p_token text,p_platform text) → void. platform android/ios, active caller only. Tokens opaque, server-owned, cannot rebind another account token.
+- register_push_device(p_token text,p_platform text,p_previous_token text=null) → void. platform android/ios, active caller only. Optional previous token replaces only the caller's own device atomically, including when the account already has 10 devices. Failed registration restores the previous token. Two-argument calls remain supported. Tokens are opaque and server-owned; another account's token cannot be rebound or removed.
 - unregister_push_device(p_token text) → void. Removes current account device only.
 - request_learning_meeting(p_student_id uuid,p_course_id uuid,p_notes text,p_proposed_at timestamptz=null) → UUID.
 - submit_student_contribution(p_student_id uuid,p_course_id uuid,p_title text,p_body text,p_kind text="poetry") → UUID draft. Publication stays with assigned teachers/owner.
@@ -56,4 +56,4 @@ Sources consulted: [Supabase push guide](https://supabase.com/docs/guides/functi
 
 ## Verification checkpoint
 
-The workspace security suite and push payload tests pass (13 tests). The edge entry point passes Deno type checking with the committed npm dependency lock installed using `npm ci`, followed by `deno check --node-modules-dir=manual index.ts`. The edge folder's package-lock records the dependencies used for that check. Deno's direct registry fetch is unavailable in this workspace, so a deployment Deno lock has not been generated; create and commit it in staging before deploying. Native FCM/APNs delivery and managed Supabase advisors remain staging checks.
+The workspace security suite and push payload tests pass (14 tests). The edge entry point passes Deno type checking with the committed npm dependency lock installed using `npm ci`, followed by `deno check --node-modules-dir=manual index.ts`. The edge folder's package-lock records the dependencies used for that check. Deno's direct registry fetch is unavailable in this workspace, so a deployment Deno lock has not been generated; create and commit it in staging before deploying. Native FCM/APNs delivery and managed Supabase advisors remain staging checks.
