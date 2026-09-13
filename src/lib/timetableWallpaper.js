@@ -1,188 +1,213 @@
-const clean = (value) =>
-  value && value !== 'N/A'
-    ? String(value)
-        .replace(/^0/, '')
-        .replace(/\s?[AP]M$/i, '')
-    : '—';
+import { buildMonthlyTimetable } from './monthlyTimetable.js';
 
-const drawText = (ctx, text, x, y, options = {}) => {
-  const { size = 28, weight = 500, align = 'left', color = '#f7f1e3' } = options;
+// Match the website's canonical navy and gold palette in theme.css.
+const colors = {
+  background: '#080f1d',
+  heading: '#0c1930',
+  surface: '#152238',
+  alternate: '#0f1a2b',
+  gold: '#d6af62',
+  ink: '#0c1930',
+  text: '#f4f6fa',
+  muted: '#b7c3d5',
+  border: '#3b4658',
+};
+
+const drawText = (
+  ctx,
+  value,
+  x,
+  y,
+  { size = 28, weight = 500, color = colors.text, maxWidth } = {},
+) => {
   ctx.fillStyle = color;
   ctx.font = `${weight} ${size}px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-  ctx.textAlign = align;
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(String(text ?? ''), x, y);
+  if (maxWidth) ctx.fillText(String(value ?? ''), x, y, maxWidth);
+  else ctx.fillText(String(value ?? ''), x, y);
 };
 
-const roundRect = (ctx, x, y, width, height, radius) => {
-  const r = Math.min(radius, width / 2, height / 2);
+function drawRule(ctx, x, y, x2, y2) {
+  ctx.strokeStyle = colors.border;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + width, y, x + width, y + height, r);
-  ctx.arcTo(x + width, y + height, x, y + height, r);
-  ctx.arcTo(x, y + height, x, y, r);
-  ctx.arcTo(x, y, x + width, y, r);
-  ctx.closePath();
-};
+  ctx.moveTo(x, y);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+}
 
-export const createWallpaperCanvas = (monthlyPrayerTimes, currentMonth) => {
+function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, phone) {
   if (!monthlyPrayerTimes?.length) return;
-
-  // 19.5:9 portrait canvas: suitable for current iPhone/Android home and lock screens.
+  const timetable = buildMonthlyTimetable(monthlyPrayerTimes);
   const canvas = document.createElement('canvas');
-  canvas.width = 1290;
-  canvas.height = 2796;
+  canvas.width = phone ? 1290 : 1800;
+  canvas.height = phone ? 2796 : 2220;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('This browser cannot create a timetable image.');
 
-  const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  bg.addColorStop(0, '#05090e');
-  bg.addColorStop(0.46, '#07131f');
-  bg.addColorStop(1, '#03070b');
-  ctx.fillStyle = bg;
+  ctx.fillStyle = colors.background;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Soft gold glow and understated mosque-arch motif.
-  const glow = ctx.createRadialGradient(1040, 520, 30, 1040, 520, 640);
-  glow.addColorStop(0, 'rgba(220,182,80,.18)');
-  glow.addColorStop(1, 'rgba(220,182,80,0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, canvas.width, 1180);
-
-  ctx.strokeStyle = 'rgba(220,182,80,.10)';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(70, 740);
-  ctx.quadraticCurveTo(645, 70, 1220, 740);
-  ctx.stroke();
-
-  // Leave the top ~300px quiet so lock-screen clock/widgets remain readable.
-  drawText(ctx, 'JAMATIA ISLAMIC CENTRE', 645, 340, {
-    size: 27,
-    weight: 750,
-    align: 'center',
-    color: '#dfb650',
+  const middle = canvas.width / 2;
+  const left = phone ? 42 : 60;
+  const tableWidth = canvas.width - left * 2;
+  const brandY = phone ? 340 : 66;
+  drawText(ctx, 'JAMATIA ISLAMIC CENTRE', middle, brandY, {
+    size: phone ? 27 : 33,
+    weight: 700,
+    color: colors.gold,
   });
-  drawText(ctx, `${currentMonth} Prayer Times`, 645, 405, {
-    size: 52,
-    weight: 760,
-    align: 'center',
-    color: '#ffffff',
+  drawText(ctx, `${currentMonth} Prayer Times`, middle, brandY + (phone ? 65 : 72), {
+    size: phone ? 49 : 60,
+    weight: 700,
+    maxWidth: tableWidth,
   });
-  drawText(ctx, 'Birmingham · Start above / Jama‘ah below · 12-hour times', 645, 459, {
-    size: 24,
-    align: 'center',
-    color: '#9eabb7',
-  });
+  drawText(
+    ctx,
+    'Birmingham · Start / Jamat · 12-hour times',
+    middle,
+    brandY + (phone ? 120 : 130),
+    {
+      size: phone ? 25 : 29,
+      color: colors.muted,
+    },
+  );
 
-  const left = 46;
-  const right = 46;
-  const tableWidth = canvas.width - left - right;
-  const top = 535;
-  const headerH = 64;
-  const rows = monthlyPrayerTimes.length;
-  const availableRowsHeight = 2050;
-  const rowH = Math.min(63, Math.floor(availableRowsHeight / Math.max(rows, 1)));
-  const dateW = 150;
-  const prayerW = (tableWidth - dateW) / 6;
-  const prayers = [
-    ['Fajr', 'fajr_begins', 'fajr_jamah'],
-    ['Sunrise', 'sunrise', null],
-    ['Dhuhr', 'zuhr_begins', 'zuhr_jamah'],
-    ['Asr', 'asr_begins', 'asr_jamah'],
-    ['Maghrib', 'maghrib_begins', 'maghrib_jamah'],
-    ['Isha', 'isha_begins', 'isha_jamah'],
-  ];
+  const top = phone ? 530 : 250;
+  const groupHeight = phone ? 74 : 78;
+  const labelHeight = phone ? 46 : 54;
+  const body = top + groupHeight + labelHeight;
+  // Reserve room for the legend and next Jummah even in a 31-day month.
+  const rowHeight = Math.min(
+    phone ? 60 : 52,
+    Math.floor((canvas.height - body - 225) / timetable.rows.length),
+  );
+  const end = body + timetable.rows.length * rowHeight;
+  const weights = timetable.columns.map(({ key }) =>
+    key === 'dayName' ? 0.8 : key === 'day' ? 0.65 : key === 'sunrise' ? 1.05 : 1,
+  );
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  const positions = [left];
+  weights.forEach((weight) =>
+    positions.push(positions.at(-1) + (tableWidth * weight) / totalWeight),
+  );
 
-  ctx.fillStyle = 'rgba(10,24,38,.94)';
-  roundRect(ctx, left, top, tableWidth, headerH + rows * rowH + 18, 28);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,.12)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  ctx.fillStyle = 'rgba(220,182,80,.13)';
-  roundRect(ctx, left + 8, top + 8, tableWidth - 16, headerH - 8, 20);
-  ctx.fill();
-
-  drawText(ctx, 'DATE', left + dateW / 2, top + headerH / 2 + 2, {
-    size: 26,
-    weight: 760,
-    align: 'center',
-    color: '#dfb650',
-  });
-  prayers.forEach(([label], index) => {
+  ctx.fillStyle = colors.heading;
+  ctx.fillRect(left, top, tableWidth, groupHeight + labelHeight);
+  let columnIndex = 0;
+  timetable.groups.forEach((group) => {
+    const start = columnIndex;
+    const after = start + group.columns.length;
+    const width = positions[after] - positions[start];
+    const x = (positions[start] + positions[after]) / 2;
+    const heading =
+      group.key === 'date' ? currentMonth.split(' ')[0].toUpperCase() : group.label.toUpperCase();
     drawText(
       ctx,
-      label.toUpperCase(),
-      left + dateW + prayerW * index + prayerW / 2,
-      top + headerH / 2 + 2,
-      { size: 25, weight: 760, align: 'center', color: '#dfb650' },
+      heading,
+      x,
+      group.single
+        ? top + (groupHeight + labelHeight) / 2
+        : top + (group.arabic ? 22 : groupHeight / 2),
+      {
+        size: phone ? 23 : 30,
+        weight: 700,
+        color: colors.gold,
+        maxWidth: width - 10,
+      },
     );
-  });
-
-  monthlyPrayerTimes.forEach((day, row) => {
-    const y = top + headerH + row * rowH;
-    const friday = day.dayName === 'Fri';
-    if (friday || row % 2 === 0) {
-      ctx.fillStyle = friday ? '#e9c760' : '#172b3d';
-      ctx.fillRect(left + 10, y, tableWidth - 20, rowH);
+    if (group.arabic)
+      drawText(ctx, group.arabic, x, top + 53, {
+        size: phone ? 27 : 31,
+        color: colors.gold,
+      });
+    if (!group.single) {
+      drawRule(ctx, positions[start], top + groupHeight, positions[after], top + groupHeight);
+      group.columns.forEach((column, offset) => {
+        const index = start + offset;
+        const columnWidth = positions[index + 1] - positions[index];
+        drawText(
+          ctx,
+          column.label.toUpperCase(),
+          (positions[index] + positions[index + 1]) / 2,
+          top + groupHeight + labelHeight / 2,
+          {
+            size: phone ? 22 : 27,
+            weight: 700,
+            color: colors.gold,
+            maxWidth: columnWidth - 8,
+          },
+        );
+        if (offset > 0) drawRule(ctx, positions[index], top + groupHeight, positions[index], end);
+      });
     }
-
-    ctx.strokeStyle = 'rgba(255,255,255,.30)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(left + 18, y + rowH);
-    ctx.lineTo(left + tableWidth - 18, y + rowH);
-    ctx.stroke();
-
-    const dateLabel = `${day.dayName || ''} ${day.day ?? '—'}`.trim();
-    drawText(ctx, dateLabel, left + dateW / 2, y + rowH / 2, {
-      size: 28,
-      weight: 750,
-      align: 'center',
-      color: friday ? '#101820' : '#ffffff',
-    });
-
-    prayers.forEach(([, beginsKey, jamahKey], index) => {
-      const x = left + dateW + prayerW * index + prayerW / 2;
-      drawText(ctx, clean(day[beginsKey]), x, y + rowH * 0.27, {
-        size: 28,
-        weight: 650,
-        align: 'center',
-        color: friday ? '#101820' : '#dce8f1',
-      });
-      drawText(ctx, jamahKey ? clean(day[jamahKey]) : '', x, y + rowH * 0.74, {
-        size: 29,
-        weight: 800,
-        align: 'center',
-        color: friday ? '#101820' : '#ffffff',
-      });
-    });
+    drawRule(ctx, positions[start], top, positions[start], end);
+    columnIndex = after;
   });
 
-  // Vertical rules and Friday bands make each date easy to follow across.
-  ctx.strokeStyle = 'rgba(255,255,255,.25)';
-  for (let col = 0; col < 6; col++) {
-    const x = left + dateW + prayerW * col;
-    ctx.beginPath();
-    ctx.moveTo(x, top);
-    ctx.lineTo(x, top + headerH + rows * rowH);
-    ctx.stroke();
+  timetable.rows.forEach((row, index) => {
+    const y = body + index * rowHeight;
+    ctx.fillStyle = row.isFriday ? colors.gold : index % 2 ? colors.alternate : colors.surface;
+    ctx.fillRect(left, y, tableWidth, rowHeight);
+    row.cells.forEach((cell, column) => {
+      const columnWidth = positions[column + 1] - positions[column];
+      drawText(
+        ctx,
+        cell.display,
+        (positions[column] + positions[column + 1]) / 2,
+        y + rowHeight / 2,
+        {
+          size: phone ? 29 : 35,
+          weight: row.isFriday || column < 2 ? 700 : 500,
+          color: row.isFriday ? colors.ink : colors.text,
+          maxWidth: columnWidth - 9,
+        },
+      );
+    });
+    drawRule(ctx, left, y + rowHeight, left + tableWidth, y + rowHeight);
+  });
+  positions.forEach((x) => drawRule(ctx, x, body, x, end));
+  drawRule(ctx, left, top, left + tableWidth, top);
+  drawRule(ctx, left + tableWidth, top, left + tableWidth, end);
+  drawRule(ctx, left, body, left + tableWidth, body);
+
+  let footerY = end + 48;
+  drawText(ctx, '" = same time as above · Gold rows = Friday', middle, footerY, {
+    size: phone ? 26 : 30,
+    color: colors.muted,
+  });
+  if (timetable.combinedMaghrib) {
+    footerY += 40;
+    drawText(ctx, 'Maghrib Jamat is at the Adhan time shown.', middle, footerY, {
+      size: phone ? 24 : 28,
+      color: colors.muted,
+    });
   }
-
-  const footerY = Math.min(2660, top + headerH + rows * rowH + 82);
-  drawText(ctx, 'Top: prayer starts · Bottom: Jama‘ah · Gold rows: Friday', 645, footerY, {
-    size: 27,
-    align: 'center',
-    color: '#dce8f1',
+  if (jummahTimes?.length) {
+    footerY += 44;
+    drawText(
+      ctx,
+      `Next Jummah · ${jummahTimes.map((time) => `${time.name}: ${time.prayer}`).join(' · ')}`,
+      middle,
+      footerY,
+      {
+        size: phone ? 24 : 29,
+        weight: 600,
+        color: colors.gold,
+        maxWidth: tableWidth,
+      },
+    );
+  }
+  drawText(ctx, 'jicmasjid.org', middle, footerY + 48, {
+    size: phone ? 24 : 28,
+    weight: 700,
+    color: colors.gold,
   });
-  drawText(ctx, 'jicmasjid.org', 645, footerY + 48, {
-    size: 22,
-    weight: 720,
-    align: 'center',
-    color: '#dfb650',
-  });
-
   return canvas;
-};
+}
+
+export const createWallpaperCanvas = (rows, month, jummahTimes = []) =>
+  createTimetableCanvas(rows, month, jummahTimes, true);
+
+export const createMonthlyTimetableCanvas = (rows, month, jummahTimes = []) =>
+  createTimetableCanvas(rows, month, jummahTimes, false);

@@ -4,7 +4,11 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { communityUrl } from '../src/lib/community.js';
 import { internalPath } from '../src/lib/navigation.js';
-import { createWallpaperCanvas } from '../src/lib/timetableWallpaper.js';
+import {
+  createWallpaperCanvas,
+  createMonthlyTimetableCanvas,
+} from '../src/lib/timetableWallpaper.js';
+import { buildMonthlyTimetable } from '../src/lib/monthlyTimetable.js';
 import { PROGRAMMES } from '../src/content/programmes.js';
 
 const invite = 'https://chat.whatsapp.com/EQFjZwFapIxEBWHPk6tfXB';
@@ -300,12 +304,23 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
     assert.equal(canvas.height, 2796);
     assert.ok(calls.some(([text]) => text === 'SUNRISE'));
     assert.ok(calls.some(([text]) => text === 'October 2026 Prayer Times'));
-    assert.ok(calls.some(([text]) => text === 'Thu 31'));
-    const fajrX = 46 + 150 + (1290 - 92 - 150) / 6 / 2;
-    const fajrCalls = calls.filter(([, x, y]) => x === fajrX && y > 599);
-    assert.equal(fajrCalls.filter(([text]) => text === '5:15').length, 31);
-    assert.equal(fajrCalls.filter(([text]) => text === '—').length, 31);
+    assert.ok(calls.some(([text]) => text === '31'));
+    const model = buildMonthlyTimetable(rows);
+    const timeCalls = calls.filter(([, , y]) => y > 650 && y < 2510);
+    assert.equal(timeCalls.filter(([text]) => text === '5:15').length, 31);
+    assert.equal(
+      model.rows.filter((row) => row.cells.find((cell) => cell.key === 'fajr_jamah').value === '—')
+        .length,
+      31,
+    );
+    assert.ok(timeCalls.filter(([text]) => text === '—').length >= 31);
     assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1290 && y >= 300 && y < 2796));
+    calls.length = 0;
+    assert.equal(createMonthlyTimetableCanvas(rows, 'October 2026'), canvas);
+    assert.equal(canvas.width, 1800);
+    assert.equal(canvas.height, 2220);
+    assert.ok(calls.some(([text]) => text === '31'));
+    assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1800 && y >= 0 && y < 2220));
   } finally {
     if (previous === undefined) delete globalThis.document;
     else globalThis.document = previous;

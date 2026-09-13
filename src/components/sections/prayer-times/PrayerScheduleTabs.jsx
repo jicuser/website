@@ -1,74 +1,8 @@
 import React, { useRef } from 'react';
-import WallpaperDownload from '@/components/WallpaperDownload';
+import MonthlyPrayerTable from './MonthlyPrayerTable';
+export { default as MonthlyPrayerTable } from './MonthlyPrayerTable';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-
-export const MonthlyPrayerTable = ({ monthlyPrayerTimes, currentMonth, currentDate }) => (
-  <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden">
-    <div className="bg-primary text-white px-4 py-3 sm:p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-80">
-            Monthly schedule
-          </p>
-          <h3 className="text-lg sm:text-xl font-bold">{currentMonth} Prayer Times</h3>
-        </div>
-        <WallpaperDownload
-          monthlyPrayerTimes={monthlyPrayerTimes}
-          currentMonth={`${currentMonth} ${currentDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London', year: 'numeric' })}`}
-        />
-      </div>
-    </div>
-    {monthlyPrayerTimes.length === 0 && (
-      <p className="p-6 text-center">
-        This month’s timetable has not been uploaded yet. Please contact the centre.
-      </p>
-    )}
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse min-w-[1000px]">
-        <thead>
-          <tr className="bg-gray-100 dark:bg-gray-600">
-            <th className="p-3 text-left text-xs sm:text-sm">Day</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Date</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Fajr Begins</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Fajr Jama'ah</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Sunrise</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Dhuhr Begins</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Dhuhr Jama'ah</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Asr Begins</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Asr Jama'ah</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Maghrib Begins</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Maghrib Jama'ah</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Isha Begins</th>
-            <th className="p-3 text-left text-xs sm:text-sm">Isha Jama'ah</th>
-          </tr>
-        </thead>
-        <tbody>
-          {monthlyPrayerTimes.map((dayData, index) => (
-            <tr
-              key={index}
-              className={`border-b border-gray-200 dark:border-gray-600 text-xs sm:text-sm ${dayData.day === currentDate.getDate() ? 'bg-primary/10' : index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : ''}`}
-            >
-              <td className="p-3 font-medium">{dayData.day}</td>
-              <td className="p-3">{dayData.d_date}</td>
-              <td className="p-3">{dayData.fajr_begins}</td>
-              <td className="p-3">{dayData.fajr_jamah}</td>
-              <td className="p-3">{dayData.sunrise}</td>
-              <td className="p-3">{dayData.zuhr_begins}</td>
-              <td className="p-3">{dayData.zuhr_jamah}</td>
-              <td className="p-3">{dayData.asr_begins}</td>
-              <td className="p-3">{dayData.asr_jamah}</td>
-              <td className="p-3">{dayData.maghrib_begins}</td>
-              <td className="p-3">{dayData.maghrib_jamah}</td>
-              <td className="p-3">{dayData.isha_begins}</td>
-              <td className="p-3">{dayData.isha_jamah}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
 
 export const JummahTimesCard = ({ jummahTimes }) => (
   <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden max-w-2xl mx-auto">
@@ -202,6 +136,7 @@ export default function PrayerScheduleTabs({
                   monthlyPrayerTimes={monthlyPrayerTimes}
                   currentMonth={currentMonth}
                   currentDate={currentDate}
+                  jummahTimes={jummahTimes}
                 />
               )}
             </TabsContent>

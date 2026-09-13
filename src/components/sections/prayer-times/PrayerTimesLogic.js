@@ -5,6 +5,7 @@ const formatTime = displayTime;
 const formatMonthRecord = (pt) => {
   const dateObj = new Date(pt.d_date + 'T00:00:00');
   return {
+    isoDate: pt.d_date,
     d_date: dateObj.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',

@@ -60,6 +60,7 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
               monthlyPrayerTimes={monthlyPrayerTimes}
               currentMonth={currentMonth}
               currentDate={currentDate}
+              jummahTimes={jummahTimes}
             />
           </div>
         </section>

@@ -1,0 +1,211 @@
+.monthly-timetable {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.monthly-timetable-heading {
+  padding: 18px;
+  background: #0c1930;
+  color: #f4f6fa;
+}
+.monthly-timetable-heading h3 {
+  margin: 0 0 8px;
+  color: var(--jic-action);
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  font-weight: 700;
+}
+.monthly-timetable-heading p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.monthly-timetable-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.monthly-timetable-grid {
+  width: 100%;
+  min-width: 48.75rem;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+.monthly-timetable-grid :is(th, td) {
+  padding: 8px 6px;
+  border-inline-end: 1px solid var(--jic-border);
+  border-bottom: 1px solid var(--jic-border);
+  white-space: nowrap;
+}
+.monthly-timetable-grid thead {
+  --jic-border: #3b4658;
+  background: #0c1930;
+  color: #f4f6fa;
+}
+.monthly-timetable-grid thead th {
+  color: var(--jic-action);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.monthly-timetable-arabic {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.monthly-timetable-grid tbody tr {
+  --timetable-row: var(--jic-surface);
+  background: var(--timetable-row);
+}
+.monthly-timetable-grid tbody tr:nth-child(even) {
+  --timetable-row: var(--jic-bg-secondary);
+}
+.monthly-timetable-grid tbody tr.is-friday {
+  --timetable-row: var(--jic-action);
+  --jic-border: #a88a51;
+  color: #0c1930;
+  font-weight: 700;
+}
+.monthly-timetable-grid .is-today :is(th, td) {
+  box-shadow:
+    inset 0 2px var(--jic-gold),
+    inset 0 -2px var(--jic-gold);
+}
+.monthly-timetable-grid .is-friday.is-today :is(th, td) {
+  box-shadow:
+    inset 0 2px #0c1930,
+    inset 0 -2px #0c1930;
+}
+.monthly-timetable-grid .monthly-timetable-column-dayName,
+.monthly-timetable-grid .monthly-timetable-column-day,
+.monthly-timetable-date-heading {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 3.5rem;
+}
+.monthly-timetable-grid .monthly-timetable-column-dayName {
+  width: 3.5rem;
+}
+.monthly-timetable-grid .monthly-timetable-column-day {
+  left: 3.5rem;
+  min-width: 3rem;
+  box-shadow: 2px 0 var(--jic-border);
+}
+.monthly-timetable-grid
+  thead
+  :is(
+    .monthly-timetable-column-dayName,
+    .monthly-timetable-column-day,
+    .monthly-timetable-date-heading
+  ) {
+  background: #0c1930;
+}
+.monthly-timetable-grid
+  tbody
+  :is(.monthly-timetable-column-dayName, .monthly-timetable-column-day) {
+  background: var(--timetable-row);
+}
+.monthly-timetable-notes {
+  padding: 12px 18px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.monthly-timetable-notes p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 4px 0;
+}
+.monthly-timetable-empty {
+  padding: 24px;
+  text-align: center;
+}
+.monthly-timetable-scroll-hint {
+  margin: 0;
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  color: var(--jic-text-secondary);
+}
+.timetable-downloads {
+  margin: 0;
+  padding: 16px 18px;
+  border-top: 1px solid var(--jic-border);
+  background: var(--jic-bg-secondary);
+}
+.timetable-downloads h4 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--jic-gold);
+}
+.timetable-downloads ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.timetable-downloads li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 18px;
+  padding: 12px 0;
+  border-top: 1px solid var(--jic-border);
+}
+.timetable-downloads-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.timetable-downloads-title svg {
+  flex-shrink: 0;
+  color: var(--jic-gold);
+}
+.timetable-downloads-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.timetable-downloads :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  color: var(--jic-text);
+  background: var(--jic-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.timetable-downloads a[download] {
+  background: var(--jic-action);
+  border-color: var(--jic-action);
+  color: #0c1930;
+}
+.timetable-downloads :is(a, button):hover {
+  outline: 1px solid var(--jic-gold);
+}
+.timetable-downloads button:disabled {
+  opacity: 0.65;
+}
+.timetable-downloads [role='alert'] {
+  color: var(--jic-error);
+  font-size: 0.875rem;
+}
+@media (min-width: 860px) {
+  .monthly-timetable-scroll-hint {
+    display: none;
+  }
+}
