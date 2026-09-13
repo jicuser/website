@@ -154,7 +154,7 @@ html[data-theme] .jic-image-viewer {
 }
 .jic-image-viewer::backdrop {
   background: #000b;
-  backdrop-filter: blur(8px);
+  backdrop-filter: var(--jic-glass-overlay-filter);
 }
 .jic-image-viewer-heading {
   display: flex;

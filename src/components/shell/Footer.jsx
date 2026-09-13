@@ -1,24 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import { SOCIAL_CHANNELS } from '@/content/socials';
 import { SOCIAL_ICONS } from '@/components/icons/SocialIcons';
 import { SITE } from '@/content/site';
+import { FOOTER_LINKS } from '@/content/nav';
 import useCommunityLink from '@/hooks/useCommunityLink';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
-
-const QUICK_LINKS = [
-  { label: 'About', to: '/about' },
-  { label: 'Prayer Times', to: '/prayer-times' },
-  { label: 'Phone timetable wallpaper', to: '/prayer-times/monthly#phone-wallpaper' },
-  { label: 'Services', to: '/services' },
-  { label: 'Masjid Building Works', to: '/projects' },
-  { label: 'Madrassah', to: '/madrassah' },
-  { label: 'Youth', to: '/youth' },
-  { label: 'Contact', to: '/contact' },
-  { label: 'Social Media', to: '/social-media' },
-];
 
 export default function Footer() {
   const whatsapp = useCommunityLink();
@@ -26,33 +15,27 @@ export default function Footer() {
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${SITE.name}, ${SITE.address.full}`)}`;
   const phoneUrl = `tel:${SITE.phone.replace(/[^\d+]/g, '').replace(/^0/, '+44')}`;
   const openDonation = () => window.dispatchEvent(new CustomEvent('jic-open-donation'));
-  const openMenu = () => window.dispatchEvent(new CustomEvent('jic-open-menu'));
   return (
     <footer className="jic-site-footer">
       <div className="container mx-auto">
         <div className="jic-footer-compact-grid">
           <nav className="jic-footer-links-inline" aria-label="Footer links">
-            <button
-              type="button"
-              className="jic-footer-menu-toggle"
-              onClick={openMenu}
-              aria-haspopup="dialog"
-              aria-controls="jic-site-menu"
-            >
-              <Menu size={18} aria-hidden="true" />
-              Menu
-            </button>
-            {QUICK_LINKS.map(({ label, to }) => (
-              <Link key={to} to={to}>
-                {label}
+            {FOOTER_LINKS.map(({ name, path }) => (
+              <Link key={path} to={path}>
+                {name}
               </Link>
             ))}
           </nav>
         </div>
       </div>
       <div className="jic-footer-actions-compact">
-        <nav className="jic-footer-socials" aria-label="Social media and contact links">
-          <a href={whatsapp} aria-label="WhatsApp Community">
+        <nav className="jic-footer-socials" aria-label="Social media links">
+          <a
+            href={whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp Community"
+          >
             <WhatsAppIcon size={22} />
           </a>
           {SOCIAL_CHANNELS.map(({ id, name, url }) => {
@@ -63,6 +46,8 @@ export default function Footer() {
               </a>
             );
           })}
+        </nav>
+        <nav className="jic-footer-contact" aria-label="Contact links">
           <a
             href={mapsUrl}
             target="_blank"

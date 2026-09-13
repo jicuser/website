@@ -66,7 +66,7 @@ export const NAV_GROUPS = [
     children: [
       { name: 'Overview', path: '/services' },
       { name: 'Religious Services', path: '/services/religious' },
-      { name: 'Educational Programs', path: '/services/education' },
+      { name: 'Educational Programmes', path: '/services/education' },
       { name: 'Community Services', path: '/services/community' },
       { name: 'Funeral Services', path: '/funerals' },
       { name: 'Nikah', path: '/services/nikah' },
@@ -104,4 +104,18 @@ export const NAV_ITEMS = [
   { name: 'Financial History', path: '/financial-history' },
   { name: 'Meet the Team', path: '/team' },
   { name: 'Contact Us', path: '/contact' },
+];
+
+// Related destinations share a row in the compact footer.
+export const FOOTER_LINKS = [
+  { name: 'About', path: '/about' },
+  { name: 'Contact Us', path: '/contact' },
+  { name: 'Prayer Times', path: '/prayer-times' },
+  { name: 'Phone wallpaper', path: '/prayer-times/monthly#phone-wallpaper' },
+  { name: 'Services', path: '/services' },
+  { name: 'Masjid Building Works', path: '/projects' },
+  { name: 'Education', path: '/education' },
+  { name: 'Madrassah', path: '/madrassah' },
+  { name: 'Youth', path: '/youth' },
+  { name: 'Social Media', path: '/social-media' },
 ];

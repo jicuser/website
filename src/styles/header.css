@@ -21,11 +21,7 @@
   overflow: hidden;
   border: 1px solid var(--jic-glass-border);
   border-radius: 16px;
-  background: var(--jic-glass-panel-strong);
   color: var(--jic-text);
-  box-shadow: var(--jic-glass-shadow);
-  backdrop-filter: var(--jic-glass-panel-filter);
-  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
 }
 .jic-header-context {
   display: none;
@@ -272,11 +268,7 @@ html {
   padding: 0;
   border: 1px solid var(--jic-border);
   border-radius: 12px;
-  box-shadow: var(--jic-glass-shadow);
   color: var(--jic-text);
-  background: var(--jic-glass-panel-strong);
-  backdrop-filter: var(--jic-glass-panel-filter);
-  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
   overflow: hidden;
 }
 .jic-unified-menu[open] {
@@ -332,7 +324,6 @@ html {
   font-size: 0.875rem;
   border: 1px solid var(--jic-glass-border);
   border-radius: 10px;
-  background: var(--jic-glass-control);
 }
 /* One list on every screen. Expansion changes only the subpages, never the dialog. */
 .jic-menu-list {
@@ -437,11 +428,7 @@ html {
   padding: 11px 14px;
   border: 1px solid var(--jic-glass-border);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--jic-glass-panel-strong) 90%, var(--jic-action) 10%);
   color: var(--jic-text);
-  box-shadow: var(--jic-glass-shadow);
-  backdrop-filter: var(--jic-glass-panel-filter);
-  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
 }
 .jic-daily-reminder > button > div {
   display: flex;

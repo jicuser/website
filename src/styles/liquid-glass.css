@@ -11,15 +11,35 @@ html[data-theme] {
   --jic-glass-border: rgba(255, 255, 255, 0.58);
   --jic-glass-highlight: rgba(255, 255, 255, 0.42);
   --jic-glass-shadow: 0 10px 30px rgba(7, 19, 36, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  --jic-glass-control-sheen: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.18),
+    rgba(255, 255, 255, 0.035) 52%,
+    transparent
+  );
+  --jic-glass-tile-sheen: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.025) 52%,
+    transparent
+  );
+  --jic-glass-panel-sheen: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.02) 55%,
+    transparent
+  );
+  --jic-glass-action-sheen: linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 55%);
+  --jic-glass-overlay-filter: blur(8px);
   --jic-glass-control-filter: blur(18px) saturate(175%);
   --jic-glass-panel-filter: blur(24px) saturate(165%);
   --jic-glass-dense-filter: blur(28px) saturate(150%);
   --jic-glass-ink: #081222;
   --jic-glass-muted: #26364a;
   --jic-glass-accent: #6b3a0c;
-  --jic-button-tint-strength: 76%;
-  --jic-community-tint-strength: 60%;
-  --jic-watch-tint-strength: 62%;
+  --jic-button-tint-strength: 84%;
+  --jic-community-tint-strength: 80%;
+  --jic-watch-tint-strength: 90%;
 }
 
 html[data-theme='dark'] {
@@ -33,23 +53,20 @@ html[data-theme='dark'] {
   --jic-glass-ink: #ffffff;
   --jic-glass-muted: #edf2f8;
   --jic-glass-accent: #ffe0a0;
-  --jic-button-tint-strength: 70%;
 }
 
-html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell) {
+html[data-theme][data-surface='glass'] :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer) {
   --jic-text: var(--jic-glass-ink);
   --jic-text-secondary: var(--jic-glass-muted);
   --jic-muted: var(--jic-glass-muted);
   --jic-gold: var(--jic-glass-accent);
 }
 
-/* Small interactive surfaces: buttons, pills, icon tiles and compact navigation. */
-html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
+/* Named controls and data-glass opt in. Plain buttons, image triggers and staff
+ * actions retain their own appearance. Both modes use this same material owner. */
+html[data-theme]
+  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
   :is(
-    button,
-    [role='button'],
     [data-glass='clear'],
     .jic-primary-cta,
     .jic-secondary-cta,
@@ -58,26 +75,21 @@ html[data-theme][data-surface='glass']
     .jic-unified-menu-donate,
     .jic-footer-donate,
     .jic-footer-socials a,
+    .jic-footer-contact a,
     .jic-scroll-top,
     .jic-rail-controls button,
     .extension-hub-controls button,
     .jic-wallpaper-control > :is(a, button),
-    .jic-poster-button,
+    .jic-community-join,
+    .jic-watch-live,
+    .jic-menu-trigger,
+    .jic-menu-appearance button,
+    .jic-hall-month-controls button,
+    .jic-popup-panel button,
+    .jic-image-viewer-heading button,
     .jic-image-viewer-actions :is(a, button)
-  ):not(
-    :where(
-      .jic-menu-word,
-      .jic-radio-flat,
-      .jic-footer-menu-toggle,
-      .jic-menu-expand,
-      .jic-unified-menu-head > button,
-      .jic-free-actions > :not(.jic-menu-trigger),
-      .jic-mobile-controls > *
-    )
   ) {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.035) 52%, transparent),
-    var(--jic-glass-control) !important;
+  background: var(--jic-glass-control-sheen), var(--jic-glass-control) !important;
   border-color: var(--jic-glass-border) !important;
   box-shadow: var(--jic-glass-shadow) !important;
   -webkit-backdrop-filter: var(--jic-glass-control-filter);
@@ -85,8 +97,8 @@ html[data-theme][data-surface='glass']
 }
 
 /* Medium surfaces: tiles, cards and utility strips. */
-html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
+html[data-theme]
+  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
   :is(
     [data-glass='frosted'],
     .jic-feature-card.is-glass-only,
@@ -109,11 +121,10 @@ html[data-theme][data-surface='glass']
     .bg-gray-700,
     .bg-gray-800,
     .bg-gray-900,
-    .bg-card
+    .bg-card,
+    .bg-card\/80
   ) {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.025) 52%, transparent),
-    var(--jic-glass-tile) !important;
+  background: var(--jic-glass-tile-sheen), var(--jic-glass-tile) !important;
   color: var(--jic-text) !important;
   border-color: var(--jic-glass-border) !important;
   box-shadow: var(--jic-glass-shadow) !important;
@@ -122,8 +133,8 @@ html[data-theme][data-surface='glass']
 }
 
 /* Large or readability-sensitive surfaces: menus, schedules, dialogs and bars. */
-html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
+html[data-theme]
+  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
   :is(
     [data-glass='dense'],
     .jic-unified-info,
@@ -134,10 +145,8 @@ html[data-theme][data-surface='glass']
     .jic-quick-menu,
     .jic-site-footer
   ),
-html[data-theme][data-surface='glass'] :is(.jic-popup-panel, .jic-image-viewer) {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 55%, transparent),
-    var(--jic-glass-panel) !important;
+html[data-theme] :is(.jic-popup-panel, .jic-image-viewer) {
+  background: var(--jic-glass-panel-sheen), var(--jic-glass-panel) !important;
   color: var(--jic-text) !important;
   border-color: var(--jic-glass-border) !important;
   box-shadow: var(--jic-glass-shadow) !important;
@@ -146,8 +155,8 @@ html[data-theme][data-surface='glass'] :is(.jic-popup-panel, .jic-image-viewer) 
 }
 
 /* Form controls use a stronger tint for legibility, but avoid nested blur passes. */
-html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
+html[data-theme]
+  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
   :is(input:not([type='checkbox']):not([type='radio']), textarea, select) {
   background: var(--jic-glass-panel-strong) !important;
   color: var(--jic-text) !important;
@@ -158,8 +167,8 @@ html[data-theme][data-surface='glass']
 }
 
 /* The enclosing panel already supplies blur. Nested controls only need a tint. */
-html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
+html[data-theme]
+  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
   :is(
     [data-glass='frosted'],
     [data-glass='dense'],
@@ -168,6 +177,9 @@ html[data-theme][data-surface='glass']
     .jic-quick-menu,
     .jic-mobile-controls,
     .jic-site-footer,
+    .jic-programme-card,
+    .jic-home-footer-strip,
+    .jic-hall-calendar,
     .jic-event-card,
     .jic-live-section
   )
@@ -177,8 +189,8 @@ html[data-theme][data-surface='glass']
 }
 
 /* Active state remains obvious across themes. */
-html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
+html[data-theme]
+  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
   :is(
     .jic-unified-subnav-link:is(.is-current, [aria-current='page']),
     [role='tab'][data-state='active']
@@ -193,21 +205,12 @@ html[data-theme][data-surface='glass']
 html[data-theme] .jic-community-join {
   --jic-button-tint: #25d366;
   --jic-button-ink: #052915;
-}
-
-html[data-theme][data-surface='glass'] .jic-community-join {
   --jic-button-tint-strength: var(--jic-community-tint-strength);
 }
 
 html[data-theme] .jic-watch-live {
-  --jic-button-tint: #dc2626;
+  --jic-button-tint: #b91c1c;
   --jic-button-ink: #fff;
-  background: var(--jic-button-tint);
-  color: var(--jic-button-ink);
-  border-color: var(--jic-button-tint);
-}
-
-html[data-theme][data-surface='glass'] .jic-watch-live {
   --jic-button-tint-strength: var(--jic-watch-tint-strength);
 }
 
@@ -216,13 +219,13 @@ html[data-theme] .jic-watch-live svg {
 }
 
 html[data-theme] .jic-menu-trigger {
-  --jic-button-tint: #0f766e;
+  --jic-button-tint: #115e59;
   --jic-button-ink: #fff;
 }
 
 html[data-theme] :is(.jic-hall-contact a, .jic-public-route .bg-primary) {
-  --jic-button-tint: var(--jic-logo-metal);
-  --jic-button-ink: var(--jic-bg);
+  --jic-button-tint: var(--jic-action);
+  --jic-button-ink: #0c1930;
 }
 
 html[data-theme] .jic-public-route .bg-destructive {
@@ -230,9 +233,9 @@ html[data-theme] .jic-public-route .bg-destructive {
   --jic-button-ink: #ffffff;
 }
 
-/* Coloured actions keep their brand/status colour while remaining translucent. */
-html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer, .jic-admin-shell)
+/* Coloured actions retain their identity in glass and solid modes. */
+html[data-theme]
+  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
   :is(
     .jic-community-join,
     .jic-watch-live,
@@ -245,7 +248,7 @@ html[data-theme][data-surface='glass']
     a.bg-destructive
   ) {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.025) 52%, transparent),
+    var(--jic-glass-action-sheen),
     color-mix(in srgb, var(--jic-button-tint) var(--jic-button-tint-strength), transparent) !important;
   color: var(--jic-button-ink) !important;
   border-color: color-mix(in srgb, var(--jic-button-tint) 68%, var(--jic-glass-border)) !important;
@@ -282,8 +285,8 @@ html[data-theme] .jic-public-route .jic-unified-menu-donate:is(:hover, :focus-vi
   }
 }
 
-/* Reading sections themselves stay transparent; their content cards carry the material. */
-html[data-theme][data-surface='glass'] .jic-public-route .page-transition > section {
+/* Reading sections stay transparent; their content cards carry the material. */
+html[data-theme] .jic-public-route .page-transition > section {
   background: transparent !important;
   box-shadow: none !important;
   -webkit-backdrop-filter: none !important;
@@ -299,6 +302,7 @@ html[data-theme][data-surface='glass'] .jic-site-footer :is(a, p, small, .jic-fo
  * same visual hierarchy with materially lower compositing cost. */
 @media (max-width: 767px) {
   html[data-theme] {
+    --jic-glass-overlay-filter: blur(5px);
     --jic-glass-control-filter: blur(10px) saturate(165%);
     --jic-glass-panel-filter: blur(14px) saturate(155%);
     --jic-glass-dense-filter: blur(16px) saturate(145%);
@@ -313,6 +317,7 @@ html[data-theme][data-surface='glass'] .jic-site-footer :is(a, p, small, .jic-fo
     --jic-glass-tile: rgba(15, 26, 43, 0.94);
     --jic-glass-panel: rgba(15, 26, 43, 0.96);
     --jic-glass-panel-strong: rgba(15, 26, 43, 0.98);
+    --jic-glass-overlay-filter: none;
     --jic-glass-control-filter: none;
     --jic-glass-panel-filter: none;
     --jic-glass-dense-filter: none;
@@ -336,11 +341,18 @@ html[data-theme][data-surface='solid'] {
   --jic-glass-panel: var(--jic-surface);
   --jic-glass-panel-strong: var(--jic-surface);
   --jic-glass-border: var(--jic-border);
+  --jic-glass-overlay-filter: none;
   --jic-glass-control-filter: none;
   --jic-glass-panel-filter: none;
   --jic-glass-dense-filter: none;
   --jic-glass-shadow: none;
+  --jic-glass-control-sheen: none;
+  --jic-glass-tile-sheen: none;
+  --jic-glass-panel-sheen: none;
+  --jic-glass-action-sheen: none;
   --jic-button-tint-strength: 100%;
+  --jic-community-tint-strength: 100%;
+  --jic-watch-tint-strength: 100%;
 }
 
 /* Safe fallback for browsers without backdrop-filter support. */

@@ -120,12 +120,9 @@ export default function UnifiedHeader() {
       setMenuOpen(false);
       setDonationOpen(true);
     };
-    const openMenu = () => setMenuOpen(true);
     window.addEventListener('jic-open-donation', openDonation);
-    window.addEventListener('jic-open-menu', openMenu);
     return () => {
       window.removeEventListener('jic-open-donation', openDonation);
-      window.removeEventListener('jic-open-menu', openMenu);
     };
   }, []);
   // Measure before paint so larger phone text cannot sit beneath the header.
