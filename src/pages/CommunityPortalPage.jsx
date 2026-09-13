@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabaseClient';
 import Tasks, { Notifications } from '@/components/workspace/Tasks';
 import Learning from '@/components/workspace/Learning';
 import Manage from '@/components/workspace/Manage';
-import FormsInbox from '@/components/admin/FormsInbox';
+import CustomFormsWorkspace from '@/components/workspace/CustomFormsWorkspace';
+import { SermonManager } from '@/components/workspace/Sermons';
 import { ActionForm, TextField, checked } from '@/components/workspace/shared';
 import '@/styles/workspace.css';
 
@@ -80,7 +81,9 @@ export default function CommunityPortalPage() {
 function Workspace({ auth }) {
   const [params] = useSearchParams();
   const formId = params.get('form');
-  const [tab, setTab] = useState(formId ? 'tasks' : 'learning');
+  const [tab, setTab] = useState(
+    formId ? 'tasks' : params.get('tab') === 'forms' ? 'forms' : 'learning',
+  );
   useEffect(() => {
     if (formId) setTab('tasks');
   }, [formId]);
@@ -130,8 +133,9 @@ function Workspace({ auth }) {
     ['learning', 'My learning'],
     ['tasks', 'Actions'],
     ['notifications', 'Notifications'],
-    ...(auth.can('forms') ? [['forms', 'Forms inbox']] : []),
+    ['forms', 'Forms and replies'],
     ...(auth.isOwner ? [['manage', 'Manage learning']] : []),
+    ...(auth.isOwner ? [['talks', 'Talks']] : []),
   ];
   return (
     <>
@@ -172,7 +176,10 @@ function Workspace({ auth }) {
         {tab === 'notifications' && (
           <Notifications rows={data.user_notifications} reload={reload} onError={report} />
         )}
-        {tab === 'forms' && auth.can('forms') && <FormsInbox />}
+        {tab === 'forms' && (
+          <CustomFormsWorkspace auth={auth} initialMine={params.get('mine') === 'true'} />
+        )}
+        {tab === 'talks' && auth.isOwner && <SermonManager />}
         {tab === 'manage' && auth.isOwner && (
           <Manage data={data} reload={reload} onError={report} />
         )}

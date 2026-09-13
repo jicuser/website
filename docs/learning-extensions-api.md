@@ -1,0 +1,10 @@
+# Learning resources and progress
+
+Additive migration after the shared workspace. No separate accounts or student store.
+
+- `learning_guardians(student_id,user_id,relationship,created_at)` supports multiple linked adults. Existing `learning_students.guardian_id` remains compatible; owners add/remove extra links. The server's own-student helper includes both paths and all linked active guardians get published-record notifications.
+- `learning_department_heads(department,user_id,created_at)` lets owners assign oversight across either adult or madrassah courses. Cosmetic profile labels never grant this scope. `can_teach_course(p_course_id)` is the client affordance check; all writes also use server policies.
+- `learning_records` adds nullable `score,max_score` for assessment (paired, 0≤score≤max_score, max>0), `due_on` and server-owned `completed_at` for plans. Teachers edit marks/due dates; authorized students/guardians/teachers toggle plan completion through `set_learning_plan_complete(p_id,p_complete)`.
+- `learning_resources` stores course_id,title,description,url OR object_path,file_name,mime_type,published,created_by,created_at. Teachers create draft resources and publish to active students/guardians. Private bucket `course-resources` caps files at25MiB and allows PDF/images/MP3/M4A/MP4. Object key is `<course UUID>/<uploader UUID>/<random 16–80 character ID>`; no upsert. Upload through normal authenticated Storage API then insert metadata, delete the uploaded object if metadata creation fails. Downloads use a60second signed URL after normal RLS authorization. External resources must be HTTPS. No public storage URLs or student details in public content.
+
+RLS preserves class/department isolation and disables access with the account. File publication controls downloads; signed links already issued can remain valid for at most60seconds after unpublishing. Removing an enrolment immediately blocks new file links. Owners clean up unreferenced uploaded objects during maintenance.

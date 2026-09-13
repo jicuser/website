@@ -16,6 +16,10 @@ const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ClassesCoursesPage = lazy(() => import('@/pages/ClassesCoursesPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const CommunityPortalPage = lazy(() => import('@/pages/CommunityPortalPage'));
+const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
+const SermonArchive = lazy(() =>
+  import('@/components/workspace/Sermons').then((module) => ({ default: module.SermonArchive })),
+);
 const EducationPage = lazy(() => import('@/pages/EducationPage'));
 const FinancialHistoryPage = lazy(() => import('@/pages/FinancialHistoryPage'));
 const HallBookingPage = lazy(() => import('@/pages/HallBookingPage'));
@@ -102,6 +106,8 @@ function AppRoutes() {
               <Route path="about" element={<AboutPage />} />
               <Route path="team" element={<TeamPage />} />
               <Route path="contact" element={<ContactPage />} />
+              <Route path="forms/:slug" element={<PublicFormPage />} />
+              <Route path="talks" element={<SermonArchive />} />
               <Route path="financial-history" element={<FinancialHistoryPage />} />
               <Route path="privacy" element={<PrivacyPage />} />
               <Route path="social-media" element={<SocialMediaPage />} />

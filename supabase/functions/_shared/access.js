@@ -12,6 +12,8 @@ export const PERMISSIONS = [
   ['forms_contact', 'Contact messages'],
   ['forms_madrassah', 'Madrassah enquiries'],
   ['forms_itikaaf', 'I’tikaf registrations'],
+  ['forms_manage', 'Create and manage custom forms'],
+  ['forms_custom', 'All custom form responses'],
   ['users', 'Invite staff and manage access'],
   ['audit', 'Activity history'],
   ['delete_content', 'Delete content in permitted sections'],
