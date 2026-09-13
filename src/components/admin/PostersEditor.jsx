@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import usePosters from '@/hooks/usePosters';
 import { POSTERS_KEY, POSTER_DESTINATIONS, posterImage, validPoster } from '@/lib/posters';
+import { AUDIENCES, WEEKDAYS } from '@/lib/education';
 import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
 import { useContent } from '@/context/ContentContext';
 import { useAuth } from '@/context/AuthContext';
@@ -258,6 +259,22 @@ export default function PostersEditor() {
               )}
             </>
           )}
+          {item.kind !== 'announcement' && <>
+            <label>Audience<select value={item.audience || ''} onChange={(event) => update('audience', event.target.value)}><option value="" disabled>Choose audience</option>{AUDIENCES.map((audience) => <option key={audience}>{audience}</option>)}</select></label>
+            <h4>Weekly schedule</h4>
+            <p>Only add confirmed recurring sessions. Posters without an adult or all audience stay outside adult education.</p>
+            {(item.sessions || []).map((session,index) => {
+              const change = (values) => update('sessions', item.sessions.map((value,i) => i === index ? { ...value, ...values } : value));
+              return <fieldset key={index}><legend>Session {index + 1}</legend>
+                <label>Day<select value={session.day} onChange={(event) => change({ day: Number(event.target.value) })}>{WEEKDAYS.map((day,i) => <option key={day} value={i+1}>{day}</option>)}</select></label>
+                <label>Time or prayer<select value={session.after || 'time'} onChange={(event) => change(event.target.value === 'time' ? { time: '18:00', after: undefined } : { after: event.target.value, time: undefined, end: undefined })}><option value="time">Fixed time</option>{['Fajr','Dhuhr','Asr','Maghrib','Isha'].map((prayer) => <option key={prayer} value={prayer}>After {prayer}</option>)}</select></label>
+                {!session.after && <label>Starts<input type="time" required value={session.time || ''} onChange={(event) => change({time:event.target.value})}/></label>}
+                <label>Session title (optional)<input maxLength={120} value={session.title || ''} onChange={(event) => change({title:event.target.value})}/></label>
+                <button type="button" className="admin-button" onClick={() => update('sessions', item.sessions.filter((_,i) => i !== index))}>Remove session</button>
+              </fieldset>;
+            })}
+            <button type="button" className="admin-button" disabled={(item.sessions || []).length >= 21} onClick={() => update('sessions', [...(item.sessions || []), {day:1,time:'18:00'}])}>Add weekly session</button>
+          </>}
           <h4>Show on website</h4>
           {POSTER_DESTINATIONS.map((group) => (
             <label className="admin-check" key={group}>

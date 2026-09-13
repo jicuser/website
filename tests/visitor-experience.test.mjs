@@ -73,7 +73,7 @@ test('approved logo variations have paired, self-contained vector exports', () =
 
 test('each programme uses a real local poster and an existing content destination', () => {
   assert.equal(new Set(PROGRAMMES.map((programme) => programme.id)).size, PROGRAMMES.length);
-  const destinations = ['/youth/classes-skills', '/madrassah/classes-courses', '/worship'];
+  const destinations = ['/youth/classes-skills', '/education/classes-courses', '/worship'];
   for (const programme of PROGRAMMES) {
     assert.ok(existsSync(new URL(`../public${programme.image}`, import.meta.url)));
     assert.ok(destinations.includes(programme.to));

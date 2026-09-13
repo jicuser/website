@@ -1,4 +1,5 @@
 import { PROGRAMMES } from '../content/programmes.js';
+import { AUDIENCES, validSessions } from './education.js';
 import { TV_REMINDERS } from '../content/tvReminders.js';
 
 export const POSTERS_KEY = 'programme_posters';
@@ -46,6 +47,8 @@ export function posterImage(value) {
 export function validPoster(poster) {
   return Boolean(
     poster &&
+    (poster.audience === undefined || AUDIENCES.includes(poster.audience)) &&
+    validSessions(poster.sessions) &&
     typeof poster.id === 'string' &&
     /^[a-zA-Z0-9_-]{1,64}$/.test(poster.id) &&
     typeof poster.title === 'string' &&
@@ -64,7 +67,8 @@ export function validPoster(poster) {
 }
 export function posterCatalogue(raw) {
   try {
-    const items = raw == null ? DEFAULT_POSTERS : JSON.parse(raw);
+    if (raw == null) return DEFAULT_POSTERS;
+    const items = JSON.parse(raw);
     if (!Array.isArray(items)) return DEFAULT_POSTERS;
     const ids = new Set();
     return items
@@ -76,6 +80,8 @@ export function posterCatalogue(raw) {
       .slice(0, 100)
       .map((p) => ({
         ...p,
+        audience: p.audience || PROGRAMMES.find((item) => item.id === p.id)?.audience,
+        sessions: p.sessions || PROGRAMMES.find((item) => item.id === p.id && item.schedule === p.schedule)?.sessions || [],
         groups: Array.isArray(p.groups)
           ? p.groups.filter((group) => POSTER_DESTINATIONS.includes(group))
           : [],

@@ -15,6 +15,7 @@ import NotFoundPage from '@/pages/NotFoundPage';
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ClassesCoursesPage = lazy(() => import('@/pages/ClassesCoursesPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
+const CommunityPortalPage = lazy(() => import('@/pages/CommunityPortalPage'));
 const EducationPage = lazy(() => import('@/pages/EducationPage'));
 const FinancialHistoryPage = lazy(() => import('@/pages/FinancialHistoryPage'));
 const HallBookingPage = lazy(() => import('@/pages/HallBookingPage'));
@@ -61,6 +62,7 @@ function AppRoutes() {
         <RouteScrollReset />
         <AnimatePresence mode="wait">
           <Routes>
+            <Route path="/portal" element={<CommunityPortalPage />} />
             <Route path="/radio" element={<RadioPlayerPage />} />
             <Route path="/tv179" element={<TvDisplayPage />} />
             <Route path="/tv179/:screenId" element={<TvDisplayPage />} />
@@ -135,6 +137,9 @@ function AppRoutes() {
               <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
 
               <Route path="education" element={<EducationPage />} />
+              <Route path="education/classes-courses" element={<EducationPage view="courses" />} />
+              <Route path="education/week" element={<EducationPage view="week" />} />
+
               <Route path="madrassah" element={<MadrassahPage />} />
               <Route path="madrassah/classes-courses" element={<ClassesCoursesPage />} />
               <Route path="madrassah/enrolment" element={<MadrassahEnrolmentPage />} />

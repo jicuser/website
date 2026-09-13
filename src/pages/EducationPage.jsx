@@ -1,69 +1,32 @@
 import React from 'react';
-import { BookOpen, FileText, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import usePosters from '@/hooks/usePosters';
+import { weeklySessions, WEEKDAYS, isAdultProgramme } from '@/lib/education';
 
-const educationTiles = [
-  {
-    title: 'Madrassah',
-    description: 'Madrassah overview, enrolment, policies and parent information.',
-    path: '/madrassah',
-    icon: BookOpen,
-  },
-  {
-    title: 'Classes & Courses',
-    description: 'Browse current classes, courses and learning opportunities.',
-    path: '/madrassah/classes-courses',
-    icon: BookOpen,
-  },
-  {
-    title: 'Student Portal',
-    description: 'Access student information and learning resources.',
-    path: '/madrassah/student-portal',
-    icon: FileText,
-  },
-  {
-    title: 'Enrolment',
-    description: 'Admissions and registration information for new pupils.',
-    path: '/madrassah/enrolment',
-    icon: UserPlus,
-  },
-];
-
-export default function EducationPage() {
+export default function EducationPage({ view = 'overview' }) {
+  const posters = usePosters();
+  const sessions = weeklySessions(posters);
+  const courses = posters.filter(isAdultProgramme);
   return (
-    <div className="page-transition">
-      <section className="pt-8 pb-10 md:pt-10 md:pb-14">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto mb-6 max-w-3xl text-center md:mb-8">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Education</p>
-            <h1 className="mt-2 text-2xl font-semibold text-foreground md:text-4xl">
-              Learn at Jamatia Islamic Centre
-            </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-              Choose an education area below. Each section keeps its own tabs visible so you can
-              move between related pages without going back to the main menu.
-            </p>
-          </div>
-
-          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-            {educationTiles.map(({ title, description, path, icon: Icon }) => (
-              <Link
-                key={path}
-                to={path}
-                className="group rounded-2xl border border-border/70 bg-card/80 px-4 py-5 text-center no-underline shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:p-5"
-              >
-                <span className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <strong className="block text-sm text-foreground md:text-base">{title}</strong>
-                <span className="mt-1 hidden text-xs leading-relaxed text-muted-foreground md:block">
-                  {description}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
+    <section className="container mx-auto max-w-5xl space-y-6 px-4 py-8">
+      <header>
+        <p className="text-sm font-semibold text-primary">Education</p>
+        <h1 className="mt-2 text-3xl font-semibold">{view === 'week' ? 'This week’s learning' : view === 'courses' ? 'Adult classes & courses' : 'Learning for adults'}</h1>
+        <p className="mt-3 text-muted-foreground">Explore our adult courses, open learning circles and regular gatherings.</p>
+      </header>
+      <nav className="flex flex-wrap gap-3" aria-label="Education">
+        {[['Overview','/education'],['Classes & courses','/education/classes-courses'],['Weekly schedule','/education/week'],['Student portal','/portal']].map(([title,path]) => <Link className="rounded-xl border border-border px-4 py-2" key={path} to={path}>{title}</Link>)}
+      </nav>
+      {view !== 'courses' && <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Weekly schedule</h2>
+        <p className="text-sm text-muted-foreground">Published recurring sessions. Check the poster for term dates and contact the centre about changes.</p>
+        {sessions.length === 0 ? <p>The next schedule will appear when published.</p> : WEEKDAYS.map((day,index) => {
+          const today = sessions.filter((session) => session.day === index + 1);
+          return today.length > 0 && <div key={day} className="rounded-xl border border-border bg-card/80 p-4"><h3 className="font-semibold">{day}</h3>{today.map((session,i) => <p key={`${session.id}-${i}`} className="mt-2"><strong>{session.time || `After ${session.after}`}</strong> · {session.title || session.programme}{session.title && <span className="text-muted-foreground"> · {session.programme}</span>}</p>)}</div>;
+        })}
+      </section>}
+      {view !== 'week' && <section className="space-y-3"><h2 className="text-xl font-semibold">What’s on</h2>{courses.map((course) => <article className="rounded-xl border border-border bg-card/80 p-4" key={course.id}><h3 className="font-semibold">{course.title}</h3><p>{course.schedule}</p><p className="mt-1 text-sm text-muted-foreground">{course.detail}</p></article>)}{courses.length === 0 && <p>New courses will appear here when published.</p>}</section>}
+      <p className="text-sm text-muted-foreground">Looking for children’s enrolment or parent information? <Link to="/madrassah" className="underline">Visit the separate Madrassah section.</Link></p>
+    </section>
   );
 }

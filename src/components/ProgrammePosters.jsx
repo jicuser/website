@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Expand } from 'lucide-react';
+import { isAdultProgramme } from '@/lib/education';
 import usePosters from '@/hooks/usePosters';
 import ImageViewer from '@/components/ImageViewer';
 import SwipeRail from '@/components/SwipeRail';
@@ -11,7 +12,7 @@ export default function ProgrammePosters() {
   const programmes = usePosters();
   const [selected, setSelected] = useState(null);
   const group = pathname === '/' ? 'home' : pathname.split('/')[1];
-  const posters = programmes.filter((item) => item.groups.includes(group));
+  const posters = programmes.filter((item) => item.groups.includes(group) && (group !== 'education' || isAdultProgramme(item)));
   if (!posters.length) return null;
   return (
     <>
