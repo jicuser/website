@@ -100,12 +100,16 @@
   padding: 22px;
   border: 1px solid var(--jic-border);
   border-radius: 18px;
-  scroll-margin-top: calc(var(--jic-prayer-sticky-offset) + 20px);
+  scroll-margin-top: 12px;
 }
 .jic-social-identity {
   display: flex;
   gap: 14px;
   align-items: center;
+}
+.jic-social-identity > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .jic-social-identity svg {
   flex-shrink: 0;
@@ -147,8 +151,11 @@
   padding: 10px 14px;
   min-height: 44px;
   border: 1px solid var(--jic-border);
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.875rem;
+}
+.jic-social-actions svg {
+  flex-shrink: 0;
 }
 .jic-social-preview {
   margin-top: 20px;
@@ -180,6 +187,18 @@
     padding: 18px;
   }
   .jic-social-jump {
-    margin-inline: -4px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .jic-social-jump a {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    padding: 8px;
+    font-size: 0.875rem;
+  }
+  .jic-social-actions > * {
+    flex: 1 1 auto;
   }
 }

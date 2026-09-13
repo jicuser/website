@@ -2,24 +2,24 @@
 
 `app.css` is the only stylesheet entry point. Edit the owner below instead of adding another override file.
 
-| File                     | Responsibility                                                                |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `index.css`              | Tailwind, global text scaling, focus, scrollbars and reduced motion           |
-| `theme.css`              | Light/dark palette and colour mapping for existing page utilities             |
-| `header.css`             | Prayer strip, navigation row, menu, reminder and measured prayer-strip offset |
-| `subnav.css`             | Section tabs and the current-tab indicator                                    |
-| `public-sections.css`    | Public page typography, section spacing and prayer tables                     |
-| `home.css`               | Shared photograph and homepage layout                                         |
-| `content.css`            | Poster cards, swipe rails and image/download controls                         |
-| `dialogs.css`            | Donation dialog structure                                                     |
-| `footer.css`             | Footer layout                                                                 |
-| `liquid-glass.css`       | Glass tokens, public card material and accessibility fallbacks                |
-| `admin.css`              | Staff workspace, editors, login and responsive behaviour                      |
-| `projects.css`           | Building project tiles                                                        |
-| `hall-booking.css`       | Hall availability calendar                                                    |
-| `worship.css`            | Worship pages and Qur'an reader                                               |
-| `tv.css`                 | Dedicated mosque-screen scale and layout                                      |
-| `spiritual-overlays.css` | Welcome salawat and occasional reflection overlays                            |
+| File                     | Responsibility                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `index.css`              | Tailwind, global text scaling, focus, scrollbars and reduced motion                  |
+| `theme.css`              | Light/dark palette and colour mapping for existing page utilities                    |
+| `header.css`             | Prayer strip, navigation row, menu, reminder and measured prayer-strip offset        |
+| `subnav.css`             | Section tabs and the current-tab indicator                                           |
+| `public-sections.css`    | Public page typography, section spacing and prayer tables                            |
+| `home.css`               | Shared photograph and homepage layout                                                |
+| `content.css`            | Poster cards, swipe rails and image/download controls                                |
+| `dialogs.css`            | Donation dialog structure                                                            |
+| `footer.css`             | Footer layout                                                                        |
+| `liquid-glass.css`       | Glass tokens, public control/card material in both modes and accessibility fallbacks |
+| `admin.css`              | Staff workspace, editors, login and responsive behaviour                             |
+| `projects.css`           | Building project tiles                                                               |
+| `hall-booking.css`       | Hall availability calendar                                                           |
+| `worship.css`            | Worship pages and Qur'an reader                                                      |
+| `tv.css`                 | Dedicated mosque-screen scale and layout                                             |
+| `spiritual-overlays.css` | Welcome salawat and occasional reflection overlays                                   |
 
 ## Rules
 
@@ -42,7 +42,7 @@ Light mode uses pearl surfaces and navy text; dark mode uses navy surfaces and o
 | `data-glass="frosted"` | Shared cards, programme and project tiles          | More tint and blur for readable copy     |
 | `data-glass="dense"`   | Menus, quotes, prayer information and forms        | Strongest tint for dense text            |
 
-`liquid-glass.css` maps existing named components and utility cards to these same tokens. Dedicated display layouts stay outside the public material selector. Keep the script Menu word, radio, footer navigation and individual bottom-bar controls unboxed. Their surrounding bars provide the glass surface; do not add separate backgrounds to buttons while leaving adjacent links plain. The full-page mobile directory sets local material tokens to a solid reading surface. The green WhatsApp action, red heart, teal desktop burger, gold mobile burger and grey footer Donate action keep their colours.
+`liquid-glass.css` maps existing named components and utility cards to these same tokens in both appearance modes. Glass off substitutes opaque colours and disables blur; it never removes the card background. Plain buttons and staff actions are not selected by the public material rules. Dedicated display layouts stay outside the public material selector. Keep the script Menu word, radio, footer navigation and individual bottom-bar controls unboxed. Their surrounding bars provide the glass surface; do not add separate backgrounds to buttons while leaving adjacent links plain. The full-page mobile directory sets local material tokens to a solid reading surface. The green WhatsApp action, red heart, teal desktop burger, gold mobile burger and grey footer Donate action keep their colours.
 
 Glass uses CSS tint, borders and backdrop blur. Mobile blur sizes are smaller, controls within blurred panels avoid nested blur, and Glass off/reduced transparency/no-blur browsers use opaque surfaces. Do not put filters on foreground text or images. A CSS support query only checks parsing; real Safari/Android rendering still needs checking. See [backdrop filters](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter).
 

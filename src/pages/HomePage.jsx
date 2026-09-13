@@ -187,7 +187,7 @@ export default function HomePage() {
           <Link
             to={to}
             className={cn('jic-feature-card', !img && 'is-glass-only')}
-            data-glass={!img ? 'clear' : undefined}
+            data-glass={!img ? 'frosted' : undefined}
             key={key}
             style={img ? { '--card-image': `url("${img}")` } : undefined}
           >
@@ -246,7 +246,7 @@ export default function HomePage() {
           </strong>
           <span>Every Friday</span>
         </div>
-        <Link to="/prayer-times/jummah" className="jic-event-arrow">
+        <Link to="/prayer-times/jummah" className="jic-event-arrow" aria-label="View Jummah times">
           ›
         </Link>
       </section>
@@ -289,7 +289,7 @@ export default function HomePage() {
             <small>Official JIC updates and announcements</small>
           </div>
         </div>
-        <a className="jic-community-join" href={whatsapp}>
+        <a className="jic-community-join" href={whatsapp} target="_blank" rel="noopener noreferrer">
           Join WhatsApp <ArrowRight size={17} />
         </a>
       </section>
