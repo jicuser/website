@@ -53,7 +53,7 @@ create table private.custom_form_limits (
 create table private.custom_form_attempts (
  source_key text not null, attempt uuid not null, form_id uuid not null references public.custom_forms,
  submission_id uuid not null references public.form_submissions on delete cascade,
- owner_id uuid references public.profiles on delete set null, primary key(source_key,attempt));
+ owner_id uuid references public.profiles on delete set null, primary key(source_key,attempt),unique(attempt));
 
 create function private.manage_custom_form(form uuid,account uuid default auth.uid()) returns boolean language sql stable security definer set search_path='' as $$
  select private.active_account(account) and (private.account_permission(account,'forms_manage') or exists(select 1 from public.custom_form_staff where form_id=form and user_id=account and role='manager')); $$;
@@ -229,8 +229,8 @@ create function public.submit_custom_form(p_slug text,p_version integer,p_answer
  begin
  if p_attempt is null then raise exception 'Attempt required'; end if;
  -- Serialize retries and duplicate attempts even before a response row exists.
- perform pg_advisory_xact_lock(hashtextextended(p_source_key||p_attempt::text,0));
- select * into previous from private.custom_form_attempts where source_key=p_source_key and attempt=p_attempt;
+ perform pg_advisory_xact_lock(hashtextextended(p_attempt::text,0));
+ select * into previous from private.custom_form_attempts where attempt=p_attempt;
  select * into form from public.custom_forms where slug=p_slug for share;
  if previous.submission_id is not null then
  if previous.form_id is distinct from form.id or previous.owner_id is distinct from p_user_id or exists(select 1 from public.form_submissions where id=previous.submission_id and (payload is distinct from p_answers or form_version is distinct from p_version)) then raise exception 'Attempt already used'; end if; return previous.submission_id; end if;
@@ -248,7 +248,7 @@ create function public.submit_custom_form(p_slug text,p_version integer,p_answer
  values('custom',p_answers,form.id,p_version,version_row.schema||jsonb_build_object('title',version_row.title),p_user_id) returning id into entry;
  for upload in select value from jsonb_array_elements(p_uploads) loop
  select * into file from private.form_uploads where id=(upload->>'id')::uuid for update;
- if file.id is null or not file.ready or file.submission_id is not null or file.form_id<>form.id or file.version<>p_version or file.attempt<>p_attempt or file.source_key<>p_source_key or file.owner_id is distinct from p_user_id or file.expires_at<now() or file.token_hash is distinct from upload->>'token_hash' or p_answers->>file.field_id is distinct from file.id::text then raise exception 'Upload does not belong to this form attempt'; end if;
+ if file.id is null or not file.ready or file.submission_id is not null or file.form_id<>form.id or file.version<>p_version or file.attempt<>p_attempt or file.owner_id is distinct from p_user_id or file.expires_at<now() or file.token_hash is distinct from upload->>'token_hash' or p_answers->>file.field_id is distinct from file.id::text then raise exception 'Upload does not belong to this form attempt'; end if;
  insert into public.form_attachments(id,submission_id,field_id,file_name,mime_type,size_bytes) values(file.id,entry,file.field_id,file.file_name,file.mime_type,file.size_bytes);
  update private.form_uploads set submission_id=entry where id=file.id;
  end loop;
@@ -311,7 +311,7 @@ insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
 create function public.prepare_custom_form_upload(p_slug text,p_version integer,p_field_id text,p_attempt uuid,p_source_key text,p_user_id uuid,p_token_hash text,p_file_name text,p_mime_type text,p_size_bytes integer) returns jsonb language plpgsql security definer set search_path='' as $$
  declare form public.custom_forms; field jsonb; result uuid=gen_random_uuid(); key text;
  begin
- perform pg_advisory_xact_lock(hashtextextended(p_source_key||p_attempt::text,0));
+ perform pg_advisory_xact_lock(hashtextextended(p_attempt::text,0));
  select * into form from public.custom_forms where slug=p_slug for share;
  if form.id is null or not form.enabled or form.published_version is null then raise exception 'Form unavailable'; end if;
  if form.published_version<>p_version then raise exception 'form_version_changed'; end if;
@@ -319,7 +319,7 @@ create function public.prepare_custom_form_upload(p_slug text,p_version integer,
  select value into field from public.custom_form_versions v,jsonb_array_elements(v.schema->'fields') where v.form_id=form.id and v.version=p_version and value->>'id'=p_field_id;
  if field is null or field->>'type' not in('image','file') then raise exception 'Invalid upload field'; end if;
  if p_mime_type is null or p_mime_type not in('image/jpeg','image/png','image/webp','application/pdf','application/zip') or (field->>'type'='image' and p_mime_type not in('image/jpeg','image/png','image/webp')) or p_size_bytes not between 1 and 10485760 or p_file_name is null or length(p_file_name) not between 1 and 160 or p_file_name ~ '[/\\]' or p_attempt is null then raise exception 'Invalid file'; end if;
- if (select count(*) from private.form_uploads where source_key=p_source_key and attempt=p_attempt and expires_at>now())>=5 then raise exception 'Maximum 5 uploads per attempt'; end if;
+ if (select count(*) from private.form_uploads where attempt=p_attempt and expires_at>now())>=15 then raise exception 'Maximum 15 staged uploads per attempt; start a new form'; end if;
  perform private.custom_form_rate(p_source_key,'upload',20);
  key=form.id::text||'/'||result::text;
  insert into private.form_uploads(id,form_id,version,field_id,attempt,source_key,owner_id,token_hash,object_key,file_name,mime_type,size_bytes) values(result,form.id,p_version,p_field_id,p_attempt,p_source_key,p_user_id,p_token_hash,key,p_file_name,p_mime_type,p_size_bytes);

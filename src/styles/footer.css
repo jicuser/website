@@ -16,18 +16,19 @@
 .jic-footer-links-inline {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 10px;
+  gap: 0 16px;
   align-items: center;
+  width: min(100%, 760px);
+  margin-inline: auto;
 }
-.jic-footer-links-inline a,
-.jic-footer-menu-toggle {
+.jic-footer-links-inline a {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   min-width: 0;
   min-height: 44px;
-  padding: 5px 0;
+  padding: 6px;
   border: 0;
   border-radius: 4px;
   background: transparent;
@@ -35,7 +36,7 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 1.35;
-  text-align: center;
+  text-align: left;
   white-space: normal;
   overflow-wrap: break-word;
 }
@@ -52,30 +53,33 @@
   width: min(100% - 32px, 396px);
   margin: 10px auto 16px;
 }
-.jic-footer-socials {
+.jic-footer-socials,
+.jic-footer-contact {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
-  gap: 0;
+  gap: 4px;
   width: 100%;
   max-width: 428px;
 }
-.jic-footer-socials a {
+.jic-footer-socials a,
+.jic-footer-contact a {
   display: grid;
   place-items: center;
-  flex: 1 1 0;
-  min-width: 0;
-  max-width: 44px;
+  flex: 0 0 44px;
+  width: 44px;
   height: 44px;
   border: 1px solid var(--jic-border);
   border-radius: 9px;
   background: var(--jic-glass-control);
   color: var(--jic-text);
 }
-.jic-footer-socials a svg {
+.jic-footer-socials a svg,
+.jic-footer-contact a svg {
   flex-shrink: 0;
 }
-.jic-footer-socials a:hover {
+.jic-footer-socials a:hover,
+.jic-footer-contact a:hover {
   border-color: var(--jic-gold);
 }
 .jic-footer-donate {

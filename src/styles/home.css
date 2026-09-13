@@ -111,7 +111,7 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
   gap: 12px;
   margin-top: 24px;
 }
-/* Homepage controls own their material here; shared glass tokens handle accessibility. */
+/* Control layout; shared materials are owned by liquid-glass.css. */
 .jic-primary-cta,
 .jic-secondary-cta {
   min-height: 48px;
@@ -125,10 +125,7 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
   font-size: 16px;
   font-weight: 650;
   text-decoration: none;
-  background: var(--jic-glass-control);
   color: var(--jic-text);
-  backdrop-filter: var(--jic-glass-panel-filter);
-  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
 }
 .jic-watch-live svg {
   color: var(--jic-error);
@@ -153,10 +150,7 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
   border: 1px solid var(--jic-glass-border);
   border-radius: 12px;
   overflow: hidden;
-  background: var(--jic-glass-control);
   color: var(--jic-text);
-  backdrop-filter: var(--jic-glass-panel-filter);
-  -webkit-backdrop-filter: var(--jic-glass-panel-filter);
   text-decoration: none;
 }
 .jic-feature-card .jic-card-icon {
@@ -228,7 +222,10 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
   color: var(--jic-text-secondary);
 }
 .jic-event-arrow {
-  padding: 5px 10px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  min-height: 44px;
   font-size: 24px;
 }
 .jic-live-section {
@@ -273,6 +270,10 @@ html[data-theme] .jic-home-footer-strip {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+.jic-home-footer-strip > div > svg {
+  flex-shrink: 0;
 }
 .jic-home-footer-strip strong,
 .jic-home-footer-strip small {
@@ -296,9 +297,12 @@ html[data-theme] .jic-home-footer-strip {
   border-radius: 10px;
   border: 1px solid var(--jic-border);
   color: var(--jic-text);
-  white-space: nowrap;
+  text-align: center;
   font-size: 16px;
   font-weight: 650;
+}
+.jic-community-join svg {
+  flex-shrink: 0;
 }
 .jic-upcoming-events h2 {
   color: #fff;

@@ -235,3 +235,200 @@ test('response inbox searches server-side, posts portal reply and assigns action
   await page.screenshot({ path: testInfo.outputPath('responses.png'), fullPage: true });
   expect(errors).toEqual([]);
 });
+
+test('fees use exact pence and retain manual confirmation retry identity', async ({ page }) => {
+  let fees = [];
+  const confirmations = [];
+  const errors = await setup(page, {
+    signedIn: true,
+    handle: async (path, body, route) => {
+      let data;
+      if (path.endsWith('/search_form_submissions'))
+        data = {
+          rows: [
+            {
+              id: responseId,
+              kind: 'custom',
+              custom_form_id: formId,
+              status: 'new',
+              created_at: '2026-09-13T10:00:00Z',
+              payload: { name: 'Example' },
+              schema_snapshot: { title: form.title, fields: [] },
+            },
+          ],
+          total: 1,
+          new_count: 1,
+          done_count: 0,
+        };
+      if (path.endsWith('/list_fee_requests'))
+        data = {
+          rows: fees,
+          total: fees.length,
+          outstanding_by_currency: {
+            GBP: fees.reduce((sum, fee) => sum + fee.outstanding_minor, 0),
+          },
+        };
+      if (path.endsWith('/create_fee_request')) {
+        expect(body.p_amount_minor).toBe(1205);
+        expect(body.p_form_id).toBe(responseId);
+        expect(body.p_idempotency_key).toMatch(/^[a-f0-9-]{36}$/);
+        fees = [
+          {
+            id: 'fee-preview',
+            title: body.p_title,
+            currency: 'GBP',
+            amount_minor: body.p_amount_minor,
+            outstanding_minor: body.p_amount_minor,
+            paid_minor: 0,
+            status: 'unpaid',
+          },
+        ];
+        data = 'fee-preview';
+      }
+      if (path.endsWith('/confirm_fee_payment')) {
+        confirmations.push(body);
+        if (confirmations.length === 1) {
+          await route.fulfill({
+            status: 503,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'Try again.' }),
+          });
+          return true;
+        }
+        fees = fees.map((fee) => ({
+          ...fee,
+          paid_minor: 1205,
+          outstanding_minor: 0,
+          status: 'paid',
+        }));
+        data = 'receipt-preview';
+      }
+      if (data !== undefined) {
+        await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
+        return true;
+      }
+    },
+  });
+  await page.goto('/portal?tab=forms&mine=true');
+  await page.locator('.custom-response summary').click();
+  await page.getByRole('button', { name: 'Add fee request', exact: true }).click();
+  await page.getByLabel('Fee description', { exact: true }).fill('Course materials');
+  await page.getByLabel('Amount (£)', { exact: true }).fill('12.05');
+  await page.getByRole('button', { name: 'Create fee request', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirm a payment received', exact: true }).click();
+  await page.getByLabel('Receipt or bank reference').fill('Cash receipt 0042');
+  await page.getByLabel('I have checked that this payment was received.').check();
+  await page.getByRole('button', { name: 'Record manual confirmation', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Try again.');
+  await page.getByRole('button', { name: 'Record manual confirmation', exact: true }).click();
+  await expect.poll(() => confirmations.length).toBe(2);
+  expect(confirmations[0].p_idempotency_key).toBe(confirmations[1].p_idempotency_key);
+  expect(confirmations[1].p_amount_minor).toBe(1205);
+  await expect(page.getByText('£12.05 · Paid', { exact: true })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('course upload removes an unattached object if metadata save fails', async ({ page }) => {
+  const uploaded = [],
+    removed = [];
+  const course = { id: formId, title: 'Adult learning', department: 'adult' };
+  const errors = await setup(page, {
+    signedIn: true,
+    handle: async (path, body, route) => {
+      if (path.endsWith('/learning_courses')) {
+        await route.fulfill({ contentType: 'application/json', body: JSON.stringify([course]) });
+        return true;
+      }
+      if (path.includes('/storage/v1/object/course-resources')) {
+        if (route.request().method() === 'POST') uploaded.push(path);
+        if (route.request().method() === 'DELETE') removed.push(body);
+        await route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({ Key: path }),
+        });
+        return true;
+      }
+      if (path.endsWith('/learning_resources') && route.request().method() === 'POST') {
+        expect(body.course_id).toBe(formId);
+        expect(body.created_by).toBe(owner);
+        await route.fulfill({
+          status: 503,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: 'Metadata unavailable.' }),
+        });
+        return true;
+      }
+    },
+  });
+  await page.goto('/portal');
+  await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption(formId);
+  const editor = page
+    .locator('form')
+    .filter({ has: page.getByRole('heading', { name: 'Add course material', exact: true }) });
+  await editor.getByLabel('Title', { exact: true }).fill('Week one handout');
+  await editor
+    .getByLabel('Choose file', { exact: true })
+    .setInputFiles({
+      name: 'handout.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('%PDF-1.4\npreview'),
+    });
+  await editor.getByRole('button', { name: 'Add material', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Metadata unavailable.');
+  expect(uploaded).toHaveLength(1);
+  expect(removed).toHaveLength(1);
+  expect(removed[0].prefixes[0]).toContain(`${formId}/${owner}/`);
+  expect(errors).toEqual([]);
+});
+
+test('optional email requires recipient review and remains an explicit separate action', async ({
+  page,
+}) => {
+  const queued = [];
+  const errors = await setup(page, {
+    signedIn: true,
+    handle: async (path, body, route) => {
+      let data;
+      if (path.endsWith('/search_form_submissions'))
+        data = {
+          rows: [
+            {
+              id: responseId,
+              kind: 'custom',
+              custom_form_id: formId,
+              status: 'new',
+              created_at: '2026-09-13T10:00:00Z',
+              payload: { name: 'Example', email: 'example@example.org' },
+              schema_snapshot: { title: form.title, fields: [] },
+            },
+          ],
+          total: 1,
+          new_count: 1,
+          done_count: 0,
+        };
+      if (path.endsWith('/form_email_capability')) data = { enabled: true };
+      if (path.endsWith('/queue_form_email')) {
+        queued.push(body);
+        data = 'email-preview';
+      }
+      if (data !== undefined) {
+        await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
+        return true;
+      }
+    },
+  });
+  await page.goto('/portal?tab=forms&mine=true');
+  await page.locator('.custom-response summary').click();
+  await page.getByRole('button', { name: 'Compose an email reply', exact: true }).click();
+  await page.getByLabel('Email message', { exact: true }).fill('Thank you for getting in touch.');
+  await page.getByRole('button', { name: 'Queue this email', exact: true }).click();
+  expect(queued).toHaveLength(0);
+  await page
+    .getByLabel('I have checked the recipient and message, and want to send this email.')
+    .check();
+  await page.getByRole('button', { name: 'Queue this email', exact: true }).click();
+  await expect.poll(() => queued.length).toBe(1);
+  expect(queued[0].p_acknowledged).toBe(true);
+  expect(queued[0].p_recipient).toBe('example@example.org');
+  expect(errors).toEqual([]);
+});

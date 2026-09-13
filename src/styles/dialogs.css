@@ -1,8 +1,8 @@
 /* Public donation dialog. Colour and opacity follow the shared material tokens. */
 .jic-popup-overlay {
   background: #0006;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: var(--jic-glass-overlay-filter);
+  -webkit-backdrop-filter: var(--jic-glass-overlay-filter);
 }
 .jic-popup-panel {
   position: relative;

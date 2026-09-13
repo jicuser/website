@@ -11,10 +11,11 @@ export function poundsToMinor(value) {
 
 export function feeAmount(minor, currency = 'GBP') {
   try {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(
-      Number(minor || 0) / 100,
+    const formatter = new Intl.NumberFormat('en-GB', { style: 'currency', currency });
+    return formatter.format(
+      Number(minor || 0) / 10 ** formatter.resolvedOptions().maximumFractionDigits,
     );
   } catch {
-    return `${(Number(minor || 0) / 100).toFixed(2)} ${currency}`;
+    return `${Number(minor || 0)} minor units (${currency})`;
   }
 }

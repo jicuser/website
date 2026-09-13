@@ -28,7 +28,7 @@ create index fee_audit_fee on public.fee_audit(fee_id,created_at);
 
 create function private.fee_source_staff(form uuid,student uuid,course uuid,account uuid default auth.uid()) returns boolean language sql stable security definer set search_path='' as $$
  select private.active_account(account) and case when form is not null then exists(select 1 from public.form_submissions f where f.id=form and case when f.kind='custom' then private.staff_custom_form(f.custom_form_id,account) else private.account_permission(account,'forms_'||f.kind) end)
- else exists(select 1 from public.learning_enrolments e where e.course_id=course and e.student_id=student and e.active) and (exists(select 1 from public.profiles where id=account and is_active and is_owner) or exists(select 1 from public.learning_staff s where s.course_id=course and s.user_id=account)) end; $$;
+ else exists(select 1 from public.learning_enrolments e where e.course_id=course and e.student_id=student and e.active) and (exists(select 1 from public.profiles where id=account and is_active and is_owner) or exists(select 1 from public.learning_staff s where s.course_id=course and s.user_id=account) or exists(select 1 from public.learning_department_heads h join public.learning_courses c on c.department=h.department where c.id=course and h.user_id=account)) end; $$;
 create function private.manage_fee(fee uuid,account uuid default auth.uid()) returns boolean language sql stable security definer set search_path='' as $$
  select exists(select 1 from public.fee_requests f where f.id=fee and private.fee_source_staff(f.form_id,f.student_id,f.course_id,account)); $$;
 create function private.read_fee(fee uuid,account uuid default auth.uid()) returns boolean language sql stable security definer set search_path='' as $$
@@ -124,10 +124,12 @@ create function private.fee_notification() returns trigger language plpgsql secu
  for recipient in select distinct account from (
  select submitter_id account from public.form_submissions where id=fee.form_id
  union select user_id from public.learning_students where id=fee.student_id
- union select guardian_id from public.learning_students where id=fee.student_id) linked
+ union select guardian_id from public.learning_students where id=fee.student_id
+ union select user_id from public.learning_guardians where student_id=fee.student_id) linked
  where account is not null and account is distinct from auth.uid() and private.read_fee(fee.id,account) loop
  insert into public.user_notifications(user_id,kind,entity_id) values(recipient,'fee',fee.id);end loop;return new;end; $$;
 create trigger fee_created_notify after insert on public.fee_requests for each row execute function private.fee_notification();
+create trigger fee_voided_notify after update of voided_at on public.fee_requests for each row when(old.voided_at is distinct from new.voided_at) execute function private.fee_notification();
 create trigger fee_receipt_notify after insert on public.fee_receipts for each row execute function private.fee_notification();
 revoke all on function private.fee_notification() from public,anon,authenticated;
 

@@ -16,3 +16,7 @@ verify_jwt = false
 [functions.custom-forms]
 # Visitors may submit published forms; every private action verifies getUser and current DB access.
 verify_jwt = false
+
+[functions.payment-webhook]
+# Stripe raw-body signature is mandatory; this endpoint never accepts client confirmations.
+verify_jwt = false

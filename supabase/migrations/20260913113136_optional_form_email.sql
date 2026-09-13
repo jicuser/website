@@ -55,13 +55,14 @@ begin
  return p_idempotency_key;
 end; $$;
 create function public.claim_form_emails() returns setof public.form_email_outbox language sql security invoker set search_path='' as $$
- with stale as (update public.form_email_outbox set status='uncertain',last_error='delivery_not_confirmed',lease_until=null where status in('queued','sending') and created_at<now()-interval '23 hours' returning id),
+ with stale as (update public.form_email_outbox set status='uncertain',last_error='delivery_not_confirmed',lease_until=null where (status in('queued','sending') and created_at<now()-interval '23 hours') or (status='sending' and attempts>=5 and lease_until<now()) returning id),
  revoked as (update public.form_email_outbox set status='cancelled',last_error='staff_access_revoked',lease_until=null where status in('queued','sending') and not private.staff_custom_submission(submission_id,created_by) returning id)
  update public.form_email_outbox set status='sending',attempts=attempts+1,lease_id=gen_random_uuid(),lease_until=now()+interval '2 minutes'
- where id in(select id from public.form_email_outbox where ((status='queued' and available_at<=now()) or (status='sending' and lease_until<now())) and attempts<5 and created_at>now()-interval '23 hours' and private.staff_custom_submission(submission_id,created_by) order by created_at for update skip locked limit 5) returning *;
+ where id in(select id from public.form_email_outbox where ((status='queued' and available_at<=now()) or (status='sending' and lease_until<now())) and attempts<5 and created_at>now()-interval '23 hours' and private.staff_custom_submission(submission_id,created_by) order by created_at for update skip locked limit 1) returning *;
 $$;
+create function public.form_email_send_allowed(p_id uuid,p_lease_id uuid) returns boolean language sql stable security invoker set search_path='' as $$ select exists(select 1 from public.form_email_outbox where id=p_id and lease_id=p_lease_id and status='sending' and lease_until>now() and private.staff_custom_submission(submission_id,created_by) and (select ready_until>now() from private.form_email_config)); $$;
 create function public.finish_form_email(p_id uuid,p_lease_id uuid,p_provider_id text default null,p_error text default null) returns void language plpgsql security invoker set search_path='' as $$
-begin update public.form_email_outbox set status=case when p_provider_id is not null then 'sent' when attempts>=5 then 'failed' else 'queued' end,provider_id=p_provider_id,last_error=left(p_error,120),lease_until=null,lease_id=null,available_at=now()+make_interval(secs=>60*power(2,attempts)::integer)
+begin update public.form_email_outbox set status=case when p_provider_id is not null then 'sent' when attempts>=5 then 'uncertain' else 'queued' end,provider_id=p_provider_id,last_error=left(p_error,120),lease_until=null,lease_id=null,available_at=now()+make_interval(secs=>60*power(2,attempts)::integer)
  where id=p_id and lease_id=p_lease_id and status='sending' and lease_until>now();
  if not found then raise exception 'Email lease expired'; end if; end; $$;
 create function public.receive_form_email(p_provider_id text,p_thread_id uuid,p_sender text,p_subject text,p_body text) returns boolean language plpgsql security invoker set search_path='' as $$
@@ -89,7 +90,7 @@ begin
   if submitter is not null and private.active_account(submitter) then insert into public.user_notifications(user_id,kind,entity_id) values(submitter,'form',item.submission_id); end if;
  end if;
 end; $$;
-revoke all on function public.form_email_capability(uuid),public.set_form_email_ready(boolean),public.queue_form_email(uuid,text,text,text,uuid,boolean),public.claim_form_emails(),public.finish_form_email(uuid,uuid,text,text),public.receive_form_email(text,uuid,text,text,text),public.review_form_email(uuid,boolean) from public,anon,authenticated;
+revoke all on function public.form_email_capability(uuid),public.set_form_email_ready(boolean),public.queue_form_email(uuid,text,text,text,uuid,boolean),public.claim_form_emails(),public.form_email_send_allowed(uuid,uuid),public.finish_form_email(uuid,uuid,text,text),public.receive_form_email(text,uuid,text,text,text),public.review_form_email(uuid,boolean) from public,anon,authenticated;
 grant execute on function public.form_email_capability(uuid),public.queue_form_email(uuid,text,text,text,uuid,boolean),public.review_form_email(uuid,boolean) to authenticated;
-grant execute on function public.set_form_email_ready(boolean),public.claim_form_emails(),public.finish_form_email(uuid,uuid,text,text),public.receive_form_email(text,uuid,text,text,text) to service_role;
+grant execute on function public.set_form_email_ready(boolean),public.claim_form_emails(),public.form_email_send_allowed(uuid,uuid),public.finish_form_email(uuid,uuid,text,text),public.receive_form_email(text,uuid,text,text,text) to service_role;
 commit;

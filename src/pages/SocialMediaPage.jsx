@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
+import { Link } from 'react-router-dom';
 import { ExternalLink, Play } from 'lucide-react';
 import { SOCIAL_CHANNELS } from '@/content/socials';
 import { SOCIAL_ICONS } from '@/components/icons/SocialIcons';
@@ -25,13 +26,13 @@ export default function SocialMediaPage() {
       </header>
       <nav className="jic-social-jump" aria-label="Social channels">
         {SOCIAL_CHANNELS.map(({ id, name }) => (
-          <a key={id} href={`#${id}`} data-glass="clear">
+          <Link key={id} to={`#${id}`} data-glass="clear">
             {name}
-          </a>
+          </Link>
         ))}
-        <a href="#whatsapp" data-glass="clear">
+        <Link to="#whatsapp" data-glass="clear">
           WhatsApp
-        </a>
+        </Link>
       </nav>
       <div className="jic-social-grid">
         {SOCIAL_CHANNELS.map(({ id, name, handle, description, topics, url }) => {

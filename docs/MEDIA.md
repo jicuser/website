@@ -39,9 +39,9 @@ Published text and quotes are separate from processing drafts. Owner checks use 
 
 ## Validation and remaining live checks
 
-`node --test tests/sermon-pipeline.test.mjs` covers URL/network restrictions, provider mocks, timestamps, verbatim quote validation, XML escaping, retry recording reuse, database permissions, leases, draft isolation, reference gates, publication and audio withdrawal. Flutter analysis covers the native archive and shared radio controller.
+`node --test tests/sermon-pipeline.test.mjs` covers URL/network restrictions, provider mocks, timestamps, verbatim quote validation, XML escaping, retry recording reuse, database permissions, leases, draft isolation, reference gates, publication and audio withdrawal. Flutter analysis covers the native archive and shared radio controller. A locally generated two-second tone was converted successfully by the real FFmpeg pipeline without recording a live source.
 
-Still required in staging: a short consented recording through the real provider, actual FFmpeg conversion/container execution, signed playback/seek on Android and iOS, lock-screen metadata, sleeping/resuming playback, review edits and withdrawal, then deployment using the organisation’s credentials. Full automatic Quran/hadith source matching is not claimed: candidate extraction is automatic; source verification remains a separate editorial action.
+Still required in staging: a short consented recording through the real provider, container execution, signed playback/seek on Android and iOS, lock-screen metadata, sleeping/resuming playback, review edits and withdrawal, then deployment using the organisation’s credentials. Full automatic Quran/hadith source matching is not claimed: candidate extraction is automatic; source verification remains a separate editorial action.
 
 ## Provider references
 

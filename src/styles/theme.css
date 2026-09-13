@@ -148,10 +148,7 @@ html:not(.dark) .bg-white\/10 {
 }
 
 .managed-page-content,
-.jic-hall-calendar,
-.jic-event-card,
-.jic-upcoming-events article,
-[class*='bg-card'] {
+.bg-card {
   background: var(--jic-surface) !important;
   color: var(--jic-text) !important;
   border-color: var(--jic-border) !important;
@@ -178,14 +175,6 @@ td {
   border-color: var(--jic-border) !important;
 }
 
-html:not(.dark) .jic-upcoming-events,
-html:not(.dark) .jic-home-footer-strip {
-  background: var(--jic-bg) !important;
-  color: var(--jic-text) !important;
-}
-html:not(.dark) .jic-home-footer-strip small {
-  color: var(--jic-text-secondary) !important;
-}
 .jic-kicker,
 .jic-gold-rule {
   color: var(--jic-gold) !important;
@@ -213,11 +202,6 @@ html:not(.dark) .jic-home-footer-strip small {
 .jic-hall-legend i.is-booked {
   background: var(--jic-error) !important;
 }
-.jic-hall-contact a {
-  background: var(--jic-gold) !important;
-  color: #0c1930 !important;
-}
-
 .admin-console {
   background: var(--jic-bg-secondary) !important;
   color: var(--jic-text) !important;
@@ -291,24 +275,12 @@ html:not(.dark) .jic-home-footer-strip small {
 .bg-blue-50 {
   background: var(--jic-bg-secondary) !important;
 }
-html:not(.dark) .page-transition,
-html:not(.dark) .jic-public-main {
-  background: #fafbfd !important;
-}
-html:not(.dark) section:not(.jic-hero) {
-  background-color: transparent;
-}
 footer {
   background: var(--jic-bg-secondary) !important;
   color: var(--jic-text) !important;
   border-color: var(--jic-border) !important;
 }
 
-/* Dark copper is a light-mode text colour; filled controls use pale brass. */
-html[data-theme] .jic-hall-contact a {
-  background: var(--jic-action) !important;
-  color: #0c1930 !important;
-}
 html[data-theme] .text-primary,
 html[data-theme] .hover\:text-primary:hover {
   color: var(--jic-gold) !important;

@@ -113,6 +113,91 @@ test('main solid-surface text and filled-button pairs meet 4.5:1 contrast', () =
     assert.ok(contrast(...pair) >= 4.5, `${pair.join(' / ')} must be readable`);
 });
 
+test('coloured actions keep readable text over dark and bright backgrounds in both modes', () => {
+  const readRules = (file) =>
+    postcss.parse(readFileSync(new URL(file, import.meta.url), 'utf8')).nodes;
+  const rules = [
+    ...readRules('../src/styles/theme.css'),
+    ...readRules('../src/styles/liquid-glass.css'),
+    ...readRules('../src/styles/footer.css'),
+  ];
+  const normalise = (selector) => selector.replace(/["']/g, '').replace(/\s+/g, ' ').trim();
+  const tokensFor = (selector) =>
+    Object.assign(
+      {},
+      ...rules
+        .filter((rule) => rule.type === 'rule' && normalise(rule.selector) === selector)
+        .map((rule) =>
+          Object.fromEntries(
+            rule.nodes
+              .filter((node) => node.type === 'decl')
+              .map((node) => [node.prop, node.value]),
+          ),
+        ),
+    );
+  const selectors = [
+    'html[data-theme] .jic-community-join',
+    'html[data-theme] .jic-watch-live',
+    'html[data-theme] .jic-menu-trigger',
+    'html[data-theme] :is(.jic-hall-contact a, .jic-public-route .bg-primary)',
+    'html[data-theme] .jic-public-route .bg-destructive',
+    '.jic-footer-donate',
+  ];
+  const rgb = (hex) => {
+    const value = hex.slice(1);
+    return (value.length === 3 ? [...value].map((part) => part + part).join('') : value)
+      .match(/../g)
+      .map((part) => parseInt(part, 16));
+  };
+  for (const theme of ['light', 'dark']) {
+    for (const surface of ['glass', 'solid']) {
+      for (const selector of selectors) {
+        const tokens = {
+          ...tokensFor(':root'),
+          ...(theme === 'dark' ? tokensFor('.dark') : {}),
+          ...tokensFor('html[data-theme]'),
+          ...(theme === 'dark' ? tokensFor('html[data-theme=dark]') : {}),
+          ...(surface === 'solid' ? tokensFor('html[data-theme][data-surface=solid]') : {}),
+          ...tokensFor(selector),
+        };
+        const resolve = (value) =>
+          value.replace(/var\((--[\w-]+)\)/g, (_, name) => resolve(tokens[name]));
+        const tint = rgb(resolve(tokens['--jic-button-tint']));
+        const ink = resolve(tokens['--jic-button-ink']);
+        const alpha = parseFloat(resolve(tokens['--jic-button-tint-strength'])) / 100;
+        const sheen = tokens['--jic-glass-action-sheen'];
+        const sheenAlpha =
+          sheen === 'none' ? 0 : Number(sheen.match(/rgba\(255,\s*255,\s*255,\s*([\d.]+)/)[1]);
+        for (const background of [0, 255]) {
+          for (const highlight of [0, sheenAlpha]) {
+            const composite =
+              '#' +
+              tint
+                .map((channel) =>
+                  Math.round(
+                    (channel * alpha + background * (1 - alpha)) * (1 - highlight) +
+                      255 * highlight,
+                  )
+                    .toString(16)
+                    .padStart(2, '0'),
+                )
+                .join('');
+            const inkHex =
+              '#' +
+              rgb(ink)
+                .map((channel) => channel.toString(16).padStart(2, '0'))
+                .join('');
+            assert.ok(
+              contrast(inkHex, composite) >= 4.5,
+              `${theme}/${surface} ${selector}: ${inkHex} over ${composite}`,
+            );
+          }
+        }
+      }
+    }
+  }
+});
+
 test('glass text retains 4.5:1 contrast over the page veil at both photo extremes', () => {
   const css = readFileSync(new URL('../src/styles/liquid-glass.css', import.meta.url), 'utf8');
   for (const selector of ['html[data-theme]', 'html[data-theme=dark]']) {
