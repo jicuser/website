@@ -65,6 +65,7 @@ export default function CommunityPortalPage() {
               type="password"
               autoComplete="current-password"
             />
+            <Link to="/account/recovery">Forgot your password?</Link>
           </ActionForm>
         ) : !auth.profile?.is_active ? (
           <div>

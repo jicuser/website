@@ -127,6 +127,21 @@ Deno.test(
           calls.find((call) => call.path.endsWith('/submit_custom_form'))?.body.p_user_id === null,
         );
       });
+      await t.step('publishable client key permits public forms but never private actions', async () => {
+        calls.length = 0;
+        const token = 'sb_publishable_test_public_client';
+        const response = await post({
+          action: 'submit', slug: 'help-form', version: 1,
+          answers: { name: 'Visitor' }, idempotency_key: submission, user_id: owner,
+        }, token);
+        assert(response.status === 200, await response.text());
+        assert(!calls.some((call) => call.path === '/auth/v1/user'));
+        assert(calls.find((call) => call.path.endsWith('/submit_custom_form'))?.body.p_user_id === null);
+        calls.length = 0;
+        const download = await post({ action: 'download', attachment_id: upload }, token);
+        assert(download.status === 401);
+        assert(calls.length === 0);
+      });
       await t.step('rejects oversized streamed JSON before network access', async () => {
         calls.length = 0;
         const response = await post({ action: 'submit', answers: { text: 'x'.repeat(65536) } });

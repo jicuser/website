@@ -31,6 +31,6 @@ Use [the API contract](community-workspace-api.md) for exact table columns and R
 - After merging main’s salawat and Prayer Times fixes, all seven mobile browser regression tests also passed.
 - Authenticated browser workflows need staging accounts for owner, teacher, student and parent before release. Database isolation tests do not replace that sign-off.
 
-## Still outside this first delivery
+## Later additions and release
 
-Custom form builder, attachment requests/upload/ZIP bundles, threaded replies, all-record exports, financial reconciliation, bulk reminders, advanced head-teacher management, full report generation, record body editing after creation, and student archival tools. Use the app scope document for phone widgets/watch, radio and AI work. These are not represented as completed features.
+The initial delivery above has since been extended with the custom form builder, private attachments and ZIP bundles, threaded replies, exports of matching responses, fee records, guardian/department-head links, marks and course resources. Use [current forms](forms-website.md), [learning extensions](learning-extensions-api.md), [fee contracts](fees-api.md) and [website release steps](WEBSITE-RELEASE.md) for the current source. Live account/provider setup and publication are separate from source verification.

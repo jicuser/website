@@ -1,5 +1,7 @@
 # JIC production deployment
 
+For the current app/workspace rollout, use [the website release steps](docs/WEBSITE-RELEASE.md). They cover the exact build flag, prepared Hostinger artifact, account recovery and rollback. The sections below retain the existing installation history.
+
 ## 1. Supabase database/security
 
 1. Back up the existing Supabase database.
@@ -23,10 +25,13 @@ Configure the build environment with:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+- `VITE_ENABLE_WORKSPACE=false` until the shared workspace backend is activated and verified, then `true` for a fresh build.
 
 The anon key is designed for browser use; Row Level Security is what protects data.
 
 ## 3. GitHub -> Hostinger
+
+Hostinger's static Advanced → Git integration copies files; it does not by itself establish a Vite build pipeline. This source repository ignores `dist`. Use the existing Node/Vite deployment configuration or upload the prepared static artifact as described in the current release guide.
 
 Recommended production branch: `main`.
 

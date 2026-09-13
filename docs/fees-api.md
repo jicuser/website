@@ -1,6 +1,6 @@
 # Shared fee and payment ledger
 
-Status: implementation in progress; additive staging migration required. This records charges and confirmed receipts; it does not collect money or change existing donation providers.
+Status: implemented and locally verified; additive staging migration and live verification required before release. This records charges and confirmed receipts; it does not collect money or change existing donation providers.
 
 `fee_requests` columns `id,form_id nullable,student_id nullable,course_id nullable,title,amount_minor integer,currency uppercase3-letter,due_at nullable,created_by,created_at,voided_at nullable,void_reason`. Exactly one source: an existing form submission OR enrolled course/student pair. Minor units are pence for GBP (e.g.1250=£12.50). Positive1–100000000. Amount and currency are immutable after creation.
 

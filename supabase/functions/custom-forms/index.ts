@@ -77,8 +77,12 @@ Deno.serve(async (req) => {
     let userId: string | null = null;
     if (authorization) {
       const token = authorization.replace(/^Bearer\s+/i, '');
-      // Public SDK sessions carry the project's anon JWT. Any other JWT must validate as a user.
-      if (token !== Deno.env.get('SUPABASE_ANON_KEY')) {
+      // Both public client key formats represent a visitor, never an authenticated account.
+      // Some SDK versions also send the publishable key as their default Bearer value.
+      // Public actions already permit no Authorization header; accepting this format grants
+      // no extra access. All other credentials must validate as an actual user JWT.
+      const visitorKey = token === Deno.env.get('SUPABASE_ANON_KEY') || /^sb_publishable_[A-Za-z0-9_-]+$/.test(token);
+      if (!visitorKey) {
         const { data, error } = await client.auth.getUser(token);
         if (error || !data.user) throw new RequestError('Please sign in again.', 401);
         userId = data.user.id;

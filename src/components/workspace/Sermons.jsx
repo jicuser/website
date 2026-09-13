@@ -116,6 +116,16 @@ function Talk({ talk: initial }) {
   );
 }
 export function SermonArchive() {
+  if (import.meta.env.VITE_ENABLE_WORKSPACE !== 'true')
+    return (
+      <section className="workspace">
+        <h1>Talks & reflections</h1>
+        <p>The recordings and reading archive is being prepared.</p>
+      </section>
+    );
+  return <PublishedSermons />;
+}
+function PublishedSermons() {
   const [rows, setRows] = useState([]),
     [page, setPage] = useState(0),
     [query, setQuery] = useState(''),

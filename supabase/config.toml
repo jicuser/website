@@ -6,8 +6,14 @@ project_id = "jic-website"
 verify_jwt = false
 
 [functions.submit-form]
-# The SDK supplies the public anon JWT; visitors need no account to submit.
-verify_jwt = true
+# Public validated submissions with transactional rate limits; no account is needed.
+# Publishable API keys are not JWTs and must reach this public handler too.
+verify_jwt = false
+
+[functions.manage-user]
+# Verify the user's JWT with Auth, then require active database permissions.
+# Handler verification also supports projects using asymmetric JWT signing keys.
+verify_jwt = false
 
 [functions.push-worker]
 # Scheduled server caller only; handler checks its dedicated secret before reading the queue.
