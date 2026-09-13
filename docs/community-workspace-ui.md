@@ -25,9 +25,10 @@ Use [the API contract](community-workspace-api.md) for exact table columns and R
 ## Validation
 
 - `npm run check`: passed.
-- `npm test`: 213 tests passed, including PostgreSQL permissions/workflow tests from the backend companion and five new education/reading/export tests.
+- `npm test`: 214 tests passed, including PostgreSQL permissions/workflow tests from the backend companion and five new education/reading/export tests.
 - Build with `VITE_ENABLE_WORKSPACE=true`: passed. The existing large HLS bundle warning remains.
 - Chromium at 390 × 844: adult overview, courses, weekly schedule and unauthenticated portal rendered without page errors or horizontal overflow. Public Supabase reads were mocked; no authentication request or private write was made.
+- After merging main’s salawat and Prayer Times fixes, all seven mobile browser regression tests also passed.
 - Authenticated browser workflows need staging accounts for owner, teacher, student and parent before release. Database isolation tests do not replace that sign-off.
 
 ## Still outside this first delivery

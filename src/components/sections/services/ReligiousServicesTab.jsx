@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Book, Clock, Heart, Headphones, Loader2 } from 'lucide-react';
-import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
+import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import MosqueSymbol from '@/components/icons/MosqueSymbol';
 
 const religiousServices = [
@@ -55,7 +55,7 @@ const PrayerTimeRow = ({ label, begins, jamaah, current }) => (
 );
 
 const ReligiousServicesTab = () => {
-  const { todaysTimes, currentDate, isLoadingPrayerTimes } = usePrayerTimes();
+  const { todaysTimes, currentDate, isLoadingPrayerTimes } = usePublicPrayerTimes();
   const current = currentPrayer(todaysTimes, currentDate);
 
   return (

@@ -19,7 +19,7 @@ import MosqueIcon from '@/components/icons/MosqueIcon';
 import useCommunityLink from '@/hooks/useCommunityLink';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import { SITE } from '@/content/site';
-import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
+import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useContent } from '@/context/ContentContext';
 import { supabase } from '@/lib/supabaseClient';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
@@ -136,7 +136,7 @@ export default function HomePage() {
   const { events, announcement, livestream } = useHomeLiveContent();
   const whatsapp = useCommunityLink();
   const cards = useHomeTiles();
-  const { jummahTimes } = usePrayerTimes();
+  const { jummahTimes } = usePublicPrayerTimes();
   const { getContent } = useContent();
   let hero = {};
   try {

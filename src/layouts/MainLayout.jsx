@@ -13,8 +13,17 @@ import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import AdminBar from '@/components/shell/AdminBar';
 import { useAuth } from '@/context/AuthContext';
+import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
 
 export default function MainLayout() {
+  return (
+    <PublicPrayerTimesProvider>
+      <PublicLayout />
+    </PublicPrayerTimesProvider>
+  );
+}
+
+function PublicLayout() {
   const { pathname, search } = useLocation();
   const { isAdmin } = useAuth();
   const preview = new URLSearchParams(search).get('preview') === '1';

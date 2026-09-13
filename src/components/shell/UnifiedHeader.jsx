@@ -20,7 +20,7 @@ import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
 import { MADRASSAH_TABS, MASJID_EXTENSION_TABS, NAV_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
-import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
+import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useAppearance } from '@/context/AppearanceContext';
 import { useNavigationHistory } from '@/context/NavigationContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
@@ -59,7 +59,7 @@ export default function UnifiedHeader() {
   const { canGoBack, previousPath } = useNavigationHistory();
   const showHome = pathname === '/' || !canGoBack || previousPath === '/';
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
-  const { todaysTimes, jummahTimes, currentDate } = usePrayerTimes();
+  const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
     audioRef = useRef(null),
     menuRef = useRef(null),
@@ -289,7 +289,9 @@ export default function UnifiedHeader() {
                       key={path}
                       to={path}
                       end={path === '/'}
-                      onClick={() => setQuickMenuOpen(false)}
+                      onClick={() => {
+                        if (pathname === path) setQuickMenuOpen(false);
+                      }}
                     >
                       {name}
                     </NavLink>
