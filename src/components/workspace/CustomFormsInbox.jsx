@@ -33,13 +33,14 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
     setSelected([]);
   };
   useEffect(() => {
+    if (search === filters.search) return undefined;
     const timer = window.setTimeout(() => {
       setFilters((current) => ({ ...current, search }));
       setPage(0);
       setSelected([]);
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [search]);
+  }, [search, filters.search]);
   useEffect(() => () => exportController.current?.abort(), []);
   useEffect(() => {
     let active = true;
