@@ -56,14 +56,9 @@ export default function SpiritualOverlays() {
   const lastShown = useRef(0);
   const interactionCount = useRef(0);
 
-  const closeSalawat = useCallback((delay = 0) => {
+  const closeSalawat = useCallback(() => {
     window.clearTimeout(salawatTimer.current);
-    if (!delay) {
-      setSalawatOpen(false);
-      return;
-    }
-    // A tap replaces the original deadline, giving readers three full seconds.
-    salawatTimer.current = window.setTimeout(() => setSalawatOpen(false), delay);
+    setSalawatOpen(false);
   }, []);
 
   useEffect(() => {
@@ -78,15 +73,26 @@ export default function SpiritualOverlays() {
     const previousFocus = document.activeElement;
     salawatDismiss.current?.focus({ preventScroll: true });
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') closeSalawat();
+      if (
+        ['Escape', 'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End'].includes(event.key)
+      ) {
+        closeSalawat();
+      }
       if (event.key !== 'Tab') return;
       event.preventDefault();
       salawatDismiss.current?.focus({ preventScroll: true });
     };
     document.addEventListener('keydown', onKeyDown);
+    // Ignore layout/route scroll events; dismiss only on a visitor's gesture.
+    for (const event of ['wheel', 'touchmove']) {
+      document.addEventListener(event, closeSalawat, { capture: true, passive: true });
+    }
     return () => {
       window.clearTimeout(salawatTimer.current);
       document.removeEventListener('keydown', onKeyDown);
+      for (const event of ['wheel', 'touchmove']) {
+        document.removeEventListener(event, closeSalawat, true);
+      }
       if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
   }, [salawatOpen, closeSalawat]);
@@ -140,6 +146,7 @@ export default function SpiritualOverlays() {
           role="dialog"
           aria-modal="true"
           aria-label="Salawat"
+          onClick={closeSalawat}
         >
           <button
             ref={salawatDismiss}
@@ -150,7 +157,7 @@ export default function SpiritualOverlays() {
           >
             <X size={20} />
           </button>
-          <div className="jic-salawat-card" onClick={() => closeSalawat(3000)}>
+          <div className="jic-salawat-card">
             <span className="jic-spiritual-kicker">SALAWAT</span>
             <p className="jic-salawat-arabic" lang="ar" dir="rtl">
               {SALAWAT.arabic}
@@ -160,7 +167,6 @@ export default function SpiritualOverlays() {
             <p className="jic-salawat-urdu" lang="ur" dir="rtl">
               {SALAWAT.urdu}
             </p>
-            <small>Tap to close after 3 seconds</small>
           </div>
         </div>
       )}

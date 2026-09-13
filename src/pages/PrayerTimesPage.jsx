@@ -7,7 +7,7 @@ import {
   JummahTimesCard,
 } from '@/components/sections/prayer-times/PrayerScheduleTabs';
 import PrayerGuidelinesSection from '@/components/sections/prayer-times/PrayerGuidelinesSection';
-import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
+import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PrayerTimesPage({ initialTab = 'today' }) {
@@ -20,7 +20,7 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
     todaysTimes,
     jummahTimes,
     isLoadingPrayerTimes,
-  } = usePrayerTimes();
+  } = usePublicPrayerTimes();
 
   // Preserve wallpaper links shared before the timetable was split into pages.
   if (initialTab !== 'daily' && hash === '#phone-wallpaper')

@@ -51,6 +51,10 @@ npm run validate
 
 `validate` checks JavaScript, runs the tests and builds `dist/`. Check the preview before committing. A push to the branch connected to Hostinger can trigger deployment; editing a local file alone does not update the public website.
 
+For the mobile reminder and Prayer Times navigation checks, run `npx playwright install chromium`
+once, then `npm run test:browser`. These use local fixture data, including a paused network
+response, and do not connect to the live database.
+
 - [Editing guide](docs/editing.md)
 - [Code map](CODEBASE_MAP.md)
 - [Style ownership](src/styles/README.md)

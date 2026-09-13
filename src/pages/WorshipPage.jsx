@@ -9,7 +9,7 @@ import {
   MoonStar,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
+import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 
 const QURAN_API = 'https://api.alquran.cloud/v1';
 const QURAN_FALLBACK = 'https://quran.com';
@@ -141,7 +141,7 @@ function QuranReader() {
 }
 
 function DailySalah() {
-  const { todaysTimes, currentDate } = usePrayerTimes();
+  const { todaysTimes, currentDate } = usePublicPrayerTimes();
   const current = currentPrayer(todaysTimes, currentDate);
   const prayers = useMemo(
     () => [

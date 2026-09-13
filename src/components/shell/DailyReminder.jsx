@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useContent } from '@/context/ContentContext';
 import { DEFAULT_REMINDERS } from '@/content/reminders';
 import { internalPath } from '@/lib/navigation';
 
 export default function DailyReminder() {
   const { getContent } = useContent();
+  const { pathname } = useLocation();
   const [index, setIndex] = useState(() => Math.floor(Date.now() / 86400000));
   const [scrolling, setScrolling] = useState(false);
   const interactions = useRef(0);
@@ -14,6 +15,7 @@ export default function DailyReminder() {
     setIndex((value) => value + 1);
   }, []);
   useEffect(() => {
+    setScrolling(false);
     const mobile = window.matchMedia('(max-width: 767px)');
     let scrollTimer,
       scrollIntentUntil = 0;
@@ -31,6 +33,8 @@ export default function DailyReminder() {
     };
     const onIntent = (event) => {
       if (isEditing(event.target)) return;
+      // A navigation tap is not a scroll gesture, even when the route resets scrollY.
+      if (mobile.matches && ['pointerdown', 'touchstart'].includes(event.type)) return;
       if (
         event.type === 'keydown' &&
         ![
@@ -51,10 +55,12 @@ export default function DailyReminder() {
     // One scroll gesture, including its momentum, counts once, not once per pixel.
     const onScroll = (event) => {
       if (mobile.matches) {
-        if (event.target !== document) return;
+        if (event.target !== document || Date.now() > scrollIntentUntil) return;
+        scrollIntentUntil = Date.now() + 1000;
         setScrolling(true);
         window.clearTimeout(scrollTimer);
         scrollTimer = window.setTimeout(() => {
+          scrollIntentUntil = 0;
           advance();
           setScrolling(false);
         }, 700);
@@ -87,7 +93,7 @@ export default function DailyReminder() {
         document.removeEventListener(type, onIntent, true),
       );
     };
-  }, [advance]);
+  }, [advance, pathname]);
   let reminders = DEFAULT_REMINDERS,
     notices = [];
   try {
