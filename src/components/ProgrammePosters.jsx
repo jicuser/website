@@ -19,7 +19,13 @@ export default function ProgrammePosters() {
   return (
     <>
       <SwipeRail
-        title={group === 'home' ? 'What’s on & learning' : 'Classes & gatherings'}
+        title={
+          group === 'home'
+            ? 'What’s on & learning'
+            : group === 'education'
+              ? 'What’s on'
+              : 'Classes & gatherings'
+        }
         className="jic-programmes"
       >
         {posters.map((item) => (

@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@supabase/supabase-js": "2.116.0",
+    "google-auth-library": "11.0.2"
+  },
+  "name": "community-push-worker",
+  "private": true,
+  "type": "module"
+}

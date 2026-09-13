@@ -67,7 +67,7 @@ export function TextField({
   name,
   type = 'text',
   required = true,
-  maxLength = 200,
+  maxLength = 160,
   ...props
 }) {
   return (

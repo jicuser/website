@@ -1,20 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { useContent } from '@/context/ContentContext';
 import { READING_COLLECTIONS, publicAssetUrl, validReadingEntry } from '@/lib/mobileContent';
 function parse(value, fallback) {
   try {
-    return JSON.parse(value) || fallback;
+    const parsed = JSON.parse(value);
+    if (Array.isArray(fallback)) return Array.isArray(parsed) ? parsed : fallback;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : fallback;
   } catch {
     return fallback;
   }
 }
 export default function MobileContentEditor() {
   const { getContent, saveContent } = useContent();
-  const [brand, setBrand] = useState(() => parse(getContent('mobile_branding', '{}'), {}));
-  const [entries, setEntries] = useState(() => parse(getContent('reading_library', '[]'), []));
+  const brandRaw = getContent('mobile_branding', '{}');
+  const readingRaw = getContent('reading_library', '[]');
+  const published = useMemo(
+    () => ({ brand: parse(brandRaw, {}), entries: parse(readingRaw, []) }),
+    [brandRaw, readingRaw],
+  );
+  const [brand, setBrand] = useState(published.brand);
+  const [entries, setEntries] = useState(published.entries);
+  const [baseline, setBaseline] = useState(() => JSON.stringify({ brand, entries }));
+  const dirty = JSON.stringify({ brand, entries }) !== baseline;
+  useEffect(() => {
+    if (!dirty) {
+      setBrand(published.brand);
+      setEntries(published.entries);
+      setBaseline(JSON.stringify(published));
+    }
+  }, [published, dirty]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  async function save() {
+  const save = useCallback(async () => {
     if (busy) return;
     setMessage('');
     if (
@@ -22,10 +40,11 @@ export default function MobileContentEditor() {
       entries.length > 200 ||
       entries.some((entry) => !validReadingEntry(entry))
     ) {
-      setMessage(
+      const error = new Error(
         'Use valid picture URLs and give every reading a title, text, reference and source link.',
       );
-      return;
+      setMessage(error.message);
+      throw error;
     }
     setBusy(true);
     try {
@@ -35,13 +54,16 @@ export default function MobileContentEditor() {
         JSON.stringify(entries.map((entry) => ({ ...entry, published: true }))),
         'json',
       );
+      setBaseline(JSON.stringify({ brand, entries }));
       setMessage('Published app content.');
     } catch (error) {
       setMessage(error.message);
+      throw error;
     } finally {
       setBusy(false);
     }
-  }
+  }, [brand, entries, busy, saveContent]);
+  useRegisterAdminSave(save, dirty && !busy, 'Publish app content');
   return (
     <section className="admin-panel">
       <h2>App images & reading</h2>
@@ -143,7 +165,11 @@ export default function MobileContentEditor() {
         >
           Add reading
         </button>
-        <button className="admin-button primary" disabled={busy} onClick={save}>
+        <button
+          className="admin-button primary"
+          disabled={busy}
+          onClick={() => save().catch(() => {})}
+        >
           {busy ? 'Publishing…' : 'Publish app content'}
         </button>
       </div>

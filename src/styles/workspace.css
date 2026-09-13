@@ -1,7 +1,7 @@
 .community-workspace {
   min-height: 100vh;
-  background: var(--background, #f7f8fa);
-  color: var(--foreground, #152238);
+  background: hsl(var(--background, 210 20% 98%));
+  color: hsl(var(--foreground, 218 45% 15%));
   padding: clamp(16px, 3vw, 32px);
 }
 .workspace-wrap {

@@ -289,12 +289,31 @@ test('workspace RLS, transactional register, moderation, delegation and private 
       },
       'service_role',
     );
+    const unread = (
+      await db.query(
+        `select id from user_notifications where user_id='${formStaff}' and read_at is null limit 1`,
+      )
+    ).rows[0].id;
+    await as(
+      null,
+      async () =>
+        assert.equal(
+          (await db.query('select push_recipient_allowed($1) as allowed', [unread])).rows[0]
+            .allowed,
+          true,
+        ),
+      'service_role',
+    );
     await db.exec(`update profiles set permissions='{}' where id='${formStaff}';`);
+    await as(formStaff, async () => {
+      assert.equal(await count('work_tasks'), 0);
+      assert.equal(await count('user_notifications'), 0);
+    });
     await as(
       null,
       async () => {
         assert.equal(
-          (await db.query('select push_recipient_allowed($1) as allowed', [notification])).rows[0]
+          (await db.query('select push_recipient_allowed($1) as allowed', [unread])).rows[0]
             .allowed,
           false,
         );

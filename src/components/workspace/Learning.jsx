@@ -284,7 +284,7 @@ export default function Learning({ data, auth, reload, onError }) {
                 required={false}
               />
               <Field label="What would you like to discuss?">
-                <textarea name="notes" required maxLength={5000} />
+                <textarea name="notes" required maxLength={4000} />
               </Field>
             </ActionForm>
           )}

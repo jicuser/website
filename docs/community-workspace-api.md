@@ -23,7 +23,7 @@ All IDs are UUIDs, dates ISO, and timestamp columns timestamptz. Select results 
 
 ## RPCs
 
-- create_work_task(p_title text,p_assigned_to uuid,p_form_id uuid=null,p_due_at timestamptz=null,p_description text="") → UUID. General delegation owner-only; self tasks allowed. Linked form tasks require caller and recipient current kind access.
+- create_work_task(p_title text,p_assigned_to uuid,p_form_id uuid=null,p_due_at timestamptz=null,p_description text="") → UUID. General delegation owner-only; self tasks allowed (maximum 100 task creations/account/hour). Linked form tasks require caller and recipient current kind access.
 - task_assignees(p_form_id uuid=null) → [{id,display_name}]. General: owner sees active people, others themselves. Form: eligible people only if caller can read form.
 - mark_class_register(p_session_id uuid,p_marks jsonb) → void. Marks [{student_id,status,note}]. Entire batch rolls back if any student is not actively enrolled.
 - register_push_device(p_token text,p_platform text) → void. platform android/ios, active caller only. Tokens opaque, server-owned, cannot rebind another account token.
@@ -53,3 +53,7 @@ Student poetry/reflections remain within the authenticated course after teacher 
 All new tables have RLS and explicit grants; device tokens and queue tables are service-only. Client RPCs are invoker wrappers around narrowly checked functions in the unexposed private schema. No client receives a service key. This migration does not create a production cron job, send notifications, change existing roles or deploy any Edge Function. Supabase advisor checks still need to run against staging before deployment; the local test database does not provide the managed advisor service.
 
 Sources consulted: [Supabase push guide](https://supabase.com/docs/guides/functions/examples/push-notifications), [row-level security](https://supabase.com/docs/guides/database/postgres/row-level-security), [FCM HTTP v1](https://firebase.google.com/docs/cloud-messaging/send/v1-api).
+
+## Verification checkpoint
+
+The workspace security suite and push payload tests pass (13 tests). The edge entry point passes Deno type checking with the committed npm dependency lock installed using `npm ci`, followed by `deno check --node-modules-dir=manual index.ts`. The edge folder's package-lock records the dependencies used for that check. Deno's direct registry fetch is unavailable in this workspace, so a deployment Deno lock has not been generated; create and commit it in staging before deploying. Native FCM/APNs delivery and managed Supabase advisors remain staging checks.

@@ -23,6 +23,10 @@ Deno.serve(async (request: Request) => {
       auth: { persistSession: false, autoRefreshToken: false },
       global: { fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(15_000) }) },
     });
+    const { data: jobs, error: claimError } = await db.rpc('claim_push_jobs');
+    if (claimError) throw new Error('Queue unavailable');
+    if (!jobs?.length) return Response.json({ processed: 0, completed: 0 });
+
     const auth = new JWT({
       email: credentials.client_email,
       key: credentials.private_key,
@@ -31,8 +35,6 @@ Deno.serve(async (request: Request) => {
     // Explicit credentials avoid metadata-server discovery. No credential payload is logged.
     const access = await auth.getAccessToken();
     if (!access.token) throw new Error('Provider authorization unavailable');
-    const { data: jobs, error: claimError } = await db.rpc('claim_push_jobs');
-    if (claimError) throw new Error('Queue unavailable');
 
     const results = await Promise.all((jobs as Job[] ?? []).map(async (job) => {
       let delivered = false;

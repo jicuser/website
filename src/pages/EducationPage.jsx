@@ -1,12 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import usePosters from '@/hooks/usePosters';
-import { weeklySessions, WEEKDAYS, isAdultProgramme } from '@/lib/education';
+import { weeklySessions, WEEKDAYS } from '@/lib/education';
 
 export default function EducationPage({ view = 'overview' }) {
   const posters = usePosters();
   const sessions = weeklySessions(posters);
-  const courses = posters.filter(isAdultProgramme);
   return (
     <section className="container mx-auto max-w-5xl space-y-6 px-4 py-8">
       <header>
@@ -22,18 +21,6 @@ export default function EducationPage({ view = 'overview' }) {
           Explore our adult courses, open learning circles and regular gatherings.
         </p>
       </header>
-      <nav className="flex flex-wrap gap-3" aria-label="Education">
-        {[
-          ['Overview', '/education'],
-          ['Classes & courses', '/education/classes-courses'],
-          ['Weekly schedule', '/education/week'],
-          ['Student portal', '/portal'],
-        ].map(([title, path]) => (
-          <Link className="rounded-xl border border-border px-4 py-2" key={path} to={path}>
-            {title}
-          </Link>
-        ))}
-      </nav>
       {view !== 'courses' && (
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">Weekly schedule</h2>
@@ -54,7 +41,7 @@ export default function EducationPage({ view = 'overview' }) {
                       <p key={`${session.id}-${i}`} className="mt-2">
                         <strong>{session.time || `After ${session.after}`}</strong> ·{' '}
                         {session.title || session.programme}
-                        {session.title && (
+                        {session.title && session.programme !== `After ${session.after}` && (
                           <span className="text-muted-foreground"> · {session.programme}</span>
                         )}
                       </p>
@@ -64,19 +51,6 @@ export default function EducationPage({ view = 'overview' }) {
               );
             })
           )}
-        </section>
-      )}
-      {view !== 'week' && (
-        <section className="space-y-3">
-          <h2 className="text-xl font-semibold">What’s on</h2>
-          {courses.map((course) => (
-            <article className="rounded-xl border border-border bg-card/80 p-4" key={course.id}>
-              <h3 className="font-semibold">{course.title}</h3>
-              <p>{course.schedule}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{course.detail}</p>
-            </article>
-          ))}
-          {courses.length === 0 && <p>New courses will appear here when published.</p>}
         </section>
       )}
       <p className="text-sm text-muted-foreground">

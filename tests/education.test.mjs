@@ -4,32 +4,92 @@ import { isAdultProgramme, weeklySessions, validSessions } from '../src/lib/educ
 import { posterCatalogue, DEFAULT_POSTERS } from '../src/lib/posters.js';
 import { validReadingEntry, publicAssetUrl } from '../src/lib/mobileContent.js';
 
-test('adult education excludes youth and Madrassah posters and unknown audiences',()=>{
- const posters=posterCatalogue(null);
- const adult=posters.filter(isAdultProgramme);
- assert.ok(adult.some((row)=>row.id==='seekers-gateway'));
- assert.ok(!adult.some((row)=>row.id==='youth-islamic-studies'));
- assert.equal(isAdultProgramme({groups:['education'],audience:'madrassah'}),false);
- assert.equal(isAdultProgramme({groups:['education']}),false);
- assert.ok(weeklySessions(posters).every((row)=>row.id!=='youth-islamic-studies'));
+test('adult education excludes youth and Madrassah posters and unknown audiences', () => {
+  const posters = posterCatalogue(null);
+  const adult = posters.filter(isAdultProgramme);
+  assert.ok(adult.some((row) => row.id === 'seekers-gateway'));
+  assert.ok(!adult.some((row) => row.id === 'youth-islamic-studies'));
+  assert.equal(isAdultProgramme({ groups: ['education'], audience: 'madrassah' }), false);
+  assert.equal(isAdultProgramme({ groups: ['education'] }), false);
+  assert.ok(weeklySessions(posters).every((row) => row.id !== 'youth-islamic-studies'));
 });
-test('legacy posters inherit known sessions only while their schedule remains unchanged',()=>{
- const original=DEFAULT_POSTERS.find((row)=>row.id==='open-quran-circle');
- const {audience,sessions,...legacy}=original;
- assert.deepEqual(posterCatalogue(JSON.stringify([legacy]))[0].sessions,sessions);
- assert.equal(posterCatalogue(JSON.stringify([{...legacy,schedule:'Ask about new dates'}]))[0].sessions.length,0);
- assert.deepEqual(weeklySessions(posterCatalogue(JSON.stringify([{...legacy,sessions:[]}]))),[]);
+test('legacy posters inherit known sessions only while their schedule remains unchanged', () => {
+  const original = DEFAULT_POSTERS.find((row) => row.id === 'open-quran-circle');
+  const { audience, sessions, ...legacy } = original;
+  assert.deepEqual(posterCatalogue(JSON.stringify([legacy]))[0].sessions, sessions);
+  assert.equal(
+    posterCatalogue(JSON.stringify([{ ...legacy, schedule: 'Ask about new dates' }]))[0].sessions
+      .length,
+    0,
+  );
+  assert.deepEqual(
+    weeklySessions(posterCatalogue(JSON.stringify([{ ...legacy, sessions: [] }]))),
+    [],
+  );
 });
-test('weekly sessions reject invalid clocks, duplicate timing modes and impossible days',()=>{
- for(const row of [{day:0,time:'18:00'},{day:8,time:'18:00'},{day:1,time:'25:00'},{day:1,time:'18:00',after:'Maghrib'},{day:1,time:'18:00',end:'17:00'},{day:1,after:'Something'}])assert.equal(validSessions([row]),false);
- assert.equal(validSessions([{day:1,after:'Maghrib'},{day:5,time:'18:30',end:'20:00'}]),true);
+test('weekly sessions reject invalid clocks, duplicate timing modes and impossible days', () => {
+  for (const row of [
+    { day: 0, time: '18:00' },
+    { day: 8, time: '18:00' },
+    { day: 1, time: '25:00' },
+    { day: 1, time: '18:00', after: 'Maghrib' },
+    { day: 1, time: '18:00', end: '17:00' },
+    { day: 1, after: 'Something' },
+  ])
+    assert.equal(validSessions([row]), false);
+  assert.equal(
+    validSessions([
+      { day: 1, after: 'Maghrib' },
+      { day: 5, time: '18:30', end: '20:00' },
+    ]),
+    true,
+  );
 });
-test('approved reading requires source and reference, with no executable links',()=>{
- const reading={id:'one',collection:'hadith',title:'Approved reading',text:'Reviewed text',reference:'Exact reference',source:'https://example.org/source'};
- assert.equal(validReadingEntry(reading),true);
- assert.equal(validReadingEntry({...reading,reference:''}),false);
- for(const source of ['javascript:alert(1)','//example.org','https://name:password@example.org','http://example.org','/\\evil']){
-  assert.equal(publicAssetUrl(source),false,source);
-  assert.equal(validReadingEntry({...reading,source}),false);
- }
+test('approved reading requires source and reference, with no executable links', () => {
+  const reading = {
+    id: 'one',
+    collection: 'hadith',
+    title: 'Approved reading',
+    text: 'Reviewed text',
+    reference: 'Exact reference',
+    source: 'https://example.org/source',
+  };
+  assert.equal(validReadingEntry(reading), true);
+  assert.equal(validReadingEntry({ ...reading, reference: '' }), false);
+  for (const source of [
+    'javascript:alert(1)',
+    '//example.org',
+    'https://name:password@example.org',
+    'http://example.org',
+    '/\\evil',
+  ]) {
+    assert.equal(publicAssetUrl(source), false, source);
+    assert.equal(validReadingEntry({ ...reading, source }), false);
+  }
+});
+
+test('CSV keeps collated fields and prevents spreadsheet formula execution', async () => {
+  const { csvCell, formsCsv } = await import('../src/lib/formExport.js');
+  assert.equal(csvCell(' =1+1'), '"\' =1+1"');
+  assert.equal(csvCell('one,"two"'), '"one,""two"""');
+  const csv = formsCsv([
+    {
+      id: '1',
+      kind: 'contact',
+      status: 'new',
+      created_at: '2026-09-13',
+      payload: { name: 'One', question: 'Line1\nLine2' },
+    },
+    {
+      id: '2',
+      kind: 'madrassah',
+      status: 'new',
+      created_at: '2026-09-13',
+      payload: { name: 'Two', phone: '+441234' },
+    },
+  ]);
+  assert.match(csv, /"name","phone","question"/);
+  assert.ok(csv.includes("' +441234") === false);
+  assert.ok(csv.includes("'+441234"));
+  assert.ok(csv.includes('Line1\nLine2'));
 });

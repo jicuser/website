@@ -76,7 +76,7 @@ create table public.work_tasks (
  status text not null default 'open' check(status in('open','in_progress','waiting','done')),
  due_at timestamptz, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
 create index work_tasks_assigned on public.work_tasks(assigned_to,status,due_at);
-create index work_tasks_creator on public.work_tasks(created_by);
+create index work_tasks_creator on public.work_tasks(created_by,created_at desc);
 create index work_tasks_form on public.work_tasks(form_id);
 create table public.user_notifications (
  id uuid primary key default gen_random_uuid(), user_id uuid not null references public.profiles on delete cascade,
@@ -173,7 +173,9 @@ create trigger learning_notify after insert or update on public.learning_records
 create function private.create_work_task(p_title text,p_assigned_to uuid,p_form_id uuid,p_due_at timestamptz,p_description text) returns uuid language plpgsql security definer set search_path='' as $$
  declare result uuid; form_kind text; actor uuid=auth.uid();
  begin
+ perform 1 from public.profiles where id in(actor,p_assigned_to) order by id for no key update;
  if not private.active_account(actor) or not private.active_account(p_assigned_to) then raise exception 'Active accounts required'; end if;
+ if (select count(*) from public.work_tasks where created_by=actor and created_at>now()-interval '1 hour')>=100 then raise exception 'Task creation limit reached; try later'; end if;
  if p_form_id is null then
  if p_assigned_to<>actor and not private.workspace_owner() then raise exception 'Owner permission required for delegation'; end if;
  else
@@ -228,8 +230,8 @@ create function public.submit_student_contribution(p_student_id uuid,p_course_id
 
 create function private.register_push_device(p_token text,p_platform text) returns void language plpgsql security definer set search_path='' as $$
  begin
+ perform 1 from public.profiles where id=auth.uid() for no key update;
  if not private.active_account(auth.uid()) then raise exception 'Active account required'; end if;
- perform 1 from public.profiles where id=auth.uid() for update;
  if exists(select 1 from public.push_devices where token=p_token and user_id<>auth.uid()) then raise exception 'Device belongs to another account; unregister before switching'; end if;
  if not exists(select 1 from public.push_devices where token=p_token) and (select count(*) from public.push_devices where user_id=auth.uid())>=10 then raise exception 'Device limit reached'; end if;
  insert into public.push_devices(token,platform,user_id) values(p_token,p_platform,auth.uid()) on conflict(token) do update set updated_at=now(),platform=excluded.platform where public.push_devices.user_id=auth.uid();

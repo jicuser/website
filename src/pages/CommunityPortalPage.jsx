@@ -81,6 +81,9 @@ function Workspace({ auth }) {
   const [params] = useSearchParams();
   const formId = params.get('form');
   const [tab, setTab] = useState(formId ? 'tasks' : 'learning');
+  useEffect(() => {
+    if (formId) setTab('tasks');
+  }, [formId]);
   const [data, setData] = useState(empty);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState('');
@@ -90,10 +93,22 @@ function Workspace({ auth }) {
     setError('');
     try {
       const results = await Promise.all(
-        tables.map(async (name) => [
-          name,
-          await checked(supabase.from(name).select('*').limit(500)),
-        ]),
+        tables.map(async (name) => {
+          let query = supabase.from(name).select('*').limit(500);
+          const order =
+            name === 'learning_meetings'
+              ? 'requested_at'
+              : [
+                    'learning_staff',
+                    'learning_enrolments',
+                    'learning_attendance',
+                    'form_workflows',
+                  ].includes(name)
+                ? null
+                : 'created_at';
+          if (order) query = query.order(order, { ascending: false });
+          return [name, await checked(query)];
+        }),
       );
       setData(Object.fromEntries(results));
     } catch (e) {
@@ -140,35 +155,31 @@ function Workspace({ auth }) {
         ))}
       </nav>
       {error && <p role="alert">{error}</p>}
-      {busy ? (
-        <p role="status">Loading workspace…</p>
-      ) : (
-        <>
-          {tab === 'learning' && (
-            <Learning data={data} auth={auth} reload={reload} onError={report} />
-          )}
-          {tab === 'tasks' && (
-            <Tasks
-              rows={data.work_tasks}
-              notifications={data.user_notifications}
-              reload={reload}
-              formId={formId}
-              onError={report}
-            />
-          )}
-          {tab === 'notifications' && (
-            <Notifications rows={data.user_notifications} reload={reload} onError={report} />
-          )}
-          {tab === 'forms' && auth.can('forms') && <FormsInbox />}
-          {tab === 'manage' && auth.isOwner && (
-            <Manage data={data} reload={reload} onError={report} />
-          )}
-          <p className="workspace-meta">
-            Showing up to 500 records in each area. All records are restricted to your current
-            access.
-          </p>
-        </>
-      )}
+      {busy && <p role="status">Loading workspace…</p>}
+      <>
+        {tab === 'learning' && (
+          <Learning data={data} auth={auth} reload={reload} onError={report} />
+        )}
+        {tab === 'tasks' && (
+          <Tasks
+            rows={data.work_tasks}
+            notifications={data.user_notifications}
+            reload={reload}
+            formId={formId}
+            onError={report}
+          />
+        )}
+        {tab === 'notifications' && (
+          <Notifications rows={data.user_notifications} reload={reload} onError={report} />
+        )}
+        {tab === 'forms' && auth.can('forms') && <FormsInbox />}
+        {tab === 'manage' && auth.isOwner && (
+          <Manage data={data} reload={reload} onError={report} />
+        )}
+        <p className="workspace-meta">
+          Showing up to 500 records in each area. All records are restricted to your current access.
+        </p>
+      </>
     </>
   );
 }
