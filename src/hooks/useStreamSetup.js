@@ -3,6 +3,7 @@ import { tvRequest } from '@/lib/tvControl';
 import { normaliseTvSettings } from '../../supabase/functions/_shared/tv.js';
 import { hasSceneContent, nameProblem } from '../../supabase/functions/_shared/tv-scenes.js';
 import { createStreamScene, streamSettings } from '@/lib/streamWorkspace';
+import { recoverStreamWorkspace, streamEndSnapshot } from '@/lib/streamRecovery';
 
 export default function useStreamSetup(screenId, userId) {
   const key = `jic-stream-workspace:${userId}:${screenId}`;
@@ -58,31 +59,31 @@ export default function useStreamSetup(screenId, userId) {
         if (!loaded.current) {
           loaded.current = true;
           setRevision(next.updated_at);
+          let draft = null;
           try {
-            const draft = JSON.parse(sessionStorage.getItem(key));
-            const restoredName =
-              draft?.streamName ||
-              draft?.savedTemplate?.name ||
-              draft?.form?.scenes?.[0]?.name ||
-              '';
-            setStreamName(restoredName);
-            if (draft?.pendingSave?.settings?.scenes?.length) setPendingSave(draft.pendingSave);
-            if (draft?.form && [2, 3].includes(draft.stage)) {
-              setSavedTemplate(draft.savedTemplate || null);
-              const restored = normaliseTvSettings(draft.form);
-              if (restored.scenes?.length && restored.scenes.length <= 6) {
-                setForm(restored);
-                setStage(nameProblem(restoredName, 'stream name') ? 2 : 3);
-                setRevision(draft.revision || next.updated_at);
-                setManagedId(draft.managedId === next.presentation?.id ? draft.managedId : null);
-                setBaseline(draft.baseline || null);
-                setMessage(
-                  'Setup restored. If you were sharing, reopen that input to start capture again.',
-                );
-              }
-            }
+            draft = JSON.parse(sessionStorage.getItem(key));
           } catch {
-            /* A damaged browser draft must not block a clean setup. */
+            /* A missing or damaged browser draft must not hide a server session. */
+          }
+          if (draft?.pendingSave?.settings?.scenes?.length) setPendingSave(draft.pendingSave);
+          const restored = recoverStreamWorkspace(next, draft);
+          if (restored) {
+            setSavedTemplate(restored.savedTemplate);
+            setStreamName(restored.streamName);
+            setForm(restored.form ? normaliseTvSettings(restored.form) : null);
+            setStage(
+              restored.managedId || (restored.form && !nameProblem(restored.streamName, 'stream name'))
+                ? 3
+                : 2,
+            );
+            setRevision(restored.revision);
+            setManagedId(restored.managedId);
+            setBaseline(restored.baseline);
+            setMessage(
+              restored.recoveredLive
+                ? 'An unfinished stream was recovered. Check its inputs or end the stream below.'
+                : 'Setup restored. If you were sharing, reopen that input to start capture again.',
+            );
           }
         }
       } catch (error) {
@@ -179,6 +180,8 @@ export default function useStreamSetup(screenId, userId) {
     setMessage('Clean setup ready. Name your stream or load saved stream settings.');
   };
   const manageLive = () => {
+    if (!data?.presentation) return;
+    if (!started) setStreamName('');
     setSavedTemplate(null);
     setForm(data.settings);
     setBaseline(data.settings);
@@ -242,10 +245,13 @@ export default function useStreamSetup(screenId, userId) {
     }
   }, [form, started, data, screenId, revision, streamName]);
   async function end() {
+    if (!data?.presentation) return;
+    const source = streamEndSnapshot(data, { form, managedId, savedTemplate, streamName });
+    const { keepDraft } = source;
     const snapshot = {
-      settings: structuredClone(streamSettings(data.settings, form || data.settings)),
-      template: savedTemplate,
-      name: streamName,
+      settings: structuredClone(streamSettings(data.settings, source.form)),
+      template: source.template,
+      name: source.name,
     };
     const next = await tvRequest(
       'normal',
@@ -254,9 +260,13 @@ export default function useStreamSetup(screenId, userId) {
       { staff: true },
     );
     setData((previous) => ({ ...previous, ...next, devices: [], inputs: [] }));
-    newSetup();
+    if (!keepDraft) newSetup();
     setPendingSave(snapshot);
-    setMessage('Stream ended. Screens are returning to the normal display.');
+    setMessage(
+      keepDraft
+        ? 'Stream ended. Screens show the normal display; your separate setup draft is kept.'
+        : 'Stream ended. Screens are returning to the normal display.',
+    );
   }
   async function run(task, action = '') {
     if (inFlight.current) return;

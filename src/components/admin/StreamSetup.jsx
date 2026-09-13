@@ -15,6 +15,7 @@ import BackgroundSettings from '@/features/displays/BackgroundSettings';
 import DeviceInputs from '@/features/displays/DeviceInputs';
 import TvConnections from '@/features/displays/TvConnections';
 import SessionOutput from '@/features/displays/SessionOutput';
+import ActiveStreamList from '@/features/displays/ActiveStreamList';
 
 // Portal targets contain controls only. Capture controllers stay mounted outside
 // the dialog, so closing a source editor does not stop a live camera or screen.
@@ -35,10 +36,19 @@ export default function StreamSetup() {
     }
   });
   const [selected, setSelected] = useState(openHall || 'mens-main');
+  const openWorkspace = (screenId) => {
+    try {
+      sessionStorage.setItem(openKey, screenId);
+    } catch {
+      /* Server sessions can still be recovered without browser storage. */
+    }
+    setSelected(screenId);
+    setOpenHall(screenId);
+  };
   if (openHall)
     return (
       <HallWorkspace
-        key={openHall}
+        key={`${user.id}:${openHall}`}
         screenId={openHall}
         userId={user.id}
         onBack={() => {
@@ -53,6 +63,7 @@ export default function StreamSetup() {
     );
   return (
     <section className="stream-setup admin-panel">
+      <ActiveStreamList key={user.id} onOpen={openWorkspace} />
       <span className="admin-eyebrow stream-step-indicator jic-prompt">STEP 1 OF 3</span>
       <h2>
         <span className="jic-prompt">Choose your stream</span>
@@ -71,14 +82,7 @@ export default function StreamSetup() {
       <div className="admin-actions">
         <button
           className="admin-button primary"
-          onClick={() => {
-            try {
-              sessionStorage.setItem(openKey, selected);
-            } catch {
-              /* Keep setup usable without storage. */
-            }
-            setOpenHall(selected);
-          }}
+          onClick={() => openWorkspace(selected)}
         >
           Open stream setup <span aria-hidden="true">→</span>
         </button>
@@ -114,7 +118,11 @@ function HallWorkspace({ screenId, userId, onBack }) {
       <div className="stream-setup-heading">
         <div>
           <span className="admin-eyebrow stream-step-indicator jic-prompt">
-            {hall ? `STEP ${stage} OF 3` : 'BACKGROUND DISPLAY'}
+            {hall
+              ? setup.started
+                ? 'STREAM SESSION OPEN'
+                : `STEP ${stage} OF 3`
+              : 'BACKGROUND DISPLAY'}
           </span>
           <h2>{screen.label}</h2>
         </div>
@@ -187,6 +195,31 @@ function HallWorkspace({ screenId, userId, onBack }) {
               Copy address
             </button>
           </details>
+          {hall && data.presentation && (
+            <section className="admin-panel stream-live-status" aria-label="Active stream session">
+              <h3>Stream session still active</h3>
+              <p>
+                {data.inputs?.length
+                  ? 'A source is registered. Check the receiving display to confirm its picture and sound.'
+                  : 'No camera or screen source is connected. If this stream uses one, reopen its input to share again.'}
+              </p>
+              <div className="admin-actions">
+                {!setup.started && (
+                  <button className="admin-button" disabled={busy} onClick={setup.manageLive}>
+                    Manage current stream
+                  </button>
+                )}
+                <button
+                  className="admin-button stream-end"
+                  disabled={busy}
+                  aria-busy={busy && setup.operation === 'end'}
+                  onClick={() => setup.run(setup.end, 'end')}
+                >
+                  {busy && setup.operation === 'end' ? 'Ending stream…' : 'End stream'}
+                </button>
+              </div>
+            </section>
+          )}
           {hall && stage === 2 && (
             <section className="admin-panel">
               <h3>
@@ -231,17 +264,6 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   </button>
                 </div>
               </form>
-              {data.presentation && (
-                <div className="stream-live-status">
-                  <p>
-                    A stream is already live. Building a new setup keeps it playing until you press
-                    Start stream.
-                  </p>
-                  <button className="admin-button" onClick={setup.manageLive}>
-                    Edit current stream
-                  </button>
-                </div>
-              )}
             </section>
           )}
           {hall && stage === 2 && data.templates?.length > 0 && (
@@ -304,7 +326,9 @@ function HallWorkspace({ screenId, userId, onBack }) {
                     ? setup.dirty
                       ? 'Layout has unpublished changes.'
                       : 'This layout is live.'
-                    : 'Your setup is not live yet.'}
+                    : data.presentation
+                      ? 'This draft is separate from the active stream.'
+                      : 'Your setup is not live yet.'}
                 </span>
                 <div className="admin-actions">
                   <button
@@ -321,26 +345,18 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   >
                     New setup
                   </button>
-                  <button
-                    className={`admin-button ${setup.started ? 'stream-end' : 'stream-start'}`}
-                    disabled={busy}
-                    aria-busy={busy}
-                    onClick={() =>
-                      setup.started
-                        ? setup.run(setup.end, 'end')
-                        : setup.publish().catch((error) => setup.setMessage(error.message))
-                    }
-                  >
-                    {busy
-                      ? setup.operation === 'end'
-                        ? 'Ending stream…'
-                        : setup.operation === 'start'
-                          ? 'Starting stream…'
-                          : 'Please wait…'
-                      : setup.started
-                        ? 'End stream'
-                        : 'Start stream'}
-                  </button>
+                  {!setup.started && (
+                    <button
+                      className="admin-button stream-start"
+                      disabled={busy}
+                      aria-busy={busy && setup.operation === 'start'}
+                      onClick={() =>
+                        setup.publish().catch((error) => setup.setMessage(error.message))
+                      }
+                    >
+                      {busy && setup.operation === 'start' ? 'Starting stream…' : 'Start stream'}
+                    </button>
+                  )}
                   {setup.started && setup.dirty && (
                     <button
                       className="admin-button primary"

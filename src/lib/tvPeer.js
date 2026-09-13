@@ -1,4 +1,5 @@
-// Wait for the complete candidate list: this transport sends SDP, not trickle ICE.
+// Prefer the complete candidate list for SDP-only signalling. A slow ICE server
+// must not discard usable candidates that the browser has already gathered.
 export function waitForIce(peer, signal, timeoutMs = 15000) {
   if (signal?.aborted) return Promise.reject(new DOMException('Sharing stopped', 'AbortError'));
   if (peer.iceGatheringState === 'complete') return Promise.resolve();
@@ -17,7 +18,14 @@ export function waitForIce(peer, signal, timeoutMs = 15000) {
     peer.addEventListener('icegatheringstatechange', changed);
     signal?.addEventListener('abort', aborted, { once: true });
     timer = setTimeout(
-      () => finish(new DOMException('Network candidate gathering timed out', 'TimeoutError')),
+      () => {
+        const hasCandidates = /^a=candidate:/m.test(peer.localDescription?.sdp || '');
+        finish(
+          hasCandidates && peer.connectionState !== 'closed'
+            ? undefined
+            : new DOMException('No network route was found for this video connection', 'TimeoutError'),
+        );
+      },
       timeoutMs,
     );
     changed();
