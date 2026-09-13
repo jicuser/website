@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Radio } from 'lucide-react';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 
 const halls = TV_SCREENS.filter((screen) => screen.id !== 'shoe-area');
@@ -52,7 +53,7 @@ export default function ActiveStreamList({ onOpen }) {
   if (!loading && !error && !streams.length) return null;
   return (
     <section className="admin-panel stream-live-status" aria-label="Unfinished streams">
-      <h3>Unfinished streams</h3>
+      <h3>Active streams{streams.length > 0 ? ` · ${streams.length}` : ''}</h3>
       {loading && <p role="status">Checking existing stream sessions…</p>}
       {error && (
         <div role="status">
@@ -62,19 +63,24 @@ export default function ActiveStreamList({ onOpen }) {
           </button>
         </div>
       )}
-      {streams.map((stream) => (
-        <div key={stream.id}>
-          <h4>{stream.label}</h4>
-          <p>
-            {stream.hasSource
-              ? 'This session is still open. Check the receiving picture before using it.'
-              : 'This session is still open. Open it to check its inputs or end the stream.'}
-          </p>
-          <button className="admin-button primary" onClick={() => onOpen(stream.id)}>
-            Manage or end stream
+      <div className="admin-actions">
+        {streams.map((stream) => (
+          <button
+            key={stream.id}
+            type="button"
+            className="admin-button primary"
+            aria-label={`Manage or end ${stream.label}`}
+            title={
+              stream.hasSource
+                ? 'Source registered; open to check or end.'
+                : 'Session open; reconnect a source or end.'
+            }
+            onClick={() => onOpen(stream.id)}
+          >
+            <Radio size={18} aria-hidden="true" /> {stream.label} · active
           </button>
-        </div>
-      ))}
+        ))}
+      </div>
     </section>
   );
 }

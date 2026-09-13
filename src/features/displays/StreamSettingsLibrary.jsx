@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
+import { FolderOpen } from 'lucide-react';
 import { streamSettings, loadSceneTemplate } from '@/lib/streamWorkspace';
 
 export default function StreamSettingsLibrary({
@@ -7,23 +8,29 @@ export default function StreamSettingsLibrary({
   templates = [],
   disabled,
   savedTemplate,
+  loadBlocked = '',
 }) {
+  const fieldId = useId();
   const [selected, setSelected] = useState(savedTemplate?.id || '');
   const [message, setMessage] = useState('');
   const template = templates.find((item) => item.id === selected);
+  useEffect(() => {
+    setSelected(savedTemplate?.id || '');
+  }, [savedTemplate?.id]);
   return (
-    <details className="scene-template-library admin-panel">
-      <summary>Use saved stream settings</summary>
-      <p>Load a previous stream with its scenes and input details.</p>
+    <section className="scene-template-library admin-panel" aria-label="Saved stream settings">
       <div className="admin-actions">
         <label>
-          Saved stream
+          <span id={fieldId}>Saved settings</span>
           <select
+            aria-labelledby={fieldId}
             value={selected}
-            disabled={disabled}
+            disabled={disabled || !templates.length}
             onChange={(event) => setSelected(event.target.value)}
           >
-            <option value="">Choose saved settings…</option>
+            <option value="">
+              {templates.length ? 'Choose saved settings…' : 'No saved settings yet'}
+            </option>
             {templates.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
@@ -32,9 +39,12 @@ export default function StreamSettingsLibrary({
           </select>
         </label>
         <button
+          type="button"
           className="admin-button"
-          disabled={disabled || !template}
+          disabled={disabled || Boolean(loadBlocked) || !template}
           onClick={() => {
+            if (disabled || loadBlocked || !template) return;
+            setMessage('');
             try {
               onChange(
                 template.settings
@@ -50,10 +60,11 @@ export default function StreamSettingsLibrary({
             }
           }}
         >
-          Load settings
+          <FolderOpen size={18} aria-hidden="true" /> Load settings
         </button>
       </div>
+      {loadBlocked && <small>{loadBlocked}</small>}
       {message && <p role="status">{message}</p>}
-    </details>
+    </section>
   );
 }

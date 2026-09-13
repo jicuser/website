@@ -14,6 +14,7 @@ import { inputLabel } from '@/lib/tvSceneState';
 import ContentEditorDialog from './ContentEditorDialog';
 import { SCENE_LAYOUTS, arrangeScene, layoutRegions, snapRect } from '@/lib/sceneLayouts';
 import { addStreamScene } from '@/lib/streamWorkspace';
+import { isSingleInputPresentation } from '@/lib/presentationMode';
 
 const sourceLabel = (layer) =>
   layer.type === 'empty'
@@ -46,7 +47,11 @@ export default function SceneEditor({
   const [showConnection, setShowConnection] = useState(false);
   const canvas = useRef(null);
   const drag = useRef(null);
-  const layer = scene.layers.find((item) => item.id === selected);
+  const [requestedMode, setRequestedMode] = useState('simple');
+  const simpleAvailable = isSingleInputPresentation(value);
+  const advanced = requestedMode === 'advanced' || !simpleAvailable;
+  const layer =
+    scene.layers.find((item) => item.id === selected) || (!advanced ? scene.layers[0] : null);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -94,7 +99,7 @@ export default function SceneEditor({
   }
 
   function begin(event, item, resize = false) {
-    if (disabled || event.button !== 0) return;
+    if (disabled || !advanced || event.button !== 0) return;
     event.stopPropagation();
     setSelected(item.id);
     const rect = canvas.current.getBoundingClientRect();
@@ -155,100 +160,126 @@ export default function SceneEditor({
       <div className="scene-heading">
         <div>
           <h3 id={`${editorId}-heading`}>
-            <span className="jic-prompt">Arrange your scene</span>
+            <span className="jic-prompt">
+              {advanced ? 'Arrange your scene' : 'Present one input'}
+            </span>
           </h3>
-          <p>Choose how many inputs, then tap each + to select its type. Drag to move or resize.</p>
+          <p>
+            {advanced
+              ? 'Add scenes and inputs, then drag to arrange them.'
+              : 'Select one input, connect your device, then press Start presenting.'}
+          </p>
         </div>
-        <span className="scene-count">Draft preview</span>
-      </div>
-      <div className="scene-management">
-        <button
-          type="button"
-          className="admin-button"
-          disabled={disabled || value.scenes.length >= MAX_SCENES}
-          onClick={() => {
-            onChange(addStreamScene(value));
-            setSelected('');
-            closeDialog();
-          }}
-        >
-          <Plus size={18} aria-hidden="true" /> Add scene
-        </button>
-        {value.scenes.length > 1 && (
-          <button
-            type="button"
-            className="admin-button"
-            disabled={disabled}
-            onClick={() => {
-              if (!window.confirm('Remove this scene and its inputs from this setup?')) return;
-              const scenes = value.scenes.filter((item) => item.id !== scene.id);
-              onChange({ ...value, scenes, active_scene_id: scenes[0].id });
-              setSelected('');
-              closeDialog();
-            }}
-          >
-            Remove scene
-          </button>
-        )}
+        <span className="scene-count">Preview</span>
       </div>
       <div className="scene-toolbar">
         <label>
-          Scene
+          Presentation mode
           <select
+            value={advanced ? 'advanced' : 'simple'}
             disabled={disabled}
-            value={scene.id}
             onChange={(event) => {
-              onChange({ ...value, active_scene_id: event.target.value });
+              setRequestedMode(event.target.value);
+              drag.current = null;
+            }}
+          >
+            <option value="simple" disabled={!simpleAvailable}>
+              Simple · one input
+            </option>
+            <option value="advanced">Advanced · scenes and layouts</option>
+          </select>
+        </label>
+      </div>
+      <div hidden={!advanced}>
+        <div className="scene-management">
+          <button
+            type="button"
+            className="admin-button"
+            disabled={disabled || value.scenes.length >= MAX_SCENES}
+            onClick={() => {
+              onChange(addStreamScene(value));
               setSelected('');
               closeDialog();
             }}
           >
-            {value.scenes.map((item, index) => (
-              <option key={item.id} value={item.id}>
-                Scene {index + 1}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span className="jic-prompt">How many inputs?</span>
-          <select
-            disabled={disabled}
-            value={scene.layers.length}
-            onChange={(event) => applyLayout(Number(event.target.value), 'columns')}
-          >
-            {!scene.layers.length && <option value="0">Choose a number</option>}
-            {[1, 2, 3, 4].map((count) => (
-              <option key={count} value={count}>
-                {count} {count === 1 ? 'input' : 'inputs'}
-              </option>
-            ))}
-            {scene.layers.length > 4 && (
-              <option value={scene.layers.length}>{scene.layers.length} saved inputs</option>
-            )}
-          </select>
-        </label>
-      </div>
-      {scene.layers.length > 1 && scene.layers.length <= 4 && (
-        <fieldset className="scene-layout-options" disabled={disabled}>
-          <legend>Choose an arrangement</legend>
-          {SCENE_LAYOUTS.map(([preset, name]) => (
+            <Plus size={18} aria-hidden="true" /> Add scene
+          </button>
+          {value.scenes.length > 1 && (
             <button
               type="button"
-              className="admin-button scene-layout-preset"
-              key={preset}
-              onClick={() => applyLayout(scene.layers.length, preset)}
+              className="admin-button"
+              disabled={disabled}
+              onClick={() => {
+                if (!window.confirm('Remove this scene and its inputs from this setup?')) return;
+                const scenes = value.scenes.filter((item) => item.id !== scene.id);
+                onChange({ ...value, scenes, active_scene_id: scenes[0].id });
+                setSelected('');
+                closeDialog();
+              }}
             >
-              <span className="scene-layout-miniature" aria-hidden="true">
-                {layoutRegions(scene.layers.length, preset).map((rect, index) => (
-                  <span key={index} style={layerStyle(rect)} />
-                ))}
-              </span>
-              <span>{name}</span>
+              Remove scene
             </button>
-          ))}
-        </fieldset>
-      )}
+          )}
+        </div>
+        <div className="scene-toolbar">
+          <label>
+            Scene
+            <select
+              disabled={disabled}
+              value={scene.id}
+              onChange={(event) => {
+                onChange({ ...value, active_scene_id: event.target.value });
+                setSelected('');
+                closeDialog();
+              }}
+            >
+              {value.scenes.map((item, index) => (
+                <option key={item.id} value={item.id}>
+                  Scene {index + 1}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span className="jic-prompt">How many inputs?</span>
+            <select
+              disabled={disabled}
+              value={scene.layers.length}
+              onChange={(event) => applyLayout(Number(event.target.value), 'columns')}
+            >
+              {!scene.layers.length && <option value="0">Choose a number</option>}
+              {[1, 2, 3, 4].map((count) => (
+                <option key={count} value={count}>
+                  {count} {count === 1 ? 'input' : 'inputs'}
+                </option>
+              ))}
+              {scene.layers.length > 4 && (
+                <option value={scene.layers.length}>{scene.layers.length} saved inputs</option>
+              )}
+            </select>
+          </label>
+        </div>
+        {scene.layers.length > 1 && scene.layers.length <= 4 && (
+          <fieldset className="scene-layout-options" disabled={disabled}>
+            <legend>Choose an arrangement</legend>
+            {SCENE_LAYOUTS.map(([preset, name]) => (
+              <button
+                type="button"
+                className="admin-button scene-layout-preset"
+                key={preset}
+                onClick={() => applyLayout(scene.layers.length, preset)}
+              >
+                <span className="scene-layout-miniature" aria-hidden="true">
+                  {layoutRegions(scene.layers.length, preset).map((rect, index) => (
+                    <span key={index} style={layerStyle(rect)} />
+                  ))}
+                </span>
+                <span>{name}</span>
+              </button>
+            ))}
+          </fieldset>
+        )}
+      </div>
       <div className="scene-preview-column">
         <div
           ref={canvas}
@@ -281,9 +312,12 @@ export default function SceneEditor({
               tabIndex={disabled ? -1 : 0}
               role="button"
               aria-pressed={selected === item.id}
-              aria-label={`Input ${index + 1}: ${sourceLabel(item)}. Press Enter to edit; arrow keys move; Shift and arrows resize.`}
+              aria-label={`Input ${index + 1}: ${sourceLabel(item)}. ${advanced ? 'Press Enter to edit; arrow keys move; Shift and arrows resize.' : 'Press Enter to select or edit.'}`}
               className={`scene-layer scene-edit-layer ${item.type === 'empty' ? 'is-empty' : ''} ${selected === item.id ? 'is-selected' : ''}`}
               style={{ ...layerStyle(item), zIndex: index + 1 }}
+              onClick={() => {
+                if (!advanced) edit(item);
+              }}
               onPointerDown={(event) => begin(event, item)}
               onPointerMove={move}
               onPointerUp={(event) => finish(event, item)}
@@ -298,7 +332,10 @@ export default function SceneEditor({
                   edit(item);
                   return;
                 }
-                if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key))
+                if (
+                  !advanced ||
+                  !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)
+                )
                   return;
                 event.preventDefault();
                 const horizontal = ['ArrowLeft', 'ArrowRight'].includes(event.key);
@@ -317,7 +354,7 @@ export default function SceneEditor({
                 {item.type === 'empty' && <b aria-hidden="true">+</b>}
                 {sourceLabel(item)}
               </span>
-              {selected === item.id && (
+              {advanced && selected === item.id && (
                 <span
                   className="scene-resize"
                   aria-hidden="true"
@@ -330,17 +367,21 @@ export default function SceneEditor({
           ))}
         </div>
         <div className="scene-editor-footer">
-          <label className="admin-check">
-            <input
-              type="checkbox"
-              checked={snap}
-              onChange={(event) => setSnap(event.target.checked)}
-            />
-            Snap to edges and grid
-          </label>
-          <small>Inputs can overlap. Preview sound is muted.</small>
+          {advanced && (
+            <label className="admin-check">
+              <input
+                type="checkbox"
+                checked={snap}
+                onChange={(event) => setSnap(event.target.checked)}
+              />
+              Snap to edges and grid
+            </label>
+          )}
+          <small>
+            {advanced ? 'Inputs can overlap. Preview sound is muted.' : 'Preview sound is muted.'}
+          </small>
         </div>
-        {layer && (
+        {layer && (advanced || layer.type !== 'empty') && (
           <div className="scene-selected-source" aria-label="Selected input controls">
             <strong>
               <span className="jic-prompt">Selected input:</span> {sourceLabel(layer)}
@@ -366,22 +407,26 @@ export default function SceneEditor({
                 {layer.type !== 'empty' && <Settings2 size={18} aria-hidden="true" />}
                 {layer.type === 'empty' ? 'Select input type' : 'Input settings'}
               </button>
-              <button
-                type="button"
-                className="admin-button"
-                disabled={disabled}
-                onClick={() => reorder(true)}
-              >
-                Bring forward
-              </button>
-              <button
-                type="button"
-                className="admin-button"
-                disabled={disabled}
-                onClick={() => reorder(false)}
-              >
-                Send back
-              </button>
+              {advanced && (
+                <>
+                  <button
+                    type="button"
+                    className="admin-button"
+                    disabled={disabled}
+                    onClick={() => reorder(true)}
+                  >
+                    Bring forward
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button"
+                    disabled={disabled}
+                    onClick={() => reorder(false)}
+                  >
+                    Send back
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

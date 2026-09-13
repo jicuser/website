@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+import { Radio } from 'lucide-react';
 import { TV_SCREENS } from '@/lib/tvControl';
 import { useAuth } from '@/context/AuthContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
@@ -10,7 +11,7 @@ import { londonDate } from '@/lib/timetable';
 import SceneEditor from '@/features/displays/SceneEditor';
 import StreamSettingsLibrary from '@/features/displays/StreamSettingsLibrary';
 import StreamSaveDialog from '@/features/displays/StreamSaveDialog';
-import { nameProblem } from '../../../supabase/functions/_shared/tv-scenes.js';
+import { hasSceneContent, nameProblem } from '../../../supabase/functions/_shared/tv-scenes.js';
 import BackgroundSettings from '@/features/displays/BackgroundSettings';
 import DeviceInputs from '@/features/displays/DeviceInputs';
 import TvConnections from '@/features/displays/TvConnections';
@@ -84,7 +85,7 @@ export default function StreamSetup() {
           className="admin-button primary"
           onClick={() => openWorkspace(selected)}
         >
-          Open stream setup <span aria-hidden="true">→</span>
+          Set up presentation <span aria-hidden="true">→</span>
         </button>
       </div>
     </section>
@@ -112,6 +113,14 @@ function HallWorkspace({ screenId, userId, onBack }) {
   const screen = TV_SCREENS.find((item) => item.id === screenId);
   const hall = screenId !== 'shoe-area';
   const url = `${window.location.origin}/tv179/${screenId}`;
+  const loadBlocked = setup.started
+    ? 'End the stream before loading saved settings.'
+    : Object.keys(localStreams).length
+      ? 'Stop local sharing before loading saved settings.'
+      : '';
+  const readyToPresent = hasSceneContent(
+    form?.scenes.find((scene) => scene.id === form.active_scene_id),
+  );
   useRegisterAdminSave(setup.publish, setup.started && setup.dirty, 'Update live layout');
   return (
     <div className="stream-setup admin-tv-editor">
@@ -172,6 +181,23 @@ function HallWorkspace({ screenId, userId, onBack }) {
         <p>Loading stream settings…</p>
       ) : (
         <>
+          {hall && (
+            <StreamSettingsLibrary
+              value={data.settings}
+              onChange={(settings, template) => {
+                if (loadBlocked) return;
+                if (
+                  stage === 3 && setup.dirty &&
+                  !window.confirm('Replace this unpublished draft with saved settings?')
+                ) return;
+                setup.loadSettings(settings, template);
+              }}
+              templates={data.templates}
+              savedTemplate={setup.savedTemplate}
+              disabled={busy}
+              loadBlocked={loadBlocked}
+            />
+          )}
           <details className="admin-panel stream-address">
             <summary>Display webpage address</summary>
             <p>
@@ -197,13 +223,9 @@ function HallWorkspace({ screenId, userId, onBack }) {
           </details>
           {hall && data.presentation && (
             <section className="admin-panel stream-live-status" aria-label="Active stream session">
-              <h3>Stream session still active</h3>
-              <p>
-                {data.inputs?.length
-                  ? 'A source is registered. Check the receiving display to confirm its picture and sound.'
-                  : 'No camera or screen source is connected. If this stream uses one, reopen its input to share again.'}
-              </p>
               <div className="admin-actions">
+                <Radio size={18} aria-hidden="true" />
+                <strong>Stream still active</strong>
                 {!setup.started && (
                   <button className="admin-button" disabled={busy} onClick={setup.manageLive}>
                     Manage current stream
@@ -218,6 +240,14 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   {busy && setup.operation === 'end' ? 'Ending stream…' : 'End stream'}
                 </button>
               </div>
+              <details>
+                <summary>Source status</summary>
+                <p>
+                  {data.inputs?.length
+                    ? 'A source is registered. Check the receiving display to confirm its picture and sound.'
+                    : 'No camera or screen source is connected. Reopen its input to share again.'}
+                </p>
+              </details>
             </section>
           )}
           {hall && stage === 2 && (
@@ -260,20 +290,11 @@ function HallWorkspace({ screenId, userId, onBack }) {
                 </label>
                 <div className="admin-actions">
                   <button className="admin-button primary" type="submit">
-                    Arrange inputs <span aria-hidden="true">→</span>
+                    Choose input <span aria-hidden="true">→</span>
                   </button>
                 </div>
               </form>
             </section>
-          )}
-          {hall && stage === 2 && data.templates?.length > 0 && (
-            <StreamSettingsLibrary
-              value={data.settings}
-              onChange={setup.loadSettings}
-              templates={data.templates}
-              savedTemplate={setup.savedTemplate}
-              disabled={busy}
-            />
           )}
           {hall && stage === 3 && form && (
             <>
@@ -348,13 +369,13 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   {!setup.started && (
                     <button
                       className="admin-button stream-start"
-                      disabled={busy}
+                      disabled={busy || !readyToPresent}
                       aria-busy={busy && setup.operation === 'start'}
                       onClick={() =>
                         setup.publish().catch((error) => setup.setMessage(error.message))
                       }
                     >
-                      {busy && setup.operation === 'start' ? 'Starting stream…' : 'Start stream'}
+                      {busy && setup.operation === 'start' ? 'Starting…' : 'Start presenting'}
                     </button>
                   )}
                   {setup.started && setup.dirty && (
