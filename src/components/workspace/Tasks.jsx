@@ -6,6 +6,51 @@ export default function Tasks({ rows, notifications, reload, formId, onError }) 
   const [people, setPeople] = useState([]);
   const [assignee, setAssignee] = useState('');
   const [filter, setFilter] = useState('active');
+  const [totals, setTotals] = useState({ open: null, overdue: null, unread: null });
+  const [totalsError, setTotalsError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    setTotals({ open: null, overdue: null, unread: null });
+    setTotalsError('');
+    const taskCount = () => {
+      let query = supabase
+        .from('work_tasks')
+        .select('id', { count: 'exact', head: true })
+        .neq('status', 'done');
+      if (formId) query = query.eq('form_id', formId);
+      return query;
+    };
+    Promise.allSettled([
+      taskCount().abortSignal(controller.signal),
+      taskCount().lt('due_at', new Date().toISOString()).abortSignal(controller.signal),
+      supabase
+        .from('user_notifications')
+        .select('id', { count: 'exact', head: true })
+        .is('read_at', null)
+        .abortSignal(controller.signal),
+    ]).then((results) => {
+      if (!active) return;
+      const names = ['open', 'overdue', 'unread'];
+      const counts = Object.fromEntries(
+        results.map((result, index) => [
+          names[index],
+          result.status === 'fulfilled' &&
+          !result.value.error &&
+          typeof result.value.count === 'number'
+            ? result.value.count
+            : null,
+        ]),
+      );
+      setTotals(counts);
+      if (Object.values(counts).some((count) => count === null))
+        setTotalsError('Some totals could not be loaded. Refresh the workspace to try again.');
+    });
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [rows, notifications, formId]);
   useEffect(() => {
     let active = true;
     setPeople([]);
@@ -23,7 +68,8 @@ export default function Tasks({ rows, notifications, reload, formId, onError }) 
   }, [formId, onError]);
   const shown = rows.filter(
     (row) =>
-      filter === 'all' || (filter === 'done' ? row.status === 'done' : row.status !== 'done'),
+      (!formId || row.form_id === formId) &&
+      (filter === 'all' || (filter === 'done' ? row.status === 'done' : row.status !== 'done')),
   );
   const update = async (row, status) => {
     try {
@@ -39,22 +85,18 @@ export default function Tasks({ rows, notifications, reload, formId, onError }) 
     <>
       <div className="workspace-grid">
         <div className="workspace-card">
-          <h3>{rows.filter((r) => r.status !== 'done').length} open actions</h3>
-        </div>
-        <div className="workspace-card">
           <h3>
-            {
-              rows.filter(
-                (r) => r.status !== 'done' && r.due_at && Date.parse(r.due_at) < Date.now(),
-              ).length
-            }{' '}
-            overdue
+            {totals.open ?? '…'} open actions{formId ? ' for this form' : ''}
           </h3>
         </div>
         <div className="workspace-card">
-          <h3>{notifications.filter((r) => !r.read_at).length} unread alerts</h3>
+          <h3>{totals.overdue ?? '…'} overdue</h3>
+        </div>
+        <div className="workspace-card">
+          <h3>{totals.unread ?? '…'} unread alerts</h3>
         </div>
       </div>
+      {totalsError && <p role="status">{totalsError}</p>}
       <ActionForm
         title={formId ? 'Assign an action for this form' : 'Create an action'}
         button="Assign action"
@@ -106,7 +148,12 @@ export default function Tasks({ rows, notifications, reload, formId, onError }) 
           <option value="all">All</option>
         </select>
       </Field>
-      {shown.length === 0 && <p>No actions here.</p>}
+      <p className="workspace-meta">
+        Showing {shown.length} matching actions from the {rows.length} most recently loaded records.
+        Totals include all records you can access
+        {formId ? ' for the selected form; unread alerts include your whole account' : ''}.
+      </p>
+      {shown.length === 0 && <p>No matching actions in the loaded records.</p>}
       {shown.map((row) => (
         <article className="workspace-card" key={row.id}>
           <h3>{row.title}</h3>

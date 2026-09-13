@@ -10,7 +10,9 @@ export default function CustomFormsEmail({ submissionId, recipient = '', subject
   const [incoming, setIncoming] = useState([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [acknowledged, setAcknowledged] = useState(false);
   const attempt = useRef(crypto.randomUUID());
+  const attemptedSignature = useRef(null);
   const reload = useCallback(async () => {
     const { data, error } = await supabase.rpc('form_email_capability', {
       p_submission_id: submissionId,
@@ -68,12 +70,20 @@ export default function CustomFormsEmail({ submissionId, recipient = '', subject
       {enabled && show && (
         <form
           className="workspace-card workspace-form"
-          onChange={() => {
-            attempt.current = crypto.randomUUID();
+          onChange={(event) => {
+            if (event.target.name !== 'acknowledged') setAcknowledged(false);
           }}
           onSubmit={(event) => {
             event.preventDefault();
             const data = new FormData(event.currentTarget);
+            const signature = JSON.stringify([
+              String(data.get('recipient')).trim(),
+              String(data.get('subject')).trim(),
+              String(data.get('body')).trim(),
+            ]);
+            if (attemptedSignature.current !== null && attemptedSignature.current !== signature)
+              attempt.current = crypto.randomUUID();
+            attemptedSignature.current = signature;
             run(async () => {
               await checked(
                 supabase.rpc('queue_form_email', {
@@ -86,6 +96,8 @@ export default function CustomFormsEmail({ submissionId, recipient = '', subject
                 }),
               );
               attempt.current = crypto.randomUUID();
+              attemptedSignature.current = null;
+              setAcknowledged(false);
               setShow(false);
               setMessage('Email queued. Its delivery status is shown below.');
             });
@@ -108,8 +120,14 @@ export default function CustomFormsEmail({ submissionId, recipient = '', subject
               <textarea name="body" required rows={5} maxLength={6000} />
             </Field>
             <label>
-              <input name="acknowledged" type="checkbox" required /> I have checked the recipient
-              and message, and want to send this email.
+              <input
+                name="acknowledged"
+                type="checkbox"
+                required
+                checked={acknowledged}
+                onChange={(event) => setAcknowledged(event.target.checked)}
+              />{' '}
+              I have checked the recipient and message, and want to send this email.
             </label>
             <p className="workspace-meta">
               This also saves the reply in the portal. Delivery is confirmed separately below.

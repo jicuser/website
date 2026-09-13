@@ -20,7 +20,11 @@ test('FCM payload excludes private fields and arbitrary deep links', () => {
     assert.equal(serialised.includes(privateValue), false);
   assert.deepEqual(message.message.data, { notification_id: id, kind: 'task' });
   assert.equal(message.message.android.notification.tag, id);
-  for (const kind of ['form','fee']) assert.deepEqual(pushMessage({id,kind},'token').message.data,{notification_id:id,kind});
+  for (const kind of ['form', 'fee'])
+    assert.deepEqual(pushMessage({ id, kind }, 'token').message.data, {
+      notification_id: id,
+      kind,
+    });
   assert.throws(() => pushMessage({ id: 'bad', kind: 'task' }, 'token'), /Invalid/);
   assert.throws(() => pushMessage({ id, kind: 'arbitrary' }, 'token'), /Invalid/);
 });

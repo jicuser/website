@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
-import { validateAnswers, validateUpload, hasExpectedSignature, safeFilename, responsesCsv } from './validation.mjs';
+import { validateUpload, hasExpectedSignature, safeFilename, responsesCsv } from './validation.mjs';
 import { createZip } from './zip.mjs';
 import { validWorkerSecret } from '../push-worker/message.mjs';
 
@@ -94,9 +94,9 @@ Deno.serve(async (req) => {
       return form;
     };
     if (body.action === 'submit') {
-      // SQL repeats validation and version checks while locking the current definition.
-      const form = await getForm();
-      const answers = validateAnswers(form.schema, body.answers);
+      // The transactional SQL validator also recognizes an accepted retry after republishing.
+      if (typeof body.slug !== 'string' || body.slug.length > 80 || !Number.isInteger(body.version)) throw new RequestError('Choose a published form.');
+      const answers = body.answers;
       const uploads = body.uploads ?? [];
       if (!Array.isArray(uploads) || uploads.length > 5) throw new RequestError('Too many attachments.');
       const claims = [];

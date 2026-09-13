@@ -320,6 +320,11 @@ test('fees use exact pence and retain manual confirmation retry identity', async
   await page.getByLabel('I have checked that this payment was received.').check();
   await page.getByRole('button', { name: 'Record manual confirmation', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Try again.');
+  await expect(page.getByLabel('Amount received (£)', { exact: true })).toHaveAttribute(
+    'readonly',
+    '',
+  );
+  await expect(page.getByLabel('Receipt or bank reference')).toHaveAttribute('readonly', '');
   await page.getByRole('button', { name: 'Record manual confirmation', exact: true }).click();
   await expect.poll(() => confirmations.length).toBe(2);
   expect(confirmations[0].p_idempotency_key).toBe(confirmations[1].p_idempotency_key);
@@ -366,13 +371,11 @@ test('course upload removes an unattached object if metadata save fails', async 
     .locator('form')
     .filter({ has: page.getByRole('heading', { name: 'Add course material', exact: true }) });
   await editor.getByLabel('Title', { exact: true }).fill('Week one handout');
-  await editor
-    .getByLabel('Choose file', { exact: true })
-    .setInputFiles({
-      name: 'handout.pdf',
-      mimeType: 'application/pdf',
-      buffer: Buffer.from('%PDF-1.4\npreview'),
-    });
+  await editor.getByLabel('Choose file', { exact: true }).setInputFiles({
+    name: 'handout.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4\npreview'),
+  });
   await editor.getByRole('button', { name: 'Add material', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Metadata unavailable.');
   expect(uploaded).toHaveLength(1);
@@ -426,9 +429,155 @@ test('optional email requires recipient review and remains an explicit separate 
   await page
     .getByLabel('I have checked the recipient and message, and want to send this email.')
     .check();
+  await page.getByLabel('Email recipient', { exact: true }).fill('updated@example.org');
+  await expect(
+    page.getByLabel('I have checked the recipient and message, and want to send this email.'),
+  ).not.toBeChecked();
+  await page
+    .getByLabel('I have checked the recipient and message, and want to send this email.')
+    .check();
   await page.getByRole('button', { name: 'Queue this email', exact: true }).click();
   await expect.poll(() => queued.length).toBe(1);
   expect(queued[0].p_acknowledged).toBe(true);
-  expect(queued[0].p_recipient).toBe('example@example.org');
+  expect(queued[0].p_recipient).toBe('updated@example.org');
+  expect(errors).toEqual([]);
+});
+
+test('public draft clears when the signed-in identity changes', async ({ page }) => {
+  const errors = await setup(page, { signedIn: true });
+  await page.goto('/forms/volunteer-registration');
+  await page.getByLabel('Your name').fill('Private previous account');
+  await page.evaluate(async () => {
+    const { supabase } = await import('/src/lib/supabaseClient.js');
+    await supabase.auth.signOut({ scope: 'local' });
+  });
+  await expect(page.getByLabel('Your name')).toHaveValue('');
+  await expect(
+    page.getByText('Sign in before completing this form to keep replies in your account.'),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('clearing an in-flight attachment prevents its late completion from reattaching', async ({
+  page,
+}) => {
+  let finishStarted = false,
+    releaseFinish;
+  const gate = new Promise((resolve) => {
+    releaseFinish = resolve;
+  });
+  const submissions = [];
+  const errors = await setup(page, {
+    handle: async (path, body, route) => {
+      let data;
+      if (path.endsWith('/get_public_form'))
+        data = {
+          ...form,
+          schema: {
+            fields: [{ id: 'photo', label: 'Optional photograph', type: 'image', required: false }],
+          },
+        };
+      if (path.includes('/storage/v1/object/upload/sign/form-attachments'))
+        data = { Key: 'preview/path' };
+      if (path.endsWith('/custom-forms')) {
+        if (body.action === 'upload_prepare')
+          data = {
+            upload_id: responseId,
+            upload_token: 'preview-secret',
+            path: 'preview/path',
+            token: 'preview-upload-token',
+          };
+        if (body.action === 'upload_finish') {
+          finishStarted = true;
+          await gate;
+          data = { ok: true, id: responseId };
+        }
+        if (body.action === 'submit') {
+          submissions.push(body);
+          data = { ok: true, id: responseId };
+        }
+      }
+      if (data !== undefined) {
+        await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
+        return true;
+      }
+    },
+  });
+  await page.goto('/forms/volunteer-registration');
+  const input = page.getByLabel('Optional photograph');
+  await input.setInputFiles({
+    name: 'example.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from([
+      137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ]),
+  });
+  try {
+    await expect.poll(() => finishStarted).toBe(true);
+    await input.setInputFiles([]);
+  } finally {
+    releaseFinish();
+  }
+  await page.getByRole('button', { name: 'Send response', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Thank you' })).toBeVisible();
+  expect(submissions[0].answers).toEqual({});
+  expect(submissions[0].uploads).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test('action totals use server counts beyond loaded rows and preserve the selected form', async ({
+  page,
+}) => {
+  const heads = [];
+  const errors = await setup(page, {
+    signedIn: true,
+    handle: async (path, body, route) => {
+      const url = new URL(route.request().url());
+      if (route.request().method() === 'HEAD') {
+        heads.push(url);
+        const count = path.endsWith('/user_notifications')
+          ? 711
+          : url.searchParams.has('due_at')
+            ? 608
+            : 1203;
+        await route.fulfill({ status: 200, headers: { 'content-range': `0-0/${count}` } });
+        return true;
+      }
+      if (path.endsWith('/work_tasks')) {
+        await route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify([
+            { id: 'task-own', form_id: responseId, title: 'Selected form task', status: 'open' },
+            { id: 'task-other', form_id: formId, title: 'Different form task', status: 'open' },
+          ]),
+        });
+        return true;
+      }
+    },
+  });
+  await page.goto(`/portal?form=${responseId}`);
+  await expect(
+    page.getByRole('heading', { name: '1203 open actions for this form' }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: '608 overdue', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '711 unread alerts', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Selected form task', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Different form task', exact: true })).toHaveCount(
+    0,
+  );
+  expect(
+    heads
+      .filter((url) => url.pathname.endsWith('/work_tasks'))
+      .every((url) => url.searchParams.get('form_id') === `eq.${responseId}`),
+  ).toBe(true);
+  expect(
+    heads.some(
+      (url) =>
+        url.pathname.endsWith('/user_notifications') &&
+        url.searchParams.get('read_at') === 'is.null',
+    ),
+  ).toBe(true);
   expect(errors).toEqual([]);
 });

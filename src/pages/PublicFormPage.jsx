@@ -14,6 +14,7 @@ import '@/styles/custom-forms.css';
 
 export default function PublicFormPage() {
   const { slug } = useParams();
+  const auth = useAuth();
   if (import.meta.env.VITE_ENABLE_WORKSPACE !== 'true')
     return (
       <div className="community-workspace">
@@ -24,7 +25,13 @@ export default function PublicFormPage() {
         </div>
       </div>
     );
-  return <PublicForm key={slug} slug={slug} />;
+  if (auth.loading && !auth.user)
+    return (
+      <div className="community-workspace public-custom-form">
+        <p role="status">Loading form…</p>
+      </div>
+    );
+  return <PublicForm key={`${slug}:${auth.user?.id || 'anonymous'}`} slug={slug} />;
 }
 
 function PublicForm({ slug }) {
@@ -59,6 +66,7 @@ function PublicForm({ slug }) {
   }, [slug]);
 
   async function upload(field, file) {
+    activeUploads.current.delete(field.id);
     setAnswers((current) => {
       const next = { ...current };
       delete next[field.id];

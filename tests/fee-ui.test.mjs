@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { feeAmount, poundsToMinor } from '../src/lib/fees.js';
+import { feeAmount, feeWrite, poundsToMinor, uncertainFeeWrite } from '../src/lib/fees.js';
 
 test('payment entry converts decimal pounds exactly to integer pence', () => {
   assert.equal(poundsToMinor('12.05'), 1205);
@@ -14,4 +14,17 @@ test('payment entry converts decimal pounds exactly to integer pence', () => {
 test('readable balances respect currency minor units', () => {
   assert.equal(feeAmount(1205, 'GBP'), '£12.05');
   assert.equal(feeAmount(1205, 'JPY'), 'JP¥1,205');
+});
+
+test('fee retries distinguish an unconfirmed network/server result from a rejected request', async () => {
+  for (const status of [0, 400, 403, 408, 503]) {
+    await assert.rejects(
+      feeWrite(Promise.resolve({ status, error: { message: 'Rejected or unconfirmed' } })),
+      (error) => {
+        assert.equal(uncertainFeeWrite(error), status === 0 || status === 408 || status >= 500);
+        return true;
+      },
+    );
+  }
+  assert.equal(await feeWrite(Promise.resolve({ status: 200, data: 'receipt-id' })), 'receipt-id');
 });

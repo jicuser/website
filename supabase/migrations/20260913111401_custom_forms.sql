@@ -50,6 +50,7 @@ create index form_uploads_cleanup on private.form_uploads(expires_at) where subm
 create table private.custom_form_limits (
  source_key text not null, bucket timestamptz not null, action text not null, hits integer not null,
  primary key(source_key,bucket,action));
+create index custom_form_limits_expiry on private.custom_form_limits(bucket);
 create table private.custom_form_attempts (
  source_key text not null, attempt uuid not null, form_id uuid not null references public.custom_forms,
  submission_id uuid not null references public.form_submissions on delete cascade,
@@ -218,7 +219,7 @@ create function private.custom_form_rate(p_source_key text,p_action text,p_limit
  declare request_hits integer; window_bucket timestamptz=to_timestamp(floor(extract(epoch from now())/600)*600);
  begin
  if p_source_key is null or p_source_key !~ '^[a-f0-9]{64}$' then raise exception 'Invalid source'; end if;
- delete from private.custom_form_limits where custom_form_limits.bucket<now()-interval '1 day';
+ delete from private.custom_form_limits where (source_key,bucket,action) in(select source_key,bucket,action from private.custom_form_limits where bucket<now()-interval '1 day' order by bucket limit 1000);
  insert into private.custom_form_limits(source_key,bucket,action,hits) values(p_source_key,window_bucket,p_action,1)
  on conflict(source_key,bucket,action) do update set hits=custom_form_limits.hits+1 returning custom_form_limits.hits into request_hits;
  if request_hits>p_limit then raise exception 'submission_rate_limit'; end if;

@@ -19,3 +19,17 @@ export function feeAmount(minor, currency = 'GBP') {
     return `${Number(minor || 0)} minor units (${currency})`;
   }
 }
+
+export async function feeWrite(query) {
+  const result = await query;
+  if (result.error) {
+    const failure = new Error(result.error.message || 'The payment record could not be confirmed.');
+    failure.status = result.status;
+    throw failure;
+  }
+  return result.data;
+}
+
+export function uncertainFeeWrite(error) {
+  return !error?.status || error.status >= 500 || error.status === 408;
+}

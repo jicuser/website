@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { feeAmount, poundsToMinor } from '@/lib/fees';
+import { feeAmount, feeWrite, poundsToMinor, uncertainFeeWrite } from '@/lib/fees';
 import { checked, dateLabel, Field } from './shared';
 
 export default function FeeLedger({
@@ -16,6 +16,7 @@ export default function FeeLedger({
   const [page, setPage] = useState(0);
   const [outstanding, setOutstanding] = useState(false);
   const [create, setCreate] = useState(false);
+  const [createPending, setCreatePending] = useState(false);
   const createAttempt = useRef(crypto.randomUUID());
   const reload = useCallback(async () => {
     setLoading(true);
@@ -51,7 +52,7 @@ export default function FeeLedger({
           Refresh payments
         </button>
         {canManage && (formId || (studentId && courseId)) && (
-          <button disabled={busy} onClick={() => setCreate(!create)}>
+          <button disabled={busy || createPending} onClick={() => setCreate(!create)}>
             {create ? 'Close fee form' : 'Add fee request'}
           </button>
         )}
@@ -70,25 +71,28 @@ export default function FeeLedger({
           onSubmit={async (event) => {
             event.preventDefault();
             const data = new FormData(event.currentTarget);
+            let requestStarted = false;
             setBusy(true);
             setError('');
             try {
-              await checked(
-                supabase.rpc('create_fee_request', {
-                  p_title: String(data.get('title')).trim(),
-                  p_amount_minor: poundsToMinor(data.get('amount')),
-                  p_currency: 'GBP',
-                  p_form_id: formId,
-                  p_student_id: studentId,
-                  p_course_id: courseId,
-                  p_due_at: data.get('due') ? new Date(data.get('due')).toISOString() : null,
-                  p_idempotency_key: createAttempt.current,
-                }),
-              );
+              const args = {
+                p_title: String(data.get('title')).trim(),
+                p_amount_minor: poundsToMinor(data.get('amount')),
+                p_currency: 'GBP',
+                p_form_id: formId,
+                p_student_id: studentId,
+                p_course_id: courseId,
+                p_due_at: data.get('due') ? new Date(data.get('due')).toISOString() : null,
+                p_idempotency_key: createAttempt.current,
+              };
+              requestStarted = true;
+              await feeWrite(supabase.rpc('create_fee_request', args));
               createAttempt.current = crypto.randomUUID();
+              setCreatePending(false);
               setCreate(false);
               await reload();
             } catch (failure) {
+              setCreatePending(requestStarted && uncertainFeeWrite(failure));
               setError(failure.message || 'The fee request could not be saved.');
             } finally {
               setBusy(false);
@@ -97,16 +101,34 @@ export default function FeeLedger({
         >
           <fieldset disabled={busy}>
             <Field label="Fee description">
-              <input name="title" required maxLength={160} placeholder="Course fee" />
+              <input
+                name="title"
+                required
+                maxLength={160}
+                placeholder="Course fee"
+                readOnly={createPending}
+              />
             </Field>
             <Field label="Amount (£)">
-              <input name="amount" required inputMode="decimal" pattern="[0-9]+(\.[0-9]{1,2})?" />
+              <input
+                name="amount"
+                required
+                inputMode="decimal"
+                pattern="[0-9]+(\.[0-9]{1,2})?"
+                readOnly={createPending}
+              />
             </Field>
             <Field label="Payment due (your local time)">
-              <input name="due" type="datetime-local" />
+              <input name="due" type="datetime-local" readOnly={createPending} />
             </Field>
             <button>{busy ? 'Saving…' : 'Create fee request'}</button>
           </fieldset>
+          {createPending && (
+            <p role="status">
+              The result is not confirmed. Retry these same details to avoid creating another fee
+              request, or refresh payment records to check the result.
+            </p>
+          )}
         </form>
       )}
       <Field label="Show payment records">
@@ -170,6 +192,7 @@ function FeeRequest({ row, canManage, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [confirm, setConfirm] = useState(false);
+  const [confirmationPending, setConfirmationPending] = useState(false);
   const [voiding, setVoiding] = useState(false);
   const [reverse, setReverse] = useState(null);
   useEffect(() => {
@@ -220,8 +243,10 @@ function FeeRequest({ row, canManage, onChanged }) {
     try {
       await operation();
       await onChanged();
+      return { ok: true };
     } catch (failure) {
       setError(failure.message || 'The payment record could not be updated.');
+      return { ok: false, uncertain: uncertainFeeWrite(failure) };
     } finally {
       setBusy(false);
     }
@@ -247,7 +272,7 @@ function FeeRequest({ row, canManage, onChanged }) {
       {canManage && row.status !== 'void' && (
         <div className="workspace-actions">
           {row.outstanding_minor > 0 && row.currency === 'GBP' && (
-            <button disabled={busy} onClick={() => setConfirm(!confirm)}>
+            <button disabled={busy || confirmationPending} onClick={() => setConfirm(!confirm)}>
               {confirm ? 'Close receipt form' : 'Confirm a payment received'}
             </button>
           )}
@@ -262,7 +287,8 @@ function FeeRequest({ row, canManage, onChanged }) {
         <ConfirmReceipt
           row={row}
           busy={busy}
-          onConfirm={(args) => run(() => checked(supabase.rpc('confirm_fee_payment', args)))}
+          onPending={setConfirmationPending}
+          onConfirm={(args) => run(() => feeWrite(supabase.rpc('confirm_fee_payment', args)))}
         />
       )}
       {voiding && (
@@ -336,7 +362,8 @@ function FeeRequest({ row, canManage, onChanged }) {
             <summary>Staff audit trail</summary>
             {audit.map((event) => (
               <p key={event.id} className="workspace-meta">
-                {dateLabel(event.created_at)} · {event.action || event.kind} {event.reason || ''}
+                {dateLabel(event.created_at)} · {event.action || event.kind}{' '}
+                {event.details?.reason || event.reason || ''}
               </p>
             ))}
           </details>
@@ -347,13 +374,14 @@ function FeeRequest({ row, canManage, onChanged }) {
   );
 }
 
-function ConfirmReceipt({ row, busy, onConfirm }) {
+function ConfirmReceipt({ row, busy, onConfirm, onPending }) {
   const attempt = useRef(crypto.randomUUID());
   const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
   return (
     <form
       className="workspace-form"
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         setError('');
         const data = new FormData(event.currentTarget);
@@ -361,13 +389,17 @@ function ConfirmReceipt({ row, busy, onConfirm }) {
           const amount = poundsToMinor(data.get('amount'));
           if (amount > row.outstanding_minor)
             throw new Error('This amount exceeds the outstanding balance.');
-          onConfirm({
+          const result = await onConfirm({
             p_fee_id: row.id,
             p_amount_minor: amount,
             p_reference: String(data.get('reference')).trim(),
             p_note: String(data.get('note')).trim(),
             p_idempotency_key: attempt.current,
           });
+          if (!result.ok) {
+            setPending(result.uncertain);
+            onPending(result.uncertain);
+          }
         } catch (failure) {
           setError(failure.message);
         }
@@ -380,19 +412,26 @@ function ConfirmReceipt({ row, busy, onConfirm }) {
             required
             inputMode="decimal"
             defaultValue={(row.outstanding_minor / 100).toFixed(2)}
+            readOnly={pending}
           />
         </Field>
         <Field label="Receipt or bank reference">
-          <input name="reference" required maxLength={160} />
+          <input name="reference" required maxLength={160} readOnly={pending} />
         </Field>
         <Field label="Note visible with this receipt">
-          <textarea name="note" rows={2} maxLength={2000} />
+          <textarea name="note" rows={2} maxLength={2000} readOnly={pending} />
         </Field>
         <label>
           <input type="checkbox" required /> I have checked that this payment was received.
         </label>
         <button>{busy ? 'Saving…' : 'Record manual confirmation'}</button>
       </fieldset>
+      {pending && (
+        <p role="status">
+          The payment result is not confirmed. Retry these same details to avoid recording it twice,
+          or refresh payment records to check the result.
+        </p>
+      )}
       {error && <p role="alert">{error}</p>}
     </form>
   );
