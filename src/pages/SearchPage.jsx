@@ -31,7 +31,9 @@ export default function SearchPage() {
       <h1 id="search-title">Search the centre</h1>
       <p>Find prayer times, classes, services and community updates.</p>
       <form role="search" onSubmit={(event) => event.preventDefault()}>
-        <label htmlFor="site-search">What are you looking for?</label>
+        <label className="jic-prompt" htmlFor="site-search">
+          What are you looking for?
+        </label>
         <div className="jic-search-field" data-glass="dense">
           <Search size={22} aria-hidden="true" />
           <input

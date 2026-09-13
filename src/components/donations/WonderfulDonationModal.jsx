@@ -105,7 +105,7 @@ export default function WonderfulDonationModal({ open, onClose }) {
                   <p className="jic-popup-kicker">SUPPORT JIC</p>
                   <h2
                     id="jic-donation-title"
-                    className="jic-popup-title mt-1 text-xl font-semibold sm:text-2xl"
+                    className="jic-popup-title jic-prompt mt-1 text-xl font-semibold sm:text-2xl"
                   >
                     Donate to Jamatia Islamic Centre
                   </h2>
@@ -129,15 +129,14 @@ export default function WonderfulDonationModal({ open, onClose }) {
                     <div>
                       <strong className="jic-popup-title block text-base">Bank transfer</strong>
                       <span className="jic-popup-muted mt-1 block text-sm leading-6">
-                        Online donation options are being worked on. For now, you can donate
-                        directly to the mosque account below.
+                        Use the bank details below to donate directly to the mosque.
                       </span>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={copyAll}
-                    className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold"
+                    className="jic-prompt inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold"
                   >
                     {copied === 'all' ? <Check size={15} /> : <Copy size={15} />}
                     {copied === 'all' ? 'Copied' : 'Copy all'}

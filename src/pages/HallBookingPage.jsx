@@ -145,8 +145,8 @@ export default function HallBookingPage() {
 
         {!liveSchedule && !loading && (
           <div className="jic-hall-notice">
-            Live booking statuses are not published yet. Dates are shown as{' '}
-            <strong>Check availability</strong> until the hall-booking data source is connected.
+            Availability is currently unconfirmed. Please contact the centre about dates marked{' '}
+            <strong>Check availability</strong>.
           </div>
         )}
 

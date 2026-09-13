@@ -2,7 +2,6 @@ import React from 'react';
 import { BookOpen, FileText, Mail, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AboutSection from '@/components/sections/madrassah/AboutSection';
-import TestimonialsSection from '@/components/sections/madrassah/TestimonialsSection';
 import CallToActionSection from '@/components/sections/madrassah/CallToActionSection';
 
 const overviewTiles = [
@@ -63,7 +62,6 @@ export default function MadrassahPage() {
         </div>
       </section>
       <AboutSection />
-      <TestimonialsSection />
       <CallToActionSection />
     </div>
   );

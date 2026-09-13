@@ -123,7 +123,7 @@ function DeviceInput({
         {!sharing.stream && !sharing.busy && !occupied && capture !== 'camera' && (
           <button
             type="button"
-            className="admin-button"
+            className="admin-button primary"
             disabled={Boolean(busyMessage || screenProblem)}
             onClick={() => start('screen')}
           >
@@ -133,7 +133,7 @@ function DeviceInput({
         {!sharing.stream && !sharing.busy && !occupied && capture !== 'screen' && (
           <button
             type="button"
-            className="admin-button"
+            className={`admin-button ${capture === 'camera' ? 'primary' : ''}`}
             disabled={Boolean(busyMessage || cameraProblem)}
             onClick={() => start('camera')}
           >
@@ -187,11 +187,12 @@ function DeviceInput({
       </div>
       {allowJoin && joinOpen && (
         <section className="admin-panel">
-          <h4>Share as {sourceName}</h4>
+          <h4>
+            <span className="jic-prompt">Share as {sourceName}</span>
+          </h4>
           <p>
-            {setupOnly ? 'After you start the stream, open' : 'Open'} this link on the contributing
-            phone or laptop and sign in. Joining adds this source without changing your scene or the
-            other devices.
+            {setupOnly ? 'Start the stream, then open' : 'Open'} this link on the phone or laptop
+            you want to share from and sign in.
           </p>
           <label>
             Device sharing link
@@ -199,7 +200,7 @@ function DeviceInput({
           </label>
           <button
             type="button"
-            className="admin-button"
+            className="admin-button primary"
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(joinUrl);
@@ -218,8 +219,7 @@ function DeviceInput({
           {setupOnly
             ? 'Preview is ready. It goes live when you start the stream.'
             : 'Keep this page open while sharing.'}{' '}
-          Closing this dialog keeps capture active. Refreshing this page stops capture; you can
-          restart it here.
+          You can close this dialog. Refreshing the page stops sharing.
         </p>
       )}
       {sharing.stream && !embedded && (
@@ -239,13 +239,13 @@ function DeviceInput({
         <details className="admin-tv-help">
           <summary>Connection help</summary>
           <p>
-            Keep this page open while sharing. Closing this popup keeps capture active; refreshing
-            the page stops it.
+            Keep this page open while sharing. You can close this popup. Refreshing the page stops
+            sharing.
           </p>
           <p>
             {relayConfigured === true
               ? 'Both devices need an internet connection. A relay is configured for different networks.'
-              : 'Use the same Wi-Fi for testing. Guest networks may block connections; different networks may need a relay.'}
+              : 'Connect both devices to the same Wi-Fi. Guest networks may block sharing; different networks may need a relay.'}
           </p>
         </details>
       )}
@@ -311,13 +311,17 @@ export default function DeviceInputs({
   if (!sources.length || tvScene(settings) !== 'teaching')
     return (
       <section className="admin-panel">
-        <h3>Share from a device</h3>
+        <h3>
+          <span className="jic-prompt">Share from a device</span>
+        </h3>
         <p>The organiser needs to start a stream containing this camera or screen source first.</p>
       </section>
     );
   return (
     <section className="admin-panel">
-      <h3>Share from a device</h3>
+      <h3>
+        <span className="jic-prompt">Share from a device</span>
+      </h3>
       <p>Choose this device’s source below. Keep this page open while sharing.</p>
       {hasDraft && (
         <p>
@@ -328,7 +332,7 @@ export default function DeviceInputs({
       <p>
         {relayConfigured === true
           ? 'A relay is configured for different networks. Both devices still need an internet connection.'
-          : 'Use the same Wi-Fi for testing. Guest networks may block connections; different networks may need a relay.'}
+          : 'Connect both devices to the same Wi-Fi. Guest networks may block sharing; different networks may need a relay.'}
       </p>
       {controls}
       <p className="admin-tv-help">

@@ -30,10 +30,12 @@ export default function SessionOutput({ screenId }) {
   }
   return (
     <details className="admin-panel">
-      <summary>Go live on YouTube / TikTok</summary>
+      <summary>
+        <span className="jic-prompt">Go live on YouTube / TikTok</span>
+      </summary>
       <p>
-        This sends the finished display picture and sound to your channel. Camera and screen sharing
-        inside the mosque do not need a stream key. Keep your broadcasting laptop running.
+        Broadcast the finished display picture and sound to your channel from a desktop browser.
+        Keep your broadcasting laptop running.
       </p>
       <div className="admin-actions">
         <button className="admin-button" onClick={openTv}>
@@ -46,19 +48,19 @@ export default function SessionOutput({ screenId }) {
         the scene, because it would repeat its own picture and sound.
       </p>
       <p role="status">{message}</p>
-      <h4>YouTube / TikTok broadcast</h4>
+      <h4>
+        <span className="jic-prompt">YouTube / TikTok broadcast</span>
+      </h4>
       {!relay ? (
         <p>
-          Website broadcasting is not connected yet. A relay is the sending service that converts
-          the display picture and forwards it to YouTube or TikTok. It needs to be installed before
-          “Go live” can work. Your existing OBS computer can also capture the finished display view
-          and send it directly to YouTube.
+          Website broadcasting is not connected yet. A broadcast relay must be set up before you can
+          go live here. You can also use OBS to send the finished display view to YouTube.
         </p>
       ) : (
         <>
           <p>
-            Use the stream server and key from your platform’s Live Studio. A website cannot sign in
-            to those platforms on your behalf. TikTok must enable streaming access on your account.
+            Enter the stream server and key from your platform’s Live Studio. TikTok streaming
+            access must be enabled on your account.
           </p>
           {destinations.map((d, i) => (
             <fieldset key={i} disabled={broadcast.busy || broadcast.live}>
@@ -71,7 +73,7 @@ export default function SessionOutput({ screenId }) {
                 </select>
               </label>
               <label>
-                Stream server
+                <span className="jic-prompt">Stream server</span>
                 <input
                   value={d.url}
                   placeholder="rtmps://…"
@@ -80,7 +82,7 @@ export default function SessionOutput({ screenId }) {
                 />
               </label>
               <label>
-                Stream key
+                <span className="jic-prompt">Stream key</span>
                 <input
                   type="password"
                   autoComplete="new-password"
@@ -105,7 +107,7 @@ export default function SessionOutput({ screenId }) {
               {destinations.length === 1 ? 'Add second destination' : 'Remove second destination'}
             </button>
             <button
-              className="admin-button"
+              className={`admin-button ${broadcast.live ? 'stream-end' : 'stream-start'}`}
               disabled={
                 broadcast.busy || (!broadcast.live && !navigator.mediaDevices?.getDisplayMedia)
               }
@@ -124,9 +126,8 @@ export default function SessionOutput({ screenId }) {
         </>
       )}
       <p>
-        A stream key is a private code supplied by YouTube or TikTok, not by this website. For
-        YouTube, open YouTube Studio → Create → Go live → Stream, then copy the stream URL and key.
-        Use it only for the outgoing broadcast.
+        Find your stream server and key in your platform’s Live Studio. Keep the key private; it is
+        only needed to broadcast to your channel.
       </p>
       <a href="https://support.google.com/youtube/answer/2907883" target="_blank" rel="noreferrer">
         YouTube setup instructions ↗

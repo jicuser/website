@@ -117,8 +117,8 @@ export default function TileContentAdminPage() {
             </Link>
             <h1 className="text-2xl font-bold sm:text-3xl">Homepage tile content</h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-400">
-              Edit the text inside the four fixed homepage tiles. Images are optional; when removed,
-              the tile becomes the same translucent glass style as the header.
+              Edit the headings and descriptions on the homepage tiles. You can also add or remove a
+              picture for each tile.
             </p>
           </div>
           <button

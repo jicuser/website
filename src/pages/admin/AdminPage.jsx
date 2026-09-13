@@ -35,6 +35,7 @@ import { useAppearance } from '@/context/AppearanceContext';
 import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { displayTime } from '@/lib/timetable';
 import { fromDateTimeLocal, toDateTimeLocal } from '@/lib/dateTime';
+import { TEAM_GROUPS } from '@/lib/teamMembers';
 
 const input =
   'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-amber-500';
@@ -713,6 +714,7 @@ function LivestreamSection() {
 function TeamSection() {
   const blank = {
     name: '',
+    member_group: '',
     role_title: '',
     bio: '',
     image_url: '',
@@ -736,6 +738,9 @@ function TeamSection() {
   }, [load]);
   const save = useCallback(async () => {
     if (!form.name.trim()) throw new Error('Add a name first.');
+    if (!TEAM_GROUPS.some(({ value }) => value === form.member_group)) {
+      throw new Error('Choose a team section.');
+    }
     setBusy(true);
     try {
       let imageUrl = form.image_url;
@@ -791,6 +796,21 @@ function TeamSection() {
               value={form.role_title}
               onChange={(e) => setForm({ ...form, role_title: e.target.value })}
             />
+          </Field>
+          <Field title="Team section">
+            <select
+              required
+              className={input}
+              value={form.member_group}
+              onChange={(e) => setForm({ ...form, member_group: e.target.value })}
+            >
+              <option value="">Choose a section</option>
+              {TEAM_GROUPS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field title="Photo">
             <div className="flex gap-2">
@@ -870,13 +890,17 @@ function TeamSection() {
             <div className="flex-1">
               <div className="font-semibold">{row.name}</div>
               <div className="text-sm text-slate-500">{row.role_title}</div>
+              <div className="text-sm text-slate-500">
+                {TEAM_GROUPS.find(({ value }) => value === row.member_group)?.label ||
+                  'Choose a team section'}
+              </div>
             </div>
             <button
               disabled={busy}
               className={ghost}
               onClick={() => {
                 setEditing(row.id);
-                setForm({ ...blank, ...row });
+                setForm({ ...blank, ...row, member_group: row.member_group || '' });
                 setPhotoFile(null);
                 window.scrollTo({ top: 0 });
               }}

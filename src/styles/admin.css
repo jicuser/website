@@ -1403,6 +1403,13 @@ html:not(.dark) .managed-page-section-copy {
 .stream-setup {
   min-width: 0;
 }
+.stream-step-indicator {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+}
 .stream-setup > * + * {
   margin-top: 20px;
 }
@@ -1641,6 +1648,8 @@ html:not(.dark) .managed-page-section-copy {
   display: grid;
   gap: 10px;
   margin-top: 18px;
+  padding-inline-start: 14px;
+  border-inline-start: 3px solid var(--jic-gold);
 }
 .scene-selected-source > strong {
   overflow-wrap: anywhere;
@@ -1739,7 +1748,7 @@ html:not(.dark) .managed-page-section-copy {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }
-  .stream-start-bar .primary {
+  .stream-start-bar :is(.primary, .stream-start) {
     order: -1;
   }
   .admin-connection-form {

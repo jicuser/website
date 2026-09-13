@@ -154,7 +154,9 @@ export default function SceneEditor({
     <section className="admin-panel scene-editor" aria-labelledby={`${editorId}-heading`}>
       <div className="scene-heading">
         <div>
-          <h3 id={`${editorId}-heading`}>Arrange your scene</h3>
+          <h3 id={`${editorId}-heading`}>
+            <span className="jic-prompt">Arrange your scene</span>
+          </h3>
           <p>Choose how many inputs, then tap each + to select its type. Drag to move or resize.</p>
         </div>
         <span className="scene-count">Draft preview</span>
@@ -209,7 +211,7 @@ export default function SceneEditor({
           </select>
         </label>
         <label>
-          How many inputs?
+          <span className="jic-prompt">How many inputs?</span>
           <select
             disabled={disabled}
             value={scene.layers.length}
@@ -340,7 +342,9 @@ export default function SceneEditor({
         </div>
         {layer && (
           <div className="scene-selected-source" aria-label="Selected input controls">
-            <strong>{sourceLabel(layer)}</strong>
+            <strong>
+              <span className="jic-prompt">Selected input:</span> {sourceLabel(layer)}
+            </strong>
             <div className="scene-source-actions">
               {layer.type === 'input' && (
                 <button
@@ -355,7 +359,7 @@ export default function SceneEditor({
               )}
               <button
                 type="button"
-                className="admin-button"
+                className={`admin-button ${layer.type === 'empty' ? 'primary' : ''}`}
                 disabled={disabled}
                 onClick={() => edit(layer)}
               >

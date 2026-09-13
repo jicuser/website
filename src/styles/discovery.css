@@ -11,7 +11,8 @@
 }
 .jic-search-page label {
   display: block;
-  font-weight: 600;
+  font-size: 1.125rem;
+  font-weight: 700;
   margin-bottom: 10px;
 }
 .jic-search-field {
@@ -21,6 +22,17 @@
   padding: 6px 12px;
   border: 1px solid var(--jic-border);
   border-radius: 14px;
+}
+.jic-search-field:focus-within {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+.jic-search-field input:focus-visible {
+  outline: none;
+}
+.jic-search-field > svg {
+  flex-shrink: 0;
+  color: var(--jic-gold);
 }
 .jic-search-field input {
   flex: 1;
@@ -37,6 +49,10 @@
   margin-block: 20px;
   overflow-x: auto;
   padding-block: 4px 10px;
+}
+.jic-search-suggestions {
+  flex-wrap: wrap;
+  overflow: visible;
 }
 .jic-search-suggestions button,
 .jic-social-jump a {
@@ -67,6 +83,10 @@
 }
 .jic-search-results a > svg {
   flex-shrink: 0;
+}
+.jic-search-results strong,
+.jic-search-results a > svg {
+  color: var(--jic-gold);
 }
 .jic-search-results small,
 .jic-search-results strong {

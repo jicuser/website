@@ -41,6 +41,8 @@ The included `public/.htaccess` is copied into `dist` and provides SPA route fal
 
 ## 4. Smoke test after deploy
 
+Team categories require `supabase/migrations/20260913114538_team_member_groups.sql` before this frontend. It adds the optional `member_group` field using the existing team permissions. In Admin → Team, assign each profile to Founder members, Management committee, Trustees or Staff. Existing unassigned profiles remain visible under Our team until assigned.
+
 - `/` loads normally.
 - `/prayer-times` loads and shows database rows for today/month.
 - `/admin` redirects public users away.
