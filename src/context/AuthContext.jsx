@@ -31,7 +31,10 @@ export function AuthProvider({ children }) {
     }
     return data;
   }, []);
-  const signInMember = useCallback((email, password) => recovery.current.signIn(email, password), []);
+  const signInMember = useCallback(
+    (email, password) => recovery.current.signIn(email, password),
+    [],
+  );
   const signOut = useCallback(() => recovery.current.signOut(), []);
   const refreshProfile = useCallback(() => recovery.current.retry(), []);
   const { user, profile } = state;

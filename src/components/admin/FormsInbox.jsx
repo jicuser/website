@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -122,6 +123,11 @@ export default function FormsInbox() {
                   </div>
                 ))}
             </dl>
+            {import.meta.env.VITE_ENABLE_WORKSPACE === 'true' && (
+              <Link className="admin-button" to={`/portal?form=${encodeURIComponent(row.id)}`}>
+                Assign action
+              </Link>
+            )}
             <button
               className="admin-button"
               disabled={Boolean(busy)}

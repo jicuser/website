@@ -117,7 +117,9 @@ do $$ declare t text; begin
 end $$;
 grant select on public.learning_courses,public.learning_staff,public.learning_students,public.learning_enrolments,public.learning_sessions,public.learning_attendance,public.learning_records,public.learning_meetings,public.student_contributions,public.work_tasks,public.user_notifications,public.form_workflows to authenticated;
 grant insert,update,delete on public.learning_courses,public.learning_staff,public.learning_students,public.learning_enrolments,public.form_workflows to authenticated;
-grant insert,update on public.learning_sessions,public.learning_records to authenticated;
+grant insert on public.learning_sessions,public.learning_records to authenticated;
+grant update(starts_at,ends_at,title) on public.learning_sessions to authenticated;
+grant update(kind,title,body,published) on public.learning_records to authenticated;
 grant update(status,proposed_at) on public.learning_meetings to authenticated;
 grant update(title,body,published) on public.student_contributions to authenticated;
 grant update(status) on public.work_tasks to authenticated;

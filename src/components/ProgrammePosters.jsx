@@ -12,7 +12,9 @@ export default function ProgrammePosters() {
   const programmes = usePosters();
   const [selected, setSelected] = useState(null);
   const group = pathname === '/' ? 'home' : pathname.split('/')[1];
-  const posters = programmes.filter((item) => item.groups.includes(group) && (group !== 'education' || isAdultProgramme(item)));
+  const posters = programmes.filter(
+    (item) => item.groups.includes(group) && (group !== 'education' || isAdultProgramme(item)),
+  );
   if (!posters.length) return null;
   return (
     <>

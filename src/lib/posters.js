@@ -81,7 +81,10 @@ export function posterCatalogue(raw) {
       .map((p) => ({
         ...p,
         audience: p.audience || PROGRAMMES.find((item) => item.id === p.id)?.audience,
-        sessions: p.sessions || PROGRAMMES.find((item) => item.id === p.id && item.schedule === p.schedule)?.sessions || [],
+        sessions:
+          p.sessions ||
+          PROGRAMMES.find((item) => item.id === p.id && item.schedule === p.schedule)?.sessions ||
+          [],
         groups: Array.isArray(p.groups)
           ? p.groups.filter((group) => POSTER_DESTINATIONS.includes(group))
           : [],

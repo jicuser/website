@@ -8,3 +8,7 @@ verify_jwt = false
 [functions.submit-form]
 # The SDK supplies the public anon JWT; visitors need no account to submit.
 verify_jwt = true
+
+[functions.push-worker]
+# Scheduled server caller only; handler checks its dedicated secret before reading the queue.
+verify_jwt = false
