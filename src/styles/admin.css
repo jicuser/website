@@ -346,6 +346,147 @@ html:not(.dark) .admin-eyebrow {
 .admin-panel p {
   font-size: 13px;
 }
+/* Team profiles: a photo tile for both the editor and the saved member list. */
+.admin-team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+.admin-team-card,
+.admin-team-add {
+  min-width: 0;
+  margin: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.admin-team-card .admin-actions {
+  justify-content: center;
+}
+.admin-team-card h3 {
+  margin-top: 16px;
+}
+.admin-team-bio {
+  margin-block: 12px;
+  white-space: pre-line;
+}
+.admin-team-group {
+  margin-top: 12px;
+  font-size: 12px;
+}
+.admin-team-form {
+  width: min(100%, 560px);
+  margin: 20px auto;
+}
+.admin-team-form > h3 {
+  margin-bottom: 20px;
+  scroll-margin-top: 100px;
+}
+.admin-team-form > fieldset {
+  min-width: 0;
+  padding: 0;
+}
+.admin-team-form label > :is(input, textarea, select) {
+  margin-top: 6px;
+}
+.admin-team-form details > summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.admin-profile-photo-field {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  text-align: center;
+}
+.admin-profile-photo-field > p {
+  margin: 0;
+  font-size: 12px;
+}
+.admin-profile-photo-picker,
+.admin-profile-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 144px;
+  height: 144px;
+  padding: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--jic-bg-secondary);
+  color: var(--jic-gold);
+}
+.admin-profile-photo-picker {
+  position: relative;
+  gap: 8px;
+  border: 2px dashed var(--jic-gold);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.admin-profile-photo-picker img,
+.admin-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.admin-profile-photo-caption {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 9px 8px 15px;
+  background: #0c1930e6;
+  color: #fff;
+  font-size: 12px;
+}
+.admin-profile-avatar {
+  width: 112px;
+  height: 112px;
+  margin-inline: auto;
+}
+.admin-team-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 250px;
+  padding: 24px;
+  border: 2px dashed var(--jic-border);
+  border-radius: 22px;
+  background: var(--jic-surface);
+  color: var(--jic-gold);
+  cursor: pointer;
+}
+.admin-team-add .admin-profile-avatar {
+  border: 2px dashed currentColor;
+}
+.admin-team-add:hover,
+.admin-profile-photo-picker:hover {
+  border-color: var(--jic-gold);
+}
+.admin-team-add:disabled,
+.admin-profile-photo-picker:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+@media (max-width: 900px) {
+  .admin-team-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .admin-team-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-team-form .admin-actions > button {
+    flex: 1 1 auto;
+  }
+}
 .admin-section-title {
   display: flex;
   gap: 14px;
