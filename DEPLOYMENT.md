@@ -41,7 +41,7 @@ The included `public/.htaccess` is copied into `dist` and provides SPA route fal
 
 ## 4. Smoke test after deploy
 
-Team categories require `supabase/migrations/20260913114538_team_member_groups.sql` before this frontend. It adds the optional `member_group` field using the existing team permissions. In Admin → Team, assign each profile to Founder members, Management committee, Trustees or Staff. Existing unassigned profiles remain visible under Our team until assigned.
+Team categories require `supabase/migrations/20260913114724_team_member_groups.sql` before this frontend. It adds the optional `member_group` field using the existing team permissions. In Admin → Team, assign each profile to Founder members, Management committee, Trustees or Staff. Existing unassigned profiles remain visible under Our team until assigned.
 
 - `/` loads normally.
 - `/prayer-times` loads and shows database rows for today/month.
@@ -84,3 +84,5 @@ The connected Supabase project's security advisor still reports leaked-password 
 ## Permanent TV address and setup code
 
 Apply `supabase/migrations/20260912083609_tv_browser_setup.sql` before the matching `tv-control` function and frontend. It adds private browser setup and saved-layout acknowledgements. Existing approved TVs keep working; new TVs enter their six-digit code in Admin. See [TV operation](docs/tv-display.md). Normal and Class / Teach are the only modes; an empty or expired class resolves to Normal.
+
+The team-group migration is already present in the connected JIC database under version20260913114724. Its repository filename was aligned after comparing the stored SQL byte-for-byte (apart from the trailing newline); do not run the same ALTER again. The six community workspace migrations are separate and remain pending.
