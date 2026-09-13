@@ -212,9 +212,11 @@ export default function ContentEditorDialog({
         <>
           <header className="scene-heading">
             <h3 id={`${editorId}-dialog-title`}>
-              {draft.type === 'empty'
-                ? 'Select input type'
-                : contentTypes.find(([type]) => type === typeOf(draft))?.[1] || 'Input settings'}
+              <span className="jic-prompt">
+                {draft.type === 'empty'
+                  ? 'Select input type'
+                  : contentTypes.find(([type]) => type === typeOf(draft))?.[1] || 'Input settings'}
+              </span>
             </h3>
             {draft.type === 'input' && connectionOpen && (
               <button
@@ -239,7 +241,7 @@ export default function ContentEditorDialog({
           {!connectionOpen && (
             <form ref={form} className="scene-dialog-form" onSubmit={saveContent} noValidate>
               <label>
-                Input type
+                <span className="jic-prompt">Input type</span>
                 <select
                   value={typeOf(draft)}
                   disabled={disabled}
@@ -264,11 +266,13 @@ export default function ContentEditorDialog({
                 <>
                   {['youtube', 'camera', 'video'].includes(draft.type) && (
                     <label>
-                      {draft.type === 'youtube'
-                        ? 'YouTube link'
-                        : draft.type === 'video'
-                          ? 'Saved video link'
-                          : 'CCTV stream address'}
+                      <span className="jic-prompt">
+                        {draft.type === 'youtube'
+                          ? 'YouTube link'
+                          : draft.type === 'video'
+                            ? 'Saved video link'
+                            : 'CCTV stream address'}
+                      </span>
                       <input
                         type="url"
                         disabled={disabled}
@@ -311,7 +315,9 @@ export default function ContentEditorDialog({
                   )}
                   {['poster', 'poster-next'].includes(draft.type) && (
                     <fieldset className="scene-posters" disabled={disabled}>
-                      <legend>Choose posters</legend>
+                      <legend>
+                        <span className="jic-prompt">Choose posters</span>
+                      </legend>
                       <p>Tick one to keep it on screen, or several to rotate.</p>
                       <div className="admin-poster-picker">
                         {posters.map((poster) => (
@@ -367,13 +373,13 @@ export default function ContentEditorDialog({
                   {draft.type === 'input' && (
                     <>
                       <label>
-                        Device name (required)
+                        <span className="jic-prompt">Device name (required)</span>
                         <input
                           disabled={disabled}
                           required
                           value={draft.name || ''}
                           maxLength={60}
-                          placeholder="e.g. Haider’s iPhone or Classroom laptop"
+                          placeholder="e.g. Hall camera or Classroom laptop"
                           {...fieldProps('name')}
                           onChange={(event) => changeDraft({ ...draft, name: event.target.value })}
                         />
@@ -433,7 +439,7 @@ export default function ContentEditorDialog({
                   )}
                   {draft.type === 'text' && (
                     <label>
-                      Notice
+                      <span className="jic-prompt">Notice</span>
                       <textarea
                         rows={4}
                         required

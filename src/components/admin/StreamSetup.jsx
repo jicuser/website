@@ -53,11 +53,11 @@ export default function StreamSetup() {
     );
   return (
     <section className="stream-setup admin-panel">
-      <span className="admin-eyebrow">STEP 1 OF 3</span>
-      <h2>Choose your stream</h2>
-      <p>
-        Each hall has one permanent display webpage. Build your scenes here, then start when ready.
-      </p>
+      <span className="admin-eyebrow stream-step-indicator jic-prompt">STEP 1 OF 3</span>
+      <h2>
+        <span className="jic-prompt">Choose your stream</span>
+      </h2>
+      <p>Choose the hall where you want to show your stream.</p>
       <label>
         Hall stream
         <select value={selected} onChange={(event) => setSelected(event.target.value)}>
@@ -80,7 +80,7 @@ export default function StreamSetup() {
             setOpenHall(selected);
           }}
         >
-          Next
+          Open stream setup <span aria-hidden="true">→</span>
         </button>
       </div>
     </section>
@@ -113,7 +113,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
     <div className="stream-setup admin-tv-editor">
       <div className="stream-setup-heading">
         <div>
-          <span className="admin-eyebrow">
+          <span className="admin-eyebrow stream-step-indicator jic-prompt">
             {hall ? `STEP ${stage} OF 3` : 'BACKGROUND DISPLAY'}
           </span>
           <h2>{screen.label}</h2>
@@ -189,7 +189,9 @@ function HallWorkspace({ screenId, userId, onBack }) {
           </details>
           {hall && stage === 2 && (
             <section className="admin-panel">
-              <h3>Name your stream</h3>
+              <h3>
+                <span className="jic-prompt">Name your stream</span>
+              </h3>
               <form
                 noValidate
                 onSubmit={(event) => {
@@ -205,7 +207,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
               >
                 <p>You can change this name when saving settings after the stream ends.</p>
                 <label>
-                  Stream name (required)
+                  <span className="jic-prompt">Stream name (required)</span>
                   <input
                     value={setup.streamName}
                     required
@@ -225,7 +227,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
                 </label>
                 <div className="admin-actions">
                   <button className="admin-button primary" type="submit">
-                    Next · arrange inputs
+                    Arrange inputs <span aria-hidden="true">→</span>
                   </button>
                 </div>
               </form>
@@ -297,7 +299,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   />
                   Mute display audio
                 </label>
-                <span>
+                <span className={setup.dirty || !setup.started ? 'jic-prompt' : undefined}>
                   {setup.started
                     ? setup.dirty
                       ? 'Layout has unpublished changes.'

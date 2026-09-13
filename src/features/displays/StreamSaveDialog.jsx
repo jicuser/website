@@ -83,12 +83,16 @@ export default function StreamSaveDialog({
       }}
     >
       <h3 id={`${id}-title`}>
-        {ended ? 'Stream ended. Save its settings?' : 'Save stream settings'}
+        <span className="jic-prompt">
+          {ended ? 'Stream ended. Save its settings?' : 'Save stream settings'}
+        </span>
       </h3>
       {ended && <p>Connected screens are returning to the normal display.</p>}
-      <p>Keep all scenes, input details, layouts and audio settings for next time.</p>
+      <p>Save this setup to use again.</p>
       <form onSubmit={save} noValidate>
-        <label htmlFor={`${id}-name`}>Stream name (required)</label>
+        <label htmlFor={`${id}-name`}>
+          <span className="jic-prompt">Stream name (required)</span>
+        </label>
         <input
           id={`${id}-name`}
           ref={nameField}

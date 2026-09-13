@@ -77,7 +77,9 @@ export default function TvConnections({ screenId, data, setData, onRefresh, run,
 
   return (
     <section className="admin-panel admin-session-panel" aria-label="Stream displays and viewers">
-      <h3>Connect a display</h3>
+      <h3>
+        <span className="jic-prompt">Connect a display</span>
+      </h3>
       {presentation ? (
         <>
           <p>
@@ -86,7 +88,7 @@ export default function TvConnections({ screenId, data, setData, onRefresh, run,
           </p>
           <form className="admin-connection-form" noValidate onSubmit={connectDisplay}>
             <label htmlFor={`${fieldId}-code`}>
-              Display code (required)
+              <span className="jic-prompt">Display code (required)</span>
               <input
                 id={`${fieldId}-code`}
                 ref={codeField}
@@ -111,7 +113,7 @@ export default function TvConnections({ screenId, data, setData, onRefresh, run,
               )}
             </label>
             <label htmlFor={`${fieldId}-name`}>
-              Display name (required)
+              <span className="jic-prompt">Display name (required)</span>
               <input
                 id={`${fieldId}-name`}
                 ref={displayField}
@@ -133,7 +135,7 @@ export default function TvConnections({ screenId, data, setData, onRefresh, run,
               </small>
             )}
             <div className="admin-actions">
-              <button type="submit" className="admin-button" disabled={busy}>
+              <button type="submit" className="admin-button primary" disabled={busy}>
                 <Monitor size={18} aria-hidden="true" /> Connect display
               </button>
             </div>
@@ -252,7 +254,7 @@ export default function TvConnections({ screenId, data, setData, onRefresh, run,
           }}
         >
           <label>
-            Display name (required)
+            <span className="jic-prompt">Display name (required)</span>
             <input
               ref={nameField}
               value={editing.name}
@@ -273,7 +275,7 @@ export default function TvConnections({ screenId, data, setData, onRefresh, run,
             )}
           </label>
           <div className="admin-actions">
-            <button className="admin-button" disabled={busy}>
+            <button className="admin-button primary" disabled={busy}>
               Save name
             </button>
             <button

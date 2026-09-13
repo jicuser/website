@@ -22,8 +22,8 @@ const AboutPage = () => {
                   About Jamatia Islamic Centre
                 </h1>
                 <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
-                  Founded with a vision to serve the Muslim community and promote Islamic values,
-                  Jamatia Islamic Centre has been a cornerstone of spiritual guidance and community
+                  Jamatia Islamic Centre was founded by its founder members in 1979 and established
+                  in 1981. Our centre brings the community together for worship, learning and
                   service.
                 </p>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -70,7 +70,7 @@ const AboutPage = () => {
               <img
                 src={IMAGES.aboutHistory}
                 className="w-full h-auto rounded-lg shadow-lg object-cover aspect-[16/9]"
-                alt="Historical photo of Jamatia Islamic Centre"
+                alt="Aerial view of Jamatia Islamic Centre"
               />
             </motion.div>
 
@@ -81,22 +81,15 @@ const AboutPage = () => {
               transition={{ duration: 0.5 }}
             >
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                From Small Beginnings
+                Founded in 1979. Established in 1981.
               </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Established in 1985, Jamatia Islamic Centre began as a small prayer room serving a
-                handful of Muslim families in the area. Through dedication and community support, it
-                has grown into a comprehensive Islamic center.
+                Our founder members began Jamatia Islamic Centre in 1979. The centre was established
+                in 1981, laying the foundation for the masjid and community we serve today.
               </p>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                In 1995, we moved to our current location and expanded our services to include
-                educational programs, community outreach, and social services. The center underwent
-                major renovations in 2010 to accommodate our growing congregation.
-              </p>
-              <p className="text-gray-600 dark:text-gray-300">
-                Today, Jamatia Islamic Centre stands as a beacon of Islamic knowledge and community
-                service, welcoming hundreds of worshippers each week and offering a wide range of
-                programs for all ages.
+                Today, the centre continues to provide a place for prayer, Islamic education and
+                community activities.
               </p>
             </motion.div>
           </div>
@@ -168,18 +161,18 @@ const AboutPage = () => {
                     <h3 className="text-2xl font-bold">Our Vision</h3>
                   </div>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    To be a leading Islamic center that inspires spiritual growth, promotes
+                    To be a leading Islamic centre that inspires spiritual growth, promotes
                     educational excellence, and serves as a model of community engagement and
                     interfaith harmony.
                   </p>
                   <ul className="space-y-2 text-gray-600 dark:text-gray-300">
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
-                      Become a center of excellence for Islamic education
+                      Become a centre of excellence for Islamic education
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
-                      Develop programs that address contemporary challenges
+                      Develop programmes that address contemporary challenges
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
@@ -237,7 +230,8 @@ const AboutPage = () => {
               {
                 icon: <Award className="h-10 w-10 text-primary" />,
                 title: 'Excellence & Integrity',
-                description: 'Striving for the highest standards in all our programs and services.',
+                description:
+                  'Striving for the highest standards in all our programmes and services.',
               },
               {
                 icon: <Globe className="h-10 w-10 text-primary" />,

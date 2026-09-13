@@ -40,8 +40,8 @@ export default function EducationPage() {
               Learn at Jamatia Islamic Centre
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-              Choose an education area below. Each section keeps its own tabs visible so you can
-              move between related pages without going back to the main menu.
+              Explore our Madrassah, classes and courses, or find enrolment information and student
+              resources.
             </p>
           </div>
 

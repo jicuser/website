@@ -25,6 +25,7 @@
 
 - Keep component geometry and its media queries together.
 - Use theme tokens for shared colours. Glass changes the background, not the opacity of text or images.
+- Use `jic-prompt` for the current question or next-step label. It follows the readable gold accent in both themes and glass modes; keep explanatory text in the normal text colour. Primary actions use existing button variants, with green for starting a stream and red for ending it.
 - `!important` is retained where a shared style intentionally replaces a page's Tailwind utilities. The public header and section tabs do not need it.
 - The TV shares prayer data and markup but has deliberate screen-size styles in `tv.css`.
 - Only the fixed prayer strip is measured by `ResizeObserver`; the unboxed logo and section tabs scroll with the page. On mobile, the script-style Menu word beside the logo opens a compact main-page list. Back, burger, Donate and theme actions stay at the bottom; the burger opens a full-page text directory. Do not add fixed top padding to every `main` element.

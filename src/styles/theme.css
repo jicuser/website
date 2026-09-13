@@ -282,6 +282,7 @@ footer {
 }
 
 html[data-theme] .text-primary,
+html[data-theme] .jic-prompt,
 html[data-theme] .hover\:text-primary:hover {
   color: var(--jic-gold) !important;
 }
