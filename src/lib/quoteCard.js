@@ -1,9 +1,19 @@
 export function safeQuoteSource(value) {
-  try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password ? url.href : null; } catch { return null; }
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password ? url.href : null;
+  } catch {
+    return null;
+  }
 }
-const escape = (value) => String(value).replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[char]);
+const escape = (value) =>
+  String(value).replace(
+    /[<>&"']/g,
+    (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[char],
+  );
 export function quoteCardSvg(quote, { title, speaker }) {
-  if (!quote?.text || quote.text.length > 400) throw Error('Choose a reviewed quote of up to 400 characters.');
+  if (!quote?.text || quote.text.length > 400)
+    throw Error('Choose a reviewed quote of up to 400 characters.');
   const lines = [];
   for (const word of quote.text.split(/\s+/)) {
     if (!lines.length || `${lines.at(-1)} ${word}`.length > 37) lines.push(word);
@@ -19,14 +29,27 @@ export async function downloadQuoteCard(quote, talk, format = 'png') {
   try {
     if (format === 'png') {
       const image = new Image();
-      await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; image.src = source; });
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = reject;
+        image.src = source;
+      });
       const canvas = document.createElement('canvas');
-      canvas.width = image.width; canvas.height = image.height;
+      canvas.width = image.width;
+      canvas.height = image.height;
       canvas.getContext('2d').drawImage(image, 0, 0);
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw Error('Could not create quote image.');
       target = URL.createObjectURL(blob);
     }
-    const anchor = document.createElement('a'); anchor.href = target; anchor.download = `talk-quote.${format}`; anchor.click();
-  } finally { setTimeout(() => { URL.revokeObjectURL(source); if (target !== source) URL.revokeObjectURL(target); }, 5000); }
+    const anchor = document.createElement('a');
+    anchor.href = target;
+    anchor.download = `talk-quote.${format}`;
+    anchor.click();
+  } finally {
+    setTimeout(() => {
+      URL.revokeObjectURL(source);
+      if (target !== source) URL.revokeObjectURL(target);
+    }, 5000);
+  }
 }

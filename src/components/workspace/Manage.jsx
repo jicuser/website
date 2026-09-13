@@ -218,6 +218,101 @@ export default function Manage({ data, reload, onError }) {
           </ActionForm>
         </details>
       ))}
+      <h2>Additional guardians</h2>
+      <ActionForm
+        title="Link another parent or guardian"
+        onSubmit={async (form) => {
+          await checked(
+            supabase
+              .from('learning_guardians')
+              .insert({
+                student_id: form.get('student'),
+                user_id: form.get('user'),
+                relationship: form.get('relationship'),
+              })
+              .select('user_id')
+              .single(),
+          );
+          await reload();
+        }}
+      >
+        <Field label="Student">
+          <select name="student" required>
+            <Options rows={data.learning_students} />
+          </select>
+        </Field>
+        <Field label="Guardian account">
+          <select name="user" required>
+            <Options rows={people} />
+          </select>
+        </Field>
+        <TextField
+          name="relationship"
+          label="Relationship"
+          defaultValue="Guardian"
+          maxLength={80}
+        />
+      </ActionForm>
+      {(data.learning_guardians || []).map((row) => (
+        <article className="workspace-card" key={`${row.student_id}-${row.user_id}`}>
+          <p>
+            {data.learning_students.find((s) => s.id === row.student_id)?.display_name} ·{' '}
+            {people.find((p) => p.id === row.user_id)?.display_name || 'Account'} ·{' '}
+            {row.relationship}
+          </p>
+          <button
+            onClick={() =>
+              remove('learning_guardians', { student_id: row.student_id, user_id: row.user_id })
+            }
+          >
+            Remove additional link
+          </button>
+        </article>
+      ))}
+      <h2>Department heads</h2>
+      <ActionForm
+        title="Assign a department head"
+        onSubmit={async (form) => {
+          await checked(
+            supabase
+              .from('learning_department_heads')
+              .insert({ department: form.get('department'), user_id: form.get('user') })
+              .select('user_id')
+              .single(),
+          );
+          await reload();
+        }}
+      >
+        <Field label="Area">
+          <select name="department">
+            <option value="adult">Adult courses & classes</option>
+            <option value="madrassah">Madrassah</option>
+          </select>
+        </Field>
+        <Field label="Head teacher">
+          <select name="user" required>
+            <Options rows={people} />
+          </select>
+        </Field>
+      </ActionForm>
+      {(data.learning_department_heads || []).map((row) => (
+        <article className="workspace-card" key={`${row.department}-${row.user_id}`}>
+          <p>
+            {row.department === 'adult' ? 'Adult courses & classes' : 'Madrassah'} ·{' '}
+            {people.find((p) => p.id === row.user_id)?.display_name || 'Account'}
+          </p>
+          <button
+            onClick={() =>
+              remove('learning_department_heads', {
+                department: row.department,
+                user_id: row.user_id,
+              })
+            }
+          >
+            Remove head assignment
+          </button>
+        </article>
+      ))}
       <h2>Teaching assignments</h2>
       {data.learning_staff.map((row) => (
         <article className="workspace-card" key={`${row.course_id}-${row.user_id}`}>

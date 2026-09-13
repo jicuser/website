@@ -15,6 +15,10 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 4337',
     url: 'http://127.0.0.1:4337',
-    env: { VITE_ENABLE_WORKSPACE: 'true', VITE_SUPABASE_URL: 'http://127.0.0.1:4337/preview-api', VITE_SUPABASE_ANON_KEY: 'local-browser-test' },
+    env: {
+      VITE_ENABLE_WORKSPACE: 'true',
+      VITE_SUPABASE_URL: 'http://127.0.0.1:4337/preview-api',
+      VITE_SUPABASE_ANON_KEY: 'local-browser-test',
+    },
   },
 });

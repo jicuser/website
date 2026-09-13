@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import LearningResources from './LearningResources';
+import FeeLedger from './FeeLedger';
 import { supabase } from '@/lib/supabaseClient';
 import { ActionForm, Field, Select, TextField, checked, dateLabel } from './shared';
 
@@ -6,6 +8,7 @@ export default function Learning({ data, auth, reload, onError }) {
   const [department, setDepartment] = useState('adult');
   const [courseId, setCourseId] = useState('');
   const [studentId, setStudentId] = useState('');
+  const [recordKind, setRecordKind] = useState('progress');
   const courses = data.learning_courses.filter((row) => row.department === department);
   const course = courses.find((row) => row.id === courseId);
   const students = data.learning_students.filter((student) =>
@@ -16,13 +19,21 @@ export default function Learning({ data, auth, reload, onError }) {
   const teacher = Boolean(
     course &&
     (auth.isOwner ||
+      (data.learning_department_heads || []).some(
+        (row) => row.department === course.department && row.user_id === auth.user.id,
+      ) ||
       data.learning_staff.some(
         (row) => row.course_id === course.id && row.user_id === auth.user.id,
       )),
   );
   const ownStudent = students.some(
     (row) =>
-      row.id === studentId && (row.user_id === auth.user.id || row.guardian_id === auth.user.id),
+      row.id === studentId &&
+      (row.user_id === auth.user.id ||
+        row.guardian_id === auth.user.id ||
+        (data.learning_guardians || []).some(
+          (g) => g.student_id === row.id && g.user_id === auth.user.id,
+        )),
   );
   const records = data.learning_records.filter(
     (row) => row.course_id === course?.id && (!studentId || row.student_id === studentId),
@@ -91,6 +102,7 @@ export default function Learning({ data, auth, reload, onError }) {
         <>
           <h2>{course.title}</h2>
           <p>{course.description}</p>
+          <LearningResources key={course.id} courseId={course.id} canTeach={teacher} />
           <h2>Progress, plans & assessments</h2>
           {records.length === 0 && <p>No learning records to show.</p>}
           {records.map((record) => (
@@ -101,6 +113,39 @@ export default function Learning({ data, auth, reload, onError }) {
               </p>
               <h3>{record.title}</h3>
               <p>{record.body}</p>
+              {record.score != null && (
+                <p>
+                  Mark: {record.score} / {record.max_score}
+                </p>
+              )}
+              {record.due_on && <p>Target date: {record.due_on}</p>}
+              {record.kind === 'plan' && (
+                <>
+                  <p>
+                    {record.completed_at
+                      ? `Completed ${dateLabel(record.completed_at)}`
+                      : 'In progress'}
+                  </p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await checked(
+                          supabase.rpc('set_learning_plan_complete', {
+                            p_id: record.id,
+                            p_complete: !record.completed_at,
+                          }),
+                        );
+                        await reload();
+                      } catch (error) {
+                        onError(error.message);
+                      }
+                    }}
+                  >
+                    {record.completed_at ? 'Reopen plan' : 'Mark plan complete'}
+                  </button>
+                </>
+              )}
+
               {teacher && (
                 <button
                   onClick={() =>
@@ -126,6 +171,15 @@ export default function Learning({ data, auth, reload, onError }) {
                       kind: form.get('kind'),
                       title: form.get('title'),
                       body: form.get('body'),
+                      due_on: form.get('due') || null,
+                      score:
+                        form.get('kind') === 'assessment' && form.get('score') !== ''
+                          ? Number(form.get('score'))
+                          : null,
+                      max_score:
+                        form.get('kind') === 'assessment' && form.get('maximum') !== ''
+                          ? Number(form.get('maximum'))
+                          : null,
                       published: false,
                     })
                     .select('id')
@@ -145,13 +199,40 @@ export default function Learning({ data, auth, reload, onError }) {
                 </select>
               </Field>
               <Field label="Type">
-                <select name="kind">
+                <select
+                  name="kind"
+                  value={recordKind}
+                  onChange={(e) => setRecordKind(e.target.value)}
+                >
                   {['progress', 'plan', 'assessment'].map((kind) => (
                     <option key={kind}>{kind}</option>
                   ))}
                 </select>
               </Field>
               <TextField label="Title" name="title" />
+              {recordKind === 'assessment' && (
+                <div className="workspace-grid">
+                  <TextField
+                    name="score"
+                    label="Mark (optional)"
+                    type="number"
+                    min="0"
+                    max="1000000"
+                    step="0.01"
+                    required={false}
+                  />
+                  <TextField
+                    name="maximum"
+                    label="Out of (required with mark)"
+                    type="number"
+                    min="0.01"
+                    max="1000000"
+                    step="0.01"
+                    required={false}
+                  />
+                </div>
+              )}
+              <TextField name="due" label="Target date (optional)" type="date" required={false} />
               <Field label="Notes or marking">
                 <textarea name="body" required maxLength={10000} rows={5} />
               </Field>
@@ -215,6 +296,14 @@ export default function Learning({ data, auth, reload, onError }) {
                 required={false}
               />
             </ActionForm>
+          )}
+          {studentId && (
+            <FeeLedger
+              key={`${studentId}-${course.id}`}
+              studentId={studentId}
+              courseId={course.id}
+              canManage={teacher}
+            />
           )}
           <h2>Meetings</h2>
           {meetings.length === 0 && <p>No meetings requested.</p>}

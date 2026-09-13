@@ -107,7 +107,7 @@ create function private.validate_custom_schema(p_schema jsonb) returns void lang
  if jsonb_array_length(p_schema->'fields') not between 1 and 40 then raise exception 'Provide 1 to 40 fields'; end if;
  for field in select value from jsonb_array_elements(p_schema->'fields') loop
  id=field->>'id'; kind=field->>'type';
- if jsonb_typeof(field)<>'object' or id is null or id !~ '^[a-z][a-z0-9_]{0,39}$' or id=any(ids) or kind is null or kind<>all(array['text','textarea','email','phone','number','date','select','multiselect','checkbox','image','file']) or coalesce(length(trim(field->>'label')),0) not between 1 and 160 or (field ? 'required' and jsonb_typeof(field->'required')<>'boolean') then raise exception 'Invalid or duplicate field'; end if;
+ if jsonb_typeof(field)<>'object' or id is null or id !~ '^[a-z][a-z0-9_]{0,39}$' or id=any(ids) or kind is null or kind<>all(array['text','textarea','email','phone','number','date','select','multiselect','checkbox','image','file']) or jsonb_typeof(field->'label') is distinct from 'string' or coalesce(length(trim(field->>'label')),0) not between 1 and 160 or (field ? 'required' and jsonb_typeof(field->'required')<>'boolean') then raise exception 'Invalid or duplicate field'; end if;
  if kind in('file','image') then file_count=file_count+1; if file_count>5 then raise exception 'Maximum 5 upload fields'; end if; end if;
  if kind in('select','multiselect') then
  if jsonb_typeof(field->'options') is distinct from 'array' or jsonb_array_length(field->'options') not between 1 and 50 then raise exception 'Options required'; end if;
@@ -139,7 +139,7 @@ create function private.validate_custom_answers(p_schema jsonb,p_answers jsonb) 
  if p_answers ? id then raise exception 'Omit hidden field answers'; end if; continue;
  end if;
  missing=answer is null or answer='null'::jsonb or answer='""'::jsonb or answer='[]'::jsonb;
- if coalesce((field->>'required')::boolean,false) and (missing or (kind='checkbox' and answer<>'true'::jsonb)) then raise exception 'Required field: %',field->>'label'; end if;
+ if coalesce((field->>'required')::boolean,false) and (missing or (jsonb_typeof(answer)='string' and length(trim(answer#>>'{}'))=0) or (kind='checkbox' and answer<>'true'::jsonb)) then raise exception 'Required field: %',field->>'label'; end if;
  if missing then continue; end if;
  if kind='checkbox' then if jsonb_typeof(answer)<>'boolean' then raise exception 'Invalid checkbox answer'; end if;
  elsif kind='number' then if jsonb_typeof(answer)<>'number' or abs((answer#>>'{}')::numeric)>1000000000000 then raise exception 'Invalid number answer'; end if;
@@ -237,6 +237,7 @@ create function public.submit_custom_form(p_slug text,p_version integer,p_answer
  if form.id is null or not form.enabled or form.published_version is null then raise exception 'Form unavailable'; end if;
  if form.published_version<>p_version then raise exception 'form_version_changed'; end if;
  if p_user_id is not null and not private.active_account(p_user_id) then raise exception 'Active account required'; end if;
+ if not exists(select 1 from public.custom_form_staff where form_id=form.id and role='responsible' and private.active_account(user_id)) then raise exception 'Form temporarily unavailable: no responsible person'; end if;
  select * into version_row from public.custom_form_versions where form_id=form.id and version=p_version;
  perform private.validate_custom_answers(version_row.schema,p_answers);
  if jsonb_typeof(p_uploads)<>'array' or jsonb_array_length(p_uploads)>5 then raise exception 'Invalid uploads'; end if;
@@ -294,7 +295,7 @@ create function public.assign_custom_form_task(p_submission_id uuid,p_assigned_t
 create function public.search_form_submissions(p_search text default '',p_kind text default null,p_form_id uuid default null,p_status text default null,p_from timestamptz default null,p_to timestamptz default null,p_offset integer default 0,p_limit integer default 25,p_oldest boolean default false,p_mine boolean default false) returns jsonb language plpgsql stable security invoker set search_path='' as $$
  declare result jsonb;
  begin
- if p_offset not between 0 and 25000 or p_limit not between 1 and 100 or length(p_search)>200 then raise exception 'Invalid search bounds'; end if;
+ if p_offset is null or p_limit is null or p_offset not between 0 and 25000 or p_limit not between 1 and 100 or length(p_search)>200 then raise exception 'Invalid search bounds'; end if;
  with matching as materialized(select f.* from public.form_submissions f where (p_kind is null or f.kind=p_kind) and (p_form_id is null or f.custom_form_id=p_form_id) and (p_from is null or f.created_at>=p_from) and (p_to is null or f.created_at<p_to) and (not p_mine or f.submitter_id=auth.uid()) and (coalesce(p_search,'')='' or position(lower(p_search) in lower(f.payload::text))>0)),
  selected as(select * from matching where p_status is null or status=p_status),
  page as(select * from selected order by case when p_oldest then created_at end asc,case when not p_oldest then created_at end desc,id limit p_limit offset p_offset)

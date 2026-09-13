@@ -3,10 +3,24 @@ import { Link } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { formsCsv } from '@/lib/formExport';
 import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/context/AuthContext';
+import CustomFormsWorkspace from '@/components/workspace/CustomFormsWorkspace';
+import '@/styles/workspace.css';
 
 const names = { contact: 'Contact', madrassah: 'Madrassah', itikaaf: 'I’tikaf' };
 
 export default function FormsInbox() {
+  const auth = useAuth();
+  return import.meta.env.VITE_ENABLE_WORKSPACE === 'true' ? (
+    <div className="community-workspace custom-forms-admin">
+      <CustomFormsWorkspace key={auth.user.id} auth={auth} />
+    </div>
+  ) : (
+    <LegacyFormsInbox />
+  );
+}
+
+function LegacyFormsInbox() {
   const [search, setSearch] = useState('');
   const [kind, setKind] = useState('all');
   const [oldest, setOldest] = useState(false);

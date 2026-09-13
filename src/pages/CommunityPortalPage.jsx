@@ -7,6 +7,7 @@ import Learning from '@/components/workspace/Learning';
 import Manage from '@/components/workspace/Manage';
 import CustomFormsWorkspace from '@/components/workspace/CustomFormsWorkspace';
 import { SermonManager } from '@/components/workspace/Sermons';
+import FeeLedger from '@/components/workspace/FeeLedger';
 import { ActionForm, TextField, checked } from '@/components/workspace/shared';
 import '@/styles/workspace.css';
 
@@ -15,6 +16,8 @@ const tables = [
   'learning_courses',
   'learning_staff',
   'learning_students',
+  'learning_guardians',
+  'learning_department_heads',
   'learning_enrolments',
   'learning_sessions',
   'learning_attendance',
@@ -82,7 +85,11 @@ function Workspace({ auth }) {
   const [params] = useSearchParams();
   const formId = params.get('form');
   const [tab, setTab] = useState(
-    formId ? 'tasks' : params.get('tab') === 'forms' ? 'forms' : 'learning',
+    formId
+      ? 'tasks'
+      : ['forms', 'fees'].includes(params.get('tab'))
+        ? params.get('tab')
+        : 'learning',
   );
   useEffect(() => {
     if (formId) setTab('tasks');
@@ -103,6 +110,8 @@ function Workspace({ auth }) {
               ? 'requested_at'
               : [
                     'learning_staff',
+                    'learning_guardians',
+                    'learning_department_heads',
                     'learning_enrolments',
                     'learning_attendance',
                     'form_workflows',
@@ -134,6 +143,7 @@ function Workspace({ auth }) {
     ['tasks', 'Actions'],
     ['notifications', 'Notifications'],
     ['forms', 'Forms and replies'],
+    ['fees', 'Fees'],
     ...(auth.isOwner ? [['manage', 'Manage learning']] : []),
     ...(auth.isOwner ? [['talks', 'Talks']] : []),
   ];
@@ -174,12 +184,18 @@ function Workspace({ auth }) {
           />
         )}
         {tab === 'notifications' && (
-          <Notifications rows={data.user_notifications} reload={reload} onError={report} />
+          <Notifications
+            rows={data.user_notifications}
+            reload={reload}
+            onError={report}
+            onOpen={setTab}
+          />
         )}
         {tab === 'forms' && (
           <CustomFormsWorkspace auth={auth} initialMine={params.get('mine') === 'true'} />
         )}
         {tab === 'talks' && auth.isOwner && <SermonManager />}
+        {tab === 'fees' && <FeeLedger canManage={auth.isOwner} />}
         {tab === 'manage' && auth.isOwner && (
           <Manage data={data} reload={reload} onError={report} />
         )}

@@ -47,7 +47,7 @@ export function validateAnswers(schema, answers) {
       continue;
     }
     const missing = value == null || value === '' || (Array.isArray(value) && !value.length);
-    if (field.required && (missing || (field.type === 'checkbox' && value !== true))) fail(`${field.label} is required.`);
+    if (field.required && (missing || (typeof value === 'string' && !value.trim()) || (field.type === 'checkbox' && value !== true))) fail(`${field.label} is required.`);
     if (missing) continue;
     const invalid = () => fail(`Check ${field.label}.`);
     switch (field.type) {

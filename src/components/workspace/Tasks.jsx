@@ -129,15 +129,33 @@ export default function Tasks({ rows, notifications, reload, formId, onError }) 
     </>
   );
 }
-export function Notifications({ rows, reload, onError }) {
+export function Notifications({ rows, reload, onError, onOpen }) {
   return (
     <>
       {rows.length === 0 && <p>No notifications yet.</p>}
       {rows.map((row) => (
         <article className="workspace-card" key={row.id}>
-          <h3>{row.kind === 'task' ? 'Action update' : 'Learning update'}</h3>
+          <h3>
+            {{
+              task: 'Action update',
+              learning: 'Learning update',
+              form: 'Form update',
+              fee: 'Fee update',
+            }[row.kind] || 'Account update'}
+          </h3>
           <p>{dateLabel(row.created_at)}</p>
-          <p>Open your {row.kind === 'task' ? 'actions' : 'learning'} tab to see the details.</p>
+          {onOpen && (
+            <button
+              onClick={() =>
+                onOpen(
+                  { task: 'tasks', learning: 'learning', form: 'forms', fee: 'fees' }[row.kind] ||
+                    'notifications',
+                )
+              }
+            >
+              Open update
+            </button>
+          )}
           {!row.read_at && (
             <button
               onClick={async () => {

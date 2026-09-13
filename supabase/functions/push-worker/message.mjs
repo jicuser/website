@@ -2,7 +2,7 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The only lock-screen content is fixed copy; caller data cannot become a message. */
 export function pushMessage(notification, token) {
-  if (!uuid.test(notification.id) || !['task', 'learning', 'form'].includes(notification.kind)) {
+  if (!uuid.test(notification.id) || !['task', 'learning', 'form', 'fee'].includes(notification.kind)) {
     throw new Error('Invalid notification');
   }
   return {

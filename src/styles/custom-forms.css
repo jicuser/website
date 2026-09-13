@@ -84,10 +84,16 @@
   border-inline-start-color: #64748b;
 }
 .public-custom-form {
-  margin-top: 80px;
+  min-height: auto;
+  background: transparent;
 }
 .public-custom-form .workspace-wrap {
   max-width: 760px;
+}
+.custom-forms-admin {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
 }
 .custom-forms-counts {
   display: flex;

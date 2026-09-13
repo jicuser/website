@@ -6,8 +6,8 @@ create table public.learning_guardians (
  relationship text not null default 'Guardian' check(length(trim(relationship)) between 1 and 80),
  created_at timestamptz not null default now(), primary key(student_id,user_id));
 create index learning_guardians_user on public.learning_guardians(user_id);
-insert into public.learning_guardians(student_id,user_id)
- select id,guardian_id from public.learning_students where guardian_id is not null;
+-- This stores additional guardians only; guardian_id remains the primary link.
+-- Do not copy that link here: changing it must revoke the previous primary guardian.
 
 create table public.learning_department_heads (
  department text not null check(department in('adult','madrassah')),
@@ -35,7 +35,7 @@ grant select,insert,delete on public.learning_guardians,public.learning_departme
 create policy guardian_read on public.learning_guardians for select to authenticated using(private.read_student(student_id));
 create policy guardian_add on public.learning_guardians for insert to authenticated with check(private.workspace_owner() and private.active_account(user_id));
 create policy guardian_remove on public.learning_guardians for delete to authenticated using(private.workspace_owner());
-create policy heads_read on public.learning_department_heads for select to authenticated using(private.workspace_owner() or user_id=(select auth.uid()));
+create policy heads_read on public.learning_department_heads for select to authenticated using(private.workspace_owner() or (private.active_account(auth.uid()) and user_id=(select auth.uid())));
 create policy heads_add on public.learning_department_heads for insert to authenticated with check(private.workspace_owner() and private.active_account(user_id));
 create policy heads_remove on public.learning_department_heads for delete to authenticated using(private.workspace_owner());
 
@@ -45,6 +45,9 @@ alter table public.learning_records add column score numeric(10,2),
  (kind='assessment' and score is not null and max_score is not null and max_score>0 and max_score<=1000000 and score>=0 and score<=max_score)),
  add constraint learning_plan_completion check(completed_at is null or kind='plan');
 grant update(score,max_score,due_on) on public.learning_records to authenticated;
+create or replace function private.stamp_learning_record() returns trigger language plpgsql set search_path='' as $$
+ begin if tg_op='INSERT' then new.created_by=auth.uid(); new.created_at=now(); new.completed_at=null;
+ else new.created_by=old.created_by; new.created_at=old.created_at; end if; return new; end; $$;
 create function private.set_learning_plan_complete(p_id uuid,p_complete boolean) returns void
  language plpgsql security definer set search_path='' as $$
  declare item public.learning_records;

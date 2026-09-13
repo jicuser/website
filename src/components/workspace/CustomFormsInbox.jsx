@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabaseClient';
 import { formAction, formTitle, safeDownloadUrl } from '@/lib/customForms';
 import { collectPages, downloadBlob, submissionsCsv } from '@/lib/formDownloads';
 import { checked, dateLabel, Field } from './shared';
+import FeeLedger from './FeeLedger';
+import CustomFormsEmail from './CustomFormsEmail';
 
 export default function CustomFormsInbox({ auth, definitions, assignments, initialMine = false }) {
   const [filters, setFilters] = useState({
@@ -436,6 +438,7 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
           Reference: {row.id}
           {row.form_version ? ` · Form version ${row.form_version}` : ''}
         </p>
+        {open && <FeeLedger key={row.id} formId={row.id} canManage={canWork} />}
         {canWork && (
           <div className="workspace-actions">
             <button
@@ -585,8 +588,12 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
                   key={item.id}
                 >
                   <span className="workspace-meta">
-                    {item.author_id === auth.user.id ? 'You' : 'Reply'} ·{' '}
-                    {item.internal ? 'Staff note · ' : ''}
+                    {item.author_kind === 'email'
+                      ? 'Email reply (sender not verified)'
+                      : item.author_id === auth.user.id
+                        ? 'You'
+                        : 'Reply'}{' '}
+                    · {item.internal ? 'Staff note · ' : ''}
                     {dateLabel(item.created_at)}
                   </span>
                   <p>{item.body}</p>
@@ -639,6 +646,14 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
                 </button>
               </fieldset>
             </form>
+            {open && canWork && (
+              <CustomFormsEmail
+                submissionId={row.id}
+                recipient={email || ''}
+                subject={`Re: ${formTitle(row)}`}
+                onReply={() => setThreadRevision((value) => value + 1)}
+              />
+            )}
             {canWork && !row.submitter_id && (
               <p className="workspace-meta">
                 This response was submitted without an account. Use the provided contact details to

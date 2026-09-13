@@ -1,0 +1,62 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+const id=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
+test('linked guardians, department heads, marks and private course resources',async t=>{
+ const db=new PGlite();
+ await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;
+ create schema auth;create schema private;create schema storage;
+ create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ grant usage on schema public,auth,private,storage to authenticated,anon,service_role;
+ create table profiles(id uuid primary key,display_name text,is_active boolean default true,is_owner boolean default false,permissions text[] default '{}',staff_kinds text[] default '{}');
+ create table form_submissions(id uuid primary key default gen_random_uuid(),kind text not null,payload jsonb default '{}',status text default 'new',created_at timestamptz default now());
+ create function private.has_permission(required text) returns boolean language sql stable security definer set search_path='' as $$select coalesce((select is_active and (is_owner or required=any(permissions)) from public.profiles where id=auth.uid()),false)$$;
+ create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+ create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);
+ alter table storage.objects enable row level security;grant select,insert,delete on storage.objects to authenticated;
+ alter table form_submissions enable row level security;grant select on form_submissions to authenticated;
+ grant all on profiles,form_submissions to service_role;
+ create policy form_read on form_submissions for select to authenticated using(private.has_permission('forms_'||kind));`);
+ for(const file of ['20260913100552_community_workspace.sql','20260913111741_learning_resources_and_progress.sql']) await db.exec(await readFile(new URL('../supabase/migrations/'+file,import.meta.url),'utf8'));
+ await db.exec(`insert into profiles(id,display_name,is_owner) values('${id(1)}','Owner',true),('${id(2)}','Teacher',false),('${id(3)}','Guardian',false),('${id(4)}','Unrelated',false),('${id(5)}','Head',false);
+ insert into learning_courses(id,title,department) values('${id(11)}','Adults','adult'),('${id(12)}','Children','madrassah');
+ insert into learning_students(id,display_name) values('${id(21)}','Learner'),('${id(22)}','Other learner');
+ insert into learning_enrolments values('${id(11)}','${id(21)}',true),('${id(12)}','${id(22)}',true);
+ insert into learning_staff values('${id(11)}','${id(2)}','teacher');`);
+ const as=async(user,fn)=>{await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','${id(user)}',false);`);try{return await fn();}finally{await db.exec('reset role');}};
+ const rows=async(q,p=[]) => (await db.query(q,p)).rows;
+ const count=async table=>Number((await rows(`select count(*) n from ${table}`))[0].n);
+ await t.test('owner links extra guardian and head; users cannot assign themselves',async()=>{
+  await as(1,()=>db.exec(`insert into learning_guardians values('${id(21)}','${id(3)}','Parent',now());insert into learning_department_heads values('adult','${id(5)}',now());`));
+  await as(4,()=>assert.rejects(()=>db.exec(`insert into learning_department_heads values('madrassah','${id(4)}',now())`),/row-level/));
+  await as(3,async()=>{assert.equal(await count('learning_students'),1);assert.equal(await count('learning_courses'),1);});
+  await as(5,async()=>{assert.equal(await count('learning_courses'),1);assert.equal((await rows(`select can_teach_course('${id(11)}') yes`))[0].yes,true);assert.equal((await rows(`select can_teach_course('${id(12)}') yes`))[0].yes,false);});
+ });
+ await t.test('marks constrained; completion timestamp server owned; guardians see only published',async()=>{
+  await as(2,()=>assert.rejects(()=>db.exec(`insert into learning_records(course_id,student_id,kind,title,score,max_score) values('${id(11)}','${id(21)}','assessment','Invalid',120,100)`),/learning_score_pair/));
+  await as(2,()=>db.exec(`insert into learning_records(id,course_id,student_id,kind,title,score,max_score,published) values('${id(31)}','${id(11)}','${id(21)}','assessment','Mark',75,100,true);insert into learning_records(id,course_id,student_id,kind,title,completed_at) values('${id(32)}','${id(11)}','${id(21)}','plan','Practice',now());`));
+  assert.equal((await rows(`select completed_at from learning_records where id='${id(32)}'`))[0].completed_at,null);
+  await as(3,async()=>{assert.equal(await count('learning_records'),1);await assert.rejects(()=>db.exec(`select set_learning_plan_complete('${id(32)}',true)`),/access/);});
+  await as(2,()=>db.exec(`update learning_records set published=true where id='${id(32)}'`));
+  await as(3,()=>db.exec(`select set_learning_plan_complete('${id(32)}',true)`));
+  assert.notEqual((await rows(`select completed_at from learning_records where id='${id(32)}'`))[0].completed_at,null);
+  await as(4,()=>assert.rejects(()=>db.exec(`select set_learning_plan_complete('${id(32)}',false)`),/access/));
+  await as(2,()=>assert.rejects(()=>db.exec(`update learning_records set completed_at=now() where id='${id(32)}'`),/permission denied/));
+ });
+ const path=`${id(11)}/${id(2)}/abcdefghijklmnop`;
+ await t.test('private files are course scoped and drafts stay private',async()=>{
+  await as(2,()=>db.exec(`insert into storage.objects(bucket_id,name) values('course-resources','${path}');insert into learning_resources(id,course_id,title,object_path,file_name,mime_type) values('${id(41)}','${id(11)}','Notes','${path}','notes.pdf','application/pdf');`));
+  await as(3,async()=>{assert.equal(await count('learning_resources'),0);assert.equal(await count('storage.objects'),0);});
+  await as(2,()=>db.exec(`update learning_resources set published=true where id='${id(41)}'`));
+  await as(3,async()=>{assert.equal(await count('learning_resources'),1);assert.equal(await count('storage.objects'),1);await assert.rejects(()=>db.exec(`insert into storage.objects(bucket_id,name) values('course-resources','${id(11)}/${id(3)}/abcdefghijklmnop')`),/row-level/);});
+  await as(4,async()=>{assert.equal(await count('learning_resources'),0);assert.equal(await count('storage.objects'),0);});
+  await as(5,async()=>{assert.equal(await count('learning_resources'),1);assert.equal(await count('storage.objects'),1);});
+  await as(2,()=>assert.rejects(()=>db.exec(`insert into learning_resources(course_id,title,url) values('${id(11)}','Bad','javascript:alert(1)')`),/check constraint/));
+ });
+ await t.test('revoked enrolment, guardian and head access fails closed',async()=>{
+  await db.exec(`update profiles set is_active=false where id in('${id(3)}','${id(5)}')`);
+  for(const user of [3,5]) await as(user,async()=>{assert.equal(await count('learning_courses'),0);assert.equal(await count('learning_resources'),0);assert.equal(await count('storage.objects'),0);assert.equal(await count('learning_department_heads'),0);});
+ });
+ await db.close();
+});
