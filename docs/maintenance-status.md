@@ -1,133 +1,123 @@
 # Website maintenance status
 
-Updated 14 September 2026. Current scope: improve and refine the existing website.
-App development, remote push, store delivery and infrastructure migration are deferred.
+Updated 14 September 2026. Current scope: refine the existing website and admin.
+Apps, remote push and hosting migration are deferred.
 
 ## Boundaries
 
-- Preserve the desktop/mobile admin design and working casting, TV, radio and prayer flows.
-- Keep changes focused; do not replace working components or stack conflicting CSS overrides.
-- Coordinate changes to `main`; never overwrite concurrent work or force-push a release.
-- No DNS, registrar, mail DNS, hosting or Cloudflare configuration changes in this work.
-- One production frontend host. Do not assume nonprofit eligibility for Vercel Hobby.
-- No paid plan, new SMTP provider, remote-desktop access or external subscription without approval.
-- Preserve real staff accounts, historical records, published content, tests and licences.
-- Review the whole visible interface in supplied screenshots; record additional findings before widening a change.
-- Save code checkpoints to the maintenance branch regularly. A checkpoint is not a live release.
+Preserve the current desktop/mobile appearance and working casting, TV, radio and
+prayer flows. Keep focused commits, checkpoint progress regularly, check the remote
+branch before release and never force-push over concurrent work. Do not change DNS,
+mail DNS, hosting, Cloudflare, service subscriptions or Vercel plans without separate
+approval. Do not assume nonprofit eligibility. Preserve real records, licences,
+tests and useful documentation during code cleanup.
 
-## Previously released accounts and mobile administration
+## Forms and content release
 
-| ID | Item | Saved/released work | Remaining acceptance |
-| --- | --- | --- | --- |
-| WEB-01 | Mobile poster picker | Titles below images; editor brought into view without opening the keyboard. Browser checks at 320, 390 and 1280px passed. | Physical-phone editing with the live account. |
-| WEB-02 | Admin section navigation | One Go to selector in the sticky mobile toolbar; desktop sidebar retained. The new toolbar was verified in the live bundle. | Physical-phone Notices and poster editing. |
-| WEB-03 | Owner-only deletion | Disabled non-owner accounts only; typed confirmation, self/owner protection, source and audit checks. manage-user version 5 was deployed. | No production account was deleted by tests. Retained records/uploads can intentionally block deletion. |
-| WEB-04 | Invitation destination | Production JIC setup route is the deployed server fallback. | Hosted Site URL, redirect allowlist and existing JIC_SITE_URL override still require verification. |
-| WEB-05 | Branded authentication emails | Invitation/reset templates and instructions are saved. | Apply hosted subjects/templates and approved SMTP sender; test a fresh email. |
-| WEB-06 | Browser connection warning | HTTPS login/setup rendered during read-only checks; HTTP login redirected to HTTPS. | The original phone warning was not reproduced; its cause remains unconfirmed. |
+Application/backend release: `e55e393cd0411e9e1bc496160546511db96ec5bb`.
+Poster detail-page seed and regression: `2e1ed986b7cd6aa8770f16772e6d6f25f8af12bc`.
+Both were fast-forwarded to `main` after successful CI. The maintenance branch
+retains the checkpoints; no code-generation or write-back workflow runs in production.
 
-## Content/forms checkpoint — not released
-
-Working branch: `maintenance/content-workflow`.
-Latest implementation checkpoint: `6d2e3ad5e5d67b6a9f9fcc0557da76ac9cba20a8`.
-The last confirmed production branch is `86c881ea8e36fc8983a7706056a17752972e5801`.
-
-The following source is now committed in GitHub, rather than existing only in a local runtime:
-
-| Part | Saved source | Verification/status |
+| Area | Released work | Remaining acceptance or limitation |
 | --- | --- | --- |
-| Content metadata | src/lib/pageContent.js and tests/page-content.test.mjs | Four focused Node tests pass. |
-| Reused form primitives | Field renderer, strict schema/answer/upload validation, bounded export helpers | Six validation tests pass. No new runtime dependency; PGlite is test-only. |
-| Website-only form backend | 20260914040000_website_forms.sql; custom-forms Edge handler and maintenance-secret helper | Nine database assertions/tests pass as part of the 15-test form-backend suite. No learning, payment or remote-push tables are created. |
-| Page and action linkage | 20260914041000_content_pages.sql plus content-workflow database tests | Eight local tests pass: publication/privacy, stable URLs, stale-edit rejection, named responsibility, eligible reassignment, and retained responses. |
-| Form editor and response inbox | CustomFormsBuilder.jsx, CustomFormsInbox.jsx, PublicFormPage.jsx | Adapted from the existing website branch; optional app, fee-ledger and remote-email UI dependencies removed. Local ESLint and dependency bundling pass. |
-| Admin Forms hub | FormsManager.jsx, FormActions.jsx, useAdminRecords.js and content-workflow.css | Current-form catalogue, information/people/responses/actions, guarded reassignment and bounded visible-tab refresh are saved. Not connected to AdminPage yet. |
+| Admin Forms | Current forms, creation and Responses & actions tiles; live/draft/closed filtering; named responsibility; linked-page information. | Test with the organisation's real operator accounts. No live form was published on an invented staff assignment. |
+| Form builder | Fields, conditions, optional attachments, responsible people, editors/followers, draft and published versions. | Choose the actual responsible people and review questions before opening registration. |
+| Responses and actions | Shared private records, notes/replies, completion, eligible reassignment and refreshed summaries. | Changing default responsibility affects future responses; reassign existing actions explicitly. Completing a task is not admission to a course. |
+| Poster management | Poster selection opens overview, artwork editing, Page & registration, Responses and Actions. | Responses/actions require a linked form and authorised staff access. |
+| Page creation | Create from a poster or Pages & programmes; choose type, placement, picture, optional existing/new form, preview and visibility. | Visibility controls apply to these created content pages, not protected system routes or every existing fixed page. |
+| Public detail pages | Stable /pages/:slug addresses, selected section listings and /forms/:slug registration. Hidden pages are unavailable; hiding does not delete or close a shared form. | Real public submission-to-operator acceptance remains a separate live test. |
+| Adult Education | Separate /education/courses route and navigation; legacy /madrassah/classes-courses redirects there. Madrasah remains separate. | A structured weekly-schedule editor and wider categorisation of existing content remain refinements. |
 
-GitHub Actions run `34804928067` passed full validation and the existing browser
-suite against backend checkpoint `6e0a60352afd0972228d71764f33e2e87d33dafb`.
-That existing browser suite does not prove the new Forms user journey; it was not
-connected at that checkpoint. Later component bundling is also not a browser test.
+### Existing poster pages
 
-No new migrations or custom-forms Edge Function have been deployed to production.
-No real responses, assignments, invitations, staff accounts or published pages were
-created or changed by this checkpoint work.
+The detail-page migration read the saved programme catalogue rather than replacing
+it with defaults. It created pages for Open Qur'an Circle, Youth Islamic Studies,
+The Seeker's Gateway, After Maghrib, and Adhan & Iqamah Course. The last stays hidden,
+matching the source poster's empty placement list. Existing page conflicts are
+preserved; rerunning cannot overwrite staff edits. Original poster artwork, display
+selection and TV settings are unchanged.
 
-### Next integration steps
+Youth Islamic Studies explicitly advertises registration of interest. Its page
+reflects this, but online registration is not open until an authorised editor creates
+or links a form, selects actual responsible staff and publishes it. No registration
+requirement was inferred for other posters. No forms, real submissions, user accounts
+or responsible-person assignments were created as seed data.
 
-1. Connect FormsManager to AdminPage and add the two new form permission IDs to
-   the shared catalogue. Use the trusted profile RPC's assigned-form flag for entry
-   without granting wider access. Keep all database permission checks.
-2. Implement the content-page editor and catalogue, poster-management tabs, public
-   detail-page route and section placement. Reuse one form and its response/action
-   records from both the poster and Admin Forms. Add appropriate image upload.
-3. Prepare existing poster pages from the published poster facts. The Youth Islamic
-   Studies poster explicitly asks to register interest. Do not invent registration
-   requirements for other posters, course dates, fees or responsible staff. Keep
-   new registration forms draft until an authorised person chooses responsibility.
-4. Keep page visibility and form acceptance separate, with clear wording. Turning
-   off a page must not delete responses or silently close a form used elsewhere.
-5. Add browser regression coverage for create/publish/link/submit/respond/reassign/
-   close/hide, including mobile layout, failed saves and unsaved-change protection.
-6. Inspect the live schema again before applying the two website-only migrations.
-   Deploy the custom-forms handler and compatible manage-user permission catalogue
-   only after verification. Anonymous form submission and authenticated private
-   actions must be tested separately. Do not apply the entire older workspace branch.
-7. Remove temporary checkpoint-generation scripts/workflows before release. The
-   final application uses ordinary source modules and SQL migrations, not a runtime
-   patching step. Check `main` again and fast-forward only the verified release.
+To enable the Youth form: Admin → Posters → Youth Islamic Studies → Page & registration
+→ Create linked form → choose questions and responsible people → publish the form
+→ save the page link. The same form then appears in Admin → Forms.
 
-## Presentation Stream — requested, still outstanding
+## Backend deployment and compatibility
 
-After the forms/page integration:
+The live project already contained an earlier website_forms deployment when this
+release resumed. It was inspected, not blindly reapplied. No response tables were
+recreated. Managed migration records:
 
-- Rename Hall streams to Presentation Stream in the admin UI.
-- Add Quick Present: choose the input, then Start. No name prompt. Request browser
-  capture permission synchronously from that click, then publish only after capture
-  succeeds. A cancelled/denied permission request must not start a blank session.
-- Keep the existing capture controllers mounted when switching views. Preserve
-  transport, display approval, recovery and Advanced layouts.
-- Show the server's normal/active session state with a compact status control.
-  Starting still requires an explicit source/Start action; ending an active session
-  uses the existing guarded End action. An active session is not proof of playback.
-- Allow confirmed deletion of saved settings through the existing delete-template
-  action. Deleting a template must not end the active presentation or erase its draft.
-- Add permission-denial, start/end/recovery, template-deletion and mount-preservation
-  regression tests. Physical iPhone/TV playback remains separate acceptance.
+- `20260914050501 website_forms`: existing earlier forms foundation.
+- `20260914105826 content_pages`: maps to source `20260914041000_content_pages.sql`.
+- `20260914105903 form_release_compatibility`: maps to `20260914104500_form_release_compatibility.sql`.
+- `20260914110939 poster_detail_pages`: maps to `20260914112000_poster_detail_pages.sql`.
 
-## Other website priorities
+The compatibility migration preserves published form addresses, checks revisions,
+retains the active-responsible-person safeguard and adds missing legacy response-task
+endpoints. Its publication API accepts the expected revision with a default for older
+callers. Existing user permission values and stored responses are preserved.
 
-| ID | Work | Status / next step |
+`custom-forms` version 1 is deployed. Public submission and upload proofs are validated
+by the handler/database; private download/export requires a verified user and scoped
+SQL authorisation. `manage-user` version 6 adds the two reviewed form permission IDs
+while retaining account-deletion safeguards and JWT verification. TV-control version
+15 and submit-form version 1 were not redeployed.
+
+Do not replay all repository migrations into the managed project without reconciling
+these version mappings. A future fresh installation uses the source migration sequence;
+the deployed project's early foundation was upgraded explicitly. Do not drop the forms
+schema as a rollback after it contains responses.
+
+## Verification
+
+- CI run `34835730621` passed the full lint, Node/database tests, production build and
+  17-browser-test suite for the application release.
+- CI run `34836749694` passed full validation and browser tests after adding poster-page
+  seeding. The seed test covers saved content, hidden items, duplicate avoidance and
+  retaining staff edits. Database tests cover privacy, versions, assignments and safe
+  failure; browser tests run the real router/components with external requests intercepted.
+- A fresh read-only fetch of production /pages/youth-islamic-studies rendered the new
+  page, saved poster details and the accurate not-open-yet registration message.
+- The initial live /education/courses scrape caught a loading state; do not treat that
+  snapshot as proof of either completed rendering or a persistent failure.
+- Public response-table access was denied by grants; the attachment bucket is private;
+  the deployed profile and publish-function contracts were inspected after migration.
+- No real response, outgoing email, payment or staff deletion was used as test data.
+  Physical phone/TV operation and a real authenticated form journey are not claimed.
+
+## Presentation Stream — next, not included in this release
+
+Rename Hall streams to Presentation Stream. Add Quick Present with input selection
+and an explicit Start click, no name prompt: request capture permission from that
+click, and publish only after capture succeeds. Cancellation must not start a blank
+session. Keep capture controllers mounted and preserve transport, display approval,
+recovery and Advanced layouts. Add a compact normal/active status control using the
+existing guarded End action, and confirmed deletion of saved templates without ending
+the stream or discarding its draft. Test permission denial, recovery, start/end,
+template deletion and mount preservation before release.
+
+## Other remaining work
+
+| ID | Work | Status |
 | --- | --- | --- |
-| WEB-07 | Forms area | Source checkpoint above; route integration and release remain outstanding. |
-| WEB-08 | Courses, events, posters and pages | Backend and metadata saved; page/poster UI and public route still required. |
-| WEB-09 | Education organisation | Education remains parent; separate Adult Courses & Classes from Madrasah, preserving links and posters. Not yet changed in this checkpoint. |
-| WEB-10 | Loading/navigation | The new record reader preserves ordinary refresh content. Global route/auth loading investigation is still separate and outstanding. |
-| WEB-11 | Repository refinement | Classify personal placeholders, obsolete instructions, temporary URLs, dead code and conflicting styles. No blanket renaming or authorship/history rewrite. |
-| WEB-12 | TV fit/delay | Retain working transport; obtain physical viewport/source geometry and timings before changing ratios or negotiation. |
-| WEB-13 | Release hygiene | Keep CI/build/browser checks. Review deprecation and optional large HLS-bundle warnings separately; do not hide them by raising limits. |
+| WEB-01/02 | Mobile poster/admin navigation | Previously released and retained. Confirm physical-phone editing. |
+| WEB-03 | Owner account deletion | Released and retained. Related history/uploads can intentionally block deletion. |
+| WEB-04/05 | Invitation destination and branded emails | Production fallback and templates saved. Hosted URL override/allowlist, Auth templates and approved SMTP sender still need configuration verification and a fresh email test. |
+| WEB-06 | Original phone security warning | Not reproduced; exact cause still unconfirmed. No TLS verification bypass used. |
+| WEB-10 | Loading/navigation performance | Global route/auth timing investigation remains open. Do not hide errors or weaken permission checks. |
+| WEB-11 | Repository refinement | Remove unnecessary personal placeholders, obsolete instructions and conflicting code only after classification; no blanket rename or history rewrite. Temporary integration generators were removed. |
+| WEB-12 | TV fit/delay | Obtain real viewport/source geometry and timings; preserve working transport. |
+| WEB-13 | Dependencies/release hygiene | CI remains enabled. Review deprecation and optional HLS size warnings separately; do not hide them by raising limits. |
 
-## Deferred / separate decisions
-
-App signing/releases/cloud builds; remote push; payment and media workers; Vercel
-migration, eligible plan and repository connection; Cloudflare/DNS/domain changes;
-SMTP identity/provider setup; retention decisions and historical-account reassignment.
-Do not assume a charity/nonprofit qualifies for a particular Vercel plan, invent a
-mailbox or delete linked content to force an account deletion.
-
-## Previous release evidence
-
-The admin-reliability release was based on `71e323290062514b6f6777c9df601875bdad2107`.
-Application/test source: `0e0db1e33d180b5d375c700ca3cf172f26bb029f`.
-Release/scope commit: `c8cfcc736a665b3cb92e26dc965d84f45e9aa063`.
-Successful Actions runs: `34795929942` and `34796339248`.
-
-That release passed ESLint, 269 Node tests, the Vite production build and 13 browser
-tests using intercepted external data. Screenshots were inspected. manage-user version
-5 was deployed without other Edge Functions or schema changes. A read-only live check
-fetched AdminPage-DENwNEw2.js with the deletion controls and mobile toolbar class.
-No real email acceptance, live deletion or physical TV test was claimed.
-
-Rollback by reverting focused commits, not rewriting history or relaxing constraints.
-Backend rollback uses the previous reviewed function source; do not drop the new form
-schema after it contains responses. See auth-email-configuration.md for hosted email
-prerequisites. Update this tracker rather than creating a competing progress document.
+Deferred: apps/store signing/cloud builds, remote push, payment/media workers,
+Vercel/Cloudflare/DNS migration, new paid services and retention/deletion policy changes.
+Frontend rollback reference: `86c881ea8e36fc8983a7706056a17752972e5801`. Revert focused
+source changes instead of erasing Git history or collected data. Keep this tracker
+current rather than creating competing progress documents.
