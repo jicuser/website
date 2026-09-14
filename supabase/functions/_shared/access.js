@@ -12,6 +12,8 @@ export const PERMISSIONS = [
   ['forms_contact', 'Contact messages'],
   ['forms_madrassah', 'Madrassah enquiries'],
   ['forms_itikaaf', 'I’tikaf registrations'],
+  ['forms_manage', 'Create and manage forms'],
+  ['forms_custom', 'Manage all custom responses'],
   ['users', 'Invite staff and manage access'],
   ['audit', 'Activity history'],
   ['delete_content', 'Delete content in permitted sections'],
@@ -38,7 +40,7 @@ export function hasAdminAccess(profile) {
     profile?.is_active &&
     (profile.is_owner === true ||
       (Array.isArray(profile.permissions) &&
-        profile.permissions.some((key) => PERMISSIONS.some(([id]) => id === key)))),
+        profile.permissions.some((key) => key === 'forms_assigned' || PERMISSIONS.some(([id]) => id === key)))),
   );
 }
 export function validateAccess(input) {

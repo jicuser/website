@@ -22,7 +22,8 @@ import {
   Moon,
   Monitor,
 } from 'lucide-react';
-import FormsInbox from '@/components/admin/FormsInbox';
+import FormsAdmin from '@/features/content/FormsAdmin';
+import '@/styles/content-workflow.css';
 import StaffAccess from '@/components/admin/StaffAccess';
 import StreamSetup from '@/components/admin/StreamSetup';
 import PostersEditor from '@/components/admin/PostersEditor';
@@ -55,7 +56,7 @@ const SECTIONS = [
   ['tv', 'Hall streams', Monitor, 'tv'],
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
-  ['forms', 'Forms inbox', FileText, 'forms'],
+  ['forms', 'Forms', FileText, 'forms'],
   ['users', 'Staff & access', ShieldCheck, 'users'],
   ['audit', 'Audit log', Activity, 'audit'],
 ];
@@ -137,7 +138,7 @@ function DashboardSection({ onChoose }) {
     ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
     [
       'forms',
-      'Forms inbox',
+      'Forms',
       'Read messages and registrations, then mark them completed.',
       FileText,
       'forms',
@@ -805,7 +806,13 @@ export default function AdminPage() {
     livestream: <LivestreamSection />,
     content: <PageEditor initialPath={params.get('page') || '/'} />,
     team: <TeamEditor uploadImage={uploadImage} />,
-    forms: <FormsInbox />,
+    forms: (
+      <FormsAdmin
+        key={`${user?.id}:${params.get('form') || ''}:${params.get('view') || ''}`}
+        initialFormId={params.get('form') || ''}
+        initialView={params.get('view') || 'overview'}
+      />
+    ),
     users: <StaffAccess />,
     audit: <AuditSection />,
   }[active];

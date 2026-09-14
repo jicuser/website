@@ -10,9 +10,9 @@ const educationTiles = [
     icon: BookOpen,
   },
   {
-    title: 'Classes & Courses',
+    title: 'Adult Courses & Classes',
     description: 'Browse current classes, courses and learning opportunities.',
-    path: '/madrassah/classes-courses',
+    path: '/education/courses',
     icon: BookOpen,
   },
   {

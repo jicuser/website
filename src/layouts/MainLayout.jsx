@@ -7,6 +7,9 @@ import UnifiedHeader from '@/components/shell/UnifiedHeader';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import RelatedContent from '@/components/RelatedContent';
 import ProgrammePosters from '@/components/ProgrammePosters';
+import ContentPageCards from '@/features/content/ContentPageCards';
+import { ContentPagesProvider } from '@/features/content/ContentPagesContext';
+import '@/styles/content-workflow.css';
 import DailyReminder from '@/components/shell/DailyReminder';
 import SpiritualOverlays from '@/components/shell/SpiritualOverlays';
 import Footer from '@/components/shell/Footer';
@@ -18,7 +21,9 @@ import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
 export default function MainLayout() {
   return (
     <PublicPrayerTimesProvider>
-      <PublicLayout />
+      <ContentPagesProvider>
+        <PublicLayout />
+      </ContentPagesProvider>
     </PublicPrayerTimesProvider>
   );
 }
@@ -54,6 +59,7 @@ function PublicLayout() {
             </div>
           )}
           <ManagedPageSections key={pathname} />
+          <ContentPageCards />
           {!isHome && !isDiscovery && <ProgrammePosters />}
           {!isDiscovery && <RelatedContent />}
         </div>

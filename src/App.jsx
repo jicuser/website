@@ -12,6 +12,9 @@ import RouteScrollReset from '@/components/shell/RouteScrollReset';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
+const ContentPage = lazy(() => import('@/pages/ContentPage'));
+const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
+const AdultCoursesPage = lazy(() => import('@/pages/AdultCoursesPage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ClassesCoursesPage = lazy(() => import('@/pages/ClassesCoursesPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
@@ -135,6 +138,9 @@ function AppRoutes() {
               <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
 
               <Route path="education" element={<EducationPage />} />
+              <Route path="education/courses" element={<AdultCoursesPage />} />
+              <Route path="pages/:slug" element={<ContentPage />} />
+              <Route path="forms/:slug" element={<PublicFormPage />} />
               <Route path="madrassah" element={<MadrassahPage />} />
               <Route path="madrassah/classes-courses" element={<ClassesCoursesPage />} />
               <Route path="madrassah/enrolment" element={<MadrassahEnrolmentPage />} />

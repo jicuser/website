@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import usePosters from '@/hooks/usePosters';
 import { POSTERS_KEY, POSTER_DESTINATIONS, posterImage, validPoster } from '@/lib/posters';
 import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
+import PageManager from '@/features/content/PageManager';
 import { useContent } from '@/context/ContentContext';
 import { useAuth } from '@/context/AuthContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
@@ -159,6 +160,7 @@ export default function PostersEditor() {
       {item && (
         <fieldset ref={editor} tabIndex={-1} disabled={busy} className="scene-properties">
           <legend>{item.title || 'New poster'}</legend>
+          <PageManager key={item.id} poster={item} />
           <label>
             Poster name
             <input

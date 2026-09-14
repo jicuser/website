@@ -18,6 +18,7 @@ import { EDITABLE_PAGES, pageDefaults, pageKey } from '@/content/editablePages';
 import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
 import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
+import PageManager from '@/features/content/PageManager';
 
 export default function PageEditor({ initialPath = '/', inline = false }) {
   const [selected, setSelected] = useState(() =>
@@ -208,6 +209,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
           Home tiles <ArrowUpRight size={16} />
         </Link>
       </div>
+      {!inline && <PageManager />}
       {!inline && (
         <details className="admin-panel">
           <summary>Site-wide text & community links</summary>
@@ -348,6 +350,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
             </section>
           )}
           <PageSectionsEditor pagePath={selected} />
+
           {!inline && (
             <section className="admin-panel">
               <div className="admin-heading">

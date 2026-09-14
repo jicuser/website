@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, Expand } from 'lucide-react';
 import usePosters from '@/hooks/usePosters';
 import ImageViewer from '@/components/ImageViewer';
 import SwipeRail from '@/components/SwipeRail';
 import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
 
+import { useContentPages } from '@/features/content/ContentPagesContext';
+import { pageUrl } from '@/lib/pageContent';
+
 export default function ProgrammePosters() {
+  const navigate = useNavigate();
+  const { pages } = useContentPages();
   const { pathname } = useLocation();
   const programmes = usePosters();
   const [selected, setSelected] = useState(null);
   const group = pathname === '/' ? 'home' : pathname.split('/')[1];
-  const posters = programmes.filter((item) => item.groups.includes(group));
+  const posters = programmes
+    .filter((item) => item.groups.includes(group))
+    .map((item) => ({
+      ...item,
+      linkedPage: pages.find((page) => page.source_poster_id === item.id),
+    }))
+    .filter((item) => item.linkedPage?.placement !== pathname);
   if (!posters.length) return null;
   return (
     <>
@@ -29,7 +40,9 @@ export default function ProgrammePosters() {
               <button
                 type="button"
                 className="jic-poster-button"
-                onClick={() => setSelected(item)}
+                onClick={() =>
+                  item.linkedPage ? navigate(pageUrl(item.linkedPage)) : setSelected(item)
+                }
                 aria-label={`View ${item.title} poster`}
               >
                 <img src={item.image} alt={item.alt} loading="lazy" width="1224" height="1730" />
@@ -43,7 +56,15 @@ export default function ProgrammePosters() {
               <h3>{item.title}</h3>
               <p>{item.schedule}</p>
               <p>{item.detail}</p>
-              <Link to={item.to === pathname ? '/contact' : item.to}>
+              <Link
+                to={
+                  item.linkedPage
+                    ? pageUrl(item.linkedPage)
+                    : item.to === pathname
+                      ? '/contact'
+                      : item.to
+                }
+              >
                 {item.to === pathname ? 'Enquire at the centre' : 'Explore programme'}{' '}
                 <ArrowRight size={16} />
               </Link>
