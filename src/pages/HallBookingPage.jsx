@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CalendarDays, Phone } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { SITE } from '@/content/site';
@@ -193,12 +194,18 @@ export default function HallBookingPage() {
           <div>
             <strong>Interested in a date?</strong>
             <span>
-              Availability can change, so please confirm with the centre before making arrangements.
+              Check the calendar, then send a booking request. A request is not confirmed until staff
+              approve the date.
             </span>
           </div>
-          <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}>
-            <Phone size={17} /> Call {SITE.phone}
-          </a>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/forms/hall-booking">
+              <CalendarDays size={17} /> Request hall booking
+            </Link>
+            <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}>
+              <Phone size={17} /> Call {SITE.phone}
+            </a>
+          </div>
         </div>
       </section>
     </div>
