@@ -43,9 +43,10 @@ test('presentation status is server-derived and quick present skips the naming s
   const status = await read('src/features/displays/ActiveStreamList.jsx');
   const setup = await read('src/components/admin/StreamSetup.jsx');
   assert.match(status, /tvRequest\(/);
-  assert.match(status, /presentation/);
+  assert.match(status, /result\.value\.presentation/);
   assert.match(status, /'Offline'/);
-  assert.match(status, /logout or on another admin device/);
+  assert.match(status, /active server session/);
+  assert.match(status, /another admin device/);
   assert.match(setup, /Quick present/);
   assert.match(setup, /setup\.build\('Quick presentation'\)/);
   assert.match(setup, /stage === 2 && !quickStart/);
