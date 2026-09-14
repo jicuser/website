@@ -1,0 +1,33 @@
+name: Verify and save website integration checkpoint
+on:
+  push:
+    branches: [maintenance/forms-integration]
+    paths: [.github/workflows/assemble-content.yml]
+permissions:
+  contents: write
+jobs:
+  checkpoint:
+    if: github.ref == 'refs/heads/maintenance/forms-integration'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Verify source hashes and save the working branch
+        run: python .integration/assemble.py
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run validate
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: verified-content-browser
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 3
