@@ -4,10 +4,7 @@ import { passwordError } from '../src/lib/accountSetup.js';
 import { accountSetupUrl } from '../supabase/functions/manage-user/site-url.mjs';
 
 test('invitation and recovery destination is the JIC setup page', () => {
-  assert.equal(
-    accountSetupUrl(),
-    'https://lawngreen-kangaroo-881113.hostingersite.com/admin/setup',
-  );
+  assert.equal(accountSetupUrl(), 'https://jicmasjid.org/admin/setup');
   assert.equal(accountSetupUrl('https://example.org'), 'https://example.org/admin/setup');
 });
 

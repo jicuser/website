@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import { accountSetupUrl } from './site-url.mjs';
+import { AccountDeletionError, deleteStaffAccount } from './delete-account.mjs';
 import {
   hasPermission,
   validateAccess,
@@ -36,8 +37,8 @@ Deno.serve(async (req) => {
     const raw = await req.text();
     if (raw.length > 8000) throw new Error('Request is too large.');
     const body = JSON.parse(raw);
-    const setup = accountSetupUrl(Deno.env.get('JIC_SITE_URL'));
     if (body.action === 'invite') {
+      const setup = accountSetupUrl(Deno.env.get('JIC_SITE_URL'));
       const access = validateDelegation(actor, validateAccess(body));
       const email = String(body.email || '')
         .trim()
@@ -71,7 +72,12 @@ Deno.serve(async (req) => {
       throw new Error('Choose a staff account.');
     const { data: target } = await db.from('profiles').select('*').eq('id', body.user_id).single();
     if (!target) throw new Error('Staff account not found.');
+    if (body.action === 'delete') {
+      const result = await deleteStaffAccount(db, actor, target, body.confirmation);
+      return Response.json(result, { headers });
+    }
     if (body.action === 'send_setup') {
+      const setup = accountSetupUrl(Deno.env.get('JIC_SITE_URL'));
       if (!target.is_active || (target.id !== user.id && !canManageAccount(actor, target)))
         throw new Error('You cannot send a setup email for this account.');
       const { data, error } = await db.auth.admin.getUserById(target.id);
@@ -105,7 +111,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : 'Request failed.' },
-      { status: 400, headers },
+      { status: error instanceof AccountDeletionError ? error.status : 400, headers },
     );
   }
 });

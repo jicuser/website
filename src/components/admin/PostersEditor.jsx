@@ -19,6 +19,17 @@ export default function PostersEditor() {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
+  const editor = useRef(null);
+  const revealEditor = useCallback(() => {
+    if (!editor.current) return;
+    const toolbar = document.querySelector('.admin-toolbar');
+    editor.current.style.scrollMarginTop = `${(toolbar?.getBoundingClientRect().height || 0) + 12}px`;
+    editor.current.scrollIntoView({ block: 'start', behavior: 'instant' });
+    editor.current.focus({ preventScroll: true });
+  }, []);
+  useEffect(() => {
+    if (selected) revealEditor();
+  }, [selected, revealEditor]);
   const dirty = JSON.stringify(items) !== JSON.stringify(baseline);
   useEffect(() => {
     if (!dirty) {
@@ -111,17 +122,21 @@ export default function PostersEditor() {
         {items.map((poster) => (
           <button
             type="button"
-            className="admin-button"
+            className="admin-button flex-col min-w-0"
             key={poster.id}
             disabled={busy}
-            onClick={() => setSelected(poster.id)}
+            aria-pressed={selected === poster.id}
+            onClick={() => {
+              if (selected === poster.id) revealEditor();
+              else setSelected(poster.id);
+            }}
           >
             {poster.kind === 'announcement' ? (
               <span className="poster-type-label">Text & pictures</span>
             ) : (
               posterImage(poster.image) && <img src={poster.image} alt="" loading="lazy" />
             )}
-            <span>{poster.title || 'New poster'} · Edit</span>
+            <span className="w-full">{poster.title || 'New poster'} · Edit</span>
           </button>
         ))}
       </div>
@@ -142,7 +157,7 @@ export default function PostersEditor() {
         </button>
       </div>
       {item && (
-        <fieldset disabled={busy} className="scene-properties">
+        <fieldset ref={editor} tabIndex={-1} disabled={busy} className="scene-properties">
           <legend>{item.title || 'New poster'}</legend>
           <label>
             Poster name

@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { supabase } from '@/lib/supabaseClient';
 import AccessChecklist from '@/features/access/AccessChecklist';
+import DeleteAccount from '@/features/access/DeleteAccount';
 import { canManageAccount, PERMISSIONS } from '../../../supabase/functions/_shared/access.js';
 
 const emptyAccess = () => ({ permissions: [], staff_kinds: [] });
@@ -221,6 +222,24 @@ export default function StaffAccess() {
                   Send setup email
                 </button>
               </div>
+              <DeleteAccount
+                actor={profile}
+                account={row}
+                disabled={Boolean(busy)}
+                hasPendingChanges={Boolean(pending[row.id])}
+                onDelete={(confirmation) =>
+                  run(`delete-${row.id}`, async () => {
+                    const result = await invoke({ action: 'delete', user_id: row.id, confirmation });
+                    setRows((current) => current.filter((item) => item.id !== row.id));
+                    setPending((current) => {
+                      const remaining = { ...current };
+                      delete remaining[row.id];
+                      return remaining;
+                    });
+                    setNotice({ text: result.warning || 'Staff account deleted.' });
+                  }, true)
+                }
+              />
               {pending[row.id] && (
                 <button
                   className="admin-button primary"

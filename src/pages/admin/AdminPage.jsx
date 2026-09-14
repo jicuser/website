@@ -860,28 +860,28 @@ export default function AdminPage() {
             {status}
           </p>
         )}
+        <label className="admin-mobile-section w-full">
+          Go to
+          <select value={active} onChange={(event) => chooseSection(event.target.value)}>
+            {SECTION_GROUPS.map(([group, keys]) => {
+              const sections = allowed.filter(([key]) => keys.includes(key));
+              return (
+                sections.length > 0 && (
+                  <optgroup key={group} label={group}>
+                    {sections.map(([key, name]) => (
+                      <option key={key} value={key}>
+                        {name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )
+              );
+            })}
+          </select>
+        </label>
       </header>
       <div className="admin-console-layout">
-        <aside className="admin-navigation">
-          <label className="admin-mobile-section">
-            Go to
-            <select value={active} onChange={(event) => chooseSection(event.target.value)}>
-              {SECTION_GROUPS.map(([group, keys]) => {
-                const sections = allowed.filter(([key]) => keys.includes(key));
-                return (
-                  sections.length > 0 && (
-                    <optgroup key={group} label={group}>
-                      {sections.map(([key, name]) => (
-                        <option key={key} value={key}>
-                          {name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  )
-                );
-              })}
-            </select>
-          </label>
+        <aside className="admin-navigation max-[800px]:hidden">
           <nav aria-label="Admin sections">
             {SECTION_GROUPS.filter(([, keys]) => allowed.some(([key]) => keys.includes(key))).map(
               ([group, keys]) => (
