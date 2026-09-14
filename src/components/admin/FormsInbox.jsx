@@ -1,10 +1,29 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
+import { formsCsv } from '@/lib/formExport';
 import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/context/AuthContext';
+import CustomFormsWorkspace from '@/components/workspace/CustomFormsWorkspace';
+import '@/styles/workspace.css';
 
 const names = { contact: 'Contact', madrassah: 'Madrassah', itikaaf: 'I’tikaf' };
 
 export default function FormsInbox() {
+  const auth = useAuth();
+  return import.meta.env.VITE_ENABLE_WORKSPACE === 'true' ? (
+    <div className="community-workspace custom-forms-admin">
+      <CustomFormsWorkspace key={auth.user.id} auth={auth} />
+    </div>
+  ) : (
+    <LegacyFormsInbox />
+  );
+}
+
+function LegacyFormsInbox() {
+  const [search, setSearch] = useState('');
+  const [kind, setKind] = useState('all');
+  const [oldest, setOldest] = useState(false);
   const [status, setStatus] = useState('new');
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);
@@ -18,12 +37,14 @@ export default function FormsInbox() {
     setLoading(true);
     setError('');
     // RLS returns only forms allowed by the signed-in staff permissions.
-    supabase
+    let query = supabase
       .from('form_submissions')
       .select('id,kind,payload,status,created_at')
       .eq('status', status)
-      .order('created_at', { ascending: false })
-      .range(page * 25, page * 25 + 24)
+      .order('created_at', { ascending: oldest })
+      .range(page * 25, page * 25 + 24);
+    if (kind !== 'all') query = query.eq('kind', kind);
+    query
       .then(({ data, error: loadError }) => {
         if (!active) return;
         setRows(data || []);
@@ -41,7 +62,7 @@ export default function FormsInbox() {
     return () => {
       active = false;
     };
-  }, [status, page, refresh]);
+  }, [status, page, refresh, kind, oldest]);
 
   async function setComplete(row) {
     setBusy(row.id);
@@ -62,6 +83,21 @@ export default function FormsInbox() {
     }
   }
 
+  const visible = rows.filter((row) =>
+    JSON.stringify(row.payload || {})
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  );
+  function download() {
+    const url = URL.createObjectURL(
+      new Blob(['\ufeff' + formsCsv(visible)], { type: 'text/csv;charset=utf-8' }),
+    );
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'forms-page.csv';
+    anchor.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
   return (
     <div className="space-y-4">
       <div className="admin-heading">
@@ -93,13 +129,55 @@ export default function FormsInbox() {
           <option value="done">Completed</option>
         </select>
       </label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label>
+          Form type
+          <select
+            className="w-full rounded-lg border bg-white p-3"
+            value={kind}
+            onChange={(e) => {
+              setKind(e.target.value);
+              setPage(0);
+            }}
+          >
+            <option value="all">All permitted forms</option>
+            {Object.entries(names).map(([value, name]) => (
+              <option key={value} value={value}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Search this page
+          <input
+            className="w-full rounded-lg border bg-white p-3"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </label>
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <button
+          className="admin-button"
+          onClick={() => {
+            setOldest(!oldest);
+            setPage(0);
+          }}
+        >
+          {oldest ? 'Oldest first' : 'Newest first'}
+        </button>
+        <button className="admin-button" disabled={loading || !visible.length} onClick={download}>
+          Download this page as CSV
+        </button>
+      </div>
       {error && <p role="alert">{error}</p>}
       {loading ? (
         <p role="status">Loading forms…</p>
-      ) : rows.length === 0 ? (
+      ) : visible.length === 0 ? (
         <p>No forms here yet.</p>
       ) : (
-        rows.map((row) => (
+        visible.map((row) => (
           <details className="rounded-xl border bg-white p-4" key={row.id}>
             <summary className="cursor-pointer break-words font-semibold">
               {names[row.kind]} · {row.payload.name || row.payload.attendee_name}
@@ -122,6 +200,11 @@ export default function FormsInbox() {
                   </div>
                 ))}
             </dl>
+            {import.meta.env.VITE_ENABLE_WORKSPACE === 'true' && (
+              <Link className="admin-button" to={`/portal?form=${encodeURIComponent(row.id)}`}>
+                Assign action
+              </Link>
+            )}
             <button
               className="admin-button"
               disabled={Boolean(busy)}

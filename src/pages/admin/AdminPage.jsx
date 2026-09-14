@@ -25,6 +25,7 @@ import {
 import FormsInbox from '@/components/admin/FormsInbox';
 import StaffAccess from '@/components/admin/StaffAccess';
 import StreamSetup from '@/components/admin/StreamSetup';
+import MobileContentEditor from '@/components/admin/MobileContentEditor';
 import PostersEditor from '@/components/admin/PostersEditor';
 import PrayerEditor from '@/components/admin/PrayerEditor';
 import PageEditor from '@/components/admin/PageEditor';
@@ -53,6 +54,7 @@ const SECTIONS = [
   ['announcements', 'Announcements', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
   ['tv', 'Hall streams', Monitor, 'tv'],
+  ['app_content', 'App images & reading', FileText, 'content'],
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
   ['forms', 'Forms inbox', FileText, 'forms'],
@@ -61,7 +63,7 @@ const SECTIONS = [
 ];
 const SECTION_GROUPS = [
   ['Everyday', ['dashboard', 'tv', 'prayer', 'posters', 'events', 'announcements', 'livestream']],
-  ['Website & people', ['content', 'forms', 'team', 'users', 'audit']],
+  ['Website & people', ['content', 'app_content', 'forms', 'team', 'users', 'audit']],
 ];
 
 function Field({ title, children, className = '' }) {
@@ -801,6 +803,7 @@ export default function AdminPage() {
     prayer: <PrayerEditor />,
     events: <EventsSection />,
     posters: <PostersEditor />,
+    app_content: <MobileContentEditor />,
     announcements: <AnnouncementsSection />,
     livestream: <LivestreamSection />,
     content: <PageEditor initialPath={params.get('page') || '/'} />,

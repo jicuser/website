@@ -4,6 +4,8 @@
 export const PROGRAMMES = [
   {
     id: 'open-quran-circle',
+    audience: 'all',
+    sessions: [{ day: 5, time: '18:30' }],
     title: 'Open Qur’an Circle',
     subtitle: 'Fridays · All are welcome',
     schedule: '6:30pm · Woodlands Road Masjid',
@@ -15,6 +17,8 @@ export const PROGRAMMES = [
   },
   {
     id: 'youth-islamic-studies',
+    audience: 'youth',
+    sessions: [1, 2, 4].map((day) => ({ day, time: '17:00', end: '18:30' })),
     title: 'Youth Islamic Studies',
     subtitle: 'For boys · Starts September 2026',
     schedule: 'Mon, Tue & Thu · 5–6.30pm',
@@ -26,17 +30,25 @@ export const PROGRAMMES = [
   },
   {
     id: 'seekers-gateway',
+    audience: 'adult',
+    sessions: [],
     title: 'The Seeker’s Gateway',
     subtitle: 'Males & females · Starts September 2026',
     schedule: 'Supervised by Shaykh Qamar Ilyas',
     detail: 'Foundations of Islamic scholarship · £100/term (three terms/year).',
     image: '/posters/seekers-gateway.jpg',
     alt: 'The Seeker’s Gateway: Arabic, Fiqh, Aqida, Tajwid, Sirah, Tafsir, Hadith, Usul, Logic and Apologetics. Starts September 2026, supervised by Shaykh Qamar Ilyas. Open to males and females, £100 per term. Contact 07484127444 between 11am and 12.15pm.',
-    to: '/madrassah/classes-courses',
-    groups: ['home', 'education', 'madrassah'],
+    to: '/education/classes-courses',
+    groups: ['home', 'education'],
   },
   {
     id: 'after-maghrib',
+    audience: 'all',
+    sessions: [
+      { day: 1, after: 'Maghrib', title: 'Sirah' },
+      { day: 3, after: 'Maghrib', title: 'Aqida' },
+      { day: 5, after: 'Maghrib', title: 'Majlis of Dhikr' },
+    ],
     title: 'After Maghrib',
     subtitle: 'With Shaykh Muhammad Yaseen',
     schedule: 'Mon: Sirah · Wed: Aqida · Fri: Dhikr',
@@ -48,6 +60,8 @@ export const PROGRAMMES = [
   },
   {
     id: 'adhan-iqamah-course',
+    audience: 'all',
+    sessions: [],
     title: 'Adhan & Iqamah Course',
     subtitle: 'Six-week course',
     schedule: 'Sundays after Dhuhr · Starting 9 August 2026',

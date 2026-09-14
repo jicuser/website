@@ -21,9 +21,9 @@ export const MADRASSAH_TABS = [
 
 export const EDUCATION_TABS = [
   { name: 'Overview', path: '/education' },
-  { name: 'Madrassah', path: '/madrassah' },
-  { name: 'Classes & Courses', path: '/madrassah/classes-courses' },
-  { name: 'Student Portal', path: '/madrassah/student-portal' },
+  { name: 'Adult Classes & Courses', path: '/education/classes-courses' },
+  { name: 'Weekly Schedule', path: '/education/week' },
+  { name: 'Student Portal', path: '/portal' },
 ];
 
 export const WORSHIP_TABS = [

@@ -1,12 +1,15 @@
-# Shared backend contract for a future Flutter client
+# Shared backend contract for the Flutter client
 
-Keep the existing React/Vite website. Flutter will use its own Dart UI and the same Supabase records, authentication, RLS and Edge Functions. No Flutter app or native widget is created by this website change.
+Keep the existing React/Vite website. The Flutter client is in `tippytaptap/JICapp` and uses its own Dart UI with the same Supabase records, authentication, RLS and Edge Functions. The app repository contains the native widget source.
+
+The September 2026 workspace implementation is specified in [community-workspace-api.md](community-workspace-api.md) and [community-workspace-ui.md](community-workspace-ui.md). Those documents describe the new additive migration, FCM sender, task inbox and learning portal. Source exists; the migration, native credentials and production rollout are not deployed by this change. The display contracts below remain unchanged.
 
 ## App inbox and notifications: agreed direction
 
-This section is the plan for future implementation. The repository already has a
-private forms inbox and staff access; it does not yet implement a general app task
-system, per-user notification inbox or mobile push delivery.
+This section records the agreed direction. The repository retains its private
+forms inbox and staff access, and now includes feature-gated shared tasks, a
+per-user notification inbox and an FCM push worker. Enable them after staging the
+new migration and verifying account isolation.
 
 | Responsibility                 | Owner and intended behavior                                                                                                                                                                                                                     |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -24,10 +27,10 @@ and notification preferences on the server, including when a queued alert is sen
 Private form details should be read inside the authenticated app, not copied into
 lock-screen push text by default.
 
-For the future Flutter app, choose one compatible push integration, with credentials
-held on the server and device registrations associated with the signed-in user.
-Supabase documents Edge Functions sending through services such as FCM or Expo;
-the final provider choice and native setup remain implementation work. See
+The Flutter app uses FCM, with sender credentials held on the server and device
+registrations associated with the signed-in user. Supabase documents Edge
+Functions sending through services such as FCM or Expo; native provisioning and
+physical-device delivery tests remain rollout work. See
 [Supabase push notifications](https://supabase.com/docs/guides/functions/examples/push-notifications).
 
 The optional-email direction concerns routine notices, tasks and form replies.

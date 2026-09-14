@@ -15,6 +15,11 @@ import NotFoundPage from '@/pages/NotFoundPage';
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ClassesCoursesPage = lazy(() => import('@/pages/ClassesCoursesPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
+const CommunityPortalPage = lazy(() => import('@/pages/CommunityPortalPage'));
+const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
+const SermonArchive = lazy(() =>
+  import('@/components/workspace/Sermons').then((module) => ({ default: module.SermonArchive })),
+);
 const EducationPage = lazy(() => import('@/pages/EducationPage'));
 const FinancialHistoryPage = lazy(() => import('@/pages/FinancialHistoryPage'));
 const HallBookingPage = lazy(() => import('@/pages/HallBookingPage'));
@@ -36,6 +41,7 @@ const SearchPage = lazy(() => import('@/pages/SearchPage'));
 
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AccountSetupPage = lazy(() => import('@/pages/admin/AccountSetupPage'));
+const AccountRecoveryPage = lazy(() => import('@/pages/AccountRecoveryPage'));
 const ShareDevicePage = lazy(() => import('@/pages/admin/ShareDevicePage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const TileContentAdminPage = lazy(() => import('@/pages/admin/TileContentAdminPage'));
@@ -61,12 +67,14 @@ function AppRoutes() {
         <RouteScrollReset />
         <AnimatePresence mode="wait">
           <Routes>
+            <Route path="/portal" element={<CommunityPortalPage />} />
             <Route path="/radio" element={<RadioPlayerPage />} />
             <Route path="/tv179" element={<TvDisplayPage />} />
             <Route path="/tv179/:screenId" element={<TvDisplayPage />} />
             <Route path="/tv" element={<Navigate to="/tv179" replace />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin/setup" element={<AccountSetupPage />} />
+            <Route path="/account/recovery" element={<AccountRecoveryPage />} />
             <Route
               path="/admin/share/:screenId"
               element={
@@ -100,6 +108,8 @@ function AppRoutes() {
               <Route path="about" element={<AboutPage />} />
               <Route path="team" element={<TeamPage />} />
               <Route path="contact" element={<ContactPage />} />
+              <Route path="forms/:slug" element={<PublicFormPage />} />
+              <Route path="talks" element={<SermonArchive />} />
               <Route path="financial-history" element={<FinancialHistoryPage />} />
               <Route path="privacy" element={<PrivacyPage />} />
               <Route path="social-media" element={<SocialMediaPage />} />
@@ -135,6 +145,9 @@ function AppRoutes() {
               <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
 
               <Route path="education" element={<EducationPage />} />
+              <Route path="education/classes-courses" element={<EducationPage view="courses" />} />
+              <Route path="education/week" element={<EducationPage view="week" />} />
+
               <Route path="madrassah" element={<MadrassahPage />} />
               <Route path="madrassah/classes-courses" element={<ClassesCoursesPage />} />
               <Route path="madrassah/enrolment" element={<MadrassahEnrolmentPage />} />
