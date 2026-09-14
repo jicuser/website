@@ -8,32 +8,14 @@ permissions:
 jobs:
   snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: 86c881ea8e36fc8983a7706056a17752972e5801
-          path: current
           persist-credentials: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: dcd17bee10bd5def2ab035a5d543d98cdec98899
-          path: existing
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: '24'
-          package-manager-cache: false
-      - run: npm ci
-        working-directory: existing
-      - name: Package source and locked test dependencies
-        run: |
-          mkdir snapshots
-          git -C current archive HEAD | gzip > snapshots/current-source.tar.gz
-          git -C existing archive HEAD | gzip > snapshots/existing-source.tar.gz
-          tar -czf snapshots/test-dependencies.tar.gz -C existing node_modules
+      - run: git archive HEAD | gzip > current-source.tar.gz
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: website-source
-          path: snapshots/
+          name: website-source-current
+          path: current-source.tar.gz
           retention-days: 1
