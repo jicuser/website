@@ -16,7 +16,7 @@ export async function formsDatabase() {
  create policy forms_read on form_submissions for select to authenticated using(private.has_permission('forms_'||kind));
  create policy forms_update on form_submissions for update to authenticated using(private.has_permission('forms_'||kind)) with check(private.has_permission('forms_'||kind));
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit integer,allowed_mime_types text[]);`);
- for (const name of ['20260914040000_website_forms.sql','20260914041000_content_pages.sql']) await db.exec(await readFile(new URL(`../../supabase/migrations/${name}`,import.meta.url),'utf8'));
+ for (const name of ['20260914040000_website_forms.sql','20260914041000_content_pages.sql','20260914104500_form_release_compatibility.sql']) await db.exec(await readFile(new URL(`../../supabase/migrations/${name}`,import.meta.url),'utf8'));
  await db.exec(`insert into profiles(id,display_name,is_owner,permissions) values('${id(1)}','Owner',true,'{}'),('${id(2)}','Form manager',false,'{forms_manage}'),('${id(3)}','Responsible person',false,'{}'),('${id(4)}','Replacement person',false,'{}'),('${id(5)}','Unrelated account',false,'{}'),('${id(6)}','Content editor',false,'{content}');`);
  const as = async(user,work,role='authenticated') => {
   await db.exec(`set role ${role};select set_config('request.jwt.claim.sub','${user || ''}',false);`);
