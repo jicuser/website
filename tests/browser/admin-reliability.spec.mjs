@@ -56,8 +56,8 @@ async function openAdmin(page, { actor = owner, section = 'posters', deletionFai
   return { errors, writes };
 }
 
-for (const width of [390, 1280]) {
-  test(`poster editing and section navigation remain usable at ${width}px`, async ({ page }) => {
+for (const width of [320, 390, 1280]) {
+  test(`poster editing and section navigation remain usable at ${width}px`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     const evidence = await openAdmin(page);
     const cards = page.locator('.admin-poster-picker button');
@@ -69,6 +69,8 @@ for (const width of [390, 1280]) {
     }));
     expect(geometry.length).toBeGreaterThan(0);
     expect(geometry.every(card => card.below && card.width > 70)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`posters-${width}.png`) });
     const selector = page.locator('.admin-toolbar .admin-mobile-section select');
     await expect(page.locator('.admin-mobile-section')).toHaveCount(1);
     if (width < 801) {
@@ -90,8 +92,11 @@ for (const width of [390, 1280]) {
     expect(top.editor).toBeGreaterThanOrEqual(top.toolbar - 1);
     await page.getByLabel('Poster name', { exact: true }).fill('Updated test poster');
     expect(evidence.writes).toHaveLength(0);
-    await page.getByRole('button', { name: 'Publish posters', exact: true }).click();
+    // Exercise the sticky save action on phones and the editor action on desktop.
+    const saveArea = page.locator(width < 801 ? '.admin-toolbar' : '.admin-main');
+    await saveArea.getByRole('button', { name: 'Publish posters', exact: true }).click();
     await expect.poll(() => evidence.writes.length).toBe(1);
+    await expect(page.locator('.admin-toolbar .admin-save-pending')).toHaveCount(0);
     if (width < 801) await selector.selectOption('announcements');
     else await page.getByRole('navigation', { name: 'Admin sections' })
       .getByRole('button', { name: 'Announcements', exact: true }).click();
