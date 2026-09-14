@@ -1,5 +1,6 @@
 import { currentPrayer } from '@/lib/currentPrayer';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Book, Clock, Heart, Headphones, Loader2 } from 'lucide-react';
@@ -24,6 +25,18 @@ const religiousServices = [
     title: 'Quran Recitation',
     description:
       'Regular Quran recitation sessions with proper tajweed rules and reflection on meanings.',
+  },
+  {
+    icon: <Heart className="h-10 w-10 text-primary" />,
+    title: 'Nikah enquiries',
+    description: 'Ask about the Nikah process or request a preferred date for the team to review.',
+    to: '/forms/nikah-enquiry',
+  },
+  {
+    icon: <Heart className="h-10 w-10 text-primary" />,
+    title: 'Funeral support',
+    description: 'Send the essential details privately so a member of the centre team can contact you.',
+    to: '/forms/funeral-enquiry',
   },
   {
     icon: <Clock className="h-10 w-10 text-primary" />,
@@ -61,23 +74,35 @@ const ReligiousServicesTab = () => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {religiousServices.map((service, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
+        {religiousServices.map((service, index) => {
+          const card = (
             <Card className="h-full hover:shadow-lg transition-all">
               <CardContent className="pt-6 flex flex-col items-center text-center">
                 <div className="mb-4 p-3 rounded-full bg-primary/10">{service.icon}</div>
                 <h3 className="text-xl font-bold mb-2">{service.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300">{service.description}</p>
+                {service.to && <span className="mt-4 font-semibold text-primary">Open enquiry form →</span>}
               </CardContent>
             </Card>
-          </motion.div>
-        ))}
+          );
+          return (
+            <motion.div
+              key={service.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.08 }}
+            >
+              {service.to ? (
+                <Link to={service.to} className="block h-full" aria-label={`Open ${service.title} form`}>
+                  {card}
+                </Link>
+              ) : (
+                card
+              )}
+            </motion.div>
+          );
+        })}
       </div>
 
       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mt-8">

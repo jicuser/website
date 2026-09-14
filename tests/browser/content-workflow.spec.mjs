@@ -58,6 +58,8 @@ async function fixture(page, {actor=owner, pagePublished=true, pageExists=true} 
 test('Admin Forms keeps live forms, people, responses and actions together',async({page},testInfo)=>{
   const {state,admin}=await fixture(page);await admin();
   await expect(page.getByRole('heading',{name:'Forms',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:/Live forms/i}).click();
+  await expect(page.locator('.content-form-card').filter({hasText:'Course interest'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('forms-catalogue.png'),fullPage:true});
   await page.locator('.content-form-card').filter({hasText:'Course interest'}).click();
   await expect(page.getByText('Responsible people & access')).toBeVisible();

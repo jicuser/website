@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Radio } from 'lucide-react';
 import { TV_SCREENS } from '@/lib/tvControl';
 import { useAuth } from '@/context/AuthContext';
@@ -37,13 +37,15 @@ export default function StreamSetup() {
     }
   });
   const [selected, setSelected] = useState(openHall || 'mens-main');
-  const openWorkspace = (screenId) => {
+  const [quickStart, setQuickStart] = useState(false);
+  const openWorkspace = (screenId, quick = false) => {
     try {
       sessionStorage.setItem(openKey, screenId);
     } catch {
       /* Server sessions can still be recovered without browser storage. */
     }
     setSelected(screenId);
+    setQuickStart(quick);
     setOpenHall(screenId);
   };
   if (openHall)
@@ -52,26 +54,32 @@ export default function StreamSetup() {
         key={`${user.id}:${openHall}`}
         screenId={openHall}
         userId={user.id}
+        quickStart={quickStart}
         onBack={() => {
           try {
             sessionStorage.removeItem(openKey);
           } catch {
             /* Storage is optional. */
           }
+          setQuickStart(false);
           setOpenHall('');
         }}
       />
     );
   return (
     <section className="stream-setup admin-panel">
-      <ActiveStreamList key={user.id} onOpen={openWorkspace} />
-      <span className="admin-eyebrow stream-step-indicator jic-prompt">STEP 1 OF 3</span>
+      <ActiveStreamList
+        key={user.id}
+        onOpen={(screenId) => openWorkspace(screenId, false)}
+        onStart={() => openWorkspace(selected, true)}
+      />
+      <span className="admin-eyebrow stream-step-indicator jic-prompt">PRESENTATION STREAM</span>
       <h2>
-        <span className="jic-prompt">Choose your stream</span>
+        <span className="jic-prompt">Choose a hall</span>
       </h2>
-      <p>Choose the hall where you want to show your stream.</p>
+      <p>Quick Present skips the name step. Choose the hall, select an input and start.</p>
       <label>
-        Hall stream
+        Hall
         <select value={selected} onChange={(event) => setSelected(event.target.value)}>
           {TV_SCREENS.map((screen) => (
             <option key={screen.id} value={screen.id}>
@@ -81,18 +89,18 @@ export default function StreamSetup() {
         </select>
       </label>
       <div className="admin-actions">
-        <button
-          className="admin-button primary"
-          onClick={() => openWorkspace(selected)}
-        >
-          Set up presentation <span aria-hidden="true">→</span>
+        <button className="admin-button primary" onClick={() => openWorkspace(selected, true)}>
+          Quick present <span aria-hidden="true">→</span>
+        </button>
+        <button className="admin-button" onClick={() => openWorkspace(selected, false)}>
+          Full setup
         </button>
       </div>
     </section>
   );
 }
 
-function HallWorkspace({ screenId, userId, onBack }) {
+function HallWorkspace({ screenId, userId, quickStart, onBack }) {
   const setup = useStreamSetup(screenId, userId);
   const { data, form, stage, busy } = setup;
   const [backgroundOpen, setBackgroundOpen] = useState(false);
@@ -121,6 +129,12 @@ function HallWorkspace({ screenId, userId, onBack }) {
   const readyToPresent = hasSceneContent(
     form?.scenes.find((scene) => scene.id === form.active_scene_id),
   );
+
+  useEffect(() => {
+    if (!quickStart || !hall || !setup.data || setup.stage !== 2 || setup.form) return;
+    setup.build('Quick presentation');
+  }, [quickStart, hall, setup.data, setup.stage, setup.form]);
+
   useRegisterAdminSave(setup.publish, setup.started && setup.dirty, 'Update live layout');
   return (
     <div className="stream-setup admin-tv-editor">
@@ -129,8 +143,10 @@ function HallWorkspace({ screenId, userId, onBack }) {
           <span className="admin-eyebrow stream-step-indicator jic-prompt">
             {hall
               ? setup.started
-                ? 'STREAM SESSION OPEN'
-                : `STEP ${stage} OF 3`
+                ? 'PRESENTATION LIVE'
+                : quickStart
+                  ? 'QUICK PRESENT'
+                  : `STEP ${stage} OF 3`
               : 'BACKGROUND DISPLAY'}
           </span>
           <h2>{screen.label}</h2>
@@ -142,7 +158,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
             if (
               form &&
               !window.confirm(
-                'Leave this setup? Local camera and screen sharing will stop. End the stream first if you want to save its settings.',
+                'Leave this setup? Local camera and screen sharing will stop. End the presentation first if you want to save its settings.',
               )
             )
               return;
@@ -150,7 +166,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
             onBack();
           }}
         >
-          Choose another stream
+          Choose another hall
         </button>
       </div>
       {setup.message && (
@@ -172,13 +188,13 @@ function HallWorkspace({ screenId, userId, onBack }) {
           }}
           onSaved={() => {
             setup.setPendingSave(null);
-            setup.setMessage('Stream ended and settings saved. Screens show the normal display.');
+            setup.setMessage('Presentation ended and settings saved. Screens show the normal display.');
             setup.refresh().catch((error) => setup.setMessage(`Settings saved. ${error.message}`));
           }}
         />
       )}
       {!data ? (
-        <p>Loading stream settings…</p>
+        <p>Loading presentation settings…</p>
       ) : (
         <>
           {hall && (
@@ -187,9 +203,11 @@ function HallWorkspace({ screenId, userId, onBack }) {
               onChange={(settings, template) => {
                 if (loadBlocked) return;
                 if (
-                  stage === 3 && setup.dirty &&
+                  stage === 3 &&
+                  setup.dirty &&
                   !window.confirm('Replace this unpublished draft with saved settings?')
-                ) return;
+                )
+                  return;
                 setup.loadSettings(settings, template);
               }}
               templates={data.templates}
@@ -202,7 +220,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
             <summary>Display webpage address</summary>
             <p>
               Keep this permanent address open on each viewing device. Enter the six-digit code from
-              its corner below after starting your stream.
+              its corner below after starting your presentation.
             </p>
             <a href={url} target="_blank" rel="noreferrer">
               {url}
@@ -222,13 +240,13 @@ function HallWorkspace({ screenId, userId, onBack }) {
             </button>
           </details>
           {hall && data.presentation && (
-            <section className="admin-panel stream-live-status" aria-label="Active stream session">
+            <section className="admin-panel stream-live-status" aria-label="Active presentation session">
               <div className="admin-actions">
                 <Radio size={18} aria-hidden="true" />
-                <strong>Stream still active</strong>
+                <strong>Presentation still live</strong>
                 {!setup.started && (
                   <button className="admin-button" disabled={busy} onClick={setup.manageLive}>
-                    Manage current stream
+                    Manage current presentation
                   </button>
                 )}
                 <button
@@ -237,7 +255,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   aria-busy={busy && setup.operation === 'end'}
                   onClick={() => setup.run(setup.end, 'end')}
                 >
-                  {busy && setup.operation === 'end' ? 'Ending stream…' : 'End stream'}
+                  {busy && setup.operation === 'end' ? 'Ending…' : 'End presentation'}
                 </button>
               </div>
               <details>
@@ -245,21 +263,21 @@ function HallWorkspace({ screenId, userId, onBack }) {
                 <p>
                   {data.inputs?.length
                     ? 'A source is registered. Check the receiving display to confirm its picture and sound.'
-                    : 'No camera or screen source is connected. Reopen its input to share again.'}
+                    : 'The server session is still active, but no camera or screen source is currently connected. Reopen an input or end the presentation.'}
                 </p>
               </details>
             </section>
           )}
-          {hall && stage === 2 && (
+          {hall && stage === 2 && !quickStart && (
             <section className="admin-panel">
               <h3>
-                <span className="jic-prompt">Name your stream</span>
+                <span className="jic-prompt">Name your presentation</span>
               </h3>
               <form
                 noValidate
                 onSubmit={(event) => {
                   event.preventDefault();
-                  const problem = nameProblem(setup.streamName, 'stream name');
+                  const problem = nameProblem(setup.streamName, 'presentation name');
                   setNameError(problem);
                   if (problem) {
                     event.currentTarget.querySelector('input')?.focus();
@@ -268,9 +286,9 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   setup.build(setup.streamName);
                 }}
               >
-                <p>You can change this name when saving settings after the stream ends.</p>
+                <p>You can change this name when saving settings after the presentation ends.</p>
                 <label>
-                  <span className="jic-prompt">Stream name (required)</span>
+                  <span className="jic-prompt">Presentation name (required)</span>
                   <input
                     value={setup.streamName}
                     required
@@ -296,9 +314,14 @@ function HallWorkspace({ screenId, userId, onBack }) {
               </form>
             </section>
           )}
+          {hall && stage === 2 && quickStart && (
+            <section className="admin-panel" aria-live="polite">
+              <p>Preparing Quick Present…</p>
+            </section>
+          )}
           {hall && stage === 3 && form && (
             <>
-              {setup.streamName && <h3>{setup.streamName}</h3>}
+              {!quickStart && setup.streamName && <h3>{setup.streamName}</h3>}
               <SceneEditor
                 value={form}
                 onChange={setup.setForm}
@@ -348,7 +371,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
                       ? 'Layout has unpublished changes.'
                       : 'This layout is live.'
                     : data.presentation
-                      ? 'This draft is separate from the active stream.'
+                      ? 'This draft is separate from the active presentation.'
                       : 'Your setup is not live yet.'}
                 </span>
                 <div className="admin-actions">
@@ -358,7 +381,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
                     onClick={() => {
                       if (
                         window.confirm(
-                          'Start a clean setup? This clears your draft and stops local sharing. End the stream first if you want to save its settings.',
+                          'Start a clean setup? This clears your draft and stops local sharing. End the presentation first if you want to save its settings.',
                         )
                       )
                         setup.newSetup();
