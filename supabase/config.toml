@@ -8,3 +8,8 @@ verify_jwt = false
 [functions.submit-form]
 # The SDK supplies the public anon JWT; visitors need no account to submit.
 verify_jwt = true
+
+[functions.custom-forms]
+# Public submissions and signed upload claims are validated by this handler.
+# Private downloads require a verified user and current form permissions.
+verify_jwt = false

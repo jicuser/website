@@ -41,7 +41,7 @@ const content = {
   accepting: true,
   updated_at: '2026-09-14T00:00:00Z',
 };
-async function setup(page, { admin = true } = {}) {
+async function setup(page, { admin = true, formData = form, pageData = content } = {}) {
   const writes = [];
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
   await page.route('**/preview-api/**', async (route) => {
@@ -64,7 +64,7 @@ async function setup(page, { admin = true } = {}) {
         expires_at: expiry,
       };
     } else if (path.endsWith('/rpc/get_my_profile')) data = owner;
-    else if (path.endsWith('/rpc/admin_form_catalogue')) data = [form];
+    else if (path.endsWith('/rpc/admin_form_catalogue')) data = [formData];
     else if (
       path.endsWith('/rpc/custom_form_members') ||
       path.endsWith('/rpc/custom_form_assignees')
@@ -72,15 +72,24 @@ async function setup(page, { admin = true } = {}) {
       data = [owner];
     else if (path.endsWith('/custom_form_staff'))
       data = [{ form_id: form.id, user_id: owner.id, role: 'responsible' }];
-    else if (path.endsWith('/content_pages')) data = [content];
-    else if (path.endsWith('/rpc/list_content_pages')) data = [content];
-    else if (path.endsWith('/rpc/get_content_page')) data = content;
-    else if (path.endsWith('/rpc/get_public_form')) data = { ...form, version: 1 };
+    else if (path.endsWith('/content_pages'))
+      data =
+        new URL(route.request().url()).searchParams.get('select') === '*' ? pageData : [pageData];
+    else if (path.endsWith('/rpc/list_content_pages')) data = [pageData];
+    else if (path.endsWith('/rpc/get_content_page')) data = pageData;
+    else if (path.endsWith('/rpc/get_public_form'))
+      data = formData.enabled ? { ...formData, version: 1 } : null;
     else if (path.endsWith('/rpc/search_form_submissions'))
       data = { rows: [], total: 0, new_count: 0, done_count: 0 };
     else if (path.endsWith('/rpc/save_custom_form')) {
       writes.push({ path, body });
       data = form.id;
+    } else if (path.endsWith('/rpc/publish_custom_form')) {
+      writes.push({ path, body });
+      data = 2;
+    } else if (path.endsWith('/functions/v1/custom-forms')) {
+      writes.push({ path, body });
+      data = { ok: true, id: 'test-response' };
     } else if (path.endsWith('/rpc/save_content_page')) {
       writes.push({ path, body });
       data = { ...content, ...body.p_page };
@@ -103,7 +112,7 @@ test('Admin Forms shows live definitions, people, response counts and actions in
   await page.goto('/admin?section=forms');
   await expect(page.getByRole('heading', { name: 'Forms', exact: true })).toBeVisible();
   await expect(page.getByText('Course applications', { exact: true })).toBeVisible();
-  await expect(page.getByText('Live', { exact: true })).toBeVisible();
+  await expect(page.getByRole('article').getByText('Live', { exact: true })).toBeVisible();
   await expect(page.getByText(/Responsible: Owner/)).toBeVisible();
   await page.getByRole('button', { name: 'Manage form', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Responses', exact: true })).toBeVisible();
@@ -132,4 +141,86 @@ test('public course detail page explains registration and links the same form', 
     'href',
     '/forms/course-application',
   );
+});
+
+test('form creation requires an assignee before publishing, and preview makes no submission', async ({
+  page,
+}, testInfo) => {
+  const writes = await setup(page);
+  await page.goto('/admin?section=forms');
+  await page.getByRole('button', { name: 'Create form', exact: true }).click();
+  const editor = page.locator('.custom-form-editor');
+  await editor.getByLabel('Form title', { exact: true }).fill('New course enquiries');
+  await editor.getByLabel('Form address', { exact: true }).fill('new-course-enquiries');
+  await editor.getByRole('button', { name: 'Save and publish', exact: true }).click();
+  await expect(
+    editor.getByText('Choose at least one responsible person before publishing.'),
+  ).toBeVisible();
+  expect(writes).toHaveLength(0);
+  await editor
+    .getByRole('group', { name: 'Responsible people', exact: true })
+    .getByRole('checkbox')
+    .check();
+  await editor.getByRole('button', { name: 'Preview questions', exact: true }).click();
+  expect(writes).toHaveLength(0);
+  await page.screenshot({ path: testInfo.outputPath('form-preview.png') });
+  await editor.getByRole('button', { name: 'Save and publish', exact: true }).click();
+  await expect.poll(() => writes.length).toBe(2);
+  expect(writes[0].body.p_form.responsible_ids).toEqual([owner.id]);
+  expect(writes[1].path).toContain('publish_custom_form');
+});
+
+test('closing form acceptance saves without publishing or deleting responses', async ({ page }) => {
+  const writes = await setup(page);
+  await page.goto(`/admin?section=forms&form=${form.id}`);
+  await page.getByRole('button', { name: 'Edit form & assignments', exact: true }).click();
+  const editor = page.locator('.custom-form-editor');
+  await editor.getByLabel('Accept responses when published').uncheck();
+  await editor.getByRole('button', { name: 'Save draft', exact: true }).click();
+  await expect.poll(() => writes.length).toBe(1);
+  expect(writes[0].body.p_form.enabled).toBe(false);
+  expect(writes[0].path).toContain('save_custom_form');
+});
+
+test('page publication switch preserves a linked form and stable address', async ({ page }) => {
+  const writes = await setup(page);
+  await page.goto('/admin?section=posters');
+  await page.locator('.admin-poster-picker button').first().click();
+  await page.getByRole('button', { name: 'Page settings', exact: true }).click();
+  const editor = page.locator('.content-fields');
+  await editor.getByLabel('Page live after saving').uncheck();
+  await editor.getByRole('button', { name: 'Save page', exact: true }).click();
+  await expect.poll(() => writes.length).toBe(1);
+  expect(writes[0].body.p_page.published).toBe(false);
+  expect(writes[0].body.p_page.form_id).toBe(form.id);
+  expect(writes[0].body.p_page.slug).toBe(content.slug);
+});
+
+test('a public interest form submits only when requested and never promises a place', async ({
+  page,
+}) => {
+  const writes = await setup(page, { admin: false });
+  await page.goto('/forms/course-application');
+  await expect(page.getByRole('link', { name: 'Sign in', exact: true })).toHaveCount(0);
+  await page.getByLabel('Your name').fill('Test visitor');
+  expect(writes).toHaveLength(0);
+  await page.getByRole('button', { name: 'Send response', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
+  expect(writes).toHaveLength(1);
+  expect(writes[0].body.answers).toEqual({ name: 'Test visitor' });
+  await expect(page.getByText(/does not confirm a place/)).toBeVisible();
+});
+
+test('a closed course form leaves the information page visible without an active Apply button', async ({
+  page,
+}) => {
+  await setup(page, {
+    admin: false,
+    formData: { ...form, enabled: false },
+    pageData: { ...content, accepting: false },
+  });
+  await page.goto('/pages/course-details');
+  await expect(page.getByRole('heading', { name: 'Course details', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Apply', exact: true })).toHaveCount(0);
+  await expect(page.getByText(/closed/i)).toBeVisible();
 });

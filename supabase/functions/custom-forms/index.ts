@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import { validateUpload, hasExpectedSignature, safeFilename, responsesCsv } from './validation.mjs';
 import { createZip } from './zip.mjs';
-import { validWorkerSecret } from '../push-worker/message.mjs';
+import { validWorkerSecret } from './maintenance.mjs';
 
 const headers = {
   'Access-Control-Allow-Origin': '*',

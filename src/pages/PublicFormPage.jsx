@@ -25,7 +25,6 @@ export default function PublicFormPage() {
 }
 
 function PublicForm({ slug }) {
-  const auth = useAuth();
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -170,12 +169,7 @@ function PublicForm({ slug }) {
           >
             <h1>{form.title}</h1>
             <p>{form.description}</p>
-            {!auth.user && (
-              <p className="workspace-meta">
-                <Link to="/portal">Sign in</Link> before completing this form to keep replies in
-                your account.
-              </p>
-            )}
+            <p className="workspace-meta">No account is required to send this form.</p>
             <fieldset disabled={busy}>
               <CustomFormsFields
                 fields={form.schema.fields}
