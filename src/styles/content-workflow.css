@@ -1,0 +1,22 @@
+.admin-console .custom-forms-admin { min-height: 0; background: transparent; padding: 0; }
+.custom-forms-admin, .content-pages-manager, .poster-workflow { min-width: 0; }
+.content-field-grid, .content-form-grid, .content-summary-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit,minmax(min(100%,240px),1fr)); margin: 16px 0; }
+.content-form-card { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; min-width: 0; overflow-wrap: anywhere; }
+.content-form-card strong { font-size: 18px; }
+.content-form-card > span { font-size: 14px; }
+.content-status { display: inline-block; font-size: 13px; border: 1px solid var(--jic-border); border-radius: 999px; padding: 4px 10px; width: fit-content; }
+.content-summary-grid > div { padding: 12px; border: 1px solid var(--jic-border); border-radius: 10px; display: grid; gap: 4px; }
+.content-summary-grid strong { font-size: 24px; }
+.content-people > div { display: grid; grid-template-columns: minmax(90px,1fr) 2fr; gap: 8px; margin-block: 10px; }
+.content-people dt { font-weight: 650; }
+.content-people dd { margin: 0; }
+.content-page-editor > fieldset { display: grid; gap: 14px; min-width: 0; border: 0; }
+.content-page-editor label { display: grid; gap: 6px; min-width: 0; }
+.content-page-editor input, .content-page-editor select, .content-page-editor textarea { min-width: 0; width: 100%; }
+.content-page-editor label.admin-check { display: flex; }
+.content-page-editor label.admin-check input { width: auto; }
+.content-page-preview img { max-height: 360px; max-width: 100%; object-fit: contain; }
+.content-page-body { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
+.poster-workflow > nav { margin-block: 12px 20px; }
+.poster-workflow [hidden] { display: none; }
+@media (max-width: 600px) { .forms-entry-tiles { grid-template-columns: minmax(0,1fr); } }
