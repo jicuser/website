@@ -1,29 +1,43 @@
-# Website content workflow
+# Forms and content pages
 
-## Agreed scope
+Integration and deployment status are recorded in `maintenance-status.md`.
 
-Admin Forms will show current forms, creation, responses and actions. A poster may
-link to a public detail page and an optional versioned form. Opening the poster in
-admin must expose the same information, people, responses and actions, not a copy.
-Pages have separate publication and placement controls. Hiding a page must not erase
-responses or silently close a shared form. Preserve the current admin design.
+## Shared records
 
-Presentation Stream follows this work: Quick Present selects a source, obtains
-browser permission from Start, then starts the session without a naming step.
-Retain the existing transport, display approvals and advanced settings. Show the
-server session status and allow confirmed deletion of saved settings.
+The website-only migrations define versioned `custom_forms`, immutable published
+versions, per-form staff assignments and private `form_submissions`. Responses may
+have private attachments, internal notes and `work_tasks`. The admin form catalogue
+and a linked poster must open the same records, not copied inboxes.
 
-Apps, remote push, paid services, hosting/DNS/Cloudflare changes and Vercel plan
-assumptions remain out of scope.
+`site_pages` stores public-facing programme/detail content. Each page has a stable
+slug, a placement, an independent publication switch, and an optional form link.
+A poster can remain an announcement without a registration form. Registration may
+be absent, an expression of interest, an application or a registration request.
 
-## Checkpoint record
+## Access and publication
 
-- Content-page metadata, safe-image validation and stable-address helpers are saved.
-- Four focused Node tests pass for that helper.
-- Forms/pages integration and Quick Present are not released to main yet.
-- Previous local database experiments are not a deployment. Re-run validation against
-  the source that is actually committed before updating release status.
-- Preserve work with small commits on maintenance/content-workflow. Main is updated
-  only after the completed changes pass validation and concurrent changes are checked.
+Public page/form reads return published content only. Staff names, assignments,
+answers and private attachments are not part of the public page response. Backend
+permissions and per-form assignments govern administration; merely showing a control
+in the interface does not grant access.
 
-The release and outstanding-work tracker remains docs/maintenance-status.md.
+Saving form questions does not change the published question version until publication.
+Page visibility and form acceptance are separate: hiding a page does not erase its
+responses or close a shared form link. An application received is not an accepted place.
+
+## Responsibility and actions
+
+Form editors, responsible people and followers have distinct purposes. Responsible
+people receive actions for new responses. Changing the form's routing affects future
+responses; existing unfinished actions are reassigned explicitly, with access checks
+and optimistic concurrency. Completing an action does not complete its response.
+
+The public-facing page address remains stable when its placement changes. Stale page
+or form edits must not overwrite newer saved work. Automatic refreshes must not clear
+an ordinary editing draft or recreate an active media capture controller.
+
+## Operational boundary
+
+This integration does not activate an app, remote push, payment processing, SMTP
+transport or media workers. Website deployment, backend migration, email delivery
+and physical-device acceptance are separate verification steps.
