@@ -1,9 +1,10 @@
-name: Form backend checkpoint
+name: Form integration checkpoint
 on:
   push:
     branches: [maintenance/content-workflow]
     paths:
       - scripts/maintenance/prepare_forms.py
+      - scripts/maintenance/prepare_form_ui.py
       - .github/workflows/form-backend-checkpoint.yml
 permissions:
   contents: read
@@ -25,15 +26,18 @@ jobs:
           ref: dcd17bee10bd5def2ab035a5d543d98cdec98899
           path: existing
           persist-credentials: false
-      - run: python current/scripts/maintenance/prepare_forms.py "$GITHUB_WORKSPACE"
+      - run: |
+          python current/scripts/maintenance/prepare_forms.py "$GITHUB_WORKSPACE"
+          python current/scripts/maintenance/prepare_form_ui.py "$GITHUB_WORKSPACE"
       - id: commit
         working-directory: current
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add supabase/migrations/20260914040000_website_forms.sql supabase/functions/custom-forms/index.ts supabase/functions/custom-forms/maintenance.mjs tests/custom-forms.test.mjs
+          git add src/components/workspace/CustomFormsBuilder.jsx src/components/workspace/CustomFormsInbox.jsx src/pages/PublicFormPage.jsx src/styles/workspace.css src/styles/custom-forms.css
           if ! git diff --cached --quiet; then
-            git commit -m 'Checkpoint website-only form backend and database regression tests'
+            git commit -m 'Checkpoint website form editor, private responses and public form rendering'
             git push origin HEAD:maintenance/content-workflow
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -57,7 +61,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: backend-checkpoint-tests
+          name: form-checkpoint-tests
           path: test-results/
           retention-days: 3
           if-no-files-found: ignore
