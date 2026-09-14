@@ -15,18 +15,23 @@ export function PublishedPagesProvider({ children }) {
       reading = true;
       clearTimeout(timer);
       try {
-        const { data, error } = await supabase.rpc('list_site_pages').abortSignal(controller.signal);
+        const { data, error } = await supabase
+          .rpc('list_site_pages')
+          .abortSignal(controller.signal);
         if (!controller.signal.aborted) setPages(!error && Array.isArray(data) ? data : []);
       } catch {
         if (!controller.signal.aborted) setPages([]);
       } finally {
         reading = false;
-        if (!controller.signal.aborted) timer = setTimeout(() => {
-          if (document.visibilityState === 'visible') void load();
-        }, 30000);
+        if (!controller.signal.aborted)
+          timer = setTimeout(() => {
+            if (document.visibilityState === 'visible') void load();
+          }, 30000);
       }
     }
-    const visible = () => { if (document.visibilityState === 'visible') void load(); };
+    const visible = () => {
+      if (document.visibilityState === 'visible') void load();
+    };
     void load();
     document.addEventListener('visibilitychange', visible);
     window.addEventListener('content-workflow-updated', visible);

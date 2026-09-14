@@ -13,8 +13,10 @@ import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const ClassesCoursesPage = lazy(() => import('@/pages/ClassesCoursesPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
+const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
+const ContentPage = lazy(() => import('@/pages/ContentPage'));
+const AdultCoursesPage = lazy(() => import('@/pages/AdultCoursesPage'));
 const EducationPage = lazy(() => import('@/pages/EducationPage'));
 const FinancialHistoryPage = lazy(() => import('@/pages/FinancialHistoryPage'));
 const HallBookingPage = lazy(() => import('@/pages/HallBookingPage'));
@@ -135,8 +137,11 @@ function AppRoutes() {
               <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
 
               <Route path="education" element={<EducationPage />} />
+              <Route path="education/courses" element={<AdultCoursesPage />} />
+              <Route path="forms/:slug" element={<PublicFormPage />} />
+              <Route path="pages/:slug" element={<ContentPage />} />
               <Route path="madrassah" element={<MadrassahPage />} />
-              <Route path="madrassah/classes-courses" element={<ClassesCoursesPage />} />
+              <Route path="madrassah/classes-courses" element={<Navigate to="/education/courses" replace />} />
               <Route path="madrassah/enrolment" element={<MadrassahEnrolmentPage />} />
 
               <Route path="youth" element={<YouthPage />} />

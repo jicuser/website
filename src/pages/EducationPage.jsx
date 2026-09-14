@@ -10,9 +10,9 @@ const educationTiles = [
     icon: BookOpen,
   },
   {
-    title: 'Classes & Courses',
-    description: 'Browse current classes, courses and learning opportunities.',
-    path: '/madrassah/classes-courses',
+    title: 'Adult Courses & Classes',
+    description: 'Adult learning, current courses and registration information.',
+    path: '/education/courses',
     icon: BookOpen,
   },
   {
@@ -40,7 +40,7 @@ export default function EducationPage() {
               Learn at Jamatia Islamic Centre
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-              Explore our Madrassah, classes and courses, or find enrolment information and student
+              Explore adult courses separately from Madrasah, or find pupil enrolment information and student
               resources.
             </p>
           </div>

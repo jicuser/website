@@ -12,6 +12,8 @@ export const PERMISSIONS = [
   ['forms_contact', 'Contact messages'],
   ['forms_madrassah', 'Madrassah enquiries'],
   ['forms_itikaaf', 'I’tikaf registrations'],
+  ['forms_manage', 'Create and manage registration forms'],
+  ['forms_custom', 'All custom form responses'],
   ['users', 'Invite staff and manage access'],
   ['audit', 'Activity history'],
   ['delete_content', 'Delete content in permitted sections'],
@@ -30,13 +32,13 @@ export function hasPermission(profile, permission) {
   const permissions = Array.isArray(profile.permissions) ? profile.permissions : [];
   if (permission === 'dashboard')
     return permissions.some((key) => key !== 'tv' && key !== 'broadcast');
-  if (permission === 'forms') return permissions.some((key) => key.startsWith('forms_'));
+  if (permission === 'forms') return profile.has_assigned_forms === true || permissions.some((key) => key.startsWith('forms_'));
   return permissions.includes(permission);
 }
 export function hasAdminAccess(profile) {
   return Boolean(
     profile?.is_active &&
-    (profile.is_owner === true ||
+    (profile.is_owner === true || profile.has_assigned_forms === true ||
       (Array.isArray(profile.permissions) &&
         profile.permissions.some((key) => PERMISSIONS.some(([id]) => id === key)))),
   );

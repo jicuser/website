@@ -22,12 +22,12 @@ import {
   Moon,
   Monitor,
 } from 'lucide-react';
-import FormsInbox from '@/components/admin/FormsInbox';
+import FormsManager from '@/features/forms/FormsManager';
 import StaffAccess from '@/components/admin/StaffAccess';
 import StreamSetup from '@/components/admin/StreamSetup';
 import PostersEditor from '@/components/admin/PostersEditor';
 import PrayerEditor from '@/components/admin/PrayerEditor';
-import PageEditor from '@/components/admin/PageEditor';
+import ContentPages from '@/features/content/ContentPages';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 import { useAppearance } from '@/context/AppearanceContext';
@@ -55,7 +55,7 @@ const SECTIONS = [
   ['tv', 'Hall streams', Monitor, 'tv'],
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
-  ['forms', 'Forms inbox', FileText, 'forms'],
+  ['forms', 'Forms', FileText, 'forms'],
   ['users', 'Staff & access', ShieldCheck, 'users'],
   ['audit', 'Audit log', Activity, 'audit'],
 ];
@@ -137,8 +137,8 @@ function DashboardSection({ onChoose }) {
     ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
     [
       'forms',
-      'Forms inbox',
-      'Read messages and registrations, then mark them completed.',
+      'Forms',
+      'Manage forms, responsible people, responses and actions.',
       FileText,
       'forms',
     ],
@@ -800,12 +800,12 @@ export default function AdminPage() {
     dashboard: <DashboardSection onChoose={chooseSection} />,
     prayer: <PrayerEditor />,
     events: <EventsSection />,
-    posters: <PostersEditor />,
+    posters: <PostersEditor key={user?.id} />,
     announcements: <AnnouncementsSection />,
     livestream: <LivestreamSection />,
-    content: <PageEditor initialPath={params.get('page') || '/'} />,
+    content: <ContentPages key={user?.id} initialPath={params.get('page') || '/'} />,
     team: <TeamEditor uploadImage={uploadImage} />,
-    forms: <FormsInbox />,
+    forms: <FormsManager key={user?.id} />,
     users: <StaffAccess />,
     audit: <AuditSection />,
   }[active];

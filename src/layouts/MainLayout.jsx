@@ -7,6 +7,8 @@ import UnifiedHeader from '@/components/shell/UnifiedHeader';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import RelatedContent from '@/components/RelatedContent';
 import ProgrammePosters from '@/components/ProgrammePosters';
+import PublishedPageLinks from '@/features/content/PublishedPageLinks';
+import { PublishedPagesProvider } from '@/context/PublishedPagesContext';
 import DailyReminder from '@/components/shell/DailyReminder';
 import SpiritualOverlays from '@/components/shell/SpiritualOverlays';
 import Footer from '@/components/shell/Footer';
@@ -18,7 +20,7 @@ import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
 export default function MainLayout() {
   return (
     <PublicPrayerTimesProvider>
-      <PublicLayout />
+      <PublishedPagesProvider><PublicLayout /></PublishedPagesProvider>
     </PublicPrayerTimesProvider>
   );
 }
@@ -55,6 +57,7 @@ function PublicLayout() {
           )}
           <ManagedPageSections key={pathname} />
           {!isHome && !isDiscovery && <ProgrammePosters />}
+          {!isDiscovery && <PublishedPageLinks />}
           {!isDiscovery && <RelatedContent />}
         </div>
       </main>

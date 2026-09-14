@@ -5,9 +5,11 @@ import { POSTERS_KEY, POSTER_DESTINATIONS, posterImage, validPoster } from '@/li
 import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
 import { useContent } from '@/context/ContentContext';
 import { useAuth } from '@/context/AuthContext';
-import { useRegisterAdminSave } from '@/context/AdminSaveContext';
+import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { supabase } from '@/lib/supabaseClient';
 import { IMAGE_ACCEPT, validateImage } from '@/lib/images';
+import PosterWorkflow from '@/features/content/PosterWorkflow';
+import '@/styles/content-workflow.css';
 
 export default function PostersEditor() {
   const published = usePosters();
@@ -16,6 +18,8 @@ export default function PostersEditor() {
   const [items, setItems] = useState(published);
   const [baseline, setBaseline] = useState(published);
   const [selected, setSelected] = useState('');
+  const [editingPoster, setEditingPoster] = useState(false);
+  const { dirty: workspaceDirty } = useAdminSave();
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
@@ -29,7 +33,7 @@ export default function PostersEditor() {
   }, []);
   useEffect(() => {
     if (selected) revealEditor();
-  }, [selected, revealEditor]);
+  }, [selected, editingPoster, revealEditor]);
   const dirty = JSON.stringify(items) !== JSON.stringify(baseline);
   useEffect(() => {
     if (!dirty) {
@@ -60,7 +64,11 @@ export default function PostersEditor() {
     setItems((previous) =>
       previous.map((poster) => (poster.id === selected ? { ...poster, [key]: value } : poster)),
     );
+  const canLeaveLinkedEditor = () =>
+    editingPoster || !workspaceDirty || window.confirm('Discard unsaved page or form changes?');
   const add = (kind) => {
+    if (!canLeaveLinkedEditor()) return;
+    setEditingPoster(true);
     const id = crypto.randomUUID();
     setItems([
       ...items,
@@ -127,8 +135,13 @@ export default function PostersEditor() {
             disabled={busy}
             aria-pressed={selected === poster.id}
             onClick={() => {
-              if (selected === poster.id) revealEditor();
-              else setSelected(poster.id);
+              if (selected === poster.id) {
+                revealEditor();
+                return;
+              }
+              if (!canLeaveLinkedEditor()) return;
+              setEditingPoster(false);
+              setSelected(poster.id);
             }}
           >
             {poster.kind === 'announcement' ? (
@@ -157,160 +170,194 @@ export default function PostersEditor() {
         </button>
       </div>
       {item && (
-        <fieldset ref={editor} tabIndex={-1} disabled={busy} className="scene-properties">
-          <legend>{item.title || 'New poster'}</legend>
-          <label>
-            Poster name
-            <input
-              maxLength={200}
-              value={item.title}
-              onChange={(event) => update('title', event.target.value)}
-            />
-          </label>
-          {item.kind === 'announcement' ? (
+        <div ref={editor} tabIndex={-1} className="poster-management">
+          {editingPoster ? (
             <>
-              <label>
-                Announcements
-                <textarea
-                  rows={8}
-                  maxLength={800}
-                  value={item.body || ''}
-                  placeholder="Write each announcement on a new line."
-                  onChange={(event) => update('body', event.target.value)}
-                />
-              </label>
-              <small>{(item.body || '').length} / 800 characters · up to 10 paragraphs</small>
-              <h4>Pictures (optional)</h4>
-              {item.images.map((url, index) => (
-                <div key={index}>
-                  <label>
-                    Picture {index + 1} URL
+              <button
+                type="button"
+                className="admin-button"
+                disabled={busy}
+                onClick={() => {
+                  if (dirty) {
+                    setMessage('Publish your poster changes before opening its page and forms.');
+                    return;
+                  }
+                  setEditingPoster(false);
+                }}
+              >
+                Poster overview, page & forms
+              </button>
+              <fieldset disabled={busy} className="scene-properties">
+                <legend>{item.title || 'New poster'}</legend>
+                <label>
+                  Poster name
+                  <input
+                    maxLength={200}
+                    value={item.title}
+                    onChange={(event) => update('title', event.target.value)}
+                  />
+                </label>
+                {item.kind === 'announcement' ? (
+                  <>
+                    <label>
+                      Announcements
+                      <textarea
+                        rows={8}
+                        maxLength={800}
+                        value={item.body || ''}
+                        placeholder="Write each announcement on a new line."
+                        onChange={(event) => update('body', event.target.value)}
+                      />
+                    </label>
+                    <small>{(item.body || '').length} / 800 characters · up to 10 paragraphs</small>
+                    <h4>Pictures (optional)</h4>
+                    {item.images.map((url, index) => (
+                      <div key={index}>
+                        <label>
+                          Picture {index + 1} URL
+                          <input
+                            value={url}
+                            maxLength={2000}
+                            onChange={(event) =>
+                              update(
+                                'images',
+                                item.images.map((image, position) =>
+                                  position === index ? event.target.value : image,
+                                ),
+                              )
+                            }
+                          />
+                        </label>
+                        {can('media') && (
+                          <label>
+                            Upload / replace picture
+                            <input
+                              type="file"
+                              accept={IMAGE_ACCEPT}
+                              onChange={(event) => upload(event.target.files[0], index)}
+                            />
+                          </label>
+                        )}
+                        <button
+                          className="admin-button"
+                          onClick={() =>
+                            update(
+                              'images',
+                              item.images.filter((_, position) => position !== index),
+                            )
+                          }
+                        >
+                          Remove picture {index + 1}
+                        </button>
+                      </div>
+                    ))}
+                    {item.images.length < 2 && (
+                      <button
+                        className="admin-button"
+                        onClick={() => update('images', [...item.images, ''])}
+                      >
+                        + Add picture
+                      </button>
+                    )}
+                    <h4>Poster preview</h4>
+                    <div className="poster-announcement-preview">
+                      <AnnouncementPoster
+                        poster={{ ...item, images: item.images.filter(posterImage) }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {['subtitle', 'schedule', 'detail', 'alt'].map((key) => (
+                      <label key={key}>
+                        {
+                          {
+                            subtitle: 'Short heading',
+                            schedule: 'Day and time',
+                            detail: 'Description',
+                            alt: 'Picture description',
+                          }[key]
+                        }
+                        <input
+                          maxLength={key === 'detail' || key === 'alt' ? 1000 : 200}
+                          value={item[key] || ''}
+                          onChange={(event) => update(key, event.target.value)}
+                        />
+                      </label>
+                    ))}
+                    <label>
+                      Picture URL
+                      <input
+                        value={item.image}
+                        maxLength={2000}
+                        onChange={(event) => update('image', event.target.value)}
+                      />
+                    </label>
+                    {can('media') && (
+                      <label>
+                        Upload / replace picture
+                        <input
+                          type="file"
+                          accept={IMAGE_ACCEPT}
+                          onChange={(event) => upload(event.target.files[0])}
+                        />
+                      </label>
+                    )}
+                  </>
+                )}
+                <h4>Show on website</h4>
+                {POSTER_DESTINATIONS.map((group) => (
+                  <label className="admin-check" key={group}>
                     <input
-                      value={url}
-                      maxLength={2000}
+                      type="checkbox"
+                      checked={item.groups.includes(group)}
                       onChange={(event) =>
                         update(
-                          'images',
-                          item.images.map((image, position) =>
-                            position === index ? event.target.value : image,
-                          ),
+                          'groups',
+                          event.target.checked
+                            ? [...item.groups, group]
+                            : item.groups.filter((value) => value !== group),
                         )
                       }
                     />
+                    {group === 'home' ? 'Home page' : group}
                   </label>
-                  {can('media') && (
-                    <label>
-                      Upload / replace picture
-                      <input
-                        type="file"
-                        accept={IMAGE_ACCEPT}
-                        onChange={(event) => upload(event.target.files[0], index)}
-                      />
-                    </label>
-                  )}
-                  <button
-                    className="admin-button"
-                    onClick={() =>
-                      update(
-                        'images',
-                        item.images.filter((_, position) => position !== index),
-                      )
-                    }
-                  >
-                    Remove picture {index + 1}
-                  </button>
-                </div>
-              ))}
-              {item.images.length < 2 && (
+                ))}
+                <label>
+                  Link when opened
+                  <input
+                    value={item.to}
+                    onChange={(event) => update('to', event.target.value)}
+                    placeholder="/contact"
+                  />
+                </label>
                 <button
                   className="admin-button"
-                  onClick={() => update('images', [...item.images, ''])}
+                  onClick={() => {
+                    if (
+                      !window.confirm(
+                        'Remove this poster from the catalogue and all places using it?',
+                      )
+                    )
+                      return;
+                    setItems(items.filter((poster) => poster.id !== selected));
+                    setSelected('');
+                  }}
                 >
-                  + Add picture
+                  Remove poster
                 </button>
-              )}
-              <h4>Poster preview</h4>
-              <div className="poster-announcement-preview">
-                <AnnouncementPoster poster={{ ...item, images: item.images.filter(posterImage) }} />
-              </div>
+              </fieldset>
             </>
           ) : (
-            <>
-              {['subtitle', 'schedule', 'detail', 'alt'].map((key) => (
-                <label key={key}>
-                  {
-                    {
-                      subtitle: 'Short heading',
-                      schedule: 'Day and time',
-                      detail: 'Description',
-                      alt: 'Picture description',
-                    }[key]
-                  }
-                  <input
-                    maxLength={key === 'detail' || key === 'alt' ? 1000 : 200}
-                    value={item[key] || ''}
-                    onChange={(event) => update(key, event.target.value)}
-                  />
-                </label>
-              ))}
-              <label>
-                Picture URL
-                <input
-                  value={item.image}
-                  maxLength={2000}
-                  onChange={(event) => update('image', event.target.value)}
-                />
-              </label>
-              {can('media') && (
-                <label>
-                  Upload / replace picture
-                  <input
-                    type="file"
-                    accept={IMAGE_ACCEPT}
-                    onChange={(event) => upload(event.target.files[0])}
-                  />
-                </label>
-              )}
-            </>
-          )}
-          <h4>Show on website</h4>
-          {POSTER_DESTINATIONS.map((group) => (
-            <label className="admin-check" key={group}>
-              <input
-                type="checkbox"
-                checked={item.groups.includes(group)}
-                onChange={(event) =>
-                  update(
-                    'groups',
-                    event.target.checked
-                      ? [...item.groups, group]
-                      : item.groups.filter((value) => value !== group),
-                  )
-                }
-              />
-              {group === 'home' ? 'Home page' : group}
-            </label>
-          ))}
-          <label>
-            Link when opened
-            <input
-              value={item.to}
-              onChange={(event) => update('to', event.target.value)}
-              placeholder="/contact"
+            <PosterWorkflow
+              key={item.id}
+              poster={item}
+              onEditPoster={() => {
+                if (canLeaveLinkedEditor()) setEditingPoster(true);
+              }}
             />
-          </label>
-          <button
-            className="admin-button"
-            onClick={() => {
-              if (!window.confirm('Remove this poster from the catalogue and all places using it?'))
-                return;
-              setItems(items.filter((poster) => poster.id !== selected));
-              setSelected('');
-            }}
-          >
-            Remove poster
-          </button>
-        </fieldset>
+          )}
+        </div>
       )}
       <button
         className="admin-button primary"

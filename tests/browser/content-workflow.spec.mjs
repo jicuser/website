@@ -40,7 +40,7 @@ async function fixture(page, {actor=owner, pagePublished=true, pageExists=true} 
     else if(path.endsWith('/custom_forms')) data=request.headers().accept?.includes('object')?state.form:[state.form];
     else if(path.endsWith('/custom_form_staff')) data=[{user_id:person.id,role:'responsible'}];
     else if(path.endsWith('/profiles')) data=[owner,person,replacement];
-    else if(path.endsWith('/functions/v1/custom-forms')) {state.writes.push(body);data={id:id(41)};}
+    else if(path.endsWith('/functions/v1/custom-forms')) {state.writes.push(body);data={ok:true,id:id(41)};}
     return route.fulfill({contentType:'application/json',body:JSON.stringify(data)});
   });
   async function admin(section='forms') {
@@ -88,6 +88,7 @@ test('Pages can be created and hidden without erasing a linked form or changing 
   await page.getByRole('button',{name:'Edit Arabic course',exact:true}).click();
   await page.getByLabel('Show page on website',{exact:true}).uncheck();
   await page.getByLabel('Place under',{exact:true}).selectOption('/education');
+  page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button',{name:'Save page',exact:true}).last().click();
   await expect.poll(()=>state.page.published).toBe(false);
   expect(state.page.form_id).toBe(id(10));expect(state.page.slug).toBe('arabic-course');expect(state.form.enabled).toBe(true);

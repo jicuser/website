@@ -84,6 +84,7 @@ for (const width of [320, 390, 1280]) {
       await expect(page.getByRole('navigation', { name: 'Admin sections' })).toBeVisible();
     }
     await cards.first().click();
+    await page.getByRole('button', { name: 'Edit poster', exact: true }).click();
     await expect(page.getByLabel('Poster name', { exact: true })).toBeVisible();
     const top = await page.locator('.scene-properties').evaluate(el => ({
       editor: el.getBoundingClientRect().top,
