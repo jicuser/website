@@ -48,7 +48,12 @@ const settings = {
   active_scene_id: 'lesson',
 };
 
-function harness({ storage = new Map(), rejectEnd = false, hangSecondRefresh = false } = {}) {
+function harness({
+  storage = new Map(),
+  server = { running: true },
+  rejectEnd = false,
+  hangSecondRefresh = false,
+} = {}) {
   const cells = [];
   let cursor = 0,
     dirty = true,
@@ -113,16 +118,15 @@ function harness({ storage = new Map(), rejectEnd = false, hangSecondRefresh = f
         return new Promise(() => {});
       if (action === 'normal') {
         if (rejectEnd) throw new Error('Could not end stream');
-        return {
-          settings: { ...settings, scene_mode: 'normal' },
-          presentation: null,
-          updated_at: 'ended',
-        };
+        server.running = false;
+      } else if (action === 'new-presentation') {
+        server.running = true;
       }
+      // Reloads see the same server state; browser storage cannot restart a session.
       return {
-        settings,
-        presentation: { id: 'live-stream' },
-        updated_at: 'live',
+        settings: { ...settings, scene_mode: server.running ? 'teaching' : 'normal' },
+        presentation: server.running ? { id: 'live-stream' } : null,
+        updated_at: server.running ? 'live' : 'ended',
         inputs: [],
         devices: [],
         templates: [],
@@ -144,7 +148,7 @@ function harness({ storage = new Map(), rejectEnd = false, hangSecondRefresh = f
     }
     return current;
   }
-  return { flush, calls, storage };
+  return { flush, calls, storage, server };
 }
 
 test('ending returns to normal and retains all settings for the save prompt and refresh', async () => {
@@ -165,8 +169,9 @@ test('ending returns to normal and retains all settings for the save prompt and 
   assert.equal(setup.pendingSave.template.name, 'Sunday lesson');
   assert.equal(setup.pendingSave.name, 'Saturday Quran lesson');
   assert.equal(app.calls.filter((action) => action === 'save-template').length, 0);
-  const restored = harness({ storage: app.storage });
+  const restored = harness({ storage: app.storage, server: app.server });
   const reloaded = await restored.flush();
+  assert.equal(reloaded.started, false);
   assert.equal(reloaded.pendingSave.settings.active_scene_id, 'lesson');
   assert.equal(reloaded.pendingSave.name, 'Saturday Quran lesson');
   reloaded.setPendingSave(null);
@@ -175,7 +180,7 @@ test('ending returns to normal and retains all settings for the save prompt and 
 });
 
 test('setup asks for a stream name and keeps it through refresh without a scene-name prompt', async () => {
-  const app = harness();
+  const app = harness({ server: { running: false } });
   let setup = await app.flush();
   setup.build('Stream 1');
   setup = await app.flush();
@@ -186,9 +191,18 @@ test('setup asks for a stream name and keeps it through refresh without a scene-
   assert.equal(setup.streamName, 'Friday study circle');
   assert.equal(setup.form.scenes.length, 1);
   assert.equal(setup.form.scenes[0].name, 'Main view');
-  const refreshed = await harness({ storage: app.storage }).flush();
+  const refreshed = await harness({ storage: app.storage, server: app.server }).flush();
   assert.equal(refreshed.streamName, 'Friday study circle');
   assert.equal(refreshed.stage, 3);
+});
+
+test('a fresh login recovers an open server session without starting another one', async () => {
+  const app = harness();
+  const setup = await app.flush();
+  assert.equal(setup.started, true);
+  assert.equal(setup.stage, 3);
+  assert.equal(setup.form.scenes[0].name, 'Main lesson');
+  assert.deepEqual(app.calls, ['admin']);
 });
 
 test('editing an ended stream with no name asks for its name and preserves the input draft', async () => {
