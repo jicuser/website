@@ -1,31 +1,31 @@
-// Qur'an 2:255, Arabic text checked against https://quran.com/2/255.
-// Arabic Qur'anic text is public domain. These are consecutive parts of one ayah.
-export const TV_DHIKR = [
-  {
-    title: 'Ayat al-Kursi',
-    reference: 'Qur’an 2:255 · Part 1 of 3',
+// After-salah selection based on Islamic Relief UK's dhikr guide.
+// Texts: Muslim 591 and 592a; Bukhari 844; Muslim 597a; Qur'an 2:255.
+// Ayat al-Kursi after obligatory prayer: an-Nasa'i, recorded in Bulugh al-Maram 2:220.
+// Sources and the distinction from the separate daily 100 repetitions: docs/tv-dhikr.md.
+const tawhid =
+  'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ';
+
+// One board, not timed slides. Count badges are rendered with Arabic-Indic digits.
+export const TV_DHIKR = {
+  title: 'أَذْكَارُ بَعْدَ الصَّلَاةِ',
+  forgiveness: { arabic: 'أَسْتَغْفِرُ اللَّهَ', count: 3 },
+  peace:
+    'اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ',
+  tawhid,
+  generosity:
+    'اللَّهُمَّ لَا مَانِعَ لِمَا أَعْطَيْتَ، وَلَا مُعْطِيَ لِمَا مَنَعْتَ، وَلَا يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ',
+  tasbih: [
+    { arabic: 'سُبْحَانَ اللَّهِ', count: 33 },
+    { arabic: 'الْحَمْدُ لِلَّهِ', count: 33 },
+    { arabic: 'اللَّهُ أَكْبَرُ', count: 33 },
+  ],
+  completion: { label: 'تَمَامَ الْمِائَةِ', arabic: tawhid, count: 1 },
+  kursi: {
+    label: 'آيَةُ الْكُرْسِيِّ',
     arabic:
-      'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ',
+      'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
   },
-  {
-    title: 'Ayat al-Kursi',
-    reference: 'Qur’an 2:255 · Part 2 of 3',
-    arabic:
-      'مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ',
-  },
-  {
-    title: 'Ayat al-Kursi',
-    reference: 'Qur’an 2:255 · Part 3 of 3',
-    arabic:
-      'وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
-  },
-  {
-    title: 'Remember Allah',
-    reference: 'Dhikr after salah',
-    arabic: 'سُبْحَانَ اللَّهِ     الْحَمْدُ لِلَّهِ     اللَّهُ أَكْبَرُ',
-    meaning: 'Subhan Allah · Alhamdu lillah · Allahu akbar',
-  },
-];
+};
 // Original community reminders, not quotations or promises of specific rewards.
 export const TV_REMINDERS = [
   'Please silence your phone and keep conversations quiet in the prayer hall.',

@@ -60,15 +60,17 @@ html[data-theme] .jic-tv-display .jic-unified-info {
 }
 .jic-tv-logo {
   position: absolute;
-  left: 0;
+  left: calc(var(--tv-unit) * -0.65);
   bottom: 0;
-  width: calc(var(--tv-unit) * 5.625);
-  height: 100%;
+  width: calc(var(--tv-unit) * 8.25);
+  /* Grow into the existing footer gap, not into posters or prayer text. */
+  height: calc(100% + var(--tv-unit) * 0.625);
 }
 .jic-tv-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: left bottom;
 }
 /* Use the vacant stage for branding; poster and prayer-notice space stays fixed. */
 .jic-tv-idle-brand {
@@ -265,7 +267,7 @@ html[data-theme] .jic-tv-stage {
 .jic-tv-status {
   position: relative;
   min-height: calc(var(--tv-unit) * 3.541667);
-  padding-inline: calc(var(--tv-unit) * 6.041667);
+  padding-inline: calc(var(--tv-unit) * 8.5) calc(var(--tv-unit) * 6.041667);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -349,6 +351,105 @@ html[data-theme] .jic-tv-stage {
   font-size: calc(var(--tv-unit) * 1.96875);
   line-height: 1.9;
   max-width: calc(var(--tv-unit) * 62.5);
+}
+
+
+/* The after-salah board uses the whole frame; other display modes keep their layout. */
+html[data-theme] .jic-tv-display.is-dhikr {
+  grid-template-rows: minmax(0, 1fr) calc(var(--tv-unit) * 4.6);
+}
+.jic-tv-display.is-dhikr > .jic-tv-header,
+.jic-tv-display.is-dhikr > .jic-tv-status > :not(.jic-tv-logo) {
+  display: none;
+}
+.jic-tv-display.is-dhikr > .jic-tv-status {
+  min-height: 0;
+}
+.tv-dhikr {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: calc(var(--tv-unit) * 0.7);
+  padding: calc(var(--tv-unit) * 0.75);
+  min-width: 0;
+  min-height: 0;
+  color: var(--jic-text);
+  font-family: 'Noto Naskh Arabic', 'Traditional Arabic', 'Geeza Pro', Arial, serif;
+  font-size: calc(var(--tv-unit) * 2.15);
+  line-height: 1.7;
+  text-align: center;
+}
+.tv-dhikr h1,
+.tv-dhikr h2,
+.tv-dhikr p {
+  margin: 0;
+}
+.tv-dhikr h1 {
+  color: var(--jic-gold);
+  font-size: calc(var(--tv-unit) * 2.5);
+  line-height: 1.8;
+  font-weight: 700;
+}
+.tv-dhikr h2 {
+  color: var(--jic-gold);
+  font-size: calc(var(--tv-unit) * 1.5);
+  line-height: 1.9;
+  font-weight: 600;
+}
+.tv-dhikr-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(var(--tv-unit) * 1);
+  min-height: 0;
+}
+.tv-dhikr-opening {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: calc(var(--tv-unit) * 0.7);
+  min-height: 0;
+}
+.tv-dhikr-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(var(--tv-unit) * 0.6);
+  min-width: 0;
+  min-height: 0;
+  padding: calc(var(--tv-unit) * 0.8);
+  border: 1px solid var(--jic-border);
+  border-radius: calc(var(--tv-unit) * 0.6);
+  background: var(--jic-surface);
+}
+.tv-dhikr-kursi p {
+  text-align: right;
+  line-height: 1.9;
+}
+.tv-dhikr-tasbih {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--tv-unit) * 0.75);
+  padding-block: calc(var(--tv-unit) * 0.35);
+  border-block: 1px solid var(--jic-border);
+  font-size: calc(var(--tv-unit) * 2.65);
+}
+.tv-dhikr .tv-dhikr-counted {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: calc(var(--tv-unit) * 0.75);
+}
+.tv-dhikr-count {
+  display: inline-block;
+  white-space: nowrap;
+  color: var(--jic-gold);
+  font-size: 0.65em;
+  font-variant-numeric: tabular-nums;
+}
+.tv-dhikr-completion {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: calc(var(--tv-unit) * 1);
+  font-size: calc(var(--tv-unit) * 1.9);
 }
 
 .jic-tv-event-message {
@@ -477,9 +578,9 @@ html[data-theme] .jic-tv-stage {
 .scene-brand {
   position: absolute;
   bottom: 0.5%;
-  left: 0.5%;
-  width: 8%;
-  height: 6%;
+  left: 0.15%;
+  width: 10.5%;
+  height: 8%;
   z-index: 20;
   pointer-events: none;
 }
@@ -487,6 +588,7 @@ html[data-theme] .jic-tv-stage {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: left bottom;
 }
 .scene-clock,
 .scene-text,

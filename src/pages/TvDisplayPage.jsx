@@ -270,7 +270,7 @@ function ScreenDisplay({ screenId }) {
         <title>JIC · {tv.label}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      <div className="jic-tv-display">
+      <div className={`jic-tv-display${sequence?.phase === 'dhikr' ? ' is-dhikr' : ''}`}>
         <header className="jic-tv-header">
           {tv.settings.show_times !== false && (
             <PrayerTimeBar

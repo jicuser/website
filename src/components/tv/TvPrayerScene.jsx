@@ -16,17 +16,52 @@ export default function TvPrayerScene({ sequence, jummahNotice }) {
         </p>
       </section>
     );
-  const slide = TV_DHIKR[Math.floor(sequence.dhikrSeconds / 40) % TV_DHIKR.length];
   return (
-    <section className="jic-tv-prayer-scene" aria-label="Dhikr after prayer">
-      <p className="jic-tv-scene-label">
-        {slide.title} · {slide.reference}
-      </p>
-      <p className="jic-tv-arabic" lang="ar" dir="rtl">
-        {slide.arabic}
-      </p>
-      {slide.meaning && <p>{slide.meaning}</p>}
-      <p className="jic-tv-scene-label">Take a moment for dhikr and du‘a.</p>
+    <section className="tv-dhikr" lang="ar" dir="rtl" aria-label={TV_DHIKR.title}>
+      <h1>{TV_DHIKR.title}</h1>
+      <div className="tv-dhikr-columns">
+        <div className="tv-dhikr-opening">
+          <div className="tv-dhikr-card">
+            <p className="tv-dhikr-counted">
+              <span>{TV_DHIKR.forgiveness.arabic}</span>
+              <DhikrCount count={TV_DHIKR.forgiveness.count} />
+            </p>
+            <p>{TV_DHIKR.peace}</p>
+          </div>
+          <div className="tv-dhikr-card">
+            <p>{TV_DHIKR.tawhid}</p>
+            <p>{TV_DHIKR.generosity}</p>
+          </div>
+        </div>
+        <div className="tv-dhikr-card tv-dhikr-kursi">
+          <h2>{TV_DHIKR.kursi.label}</h2>
+          <p>{TV_DHIKR.kursi.arabic}</p>
+        </div>
+      </div>
+      <div className="tv-dhikr-tasbih">
+        {TV_DHIKR.tasbih.map((item) => (
+          <p className="tv-dhikr-counted" key={item.arabic}>
+            <span>{item.arabic}</span>
+            <DhikrCount count={item.count} />
+          </p>
+        ))}
+      </div>
+      <div className="tv-dhikr-completion">
+        <h2>
+          {TV_DHIKR.completion.label} <DhikrCount count={TV_DHIKR.completion.count} />
+        </h2>
+        <p>{TV_DHIKR.completion.arabic}</p>
+      </div>
     </section>
+  );
+}
+
+function DhikrCount({ count }) {
+  const digits = String(count).replace(/\d/g, (digit) => '٠١٢٣٤٥٦٧٨٩'[Number(digit)]);
+  const label = count === 1 ? 'مَرَّةٌ وَاحِدَةٌ' : `${digits} ${count < 11 ? 'مَرَّاتٍ' : 'مَرَّةً'}`;
+  return (
+    <span className="tv-dhikr-count" aria-label={label}>
+      {digits} ×
+    </span>
   );
 }
