@@ -494,20 +494,20 @@ function AnnouncementsSection() {
       setMsg(error.message);
       throw error;
     }
-    setMsg('Announcement saved.');
+    setMsg('Notice saved.');
     setForm(makeBlank());
     await load();
   }, [form, load]);
-  useRegisterAdminSave(save, dirty, 'Save announcement');
+  useRegisterAdminSave(save, dirty, 'Save notice');
   const del = async (id) => {
-    if (window.confirm('Delete announcement?')) {
+    if (window.confirm('Delete notice?')) {
       await supabase.from('announcements').delete().eq('id', id);
       load();
     }
   };
   return (
     <div>
-      <h2 className="text-2xl font-bold">Announcements</h2>
+      <h2 className="text-2xl font-bold">Notices</h2>
       <Notice message={msg} error={msg && !msg.includes('saved')} />
       <form
         onSubmit={(e) => {
