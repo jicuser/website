@@ -1109,3 +1109,23 @@ html[data-theme] .jic-tv-display.is-portrait {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+.scene-prayer-table.has-tomorrow .scene-prayer-table-head,
+.scene-prayer-table.has-tomorrow .scene-prayer-table-row {
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, .86fr));
+}
+.scene-prayer-table.has-tomorrow .scene-prayer-table-head > :last-child,
+.scene-prayer-table.has-tomorrow .scene-prayer-table-row > :last-child {
+  color: #9eabb8;
+}
+@media (max-aspect-ratio: 3/4) {
+  .scene-prayer-table.has-tomorrow .scene-prayer-table-head > :last-child,
+  .scene-prayer-table.has-tomorrow .scene-prayer-table-row > :last-child {
+    display: none;
+  }
+  .scene-prayer-table.has-tomorrow .scene-prayer-table-head,
+  .scene-prayer-table.has-tomorrow .scene-prayer-table-row {
+    grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, .9fr));
+  }
+}
