@@ -22,7 +22,8 @@ const times = {
 const run = (local, options = {}, data = times, jummah = [], room = 'mens-main') =>
   tvPrayerSequence(new Date(`2026-09-12T${local}+01:00`), data, jummah, options, room);
 test('Asr uses the configured nine-minute dhikr delay and twenty-minute return boundary', () => {
-  assert.equal(run('17:59:59'), null);
+  assert.equal(run('17:58:59'), null);
+  assert.equal(run('17:59:59').phase, 'before');
   assert.equal(run('18:00:00').phase, 'jamaah');
   assert.equal(run('18:08:59').phase, 'jamaah');
   assert.equal(run('18:09:00').phase, 'dhikr');
