@@ -21,17 +21,17 @@ const times = {
 };
 const run = (local, options = {}, data = times, jummah = [], room = 'mens-main') =>
   tvPrayerSequence(new Date(`2026-09-12T${local}+01:00`), data, jummah, options, room);
-test('Jamaah notice, five-minute dhikr delay and twenty-minute return have exact boundaries', () => {
+test('Asr uses the configured nine-minute dhikr delay and twenty-minute return boundary', () => {
   assert.equal(run('17:59:59'), null);
   assert.equal(run('18:00:00').phase, 'jamaah');
-  assert.equal(run('18:04:59').phase, 'jamaah');
-  assert.equal(run('18:05:00').phase, 'dhikr');
+  assert.equal(run('18:08:59').phase, 'jamaah');
+  assert.equal(run('18:09:00').phase, 'dhikr');
   assert.equal(run('18:19:59').phase, 'dhikr');
   assert.equal(run('18:20:00'), null);
 });
-test('Maghrib uses ten minutes and never treats the prayer beginning as Jamaah', () => {
-  assert.equal(run('19:44:59').phase, 'jamaah');
-  assert.equal(run('19:45:00').phase, 'dhikr');
+test('Maghrib uses eight minutes and never treats the prayer beginning as Jamaah', () => {
+  assert.equal(run('19:42:59').phase, 'jamaah');
+  assert.equal(run('19:43:00').phase, 'dhikr');
   assert.equal(run('19:55:00'), null);
   assert.equal(run('18:00:00', {}, { ...times, jamaah_asr: '—', asr: '6:00 PM' }), null);
 });
@@ -66,6 +66,21 @@ test('London winter time and invalid clock values are handled', () => {
   assert.equal(prayerMinutes('12:00 AM'), 0);
   assert.equal(prayerMinutes('12:00 PM'), 720);
 });
+test('post-salah delays are persisted and can be configured per prayer', () => {
+  const settings = validateSettings({
+    ...DEFAULT_TV_SETTINGS,
+    dhikr_delay_fajr: 12,
+    dhikr_delay_dhuhr: 8,
+    dhikr_delay_asr: 7,
+    dhikr_delay_maghrib: 6,
+    dhikr_delay_isha: 5,
+  });
+  assert.equal(settings.dhikr_delay_fajr, 12);
+  assert.equal(settings.dhikr_delay_maghrib, 6);
+  assert.equal(run('18:06:59', settings).phase, 'jamaah');
+  assert.equal(run('18:07:00', settings).phase, 'dhikr');
+});
+
 test('shoe-area settings cannot enable live feeds and TV operators require active profiles', () => {
   const settings = validateSettings(
     { ...DEFAULT_TV_SETTINGS, scene_mode: 'teaching' },
@@ -129,7 +144,7 @@ test('cleared Class resumes Normal prayer notices even when another scene has co
     scenes: [...teaching.scenes, { id: 'cleared', layers: [] }],
   };
   assert.equal(tvScene(settings), 'normal');
-  assert.equal(run('18:05:00', settings).phase, 'dhikr');
+  assert.equal(run('18:10:00', settings).phase, 'dhikr');
   assert.equal(
     tvSpecialNotice(new Date('2026-09-12T12:00:00Z'), { ...settings, notice_mode: 'jummah' }),
     'jummah',
