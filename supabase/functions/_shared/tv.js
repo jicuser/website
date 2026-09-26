@@ -25,6 +25,11 @@ export const DEFAULT_TV_SETTINGS = {
   rotation_seconds: 20,
   muted: true,
   prayer_enabled: true,
+  dhikr_delay_fajr: 14,
+  dhikr_delay_dhuhr: 9,
+  dhikr_delay_asr: 9,
+  dhikr_delay_maghrib: 8,
+  dhikr_delay_isha: 7,
   show_times: true,
   show_next: true,
   show_clock: true,
@@ -110,6 +115,17 @@ export function validateSettings(input, screenId = '') {
     'auto_jummah',
   ]) {
     if (typeof values[key] !== 'boolean') throw new Error('Invalid display switch.');
+    result[key] = values[key];
+  }
+  for (const key of [
+    'dhikr_delay_fajr',
+    'dhikr_delay_dhuhr',
+    'dhikr_delay_asr',
+    'dhikr_delay_maghrib',
+    'dhikr_delay_isha',
+  ]) {
+    if (!Number.isInteger(values[key]) || values[key] < 0 || values[key] > 20)
+      throw new Error('Use 0–20 minutes for each post-salah dhikr delay.');
     result[key] = values[key];
   }
   if (
