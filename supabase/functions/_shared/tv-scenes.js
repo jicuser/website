@@ -9,6 +9,7 @@ export const SOURCE_TYPES = [
   ['times', 'Salah timetable'],
   ['next', 'Next prayer'],
   ['clock', 'Current clock'],
+  ['brand', 'Logo'],
   ['text', 'Text / notice'],
 ];
 export const INPUT_SLOTS = ['input-1', 'input-2', 'input-3', 'input-4'];
@@ -99,9 +100,15 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
           if (!Number.isFinite(layer[key])) throw new Error('Enter valid source positions.');
         const rect = fitRect(layer);
         if (Object.keys(rect).some((key) => Math.abs(rect[key] - layer[key]) > 0.001))
-          throw new Error('Sources must fit inside the landscape screen.');
+          throw new Error('Sources must fit inside the screen.');
         const item = { id: layer.id, type: layer.type, ...rect };
+        if (typeof layer.hidden === 'boolean') item.hidden = layer.hidden;
         if (['poster', 'poster-next'].includes(layer.type)) {
+          if (layer.poster_offset !== undefined) {
+            if (!Number.isInteger(layer.poster_offset) || layer.poster_offset < 0 || layer.poster_offset > 9)
+              throw new Error('Use a valid poster position.');
+            item.poster_offset = layer.poster_offset;
+          }
           if (layer.poster_ids !== undefined) {
             if (!Array.isArray(layer.poster_ids) || layer.poster_ids.length > 100 || layer.poster_ids.some((id) => !validId(id)))
               throw new Error('Choose valid posters.');
