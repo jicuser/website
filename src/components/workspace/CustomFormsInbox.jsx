@@ -6,10 +6,10 @@ import { collectPages, downloadBlob, submissionsCsv } from '@/lib/formDownloads'
 import { checked, dateLabel, Field } from './shared';
 import { workflowChanged } from '@/lib/pageContent';
 
-export default function CustomFormsInbox({ auth, definitions, assignments, initialMine = false, formId = null }) {
+export default function CustomFormsInbox({ auth, definitions, assignments, initialMine = false, initialKind = '', formId = null }) {
   const [filters, setFilters] = useState({
     search: '',
-    kind: '',
+    kind: formId ? 'custom' : initialKind,
     form: formId ? `form:${formId}` : '',
     status: 'new',
     from: '',
