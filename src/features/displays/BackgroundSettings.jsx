@@ -1,77 +1,156 @@
 import React, { useState } from 'react';
 import NormalSettings from './NormalSettings';
 import TvPreview from '@/components/admin/TvPreview';
-import { tvRequest } from '@/lib/tvControl';
+import TvStandbyLayoutEditor from './TvStandbyLayoutEditor';
+import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
+import { TV_PRESET_KEYS } from '../../../supabase/functions/_shared/tv.js';
 
-export default function BackgroundSettings({ screenId, data, currentEvents, onRefresh }) {
+export default function BackgroundSettings({
+  screenId,
+  data,
+  currentEvents,
+  onRefresh,
+  onSwitchScreen,
+}) {
   const [form, setForm] = useState(() => ({ ...data.settings, scene_mode: 'normal' }));
   const [revision, setRevision] = useState(data.updated_at);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [preset, setPreset] = useState('standby');
+  const update = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
+  const presetName = form.preset_names?.[preset] || preset;
+
   return (
     <div className="stream-background-settings">
-      <p>This is what the screen shows when no presentation is active.</p>
-      <div className="tv-standby-preview-heading">
-        <strong>Live layout preview</strong>
-        <span>Landscape 16:9</span>
+      <div className="tv-editor-context">
+        <label>
+          Screen
+          <select
+            value={screenId}
+            onChange={(event) => onSwitchScreen?.(event.target.value)}
+          >
+            {TV_SCREENS.map((screen) => (
+              <option key={screen.id} value={screen.id}>
+                {screen.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Screen shape
+          <select
+            value={form.display_orientation || 'landscape'}
+            onChange={(event) => update('display_orientation', event.target.value)}
+          >
+            <option value="landscape">Landscape · 16:9</option>
+            <option value="portrait">Portrait · 9:16</option>
+          </select>
+        </label>
       </div>
-      <TvPreview screenId={screenId} label={data.label} settings={form} />
-      <p className="workspace-meta">Layout editor is the next control: it will let each screen use landscape or portrait and let timetable, posters, clock and notices be positioned visually.</p>
+
+      <nav className="tv-preset-tabs" aria-label="TV display presets">
+        {TV_PRESET_KEYS.map((key) => (
+          <button
+            type="button"
+            key={key}
+            className="admin-button"
+            aria-pressed={preset === key}
+            onClick={() => setPreset(key)}
+          >
+            {form.preset_names?.[key] || key}
+          </button>
+        ))}
+      </nav>
+
+      <div className="tv-preset-heading">
+        <div>
+          <span className="admin-eyebrow">PREVIEWING</span>
+          <h3>{presetName}</h3>
+          <p>This preview uses the same renderer as the real TV. Previewing does not change the live screen.</p>
+        </div>
+        <label>
+          Preset name
+          <input
+            maxLength={40}
+            value={presetName}
+            onChange={(event) =>
+              update('preset_names', {
+                ...(form.preset_names || {}),
+                [preset]: event.target.value,
+              })
+            }
+          />
+        </label>
+      </div>
+
+      <TvPreview
+        screenId={screenId}
+        label={data.label}
+        settings={form}
+        previewState={preset}
+      />
+
+      {preset === 'standby' && (
+        <TvStandbyLayoutEditor screenId={screenId} settings={form} onChange={update} />
+      )}
+
       <NormalSettings
         form={form}
-        update={(key, value) => setForm((previous) => ({ ...previous, [key]: value }))}
+        update={update}
         currentEvents={currentEvents}
         hall={screenId !== 'shoe-area'}
+        preset={preset}
       />
-      <button
-        className="admin-button primary"
-        disabled={busy}
-        onClick={async () => {
-          setBusy(true);
-          try {
-            const saved = await tvRequest(
-              'save-background',
-              screenId,
-              { settings: form, expectedUpdatedAt: revision },
-              { staff: true },
-            );
-            setRevision(saved.updated_at);
-            await onRefresh();
-            setMessage('Standby display saved.');
-          } catch (error) {
-            setMessage(error.message);
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        {busy ? 'Saving…' : 'Save standby display'}
-      </button>
-      <button
-        className="admin-button"
-        disabled={busy}
-        onClick={async () => {
-          if (
-            !window.confirm(
-              'Load the current background settings? This replaces your unpublished background changes.',
-            )
-          )
-            return;
-          setBusy(true);
-          try {
-            const next = await onRefresh();
-            setForm({ ...next.settings, scene_mode: 'normal' });
-            setRevision(next.updated_at);
-            setMessage('Current background settings loaded.');
-          } catch (error) {
-            setMessage(error.message);
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        Reload standby settings
-      </button>
+
+      <div className="admin-actions tv-save-actions">
+        <button
+          className="admin-button primary"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            setMessage('');
+            try {
+              const saved = await tvRequest(
+                'save-background',
+                screenId,
+                { settings: form, expectedUpdatedAt: revision },
+                { staff: true },
+              );
+              setRevision(saved.updated_at);
+              const next = await onRefresh();
+              if (next?.settings) setForm({ ...next.settings, scene_mode: 'normal' });
+              setMessage('TV display settings saved.');
+            } catch (error) {
+              setMessage(error.message);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {busy ? 'Saving…' : 'Save TV settings'}
+        </button>
+        <button
+          className="admin-button"
+          disabled={busy}
+          onClick={async () => {
+            if (!window.confirm('Reload the saved TV settings and discard unpublished changes?'))
+              return;
+            setBusy(true);
+            try {
+              const next = await onRefresh();
+              setForm({ ...next.settings, scene_mode: 'normal' });
+              setRevision(next.updated_at);
+              setMessage('Saved TV settings reloaded.');
+            } catch (error) {
+              setMessage(error.message);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          Reload saved settings
+        </button>
+      </div>
       {message && <p role="status">{message}</p>}
     </div>
   );
