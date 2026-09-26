@@ -37,13 +37,28 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
   return (
     <section className="poster-workflow">
       <nav className="poster-workflow-tabs" aria-label="Poster management">
-        <button className="admin-button" aria-pressed={tab === 'overview'} onClick={() => choose('overview')}>
+        <button
+          className="admin-button"
+          aria-pressed={tab === 'overview'}
+          onClick={() => choose('overview')}
+        >
           Overview
         </button>
-        <button className="admin-button" onClick={onEditPoster}>Edit poster</button>
-        <button className="admin-button" aria-pressed={tab === 'page'} onClick={() => choose('page')}>
-          {page ? 'Page & registration' : 'Add page / registration'}
+        <button className="admin-button" onClick={onEditPoster}>
+          Poster
         </button>
+        <button
+          className="admin-button"
+          aria-pressed={tab === 'page'}
+          onClick={() => choose('page')}
+        >
+          {page ? 'Page' : 'Add page'}
+        </button>
+        {page?.form_id && can('forms') && (
+          <Link className="admin-button" to={`/admin?section=forms&form=${page.form_id}`}>
+            Form & responses
+          </Link>
+        )}
       </nav>
       {error && (
         <p role="alert">
@@ -66,43 +81,76 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
         <>
           <div className="poster-overview-card">
             {poster.image ? (
-              <img className="poster-overview-image" src={poster.image} alt={poster.alt || poster.title} />
+              <img
+                className="poster-overview-image"
+                src={poster.image}
+                alt={poster.alt || poster.title}
+              />
             ) : (
-              <div className="poster-overview-image poster-overview-placeholder">No poster image</div>
+              <div className="poster-overview-image poster-overview-placeholder">
+                No poster image
+              </div>
             )}
             <div>
               <h3>{poster.title}</h3>
-              {poster.subtitle && <p><strong>{poster.subtitle}</strong></p>}
+              {poster.subtitle && (
+                <p>
+                  <strong>{poster.subtitle}</strong>
+                </p>
+              )}
               {poster.schedule && <p>{poster.schedule}</p>}
               {poster.detail && <p>{poster.detail}</p>}
             </div>
           </div>
-          {page ? (
-            <>
+
+          <div className="poster-setup-grid">
+            <section className="admin-panel">
+              <strong>Poster / tile placement</strong>
               <p>
-                Website page: {page.published ? 'Visible' : 'Hidden'} · {page.title}
+                {poster.groups?.length
+                  ? `Shown on: ${poster.groups.map((group) => (group === 'home' ? 'Home' : group)).join(', ')}`
+                  : 'Not currently shown on public website sections.'}
               </p>
-              {page.published && (
+              <button className="admin-button" onClick={onEditPoster}>
+                Edit poster & placement
+              </button>
+            </section>
+
+            <section className="admin-panel">
+              <strong>Dedicated page</strong>
+              <p>
+                {page
+                  ? `${page.published ? 'Visible' : 'Hidden'} · placed under ${page.placement || 'website'}`
+                  : 'Off · this poster has no dedicated page.'}
+              </p>
+              <button className="admin-button" onClick={() => choose('page')}>
+                {page ? 'Edit page' : 'Add dedicated page'}
+              </button>
+              {page?.published && (
                 <Link className="admin-button" to={pageUrl(page)} target="_blank" rel="noreferrer">
                   View page
                 </Link>
               )}
+            </section>
+
+            <section className="admin-panel">
+              <strong>Registration / form</strong>
               <p>
-                {page.form_id
-                  ? can('forms')
-                    ? 'Registration form linked. Open Forms to manage responses and actions.'
-                    : 'A registration form is linked. Response access is limited to authorised staff.'
-                  : 'No form linked. This poster can remain an announcement without registration.'}
+                {page?.form_id
+                  ? 'Form linked. Responses and actions are managed in Forms.'
+                  : 'Off · no registration form linked.'}
               </p>
-            </>
-          ) : (
-            !loading &&
-            !error && (
-              <p>
-                No detail page yet. Choose Page & registration to create one; a form is optional.
-              </p>
-            )
-          )}
+              {page?.form_id && can('forms') ? (
+                <Link className="admin-button" to={`/admin?section=forms&form=${page.form_id}`}>
+                  Open form & responses
+                </Link>
+              ) : (
+                <button className="admin-button" onClick={() => choose('page')}>
+                  {page ? 'Add registration form' : 'Add page / form'}
+                </button>
+              )}
+            </section>
+          </div>
         </>
       )}
 
