@@ -54,39 +54,21 @@ export default function BackgroundSettings({
         </label>
       </div>
 
-      <nav className="tv-preset-tabs" aria-label="TV display presets">
-        {presetKeys.map((key) => (
-          <button
-            type="button"
-            key={key}
-            className="admin-button"
-            aria-pressed={preset === key}
-            onClick={() => setPreset(key)}
-          >
-            {form.preset_names?.[key] || key}
-          </button>
-        ))}
-      </nav>
-
-      <div className="tv-preset-heading">
-        <div>
-          <span className="admin-eyebrow">PREVIEWING</span>
-          <h3>{presetName}</h3>
-          <p>Edit the preview below. Changes stay here until you press Save TV settings.</p>
-        </div>
-        <label>
-          Preset name
-          <input
-            maxLength={40}
-            value={presetName}
-            onChange={(event) =>
-              update('preset_names', {
-                ...(form.preset_names || {}),
-                [preset]: event.target.value,
-              })
-            }
-          />
-        </label>
+      <div className="tv-scene-tabs-wrap">
+        <span>Scene</span>
+        <nav className="tv-preset-tabs" aria-label="TV scenes">
+          {presetKeys.map((key) => (
+            <button
+              type="button"
+              key={key}
+              className="admin-button"
+              aria-pressed={preset === key}
+              onClick={() => setPreset(key)}
+            >
+              {form.preset_names?.[key] || key}
+            </button>
+          ))}
+        </nav>
       </div>
 
       <TvDisplayLayoutEditor
