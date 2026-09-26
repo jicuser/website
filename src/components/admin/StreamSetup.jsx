@@ -537,7 +537,7 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onBack })
               open={backgroundOnly || !hall || backgroundOpen}
               onToggle={(event) => setBackgroundOpen(event.currentTarget.open)}
             >
-              <summary>{backgroundOnly ? 'Standby display & prayer sequence' : 'Background posters & prayer notices'}</summary>
+              <summary>{backgroundOnly ? 'Standby display settings' : 'Standby display settings'}</summary>
               {(backgroundOnly || backgroundOpen || !hall) && (
                 <BackgroundSettings
                   screenId={screenId}
