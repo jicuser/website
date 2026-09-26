@@ -136,7 +136,7 @@ export default function SceneCanvas({
                             ? posters.filter((p) => layer.poster_ids.includes(p.id))
                             : posters;
                           const base =
-                            layer.poster_ids || scene.id === 'standby'
+                            layer.poster_ids || scene.id.startsWith('standby')
                               ? Math.floor(
                                   now.getTime() /
                                     ((layer.rotation_seconds || tv.settings.rotation_seconds || 20) * 1000),
