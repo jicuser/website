@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import NormalSettings from './NormalSettings';
 import TvPreview from '@/components/admin/TvPreview';
-import TvStandbyLayoutEditor from './TvStandbyLayoutEditor';
+import TvDisplayLayoutEditor from './TvStandbyLayoutEditor';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { TV_PRESET_KEYS } from '../../../supabase/functions/_shared/tv.js';
 
@@ -91,9 +91,12 @@ export default function BackgroundSettings({
         previewState={preset}
       />
 
-      {preset === 'standby' && (
-        <TvStandbyLayoutEditor screenId={screenId} settings={form} onChange={update} />
-      )}
+      <TvDisplayLayoutEditor
+        screenId={screenId}
+        settings={form}
+        preset={preset}
+        onChange={update}
+      />
 
       <NormalSettings
         form={form}
