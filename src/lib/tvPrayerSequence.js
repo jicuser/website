@@ -48,10 +48,14 @@ export function tvPrayerSequence(now, times, jummah = [], settings = {}, screenI
     .map(([name, key]) => ({ name, key, time: times[`jamaah_${key}`] }));
   if (parts.weekday === 'Fri')
     prayers.push(...jummah.map((item) => ({ name: item.name, key: 'jummah', time: item.prayer })));
+  const lead = Number.isInteger(settings.jamaah_lead_minutes) ? settings.jamaah_lead_minutes : 1;
   const current = prayers
     .map((prayer) => ({ ...prayer, start: prayerMinutes(prayer.time) }))
     .filter(
-      (prayer) => prayer.start !== null && minute >= prayer.start && minute < prayer.start + 20,
+      (prayer) =>
+        prayer.start !== null &&
+        minute >= prayer.start - lead &&
+        minute < prayer.start + 20,
     )
     .sort((a, b) => b.start - a.start)[0];
   if (!current) return null;
@@ -64,7 +68,8 @@ export function tvPrayerSequence(now, times, jummah = [], settings = {}, screenI
       : defaultDelays[current.key] ?? 9;
   return {
     ...current,
-    phase: elapsed < delay ? 'jamaah' : 'dhikr',
+    phase: elapsed < 0 ? 'before' : elapsed < delay ? 'jamaah' : 'dhikr',
+    secondsToJamaah: elapsed < 0 ? Math.max(0, Math.ceil(-elapsed * 60)) : 0,
     dhikrSeconds: Math.max(0, Math.floor((elapsed - delay) * 60)),
   };
 }
