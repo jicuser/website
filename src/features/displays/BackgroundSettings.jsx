@@ -17,6 +17,7 @@ export default function BackgroundSettings({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [preset, setPreset] = useState('standby');
+  const [renaming, setRenaming] = useState(false);
   const update = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
   const presetKeys = screenId === 'shoe-area' ? ['standby'] : TV_PRESET_KEYS;
   const presetName = form.preset_names?.[preset] || preset;
@@ -24,6 +25,7 @@ export default function BackgroundSettings({
     setForm({ ...data.settings, scene_mode: 'normal' });
     setRevision(data.updated_at);
     setPreset('standby');
+    setRenaming(false);
     setMessage('');
   }, [screenId, data.updated_at]);
 
@@ -56,7 +58,12 @@ export default function BackgroundSettings({
       </div>
 
       <div className="tv-scene-tabs-wrap">
-        <span>Scene</span>
+        <div className="tv-scene-tabs-head">
+          <span>Scene</span>
+          <button type="button" className="admin-text-button" onClick={() => setRenaming((value) => !value)}>
+            {renaming ? 'Done' : 'Rename'}
+          </button>
+        </div>
         <nav className="tv-preset-tabs" aria-label="TV scenes">
           {presetKeys.map((key) => (
             <button
@@ -70,6 +77,21 @@ export default function BackgroundSettings({
             </button>
           ))}
         </nav>
+        {renaming && (
+          <label className="tv-scene-rename">
+            Scene name
+            <input
+              maxLength={40}
+              value={presetName}
+              onChange={(event) =>
+                update('preset_names', {
+                  ...(form.preset_names || {}),
+                  [preset]: event.target.value,
+                })
+              }
+            />
+          </label>
+        )}
       </div>
 
       <TvDisplayLayoutEditor
