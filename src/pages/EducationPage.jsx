@@ -23,8 +23,8 @@ const educationTiles = [
   },
   {
     title: 'Enrolment',
-    description: 'Admissions and registration information for new pupils.',
-    path: '/madrassah/enrolment',
+    description: 'Choose Madrassah pupil enrolment or adult course registration.',
+    path: '/education/enrolment',
     icon: UserPlus,
   },
 ];
