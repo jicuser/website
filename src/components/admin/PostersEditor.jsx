@@ -125,8 +125,8 @@ export default function PostersEditor() {
         Normal TVs show up to four across and move along one poster each rotation.
       </p>
       <Link to="/admin?section=events">Dated event posters →</Link>
-      <h3>Current posters ({items.length})</h3>
-      <div className="admin-poster-picker">
+      {!item && <h3>Current posters ({items.length})</h3>}
+      {!item && <div className="admin-poster-picker">
         {items.map((poster) => (
           <button
             type="button"
@@ -152,8 +152,8 @@ export default function PostersEditor() {
             <span className="w-full">{poster.title || 'New poster'} · Edit</span>
           </button>
         ))}
-      </div>
-      <div className="admin-actions">
+      </div>}
+      {!item && <div className="admin-actions">
         <button
           className="admin-button"
           disabled={busy || items.length >= 100}
@@ -168,9 +168,23 @@ export default function PostersEditor() {
         >
           + Add announcement poster
         </button>
-      </div>
+      </div>}
       {item && (
         <div ref={editor} tabIndex={-1} className="poster-management">
+          <div className="admin-heading poster-workspace-heading">
+            <button
+              type="button"
+              className="admin-button"
+              onClick={() => {
+                if (!canLeaveLinkedEditor()) return;
+                setEditingPoster(false);
+                setSelected('');
+              }}
+            >
+              ← All posters
+            </button>
+            <strong>{item.title || 'New poster'}</strong>
+          </div>
           {editingPoster ? (
             <>
               <button
@@ -359,13 +373,13 @@ export default function PostersEditor() {
           )}
         </div>
       )}
-      <button
+      {dirty && <button
         className="admin-button primary"
-        disabled={!dirty || busy}
+        disabled={busy}
         onClick={() => save().catch((error) => setMessage(error.message))}
       >
         Publish posters
-      </button>
+      </button>}
       {message && <p role="status">{message}</p>}
     </section>
   );
