@@ -20,3 +20,17 @@
 .poster-workflow > nav { margin-block: 12px 20px; }
 .poster-workflow [hidden] { display: none; }
 @media (max-width: 600px) { .forms-entry-tiles { grid-template-columns: minmax(0,1fr); } }
+
+
+.form-card-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  width: 100%;
+  padding-top: 8px;
+  border-top: 1px solid var(--jic-border);
+}
+.form-card-metrics b {
+  color: var(--jic-text);
+  font-size: 16px;
+}
