@@ -2,26 +2,30 @@ import React, { useEffect, useRef, useState } from 'react';
 import { publicSettings } from '../../../supabase/functions/_shared/tv.js';
 
 // Normal drafts use the real display renderer, but never publish or send private sources.
-export default function TvPreview({ screenId, label, settings }) {
+export default function TvPreview({ screenId, label, settings, previewState = 'standby' }) {
   const box = useRef(null);
   const frame = useRef(null);
   const [scale, setScale] = useState(0);
-  const latest = useRef(settings);
-  latest.current = settings;
+  const latest = useRef({ settings, previewState });
+  latest.current = { settings, previewState };
   const send = () =>
     frame.current?.contentWindow?.postMessage(
       {
         type: 'jic-normal-preview',
         screenId,
-        settings: publicSettings({ ...latest.current, scene_mode: 'normal', muted: true }),
+        settings: publicSettings({ ...latest.current.settings, scene_mode: 'normal', muted: true }),
+        previewState: latest.current.previewState,
       },
       window.location.origin,
     );
+  const portrait = settings.display_orientation === 'portrait';
+  const baseWidth = portrait ? 720 : 1280;
+  const baseHeight = portrait ? 1280 : 720;
   useEffect(() => {
-    const observer = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / 1280));
+    const observer = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / baseWidth));
     observer.observe(box.current);
     return () => observer.disconnect();
-  }, []);
+  }, [baseWidth]);
   useEffect(() => {
     const ready = (event) => {
       if (
@@ -36,15 +40,15 @@ export default function TvPreview({ screenId, label, settings }) {
   }, [screenId]);
   useEffect(() => {
     send();
-  }, [settings, screenId]);
+  }, [settings, screenId, previewState]);
   return (
-    <div ref={box} className="admin-tv-preview">
+    <div ref={box} className={`admin-tv-preview ${portrait ? 'is-portrait' : ''}`}>
       <iframe
         ref={frame}
-        title={`${label} Normal draft preview`}
+        title={`${label} ${previewState} draft preview`}
         src={`/tv179/${screenId}?preview=normal`}
         onLoad={send}
-        style={{ transform: `scale(${scale})` }}
+        style={{ width: `${baseWidth}px`, height: `${baseHeight}px`, transform: `scale(${scale})` }}
       />
     </div>
   );
