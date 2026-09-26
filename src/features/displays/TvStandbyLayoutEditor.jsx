@@ -44,6 +44,10 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
     const timer = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+  useEffect(() => {
+    if (!scene.layers.some((item) => item.id === selected))
+      setSelected(scene.layers[0]?.id || '');
+  }, [preset, scene.id, scene.layers, selected]);
 
   const layer = scene.layers.find((item) => item.id === selected) || null;
   const posters = [
