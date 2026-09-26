@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CalendarDays, FileText, Plus, ClipboardList } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
@@ -478,17 +478,27 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
   );
 }
 
-export default function FormsManager() {
+export default function FormsManager({ registerBack }) {
   const { dirty } = useAdminSave();
   const [params, setParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
   const select = params.get('form');
   const view = params.get('view') || 'forms';
-  const choose = (changes) => {
-    if (dirty && !window.confirm('Discard unsaved form changes?')) return;
-    setCreating(false);
-    setParams({ section: 'forms', ...changes });
-  };
+  const choose = useCallback(
+    (changes) => {
+      if (dirty && !window.confirm('Discard unsaved form changes?')) return;
+      setCreating(false);
+      setParams({ section: 'forms', ...changes });
+    },
+    [dirty, setParams],
+  );
+  useEffect(() => {
+    if (!registerBack) return undefined;
+    if (creating) registerBack(() => setCreating(false));
+    else if (select || view !== 'forms') registerBack(() => choose({ view: 'forms' }));
+    else registerBack(null);
+    return () => registerBack(null);
+  }, [registerBack, creating, select, view, choose]);
   if (creating)
     return (
       <CustomFormsBuilder
