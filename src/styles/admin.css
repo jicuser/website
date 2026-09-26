@@ -1973,3 +1973,101 @@ html.dark .admin-console .admin-field-error {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* 2026 admin workspace refinement: compact shell, predictable mobile hierarchy. */
+.admin-mobile-section {
+  width: 100%;
+}
+.admin-mobile-nav-scroll {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.admin-mobile-nav-scroll::-webkit-scrollbar { display: none; }
+.admin-mobile-nav-scroll button,
+.admin-mobile-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid #ffffff24;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.admin-mobile-nav-scroll button[aria-current='page'] {
+  background: var(--jic-action);
+  color: #0c1930 !important;
+}
+.poster-workspace-heading {
+  margin-bottom: 14px;
+}
+@media (max-width: 800px) {
+  .admin-toolbar {
+    gap: 7px;
+    padding: 8px 10px;
+  }
+  .admin-toolbar-title {
+    width: auto;
+    flex: 1 1 120px;
+  }
+  .admin-toolbar-actions {
+    flex: 0 0 auto;
+    gap: 5px;
+  }
+  .admin-toolbar-actions .admin-button {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+  .admin-toolbar-actions .admin-button span {
+    display: none;
+  }
+  .admin-mobile-section {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 7px;
+    align-items: center;
+  }
+  .admin-mobile-section:not(:has(.admin-mobile-back)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-main {
+    padding: 14px 12px 28px;
+  }
+  .admin-task-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-task-grid > :is(a, button) {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 3px 10px;
+    padding: 13px 14px;
+  }
+  .admin-task-grid svg {
+    grid-row: 1 / span 2;
+    width: 24px;
+    height: 24px;
+  }
+  .admin-task-grid strong { font-size: 15px; }
+  .admin-task-grid span { font-size: 11px; }
+  .admin-page-picker {
+    max-height: none;
+  }
+  .admin-page-picker nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-search svg {
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .admin-panel .admin-search input {
+    padding-left: 38px;
+  }
+}
