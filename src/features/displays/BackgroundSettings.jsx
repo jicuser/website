@@ -10,7 +10,7 @@ export default function BackgroundSettings({ screenId, data, currentEvents, onRe
   const [message, setMessage] = useState('');
   return (
     <div className="stream-background-settings">
-      <p>These posters and prayer notices show when the hall has no active stream.</p>
+      <p>This is what the screen shows in standby when no presentation is active.</p>
       <TvPreview screenId={screenId} label={data.label} settings={form} />
       <NormalSettings
         form={form}
@@ -32,7 +32,7 @@ export default function BackgroundSettings({ screenId, data, currentEvents, onRe
             );
             setRevision(saved.updated_at);
             await onRefresh();
-            setMessage('Background display saved.');
+            setMessage('Standby display saved.');
           } catch (error) {
             setMessage(error.message);
           } finally {
@@ -40,7 +40,7 @@ export default function BackgroundSettings({ screenId, data, currentEvents, onRe
           }
         }}
       >
-        {busy ? 'Saving…' : 'Save background display'}
+        {busy ? 'Saving…' : 'Save standby display'}
       </button>
       <button
         className="admin-button"
@@ -65,7 +65,7 @@ export default function BackgroundSettings({ screenId, data, currentEvents, onRe
           }
         }}
       >
-        Load current settings
+        Reload standby settings
       </button>
       {message && <p role="status">{message}</p>}
     </div>
