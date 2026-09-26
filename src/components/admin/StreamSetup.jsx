@@ -136,7 +136,7 @@ function ScreenOverview({ onOpen }) {
   );
 }
 
-export default function StreamSetup() {
+export default function StreamSetup({ registerBack }) {
   const { user } = useAuth();
   const openKey = `jic-stream-open:${user.id}`;
   const [openHall, setOpenHall] = useState(() => {
@@ -159,6 +159,32 @@ export default function StreamSetup() {
     setBackgroundOnly(background);
     setOpenHall(screenId);
   };
+  const switchScreen = (screenId) => {
+    try {
+      sessionStorage.setItem(openKey, screenId);
+    } catch {
+      /* Storage is optional. */
+    }
+    setOpenHall(screenId);
+  };
+  useEffect(() => {
+    if (!registerBack) return undefined;
+    if (openHall) {
+      registerBack(() => {
+        setQuickStart(false);
+        setBackgroundOnly(false);
+        setOpenHall('');
+        try {
+          sessionStorage.removeItem(openKey);
+        } catch {
+          /* Storage is optional. */
+        }
+      });
+    } else {
+      registerBack(null);
+    }
+    return () => registerBack(null);
+  }, [registerBack, openHall, openKey]);
   if (openHall)
     return (
       <HallWorkspace
@@ -167,6 +193,7 @@ export default function StreamSetup() {
         userId={user.id}
         quickStart={quickStart}
         backgroundOnly={backgroundOnly}
+        onSwitchScreen={switchScreen}
         onBack={() => {
           try {
             sessionStorage.removeItem(openKey);
@@ -186,7 +213,7 @@ export default function StreamSetup() {
   );
 }
 
-function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onBack }) {
+function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onSwitchScreen, onBack }) {
   const setup = useStreamSetup(screenId, userId);
   const { data, form, stage, busy } = setup;
   const [backgroundOpen, setBackgroundOpen] = useState(backgroundOnly);
@@ -416,6 +443,7 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onBack })
                 disabled={busy}
                 screenId={screenId}
                 previewLive={setup.started}
+                initialMode={quickStart ? 'simple' : 'advanced'}
                 localStreams={localStreams}
                 renderDeviceInput={(layer) => <CaptureDock slot={layer.slot} onTarget={onTarget} />}
                 posters={[
@@ -531,22 +559,33 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onBack })
             />
           )}
           {hall && !backgroundOnly && setup.started && <SessionOutput screenId={screenId} />}
-          {(backgroundOnly || stage === 2 || !hall) && (
-            <details
-              className="admin-panel"
-              open={backgroundOnly || !hall || backgroundOpen}
-              onToggle={(event) => setBackgroundOpen(event.currentTarget.open)}
-            >
-              <summary>{backgroundOnly ? 'Standby display settings' : 'Standby display settings'}</summary>
-              {(backgroundOnly || backgroundOpen || !hall) && (
-                <BackgroundSettings
-                  screenId={screenId}
-                  data={data}
-                  currentEvents={currentEvents}
-                  onRefresh={setup.refresh}
-                />
-              )}
-            </details>
+          {backgroundOnly ? (
+            <BackgroundSettings
+              screenId={screenId}
+              data={data}
+              currentEvents={currentEvents}
+              onRefresh={setup.refresh}
+              onSwitchScreen={onSwitchScreen}
+            />
+          ) : (
+            (stage === 2 || !hall) && (
+              <details
+                className="admin-panel"
+                open={!hall || backgroundOpen}
+                onToggle={(event) => setBackgroundOpen(event.currentTarget.open)}
+              >
+                <summary>Standby display settings</summary>
+                {(backgroundOpen || !hall) && (
+                  <BackgroundSettings
+                    screenId={screenId}
+                    data={data}
+                    currentEvents={currentEvents}
+                    onRefresh={setup.refresh}
+                    onSwitchScreen={onSwitchScreen}
+                  />
+                )}
+              </details>
+            )
           )}
         </>
       )}
