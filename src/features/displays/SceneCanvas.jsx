@@ -152,7 +152,7 @@ export default function SceneCanvas({
               )}
             </div>
           ))}
-        {!scene.layers.some((layer) => layer.type === 'brand' && !layer.hidden) && (
+        {!scene.layers.some((layer) => layer.type === 'brand') && (
           <div className="scene-brand">
             <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
           </div>
