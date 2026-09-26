@@ -346,38 +346,49 @@ export function validateSettings(input, screenId = '') {
       throw new Error('Use 1–40 characters for each TV preset name.');
     result.preset_names[key] = name.trim();
   }
-  const standby = validateScenes([values.standby_scene], secureStreamUrl, youtubeUrl)[0];
   const allowedStandby = new Set(['times', 'next', 'clock', 'poster', 'poster-next', 'text', 'brand', 'empty']);
-  if (standby.layers.some((layer) => !allowedStandby.has(layer.type)))
-    throw new Error('Standby layouts can use timetable, next prayer, clock, posters, logo and text only.');
-  for (const layer of standby.layers) {
-    if (layer.type === 'times') {
-      const layout = values.standby_scene.layers.find((item) => item.id === layer.id)?.layout || 'horizontal';
-      if (!['horizontal', 'vertical'].includes(layout)) throw new Error('Choose a valid prayer timetable layout.');
-      layer.layout = layout;
-    }
-  }
-  result.standby_scene = standby;
-  result.preset_scenes = {};
   const allowedPreset = new Set(['times', 'next', 'clock', 'state', 'text', 'brand', 'empty']);
-  for (const key of TV_PRESET_KEYS.filter((value) => value !== 'standby')) {
-    const source = values.preset_scenes?.[key];
+  const validateDisplayScene = (source, preset) => {
     const checked = validateScenes([source], secureStreamUrl, youtubeUrl)[0];
-    if (checked.layers.some((layer) => !allowedPreset.has(layer.type)))
-      throw new Error('Prayer preset layouts can use timetable, preset content, next prayer, clock, logo and text only.');
-    if (!checked.layers.some((layer) => layer.type === 'state' && !layer.hidden))
+    const allowed = preset === 'standby' ? allowedStandby : allowedPreset;
+    if (checked.layers.some((layer) => !allowed.has(layer.type)))
+      throw new Error(
+        preset === 'standby'
+          ? 'Standby layouts can use timetable, next prayer, clock, posters, logo and text only.'
+          : 'Prayer preset layouts can use timetable, preset content, next prayer, clock, logo and text only.',
+      );
+    if (
+      preset !== 'standby' &&
+      !checked.layers.some((layer) => layer.type === 'state' && !layer.hidden)
+    )
       throw new Error('Each prayer preset needs a visible preset content block.');
     for (const layer of checked.layers) {
-      if (layer.type === 'times') {
-        const original = source.layers.find((item) => item.id === layer.id);
-        const layout = original?.layout || 'horizontal';
-        if (!['horizontal', 'vertical'].includes(layout))
-          throw new Error('Choose a valid prayer timetable layout.');
-        layer.layout = layout;
-      }
+      if (layer.type !== 'times') continue;
+      const original = source.layers.find((item) => item.id === layer.id);
+      const layout = original?.layout || 'horizontal';
+      if (!PRAYER_TIMETABLE_LAYOUTS.includes(layout))
+        throw new Error('Choose a valid prayer timetable layout.');
+      layer.layout = layout;
     }
-    result.preset_scenes[key] = checked;
+    return checked;
+  };
+  result.display_layouts = {};
+  for (const orientation of ['landscape', 'portrait']) {
+    result.display_layouts[orientation] = {};
+    for (const preset of TV_PRESET_KEYS) {
+      result.display_layouts[orientation][preset] = validateDisplayScene(
+        values.display_layouts[orientation][preset],
+        preset,
+      );
+    }
   }
+  result.standby_scene = result.display_layouts[result.display_orientation].standby;
+  result.preset_scenes = Object.fromEntries(
+    TV_PRESET_KEYS.filter((key) => key !== 'standby').map((key) => [
+      key,
+      result.display_layouts[result.display_orientation][key],
+    ]),
+  );
   for (const key of [
     'dhikr_delay_fajr',
     'dhikr_delay_dhuhr',
