@@ -152,7 +152,7 @@ function quickLayout(scene, orientation, preset, mode) {
 
 export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'standby', onChange }) {
   const orientation = settings.display_orientation === 'portrait' ? 'portrait' : 'landscape';
-  const prayers = usePrayerTimes();
+  const prayers = usePrayerTimes({ includeTomorrow: true });
   const programmes = usePosters();
   const { events, livestream } = useHomeLiveContent({ eventLimit: 50 });
   const fallback = defaultScene(orientation, preset);
