@@ -6,7 +6,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
   return (
     <>
       <section className="admin-panel">
-        <h3>Background display</h3>
+        <h3>Standby display</h3>
         {[
           ['show_times', 'Salah timetable'],
           ['show_next', 'Next prayer'],
@@ -96,7 +96,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
       </details>
       {hall && (
         <details className="admin-panel">
-          <summary>Automatic prayers, Jummah & Ramadan</summary>
+          <summary>Prayer sequence & special notices</summary>
           <label className="admin-check">
             <input
               type="checkbox"
