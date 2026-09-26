@@ -1325,3 +1325,62 @@ html[data-theme] .jic-tv-display.is-portrait {
     grid-template-columns: minmax(0,1fr);
   }
 }
+
+
+/* Full-screen final preview uses the same renderer with no editor grid or handles. */
+.tv-final-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: #02050a;
+  color: #fff;
+}
+.tv-final-preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(10px, env(safe-area-inset-top)) 12px 10px;
+  background: #0c1729;
+  border-bottom: 1px solid rgba(255,255,255,.14);
+}
+.tv-final-preview-bar > div {
+  display: grid;
+  gap: 2px;
+}
+.tv-final-preview-bar span {
+  color: #b5c0cf;
+  font-size: .8rem;
+}
+.tv-final-preview-stage {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #000;
+}
+.tv-final-preview-stage > .scene-player {
+  width: min(100vw, calc((100dvh - 64px) * 16 / 9));
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+}
+.tv-final-preview-stage.is-portrait > .scene-player {
+  width: min(100vw, calc((100dvh - 64px) * 9 / 16));
+  aspect-ratio: 9 / 16;
+}
+.tv-final-preview-stage .scene-canvas {
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 600px) {
+  .tv-final-preview-bar {
+    align-items: flex-start;
+  }
+  .tv-final-preview-bar .admin-button {
+    min-height: 42px;
+    padding-inline: 12px;
+  }
+}
