@@ -281,7 +281,7 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onSwitchS
             onBack();
           }}
         >
-          Choose another hall
+          Back to screens
         </button>
       </div>
       {setup.message && (
