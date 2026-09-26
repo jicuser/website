@@ -132,9 +132,13 @@ export default function SceneCanvas({
                           const selected = layer.poster_ids
                             ? posters.filter((p) => layer.poster_ids.includes(p.id))
                             : posters;
-                          const base = layer.poster_ids
-                            ? Math.floor(now.getTime() / ((layer.rotation_seconds || tv.settings.rotation_seconds || 20) * 1000))
-                            : slide;
+                          const base =
+                            layer.poster_ids || scene.id === 'standby'
+                              ? Math.floor(
+                                  now.getTime() /
+                                    ((layer.rotation_seconds || tv.settings.rotation_seconds || 20) * 1000),
+                                )
+                              : slide;
                           const index = base + (layer.poster_offset ?? (layer.type === 'poster-next' ? 1 : 0));
                           return selected[index % selected.length];
                         })()
