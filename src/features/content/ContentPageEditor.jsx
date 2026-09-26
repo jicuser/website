@@ -177,7 +177,7 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
   return (
     <section className="content-page-editor" aria-label="Content page editor">
       <div className="admin-heading">
-        <h3>{page?.id ? 'Page & registration' : 'Create a page'}</h3>
+        <h3>{page?.id ? 'Dedicated page' : 'Add dedicated page'}</h3>
         {onClose && (
           <button className="admin-button" disabled={busy} onClick={close}>
             Close page editor
@@ -186,6 +186,38 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
       </div>
       {message && <p role="status">{message}</p>}
       <fieldset disabled={busy}>
+        <section className="admin-panel content-page-toggle">
+          <div className="admin-heading">
+            <div>
+              <h4>Dedicated website page</h4>
+              <p>
+                This is optional. Keep it off if the poster should only appear as a poster/tile.
+              </p>
+            </div>
+            <label className="admin-check">
+              <input
+                type="checkbox"
+                checked={draft.published}
+                onChange={(event) => patch({ published: event.target.checked })}
+              />
+              {draft.published ? 'Page visible' : 'Page hidden'}
+            </label>
+          </div>
+          <label>
+            Place page under
+            <select
+              value={draft.placement}
+              onChange={(event) => patch({ placement: event.target.value })}
+            >
+              {PAGE_PLACEMENTS.map(([value, label]) => (
+                <option value={value} key={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </section>
+
         <div className="content-field-grid">
           <label>
             Page title
@@ -203,6 +235,109 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
             />
           </label>
           <label>
+            When / schedule
+            <input
+              value={draft.schedule}
+              maxLength={400}
+              onChange={(event) => patch({ schedule: event.target.value })}
+            />
+          </label>
+        </div>
+
+        <label>
+          Page details
+          <textarea
+            rows={6}
+            value={draft.body}
+            maxLength={12000}
+            onChange={(event) => patch({ body: event.target.value })}
+          />
+        </label>
+
+        <label>
+          Page picture address
+          <input
+            value={draft.image_url}
+            maxLength={2000}
+            onChange={(event) => patch({ image_url: event.target.value })}
+          />
+        </label>
+        {can('media') && (
+          <label>
+            Upload / replace page picture
+            <input
+              type="file"
+              accept={IMAGE_ACCEPT}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = '';
+                void upload(file);
+              }}
+            />
+          </label>
+        )}
+
+        <section className="admin-panel content-registration-setup">
+          <h4>Registration / form</h4>
+          <p>
+            This is separate from the page. A poster can have no form, a linked existing form, or a
+            new form created here.
+          </p>
+          <label>
+            Registration
+            <select
+              value={draft.registration}
+              onChange={(event) =>
+                patch({
+                  registration: event.target.value,
+                  ...(event.target.value === 'none' ? { form_id: null } : {}),
+                })
+              }
+            >
+              {REGISTRATION_TYPES.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {draft.registration !== 'none' && (
+            <>
+              <label>
+                Linked form
+                <select
+                  value={draft.form_id || ''}
+                  onChange={(event) => patch({ form_id: event.target.value || null })}
+                >
+                  <option value="">No online form linked yet</option>
+                  {draft.form_id && !forms.some((form) => form.id === draft.form_id) && (
+                    <option value={draft.form_id}>Current linked form</option>
+                  )}
+                  {forms.map((form) => (
+                    <option value={form.id} key={form.id}>
+                      {form.title}
+                      {form.published_version === null ? ' · Draft' : ''}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {formsError && <p role="status">{formsError}</p>}
+              {can('forms_manage') && (
+                <button type="button" className="admin-button" onClick={() => setCreating(true)}>
+                  + Create new form
+                </button>
+              )}
+              <small>
+                Manage responses and actions from Forms. Page visibility and form acceptance stay
+                separate.
+              </small>
+            </>
+          )}
+        </section>
+
+        <details className="admin-panel">
+          <summary>Advanced page settings</summary>
+          <label>
             Page address
             <input
               value={draft.slug}
@@ -215,7 +350,7 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
             />
           </label>
           <label>
-            Type
+            Page type
             <select value={draft.kind} onChange={(event) => patch({ kind: event.target.value })}>
               {PAGE_KINDS.map(([value, label]) => (
                 <option value={value} key={value}>
@@ -224,125 +359,16 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
               ))}
             </select>
           </label>
-          <label>
-            Place under
-            <select
-              value={draft.placement}
-              onChange={(event) => patch({ placement: event.target.value })}
-            >
-              {PAGE_PLACEMENTS.map(([value, label]) => (
-                <option value={value} key={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <small>The address stays {pageUrl(draft)} when you move the page to another section.</small>
-        <label>
-          Details
-          <textarea
-            rows={6}
-            value={draft.body}
-            maxLength={12000}
-            onChange={(event) => patch({ body: event.target.value })}
-          />
-        </label>
-        <label>
-          When / schedule
-          <input
-            value={draft.schedule}
-            maxLength={400}
-            onChange={(event) => patch({ schedule: event.target.value })}
-          />
-        </label>
-        <label>
-          Picture address
-          <input
-            value={draft.image_url}
-            maxLength={2000}
-            onChange={(event) => patch({ image_url: event.target.value })}
-          />
-        </label>
-        {can('media') && (
-          <label>
-            Upload page picture
-            <input
-              type="file"
-              accept={IMAGE_ACCEPT}
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                event.target.value = '';
-                void upload(file);
-              }}
-            />
-          </label>
-        )}
-        <label>
-          Registration
-          <select
-            value={draft.registration}
-            onChange={(event) =>
-              patch({
-                registration: event.target.value,
-                ...(event.target.value === 'none' ? { form_id: null } : {}),
-              })
-            }
-          >
-            {REGISTRATION_TYPES.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        {draft.registration !== 'none' && (
-          <>
-            <label>
-              Linked form
-              <select
-                value={draft.form_id || ''}
-                onChange={(event) => patch({ form_id: event.target.value || null })}
-              >
-                <option value="">No online form linked yet</option>
-                {draft.form_id && !forms.some((form) => form.id === draft.form_id) && (
-                  <option value={draft.form_id}>Current linked form</option>
-                )}
-                {forms.map((form) => (
-                  <option value={form.id} key={form.id}>
-                    {form.title}
-                    {form.published_version === null ? ' · Draft' : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {formsError && <p role="status">{formsError}</p>}
-            {can('forms_manage') && (
-              <button type="button" className="admin-button" onClick={() => setCreating(true)}>
-                Create linked form
-              </button>
-            )}
-            <small>
-              A draft or closed form cannot accept registrations. Page visibility and form
-              acceptance are separate.
-            </small>
-          </>
-        )}
-        <label className="admin-check">
-          <input
-            type="checkbox"
-            checked={draft.published}
-            onChange={(event) => patch({ published: event.target.checked })}
-          />
-          Show page on website
-        </label>
+          <small>The address stays {pageUrl(draft)} if you move the page to another section.</small>
+        </details>
+
         <div className="admin-actions">
           <button
             className="admin-button primary"
             disabled={!dirty && Boolean(draft.updated_at)}
             onClick={() => save().catch(() => {})}
           >
-            Save page
+            Save page settings
           </button>
           <button className="admin-button" onClick={() => setPreview((value) => !value)}>
             {preview ? 'Close page preview' : 'Preview page'}
@@ -350,6 +376,11 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
           {draft.updated_at && draft.published && (
             <Link className="admin-button" to={pageUrl(draft)} target="_blank" rel="noreferrer">
               View published page
+            </Link>
+          )}
+          {draft.form_id && can('forms') && (
+            <Link className="admin-button" to={`/admin?section=forms&form=${draft.form_id}`}>
+              Open form & responses
             </Link>
           )}
         </div>
