@@ -8,24 +8,10 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
   if (preset === 'standby') {
     return (
       <>
-        <section className="admin-panel tv-preset-settings">
-          <h3>Standby content</h3>
-          <p>These switches control the matching blocks in the visual layout above.</p>
-          {[
-            ['show_times', 'Salah timetable'],
-            ['show_next', 'Next Salah'],
-            ['show_clock', 'Clock & date'],
-          ].map(([key, name]) => (
-            <label key={key} className="admin-check">
-              <input
-                type="checkbox"
-                checked={form[key] !== false}
-                onChange={(event) => update(key, event.target.checked)}
-              />
-              {name}
-            </label>
-          ))}
-        </section>
+        <p className="workspace-meta tv-layout-help">
+          Show, hide, move and resize the timetable, Next Salah, clock, logo and poster blocks in
+          the visual layout above.
+        </p>
 
         <details className="admin-panel">
           <summary>Posters & rotation</summary>
