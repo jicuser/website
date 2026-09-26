@@ -5,7 +5,6 @@ import { checked } from '@/components/workspace/shared';
 import useAdminRecords from '@/hooks/useAdminRecords';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminSave } from '@/context/AdminSaveContext';
-import { FormWorkspace } from '@/features/forms/FormsManager';
 import ContentPageEditor from './ContentPageEditor';
 import { pageUrl } from '@/lib/pageContent';
 
@@ -41,20 +40,10 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
         <button className="admin-button" aria-pressed={tab === 'overview'} onClick={() => choose('overview')}>
           Overview
         </button>
-        <button className="admin-button" onClick={onEditPoster}>Poster</button>
+        <button className="admin-button" onClick={onEditPoster}>Edit poster</button>
         <button className="admin-button" aria-pressed={tab === 'page'} onClick={() => choose('page')}>
-          Page
+          {page ? 'Page & registration' : 'Add page / registration'}
         </button>
-        {page?.form_id && can('forms') && (
-          <button className="admin-button" aria-pressed={tab === 'responses'} onClick={() => choose('responses')}>
-            Responses
-          </button>
-        )}
-        {page?.form_id && can('forms') && (
-          <button className="admin-button" aria-pressed={tab === 'actions'} onClick={() => choose('actions')}>
-            Actions
-          </button>
-        )}
       </nav>
       {error && (
         <p role="alert">
@@ -76,7 +65,11 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
       {tab === 'overview' && (
         <>
           <div className="poster-overview-card">
-            {poster.image && <img className="poster-overview-image" src={poster.image} alt={poster.alt || poster.title} />}
+            {poster.image ? (
+              <img className="poster-overview-image" src={poster.image} alt={poster.alt || poster.title} />
+            ) : (
+              <div className="poster-overview-image poster-overview-placeholder">No poster image</div>
+            )}
             <div>
               <h3>{poster.title}</h3>
               {poster.subtitle && <p><strong>{poster.subtitle}</strong></p>}
@@ -94,15 +87,13 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
                   View page
                 </Link>
               )}
-              {page.form_id && can('forms') ? (
-                <FormWorkspace key={page.form_id} formId={page.form_id} />
-              ) : (
-                <p>
-                  {page.form_id
-                    ? 'A form is linked. Response access is limited to authorised staff.'
-                    : 'No form linked. This poster can remain an announcement without registration.'}
-                </p>
-              )}
+              <p>
+                {page.form_id
+                  ? can('forms')
+                    ? 'Registration form linked. Open Forms to manage responses and actions.'
+                    : 'A registration form is linked. Response access is limited to authorised staff.'
+                  : 'No form linked. This poster can remain an announcement without registration.'}
+              </p>
             </>
           ) : (
             !loading &&
@@ -114,9 +105,7 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
           )}
         </>
       )}
-      {can('forms') && page?.form_id && ['responses', 'actions'].includes(tab) && (
-        <FormWorkspace key={`${page.form_id}:${tab}`} formId={page.form_id} initialTab={tab} />
-      )}
+
     </section>
   );
 }
