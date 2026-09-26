@@ -13,6 +13,7 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
   const { dirty } = useAdminSave();
   const [tab, setTab] = useState('overview');
   const [pageBusy, setPageBusy] = useState(false);
+  const [pageMessage, setPageMessage] = useState('');
   const read = useCallback(
     (signal) =>
       checked(
@@ -36,6 +37,7 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
     if (!visible && !window.confirm('Hide this dedicated page? Its linked form and responses are kept.'))
       return;
     setPageBusy(true);
+    setPageMessage('');
     try {
       await checked(
         supabase.rpc('save_site_page', {
@@ -47,6 +49,9 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
         }),
       );
       await reload();
+      setPageMessage(visible ? 'Dedicated page is now visible.' : 'Dedicated page is hidden.');
+    } catch (failure) {
+      setPageMessage(failure.message || 'Page visibility could not be changed.');
     } finally {
       setPageBusy(false);
     }
@@ -167,6 +172,7 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
                   View page
                 </Link>
               )}
+              {pageMessage && <small role="status">{pageMessage}</small>}
             </section>
 
             <section className="admin-panel">
