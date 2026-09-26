@@ -125,7 +125,14 @@ export default function PostersEditor() {
         Normal TVs show up to four across and move along one poster each rotation.
       </p>
       <Link to="/admin?section=events">Dated event posters →</Link>
-      {!item && <h3>Current posters ({items.length})</h3>}
+      {!item && (
+        <div className="admin-heading">
+          <div>
+            <h3>All posters</h3>
+            <p>{items.length} current · tap a poster to manage it.</p>
+          </div>
+        </div>
+      )}
       {!item && <div className="admin-poster-picker">
         {items.map((poster) => (
           <button
@@ -149,7 +156,8 @@ export default function PostersEditor() {
             ) : (
               posterImage(poster.image) && <img src={poster.image} alt="" loading="lazy" />
             )}
-            <span className="w-full">{poster.title || 'New poster'} · Edit</span>
+            <span className="w-full"><strong>{poster.title || 'New poster'}</strong></span>
+            <span className="workspace-meta">{poster.kind === 'announcement' ? 'Announcement' : 'Image poster'} · Tap to manage</span>
           </button>
         ))}
       </div>}
@@ -171,7 +179,7 @@ export default function PostersEditor() {
       </div>}
       {item && (
         <div ref={editor} tabIndex={-1} className="poster-management">
-          <div className="admin-heading poster-workspace-heading">
+          <div className="poster-mobile-backbar">
             <button
               type="button"
               className="admin-button"
@@ -183,7 +191,7 @@ export default function PostersEditor() {
             >
               ← All posters
             </button>
-            <strong>{item.title || 'New poster'}</strong>
+            <span>{item.title || 'New poster'}</span>
           </div>
           {editingPoster ? (
             <>
