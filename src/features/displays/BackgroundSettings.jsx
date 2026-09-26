@@ -10,8 +10,13 @@ export default function BackgroundSettings({ screenId, data, currentEvents, onRe
   const [message, setMessage] = useState('');
   return (
     <div className="stream-background-settings">
-      <p>This is what the screen shows in standby when no presentation is active.</p>
+      <p>This is what the screen shows when no presentation is active.</p>
+      <div className="tv-standby-preview-heading">
+        <strong>Live layout preview</strong>
+        <span>Landscape 16:9</span>
+      </div>
       <TvPreview screenId={screenId} label={data.label} settings={form} />
+      <p className="workspace-meta">Layout editor is the next control: it will let each screen use landscape or portrait and let timetable, posters, clock and notices be positioned visually.</p>
       <NormalSettings
         form={form}
         update={(key, value) => setForm((previous) => ({ ...previous, [key]: value }))}
