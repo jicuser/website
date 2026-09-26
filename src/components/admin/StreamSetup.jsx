@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Radio } from 'lucide-react';
-import { TV_SCREENS } from '@/lib/tvControl';
+import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { useAuth } from '@/context/AuthContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
@@ -16,13 +16,124 @@ import BackgroundSettings from '@/features/displays/BackgroundSettings';
 import DeviceInputs from '@/features/displays/DeviceInputs';
 import TvConnections from '@/features/displays/TvConnections';
 import SessionOutput from '@/features/displays/SessionOutput';
-import ActiveStreamList from '@/features/displays/ActiveStreamList';
 
 // Portal targets contain controls only. Capture controllers stay mounted outside
 // the dialog, so closing a source editor does not stop a live camera or screen.
 function CaptureDock({ slot, onTarget }) {
   const attach = useCallback((node) => onTarget(slot, node), [slot, onTarget]);
   return <div className="scene-capture-dock" ref={attach} />;
+}
+
+function standbySummary(settings = {}) {
+  const parts = [];
+  if (settings.show_times) parts.push('timetable');
+  if (settings.show_next) parts.push('next prayer');
+  if (settings.show_clock) parts.push('clock');
+  const posters = Array.isArray(settings.poster_ids) ? settings.poster_ids.length : 0;
+  if (posters) parts.push(`${posters} poster${posters === 1 ? '' : 's'}`);
+  if (settings.include_events) parts.push('event posters');
+  return parts.length ? parts.join(' · ') : 'Blank standby layout';
+}
+
+function ScreenOverview({ onOpen }) {
+  const [states, setStates] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+
+  const load = useCallback(async (signal) => {
+    setLoading(true);
+    setMessage('');
+    const results = await Promise.allSettled(
+      TV_SCREENS.map((screen) => tvRequest('admin', screen.id, {}, { staff: true, signal })),
+    );
+    if (signal?.aborted) return;
+    const next = {};
+    results.forEach((result, index) => {
+      next[TV_SCREENS[index].id] =
+        result.status === 'fulfilled' ? { data: result.value } : { error: result.reason?.message };
+    });
+    setStates(next);
+    if (results.some((result) => result.status === 'rejected'))
+      setMessage('Some screen status could not be checked. You can still open its controls.');
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
+
+  return (
+    <>
+      <div className="admin-heading">
+        <div>
+          <span className="admin-eyebrow">TV & SCREENS</span>
+          <h2>Current screens</h2>
+          <p>See what each screen is doing now, then manage its standby display or present.</p>
+        </div>
+        <button
+          className="admin-button"
+          disabled={loading}
+          onClick={() => load()}
+        >
+          {loading ? 'Checking…' : 'Refresh status'}
+        </button>
+      </div>
+      {message && <p className="stream-feedback" role="status">{message}</p>}
+      <div className="tv-screen-overview-grid">
+        {TV_SCREENS.map((screen) => {
+          const state = states[screen.id];
+          const data = state?.data;
+          const presenting = Boolean(data?.presentation);
+          return (
+            <article className="admin-panel tv-screen-overview-card" key={screen.id}>
+              <div className="tv-screen-overview-title">
+                <div>
+                  <strong>{screen.label}</strong>
+                  <span className="content-status">{presenting ? 'Presenting' : 'Standby'}</span>
+                </div>
+                {state?.error && <small>Could not read live status</small>}
+              </div>
+              <p>
+                {data
+                  ? presenting
+                    ? 'A presentation is active. Standby settings are kept underneath it.'
+                    : `Standby: ${standbySummary(data.settings)}`
+                  : loading
+                    ? 'Checking current display…'
+                    : 'Open the screen to manage its standby display.'}
+              </p>
+              {data?.settings?.prayer_enabled !== false && screen.id !== 'shoe-area' && (
+                <small>Prayer sequence is automatic.</small>
+              )}
+              <div className="admin-actions">
+                <button className="admin-button" onClick={() => onOpen(screen.id, false, true)}>
+                  Standby display
+                </button>
+                {screen.id !== 'shoe-area' && (
+                  presenting ? (
+                    <button className="admin-button primary" onClick={() => onOpen(screen.id, false, false)}>
+                      Manage live presentation
+                    </button>
+                  ) : (
+                    <button className="admin-button primary" onClick={() => onOpen(screen.id, true, false)}>
+                      Quick present
+                    </button>
+                  )
+                )}
+                {screen.id !== 'shoe-area' && !presenting && (
+                  <button className="admin-button" onClick={() => onOpen(screen.id, false, false)}>
+                    Advanced
+                  </button>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </>
+  );
 }
 
 export default function StreamSetup() {
@@ -36,7 +147,6 @@ export default function StreamSetup() {
       return '';
     }
   });
-  const [selected, setSelected] = useState(openHall || 'mens-main');
   const [quickStart, setQuickStart] = useState(false);
   const [backgroundOnly, setBackgroundOnly] = useState(false);
   const openWorkspace = (screenId, quick = false, background = false) => {
@@ -45,7 +155,6 @@ export default function StreamSetup() {
     } catch {
       /* Server sessions can still be recovered without browser storage. */
     }
-    setSelected(screenId);
     setQuickStart(quick);
     setBackgroundOnly(background);
     setOpenHall(screenId);
@@ -71,36 +180,8 @@ export default function StreamSetup() {
       />
     );
   return (
-    <section className="stream-setup admin-panel">
-      <ActiveStreamList
-        key={user.id}
-        onOpen={(screenId) => openWorkspace(screenId, false)}
-        onStart={() => openWorkspace(selected, true)}
-      />
-      <span className="admin-eyebrow">TV & SCREENS</span>
-      <h2>Choose a screen</h2>
-      <p>Manage the normal display and prayer sequence, or present something immediately.</p>
-      <label>
-        Hall
-        <select value={selected} onChange={(event) => setSelected(event.target.value)}>
-          {TV_SCREENS.map((screen) => (
-            <option key={screen.id} value={screen.id}>
-              {screen.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <div className="admin-actions">
-        <button className="admin-button primary" onClick={() => openWorkspace(selected, true)}>
-          Quick present <span aria-hidden="true">→</span>
-        </button>
-        <button className="admin-button" onClick={() => openWorkspace(selected, false, true)}>
-          Normal display & prayer sequence
-        </button>
-        <button className="admin-button" onClick={() => openWorkspace(selected, false)}>
-          Advanced presentation
-        </button>
-      </div>
+    <section className="stream-setup">
+      <ScreenOverview onOpen={openWorkspace} />
     </section>
   );
 }
@@ -147,14 +228,14 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onBack })
         <div>
           <span className="admin-eyebrow stream-step-indicator jic-prompt">
             {backgroundOnly
-              ? 'NORMAL DISPLAY'
+              ? 'STANDBY DISPLAY'
               : hall
                 ? setup.started
                   ? 'PRESENTATION LIVE'
                   : quickStart
                     ? 'QUICK PRESENT'
                     : 'ADVANCED PRESENTATION'
-                : 'BACKGROUND DISPLAY'}
+                : 'STANDBY DISPLAY'}
           </span>
           <h2>{screen.label}</h2>
         </div>
@@ -195,7 +276,7 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onBack })
           }}
           onSaved={() => {
             setup.setPendingSave(null);
-            setup.setMessage('Presentation ended and settings saved. Screens show the normal display.');
+            setup.setMessage('Presentation ended and settings saved. Screens return to the standby display.');
             setup.refresh().catch((error) => setup.setMessage(`Settings saved. ${error.message}`));
           }}
         />
@@ -456,7 +537,7 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onBack })
               open={backgroundOnly || !hall || backgroundOpen}
               onToggle={(event) => setBackgroundOpen(event.currentTarget.open)}
             >
-              <summary>{backgroundOnly ? 'Normal display & prayer sequence' : 'Background posters & prayer notices'}</summary>
+              <summary>{backgroundOnly ? 'Standby display & prayer sequence' : 'Background posters & prayer notices'}</summary>
               {(backgroundOnly || backgroundOpen || !hall) && (
                 <BackgroundSettings
                   screenId={screenId}
