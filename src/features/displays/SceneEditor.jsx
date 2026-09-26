@@ -31,6 +31,7 @@ export default function SceneEditor({
   renderDeviceInput,
   localStreams = {},
   previewLive = false,
+  initialMode = 'simple',
 }) {
   const editorId = useId();
   const prayers = usePrayerTimes();
@@ -47,7 +48,7 @@ export default function SceneEditor({
   const [showConnection, setShowConnection] = useState(false);
   const canvas = useRef(null);
   const drag = useRef(null);
-  const [requestedMode, setRequestedMode] = useState('simple');
+  const [requestedMode, setRequestedMode] = useState(initialMode);
   const simpleAvailable = isSingleInputPresentation(value);
   const advanced = requestedMode === 'advanced' || !simpleAvailable;
   const layer =
