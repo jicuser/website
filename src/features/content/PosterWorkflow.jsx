@@ -37,40 +37,24 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
   };
   return (
     <section className="poster-workflow">
-      <nav className="admin-actions" aria-label="Poster management">
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'overview'}
-          onClick={() => choose('overview')}
-        >
+      <nav className="poster-workflow-tabs" aria-label="Poster management">
+        <button className="admin-button" aria-pressed={tab === 'overview'} onClick={() => choose('overview')}>
           Overview
         </button>
-        <button className="admin-button" onClick={onEditPoster}>
-          Edit poster
+        <button className="admin-button" onClick={onEditPoster}>Poster</button>
+        <button className="admin-button" aria-pressed={tab === 'page'} onClick={() => choose('page')}>
+          Page
         </button>
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'page'}
-          onClick={() => choose('page')}
-        >
-          Page & registration
-        </button>
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'responses'}
-          disabled={!page?.form_id || !can('forms')}
-          onClick={() => choose('responses')}
-        >
-          Responses
-        </button>
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'actions'}
-          disabled={!page?.form_id || !can('forms')}
-          onClick={() => choose('actions')}
-        >
-          Actions
-        </button>
+        {page?.form_id && can('forms') && (
+          <button className="admin-button" aria-pressed={tab === 'responses'} onClick={() => choose('responses')}>
+            Responses
+          </button>
+        )}
+        {page?.form_id && can('forms') && (
+          <button className="admin-button" aria-pressed={tab === 'actions'} onClick={() => choose('actions')}>
+            Actions
+          </button>
+        )}
       </nav>
       {error && (
         <p role="alert">
@@ -91,9 +75,15 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
       )}
       {tab === 'overview' && (
         <>
-          <h3>{poster.title}</h3>
-          <p>{poster.schedule}</p>
-          <p>{poster.detail}</p>
+          <div className="poster-overview-card">
+            {poster.image && <img className="poster-overview-image" src={poster.image} alt={poster.alt || poster.title} />}
+            <div>
+              <h3>{poster.title}</h3>
+              {poster.subtitle && <p><strong>{poster.subtitle}</strong></p>}
+              {poster.schedule && <p>{poster.schedule}</p>}
+              {poster.detail && <p>{poster.detail}</p>}
+            </div>
+          </div>
           {page ? (
             <>
               <p>
