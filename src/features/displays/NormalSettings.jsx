@@ -8,11 +8,6 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
   if (preset === 'standby') {
     return (
       <>
-        <p className="workspace-meta tv-layout-help">
-          Show, hide, move and resize the timetable, Next Salah, clock, logo and poster blocks in
-          the visual layout above.
-        </p>
-
         <details className="admin-panel">
           <summary>Posters & rotation</summary>
           <p>
