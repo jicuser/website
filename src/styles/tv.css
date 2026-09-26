@@ -1141,3 +1141,82 @@ html[data-theme] .jic-tv-display.is-portrait {
     width: 100%;
   }
 }
+
+
+/* Simple TV layout editor: scene tabs, one canvas, visible grid, direct drag/resize. */
+.tv-scene-tabs-wrap {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+}
+.tv-scene-tabs-wrap > span {
+  color: var(--jic-muted);
+  font-size: .82rem;
+  font-weight: 700;
+}
+.tv-layout-editor {
+  gap: 10px;
+}
+.tv-layout-toolbar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.tv-layout-toolbar > span {
+  color: var(--jic-muted);
+  font-size: .82rem;
+  text-align: right;
+}
+.tv-layout-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.12) 1px, transparent 1px);
+  background-size: 5% 5%;
+}
+.tv-layout-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+}
+.tv-layout-controls label {
+  min-width: 0;
+}
+.tv-layout-controls select {
+  width: 100%;
+}
+.tv-layout-box > span:first-child {
+  max-width: calc(100% - 6px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tv-layout-resize {
+  width: 48px;
+  height: 48px;
+  font-size: 1.7rem;
+}
+@media (max-width: 600px) {
+  .tv-layout-editor {
+    padding: 8px;
+    border-radius: 12px;
+  }
+  .tv-layout-toolbar {
+    align-items: start;
+  }
+  .tv-layout-toolbar > span {
+    max-width: 55%;
+  }
+  .tv-layout-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tv-layout-resize {
+    width: 52px;
+    height: 52px;
+  }
+}
