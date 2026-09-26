@@ -3,6 +3,7 @@ import NormalSettings from './NormalSettings';
 import TvDisplayLayoutEditor from './TvDisplayLayoutEditor';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { TV_PRESET_KEYS } from '../../../supabase/functions/_shared/tv.js';
+import '@/styles/tv-admin.css';
 
 export default function BackgroundSettings({
   screenId,
