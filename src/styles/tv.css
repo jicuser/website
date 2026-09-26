@@ -1220,3 +1220,108 @@ html[data-theme] .jic-tv-display.is-portrait {
     height: 52px;
   }
 }
+
+
+/* TV layout editor: edit overlays are separate from the exact final preview. */
+.tv-layout-toolbar > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+.tv-layout-toolbar > div:first-child > span {
+  color: var(--jic-muted);
+  font-size: .78rem;
+}
+.tv-layout-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.tv-layout-history [aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  background: color-mix(in srgb, var(--jic-gold) 14%, var(--jic-surface));
+}
+.tv-layout-canvas.is-final-preview {
+  border-style: solid;
+  box-shadow: 0 0 0 1px var(--jic-border), var(--jic-shadow-soft);
+}
+.tv-layout-canvas.is-final-preview .tv-layout-render {
+  pointer-events: none;
+}
+.tv-layout-box {
+  background: transparent;
+}
+.tv-layout-box:not(.is-selected) {
+  border-color: rgba(255,255,255,.28);
+}
+.tv-layout-box.is-selected {
+  background: rgba(211,159,39,.08);
+}
+.tv-layer-content-picker,
+.tv-state-asset-picker {
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--jic-surface) 94%, var(--jic-gold) 2%);
+}
+.tv-state-asset-picker p {
+  margin: 0;
+  color: var(--jic-muted);
+  font-size: .85rem;
+}
+.tv-upload-button {
+  position: relative;
+  overflow: hidden;
+}
+.tv-upload-button input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.scene-source-clock,
+.scene-source-next,
+.scene-source-state,
+.scene-source-brand {
+  container-type: size;
+}
+.scene-clock {
+  font-size: min(42cqh, 16cqw);
+  line-height: 1;
+}
+.scene-next {
+  font-size: min(24cqh, 8cqw);
+}
+.scene-state-block {
+  container-type: size;
+  --tv-unit: min(1cqw, 1.777778cqh);
+}
+.scene-canvas.is-portrait .scene-state-block {
+  --tv-unit: min(1.777778cqw, 1cqh);
+}
+.scene-state-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+@media (max-width: 600px) {
+  .tv-layout-toolbar {
+    display: grid;
+    gap: 8px;
+  }
+  .tv-layout-history {
+    justify-content: stretch;
+  }
+  .tv-layout-history .admin-button {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .tv-state-asset-picker .admin-actions {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+  }
+}
