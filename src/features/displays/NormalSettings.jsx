@@ -6,7 +6,8 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
   return (
     <>
       <section className="admin-panel">
-        <h3>Standby display</h3>
+        <h3>What appears in standby</h3>
+        <p>Turn the main items on or off. Open the sections below only when you need to change them.</p>
         {[
           ['show_times', 'Salah timetable'],
           ['show_next', 'Next prayer'],
@@ -22,7 +23,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
           </label>
         ))}
       </section>
-      <details className="admin-panel" open={true}>
+      <details className="admin-panel">
         <summary>Posters & rotation</summary>
         <p>
           Tick the posters for this display. Up to four show across, moving one place each rotation.
@@ -96,7 +97,7 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
       </details>
       {hall && (
         <details className="admin-panel">
-          <summary>Prayer sequence & special notices</summary>
+          <summary>Automatic prayer screens</summary>
           <label className="admin-check">
             <input
               type="checkbox"
