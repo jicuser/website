@@ -82,6 +82,84 @@ export const DEFAULT_TV_PRESET_SCENES = {
   },
 };
 
+
+export const PRAYER_TIMETABLE_LAYOUTS = ['horizontal', 'compact', 'clock-table', 'vertical'];
+
+export const DEFAULT_PORTRAIT_STANDBY_SCENE = {
+  id: 'standby-portrait',
+  name: 'Standby portrait',
+  overlap: true,
+  layers: [
+    { id: 'portrait-times', type: 'times', x: 0, y: 0, width: 100, height: 34, layout: 'vertical' },
+    { id: 'portrait-next', type: 'next', x: 0, y: 34, width: 100, height: 8 },
+    { id: 'portrait-poster-1', type: 'poster', x: 0, y: 42, width: 50, height: 40, poster_offset: 0 },
+    { id: 'portrait-poster-2', type: 'poster', x: 50, y: 42, width: 50, height: 40, poster_offset: 1 },
+    { id: 'portrait-poster-3', type: 'poster', x: 0, y: 42, width: 50, height: 40, poster_offset: 2, hidden: true },
+    { id: 'portrait-poster-4', type: 'poster', x: 50, y: 42, width: 50, height: 40, poster_offset: 3, hidden: true },
+    { id: 'portrait-brand', type: 'brand', x: 0, y: 82, width: 24, height: 18 },
+    { id: 'portrait-clock', type: 'clock', x: 24, y: 82, width: 76, height: 18 },
+  ],
+};
+
+const portraitPresetScene = (key, name, options = {}) => ({
+  id: `preset-${key}-portrait`,
+  name: `${name} portrait`,
+  overlap: true,
+  layers:
+    key === 'dhikr' || key === 'ramadan'
+      ? [
+          { id: `${key}-portrait-state`, type: 'state', x: 0, y: 0, width: 100, height: 90 },
+          { id: `${key}-portrait-brand`, type: 'brand', x: 0, y: 90, width: 26, height: 10 },
+          { id: `${key}-portrait-clock`, type: 'clock', x: 26, y: 90, width: 74, height: 10, hidden: key === 'dhikr' },
+        ]
+      : [
+          { id: `${key}-portrait-state`, type: 'state', x: 0, y: 0, width: 100, height: 58 },
+          { id: `${key}-portrait-times`, type: 'times', x: 0, y: 58, width: 100, height: 30, layout: options.layout || 'vertical' },
+          { id: `${key}-portrait-next`, type: 'next', x: 0, y: 88, width: 100, height: 6, hidden: key === 'jummah' },
+          { id: `${key}-portrait-clock`, type: 'clock', x: 0, y: 94, width: 100, height: 6 },
+        ],
+});
+
+export const DEFAULT_TV_PORTRAIT_PRESET_SCENES = {
+  before: portraitPresetScene('before', 'Before Jama‘ah'),
+  jamaah: portraitPresetScene('jamaah', 'Jama‘ah'),
+  dhikr: portraitPresetScene('dhikr', 'Dhikr'),
+  jummah: portraitPresetScene('jummah', 'Jummah'),
+  ramadan: portraitPresetScene('ramadan', 'Ramadan du‘a'),
+};
+
+const cloneScene = (scene) => ({
+  ...scene,
+  layers: (scene?.layers || []).map((layer) => ({ ...layer })),
+});
+
+const defaultOrientationLayouts = () => ({
+  landscape: {
+    standby: cloneScene(DEFAULT_STANDBY_SCENE),
+    ...Object.fromEntries(
+      Object.entries(DEFAULT_TV_PRESET_SCENES).map(([key, scene]) => [key, cloneScene(scene)]),
+    ),
+  },
+  portrait: {
+    standby: cloneScene(DEFAULT_PORTRAIT_STANDBY_SCENE),
+    ...Object.fromEntries(
+      Object.entries(DEFAULT_TV_PORTRAIT_PRESET_SCENES).map(([key, scene]) => [key, cloneScene(scene)]),
+    ),
+  },
+});
+
+export const DEFAULT_TV_DISPLAY_LAYOUTS = defaultOrientationLayouts();
+
+export function tvDisplayScene(settings = {}, preset = 'standby', orientation = settings.display_orientation || 'landscape') {
+  const direct = settings.display_layouts?.[orientation]?.[preset];
+  if (direct) return direct;
+  if (orientation === 'landscape') {
+    if (preset === 'standby' && settings.standby_scene) return settings.standby_scene;
+    if (preset !== 'standby' && settings.preset_scenes?.[preset]) return settings.preset_scenes[preset];
+  }
+  return defaultOrientationLayouts()[orientation]?.[preset] || cloneScene(DEFAULT_STANDBY_SCENE);
+}
+
 export const TV_SCREENS = [
   { id: 'mens-main', label: 'Men’s Main Hall' },
   { id: 'mens-upstairs', label: 'Men’s Upstairs Hall' },
@@ -111,6 +189,7 @@ export const DEFAULT_TV_SETTINGS = {
   standby_scene: DEFAULT_STANDBY_SCENE,
   preset_names: DEFAULT_TV_PRESET_NAMES,
   preset_scenes: DEFAULT_TV_PRESET_SCENES,
+  display_layouts: DEFAULT_TV_DISPLAY_LAYOUTS,
   jamaah_lead_minutes: 1,
   before_jamaah_message: 'Jama‘ah begins in 1 minute',
   jamaah_message: 'It is Jama‘ah time',
@@ -132,20 +211,44 @@ export const DEFAULT_TV_SETTINGS = {
   taraweeh_dua: '',
 };
 export function normaliseTvSettings(settings = {}) {
+  const defaults = defaultOrientationLayouts();
+  const legacyLandscape = {
+    standby: settings.standby_scene || defaults.landscape.standby,
+    ...Object.fromEntries(
+      TV_PRESET_KEYS.filter((key) => key !== 'standby').map((key) => [
+        key,
+        settings.preset_scenes?.[key] || defaults.landscape[key],
+      ]),
+    ),
+  };
+  const displayLayouts = {
+    landscape: Object.fromEntries(
+      TV_PRESET_KEYS.map((key) => [
+        key,
+        cloneScene(settings.display_layouts?.landscape?.[key] || legacyLandscape[key] || defaults.landscape[key]),
+      ]),
+    ),
+    portrait: Object.fromEntries(
+      TV_PRESET_KEYS.map((key) => [
+        key,
+        cloneScene(settings.display_layouts?.portrait?.[key] || defaults.portrait[key]),
+      ]),
+    ),
+  };
+  const orientation = ['landscape', 'portrait'].includes(settings.display_orientation)
+    ? settings.display_orientation
+    : 'landscape';
   const next = {
     ...DEFAULT_TV_SETTINGS,
     ...settings,
-    standby_scene: settings.standby_scene
-      ? settings.standby_scene
-      : { ...DEFAULT_STANDBY_SCENE, layers: DEFAULT_STANDBY_SCENE.layers.map((layer) => ({ ...layer })) },
+    display_orientation: orientation,
+    display_layouts: displayLayouts,
+    standby_scene: displayLayouts[orientation].standby,
     preset_names: { ...DEFAULT_TV_PRESET_NAMES, ...(settings.preset_names || {}) },
     preset_scenes: Object.fromEntries(
-      Object.entries(DEFAULT_TV_PRESET_SCENES).map(([key, scene]) => [
+      TV_PRESET_KEYS.filter((key) => key !== 'standby').map((key) => [
         key,
-        settings.preset_scenes?.[key] || {
-          ...scene,
-          layers: scene.layers.map((layer) => ({ ...layer })),
-        },
+        displayLayouts[orientation][key],
       ]),
     ),
   };
