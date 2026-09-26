@@ -38,7 +38,8 @@ export default function StreamSetup() {
   });
   const [selected, setSelected] = useState(openHall || 'mens-main');
   const [quickStart, setQuickStart] = useState(false);
-  const openWorkspace = (screenId, quick = false) => {
+  const [backgroundOnly, setBackgroundOnly] = useState(false);
+  const openWorkspace = (screenId, quick = false, background = false) => {
     try {
       sessionStorage.setItem(openKey, screenId);
     } catch {
@@ -46,6 +47,7 @@ export default function StreamSetup() {
     }
     setSelected(screenId);
     setQuickStart(quick);
+    setBackgroundOnly(background);
     setOpenHall(screenId);
   };
   if (openHall)
@@ -55,6 +57,7 @@ export default function StreamSetup() {
         screenId={openHall}
         userId={user.id}
         quickStart={quickStart}
+        backgroundOnly={backgroundOnly}
         onBack={() => {
           try {
             sessionStorage.removeItem(openKey);
@@ -62,6 +65,7 @@ export default function StreamSetup() {
             /* Storage is optional. */
           }
           setQuickStart(false);
+          setBackgroundOnly(false);
           setOpenHall('');
         }}
       />
@@ -73,11 +77,9 @@ export default function StreamSetup() {
         onOpen={(screenId) => openWorkspace(screenId, false)}
         onStart={() => openWorkspace(selected, true)}
       />
-      <span className="admin-eyebrow stream-step-indicator jic-prompt">PRESENTATION STREAM</span>
-      <h2>
-        <span className="jic-prompt">Choose a hall</span>
-      </h2>
-      <p>Quick Present skips the name step. Choose the hall, select an input and start.</p>
+      <span className="admin-eyebrow">TV & SCREENS</span>
+      <h2>Choose a screen</h2>
+      <p>Manage the normal display and prayer sequence, or present something immediately.</p>
       <label>
         Hall
         <select value={selected} onChange={(event) => setSelected(event.target.value)}>
@@ -92,18 +94,21 @@ export default function StreamSetup() {
         <button className="admin-button primary" onClick={() => openWorkspace(selected, true)}>
           Quick present <span aria-hidden="true">→</span>
         </button>
+        <button className="admin-button" onClick={() => openWorkspace(selected, false, true)}>
+          Normal display & prayer sequence
+        </button>
         <button className="admin-button" onClick={() => openWorkspace(selected, false)}>
-          Full setup
+          Advanced presentation
         </button>
       </div>
     </section>
   );
 }
 
-function HallWorkspace({ screenId, userId, quickStart, onBack }) {
+function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onBack }) {
   const setup = useStreamSetup(screenId, userId);
   const { data, form, stage, busy } = setup;
-  const [backgroundOpen, setBackgroundOpen] = useState(false);
+  const [backgroundOpen, setBackgroundOpen] = useState(backgroundOnly);
   const [nameError, setNameError] = useState('');
   const [targets, setTargets] = useState({});
   const [localStreams, setLocalStreams] = useState({});
@@ -141,13 +146,15 @@ function HallWorkspace({ screenId, userId, quickStart, onBack }) {
       <div className="stream-setup-heading">
         <div>
           <span className="admin-eyebrow stream-step-indicator jic-prompt">
-            {hall
-              ? setup.started
-                ? 'PRESENTATION LIVE'
-                : quickStart
-                  ? 'QUICK PRESENT'
-                  : `STEP ${stage} OF 3`
-              : 'BACKGROUND DISPLAY'}
+            {backgroundOnly
+              ? 'NORMAL DISPLAY'
+              : hall
+                ? setup.started
+                  ? 'PRESENTATION LIVE'
+                  : quickStart
+                    ? 'QUICK PRESENT'
+                    : 'ADVANCED PRESENTATION'
+                : 'BACKGROUND DISPLAY'}
           </span>
           <h2>{screen.label}</h2>
         </div>
@@ -197,7 +204,7 @@ function HallWorkspace({ screenId, userId, quickStart, onBack }) {
         <p>Loading presentation settings…</p>
       ) : (
         <>
-          {hall && (
+          {hall && !quickStart && !backgroundOnly && (
             <StreamSettingsLibrary
               value={data.settings}
               onChange={(settings, template) => {
@@ -216,7 +223,7 @@ function HallWorkspace({ screenId, userId, quickStart, onBack }) {
               loadBlocked={loadBlocked}
             />
           )}
-          <details className="admin-panel stream-address">
+          {!quickStart && !backgroundOnly && <details className="admin-panel stream-address">
             <summary>Display webpage address</summary>
             <p>
               Keep this permanent address open on each viewing device. Enter the six-digit code from
@@ -238,8 +245,8 @@ function HallWorkspace({ screenId, userId, quickStart, onBack }) {
             >
               Copy address
             </button>
-          </details>
-          {hall && data.presentation && (
+          </details>}
+          {hall && !backgroundOnly && data.presentation && (
             <section className="admin-panel stream-live-status" aria-label="Active presentation session">
               <div className="admin-actions">
                 <Radio size={18} aria-hidden="true" />
@@ -268,7 +275,7 @@ function HallWorkspace({ screenId, userId, quickStart, onBack }) {
               </details>
             </section>
           )}
-          {hall && stage === 2 && !quickStart && (
+          {hall && stage === 2 && !quickStart && !backgroundOnly && (
             <section className="admin-panel">
               <h3>
                 <span className="jic-prompt">Name your presentation</span>
@@ -314,12 +321,12 @@ function HallWorkspace({ screenId, userId, quickStart, onBack }) {
               </form>
             </section>
           )}
-          {hall && stage === 2 && quickStart && (
+          {hall && stage === 2 && quickStart && !backgroundOnly && (
             <section className="admin-panel" aria-live="polite">
               <p>Preparing Quick Present…</p>
             </section>
           )}
-          {hall && stage === 3 && form && (
+          {hall && stage === 3 && form && !backgroundOnly && (
             <>
               {!quickStart && setup.streamName && <h3>{setup.streamName}</h3>}
               <SceneEditor
@@ -432,7 +439,7 @@ function HallWorkspace({ screenId, userId, quickStart, onBack }) {
               </div>
             </>
           )}
-          {hall && data.presentation && (
+          {hall && !backgroundOnly && data.presentation && (
             <TvConnections
               screenId={screenId}
               data={data}
@@ -442,15 +449,15 @@ function HallWorkspace({ screenId, userId, quickStart, onBack }) {
               busy={busy}
             />
           )}
-          {hall && setup.started && <SessionOutput screenId={screenId} />}
-          {(stage === 2 || !hall) && (
+          {hall && !backgroundOnly && setup.started && <SessionOutput screenId={screenId} />}
+          {(backgroundOnly || stage === 2 || !hall) && (
             <details
               className="admin-panel"
-              open={!hall || backgroundOpen}
+              open={backgroundOnly || !hall || backgroundOpen}
               onToggle={(event) => setBackgroundOpen(event.currentTarget.open)}
             >
-              <summary>Background posters & prayer notices</summary>
-              {(backgroundOpen || !hall) && (
+              <summary>{backgroundOnly ? 'Normal display & prayer sequence' : 'Background posters & prayer notices'}</summary>
+              {(backgroundOnly || backgroundOpen || !hall) && (
                 <BackgroundSettings
                   screenId={screenId}
                   data={data}
