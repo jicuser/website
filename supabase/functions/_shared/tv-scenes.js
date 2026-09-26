@@ -144,6 +144,16 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
             throw new Error('Use up to 1200 characters per notice.');
           item.text = layer.text;
         }
+        if (layer.type === 'state') {
+          if (layer.image_url !== undefined && layer.image_url !== '') {
+            item.image_url = streamUrl(layer.image_url);
+          }
+          if (layer.image_fit !== undefined) {
+            if (!['contain', 'cover'].includes(layer.image_fit))
+              throw new Error('Choose contain or cover for preset pictures.');
+            item.image_fit = layer.image_fit;
+          }
+        }
         if (['youtube', 'video', 'camera', 'input', 'schedule'].includes(layer.type)) {
           if (typeof layer.audio !== 'boolean')
             throw new Error('Choose whether this source plays audio.');
