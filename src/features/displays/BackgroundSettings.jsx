@@ -18,6 +18,7 @@ export default function BackgroundSettings({
   const [message, setMessage] = useState('');
   const [preset, setPreset] = useState('standby');
   const update = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
+  const presetKeys = screenId === 'shoe-area' ? ['standby'] : TV_PRESET_KEYS;
   const presetName = form.preset_names?.[preset] || preset;
 
   return (
@@ -49,7 +50,7 @@ export default function BackgroundSettings({
       </div>
 
       <nav className="tv-preset-tabs" aria-label="TV display presets">
-        {TV_PRESET_KEYS.map((key) => (
+        {presetKeys.map((key) => (
           <button
             type="button"
             key={key}
