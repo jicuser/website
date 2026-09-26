@@ -75,7 +75,7 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
           Overview
         </button>
         <button className="admin-button" onClick={onEditPoster}>
-          Poster
+          Edit poster
         </button>
         <button
           className="admin-button"
