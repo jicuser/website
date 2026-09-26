@@ -58,7 +58,6 @@ async function fixture(page, {actor=owner, pagePublished=true, pageExists=true} 
 test('Admin Forms keeps live forms, people, responses and actions together',async({page},testInfo)=>{
   const {state,admin}=await fixture(page);await admin();
   await expect(page.getByRole('heading',{name:'Forms',exact:true})).toBeVisible();
-  await page.getByRole('button',{name:/Live forms/i}).click();
   await expect(page.locator('.content-form-card').filter({hasText:'Course interest'})).toBeVisible();
   await page.screenshot({path:testInfo.outputPath('forms-catalogue.png'),fullPage:true});
   await page.locator('.content-form-card').filter({hasText:'Course interest'}).click();
@@ -81,7 +80,9 @@ test('A poster opens its linked page and the same form responses without copying
   await expect(page.getByRole('navigation',{name:'Poster management'})).toBeVisible();
   await page.getByRole('button',{name:'Page & registration',exact:true}).click();
   await expect(page.getByLabel('Page title',{exact:true})).toHaveValue('Arabic course');
-  await page.getByRole('button',{name:'Responses',exact:true}).first().click();
+  await page.getByRole('link',{name:'Form & responses',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Course interest',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Responses (1)',exact:true}).click();
   await expect(page.getByText('Test applicant',{exact:false}).first()).toBeVisible();
   expect(state.writes).toEqual([]);expect(state.errors).toEqual([]);
 });
@@ -90,10 +91,10 @@ test('Pages can be created and hidden without erasing a linked form or changing 
   const {state,admin}=await fixture(page);await admin('content');
   await page.getByRole('button',{name:'Pages & programmes',exact:true}).click();
   await page.getByRole('button',{name:'Edit Arabic course',exact:true}).click();
-  await page.getByLabel('Show page on website',{exact:true}).uncheck();
+  await page.getByLabel('Page visible',{exact:true}).uncheck();
   await page.getByRole('combobox',{name:'Place under',exact:true}).selectOption('/education');
   page.once('dialog', dialog => dialog.accept());
-  await page.getByRole('button',{name:'Save page',exact:true}).last().click();
+  await page.getByRole('button',{name:'Save page settings',exact:true}).last().click();
   await expect.poll(()=>state.page.published).toBe(false);
   expect(state.page.form_id).toBe(id(10));expect(state.page.slug).toBe('arabic-course');expect(state.form.enabled).toBe(true);
   await page.screenshot({path:testInfo.outputPath('page-editor.png'),fullPage:true});
