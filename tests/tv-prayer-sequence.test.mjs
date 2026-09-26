@@ -91,6 +91,33 @@ test('unknown prayer timetable styles are rejected', () => {
   assert.throws(() => validateSettings(input), /valid prayer timetable layout/);
 });
 
+test('TV preset artwork and per-box poster choices survive validation safely', () => {
+  const input = structuredClone(DEFAULT_TV_SETTINGS);
+  const state = input.display_layouts.landscape.dhikr.layers.find((layer) => layer.type === 'state');
+  state.image_url = 'https://example.org/dhikr-board.png';
+  state.image_fit = 'contain';
+  const poster = input.display_layouts.landscape.standby.layers.find(
+    (layer) => layer.type === 'poster',
+  );
+  poster.poster_ids = ['poster-one'];
+  const saved = validateSettings(input);
+  const savedState = saved.display_layouts.landscape.dhikr.layers.find(
+    (layer) => layer.type === 'state',
+  );
+  const savedPoster = saved.display_layouts.landscape.standby.layers.find(
+    (layer) => layer.type === 'poster',
+  );
+  assert.equal(savedState.image_url, 'https://example.org/dhikr-board.png');
+  assert.equal(savedState.image_fit, 'contain');
+  assert.deepEqual(savedPoster.poster_ids, ['poster-one']);
+
+  const unsafe = structuredClone(DEFAULT_TV_SETTINGS);
+  unsafe.display_layouts.landscape.dhikr.layers.find(
+    (layer) => layer.type === 'state',
+  ).image_url = 'http://example.org/dhikr-board.png';
+  assert.throws(() => validateSettings(unsafe), /HTTPS/);
+});
+
 test('post-salah delays are persisted and can be configured per prayer', () => {
   const settings = validateSettings({
     ...DEFAULT_TV_SETTINGS,
