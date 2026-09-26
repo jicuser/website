@@ -98,7 +98,9 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
       })),
   ];
   const selectedPosterId =
-    layer?.type === 'poster' && layer.poster_ids?.length === 1 ? layer.poster_ids[0] : '';
+    ['poster', 'poster-next'].includes(layer?.type) && layer.poster_ids?.length === 1
+      ? layer.poster_ids[0]
+      : '';
 
   function setScene(next) {
     onChange('display_layouts', {
@@ -312,7 +314,7 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
               <select value={selected} onChange={(event) => setSelected(event.target.value)}>
                 {scene.layers.map((item, index) => (
                   <option key={item.id} value={item.id}>
-                    {item.type === 'poster' ? posterLabel(item, index) : labels[item.type] || 'Block'}
+                    {['poster', 'poster-next'].includes(item.type) ? posterLabel(item, index) : labels[item.type] || 'Block'}
                     {item.hidden ? ' · hidden' : ''}
                   </option>
                 ))}
@@ -347,7 +349,7 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
             )}
           </div>
 
-          {layer?.type === 'poster' && (
+          {['poster', 'poster-next'].includes(layer?.type) && (
             <label className="tv-layer-content-picker">
               Poster in this box
               <select
