@@ -1,5 +1,30 @@
 import { hasPermission } from './access.js';
 import { newScene, validateScenes, hasSceneContent } from './tv-scenes.js';
+export const DEFAULT_STANDBY_SCENE = {
+  id: 'standby',
+  name: 'Standby',
+  overlap: true,
+  layers: [
+    { id: 'standby-times', type: 'times', x: 0, y: 0, width: 100, height: 22, layout: 'horizontal' },
+    { id: 'standby-poster-1', type: 'poster', x: 0, y: 22, width: 25, height: 68, poster_offset: 0 },
+    { id: 'standby-poster-2', type: 'poster', x: 25, y: 22, width: 25, height: 68, poster_offset: 1 },
+    { id: 'standby-poster-3', type: 'poster', x: 50, y: 22, width: 25, height: 68, poster_offset: 2 },
+    { id: 'standby-poster-4', type: 'poster', x: 75, y: 22, width: 25, height: 68, poster_offset: 3 },
+    { id: 'standby-brand', type: 'brand', x: 0, y: 90, width: 13, height: 10 },
+    { id: 'standby-next', type: 'next', x: 13, y: 90, width: 42, height: 10 },
+    { id: 'standby-clock', type: 'clock', x: 55, y: 90, width: 45, height: 10 },
+  ],
+};
+export const TV_PRESET_KEYS = ['standby', 'before', 'jamaah', 'dhikr', 'jummah', 'ramadan'];
+export const DEFAULT_TV_PRESET_NAMES = {
+  standby: 'Standby',
+  before: 'Before Jama‘ah',
+  jamaah: 'Jama‘ah',
+  dhikr: 'Dhikr',
+  jummah: 'Jummah',
+  ramadan: 'Ramadan du‘a',
+};
+
 export const TV_SCREENS = [
   { id: 'mens-main', label: 'Men’s Main Hall' },
   { id: 'mens-upstairs', label: 'Men’s Upstairs Hall' },
@@ -25,6 +50,13 @@ export const DEFAULT_TV_SETTINGS = {
   rotation_seconds: 20,
   muted: true,
   prayer_enabled: true,
+  display_orientation: 'landscape',
+  standby_scene: DEFAULT_STANDBY_SCENE,
+  preset_names: DEFAULT_TV_PRESET_NAMES,
+  jamaah_lead_minutes: 1,
+  before_jamaah_message: 'Jama‘ah begins in 1 minute',
+  jamaah_message: 'It is Jama‘ah time',
+  jamaah_submessage: 'Please switch off or silence your phone.',
   dhikr_delay_fajr: 14,
   dhikr_delay_dhuhr: 9,
   dhikr_delay_asr: 9,
@@ -42,7 +74,14 @@ export const DEFAULT_TV_SETTINGS = {
   taraweeh_dua: '',
 };
 export function normaliseTvSettings(settings = {}) {
-  const next = { ...DEFAULT_TV_SETTINGS, ...settings };
+  const next = {
+    ...DEFAULT_TV_SETTINGS,
+    ...settings,
+    standby_scene: settings.standby_scene
+      ? settings.standby_scene
+      : { ...DEFAULT_STANDBY_SCENE, layers: DEFAULT_STANDBY_SCENE.layers.map((layer) => ({ ...layer })) },
+    preset_names: { ...DEFAULT_TV_PRESET_NAMES, ...(settings.preset_names || {}) },
+  };
   // Remove only the exact old generated starter layout. Custom scenes are preserved.
   const starter = [
     ['poster', 'poster', 0, 18, 50, 75],
@@ -117,6 +156,38 @@ export function validateSettings(input, screenId = '') {
     if (typeof values[key] !== 'boolean') throw new Error('Invalid display switch.');
     result[key] = values[key];
   }
+  if (!['landscape', 'portrait'].includes(values.display_orientation))
+    throw new Error('Choose landscape or portrait.');
+  result.display_orientation = values.display_orientation;
+  if (!Number.isInteger(values.jamaah_lead_minutes) || values.jamaah_lead_minutes < 0 || values.jamaah_lead_minutes > 10)
+    throw new Error('Use 0–10 minutes for the pre-Jama‘ah screen.');
+  result.jamaah_lead_minutes = values.jamaah_lead_minutes;
+  for (const key of ['before_jamaah_message', 'jamaah_message', 'jamaah_submessage']) {
+    if (typeof values[key] !== 'string' || values[key].length > 240)
+      throw new Error('Use up to 240 characters for prayer screen messages.');
+    result[key] = values[key].trim();
+  }
+  if (!values.preset_names || typeof values.preset_names !== 'object')
+    throw new Error('Preset names are required.');
+  result.preset_names = {};
+  for (const key of TV_PRESET_KEYS) {
+    const name = values.preset_names[key];
+    if (typeof name !== 'string' || !name.trim() || name.length > 40)
+      throw new Error('Use 1–40 characters for each TV preset name.');
+    result.preset_names[key] = name.trim();
+  }
+  const standby = validateScenes([values.standby_scene], secureStreamUrl, youtubeUrl)[0];
+  const allowedStandby = new Set(['times', 'next', 'clock', 'poster', 'poster-next', 'text', 'brand', 'empty']);
+  if (standby.layers.some((layer) => !allowedStandby.has(layer.type)))
+    throw new Error('Standby layouts can use timetable, next prayer, clock, posters, logo and text only.');
+  for (const layer of standby.layers) {
+    if (layer.type === 'times') {
+      const layout = values.standby_scene.layers.find((item) => item.id === layer.id)?.layout || 'horizontal';
+      if (!['horizontal', 'vertical'].includes(layout)) throw new Error('Choose a valid prayer timetable layout.');
+      layer.layout = layout;
+    }
+  }
+  result.standby_scene = standby;
   for (const key of [
     'dhikr_delay_fajr',
     'dhikr_delay_dhuhr',
