@@ -1129,3 +1129,15 @@ html[data-theme] .jic-tv-display.is-portrait {
     grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, .9fr));
   }
 }
+
+@media (max-width: 700px) {
+  .tv-save-actions {
+    position: static;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 14px;
+  }
+  .tv-save-actions .admin-button {
+    width: 100%;
+  }
+}
