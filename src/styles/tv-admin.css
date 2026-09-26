@@ -1,0 +1,303 @@
+/* Admin-only TV workspace styles. Public display rendering stays in tv.css. */
+
+.tv-editor-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.tv-editor-context label {
+  min-width: min(100%, 220px);
+}
+
+.tv-scene-tabs-wrap {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 12px;
+}
+.tv-scene-tabs-wrap > span {
+  color: var(--jic-muted);
+  font-size: .82rem;
+  font-weight: 700;
+}
+.tv-preset-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 6px;
+  scrollbar-width: thin;
+}
+.tv-preset-tabs .admin-button {
+  flex: 0 0 auto;
+}
+.tv-preset-tabs [aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 -2px var(--jic-gold);
+}
+
+.tv-layout-editor {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.tv-layout-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.tv-layout-toolbar > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+.tv-layout-toolbar > div:first-child > span {
+  color: var(--jic-muted);
+  font-size: .78rem;
+}
+.tv-layout-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.tv-layout-history [aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  background: color-mix(in srgb, var(--jic-gold) 14%, var(--jic-surface));
+}
+
+.tv-layout-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: #02050a;
+  touch-action: none;
+}
+.tv-layout-canvas.is-portrait {
+  width: min(100%, 430px);
+  margin-inline: auto;
+  aspect-ratio: 9 / 16;
+}
+.tv-layout-render {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tv-layout-render .scene-canvas {
+  width: 100%;
+  height: 100%;
+}
+.tv-layout-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.12) 1px, transparent 1px);
+  background-size: 5% 5%;
+}
+.tv-layout-box {
+  position: absolute;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(255,255,255,.28);
+  background: transparent;
+  color: #fff;
+  font-size: clamp(.62rem, 1.2vw, .82rem);
+  font-weight: 700;
+  text-shadow: 0 1px 3px #000;
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+}
+.tv-layout-box.is-selected {
+  border: 2px solid var(--jic-gold);
+  background: rgba(211,159,39,.08);
+}
+.tv-layout-box > span:first-child {
+  max-width: calc(100% - 8px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tv-layout-resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px 0 0 0;
+  background: var(--jic-gold);
+  color: #07111f;
+  font-size: 1.7rem;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.tv-layout-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+}
+.tv-layout-controls label,
+.tv-layout-controls select {
+  min-width: 0;
+  width: 100%;
+}
+.tv-layer-content-picker,
+.tv-state-asset-picker {
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--jic-surface) 94%, var(--jic-gold) 2%);
+}
+.tv-state-asset-picker p {
+  margin: 0;
+  color: var(--jic-muted);
+  font-size: .85rem;
+}
+.tv-upload-button {
+  position: relative;
+  overflow: hidden;
+}
+.tv-upload-button input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.tv-reset-layout {
+  justify-self: start;
+}
+
+.tv-preset-settings {
+  margin-top: 12px;
+}
+.tv-prayer-delay-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.tv-save-actions {
+  position: sticky;
+  bottom: 10px;
+  z-index: 5;
+  padding: 10px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+  box-shadow: var(--jic-shadow-soft);
+}
+
+/* Full-screen draft preview uses the same SceneCanvas as the live TV. */
+.tv-final-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: #02050a;
+  color: #fff;
+}
+.tv-final-preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(10px, env(safe-area-inset-top)) 12px 10px;
+  background: #0c1729;
+  border-bottom: 1px solid rgba(255,255,255,.14);
+}
+.tv-final-preview-bar > div {
+  display: grid;
+  gap: 2px;
+}
+.tv-final-preview-bar span {
+  color: #b5c0cf;
+  font-size: .8rem;
+}
+.tv-final-preview-stage {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #000;
+}
+.tv-final-preview-stage > .scene-player {
+  width: min(100vw, calc((100dvh - 64px) * 16 / 9));
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+}
+.tv-final-preview-stage.is-portrait > .scene-player {
+  width: min(100vw, calc((100dvh - 64px) * 9 / 16));
+  aspect-ratio: 9 / 16;
+}
+.tv-final-preview-stage .scene-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 700px) {
+  .tv-editor-context {
+    display: grid;
+  }
+  .tv-editor-context label {
+    min-width: 0;
+  }
+  .tv-layout-editor {
+    padding: 8px;
+    border-radius: 12px;
+  }
+  .tv-layout-toolbar {
+    display: grid;
+    gap: 8px;
+  }
+  .tv-layout-history {
+    justify-content: stretch;
+  }
+  .tv-layout-history .admin-button {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .tv-layout-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tv-layout-resize {
+    width: 52px;
+    height: 52px;
+  }
+  .tv-state-asset-picker .admin-actions,
+  .tv-save-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tv-save-actions {
+    position: static;
+    margin-top: 14px;
+  }
+  .tv-save-actions .admin-button {
+    width: 100%;
+  }
+  .tv-final-preview-bar {
+    align-items: flex-start;
+  }
+  .tv-final-preview-bar .admin-button {
+    min-height: 42px;
+    padding-inline: 12px;
+  }
+}
