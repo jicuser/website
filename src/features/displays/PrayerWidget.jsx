@@ -29,13 +29,14 @@ function JummahRow({ data }) {
   );
 }
 
-function PrayerTable({ data, current, compact = false }) {
+function PrayerTable({ data, current, compact = false, showTomorrow = false }) {
   return (
-    <div className={`scene-prayer-table ${compact ? 'is-compact' : ''}`}>
+    <div className={`scene-prayer-table ${compact ? 'is-compact' : ''} ${showTomorrow ? 'has-tomorrow' : ''}`}>
       <div className="scene-prayer-table-head" aria-hidden="true">
         <span>Salah</span>
         <span>Start</span>
         <span>Jama‘ah</span>
+        {showTomorrow && <span>Tomorrow</span>}
       </div>
       {prayers.map(([name, key, arabic]) => (
         <div
@@ -49,6 +50,7 @@ function PrayerTable({ data, current, compact = false }) {
           </span>
           <strong>{displayTime(data.todaysTimes?.[key])}</strong>
           <strong>{jamaah(data, key)}</strong>
+          {showTomorrow && <strong>{displayTime(data.tomorrowsTimes?.[key])}</strong>}
         </div>
       ))}
       <JummahRow data={data} />
@@ -113,7 +115,7 @@ export default function PrayerWidget({ kind, prayers: data, now, layout = 'horiz
     return (
       <div className="scene-salah-board">
         <ClockFace now={now} current={current} />
-        <PrayerTable data={data} current={current} />
+        <PrayerTable data={data} current={current} showTomorrow />
       </div>
     );
 
