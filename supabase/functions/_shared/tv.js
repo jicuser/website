@@ -24,6 +24,63 @@ export const DEFAULT_TV_PRESET_NAMES = {
   jummah: 'Jummah',
   ramadan: 'Ramadan du‘a',
 };
+export const DEFAULT_TV_PRESET_SCENES = {
+  before: {
+    id: 'preset-before',
+    name: 'Before Jama‘ah',
+    overlap: true,
+    layers: [
+      { id: 'before-times', type: 'times', x: 0, y: 0, width: 100, height: 22, layout: 'horizontal' },
+      { id: 'before-state', type: 'state', x: 0, y: 22, width: 100, height: 68 },
+      { id: 'before-brand', type: 'brand', x: 0, y: 90, width: 13, height: 10 },
+      { id: 'before-next', type: 'next', x: 13, y: 90, width: 42, height: 10 },
+      { id: 'before-clock', type: 'clock', x: 55, y: 90, width: 45, height: 10 },
+    ],
+  },
+  jamaah: {
+    id: 'preset-jamaah',
+    name: 'Jama‘ah',
+    overlap: true,
+    layers: [
+      { id: 'jamaah-times', type: 'times', x: 0, y: 0, width: 100, height: 22, layout: 'horizontal' },
+      { id: 'jamaah-state', type: 'state', x: 0, y: 22, width: 100, height: 68 },
+      { id: 'jamaah-brand', type: 'brand', x: 0, y: 90, width: 13, height: 10 },
+      { id: 'jamaah-next', type: 'next', x: 13, y: 90, width: 42, height: 10 },
+      { id: 'jamaah-clock', type: 'clock', x: 55, y: 90, width: 45, height: 10 },
+    ],
+  },
+  dhikr: {
+    id: 'preset-dhikr',
+    name: 'Dhikr',
+    overlap: true,
+    layers: [
+      { id: 'dhikr-state', type: 'state', x: 0, y: 0, width: 100, height: 91 },
+      { id: 'dhikr-brand', type: 'brand', x: 0, y: 91, width: 16, height: 9 },
+      { id: 'dhikr-clock', type: 'clock', x: 58, y: 91, width: 42, height: 9, hidden: true },
+    ],
+  },
+  jummah: {
+    id: 'preset-jummah',
+    name: 'Jummah',
+    overlap: true,
+    layers: [
+      { id: 'jummah-times', type: 'times', x: 0, y: 0, width: 100, height: 22, layout: 'horizontal' },
+      { id: 'jummah-state', type: 'state', x: 0, y: 22, width: 100, height: 68 },
+      { id: 'jummah-brand', type: 'brand', x: 0, y: 90, width: 13, height: 10 },
+      { id: 'jummah-clock', type: 'clock', x: 55, y: 90, width: 45, height: 10 },
+    ],
+  },
+  ramadan: {
+    id: 'preset-ramadan',
+    name: 'Ramadan du‘a',
+    overlap: true,
+    layers: [
+      { id: 'ramadan-state', type: 'state', x: 0, y: 0, width: 100, height: 90 },
+      { id: 'ramadan-brand', type: 'brand', x: 0, y: 90, width: 13, height: 10 },
+      { id: 'ramadan-clock', type: 'clock', x: 55, y: 90, width: 45, height: 10 },
+    ],
+  },
+};
 
 export const TV_SCREENS = [
   { id: 'mens-main', label: 'Men’s Main Hall' },
@@ -53,6 +110,7 @@ export const DEFAULT_TV_SETTINGS = {
   display_orientation: 'landscape',
   standby_scene: DEFAULT_STANDBY_SCENE,
   preset_names: DEFAULT_TV_PRESET_NAMES,
+  preset_scenes: DEFAULT_TV_PRESET_SCENES,
   jamaah_lead_minutes: 1,
   before_jamaah_message: 'Jama‘ah begins in 1 minute',
   jamaah_message: 'It is Jama‘ah time',
@@ -81,6 +139,15 @@ export function normaliseTvSettings(settings = {}) {
       ? settings.standby_scene
       : { ...DEFAULT_STANDBY_SCENE, layers: DEFAULT_STANDBY_SCENE.layers.map((layer) => ({ ...layer })) },
     preset_names: { ...DEFAULT_TV_PRESET_NAMES, ...(settings.preset_names || {}) },
+    preset_scenes: Object.fromEntries(
+      Object.entries(DEFAULT_TV_PRESET_SCENES).map(([key, scene]) => [
+        key,
+        settings.preset_scenes?.[key] || {
+          ...scene,
+          layers: scene.layers.map((layer) => ({ ...layer })),
+        },
+      ]),
+    ),
   };
   // Remove only the exact old generated starter layout. Custom scenes are preserved.
   const starter = [
@@ -188,6 +255,26 @@ export function validateSettings(input, screenId = '') {
     }
   }
   result.standby_scene = standby;
+  result.preset_scenes = {};
+  const allowedPreset = new Set(['times', 'next', 'clock', 'state', 'text', 'brand', 'empty']);
+  for (const key of TV_PRESET_KEYS.filter((value) => value !== 'standby')) {
+    const source = values.preset_scenes?.[key];
+    const checked = validateScenes([source], secureStreamUrl, youtubeUrl)[0];
+    if (checked.layers.some((layer) => !allowedPreset.has(layer.type)))
+      throw new Error('Prayer preset layouts can use timetable, preset content, next prayer, clock, logo and text only.');
+    if (!checked.layers.some((layer) => layer.type === 'state' && !layer.hidden))
+      throw new Error('Each prayer preset needs a visible preset content block.');
+    for (const layer of checked.layers) {
+      if (layer.type === 'times') {
+        const original = source.layers.find((item) => item.id === layer.id);
+        const layout = original?.layout || 'horizontal';
+        if (!['horizontal', 'vertical'].includes(layout))
+          throw new Error('Choose a valid prayer timetable layout.');
+        layer.layout = layout;
+      }
+    }
+    result.preset_scenes[key] = checked;
+  }
   for (const key of [
     'dhikr_delay_fajr',
     'dhikr_delay_dhuhr',
