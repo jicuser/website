@@ -78,7 +78,7 @@ test('A poster opens its linked page and the same form responses without copying
   const {state,admin}=await fixture(page);await admin('posters');
   await page.locator('.admin-poster-picker button').filter({hasText:'The Seeker’s Gateway'}).click();
   await expect(page.getByRole('navigation',{name:'Poster management'})).toBeVisible();
-  await page.getByRole('button',{name:'Page & registration',exact:true}).click();
+  await page.getByRole('button',{name:'Page',exact:true}).click();
   await expect(page.getByLabel('Page title',{exact:true})).toHaveValue('Arabic course');
   await page.getByRole('link',{name:'Form & responses',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Course interest',exact:true})).toBeVisible();
