@@ -563,7 +563,7 @@ function AnnouncementsSection() {
         </div>
         <button className={`${primary} mt-4`} disabled={!dirty}>
           <Save size={15} />
-          Save announcement
+          Save notice
         </button>
       </form>
       <div className="space-y-3">
