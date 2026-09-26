@@ -2113,3 +2113,27 @@ html.dark .admin-console .admin-field-error {
     height: 15px;
   }
 }
+
+@media (max-width: 800px) {
+  .admin-mobile-section {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 0 10px 8px;
+  }
+  .admin-mobile-current {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 13px;
+  }
+  .admin-mobile-overview {
+    min-height: 36px;
+    padding: 7px 9px;
+    border: 1px solid #ffffff24;
+    border-radius: 10px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+}
