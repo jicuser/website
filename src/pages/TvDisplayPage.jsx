@@ -225,7 +225,7 @@ function ScreenDisplay({ screenId }) {
   const enterFullscreen = async () => {
     try {
       await screen.current?.requestFullscreen?.();
-      await window.screen.orientation?.lock?.('landscape');
+      await window.screen.orientation?.lock?.(tv.settings.display_orientation === 'portrait' ? 'portrait' : 'landscape');
     } catch {
       /* The device keeps its orientation when browser locking is unavailable. */
     }
