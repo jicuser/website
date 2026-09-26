@@ -2137,3 +2137,46 @@ html.dark .admin-console .admin-field-error {
     font-size: 12px;
   }
 }
+
+
+.tv-screen-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.tv-screen-overview-card {
+  margin: 0;
+}
+.tv-screen-overview-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.tv-screen-overview-title > div {
+  display: grid;
+  gap: 8px;
+}
+.tv-screen-overview-title strong {
+  font-size: 17px;
+}
+.tv-screen-overview-card > small {
+  display: block;
+  margin-top: 8px;
+}
+@media (max-width: 700px) {
+  .tv-screen-overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tv-screen-overview-card {
+    padding: 16px;
+  }
+  .tv-screen-overview-card .admin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tv-screen-overview-card .admin-actions .primary {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}
