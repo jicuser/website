@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import NormalSettings from './NormalSettings';
-import TvPreview from '@/components/admin/TvPreview';
 import TvDisplayLayoutEditor from './TvStandbyLayoutEditor';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { TV_PRESET_KEYS } from '../../../supabase/functions/_shared/tv.js';
@@ -67,7 +66,7 @@ export default function BackgroundSettings({
         <div>
           <span className="admin-eyebrow">PREVIEWING</span>
           <h3>{presetName}</h3>
-          <p>This preview uses the same renderer as the real TV. Previewing does not change the live screen.</p>
+          <p>Edit the preview below. Changes stay here until you press Save TV settings.</p>
         </div>
         <label>
           Preset name
@@ -83,13 +82,6 @@ export default function BackgroundSettings({
           />
         </label>
       </div>
-
-      <TvPreview
-        screenId={screenId}
-        label={data.label}
-        settings={form}
-        previewState={preset}
-      />
 
       <TvDisplayLayoutEditor
         screenId={screenId}
