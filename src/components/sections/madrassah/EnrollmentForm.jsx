@@ -42,18 +42,15 @@ const EnrollmentForm = () => {
       transition={{ duration: 0.5 }}
       className="madrassah-enrolment-form w-full max-w-2xl mx-auto"
     >
-      <p className="madrassah-enrolment-eyebrow">Madrassah · pupil admissions</p>
-      <h1 className="madrassah-enrolment-title">Pupil enrolment enquiry</h1>
-      <p className="madrassah-enrolment-intro">
-        Use this form for a child joining the Madrassah. Adult courses have a separate registration area.
-      </p>
+      <h1 className="madrassah-enrolment-title">Pupil enrolment</h1>
+      <p className="madrassah-enrolment-intro">Enquire about a place at the Madrassah.</p>
       <form onSubmit={handleSubmit} className="madrassah-enrolment-fields">
         <div>
           <label
             htmlFor="name"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Name *
+            Parent / guardian *
           </label>
           <input
             type="text"
@@ -72,7 +69,7 @@ const EnrollmentForm = () => {
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Email Address *
+            Email *
           </label>
           <input
             type="email"
@@ -91,7 +88,7 @@ const EnrollmentForm = () => {
             htmlFor="phone"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Phone Number
+            Phone
           </label>
           <input
             type="tel"
@@ -109,7 +106,7 @@ const EnrollmentForm = () => {
             htmlFor="query"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Enrolment details *
+            Pupil details *
           </label>
           <textarea
             id="query"
@@ -120,11 +117,11 @@ const EnrollmentForm = () => {
             required
             rows={4}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800"
-            placeholder="Tell us the pupil’s age and what you would like to ask."
+            placeholder="Pupil name, age and any details we should know."
           ></textarea>
         </div>
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? 'Submitting...' : 'Send enrolment enquiry'}
+          {isSubmitting ? 'Submitting...' : 'Send enquiry'}
         </Button>
       </form>
     </motion.div>
