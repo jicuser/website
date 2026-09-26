@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { DEFAULT_STANDBY_SCENE, DEFAULT_TV_PRESET_SCENES } from '../../../supabase/functions/_shared/tv.js';
+import {
+  DEFAULT_TV_DISPLAY_LAYOUTS,
+  PRAYER_TIMETABLE_LAYOUTS,
+} from '../../../supabase/functions/_shared/tv.js';
 import { fitRect, layerStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
 import { snapRect } from '@/lib/sceneLayouts';
 import SceneCanvas from './SceneCanvas';
@@ -20,21 +23,147 @@ const labels = {
   text: 'Notice',
 };
 
+const prayerStyles = [
+  ['horizontal', 'Across cards'],
+  ['compact', 'Compact table'],
+  ['clock-table', 'Clock + table'],
+  ['vertical', 'Vertical table'],
+].filter(([id]) => PRAYER_TIMETABLE_LAYOUTS.includes(id));
+
 const cloneScene = (scene) => ({
   ...scene,
-  layers: scene.layers.map((layer) => ({ ...layer })),
+  layers: (scene?.layers || []).map((layer) => ({ ...layer })),
 });
 
+function defaultScene(orientation, preset) {
+  return cloneScene(DEFAULT_TV_DISPLAY_LAYOUTS[orientation]?.[preset]);
+}
+
+function withLayer(scene, id, changes) {
+  return {
+    ...scene,
+    layers: scene.layers.map((item) => (item.id === id ? { ...item, ...changes } : item)),
+  };
+}
+
+function quickLayout(scene, orientation, preset, mode) {
+  if (preset !== 'standby') {
+    const state = scene.layers.find((item) => item.type === 'state');
+    const times = scene.layers.find((item) => item.type === 'times');
+    let next = cloneScene(scene);
+    if (!state) return next;
+    if (orientation === 'portrait') {
+      next = withLayer(next, state.id, { x: 0, y: 0, width: 100, height: 58, hidden: false });
+      if (times)
+        next = withLayer(next, times.id, {
+          x: 0,
+          y: 58,
+          width: 100,
+          height: 30,
+          layout: mode === 'prayer' ? 'vertical' : 'compact',
+          hidden: false,
+        });
+    } else {
+      next = withLayer(next, state.id, {
+        x: mode === 'split' ? 48 : 0,
+        y: 0,
+        width: mode === 'split' ? 52 : 100,
+        height: 100,
+        hidden: false,
+      });
+      if (times)
+        next = withLayer(next, times.id, {
+          x: 0,
+          y: 0,
+          width: mode === 'split' ? 48 : 100,
+          height: mode === 'split' ? 100 : 24,
+          layout: mode === 'split' ? 'compact' : 'horizontal',
+          hidden: false,
+        });
+    }
+    return next;
+  }
+
+  const next = cloneScene(scene);
+  const times = next.layers.find((item) => item.type === 'times');
+  const posters = next.layers.filter((item) => ['poster', 'poster-next'].includes(item.type));
+  const nextPrayer = next.layers.find((item) => item.type === 'next');
+  const clock = next.layers.find((item) => item.type === 'clock');
+  const brand = next.layers.find((item) => item.type === 'brand');
+
+  if (orientation === 'portrait') {
+    if (mode === 'prayer') {
+      if (times) Object.assign(times, { x: 0, y: 0, width: 100, height: 100, layout: 'vertical', hidden: false });
+      posters.forEach((item) => { item.hidden = true; });
+      if (nextPrayer) nextPrayer.hidden = true;
+      if (clock) clock.hidden = true;
+      if (brand) brand.hidden = true;
+    } else if (mode === 'poster') {
+      if (times) Object.assign(times, { x: 0, y: 0, width: 100, height: 24, layout: 'compact', hidden: false });
+      posters.forEach((item, index) => Object.assign(item, {
+        x: 0,
+        y: 24,
+        width: 100,
+        height: 66,
+        hidden: index > 0,
+      }));
+      if (nextPrayer) nextPrayer.hidden = true;
+      if (clock) Object.assign(clock, { x: 24, y: 90, width: 76, height: 10, hidden: false });
+      if (brand) Object.assign(brand, { x: 0, y: 90, width: 24, height: 10, hidden: false });
+    } else {
+      if (times) Object.assign(times, { x: 0, y: 0, width: 100, height: 34, layout: 'vertical', hidden: false });
+      if (nextPrayer) Object.assign(nextPrayer, { x: 0, y: 34, width: 100, height: 8, hidden: false });
+      posters.forEach((item, index) => Object.assign(item, {
+        x: index % 2 === 0 ? 0 : 50,
+        y: 42,
+        width: 50,
+        height: 40,
+        hidden: index > 1,
+      }));
+      if (brand) Object.assign(brand, { x: 0, y: 82, width: 24, height: 18, hidden: false });
+      if (clock) Object.assign(clock, { x: 24, y: 82, width: 76, height: 18, hidden: false });
+    }
+    return next;
+  }
+
+  if (mode === 'prayer') {
+    if (times) Object.assign(times, { x: 0, y: 0, width: 100, height: 100, layout: 'clock-table', hidden: false });
+    posters.forEach((item) => { item.hidden = true; });
+    if (nextPrayer) nextPrayer.hidden = true;
+    if (clock) clock.hidden = true;
+    if (brand) brand.hidden = true;
+  } else if (mode === 'split') {
+    if (times) Object.assign(times, { x: 0, y: 0, width: 55, height: 100, layout: 'clock-table', hidden: false });
+    posters.forEach((item, index) => Object.assign(item, {
+      x: 55,
+      y: 0,
+      width: 45,
+      height: 100,
+      hidden: index > 0,
+    }));
+    if (nextPrayer) nextPrayer.hidden = true;
+    if (clock) clock.hidden = true;
+    if (brand) brand.hidden = true;
+  } else {
+    return defaultScene('landscape', 'standby');
+  }
+  return next;
+}
+
 export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'standby', onChange }) {
+  const orientation = settings.display_orientation === 'portrait' ? 'portrait' : 'landscape';
   const prayers = usePrayerTimes();
   const programmes = usePosters();
   const { events, livestream } = useHomeLiveContent({ eventLimit: 50 });
-  const fallback =
-    preset === 'standby' ? DEFAULT_STANDBY_SCENE : DEFAULT_TV_PRESET_SCENES[preset];
+  const fallback = defaultScene(orientation, preset);
   const scene =
-    preset === 'standby'
-      ? settings.standby_scene || cloneScene(DEFAULT_STANDBY_SCENE)
-      : settings.preset_scenes?.[preset] || cloneScene(fallback);
+    settings.display_layouts?.[orientation]?.[preset] ||
+    (orientation === 'landscape'
+      ? preset === 'standby'
+        ? settings.standby_scene
+        : settings.preset_scenes?.[preset]
+      : null) ||
+    fallback;
   const [selected, setSelected] = useState(scene.layers[0]?.id || '');
   const [now, setNow] = useState(() => new Date());
   const canvas = useRef(null);
@@ -47,7 +176,7 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
   useEffect(() => {
     if (!scene.layers.some((item) => item.id === selected))
       setSelected(scene.layers[0]?.id || '');
-  }, [preset, scene.id, scene.layers, selected]);
+  }, [orientation, preset, scene.id, scene.layers, selected]);
 
   const layer = scene.layers.find((item) => item.id === selected) || null;
   const posters = [
@@ -63,13 +192,13 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
   ];
 
   function setScene(next) {
-    const prepared = { ...next, overlap: true };
-    if (preset === 'standby') onChange('standby_scene', prepared);
-    else
-      onChange('preset_scenes', {
-        ...(settings.preset_scenes || {}),
-        [preset]: prepared,
-      });
+    onChange('display_layouts', {
+      ...(settings.display_layouts || {}),
+      [orientation]: {
+        ...(settings.display_layouts?.[orientation] || {}),
+        [preset]: { ...next, overlap: true },
+      },
+    });
   }
 
   function updateLayer(next) {
@@ -103,16 +232,8 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
     const dx = ((event.clientX - start.startX) / start.width) * 100;
     const dy = ((event.clientY - start.startY) / start.height) * 100;
     const raw = start.resize
-      ? {
-          ...start.item,
-          width: start.item.width + dx,
-          height: start.item.height + dy,
-        }
-      : {
-          ...start.item,
-          x: start.item.x + dx,
-          y: start.item.y + dy,
-        };
+      ? { ...start.item, width: start.item.width + dx, height: start.item.height + dy }
+      : { ...start.item, x: start.item.x + dx, y: start.item.y + dy };
     const next = snapRect(
       fitRect(raw),
       scene.layers.filter((item) => item.id !== start.item.id && !item.hidden),
@@ -133,29 +254,26 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
 
   const previewSettings = {
     ...settings,
+    display_orientation: orientation,
     scenes: [scene],
     active_scene_id: scene.id,
     scene_mode: 'normal',
     muted: true,
   };
-  const sampleTime =
-    prayers.todaysTimes?.jamaah_isha || prayers.todaysTimes?.isha || '8:45 PM';
+  const sampleTime = prayers.todaysTimes?.jamaah_isha || prayers.todaysTimes?.isha || '8:45 PM';
   const sampleSequence = ['before', 'jamaah', 'dhikr'].includes(preset)
     ? {
         name: 'Isha',
         key: 'isha',
         time: sampleTime,
         phase: preset,
-        secondsToJamaah: preset === 'before' ? Math.max(1, (settings.jamaah_lead_minutes || 1) * 60) : 0,
+        secondsToJamaah:
+          preset === 'before' ? Math.max(1, (settings.jamaah_lead_minutes || 1) * 60) : 0,
         dhikrSeconds: preset === 'dhikr' ? 60 : 0,
       }
     : null;
   const presetContent = sampleSequence ? (
-    <TvPrayerScene
-      sequence={sampleSequence}
-      jummahNotice={settings.jummah_notice}
-      settings={settings}
-    />
+    <TvPrayerScene sequence={sampleSequence} jummahNotice={settings.jummah_notice} settings={settings} />
   ) : preset === 'jummah' ? (
     <TvSpecialNotice mode="jummah" settings={settings} fasting={null} />
   ) : preset === 'ramadan' ? (
@@ -164,11 +282,33 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
   const presetLabel = settings.preset_names?.[preset] || (preset === 'standby' ? 'Standby' : preset);
 
   return (
-    <section className="tv-layout-editor" aria-label="Standby layout editor">
-      <div className="admin-heading">
+    <section className="tv-layout-editor" aria-label={`${presetLabel} layout editor`}>
+      <div className="admin-heading tv-layout-heading">
         <div>
           <h3>Arrange {presetLabel}</h3>
-          <p>Drag blocks on the preview. Use the large corner handle to resize them.</p>
+          <p>{orientation === 'portrait' ? 'Portrait' : 'Landscape'} has its own saved layout.</p>
+        </div>
+        <div className="tv-quick-layouts" aria-label="Quick layouts">
+          {preset === 'standby' ? (
+            orientation === 'portrait' ? (
+              <>
+                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'balanced'))}>Balanced</button>
+                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'prayer'))}>Prayer board</button>
+                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'poster'))}>Large poster</button>
+              </>
+            ) : (
+              <>
+                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'posters'))}>Timetable + posters</button>
+                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'prayer'))}>Prayer board</button>
+                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'split'))}>Prayer + poster</button>
+              </>
+            )
+          ) : (
+            <>
+              <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'balanced'))}>Standard</button>
+              <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'split'))}>Split</button>
+            </>
+          )}
         </div>
       </div>
 
@@ -181,16 +321,14 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
             aria-pressed={selected === item.id}
             onClick={() => setSelected(item.id)}
           >
-            {labels[item.type] || 'Block'}{item.type === 'poster' ? ` ${(item.poster_offset ?? index) + 1}` : ''}
+            {labels[item.type] || 'Block'}
+            {item.type === 'poster' ? ` ${(item.poster_offset ?? index) + 1}` : ''}
             {item.hidden ? ' · hidden' : ''}
           </button>
         ))}
       </div>
 
-      <div
-        ref={canvas}
-        className={`tv-layout-canvas ${settings.display_orientation === 'portrait' ? 'is-portrait' : ''}`}
-      >
+      <div ref={canvas} className={`tv-layout-canvas ${orientation === 'portrait' ? 'is-portrait' : ''}`}>
         <div className="tv-layout-render" aria-hidden="true">
           <SceneCanvas
             preview
@@ -217,20 +355,12 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
             onPointerDown={(event) => begin(event, item)}
             onPointerMove={move}
             onPointerUp={finish}
-            onPointerCancel={() => {
-              drag.current = null;
-            }}
+            onPointerCancel={() => { drag.current = null; }}
             onFocus={() => setSelected(item.id)}
           >
             <span>{labels[item.type] || 'Block'}</span>
             {selected === item.id && (
-              <span
-                className="tv-layout-resize"
-                aria-hidden="true"
-                onPointerDown={(event) => begin(event, item, true)}
-              >
-                ↘
-              </span>
+              <span className="tv-layout-resize" aria-hidden="true" onPointerDown={(event) => begin(event, item, true)}>↘</span>
             )}
           </div>
         ))}
@@ -238,54 +368,48 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
 
       {layer && (
         <div className="tv-layout-selected">
-          <strong>{labels[layer.type] || 'Block'}</strong>
-          <div className="admin-actions">
-            {layer.type !== 'state' && (
-              <button
-                type="button"
-                className="admin-button"
-                onClick={() => updateLayer({ ...layer, hidden: !layer.hidden })}
+          <div className="tv-layout-selected-head">
+            <strong>{labels[layer.type] || 'Block'}</strong>
+            <button
+              type="button"
+              className="admin-button"
+              onClick={() => updateLayer({ ...layer, hidden: !layer.hidden })}
+              disabled={layer.type === 'state'}
+            >
+              {layer.hidden ? 'Show' : 'Hide'}
+            </button>
+          </div>
+          {layer.type === 'times' && (
+            <label className="tv-prayer-style">
+              Prayer timetable style
+              <select
+                value={layer.layout || 'horizontal'}
+                onChange={(event) => updateLayer({ ...layer, layout: event.target.value })}
               >
-                {layer.hidden ? 'Show block' : 'Hide block'}
-              </button>
-            )}
-            <button type="button" className="admin-button" onClick={() => place({ x: 0, width: 100 })}>
-              Full width
-            </button>
-            <button type="button" className="admin-button" onClick={() => place({ x: 0, width: 50 })}>
-              Left half
-            </button>
-            <button type="button" className="admin-button" onClick={() => place({ x: 50, width: 50 })}>
-              Right half
-            </button>
-            {layer.type === 'times' && (
-              <button
-                type="button"
-                className="admin-button"
-                onClick={() =>
-                  updateLayer({
-                    ...layer,
-                    layout: layer.layout === 'vertical' ? 'horizontal' : 'vertical',
-                  })
-                }
-              >
-                Prayer times: {layer.layout === 'vertical' ? 'down the side' : 'across'}
-              </button>
-            )}
+                {prayerStyles.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+              </select>
+            </label>
+          )}
+          <div className="admin-actions tv-position-actions">
+            <button type="button" className="admin-button" onClick={() => place({ x: 0, y: 0, width: 100, height: layer.height })}>Top full width</button>
+            <button type="button" className="admin-button" onClick={() => place({ x: 0, width: 100 })}>Full width</button>
+            <button type="button" className="admin-button" onClick={() => place({ x: 0, width: 50 })}>Left half</button>
+            <button type="button" className="admin-button" onClick={() => place({ x: 50, width: 50 })}>Right half</button>
           </div>
         </div>
       )}
 
       <button
         type="button"
-        className="admin-button"
+        className="admin-button tv-reset-layout"
         onClick={() => {
-          if (!window.confirm(`Reset the ${presetLabel} layout to the standard JIC arrangement?`)) return;
-          setScene(cloneScene(fallback));
-          setSelected(fallback.layers[0]?.id || '');
+          if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
+          const reset = defaultScene(orientation, preset);
+          setScene(reset);
+          setSelected(reset.layers[0]?.id || '');
         }}
       >
-        Reset layout
+        Reset this {orientation} layout
       </button>
     </section>
   );
