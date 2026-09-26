@@ -162,7 +162,7 @@ function DashboardSection({ onChoose }) {
           </Link>
         )}
         {tasks.map(([id, title, description, Icon]) => (
-          <button key={id} onClick={() => onChoose(id)}>
+          <button key={id} aria-label={title} onClick={() => onChoose(id)}>
             <Icon />
             <strong>{title}</strong>
             <span>{description}</span>
