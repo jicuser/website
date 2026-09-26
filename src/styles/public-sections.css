@@ -194,9 +194,9 @@
 }
 .madrassah-enrolment-intro {
   max-width: 58ch;
-  margin: 6px 0 18px;
+  margin: 5px 0 14px;
   color: var(--jic-text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 .madrassah-enrolment-fields { display: grid; gap: 14px; }
@@ -223,7 +223,9 @@
   .madrassah-enrolment-form { padding: 28px; }
 }
 @media (max-width: 600px) {
-  .madrassah-enrolment-form { padding: 16px; border-radius: 16px; }
+  .madrassah-enrolment-form { padding: 15px; border-radius: 16px; }
+  .madrassah-enrolment-title { font-size: 1.55rem; }
+  .madrassah-enrolment-intro { margin-bottom: 12px; }
   .madrassah-page-context { display: grid; }
   .education-enrolment-card { padding: 14px; }
 }
