@@ -861,25 +861,19 @@ export default function AdminPage() {
             {status}
           </p>
         )}
-        <nav className="admin-mobile-section" aria-label="Admin navigation">
-          {active !== 'dashboard' && allowed.some(([key]) => key === 'dashboard') && (
-            <button className="admin-mobile-back" onClick={() => chooseSection('dashboard')}>
-              <ArrowLeft size={17} /> Overview
+        {active !== 'dashboard' && (
+          <nav className="admin-mobile-section" aria-label="Current admin section">
+            <button className="admin-mobile-back" onClick={() => window.history.back()}>
+              <ArrowLeft size={17} /> Back
             </button>
-          )}
-          <div className="admin-mobile-nav-scroll">
-            {allowed.map(([key, name, Icon]) => (
-              <button
-                key={key}
-                onClick={() => chooseSection(key)}
-                aria-current={active === key ? 'page' : undefined}
-              >
-                <Icon size={16} />
-                {name}
-              </button>
-            ))}
-          </div>
-        </nav>
+            <strong className="admin-mobile-current">
+              {allowed.find(([key]) => key === active)?.[1] || 'Admin'}
+            </strong>
+            <button className="admin-mobile-overview" onClick={() => chooseSection('dashboard')}>
+              Overview
+            </button>
+          </nav>
+        )}
       </header>
       <div className="admin-console-layout">
         <aside className="admin-navigation max-[800px]:hidden">
