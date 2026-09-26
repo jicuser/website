@@ -10,7 +10,7 @@ const prayers = [
   ['Maghrib', 'maghrib'],
   ['Isha', 'isha'],
 ];
-export default function PrayerWidget({ kind, prayers: data, now }) {
+export default function PrayerWidget({ kind, prayers: data, now, layout = 'horizontal' }) {
   if (kind === 'next') {
     const next = nextPrayer(data.todaysTimes, now);
     return (
@@ -35,20 +35,31 @@ export default function PrayerWidget({ kind, prayers: data, now }) {
   }
   const current = currentPrayer(data.todaysTimes, now);
   return (
-    <div className="scene-timetable">
-      {prayers.map(([name, key]) => (
-        <div
-          key={key}
-          className={current?.key === key ? 'is-current' : ''}
-          aria-current={current?.key === key ? 'time' : undefined}
-        >
-          <span>{name}</span>
-          <strong>{displayTime(data.todaysTimes?.[key])}</strong>
-          <small>
-            Jama‘ah {key === 'sunrise' ? '—' : displayTime(data.todaysTimes?.[`jamaah_${key}`])}
-          </small>
+    <div className={`scene-timetable ${layout === 'vertical' ? 'is-vertical' : ''}`}>
+      <div className="scene-timetable-prayers">
+        {prayers.map(([name, key]) => (
+          <div
+            key={key}
+            className={current?.key === key ? 'is-current' : ''}
+            aria-current={current?.key === key ? 'time' : undefined}
+          >
+            <span>{name}</span>
+            <strong>{displayTime(data.todaysTimes?.[key])}</strong>
+            <small>
+              Jama‘ah {key === 'sunrise' ? '—' : displayTime(data.todaysTimes?.[`jamaah_${key}`])}
+            </small>
+          </div>
+        ))}
+      </div>
+      {data.jummahTimes?.length > 0 && (
+        <div className="scene-jummah-row">
+          {data.jummahTimes.slice(0, 2).map((item, index) => (
+            <span key={item.name || index}>
+              {item.name || `Jummah ${index + 1}`} <strong>{displayTime(item.prayer)}</strong>
+            </span>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }
