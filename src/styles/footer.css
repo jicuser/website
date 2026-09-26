@@ -185,3 +185,66 @@
     text-align: left;
   }
 }
+
+
+/* Compact footer: social and contact controls stay in disciplined single rows. */
+.jic-footer-actions-compact {
+  width: min(100% - 24px, 720px);
+  margin: 6px auto 10px;
+  gap: 6px;
+}
+.jic-footer-socials,
+.jic-footer-contact {
+  flex-wrap: nowrap;
+  width: auto;
+  max-width: 100%;
+}
+.jic-footer-socials a,
+.jic-footer-contact a {
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+}
+.jic-footer-bottom {
+  min-height: 82px;
+}
+.jic-footer-donation-copy {
+  padding-top: 6px;
+}
+.jic-footer-donation-copy .jic-footer-legal {
+  margin-top: 4px;
+}
+@media (max-width: 767px) {
+  .jic-site-footer > .container {
+    padding-block: 8px;
+  }
+  .jic-footer-links-inline a {
+    min-height: 38px;
+    padding-block: 4px;
+  }
+  .jic-footer-actions-compact {
+    flex-direction: row;
+    justify-content: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .jic-footer-actions-compact::-webkit-scrollbar {
+    display: none;
+  }
+  .jic-footer-socials,
+  .jic-footer-contact {
+    flex: 0 0 auto;
+  }
+  .jic-footer-signature {
+    flex-basis: 118px;
+    width: 118px;
+  }
+  .jic-footer-donate {
+    min-height: 40px;
+  }
+}
+@media (min-width: 768px) {
+  .jic-footer-actions-compact {
+    flex-wrap: nowrap;
+  }
+}
