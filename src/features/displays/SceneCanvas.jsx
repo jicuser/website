@@ -112,7 +112,18 @@ export default function SceneCanvas({
                   })}
                 </time>
               ) : layer.type === 'state' ? (
-                <div className="scene-state-block">{presetContent}</div>
+                <div className="scene-state-block">
+                  {layer.image_url ? (
+                    <img
+                      className="scene-state-image"
+                      src={layer.image_url}
+                      alt=""
+                      style={{ objectFit: layer.image_fit || 'contain' }}
+                    />
+                  ) : (
+                    presetContent
+                  )}
+                </div>
               ) : layer.type === 'brand' ? (
                 <div className="scene-brand-block">
                   <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
