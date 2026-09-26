@@ -11,7 +11,7 @@ import { IMAGE_ACCEPT, validateImage } from '@/lib/images';
 import PosterWorkflow from '@/features/content/PosterWorkflow';
 import '@/styles/content-workflow.css';
 
-export default function PostersEditor() {
+export default function PostersEditor({ registerBack }) {
   const published = usePosters();
   const { saveContent } = useContent();
   const { can } = useAuth();
@@ -66,6 +66,24 @@ export default function PostersEditor() {
     );
   const canLeaveLinkedEditor = () =>
     editingPoster || !workspaceDirty || window.confirm('Discard unsaved page or form changes?');
+  useEffect(() => {
+    if (!registerBack) return undefined;
+    if (selected) {
+      registerBack(() => {
+        if (
+          !editingPoster &&
+          workspaceDirty &&
+          !window.confirm('Discard unsaved page or form changes?')
+        )
+          return;
+        setEditingPoster(false);
+        setSelected('');
+      });
+    } else {
+      registerBack(null);
+    }
+    return () => registerBack(null);
+  }, [registerBack, selected, editingPoster, workspaceDirty]);
   const add = (kind) => {
     if (!canLeaveLinkedEditor()) return;
     setEditingPoster(true);
