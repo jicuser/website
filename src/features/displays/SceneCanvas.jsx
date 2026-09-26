@@ -73,6 +73,7 @@ export default function SceneCanvas({
   livestream,
   localStreams = {},
   preview = false,
+  presetContent = null,
 }) {
   const scene =
     tv.settings.scenes.find((s) => s.id === tv.settings.active_scene_id) || tv.settings.scenes[0];
@@ -110,6 +111,8 @@ export default function SceneCanvas({
                     hour12: true,
                   })}
                 </time>
+              ) : layer.type === 'state' ? (
+                <div className="scene-state-block">{presetContent}</div>
               ) : layer.type === 'brand' ? (
                 <div className="scene-brand-block">
                   <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
