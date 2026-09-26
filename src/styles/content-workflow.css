@@ -34,3 +34,61 @@
   color: var(--jic-text);
   font-size: 16px;
 }
+
+.poster-mobile-backbar {
+  position: sticky;
+  top: var(--admin-sticky-offset, 0);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 14px;
+  background: var(--jic-bg);
+}
+.poster-mobile-backbar > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.poster-workflow-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.poster-workflow-tabs .admin-button[aria-pressed="true"] {
+  border-color: var(--jic-gold);
+}
+.poster-overview-card {
+  display: grid;
+  grid-template-columns: minmax(120px, 220px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.poster-overview-image {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: 16px;
+  background: rgba(0,0,0,.15);
+}
+@media (max-width: 600px) {
+  .poster-workflow-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .poster-workflow-tabs .admin-button {
+    min-width: 0;
+    padding-inline: 10px;
+  }
+  .poster-overview-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .poster-overview-image {
+    max-height: 440px;
+  }
+}
