@@ -4,7 +4,6 @@ import {
   PRAYER_TIMETABLE_LAYOUTS,
 } from '../../../supabase/functions/_shared/tv.js';
 import { fitRect, layerStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
-import { snapRect } from '@/lib/sceneLayouts';
 import SceneCanvas from './SceneCanvas';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
@@ -234,12 +233,15 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
     const raw = start.resize
       ? { ...start.item, width: start.item.width + dx, height: start.item.height + dy }
       : { ...start.item, x: start.item.x + dx, y: start.item.y + dy };
-    const next = snapRect(
-      fitRect(raw),
-      scene.layers.filter((item) => item.id !== start.item.id && !item.hidden),
-      { resize: start.resize },
+    const fitted = fitRect(raw);
+    const grid = event.shiftKey ? 1 : 5;
+    const snapped = Object.fromEntries(
+      ['x', 'y', 'width', 'height'].map((key) => [
+        key,
+        Math.round(fitted[key] / grid) * grid,
+      ]),
     );
-    updateLayer({ ...start.item, ...next });
+    updateLayer({ ...start.item, ...fitRect({ ...fitted, ...snapped }) });
   }
 
   function finish(event) {
@@ -283,52 +285,13 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
 
   return (
     <section className="tv-layout-editor" aria-label={`${presetLabel} layout editor`}>
-      <div className="admin-heading tv-layout-heading">
-        <div>
-          <h3>Arrange {presetLabel}</h3>
-          <p>{orientation === 'portrait' ? 'Portrait' : 'Landscape'} has its own saved layout.</p>
-        </div>
-        <div className="tv-quick-layouts" aria-label="Quick layouts">
-          {preset === 'standby' ? (
-            orientation === 'portrait' ? (
-              <>
-                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'balanced'))}>Balanced</button>
-                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'prayer'))}>Prayer board</button>
-                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'poster'))}>Large poster</button>
-              </>
-            ) : (
-              <>
-                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'posters'))}>Timetable + posters</button>
-                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'prayer'))}>Prayer board</button>
-                <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'split'))}>Prayer + poster</button>
-              </>
-            )
-          ) : (
-            <>
-              <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'balanced'))}>Standard</button>
-              <button className="admin-button" type="button" onClick={() => setScene(quickLayout(scene, orientation, preset, 'split'))}>Split</button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="tv-layout-blocks" aria-label="Display blocks">
-        {scene.layers.map((item, index) => (
-          <button
-            type="button"
-            key={item.id}
-            className="admin-button"
-            aria-pressed={selected === item.id}
-            onClick={() => setSelected(item.id)}
-          >
-            {labels[item.type] || 'Block'}
-            {item.type === 'poster' ? ` ${(item.poster_offset ?? index) + 1}` : ''}
-            {item.hidden ? ' · hidden' : ''}
-          </button>
-        ))}
+      <div className="tv-layout-toolbar">
+        <strong>{presetLabel}</strong>
+        <span>{orientation === 'portrait' ? '9:16' : '16:9'} · drag blocks · drag corner to resize</span>
       </div>
 
       <div ref={canvas} className={`tv-layout-canvas ${orientation === 'portrait' ? 'is-portrait' : ''}`}>
+        <div className="tv-layout-grid" aria-hidden="true" />
         <div className="tv-layout-render" aria-hidden="true">
           <SceneCanvas
             preview
@@ -366,39 +329,39 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
         ))}
       </div>
 
-      {layer && (
-        <div className="tv-layout-selected">
-          <div className="tv-layout-selected-head">
-            <strong>{labels[layer.type] || 'Block'}</strong>
-            <button
-              type="button"
-              className="admin-button"
-              onClick={() => updateLayer({ ...layer, hidden: !layer.hidden })}
-              disabled={layer.type === 'state'}
+      <div className="tv-layout-controls">
+        <label>
+          Block
+          <select value={selected} onChange={(event) => setSelected(event.target.value)}>
+            {scene.layers.map((item, index) => (
+              <option key={item.id} value={item.id}>
+                {labels[item.type] || 'Block'}{item.type === 'poster' ? ` ${(item.poster_offset ?? index) + 1}` : ''}{item.hidden ? ' · hidden' : ''}
+              </option>
+            ))}
+          </select>
+        </label>
+        {layer?.type === 'times' && (
+          <label>
+            Timetable style
+            <select
+              value={layer.layout || 'horizontal'}
+              onChange={(event) => updateLayer({ ...layer, layout: event.target.value })}
             >
-              {layer.hidden ? 'Show' : 'Hide'}
-            </button>
-          </div>
-          {layer.type === 'times' && (
-            <label className="tv-prayer-style">
-              Prayer timetable style
-              <select
-                value={layer.layout || 'horizontal'}
-                onChange={(event) => updateLayer({ ...layer, layout: event.target.value })}
-              >
-                {prayerStyles.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
-              </select>
-            </label>
-          )}
-          <div className="admin-actions tv-position-actions">
-            <button type="button" className="admin-button" onClick={() => place({ x: 0, y: 0, width: 100, height: layer.height })}>Top full width</button>
-            <button type="button" className="admin-button" onClick={() => place({ x: 0, width: 100 })}>Full width</button>
-            <button type="button" className="admin-button" onClick={() => place({ x: 0, width: 50 })}>Left half</button>
-            <button type="button" className="admin-button" onClick={() => place({ x: 50, width: 50 })}>Right half</button>
-          </div>
-        </div>
-      )}
-
+              {prayerStyles.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+            </select>
+          </label>
+        )}
+        {layer && (
+          <button
+            type="button"
+            className="admin-button"
+            onClick={() => updateLayer({ ...layer, hidden: !layer.hidden })}
+            disabled={layer.type === 'state'}
+          >
+            {layer.hidden ? 'Show block' : 'Hide block'}
+          </button>
+        )}
+      </div>
       <button
         type="button"
         className="admin-button tv-reset-layout"
