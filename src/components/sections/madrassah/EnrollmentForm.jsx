@@ -40,12 +40,14 @@ const EnrollmentForm = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-8 w-full max-w-2xl mx-auto"
+      className="madrassah-enrolment-form w-full max-w-2xl mx-auto"
     >
-      <h3 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
-        Contact Us for Enrollment
-      </h3>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <p className="madrassah-enrolment-eyebrow">Madrassah · pupil admissions</p>
+      <h1 className="madrassah-enrolment-title">Pupil enrolment enquiry</h1>
+      <p className="madrassah-enrolment-intro">
+        Use this form for a child joining the Madrassah. Adult courses have a separate registration area.
+      </p>
+      <form onSubmit={handleSubmit} className="madrassah-enrolment-fields">
         <div>
           <label
             htmlFor="name"
@@ -62,7 +64,7 @@ const EnrollmentForm = () => {
             onChange={handleChange}
             required
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800"
-            placeholder="Your Full Name"
+            placeholder="Parent / guardian full name"
           />
         </div>
         <div>
@@ -99,7 +101,7 @@ const EnrollmentForm = () => {
             value={formData.phone}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800"
-            placeholder="Your Phone Number (Optional)"
+            placeholder="Phone number (optional)"
           />
         </div>
         <div>
@@ -107,7 +109,7 @@ const EnrollmentForm = () => {
             htmlFor="query"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Your Query *
+            Enrolment details *
           </label>
           <textarea
             id="query"
@@ -116,13 +118,13 @@ const EnrollmentForm = () => {
             value={formData.query}
             onChange={handleChange}
             required
-            rows={5}
+            rows={4}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800"
-            placeholder="Please enter your question or message here..."
+            placeholder="Tell us the pupil’s age and what you would like to ask."
           ></textarea>
         </div>
-        <Button type="submit" disabled={isSubmitting} className="w-full text-lg py-3">
-          {isSubmitting ? 'Submitting...' : 'Submit Inquiry'}
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? 'Submitting...' : 'Send enrolment enquiry'}
         </Button>
       </form>
     </motion.div>
