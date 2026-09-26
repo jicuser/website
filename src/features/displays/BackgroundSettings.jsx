@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NormalSettings from './NormalSettings';
 import TvDisplayLayoutEditor from './TvStandbyLayoutEditor';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
@@ -19,6 +19,12 @@ export default function BackgroundSettings({
   const update = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
   const presetKeys = screenId === 'shoe-area' ? ['standby'] : TV_PRESET_KEYS;
   const presetName = form.preset_names?.[preset] || preset;
+  useEffect(() => {
+    setForm({ ...data.settings, scene_mode: 'normal' });
+    setRevision(data.updated_at);
+    setPreset('standby');
+    setMessage('');
+  }, [screenId, data.updated_at]);
 
   return (
     <div className="stream-background-settings">
