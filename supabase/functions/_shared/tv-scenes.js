@@ -10,6 +10,7 @@ export const SOURCE_TYPES = [
   ['next', 'Next prayer'],
   ['clock', 'Current clock'],
   ['brand', 'Logo'],
+  ['state', 'Preset content'],
   ['text', 'Text / notice'],
 ];
 export const INPUT_SLOTS = ['input-1', 'input-2', 'input-3', 'input-4'];
