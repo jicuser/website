@@ -92,7 +92,7 @@ test('Pages can be created and hidden without erasing a linked form or changing 
   await page.getByRole('button',{name:'Pages & programmes',exact:true}).click();
   await page.getByRole('button',{name:'Edit Arabic course',exact:true}).click();
   await page.getByLabel('Page visible',{exact:true}).uncheck();
-  await page.getByRole('combobox',{name:'Place under',exact:true}).selectOption('/education');
+  await page.getByRole('combobox',{name:'Place page under',exact:true}).selectOption('/education');
   page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button',{name:'Save page settings',exact:true}).last().click();
   await expect.poll(()=>state.page.published).toBe(false);
