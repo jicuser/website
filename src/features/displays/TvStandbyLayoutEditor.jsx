@@ -236,13 +236,15 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
         <div className="tv-layout-selected">
           <strong>{labels[layer.type] || 'Block'}</strong>
           <div className="admin-actions">
-            <button
-              type="button"
-              className="admin-button"
-              onClick={() => updateLayer({ ...layer, hidden: !layer.hidden })}
-            >
-              {layer.hidden ? 'Show block' : 'Hide block'}
-            </button>
+            {layer.type !== 'state' && (
+              <button
+                type="button"
+                className="admin-button"
+                onClick={() => updateLayer({ ...layer, hidden: !layer.hidden })}
+              >
+                {layer.hidden ? 'Show block' : 'Hide block'}
+              </button>
+            )}
             <button type="button" className="admin-button" onClick={() => place({ x: 0, width: 100 })}>
               Full width
             </button>
