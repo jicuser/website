@@ -36,7 +36,7 @@ function PublicLayout() {
     <div
       className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
     >
-      <PublicBackdrop />
+      {isHome && <PublicBackdrop />}
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
         <DailyReminder />
