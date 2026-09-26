@@ -120,11 +120,8 @@ export default function PostersEditor() {
   return (
     <section className="admin-panel">
       <h2>Posters & announcements</h2>
-      <p>
-        Edit a poster here, then tick its name in TV screens or choose its website pages below.
-        Normal TVs show up to four across and move along one poster each rotation.
-      </p>
-      <Link to="/admin?section=events">Dated event posters →</Link>
+      <p>Choose a poster to preview or edit it. Registration and detail pages are optional.</p>
+      <Link to="/admin?section=events">Manage dated event posters →</Link>
       {!item && (
         <div className="admin-heading">
           <div>
@@ -182,16 +179,16 @@ export default function PostersEditor() {
           <div className="poster-mobile-backbar">
             <button
               type="button"
-              className="admin-button"
+              className="admin-button poster-back-button"
               onClick={() => {
                 if (!canLeaveLinkedEditor()) return;
                 setEditingPoster(false);
                 setSelected('');
               }}
             >
-              ← All posters
+              ← Back to all posters
             </button>
-            <span>{item.title || 'New poster'}</span>
+            <strong>{item.title || 'New poster'}</strong>
           </div>
           {editingPoster ? (
             <>
@@ -201,13 +198,13 @@ export default function PostersEditor() {
                 disabled={busy}
                 onClick={() => {
                   if (dirty) {
-                    setMessage('Publish your poster changes before opening its page and forms.');
+                    setMessage('Publish your poster changes before returning to its overview.');
                     return;
                   }
                   setEditingPoster(false);
                 }}
               >
-                Poster overview, page & forms
+                ← Back to poster overview
               </button>
               <fieldset disabled={busy} className="scene-properties">
                 <legend>{item.title || 'New poster'}</legend>
@@ -325,6 +322,14 @@ export default function PostersEditor() {
                         />
                       </label>
                     )}
+                    <h4>Poster preview</h4>
+                    <div className="poster-image-admin-preview">
+                      {posterImage(item.image) ? (
+                        <img src={item.image} alt={item.alt || item.title} />
+                      ) : (
+                        <span>No poster image selected</span>
+                      )}
+                    </div>
                   </>
                 )}
                 <h4>Show on website</h4>
