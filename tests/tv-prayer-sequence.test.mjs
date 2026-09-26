@@ -5,6 +5,7 @@ import {
   DEFAULT_TV_SETTINGS,
   validateSettings,
   isTvStaff,
+  tvDisplayScene,
 } from '../supabase/functions/_shared/tv.js';
 const teaching = {
   scene_mode: 'teaching',
@@ -67,6 +68,29 @@ test('London winter time and invalid clock values are handled', () => {
   assert.equal(prayerMinutes('12:00 AM'), 0);
   assert.equal(prayerMinutes('12:00 PM'), 720);
 });
+test('landscape and portrait layouts are independent and support prayer-board styles', () => {
+  const input = structuredClone(DEFAULT_TV_SETTINGS);
+  input.display_orientation = 'portrait';
+  input.display_layouts.portrait.standby.layers.find((layer) => layer.type === 'times').layout =
+    'compact';
+  input.display_layouts.landscape.standby.layers.find((layer) => layer.type === 'times').layout =
+    'clock-table';
+  const saved = validateSettings(input);
+  assert.equal(tvDisplayScene(saved, 'standby', 'portrait').layers.find((layer) => layer.type === 'times').layout, 'compact');
+  assert.equal(tvDisplayScene(saved, 'standby', 'landscape').layers.find((layer) => layer.type === 'times').layout, 'clock-table');
+  assert.notEqual(
+    tvDisplayScene(saved, 'standby', 'portrait').id,
+    tvDisplayScene(saved, 'standby', 'landscape').id,
+  );
+});
+
+test('unknown prayer timetable styles are rejected', () => {
+  const input = structuredClone(DEFAULT_TV_SETTINGS);
+  input.display_layouts.landscape.standby.layers.find((layer) => layer.type === 'times').layout =
+    'squashed';
+  assert.throws(() => validateSettings(input), /valid prayer timetable layout/);
+});
+
 test('post-salah delays are persisted and can be configured per prayer', () => {
   const settings = validateSettings({
     ...DEFAULT_TV_SETTINGS,
