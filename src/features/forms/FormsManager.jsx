@@ -327,13 +327,19 @@ function FormCatalogue({ view, onChoose, onCreate }) {
               : 'Manage live forms, where they are used and who handles each response.'}
           </p>
         </div>
-        {view !== 'home' && view !== 'schedule' && (
-          <button className="admin-button" disabled={loading} onClick={reload}>
-            Refresh forms
+        {view === 'forms' && (auth.isOwner || auth.can('forms_manage')) ? (
+          <button className="admin-button primary" onClick={onCreate}>
+            <Plus size={16} /> New form
           </button>
-        )}
+        ) : view !== 'home' && view !== 'schedule' ? (
+          <button className="admin-button" disabled={loading} onClick={reload}>
+            Refresh
+          </button>
+        ) : null}
       </div>
-      <EntryTiles auth={auth} loading={loading} onChoose={onChoose} onCreate={onCreate} />
+      {view === 'home' && (
+        <EntryTiles auth={auth} loading={loading} onChoose={onChoose} onCreate={onCreate} />
+      )}
       {error && <p role="alert">{error}</p>}
 
       {view === 'home' ? (
@@ -424,7 +430,7 @@ export default function FormsManager() {
   const [params, setParams] = useSearchParams();
   const [creating, setCreating] = useState(false);
   const select = params.get('form');
-  const view = params.get('view') || 'home';
+  const view = params.get('view') || 'forms';
   const choose = (changes) => {
     if (dirty && !window.confirm('Discard unsaved form changes?')) return;
     setCreating(false);
