@@ -24,6 +24,46 @@ function useFormSummaries() {
   return useAdminRecords(read);
 }
 
+function useLegacyFormCounts(kindKey) {
+  const { user } = useAuth();
+  const read = useCallback(
+    async (signal) => {
+      const kinds = kindKey ? kindKey.split('|').filter(Boolean) : [];
+      const pairs = await Promise.all(
+        kinds.map(async (kind) => {
+          const summary = await checked(
+            supabase
+              .rpc('search_form_submissions', {
+                p_search: '',
+                p_kind: kind,
+                p_form_id: null,
+                p_status: null,
+                p_from: null,
+                p_to: null,
+                p_offset: 0,
+                p_limit: 1,
+                p_oldest: false,
+                p_mine: false,
+              })
+              .abortSignal(signal),
+          );
+          return [
+            kind,
+            {
+              total: summary?.total || 0,
+              new_count: summary?.new_count || 0,
+              done_count: summary?.done_count || 0,
+            },
+          ];
+        }),
+      );
+      return Object.fromEntries(pairs);
+    },
+    [user?.id, kindKey],
+  );
+  return useAdminRecords(read);
+}
+
 export function FormWorkspace({ formId, initialTab = 'overview', onClose }) {
   const auth = useAuth();
   const { data: forms, loading, error, reload } = useFormSummaries();
@@ -294,22 +334,32 @@ function LegacyFormCards({ auth, onChoose }) {
     ['madrassah', 'Madrassah enquiry', 'Existing Madrassah enquiries.', 'forms_madrassah'],
     ['itikaaf', 'I’tikaf registration', 'Existing I’tikaf registrations.', 'forms_itikaaf'],
   ].filter(([, , , permission]) => auth.isOwner || auth.can(permission));
+  const kindKey = legacy.map(([kind]) => kind).join('|');
+  const { data: counts, loading, error } = useLegacyFormCounts(kindKey);
   if (!legacy.length) return null;
-  return legacy.map(([kind, title, description]) => (
-    <button
-      className="admin-panel content-form-card"
-      key={kind}
-      onClick={() => onChoose({ view: 'responses' })}
-    >
-      <span className="content-status">Live</span>
-      <strong>{title}</strong>
-      <span>{description}</span>
-      <span>Open Responses to view submissions.</span>
-    </button>
-  ));
+  return legacy.map(([kind, title, description]) => {
+    const summary = counts?.[kind];
+    return (
+      <button
+        className="admin-panel content-form-card"
+        key={kind}
+        onClick={() => onChoose({ view: 'responses', kind })}
+      >
+        <span className="content-status">Live</span>
+        <strong>{title}</strong>
+        <span>{description}</span>
+        <span className="form-card-metrics">
+          <b>{loading && !summary ? '…' : summary?.new_count || 0}</b> waiting
+          <b>{loading && !summary ? '…' : summary?.done_count || 0}</b> completed
+          <b>{loading && !summary ? '…' : summary?.total || 0}</b> total
+        </span>
+        {error && <span className="workspace-meta">Counts unavailable · tap to open responses</span>}
+      </button>
+    );
+  });
 }
 
-function FormCatalogue({ view, onChoose, onCreate }) {
+function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
   const auth = useAuth();
   const { data, loading, error, reload } = useFormSummaries();
   const forms = data || [];
@@ -368,8 +418,10 @@ function FormCatalogue({ view, onChoose, onCreate }) {
               >
                 <span className="content-status">{formStatus(form)}</span>
                 <strong>{form.title}</strong>
-                <span>
-                  {form.new_count} awaiting response · {form.open_actions} outstanding actions
+                <span className="form-card-metrics">
+                  <b>{form.new_count}</b> waiting
+                  <b>{form.done_count}</b> completed
+                  <b>{form.open_actions}</b> actions
                 </span>
                 <span>
                   Responsible:{' '}
@@ -413,6 +465,7 @@ function FormCatalogue({ view, onChoose, onCreate }) {
           ) : (
             <CustomFormsInbox
               auth={auth}
+              initialKind={responseKind}
               definitions={forms}
               assignments={forms.flatMap((form) =>
                 form.people.map((person) => ({ ...person, form_id: form.id })),
@@ -456,6 +509,11 @@ export default function FormsManager() {
       />
     );
   return (
-    <FormCatalogue view={view} onChoose={choose} onCreate={() => setCreating(true)} />
+    <FormCatalogue
+      view={view}
+      responseKind={params.get('kind') || ''}
+      onChoose={choose}
+      onCreate={() => setCreating(true)}
+    />
   );
 }
