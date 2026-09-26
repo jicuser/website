@@ -788,11 +788,11 @@ export default function AdminPage() {
     ? params.get('section')
     : allowed[0]?.[0] || 'dashboard';
   const setActive = (key) => setParams({ section: key });
-  useEffect(() => setSectionBack(null), [active]);
 
   const chooseSection = (key) => {
     if (key === active || !allowed.some((item) => item[0] === key)) return;
     if (dirty && active !== 'tv' && !window.confirm('Discard unsaved changes?')) return;
+    setSectionBack(null);
     setActive(key);
   };
   const safeSignOut = async () => {
