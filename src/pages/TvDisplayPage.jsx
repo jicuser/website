@@ -164,6 +164,27 @@ function ScreenDisplay({ screenId }) {
           : automaticNotice)
       : null;
   const noticeVisible = Boolean(sequence || specialNotice);
+  const presetKey = sequence?.phase
+    ? sequence.phase
+    : specialNotice === 'jummah'
+      ? 'jummah'
+      : specialNotice
+        ? 'ramadan'
+        : null;
+  const presetScene = presetKey ? tv.settings.preset_scenes?.[presetKey] : null;
+  const presetContent = sequence ? (
+    <TvPrayerScene
+      sequence={sequence}
+      jummahNotice={tv.settings.jummah_notice}
+      settings={tv.settings}
+    />
+  ) : specialNotice ? (
+    <TvSpecialNotice
+      mode={specialNotice}
+      settings={tv.settings}
+      fasting={fastingTimes(now, prayers.todaysTimes, prayers.tomorrowsTimes)}
+    />
+  ) : null;
   const onImageError = useCallback(
     (image) =>
       setFailedImages((previous) => (previous.includes(image) ? previous : [...previous, image])),
@@ -268,6 +289,42 @@ function ScreenDisplay({ screenId }) {
         {connectionControl}
       </div>
     );
+
+  if (scene === 'normal' && noticeVisible && presetScene) {
+    const presetTv = {
+      ...tv,
+      settings: {
+        ...tv.settings,
+        scenes: [presetScene],
+        active_scene_id: presetScene.id,
+        scene_mode: 'normal',
+      },
+    };
+    return (
+      <div
+        ref={screen}
+        className={`jic-tv-shell ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''}`}
+        onDoubleClick={enterFullscreen}
+      >
+        <Helmet>
+          <title>JIC · {tv.label}</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <SceneCanvas
+          tv={presetTv}
+          screenId={screenId}
+          now={now}
+          prayers={prayers}
+          posters={posters}
+          slide={slide}
+          onImageError={onImageError}
+          livestream={livestream}
+          presetContent={presetContent}
+        />
+        {connectionControl}
+      </div>
+    );
+  }
 
   if (scene === 'normal' && !noticeVisible) {
     const standbyScene = tv.settings.standby_scene;
