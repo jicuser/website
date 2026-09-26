@@ -78,9 +78,9 @@ export default function SceneCanvas({
     tv.settings.scenes.find((s) => s.id === tv.settings.active_scene_id) || tv.settings.scenes[0];
   return (
     <main className="scene-player">
-      <div className="scene-canvas" aria-label={scene.name}>
+      <div className={`scene-canvas ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''}`} aria-label={scene.name}>
         {scene.layers
-          .filter((layer) => layer.type !== 'empty')
+          .filter((layer) => layer.type !== 'empty' && !layer.hidden)
           .map((layer, index) => (
             <div
               className={`scene-layer scene-source-${layer.type}`}
@@ -100,7 +100,7 @@ export default function SceneCanvas({
                   title="Saved video"
                 />
               ) : ['times', 'next'].includes(layer.type) ? (
-                <PrayerWidget prayers={prayers} now={now} kind={layer.type} />
+                <PrayerWidget prayers={prayers} now={now} kind={layer.type} layout={layer.layout} />
               ) : layer.type === 'clock' ? (
                 <time className="scene-clock" dateTime={now.toISOString()}>
                   {now.toLocaleTimeString('en-GB', {
@@ -110,6 +110,10 @@ export default function SceneCanvas({
                     hour12: true,
                   })}
                 </time>
+              ) : layer.type === 'brand' ? (
+                <div className="scene-brand-block">
+                  <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
+                </div>
               ) : layer.type === 'text' ? (
                 <p className="scene-text" dir="auto">
                   {layer.text}
@@ -128,9 +132,10 @@ export default function SceneCanvas({
                           const selected = layer.poster_ids
                             ? posters.filter((p) => layer.poster_ids.includes(p.id))
                             : posters;
-                          const index = layer.poster_ids
-                            ? Math.floor(now.getTime() / ((layer.rotation_seconds || 20) * 1000))
-                            : slide + (layer.type === 'poster-next' ? 1 : 0);
+                          const base = layer.poster_ids
+                            ? Math.floor(now.getTime() / ((layer.rotation_seconds || tv.settings.rotation_seconds || 20) * 1000))
+                            : slide;
+                          const index = base + (layer.poster_offset ?? (layer.type === 'poster-next' ? 1 : 0));
                           return selected[index % selected.length];
                         })()
                       : undefined
@@ -140,9 +145,11 @@ export default function SceneCanvas({
               )}
             </div>
           ))}
-        <div className="scene-brand">
-          <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
-        </div>
+        {!scene.layers.some((layer) => layer.type === 'brand' && !layer.hidden) && (
+          <div className="scene-brand">
+            <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
+          </div>
+        )}
       </div>
     </main>
   );
