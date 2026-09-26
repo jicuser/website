@@ -350,7 +350,8 @@ export default function PostersEditor({ registerBack }) {
                     </div>
                   </>
                 )}
-                <h4>Show on website</h4>
+                <h4>Poster / tile placement</h4>
+                <p>Choose where this poster card appears. A dedicated page and registration form are separate settings on the poster overview.</p>
                 {POSTER_DESTINATIONS.map((group) => (
                   <label className="admin-check" key={group}>
                     <input
@@ -369,7 +370,7 @@ export default function PostersEditor({ registerBack }) {
                   </label>
                 ))}
                 <label>
-                  Link when opened
+                  Poster click destination
                   <input
                     value={item.to}
                     onChange={(event) => update('to', event.target.value)}
