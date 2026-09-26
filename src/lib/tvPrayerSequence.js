@@ -56,7 +56,12 @@ export function tvPrayerSequence(now, times, jummah = [], settings = {}, screenI
     .sort((a, b) => b.start - a.start)[0];
   if (!current) return null;
   const elapsed = minute - current.start;
-  const delay = current.key === 'maghrib' ? 10 : 5;
+  const defaultDelays = { fajr: 14, dhuhr: 9, asr: 9, maghrib: 8, isha: 7, jummah: 9 };
+  const configuredDelay = Number(settings[`dhikr_delay_${current.key}`]);
+  const delay =
+    Number.isFinite(configuredDelay) && configuredDelay >= 0 && configuredDelay <= 20
+      ? configuredDelay
+      : defaultDelays[current.key] ?? 9;
   return {
     ...current,
     phase: elapsed < delay ? 'jamaah' : 'dhikr',
