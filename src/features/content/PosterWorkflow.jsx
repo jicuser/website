@@ -12,6 +12,7 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
   const { can } = useAuth();
   const { dirty } = useAdminSave();
   const [tab, setTab] = useState('overview');
+  const [pageBusy, setPageBusy] = useState(false);
   const read = useCallback(
     (signal) =>
       checked(
@@ -26,6 +27,30 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
   );
   const { data, loading, error, reload } = useAdminRecords(read);
   const page = data?.[0];
+  const setPageVisible = async (visible) => {
+    if (!page || pageBusy) return;
+    if (dirty) {
+      window.alert('Save or discard the current page/form changes before changing page visibility.');
+      return;
+    }
+    if (!visible && !window.confirm('Hide this dedicated page? Its linked form and responses are kept.'))
+      return;
+    setPageBusy(true);
+    try {
+      await checked(
+        supabase.rpc('save_site_page', {
+          p_page: {
+            ...page,
+            published: visible,
+            expected_updated_at: page.updated_at || null,
+          },
+        }),
+      );
+      await reload();
+    } finally {
+      setPageBusy(false);
+    }
+  };
   const choose = (next) => {
     if (
       tab === next ||
@@ -118,13 +143,24 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
 
             <section className="admin-panel">
               <strong>Dedicated page</strong>
-              <p>
-                {page
-                  ? `${page.published ? 'Visible' : 'Hidden'} · placed under ${page.placement || 'website'}`
-                  : 'Off · this poster has no dedicated page.'}
-              </p>
+              {page ? (
+                <>
+                  <label className="admin-check">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(page.published)}
+                      disabled={pageBusy}
+                      onChange={(event) => setPageVisible(event.target.checked)}
+                    />
+                    {page.published ? 'Page visible on website' : 'Page hidden'}
+                  </label>
+                  <p>Placed under: {page.placement || 'website'}</p>
+                </>
+              ) : (
+                <p>Off · this poster has no dedicated page.</p>
+              )}
               <button className="admin-button" onClick={() => choose('page')}>
-                {page ? 'Edit page' : 'Add dedicated page'}
+                {page ? 'Edit page & placement' : 'Add dedicated page'}
               </button>
               {page?.published && (
                 <Link className="admin-button" to={pageUrl(page)} target="_blank" rel="noreferrer">
@@ -137,7 +173,9 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
               <strong>Registration / form</strong>
               <p>
                 {page?.form_id
-                  ? 'Form linked. Responses and actions are managed in Forms.'
+                  ? page.registration === 'none'
+                    ? 'Form linked · public registration is off. Responses are kept.'
+                    : 'Form linked · public registration is on. Responses and actions are managed in Forms.'
                   : 'Off · no registration form linked.'}
               </p>
               {page?.form_id && can('forms') ? (
