@@ -71,16 +71,17 @@ for (const width of [320, 390, 1280]) {
     expect(geometry.every(card => card.below && card.width > 70)).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: testInfo.outputPath(`posters-${width}.png`) });
-    const selector = page.locator('.admin-toolbar .admin-mobile-section select');
     await expect(page.locator('.admin-mobile-section')).toHaveCount(1);
     if (width < 801) {
-      await expect(selector).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Back', exact: true })).toBeVisible();
+      await expect(page.locator('.admin-mobile-current')).toHaveText('Posters & content');
+      await expect(page.getByRole('button', { name: 'Overview', exact: true })).toBeVisible();
       await page.evaluate(() => scrollTo(0, 800));
-      const box = await selector.boundingBox();
+      const box = await page.locator('.admin-mobile-section').boundingBox();
       expect(box.y).toBeGreaterThanOrEqual(0);
       expect(box.y + box.height).toBeLessThan(900);
     } else {
-      await expect(selector).toBeHidden();
+      await expect(page.locator('.admin-mobile-section')).toBeHidden();
       await expect(page.getByRole('navigation', { name: 'Admin sections' })).toBeVisible();
     }
     await cards.first().click();
@@ -98,10 +99,14 @@ for (const width of [320, 390, 1280]) {
     await saveArea.getByRole('button', { name: 'Publish posters', exact: true }).click();
     await expect.poll(() => evidence.writes.length).toBe(1);
     await expect(page.locator('.admin-toolbar .admin-save-pending')).toHaveCount(0);
-    if (width < 801) await selector.selectOption('announcements');
-    else await page.getByRole('navigation', { name: 'Admin sections' })
-      .getByRole('button', { name: 'Announcements', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Announcements', exact: true })).toBeVisible();
+    if (width < 801) {
+      await page.getByRole('button', { name: 'Overview', exact: true }).click();
+      await page.getByRole('button', { name: 'Notices', exact: true }).click();
+    } else {
+      await page.getByRole('navigation', { name: 'Admin sections' })
+        .getByRole('button', { name: 'Notices', exact: true }).click();
+    }
+    await expect(page.getByRole('heading', { name: 'Notices', exact: true })).toBeVisible();
     expect(evidence.errors).toEqual([]);
   });
 }
