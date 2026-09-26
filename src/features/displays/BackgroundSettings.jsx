@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import NormalSettings from './NormalSettings';
-import TvDisplayLayoutEditor from './TvStandbyLayoutEditor';
+import TvDisplayLayoutEditor from './TvDisplayLayoutEditor';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { TV_PRESET_KEYS } from '../../../supabase/functions/_shared/tv.js';
 
