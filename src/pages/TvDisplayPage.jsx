@@ -13,7 +13,7 @@ import {
   fastingTimes,
 } from '@/lib/tvPrayerSequence';
 import { TV_SCREENS } from '@/lib/tvControl';
-import { tvScene, publicSettings } from '../../supabase/functions/_shared/tv.js';
+import { tvScene, publicSettings, tvDisplayScene } from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar, { NextPrayerSummary } from '@/components/shell/PrayerTimeBar';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
@@ -171,7 +171,7 @@ function ScreenDisplay({ screenId }) {
       : specialNotice
         ? 'ramadan'
         : null;
-  const presetScene = presetKey ? tv.settings.preset_scenes?.[presetKey] : null;
+  const presetScene = presetKey ? tvDisplayScene(tv.settings, presetKey) : null;
   const presetContent = sequence ? (
     <TvPrayerScene
       sequence={sequence}
@@ -327,7 +327,7 @@ function ScreenDisplay({ screenId }) {
   }
 
   if (scene === 'normal' && !noticeVisible) {
-    const standbyScene = tv.settings.standby_scene;
+    const standbyScene = tvDisplayScene(tv.settings, 'standby');
     const standbyTv = standbyScene
       ? {
           ...tv,
