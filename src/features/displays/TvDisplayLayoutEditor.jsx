@@ -13,6 +13,7 @@ import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLo
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import usePosters from '@/hooks/usePosters';
 import useSceneHistory from './useSceneHistory';
+import TvFinalPreview from './TvFinalPreview';
 
 const labels = {
   times: 'Prayer timetable',
@@ -244,7 +245,7 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
             aria-pressed={previewOnly}
             onClick={() => setPreviewOnly((value) => !value)}
           >
-            {previewOnly ? 'Edit layout' : 'Final preview'}
+            {previewOnly ? 'Close preview' : 'Preview TV'}
           </button>
         </div>
       </div>
@@ -422,6 +423,26 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
           </button>
         </>
       )}
+
+      <TvFinalPreview
+        open={previewOnly}
+        onClose={() => setPreviewOnly(false)}
+        orientation={orientation}
+        title={presetLabel}
+      >
+        <SceneCanvas
+          preview
+          tv={{ settings: previewSettings, paired: true, inputs: [] }}
+          screenId={screenId}
+          now={now}
+          prayers={prayers}
+          posters={posters}
+          slide={0}
+          onImageError={() => {}}
+          livestream={livestream}
+          presetContent={presetContent}
+        />
+      </TvFinalPreview>
     </section>
   );
 }
