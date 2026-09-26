@@ -106,10 +106,32 @@ export default function NormalSettings({ form, update, currentEvents, hall }) {
             Automatic prayer reminders
           </label>
           <p>
-            At Jama‘ah: silence your phone. Dhikr begins 5 minutes later, or 10 minutes after
-            Maghrib. Posters return 20 minutes after Jama‘ah. An active stream pauses all automatic
-            notices.
+            Set when the post-salah dhikr screen starts for each prayer. An active presentation
+            pauses automatic notices and returns to the correct normal state when it ends.
           </p>
+          <div className="admin-field-grid tv-prayer-delay-grid">
+            {[
+              ['fajr', 'Fajr', 14],
+              ['dhuhr', 'Dhuhr', 9],
+              ['asr', 'Asr', 9],
+              ['maghrib', 'Maghrib', 8],
+              ['isha', 'Isha', 7],
+            ].map(([key, label, fallback]) => (
+              <label key={key}>
+                {label} — dhikr after Jama‘ah
+                <select
+                  value={form[`dhikr_delay_${key}`] ?? fallback}
+                  onChange={(event) => update(`dhikr_delay_${key}`, Number(event.target.value))}
+                >
+                  {[5, 6, 7, 8, 9, 10, 12, 14, 15, 20].map((minutes) => (
+                    <option key={minutes} value={minutes}>
+                      {minutes} minutes
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
           <label className="admin-check">
             <input
               type="checkbox"
