@@ -1,14 +1,28 @@
 import React from 'react';
 import { TV_DHIKR } from '@/content/tvReminders';
-export default function TvPrayerScene({ sequence, jummahNotice }) {
+export default function TvPrayerScene({ sequence, jummahNotice, settings = {} }) {
+  if (sequence.phase === 'before')
+    return (
+      <section className="jic-tv-prayer-scene" aria-label="Upcoming congregation notice">
+        <p className="jic-tv-scene-label">
+          {sequence.name} · {sequence.time}
+        </p>
+        <h1>{settings.before_jamaah_message || 'Jama‘ah begins in 1 minute'}</h1>
+        <p>Please finish conversations and prepare for salah.</p>
+      </section>
+    );
   if (sequence.phase === 'jamaah')
     return (
       <section className="jic-tv-prayer-scene" aria-label="Congregation notice">
         <p className="jic-tv-scene-label">
           {sequence.name} · {sequence.time}
         </p>
-        <h1>{sequence.key === 'jummah' ? 'Jumu‘ah congregation' : 'It is Jama‘ah time'}</h1>
-        <p>Please switch off or silence your phone.</p>
+        <h1>
+          {sequence.key === 'jummah'
+            ? 'Jumu‘ah congregation'
+            : settings.jamaah_message || 'It is Jama‘ah time'}
+        </h1>
+        <p>{settings.jamaah_submessage || 'Please switch off or silence your phone.'}</p>
         <p>
           {sequence.key === 'jummah'
             ? jummahNotice
