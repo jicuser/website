@@ -281,17 +281,15 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
           <h4>Registration / form</h4>
           <p>
             This is separate from the page. A poster can have no form, a linked existing form, or a
-            new form created here.
+            new form created here. Turning public registration off keeps the linked form and its
+            responses.
           </p>
           <label>
             Registration
             <select
               value={draft.registration}
               onChange={(event) =>
-                patch({
-                  registration: event.target.value,
-                  ...(event.target.value === 'none' ? { form_id: null } : {}),
-                })
+                patch({ registration: event.target.value })
               }
             >
               {REGISTRATION_TYPES.map(([value, label]) => (
