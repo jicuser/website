@@ -1,29 +1,23 @@
 import React from 'react';
-import { BookOpen, FileText, UserPlus } from 'lucide-react';
+import { BookOpen, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const educationTiles = [
   {
     title: 'Madrassah',
-    description: 'Madrassah overview, enrolment, policies and parent information.',
+    description: 'Pupil classes, enrolment and parent information.',
     path: '/madrassah',
     icon: BookOpen,
   },
   {
     title: 'Adult Courses & Classes',
-    description: 'Adult learning, current courses and registration information.',
+    description: 'Adult learning and current courses.',
     path: '/education/courses',
     icon: BookOpen,
   },
   {
-    title: 'Student Portal',
-    description: 'Access student information and learning resources.',
-    path: '/madrassah/student-portal',
-    icon: FileText,
-  },
-  {
     title: 'Enrolment',
-    description: 'Choose Madrassah pupil enrolment or adult course registration.',
+    description: 'Choose pupil or adult registration.',
     path: '/education/enrolment',
     icon: UserPlus,
   },
@@ -39,13 +33,9 @@ export default function EducationPage() {
             <h1 className="mt-2 text-2xl font-semibold text-foreground md:text-4xl">
               Learn at Jamatia Islamic Centre
             </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-              Explore adult courses separately from Madrasah, or find pupil enrolment information and student
-              resources.
-            </p>
-          </div>
+           </div>
 
-          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
             {educationTiles.map(({ title, description, path, icon: Icon }) => (
               <Link
                 key={path}
