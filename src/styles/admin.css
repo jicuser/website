@@ -2071,3 +2071,45 @@ html.dark .admin-console .admin-field-error {
     padding-left: 38px;
   }
 }
+
+
+/* Mobile admin navigation: a single compact rail, never a wrapping wall of links. */
+@media (max-width: 800px) {
+  .admin-mobile-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    padding: 0 10px 8px;
+  }
+  .admin-mobile-back {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  .admin-mobile-nav-scroll {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .admin-mobile-nav-scroll button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: 168px;
+    min-height: 36px;
+    padding: 7px 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    line-height: 1;
+  }
+  .admin-mobile-nav-scroll button svg {
+    flex: 0 0 15px;
+    width: 15px;
+    height: 15px;
+  }
+}
