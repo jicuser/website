@@ -10,7 +10,7 @@ test('admin forms workspace exposes live forms, responses and schedule as distin
   assert.match(source, /onChoose\(\{ view: 'forms' \}\)/);
   assert.match(source, /<strong>Schedule<\/strong>/);
   assert.match(source, /<ScheduleManager \/>/);
-  assert.match(source, /const view = params\.get\('view'\) \|\| 'home'/);
+  assert.match(source, /const view = params\.get\('view'\) \|\| 'forms'/);
   assert.match(source, /Contact Us/);
 });
 
