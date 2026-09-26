@@ -18,6 +18,7 @@ import {
   Upload,
   Activity,
   X,
+  ArrowLeft,
   Sun,
   Moon,
   Monitor,
@@ -49,19 +50,19 @@ const SECTIONS = [
   ['dashboard', 'Overview', Activity, 'dashboard'],
   ['prayer', 'Timetable & Jummah', Clock3, 'prayer_times'],
   ['events', 'Events', CalendarDays, 'events'],
-  ['posters', 'Posters & announcements', FileText, 'content'],
-  ['announcements', 'Announcements', Megaphone, 'announcements'],
+  ['posters', 'Posters & content', FileText, 'content'],
+  ['announcements', 'Notices', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
-  ['tv', 'Hall streams', Monitor, 'tv'],
-  ['content', 'Website & pages', FileText, 'content'],
+  ['tv', 'TV & screens', Monitor, 'tv'],
+  ['content', 'Website', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
   ['forms', 'Forms', FileText, 'forms'],
   ['users', 'Staff & access', ShieldCheck, 'users'],
   ['audit', 'Audit log', Activity, 'audit'],
 ];
 const SECTION_GROUPS = [
-  ['Everyday', ['dashboard', 'tv', 'prayer', 'posters', 'events', 'announcements', 'livestream']],
-  ['Website & people', ['content', 'forms', 'team', 'users', 'audit']],
+  ['Manage', ['dashboard', 'content', 'posters', 'events', 'announcements', 'forms', 'prayer', 'tv', 'livestream']],
+  ['People & system', ['team', 'users', 'audit']],
 ];
 
 function Field({ title, children, className = '' }) {
@@ -117,7 +118,7 @@ async function uploadImage(file, folder = 'admin') {
 function DashboardSection({ onChoose }) {
   const { can } = useAuth();
   const tasks = [
-    ['tv', 'Hall streams', 'Choose a hall, show a class or return to posters.', Monitor, 'tv'],
+    ['tv', 'TV & screens', 'Normal displays, prayer sequence and presentations.', Monitor, 'tv'],
     [
       'prayer',
       'Prayer times',
@@ -125,15 +126,15 @@ function DashboardSection({ onChoose }) {
       Clock3,
       'prayer_times',
     ],
-    ['events', 'Events & posters', 'Add a poster, date and event details.', CalendarDays, 'events'],
+    ['events', 'Events', 'Upcoming events and dated programmes.', CalendarDays, 'events'],
     [
       'posters',
-      'Posters & announcements',
-      'Edit pictures and announcement text; choose where posters appear.',
+      'Posters & content',
+      'Posters, linked pages, registration and display placement.',
       FileText,
       'content',
     ],
-    ['announcements', 'Notices', 'Keep the community up to date.', Megaphone, 'announcements'],
+    ['announcements', 'Notices', 'Short community updates and alerts.', Megaphone, 'announcements'],
     ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
     [
       'forms',
@@ -782,7 +783,7 @@ export default function AdminPage() {
   const active = allowed.some((item) => item[0] === params.get('section'))
     ? params.get('section')
     : allowed[0]?.[0] || 'dashboard';
-  const setActive = (key) => setParams({ section: key }, { replace: true });
+  const setActive = (key) => setParams({ section: key });
 
   const chooseSection = (key) => {
     if (key === active || !allowed.some((item) => item[0] === key)) return;
@@ -860,25 +861,25 @@ export default function AdminPage() {
             {status}
           </p>
         )}
-        <label className="admin-mobile-section w-full">
-          Go to
-          <select value={active} onChange={(event) => chooseSection(event.target.value)}>
-            {SECTION_GROUPS.map(([group, keys]) => {
-              const sections = allowed.filter(([key]) => keys.includes(key));
-              return (
-                sections.length > 0 && (
-                  <optgroup key={group} label={group}>
-                    {sections.map(([key, name]) => (
-                      <option key={key} value={key}>
-                        {name}
-                      </option>
-                    ))}
-                  </optgroup>
-                )
-              );
-            })}
-          </select>
-        </label>
+        <nav className="admin-mobile-section" aria-label="Admin navigation">
+          {active !== 'dashboard' && allowed.some(([key]) => key === 'dashboard') && (
+            <button className="admin-mobile-back" onClick={() => chooseSection('dashboard')}>
+              <ArrowLeft size={17} /> Overview
+            </button>
+          )}
+          <div className="admin-mobile-nav-scroll">
+            {allowed.map(([key, name, Icon]) => (
+              <button
+                key={key}
+                onClick={() => chooseSection(key)}
+                aria-current={active === key ? 'page' : undefined}
+              >
+                <Icon size={16} />
+                {name}
+              </button>
+            ))}
+          </div>
+        </nav>
       </header>
       <div className="admin-console-layout">
         <aside className="admin-navigation max-[800px]:hidden">
