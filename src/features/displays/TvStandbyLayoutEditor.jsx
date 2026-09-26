@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { DEFAULT_STANDBY_SCENE } from '../../../supabase/functions/_shared/tv.js';
+import { DEFAULT_STANDBY_SCENE, DEFAULT_TV_PRESET_SCENES } from '../../../supabase/functions/_shared/tv.js';
 import { fitRect, layerStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
 import { snapRect } from '@/lib/sceneLayouts';
 import SceneCanvas from './SceneCanvas';
+import TvPrayerScene from '@/components/tv/TvPrayerScene';
+import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import usePosters from '@/hooks/usePosters';
@@ -14,19 +16,25 @@ const labels = {
   poster: 'Poster',
   'poster-next': 'Poster',
   brand: 'JIC logo',
+  state: 'Preset content',
   text: 'Notice',
 };
 
-const cloneDefault = () => ({
-  ...DEFAULT_STANDBY_SCENE,
-  layers: DEFAULT_STANDBY_SCENE.layers.map((layer) => ({ ...layer })),
+const cloneScene = (scene) => ({
+  ...scene,
+  layers: scene.layers.map((layer) => ({ ...layer })),
 });
 
-export default function TvStandbyLayoutEditor({ screenId, settings, onChange }) {
+export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'standby', onChange }) {
   const prayers = usePrayerTimes();
   const programmes = usePosters();
   const { events, livestream } = useHomeLiveContent({ eventLimit: 50 });
-  const scene = settings.standby_scene || cloneDefault();
+  const fallback =
+    preset === 'standby' ? DEFAULT_STANDBY_SCENE : DEFAULT_TV_PRESET_SCENES[preset];
+  const scene =
+    preset === 'standby'
+      ? settings.standby_scene || cloneScene(DEFAULT_STANDBY_SCENE)
+      : settings.preset_scenes?.[preset] || cloneScene(fallback);
   const [selected, setSelected] = useState(scene.layers[0]?.id || '');
   const [now, setNow] = useState(() => new Date());
   const canvas = useRef(null);
@@ -51,7 +59,13 @@ export default function TvStandbyLayoutEditor({ screenId, settings, onChange }) 
   ];
 
   function setScene(next) {
-    onChange('standby_scene', { ...next, overlap: true });
+    const prepared = { ...next, overlap: true };
+    if (preset === 'standby') onChange('standby_scene', prepared);
+    else
+      onChange('preset_scenes', {
+        ...(settings.preset_scenes || {}),
+        [preset]: prepared,
+      });
   }
 
   function updateLayer(next) {
@@ -120,24 +134,38 @@ export default function TvStandbyLayoutEditor({ screenId, settings, onChange }) 
     scene_mode: 'normal',
     muted: true,
   };
+  const sampleTime =
+    prayers.todaysTimes?.jamaah_isha || prayers.todaysTimes?.isha || '8:45 PM';
+  const sampleSequence = ['before', 'jamaah', 'dhikr'].includes(preset)
+    ? {
+        name: 'Isha',
+        key: 'isha',
+        time: sampleTime,
+        phase: preset,
+        secondsToJamaah: preset === 'before' ? Math.max(1, (settings.jamaah_lead_minutes || 1) * 60) : 0,
+        dhikrSeconds: preset === 'dhikr' ? 60 : 0,
+      }
+    : null;
+  const presetContent = sampleSequence ? (
+    <TvPrayerScene
+      sequence={sampleSequence}
+      jummahNotice={settings.jummah_notice}
+      settings={settings}
+    />
+  ) : preset === 'jummah' ? (
+    <TvSpecialNotice mode="jummah" settings={settings} fasting={null} />
+  ) : preset === 'ramadan' ? (
+    <TvSpecialNotice mode="taraweeh" settings={settings} fasting={null} />
+  ) : null;
+  const presetLabel = settings.preset_names?.[preset] || (preset === 'standby' ? 'Standby' : preset);
 
   return (
     <section className="tv-layout-editor" aria-label="Standby layout editor">
       <div className="admin-heading">
         <div>
-          <h3>Arrange standby screen</h3>
+          <h3>Arrange {presetLabel}</h3>
           <p>Drag blocks on the preview. Use the large corner handle to resize them.</p>
         </div>
-        <label className="tv-orientation-control">
-          Screen shape
-          <select
-            value={settings.display_orientation || 'landscape'}
-            onChange={(event) => onChange('display_orientation', event.target.value)}
-          >
-            <option value="landscape">Landscape · 16:9</option>
-            <option value="portrait">Portrait · 9:16</option>
-          </select>
-        </label>
       </div>
 
       <div className="tv-layout-blocks" aria-label="Display blocks">
@@ -170,6 +198,7 @@ export default function TvStandbyLayoutEditor({ screenId, settings, onChange }) 
             slide={0}
             onImageError={() => {}}
             livestream={livestream}
+            presetContent={presetContent}
           />
         </div>
         {scene.layers.map((item) => (
@@ -245,9 +274,9 @@ export default function TvStandbyLayoutEditor({ screenId, settings, onChange }) 
         type="button"
         className="admin-button"
         onClick={() => {
-          if (!window.confirm('Reset this standby layout to the standard JIC arrangement?')) return;
-          onChange('standby_scene', cloneDefault());
-          setSelected('standby-times');
+          if (!window.confirm(`Reset the ${presetLabel} layout to the standard JIC arrangement?`)) return;
+          setScene(cloneScene(fallback));
+          setSelected(fallback.layers[0]?.id || '');
         }}
       >
         Reset layout
