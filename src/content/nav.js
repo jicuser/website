@@ -11,19 +11,19 @@ export const MASJID_EXTENSION_TABS = [
 ];
 
 export const MADRASSAH_TABS = [
-  { name: 'Overview', path: '/madrassah' },
-  { name: 'Enrolment', path: '/madrassah/enrolment' },
-  { name: 'Adult Courses & Classes', path: '/education/courses' },
+  { name: 'Madrassah Home', path: '/madrassah' },
+  { name: 'Pupil Enrolment', path: '/madrassah/enrolment' },
+  { name: 'Classes', path: '/madrassah/classes-courses' },
   { name: 'Student Portal', path: '/madrassah/student-portal' },
-  { name: 'Contact', path: '/madrassah/contact' },
+  { name: 'Contact Madrassah', path: '/madrassah/contact' },
   { name: 'Policies', path: '/madrassah/policies' },
 ];
 
 export const EDUCATION_TABS = [
-  { name: 'Overview', path: '/education' },
-  { name: 'Madrassah', path: '/madrassah' },
+  { name: 'Education Home', path: '/education' },
   { name: 'Adult Courses & Classes', path: '/education/courses' },
-  { name: 'Student Portal', path: '/madrassah/student-portal' },
+  { name: 'Choose Enrolment', path: '/education/enrolment' },
+  { name: 'Madrassah', path: '/madrassah' },
 ];
 
 export const WORSHIP_TABS = [
