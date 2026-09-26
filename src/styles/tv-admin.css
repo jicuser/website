@@ -301,3 +301,21 @@
     padding-inline: 12px;
   }
 }
+
+
+.tv-scene-tabs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tv-scene-tabs-head > span {
+  color: var(--jic-muted);
+  font-size: .82rem;
+  font-weight: 700;
+}
+.tv-scene-rename {
+  display: grid;
+  gap: 5px;
+  max-width: 360px;
+}
