@@ -896,3 +896,216 @@ html[data-theme] .jic-tv-display.is-portrait {
   width: 100%;
   height: 100%;
 }
+
+
+/* Alternative Salah timetable layouts, including prayer-board style. */
+.scene-prayer-table {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto repeat(6, minmax(0, 1fr)) auto;
+  background: #090c10;
+  color: #f6f7f8;
+  container-type: inline-size;
+}
+.scene-prayer-table-head,
+.scene-prayer-table-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr) minmax(0, .9fr);
+  align-items: center;
+  gap: 2%;
+  padding-inline: 4%;
+}
+.scene-prayer-table-head {
+  min-height: 9%;
+  color: #aeb8c5;
+  font-size: 2.4cqw;
+  border-bottom: 1px solid #3d4f63;
+}
+.scene-prayer-table-row {
+  border-bottom: 1px solid #263341;
+  font-size: 2.7cqw;
+}
+.scene-prayer-table-row > strong {
+  text-align: right;
+  font-size: 3.2cqw;
+  font-variant-numeric: tabular-nums;
+}
+.scene-prayer-table-row.is-current {
+  color: #a8ec74;
+  background: #91c86c16;
+}
+.scene-prayer-name {
+  display: flex;
+  align-items: baseline;
+  gap: .5em;
+  min-width: 0;
+}
+.scene-prayer-name small {
+  color: #b9c2cd;
+  font-size: .78em;
+  font-family: 'Noto Naskh Arabic', 'Geeza Pro', 'Segoe UI', Arial, sans-serif;
+}
+.scene-prayer-table.is-compact .scene-prayer-table-head,
+.scene-prayer-table.is-compact .scene-prayer-table-row {
+  padding-inline: 2.5%;
+}
+.scene-prayer-table.is-compact .scene-prayer-table-head { font-size: 2.1cqw; }
+.scene-prayer-table.is-compact .scene-prayer-table-row { font-size: 2.3cqw; }
+.scene-prayer-table.is-compact .scene-prayer-table-row > strong { font-size: 2.7cqw; }
+
+.scene-salah-board {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(28%, .8fr) minmax(0, 1.5fr);
+  background: #090c10;
+  color: #f6f7f8;
+  overflow: hidden;
+}
+.scene-salah-board > .scene-prayer-table {
+  min-width: 0;
+  border-left: 1px solid #3d4f63;
+}
+.scene-salah-clock {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 3%;
+  padding: 5%;
+  background:
+    radial-gradient(circle at 50% 30%, #18222c 0, #0b1016 58%, #06080b 100%);
+}
+.scene-salah-clock-face {
+  position: relative;
+  width: min(82%, 36cqw);
+  aspect-ratio: 1;
+  border: .7cqw solid #8c99a8;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 .5cqw #101820;
+}
+.scene-salah-clock-face > i {
+  --tick-angle: calc(var(--tick) * 30deg);
+  position: absolute;
+  left: 49%;
+  top: 4%;
+  width: 2%;
+  height: 6%;
+  border-radius: 999px;
+  background: #d5dbe2;
+  transform-origin: 50% 766%;
+  transform: rotate(var(--tick-angle));
+}
+.scene-clock-hand {
+  --angle: 0deg;
+  position: absolute;
+  left: calc(50% - .55cqw);
+  bottom: 50%;
+  width: 1.1cqw;
+  border-radius: 999px;
+  transform-origin: 50% 100%;
+  transform: rotate(var(--angle));
+}
+.scene-clock-hand.is-hour {
+  height: 27%;
+  background: #eef1f4;
+}
+.scene-clock-hand.is-minute {
+  height: 38%;
+  background: #df5a57;
+}
+.scene-clock-pin {
+  position: absolute;
+  left: 46.5%;
+  top: 46.5%;
+  width: 7%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #d39f27;
+}
+.scene-salah-clock > strong {
+  font-size: 5cqw;
+  font-variant-numeric: tabular-nums;
+}
+.scene-salah-clock > span {
+  color: #a8ec74;
+  font-size: 2.3cqw;
+  font-weight: 700;
+}
+
+.scene-canvas.is-portrait .scene-salah-board {
+  grid-template-columns: 1fr;
+  grid-template-rows: 30% minmax(0, 1fr);
+}
+.scene-canvas.is-portrait .scene-salah-clock {
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  justify-items: start;
+  column-gap: 6%;
+  padding: 4%;
+}
+.scene-canvas.is-portrait .scene-salah-clock-face {
+  grid-row: 1 / span 2;
+  width: min(24cqw, 82%);
+}
+.scene-canvas.is-portrait .scene-salah-clock > strong { font-size: 7cqw; }
+.scene-canvas.is-portrait .scene-salah-clock > span { font-size: 3.5cqw; }
+.scene-canvas.is-portrait .scene-prayer-table-head { font-size: 3.1cqw; }
+.scene-canvas.is-portrait .scene-prayer-table-row { font-size: 3.2cqw; }
+.scene-canvas.is-portrait .scene-prayer-table-row > strong { font-size: 3.7cqw; }
+.scene-canvas.is-portrait .scene-timetable.is-vertical .scene-timetable-prayers > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 4%;
+  justify-items: start;
+  padding-inline: 5%;
+  font-size: 4cqw;
+}
+.scene-canvas.is-portrait .scene-timetable.is-vertical .scene-timetable-prayers > div > strong {
+  justify-self: end;
+  font-size: 4.8cqw;
+}
+.scene-canvas.is-portrait .scene-timetable.is-vertical .scene-timetable-prayers > div > small {
+  justify-self: end;
+  font-size: 3cqw;
+}
+
+/* Keep the visual editor compact: choose a block, then only show controls for that block. */
+.tv-layout-heading {
+  align-items: start;
+}
+.tv-quick-layouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.tv-layout-selected-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.tv-prayer-style {
+  display: grid;
+  gap: 5px;
+}
+.tv-position-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.tv-reset-layout {
+  justify-self: start;
+}
+@media (max-width: 600px) {
+  .tv-quick-layouts {
+    justify-content: stretch;
+  }
+  .tv-quick-layouts .admin-button {
+    flex: 1 1 120px;
+  }
+  .tv-position-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
