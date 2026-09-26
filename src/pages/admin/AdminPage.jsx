@@ -172,8 +172,8 @@ function DashboardSection({ onChoose }) {
     </div>
   );
 }
-function TvSection() {
-  return <StreamSetup />;
+function TvSection({ registerBack }) {
+  return <StreamSetup registerBack={registerBack} />;
 }
 
 function EventsSection() {
@@ -780,10 +780,15 @@ export default function AdminPage() {
   const allowed = useMemo(() => SECTIONS.filter(([, , , permission]) => can(permission)), [can]);
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
+  const [sectionBack, setSectionBack] = useState(null);
+  const registerBack = useCallback((handler) => {
+    setSectionBack(() => (typeof handler === 'function' ? handler : null));
+  }, []);
   const active = allowed.some((item) => item[0] === params.get('section'))
     ? params.get('section')
     : allowed[0]?.[0] || 'dashboard';
   const setActive = (key) => setParams({ section: key });
+  useEffect(() => setSectionBack(null), [active]);
 
   const chooseSection = (key) => {
     if (key === active || !allowed.some((item) => item[0] === key)) return;
@@ -797,16 +802,16 @@ export default function AdminPage() {
   };
 
   const section = {
-    tv: <TvSection />,
+    tv: <TvSection registerBack={registerBack} />,
     dashboard: <DashboardSection onChoose={chooseSection} />,
     prayer: <PrayerEditor />,
     events: <EventsSection />,
-    posters: <PostersEditor key={user?.id} />,
+    posters: <PostersEditor key={user?.id} registerBack={registerBack} />,
     announcements: <AnnouncementsSection />,
     livestream: <LivestreamSection />,
     content: <ContentPages key={user?.id} initialPath={params.get('page') || '/'} />,
     team: <TeamEditor uploadImage={uploadImage} />,
-    forms: <FormsManager key={user?.id} />,
+    forms: <FormsManager key={user?.id} registerBack={registerBack} />,
     users: <StaffAccess />,
     audit: <AuditSection />,
   }[active];
@@ -863,7 +868,10 @@ export default function AdminPage() {
         )}
         {active !== 'dashboard' && (
           <nav className="admin-mobile-section" aria-label="Current admin section">
-            <button className="admin-mobile-back" onClick={() => window.history.back()}>
+            <button
+              className="admin-mobile-back"
+              onClick={() => (sectionBack ? sectionBack() : chooseSection('dashboard'))}
+            >
               <ArrowLeft size={17} /> Back
             </button>
             <strong className="admin-mobile-current">
