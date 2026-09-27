@@ -24,6 +24,7 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
   const [selected, setSelected] = useState([]);
+  const [compact, setCompact] = useState(true);
   const [exportStatus, setExportStatus] = useState('');
   const exportController = useRef(null);
   const patch = (value) => {
@@ -133,22 +134,59 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
     }
   }
   return (
-    <section>
-      <div className="workspace-header">
-        <h2>Responses</h2>
-        <button disabled={loading} onClick={() => setRevision((value) => value + 1)}>
-          Refresh responses
-        </button>
+    <section className={`custom-inbox ${compact ? 'is-compact' : ''}`}>
+      <div className="workspace-header custom-inbox-header">
+        <div>
+          <h2>Inbox</h2>
+          <span className="workspace-meta">
+            {result.new_count} waiting · {result.done_count} completed
+          </span>
+        </div>
+        <div className="workspace-actions">
+          <button type="button" onClick={() => setCompact((value) => !value)}>
+            {compact ? 'Roomy view' : 'Compact view'}
+          </button>
+          <button disabled={loading} onClick={() => setRevision((value) => value + 1)}>
+            Refresh
+          </button>
+        </div>
       </div>
-      <div className="custom-forms-toolbar">
-        <Field label="Search all answers">
+
+      <div className="custom-inbox-quick">
+        <div className="custom-inbox-status-tabs" aria-label="Inbox status">
+          <button
+            type="button"
+            aria-pressed={filters.status === 'new'}
+            onClick={() => patch({ status: 'new' })}
+          >
+            Waiting <b>{result.new_count}</b>
+          </button>
+          <button
+            type="button"
+            aria-pressed={filters.status === 'done'}
+            onClick={() => patch({ status: 'done' })}
+          >
+            Completed <b>{result.done_count}</b>
+          </button>
+          <button
+            type="button"
+            aria-pressed={filters.status === ''}
+            onClick={() => patch({ status: '' })}
+          >
+            All <b>{result.total}</b>
+          </button>
+        </div>
+
+        <Field label="Search">
           <input
             type="search"
             value={search}
             maxLength={200}
+            placeholder="Name, email or answer"
             onChange={(event) => setSearch(event.target.value)}
           />
         </Field>
+
         <Field label="Form">
           <select
             disabled={Boolean(formId)}
@@ -173,73 +211,56 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
             ))}
           </select>
         </Field>
-        <Field label="Status">
-          <select
-            value={filters.status}
-            onChange={(event) => patch({ status: event.target.value })}
-          >
-            <option value="new">Outstanding</option>
-            <option value="done">Completed</option>
-            <option value="">All statuses</option>
-          </select>
-        </Field>
-        <Field label="View">
-          <select
-            value={filters.mine ? 'mine' : 'all'}
-            onChange={(event) => patch({ mine: event.target.value === 'mine' })}
-          >
-            <option value="all">All my permitted responses</option>
-            <option value="mine">Responses I submitted</option>
-          </select>
-        </Field>
       </div>
-      <div className="custom-forms-toolbar">
-        <Field label="From date">
-          <input
-            type="date"
-            value={filters.from}
-            onChange={(event) => patch({ from: event.target.value })}
-          />
-        </Field>
-        <Field label="To date">
-          <input
-            type="date"
-            value={filters.to}
-            onChange={(event) => patch({ to: event.target.value })}
-          />
-        </Field>
-        <Field label="Sort">
-          <select
-            value={filters.oldest ? 'oldest' : 'newest'}
-            onChange={(event) => patch({ oldest: event.target.value === 'oldest' })}
-          >
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-          </select>
-        </Field>
-      </div>
-      <div className="custom-forms-counts">
-        <span>
-          <strong>{result.total}</strong> matching responses
-        </span>
-        <span>
-          <strong>{result.new_count}</strong> outstanding
-        </span>
-        <span>
-          <strong>{result.done_count}</strong> completed
-        </span>
-      </div>
-      <div className="workspace-actions">
-        <button disabled={loading || Boolean(exportStatus) || !result.total} onClick={exportCsv}>
-          Download all matching responses as CSV
-        </button>
-        <button disabled={loading || Boolean(exportStatus) || !selected.length} onClick={exportZip}>
-          Download selected attachments as ZIP
-        </button>
-        {exportStatus && exportController.current && (
-          <button onClick={() => exportController.current?.abort()}>Cancel export</button>
-        )}
-      </div>
+
+      <details className="custom-inbox-tools">
+        <summary>Filters & downloads</summary>
+        <div className="custom-forms-toolbar">
+          <Field label="View">
+            <select
+              value={filters.mine ? 'mine' : 'all'}
+              onChange={(event) => patch({ mine: event.target.value === 'mine' })}
+            >
+              <option value="all">All permitted responses</option>
+              <option value="mine">Responses I submitted</option>
+            </select>
+          </Field>
+          <Field label="From date">
+            <input
+              type="date"
+              value={filters.from}
+              onChange={(event) => patch({ from: event.target.value })}
+            />
+          </Field>
+          <Field label="To date">
+            <input
+              type="date"
+              value={filters.to}
+              onChange={(event) => patch({ to: event.target.value })}
+            />
+          </Field>
+          <Field label="Sort">
+            <select
+              value={filters.oldest ? 'oldest' : 'newest'}
+              onChange={(event) => patch({ oldest: event.target.value === 'oldest' })}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </Field>
+        </div>
+        <div className="workspace-actions">
+          <button disabled={loading || Boolean(exportStatus) || !result.total} onClick={exportCsv}>
+            Download CSV
+          </button>
+          <button disabled={loading || Boolean(exportStatus) || !selected.length} onClick={exportZip}>
+            Download selected attachments
+          </button>
+          {exportStatus && exportController.current && (
+            <button onClick={() => exportController.current?.abort()}>Cancel export</button>
+          )}
+        </div>
+      </details>
       {exportStatus && <p role="status">{exportStatus}</p>}
       {error && <p role="alert">{error}</p>}
       {loading && !result.rows.length ? (
@@ -296,10 +317,8 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
           Next
         </button>
       </div>
-      <p className="workspace-meta">
-        Counts use your form, date, search and ownership filters. CSV includes every matching
-        status-filtered response, up to 25,000 per export. ZIP accepts selected responses from one
-        form, up to 25 MB.
+      <p className="workspace-meta custom-inbox-footnote">
+        Downloads use the filters above. Attachment download works with selected responses from one form.
       </p>
     </section>
   );
@@ -410,17 +429,8 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
   )?.[1];
   return (
     <article className="workspace-card custom-response">
-      {canWork && row.kind === 'custom' && (
-        <label className="workspace-meta">
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={(event) => onSelect(event.target.checked)}
-          />{' '}
-          Select for attachment download
-        </label>
-      )}
       <details onToggle={(event) => setOpen(event.currentTarget.open)}>
+
         <summary>
           {formTitle(row)} · {row.payload?.name || row.payload?.attendee_name || 'Response'}
           <span className="workspace-meta">
@@ -428,6 +438,16 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
             · {dateLabel(row.created_at)} · {row.status === 'done' ? 'Completed' : 'Outstanding'}
           </span>
         </summary>
+        {canWork && row.kind === 'custom' && (
+          <label className="workspace-meta custom-response-select">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={(event) => onSelect(event.target.checked)}
+            />{' '}
+            Select for attachment download
+          </label>
+        )}
         <dl>
           {Object.entries(row.payload || {})
             .filter(([key, value]) => value !== '' && !uploadFields.has(key))
