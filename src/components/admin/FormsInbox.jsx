@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 const names = { contact: 'Contact', madrassah: 'Madrassah', itikaaf: 'I’tikaf' };
 
-export default function FormsInbox() {
+export default function FormsInbox({ kind = null, title = 'Forms inbox', description = 'Submissions you have permission to manage.' }) {
   const [status, setStatus] = useState('new');
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);
@@ -18,11 +18,14 @@ export default function FormsInbox() {
     setLoading(true);
     setError('');
     // RLS returns only forms allowed by the signed-in staff permissions.
-    supabase
-      .from('form_submissions')
-      .select('id,kind,payload,status,created_at')
-      .eq('status', status)
-      .order('created_at', { ascending: false })
+    (() => {
+      let query = supabase
+        .from('form_submissions')
+        .select('id,kind,payload,status,created_at')
+        .eq('status', status);
+      if (kind) query = query.eq('kind', kind);
+      return query.order('created_at', { ascending: false });
+    })()
       .range(page * 25, page * 25 + 24)
       .then(({ data, error: loadError }) => {
         if (!active) return;
@@ -41,7 +44,7 @@ export default function FormsInbox() {
     return () => {
       active = false;
     };
-  }, [status, page, refresh]);
+  }, [status, page, refresh, kind]);
 
   async function setComplete(row) {
     setBusy(row.id);
@@ -66,8 +69,8 @@ export default function FormsInbox() {
     <div className="space-y-4">
       <div className="admin-heading">
         <div>
-          <h2>Forms inbox</h2>
-          <p>Messages and registrations you have permission to manage.</p>
+          <h2>{title}</h2>
+          <p>{description}</p>
         </div>
         <button
           className="admin-button"
@@ -95,9 +98,9 @@ export default function FormsInbox() {
       </label>
       {error && <p role="alert">{error}</p>}
       {loading ? (
-        <p role="status">Loading forms…</p>
+        <p role="status">Loading…</p>
       ) : rows.length === 0 ? (
-        <p>No forms here yet.</p>
+        <p>Nothing here yet.</p>
       ) : (
         rows.map((row) => (
           <details className="rounded-xl border bg-white p-4" key={row.id}>
