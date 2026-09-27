@@ -6,6 +6,8 @@ import {
   validateSettings,
   isTvStaff,
   tvDisplayScene,
+  tvScheduledScene,
+  publicSettings,
 } from '../supabase/functions/_shared/tv.js';
 const teaching = {
   scene_mode: 'teaching',
@@ -116,6 +118,64 @@ test('TV preset artwork and per-box poster choices survive validation safely', (
     (layer) => layer.type === 'state',
   ).image_url = 'http://example.org/dhikr-board.png';
   assert.throws(() => validateSettings(unsafe), /HTTPS/);
+});
+
+test('scheduled TV scenes follow London day and time rules', () => {
+  const input = structuredClone(DEFAULT_TV_SETTINGS);
+  const landscape = structuredClone(input.display_layouts.landscape.standby);
+  landscape.id = 'scheduled-weeknight-landscape';
+  const portrait = structuredClone(input.display_layouts.portrait.standby);
+  portrait.id = 'scheduled-weeknight-portrait';
+  input.scheduled_scenes = [
+    {
+      id: 'weeknight',
+      name: 'Evening notices',
+      enabled: true,
+      days: [1, 3, 5],
+      all_day: false,
+      start_time: '18:00',
+      end_time: '20:00',
+      layouts: { landscape, portrait },
+    },
+  ];
+  const saved = validateSettings(input);
+  assert.equal(
+    tvScheduledScene(saved, new Date('2026-09-28T18:30:00+01:00'), 'landscape')?.name,
+    'Evening notices',
+  );
+  assert.equal(tvScheduledScene(saved, new Date('2026-09-29T18:30:00+01:00')), null);
+  assert.equal(tvScheduledScene(saved, new Date('2026-09-28T20:00:00+01:00')), null);
+});
+
+test('overnight TV rules carry into the following London day and unpaired displays hide them', () => {
+  const input = structuredClone(DEFAULT_TV_SETTINGS);
+  const landscape = structuredClone(input.display_layouts.landscape.standby);
+  landscape.id = 'scheduled-night-landscape';
+  const portrait = structuredClone(input.display_layouts.portrait.standby);
+  portrait.id = 'scheduled-night-portrait';
+  input.scheduled_scenes = [
+    {
+      id: 'night',
+      name: 'Night scene',
+      enabled: true,
+      days: [5],
+      all_day: false,
+      start_time: '22:00',
+      end_time: '01:00',
+      layouts: { landscape, portrait },
+    },
+  ];
+  const saved = validateSettings(input);
+  assert.equal(
+    tvScheduledScene(saved, new Date('2026-10-02T22:30:00+01:00'))?.name,
+    'Night scene',
+  );
+  assert.equal(
+    tvScheduledScene(saved, new Date('2026-10-03T00:30:00+01:00'))?.name,
+    'Night scene',
+  );
+  assert.equal(tvScheduledScene(saved, new Date('2026-10-03T01:00:00+01:00')), null);
+  assert.deepEqual(publicSettings(saved, false).scheduled_scenes, []);
 });
 
 test('post-salah delays are persisted and can be configured per prayer', () => {
