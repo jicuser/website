@@ -330,7 +330,6 @@ function EntryTiles({ auth, loading, onChoose, onCreate }) {
 
 function LegacyFormCards({ auth, onChoose, counts, loading, error }) {
   const legacy = [
-    ['contact', 'Contact Us', 'Website contact enquiries.', 'forms_contact'],
     ['madrassah', 'Madrassah enquiry', 'Existing Madrassah enquiries.', 'forms_madrassah'],
     ['itikaaf', 'I’tikaf registration', 'Existing I’tikaf registrations.', 'forms_itikaaf'],
   ].filter(([, , , permission]) => auth.isOwner || auth.can(permission));
@@ -362,7 +361,6 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
   const { data, loading, error, reload } = useFormSummaries();
   const forms = data || [];
   const legacyKinds = [
-    ['contact', 'forms_contact'],
     ['madrassah', 'forms_madrassah'],
     ['itikaaf', 'forms_itikaaf'],
   ]
