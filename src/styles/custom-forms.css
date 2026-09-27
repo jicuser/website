@@ -125,3 +125,123 @@
     text-align: center;
   }
 }
+
+
+/* Forms admin: keep daily work simple; advanced controls stay available on demand. */
+.custom-form-routing {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--jic-surface) 96%, var(--jic-gold) 2%);
+}
+.custom-form-routing h3,
+.custom-form-routing p {
+  margin: 0;
+}
+.custom-form-members-primary {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+}
+.custom-form-advanced {
+  padding: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+}
+.custom-form-advanced > summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.custom-inbox {
+  display: grid;
+  gap: 12px;
+}
+.custom-inbox-header {
+  margin-bottom: 0;
+}
+.custom-inbox-header > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+.custom-inbox-header .workspace-actions {
+  margin: 0;
+}
+.custom-inbox-quick {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(180px, .9fr) minmax(180px, .9fr);
+  gap: 10px;
+  align-items: end;
+}
+.custom-inbox-status-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.custom-inbox-status-tabs button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  font: inherit;
+}
+.custom-inbox-status-tabs button[aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 -2px var(--jic-gold);
+}
+.custom-inbox-status-tabs b {
+  display: block;
+  font-size: 15px;
+}
+.custom-inbox-tools {
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.custom-inbox-tools > summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.custom-inbox-tools .workspace-actions {
+  margin-bottom: 0;
+}
+.custom-inbox .custom-response {
+  margin-bottom: 8px;
+}
+.custom-inbox.is-compact .custom-response {
+  padding-block: 10px;
+}
+.custom-inbox.is-compact .custom-response summary {
+  line-height: 1.35;
+}
+.custom-inbox.is-compact .custom-response summary .workspace-meta {
+  display: inline;
+}
+.custom-response-select {
+  display: block;
+  margin-top: 12px;
+}
+.custom-inbox-footnote {
+  margin-top: 0;
+}
+
+@media (max-width: 820px) {
+  .custom-inbox-quick {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .custom-inbox-status-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .custom-inbox-status-tabs button {
+    padding-inline: 6px;
+    font-size: .88rem;
+  }
+}
