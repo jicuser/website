@@ -100,6 +100,7 @@ export default function BackgroundSettings({
         settings={form}
         preset={preset}
         onChange={update}
+        allowBlocks={preset === 'standby'}
       />
 
       <NormalSettings
