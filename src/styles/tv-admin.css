@@ -1,5 +1,11 @@
 /* Admin-only TV workspace styles. Public display rendering stays in tv.css. */
 
+.admin-tv-preview.is-portrait {
+  aspect-ratio: 9 / 16;
+  width: min(100%, 430px);
+  margin-inline: auto;
+}
+
 .tv-editor-context {
   display: flex;
   flex-wrap: wrap;
