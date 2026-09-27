@@ -16,6 +16,7 @@ export default function StaffAccess() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [access, setAccess] = useState(emptyAccess);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [pending, setPending] = useState({});
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState('');
@@ -97,6 +98,7 @@ export default function StaffAccess() {
       setEmail('');
       setName('');
       setAccess(emptyAccess());
+      setInviteOpen(false);
       setNotice({
         text: 'Invitation sent. The recipient can set their password using the email link.',
       });
@@ -105,8 +107,8 @@ export default function StaffAccess() {
   };
   return (
     <div className="admin-staff-access">
-      <h2>Staff access</h2>
-      <p>Tick exactly what each person can manage. Labels never select permissions for you.</p>
+      <h2>Staff & access</h2>
+      <p>Invite staff, then give only the access they need.</p>
       {notice && (
         <p
           className={notice.error ? 'admin-error' : 'admin-success'}
@@ -115,39 +117,72 @@ export default function StaffAccess() {
           {notice.text}
         </p>
       )}
-      <form onSubmit={invite} className="admin-panel">
-        <h3>Invite someone</h3>
-        <fieldset disabled={Boolean(busy)}>
-          <div className="admin-access-grid">
-            <label>
-              Name
-              <input
-                autoComplete="name"
-                maxLength={120}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </label>
-            <label>
-              Email
-              <input
-                required
-                type="email"
-                autoComplete="email"
-                maxLength={254}
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </label>
-          </div>
-          <AccessChecklist actor={profile} value={access} onChange={setAccess} />
-          <button className="admin-button primary">
-            <UserPlus size={18} />
-            {busy === 'invite' ? 'Sending…' : 'Send invitation'}
-          </button>
-        </fieldset>
-      </form>
-      <h3>Current staff</h3>
+      <div className="admin-heading admin-staff-list-heading">
+        <div>
+          <h3>Current staff</h3>
+          <p>Open a person to change their access.</p>
+        </div>
+        <button
+          type="button"
+          className="admin-button primary"
+          aria-expanded={inviteOpen}
+          onClick={() => setInviteOpen((value) => !value)}
+        >
+          <UserPlus size={18} />
+          {inviteOpen ? 'Close' : 'Add staff'}
+        </button>
+      </div>
+      {inviteOpen && (
+        <form onSubmit={invite} className="admin-panel admin-staff-invite-inline">
+          <fieldset disabled={Boolean(busy)}>
+            <div className="admin-access-grid">
+              <label>
+                Name
+                <input
+                  autoComplete="name"
+                  maxLength={120}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </label>
+              <label>
+                Email
+                <input
+                  required
+                  type="email"
+                  autoComplete="email"
+                  maxLength={254}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+              </label>
+            </div>
+            <details className="admin-staff-invite-access">
+              <summary>Access & staff labels</summary>
+              <AccessChecklist actor={profile} value={access} onChange={setAccess} />
+            </details>
+            <div className="admin-actions">
+              <button className="admin-button primary">
+                <UserPlus size={18} />
+                {busy === 'invite' ? 'Sending…' : 'Send invitation'}
+              </button>
+              <button
+                type="button"
+                className="admin-button"
+                onClick={() => {
+                  setInviteOpen(false);
+                  setEmail('');
+                  setName('');
+                  setAccess(emptyAccess());
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </fieldset>
+        </form>
+      )}
+
       {loading ? (
         <p role="status">Loading staff…</p>
       ) : (
