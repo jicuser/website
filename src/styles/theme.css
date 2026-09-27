@@ -72,8 +72,8 @@
 html,
 body,
 #root {
-  background: var(--jic-bg) !important;
-  color: var(--jic-text) !important;
+  background: var(--jic-bg);
+  color: var(--jic-text);
 }
 body {
   transition:
@@ -90,125 +90,125 @@ main,
 html:not(.dark) .bg-gray-50,
 html:not(.dark) .bg-gray-100,
 html:not(.dark) .bg-gray-200 {
-  background-color: var(--jic-bg-secondary) !important;
+  background-color: var(--jic-bg-secondary);
 }
 html:not(.dark) .bg-gray-800,
 html:not(.dark) .bg-gray-900,
 html:not(.dark) .bg-white {
-  background-color: var(--jic-surface) !important;
+  background-color: var(--jic-surface);
 }
 .dark .bg-gray-50,
 .dark .bg-gray-100,
 .dark .bg-gray-800,
 .dark .bg-gray-900,
 .dark .bg-white {
-  background-color: var(--jic-surface) !important;
+  background-color: var(--jic-surface);
 }
 html:not(.dark) .text-gray-900,
 html:not(.dark) .text-gray-800,
 html:not(.dark) .text-gray-700,
 html:not(.dark) .text-white {
-  color: var(--jic-text) !important;
+  color: var(--jic-text);
 }
 html:not(.dark) .text-gray-600,
 html:not(.dark) .text-gray-500 {
-  color: var(--jic-text-secondary) !important;
+  color: var(--jic-text-secondary);
 }
 html:not(.dark) .text-gray-400,
 html:not(.dark) .text-gray-300,
 html:not(.dark) .text-gray-200 {
-  color: var(--jic-muted) !important;
+  color: var(--jic-muted);
 }
 .dark .text-gray-900,
 .dark .text-gray-800,
 .dark .text-gray-700,
 .dark .text-white,
 .dark .text-gray-200 {
-  color: var(--jic-text) !important;
+  color: var(--jic-text);
 }
 .dark .text-gray-600,
 .dark .text-gray-500,
 .dark .text-gray-400,
 .dark .text-gray-300 {
-  color: var(--jic-text-secondary) !important;
+  color: var(--jic-text-secondary);
 }
 html:not(.dark) .border-white\/10,
 html:not(.dark) .border-white\/20,
 .dark .border-white\/10,
 .dark .border-white\/20 {
-  border-color: var(--jic-border) !important;
+  border-color: var(--jic-border);
 }
 html:not(.dark) .bg-white\/5,
 html:not(.dark) .bg-white\/10 {
-  background: var(--jic-surface) !important;
+  background: var(--jic-surface);
 }
 .dark .bg-white\/5,
 .dark .bg-white\/10 {
-  background: rgba(13, 22, 34, 0.72) !important;
+  background: rgba(13, 22, 34, 0.72);
 }
 
 .managed-page-content,
 .bg-card {
-  background: var(--jic-surface) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-border) !important;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  border-color: var(--jic-border);
 }
 .managed-page-content p,
 .prose p,
 .prose li {
-  color: var(--jic-text-secondary) !important;
+  color: var(--jic-text-secondary);
 }
 input:not([type='checkbox']):not([type='radio']),
 textarea,
 select {
-  background: var(--jic-surface) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-border) !important;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  border-color: var(--jic-border);
 }
 input::placeholder,
 textarea::placeholder {
-  color: var(--jic-muted) !important;
+  color: var(--jic-muted);
 }
 table,
 th,
 td {
-  border-color: var(--jic-border) !important;
+  border-color: var(--jic-border);
 }
 
 .jic-kicker,
 .jic-gold-rule {
-  color: var(--jic-gold) !important;
+  color: var(--jic-gold);
 }
 
 .jic-hall-kicker {
-  color: var(--jic-gold) !important;
+  color: var(--jic-gold);
 }
 .jic-hall-day {
-  border-color: var(--jic-border) !important;
-  color: var(--jic-text) !important;
+  border-color: var(--jic-border);
+  color: var(--jic-text);
 }
 .jic-hall-day.is-today {
-  outline-color: var(--jic-gold) !important;
+  outline-color: var(--jic-gold);
 }
 .jic-hall-day.is-available::before,
 .jic-hall-legend i.is-available {
-  background: var(--jic-success) !important;
+  background: var(--jic-success);
 }
 .jic-hall-day.is-pending::before,
 .jic-hall-legend i.is-pending {
-  background: var(--jic-warning) !important;
+  background: var(--jic-warning);
 }
 .jic-hall-day.is-booked::before,
 .jic-hall-legend i.is-booked {
-  background: var(--jic-error) !important;
+  background: var(--jic-error);
 }
 .admin-console {
-  background: var(--jic-bg-secondary) !important;
-  color: var(--jic-text) !important;
+  background: var(--jic-bg-secondary);
+  color: var(--jic-text);
 }
 .admin-console header {
-  background: var(--jic-surface) !important;
-  border-color: var(--jic-border) !important;
+  background: var(--jic-surface);
+  border-color: var(--jic-border);
 }
 .admin-console header,
 .admin-console header a,
@@ -217,74 +217,74 @@ td {
 .admin-console h2,
 .admin-console h3,
 .admin-console h4 {
-  color: var(--jic-text) !important;
+  color: var(--jic-text);
 }
 .admin-console p,
 .admin-panel small,
 .admin-panel label:not(.admin-button):not(.admin-check) {
-  color: var(--jic-text-secondary) !important;
+  color: var(--jic-text-secondary);
 }
 .admin-console aside,
 .admin-console .bg-white,
 .admin-panel,
 .admin-shortcuts > button,
 .admin-shortcuts > a {
-  background: var(--jic-surface) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-border) !important;
-  box-shadow: none !important;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  border-color: var(--jic-border);
+  box-shadow: none;
 }
 .admin-button {
-  background: var(--admin-button-bg, var(--jic-surface)) !important;
-  color: var(--admin-button-ink, var(--jic-text)) !important;
-  border-color: var(--admin-button-bg, var(--jic-border)) !important;
+  background: var(--admin-button-bg, var(--jic-surface));
+  color: var(--admin-button-ink, var(--jic-text));
+  border-color: var(--admin-button-bg, var(--jic-border));
 }
 .admin-button.primary,
 .admin-button.active,
 .admin-global-save {
-  background: var(--admin-button-bg, var(--jic-action)) !important;
-  color: var(--admin-button-ink, #0c1930) !important;
-  border-color: var(--admin-button-bg, var(--jic-action)) !important;
+  background: var(--admin-button-bg, var(--jic-action));
+  color: var(--admin-button-ink, #0c1930);
+  border-color: var(--admin-button-bg, var(--jic-action));
 }
 .admin-eyebrow,
 .admin-section-title > svg,
 .admin-shortcuts svg,
 .admin-shortcuts b {
-  color: var(--jic-gold-strong) !important;
+  color: var(--jic-gold-strong);
 }
 .admin-upload,
 .admin-time-preview,
 .admin-hint {
-  background: color-mix(in srgb, var(--jic-gold) 8%, var(--jic-surface)) !important;
-  border-color: color-mix(in srgb, var(--jic-gold) 35%, var(--jic-border)) !important;
+  background: color-mix(in srgb, var(--jic-gold) 8%, var(--jic-surface));
+  border-color: color-mix(in srgb, var(--jic-gold) 35%, var(--jic-border));
 }
 .admin-page-picker nav button {
-  color: var(--jic-text-secondary) !important;
+  color: var(--jic-text-secondary);
 }
 .admin-page-picker nav button.selected {
-  background: color-mix(in srgb, var(--jic-gold) 14%, var(--jic-surface)) !important;
-  color: var(--jic-text) !important;
+  background: color-mix(in srgb, var(--jic-gold) 14%, var(--jic-surface));
+  color: var(--jic-text);
 }
 
 .bg-green-50 {
-  background: color-mix(in srgb, var(--jic-success) 10%, var(--jic-surface)) !important;
+  background: color-mix(in srgb, var(--jic-success) 10%, var(--jic-surface));
 }
 .bg-red-50 {
-  background: color-mix(in srgb, var(--jic-error) 9%, var(--jic-surface)) !important;
+  background: color-mix(in srgb, var(--jic-error) 9%, var(--jic-surface));
 }
 .bg-blue-50 {
-  background: var(--jic-bg-secondary) !important;
+  background: var(--jic-bg-secondary);
 }
 footer {
-  background: var(--jic-bg-secondary) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-border) !important;
+  background: var(--jic-bg-secondary);
+  color: var(--jic-text);
+  border-color: var(--jic-border);
 }
 
 html[data-theme] .text-primary,
 html[data-theme] .jic-prompt,
 html[data-theme] .hover\:text-primary:hover {
-  color: var(--jic-gold) !important;
+  color: var(--jic-gold);
 }
 
 /* Glass opacity and on-glass text are owned by liquid-glass.css. */
