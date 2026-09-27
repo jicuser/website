@@ -155,7 +155,7 @@ export default function TvDisplayLayoutEditor({
       height: type === 'brand' ? 15 : type === 'clock' || type === 'next' ? 18 : 30,
     };
     if (type === 'times') next.layout = orientation === 'portrait' ? 'vertical' : 'horizontal';
-    if (type === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
+    if (type === 'poster') Object.assign(next, { rotation_seconds: 20 });
     if (type === 'text') next.text = 'New notice';
     commitScene({ ...scene, layers: [...scene.layers, fitRect(next)] });
     setSelected(id);
@@ -179,7 +179,7 @@ export default function TvDisplayLayoutEditor({
       height: layer.height,
     };
     if (type === 'times') next.layout = orientation === 'portrait' ? 'vertical' : 'horizontal';
-    if (type === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
+    if (type === 'poster') Object.assign(next, { rotation_seconds: 20 });
     if (type === 'text') next.text = 'New notice';
     updateLayer(next);
   }
