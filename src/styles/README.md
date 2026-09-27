@@ -14,7 +14,10 @@
 | `dialogs.css`            | Donation dialog structure                                                            |
 | `footer.css`             | Footer layout                                                                        |
 | `liquid-glass.css`       | Glass tokens, public control/card material in both modes and accessibility fallbacks |
-| `admin.css`              | Staff workspace, editors, login and responsive behaviour                             |
+| `admin.css`              | Staff workspace shell, editors, login and responsive behaviour                       |
+| `tv-admin.css`           | TV settings/editor controls only; never the live TV renderer                         |
+| `custom-forms.css`       | Form builder, response inbox and form-admin layout                                    |
+| `content-workflow.css`   | Posters, programme pages and structured content workflow                              |
 | `projects.css`           | Building project tiles                                                               |
 | `hall-booking.css`       | Hall availability calendar                                                           |
 | `worship.css`            | Worship pages and Qur'an reader                                                      |
@@ -26,8 +29,8 @@
 - Keep component geometry and its media queries together.
 - Use theme tokens for shared colours. Glass changes the background, not the opacity of text or images.
 - Use `jic-prompt` for the current question or next-step label. It follows the readable gold accent in both themes and glass modes; keep explanatory text in the normal text colour. Primary actions use existing button variants, with green for starting a stream and red for ending it.
-- `!important` is retained where a shared style intentionally replaces a page's Tailwind utilities. The public header and section tabs do not need it.
-- The TV shares prayer data and markup but has deliberate screen-size styles in `tv.css`.
+- Do not use `!important` as a cascade patch. Put a rule in the stylesheet that owns the component and use a scoped selector. The only retained exception is the global reduced-motion accessibility fallback in `index.css`.
+- The live TV renderer is owned by `tv.css`; admin-only TV editing controls are owned by `tv-admin.css`. Do not duplicate the same selector in both.
 - Only the fixed prayer strip is measured by `ResizeObserver`; the unboxed logo and section tabs scroll with the page. On mobile, the script-style Menu word beside the logo opens a compact main-page list. Back, burger, Donate and theme actions stay at the bottom; the burger opens a full-page text directory. Do not add fixed top padding to every `main` element.
 - Keep horizontal overflow inside the timetable or tab rail; do not hide all page overflow to disguise a sizing problem.
 - Preserve reduced-motion, reduced-transparency and no-blur fallbacks.
