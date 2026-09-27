@@ -191,6 +191,35 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
             onChange={(event) => patch({ enabled: event.target.checked })}
           />
         </label>
+
+        <section className="custom-form-routing">
+          <div>
+            <h3>Who handles responses?</h3>
+            <p className="workspace-meta">
+              These people receive the automatic action when somebody submits this form.
+            </p>
+          </div>
+          <div className="custom-form-members custom-form-members-primary">
+            {people.length === 0 && <p>No eligible accounts available.</p>}
+            {people.map((person) => (
+              <label key={person.id}>
+                <input
+                  type="checkbox"
+                  checked={draft.responsible_ids.includes(person.id)}
+                  onChange={(event) =>
+                    patch({
+                      responsible_ids: event.target.checked
+                        ? [...draft.responsible_ids, person.id]
+                        : draft.responsible_ids.filter((id) => id !== person.id),
+                    })
+                  }
+                />
+                {person.display_name || 'Unnamed account'}
+              </label>
+            ))}
+          </div>
+        </section>
+
         <h3>Questions</h3>
         {draft.schema.fields.map((field, index) => (
           <FieldEditor
@@ -226,42 +255,41 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
         >
           Add question
         </button>
-        <h3>People and actions</h3>
-        <p>
-          Responsible people receive a task for each response. Following staff can view new responses in admin. Managers
-          can edit this form.
-        </p>
-        <div className="workspace-grid">
-          {[
-            ['responsible', 'Responsible people'],
-            ['watcher', 'Notify these people'],
-            ['manager', 'Form managers'],
-          ].map(([role, label]) => (
-            <fieldset className="custom-form-field" key={role}>
-              <legend>{label}</legend>
-              <div className="custom-form-members">
-                {people.length === 0 && <p>No eligible accounts available.</p>}
-                {people.map((person) => (
-                  <label key={person.id}>
-                    <input
-                      type="checkbox"
-                      checked={draft[`${role}_ids`].includes(person.id)}
-                      onChange={(event) =>
-                        patch({
-                          [`${role}_ids`]: event.target.checked
-                            ? [...draft[`${role}_ids`], person.id]
-                            : draft[`${role}_ids`].filter((id) => id !== person.id),
-                        })
-                      }
-                    />
-                    {person.display_name || 'Unnamed account'}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          ))}
-        </div>
-        <div className="workspace-grid">
+        <details className="custom-form-advanced">
+          <summary>Access & automatic action</summary>
+          <p className="workspace-meta">
+            Following staff can see new responses. Form managers can edit this form.
+          </p>
+          <div className="workspace-grid">
+            {[
+              ['watcher', 'Following staff'],
+              ['manager', 'Form managers'],
+            ].map(([role, label]) => (
+              <fieldset className="custom-form-field" key={role}>
+                <legend>{label}</legend>
+                <div className="custom-form-members">
+                  {people.length === 0 && <p>No eligible accounts available.</p>}
+                  {people.map((person) => (
+                    <label key={person.id}>
+                      <input
+                        type="checkbox"
+                        checked={draft[`${role}_ids`].includes(person.id)}
+                        onChange={(event) =>
+                          patch({
+                            [`${role}_ids`]: event.target.checked
+                              ? [...draft[`${role}_ids`], person.id]
+                              : draft[`${role}_ids`].filter((id) => id !== person.id),
+                          })
+                        }
+                      />
+                      {person.display_name || 'Unnamed account'}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+          </div>
+          <div className="workspace-grid">
           <Field label="Automatic action">
             <input
               value={draft.task_title}
@@ -291,6 +319,7 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
             <option key={value}>{value}</option>
           ))}
         </datalist>
+        </details>
         <div className="workspace-actions">
           <button onClick={() => setPreview(!preview)}>
             {preview ? 'Close preview' : 'Preview questions'}
