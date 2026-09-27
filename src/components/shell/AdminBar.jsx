@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Pencil, LayoutDashboard, LogOut } from 'lucide-react';
+import { Pencil, LayoutDashboard, LogOut, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { EDITABLE_PAGES } from '@/content/editablePages';
 const WebsitePageEditor = lazy(() => import('@/components/admin/WebsitePageEditor'));
@@ -36,6 +36,12 @@ export default function AdminBar() {
             <Pencil size={17} />
             Edit page
           </button>
+        )}
+        {pathname === '/team' && can('team') && (
+          <Link to="/admin?section=team">
+            <Users size={17} />
+            Team profiles
+          </Link>
         )}
         <button type="button" onClick={handleSignOut} disabled={signingOut} aria-busy={signingOut}>
           <LogOut size={17} aria-hidden="true" />
