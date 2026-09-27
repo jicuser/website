@@ -190,6 +190,7 @@ export const DEFAULT_TV_SETTINGS = {
   preset_names: DEFAULT_TV_PRESET_NAMES,
   preset_scenes: DEFAULT_TV_PRESET_SCENES,
   display_layouts: DEFAULT_TV_DISPLAY_LAYOUTS,
+  scheduled_scenes: [],
   jamaah_lead_minutes: 1,
   before_jamaah_message: 'Jama‘ah begins in 1 minute',
   jamaah_message: 'It is Jama‘ah time',
@@ -251,6 +252,16 @@ export function normaliseTvSettings(settings = {}) {
         displayLayouts[orientation][key],
       ]),
     ),
+    scheduled_scenes: Array.isArray(settings.scheduled_scenes)
+      ? settings.scheduled_scenes.map((item) => ({
+          ...item,
+          days: Array.isArray(item?.days) ? [...item.days] : [],
+          layouts: {
+            landscape: item?.layouts?.landscape ? cloneScene(item.layouts.landscape) : null,
+            portrait: item?.layouts?.portrait ? cloneScene(item.layouts.portrait) : null,
+          },
+        }))
+      : [],
   };
   // Remove only the exact old generated starter layout. Custom scenes are preserved.
   const starter = [
@@ -389,6 +400,64 @@ export function validateSettings(input, screenId = '') {
       result.display_layouts[result.display_orientation][key],
     ]),
   );
+
+  if (!Array.isArray(values.scheduled_scenes) || values.scheduled_scenes.length > 12)
+    throw new Error('Keep up to twelve scheduled TV scenes.');
+  const scheduledIds = new Set();
+  const scheduledAllowed = new Set(['times', 'next', 'clock', 'poster', 'poster-next', 'text', 'brand', 'empty']);
+  const clockPattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+  result.scheduled_scenes = values.scheduled_scenes.map((item) => {
+    if (
+      !item ||
+      typeof item.id !== 'string' ||
+      !/^[a-zA-Z0-9_-]{1,64}$/.test(item.id) ||
+      scheduledIds.has(item.id)
+    )
+      throw new Error('Scheduled TV scene IDs must be unique.');
+    scheduledIds.add(item.id);
+    if (typeof item.name !== 'string' || !item.name.trim() || item.name.length > 60)
+      throw new Error('Give every scheduled TV scene a short name.');
+    if (typeof item.enabled !== 'boolean' || typeof item.all_day !== 'boolean')
+      throw new Error('Choose whether each scheduled TV scene is active.');
+    if (
+      !Array.isArray(item.days) ||
+      !item.days.length ||
+      item.days.length > 7 ||
+      new Set(item.days).size !== item.days.length ||
+      item.days.some((day) => !Number.isInteger(day) || day < 1 || day > 7)
+    )
+      throw new Error('Choose at least one valid day for every scheduled TV scene.');
+    if (!item.all_day && (!clockPattern.test(item.start_time || '') || !clockPattern.test(item.end_time || '')))
+      throw new Error('Choose valid start and end times for scheduled TV scenes.');
+    if (!item.layouts || typeof item.layouts !== 'object')
+      throw new Error('Scheduled TV scenes need landscape and portrait layouts.');
+    const layouts = {};
+    for (const orientation of ['landscape', 'portrait']) {
+      const source = item.layouts[orientation];
+      const checked = validateScenes([source], secureStreamUrl, youtubeUrl)[0];
+      if (checked.layers.some((layer) => !scheduledAllowed.has(layer.type)))
+        throw new Error('Scheduled scenes can use posters, timetable, next prayer, clock, logo and text only.');
+      for (const layer of checked.layers) {
+        if (layer.type !== 'times') continue;
+        const original = source.layers.find((candidate) => candidate.id === layer.id);
+        const layout = original?.layout || 'horizontal';
+        if (!PRAYER_TIMETABLE_LAYOUTS.includes(layout))
+          throw new Error('Choose a valid prayer timetable layout.');
+        layer.layout = layout;
+      }
+      layouts[orientation] = checked;
+    }
+    return {
+      id: item.id,
+      name: item.name.trim(),
+      enabled: item.enabled,
+      days: [...item.days].sort((a, b) => a - b),
+      all_day: item.all_day,
+      start_time: item.all_day ? '' : item.start_time,
+      end_time: item.all_day ? '' : item.end_time,
+      layouts,
+    };
+  });
   for (const key of [
     'dhikr_delay_fajr',
     'dhikr_delay_dhuhr',
@@ -488,6 +557,49 @@ export function tvScene(settings = {}, now = Date.now()) {
     (!settings.class_until || Date.parse(settings.class_until) > now)
     ? 'teaching'
     : 'normal';
+}
+export function tvScheduledScene(settings = {}, now = new Date(), orientation = settings.display_orientation || 'landscape') {
+  const scenes = Array.isArray(settings.scheduled_scenes) ? settings.scheduled_scenes : [];
+  if (!scenes.length) return null;
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(now)
+      .map(({ type, value }) => [type, value]),
+  );
+  const dayMap = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
+  const day = dayMap[parts.weekday];
+  const previousDay = day === 1 ? 7 : day - 1;
+  const minute = Number(parts.hour) * 60 + Number(parts.minute);
+  const toMinutes = (value) => {
+    const [hour, minutes] = String(value || '').split(':').map(Number);
+    return hour * 60 + minutes;
+  };
+  for (const item of scenes) {
+    if (!item?.enabled) continue;
+    let active = false;
+    if (item.all_day) active = item.days?.includes(day);
+    else {
+      const start = toMinutes(item.start_time);
+      const end = toMinutes(item.end_time);
+      if (start === end) active = item.days?.includes(day);
+      else if (start < end) active = item.days?.includes(day) && minute >= start && minute < end;
+      else
+        active =
+          (item.days?.includes(day) && minute >= start) ||
+          (item.days?.includes(previousDay) && minute < end);
+    }
+    if (active) {
+      const layout = item.layouts?.[orientation] || item.layouts?.landscape || item.layouts?.portrait;
+      if (layout) return { id: item.id, name: item.name, scene: layout };
+    }
+  }
+  return null;
 }
 export const isTvStaff = (profile) => hasPermission(profile, 'tv');
 export function validDescription(description, type) {
