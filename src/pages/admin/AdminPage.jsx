@@ -64,8 +64,8 @@ const SECTIONS = [
   ['audit', 'Audit log', Activity, 'audit'],
 ];
 const SECTION_GROUPS = [
-  ['Manage', ['dashboard', 'content', 'posters', 'events', 'announcements', 'messages', 'forms', 'prayer', 'tv', 'livestream']],
-  ['People & system', ['team', 'users', 'audit']],
+  ['Manage', ['dashboard', 'content', 'team', 'posters', 'events', 'announcements', 'messages', 'forms', 'prayer', 'tv', 'livestream']],
+  ['People & system', ['users', 'audit']],
 ];
 
 function Field({ title, children, className = '' }) {
@@ -139,6 +139,7 @@ function DashboardSection({ onChoose }) {
     ],
     ['announcements', 'Notices', 'Short community updates and alerts.', Megaphone, 'announcements'],
     ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
+    ['team', 'Team profiles', 'People shown on the Meet the Team page.', Users, 'team'],
     [
       'messages',
       'Messages',
