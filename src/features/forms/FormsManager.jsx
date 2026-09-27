@@ -328,14 +328,12 @@ function EntryTiles({ auth, loading, onChoose, onCreate }) {
   );
 }
 
-function LegacyFormCards({ auth, onChoose }) {
+function LegacyFormCards({ auth, onChoose, counts, loading, error }) {
   const legacy = [
     ['contact', 'Contact Us', 'Website contact enquiries.', 'forms_contact'],
     ['madrassah', 'Madrassah enquiry', 'Existing Madrassah enquiries.', 'forms_madrassah'],
     ['itikaaf', 'I’tikaf registration', 'Existing I’tikaf registrations.', 'forms_itikaaf'],
   ].filter(([, , , permission]) => auth.isOwner || auth.can(permission));
-  const kindKey = legacy.map(([kind]) => kind).join('|');
-  const { data: counts, loading, error } = useLegacyFormCounts(kindKey);
   if (!legacy.length) return null;
   return legacy.map(([kind, title, description]) => {
     const summary = counts?.[kind];
@@ -363,6 +361,22 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
   const auth = useAuth();
   const { data, loading, error, reload } = useFormSummaries();
   const forms = data || [];
+  const legacyKinds = [
+    ['contact', 'forms_contact'],
+    ['madrassah', 'forms_madrassah'],
+    ['itikaaf', 'forms_itikaaf'],
+  ]
+    .filter(([, permission]) => auth.isOwner || auth.can(permission))
+    .map(([kind]) => kind);
+  const {
+    data: legacyCounts,
+    loading: legacyLoading,
+    error: legacyError,
+  } = useLegacyFormCounts(legacyKinds.join('|'));
+  const waitingCount =
+    forms.reduce((total, form) => total + Number(form.new_count || 0), 0) +
+    legacyKinds.reduce((total, kind) => total + Number(legacyCounts?.[kind]?.new_count || 0), 0);
+  const actionCount = forms.reduce((total, form) => total + Number(form.open_actions || 0), 0);
   const [status, setStatus] = useState('all');
   const listed = forms.filter((form) => status === 'all' || formStatus(form) === status);
 
@@ -398,6 +412,19 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
         <ScheduleManager />
       ) : view === 'forms' ? (
         <>
+          <button
+            type="button"
+            className="content-inbox-strip"
+            onClick={() => onChoose({ view: 'responses' })}
+          >
+            <span>
+              <strong>Inbox</strong>
+              <small>
+                {loading || legacyLoading ? 'Loading…' : `${waitingCount} waiting · ${actionCount} actions`}
+              </small>
+            </span>
+            <b>Open</b>
+          </button>
           <label>
             Show forms
             <select value={status} onChange={(event) => setStatus(event.target.value)}>
@@ -409,7 +436,13 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
           </label>
           {loading && !data && <p role="status">Loading forms…</p>}
           <div className="content-form-grid">
-            <LegacyFormCards auth={auth} onChoose={onChoose} />
+            <LegacyFormCards
+              auth={auth}
+              onChoose={onChoose}
+              counts={legacyCounts}
+              loading={legacyLoading}
+              error={legacyError}
+            />
             {listed.map((form) => (
               <button
                 className="admin-panel content-form-card"
