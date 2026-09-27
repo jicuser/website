@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import NormalSettings from './NormalSettings';
 import TvDisplayLayoutEditor from './TvDisplayLayoutEditor';
+import ScheduledScenes from './ScheduledScenes';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { TV_PRESET_KEYS } from '../../../supabase/functions/_shared/tv.js';
 import '@/styles/tv-admin.css';
@@ -108,6 +109,8 @@ export default function BackgroundSettings({
         hall={screenId !== 'shoe-area'}
         preset={preset}
       />
+
+      <ScheduledScenes form={form} update={update} screenId={screenId} />
 
       <div className="admin-actions tv-save-actions">
         <button
