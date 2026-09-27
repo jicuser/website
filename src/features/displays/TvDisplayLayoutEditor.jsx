@@ -157,7 +157,7 @@ export default function TvDisplayLayoutEditor({
     if (type === 'times') next.layout = orientation === 'portrait' ? 'vertical' : 'horizontal';
     if (type === 'poster') Object.assign(next, { rotation_seconds: 20 });
     if (type === 'text') next.text = 'New notice';
-    commitScene({ ...scene, layers: [...scene.layers, fitRect(next)] });
+    commitScene({ ...scene, layers: [...scene.layers, { ...next, ...fitRect(next) }] });
     setSelected(id);
   }
 
