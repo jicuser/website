@@ -22,6 +22,7 @@ import {
   Sun,
   Moon,
   Monitor,
+  MessageSquare,
 } from 'lucide-react';
 import FormsManager from '@/features/forms/FormsManager';
 import StaffAccess from '@/components/admin/StaffAccess';
@@ -36,6 +37,7 @@ import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { displayTime } from '@/lib/timetable';
 import { fromDateTimeLocal, toDateTimeLocal } from '@/lib/dateTime';
 import TeamEditor from '@/components/admin/TeamEditor';
+import FormsInbox from '@/components/admin/FormsInbox';
 
 const input =
   'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-amber-500';
@@ -56,12 +58,13 @@ const SECTIONS = [
   ['tv', 'TV & screens', Monitor, 'tv'],
   ['content', 'Website', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
+  ['messages', 'Messages', MessageSquare, 'forms_contact'],
   ['forms', 'Forms', FileText, 'forms'],
   ['users', 'Staff & access', ShieldCheck, 'users'],
   ['audit', 'Audit log', Activity, 'audit'],
 ];
 const SECTION_GROUPS = [
-  ['Manage', ['dashboard', 'content', 'posters', 'events', 'announcements', 'forms', 'prayer', 'tv', 'livestream']],
+  ['Manage', ['dashboard', 'content', 'posters', 'events', 'announcements', 'messages', 'forms', 'prayer', 'tv', 'livestream']],
   ['People & system', ['team', 'users', 'audit']],
 ];
 
@@ -137,9 +140,16 @@ function DashboardSection({ onChoose }) {
     ['announcements', 'Notices', 'Short community updates and alerts.', Megaphone, 'announcements'],
     ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
     [
+      'messages',
+      'Messages',
+      'Contact Us messages from the website.',
+      MessageSquare,
+      'forms_contact',
+    ],
+    [
       'forms',
       'Forms',
-      'Manage forms, responsible people, responses and actions.',
+      'Registration forms, responses and assigned actions.',
       FileText,
       'forms',
     ],
@@ -811,6 +821,13 @@ export default function AdminPage() {
     livestream: <LivestreamSection />,
     content: <ContentPages key={user?.id} initialPath={params.get('page') || '/'} />,
     team: <TeamEditor uploadImage={uploadImage} />,
+    messages: (
+      <FormsInbox
+        kind="contact"
+        title="Messages"
+        description="Messages sent through Contact Us. Registration and application responses stay in Forms."
+      />
+    ),
     forms: <FormsManager key={user?.id} registerBack={registerBack} />,
     users: <StaffAccess />,
     audit: <AuditSection />,
