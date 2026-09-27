@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAdminSave } from '@/context/AdminSaveContext';
+import { useAuth } from '@/context/AuthContext';
 import useAdminRecords from '@/hooks/useAdminRecords';
 import { checked } from '@/components/workspace/shared';
 import { PAGE_PLACEMENTS, pageUrl } from '@/lib/pageContent';
@@ -107,6 +108,7 @@ export function ContentPageCatalogue() {
 
 export default function ContentPages({ initialPath = '/' }) {
   const { dirty } = useAdminSave();
+  const { can } = useAuth();
   const [tab, setTab] = useState('site');
   function choose(next) {
     if (tab === next || (dirty && !window.confirm('Discard unsaved page changes?'))) return;
@@ -129,6 +131,11 @@ export default function ContentPages({ initialPath = '/' }) {
         >
           Pages & programmes
         </button>
+        {can('team') && (
+          <Link className="admin-button" to="/admin?section=team">
+            Team profiles
+          </Link>
+        )}
       </nav>
       {tab === 'site' ? <PageEditor initialPath={initialPath} /> : <ContentPageCatalogue />}
     </div>
