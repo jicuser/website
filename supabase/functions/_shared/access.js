@@ -1,11 +1,11 @@
 // Stable permission IDs are shared by the website, Edge Functions and future app.
 export const PERMISSIONS = [
-  ['content', 'Website pages and text'],
+  ['content', 'Website pages, posters and text'],
   ['media', 'Upload pictures in permitted editors'],
-  ['events', 'Events and posters'],
+  ['events', 'Events'],
   ['announcements', 'Notices'],
   ['prayer_times', 'Prayer timetable'],
-  ['team', 'Public team page'],
+  ['team', 'Team profiles'],
   ['livestream', 'Website livestream settings'],
   ['tv', 'TV scenes and device inputs'],
   ['broadcast', 'Recording and broadcasting (also select TV)'],
@@ -14,7 +14,7 @@ export const PERMISSIONS = [
   ['forms_itikaaf', 'I’tikaf registrations'],
   ['forms_manage', 'Create and manage registration forms'],
   ['forms_custom', 'All custom form responses'],
-  ['users', 'Invite staff and manage access'],
+  ['users', 'Staff accounts and access'],
   ['audit', 'Activity history'],
   ['delete_content', 'Delete content in permitted sections'],
 ];
