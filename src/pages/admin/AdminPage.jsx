@@ -57,7 +57,7 @@ const SECTIONS = [
   ['livestream', 'Livestream', Radio, 'livestream'],
   ['tv', 'TV & screens', Monitor, 'tv'],
   ['content', 'Website', FileText, 'content'],
-  ['team', 'Meet the team', Users, 'team'],
+  ['team', 'Team profiles', Users, 'team'],
   ['messages', 'Messages', MessageSquare, 'forms_contact'],
   ['forms', 'Forms', FileText, 'forms'],
   ['users', 'Staff & access', ShieldCheck, 'users'],
