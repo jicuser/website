@@ -241,7 +241,7 @@ html[data-theme] .jic-image-viewer {
   color: var(--jic-error);
 }
 html[data-theme] .bg-primary.text-white {
-  color: #0c1930 !important;
+  color: #0c1930;
 }
 html[data-theme] :is(a, button, input, textarea, select, [tabindex]):focus-visible {
   outline: 3px solid var(--jic-gold);
@@ -249,7 +249,7 @@ html[data-theme] :is(a, button, input, textarea, select, [tabindex]):focus-visib
 }
 html[data-theme] .jic-radio-player-page {
   min-height: 100dvh;
-  padding: 24px !important;
+  padding: 24px;
   display: grid;
   place-items: center;
   background: var(--jic-bg);
