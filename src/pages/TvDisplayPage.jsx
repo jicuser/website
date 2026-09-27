@@ -13,7 +13,12 @@ import {
   fastingTimes,
 } from '@/lib/tvPrayerSequence';
 import { TV_SCREENS } from '@/lib/tvControl';
-import { tvScene, publicSettings, tvDisplayScene } from '../../supabase/functions/_shared/tv.js';
+import {
+  tvScene,
+  publicSettings,
+  tvDisplayScene,
+  tvScheduledScene,
+} from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar, { NextPrayerSummary } from '@/components/shell/PrayerTimeBar';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
@@ -327,7 +332,10 @@ function ScreenDisplay({ screenId }) {
   }
 
   if (scene === 'normal' && !noticeVisible) {
-    const standbyScene = tvDisplayScene(tv.settings, 'standby');
+    const scheduled = normalPreview
+      ? null
+      : tvScheduledScene(tv.settings, now, tv.settings.display_orientation);
+    const standbyScene = scheduled?.scene || tvDisplayScene(tv.settings, 'standby');
     const standbyTv = standbyScene
       ? {
           ...tv,
