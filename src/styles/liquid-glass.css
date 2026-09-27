@@ -89,9 +89,9 @@ html[data-theme]
     .jic-image-viewer-heading button,
     .jic-image-viewer-actions :is(a, button)
   ) {
-  background: var(--jic-glass-control-sheen), var(--jic-glass-control) !important;
-  border-color: var(--jic-glass-border) !important;
-  box-shadow: var(--jic-glass-shadow) !important;
+  background: var(--jic-glass-control-sheen), var(--jic-glass-control);
+  border-color: var(--jic-glass-border);
+  box-shadow: var(--jic-glass-shadow);
   -webkit-backdrop-filter: var(--jic-glass-control-filter);
   backdrop-filter: var(--jic-glass-control-filter);
 }
@@ -124,10 +124,10 @@ html[data-theme]
     .bg-card,
     .bg-card\/80
   ) {
-  background: var(--jic-glass-tile-sheen), var(--jic-glass-tile) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-glass-border) !important;
-  box-shadow: var(--jic-glass-shadow) !important;
+  background: var(--jic-glass-tile-sheen), var(--jic-glass-tile);
+  color: var(--jic-text);
+  border-color: var(--jic-glass-border);
+  box-shadow: var(--jic-glass-shadow);
   -webkit-backdrop-filter: var(--jic-glass-panel-filter);
   backdrop-filter: var(--jic-glass-panel-filter);
 }
@@ -146,10 +146,10 @@ html[data-theme]
     .jic-site-footer
   ),
 html[data-theme] :is(.jic-popup-panel, .jic-image-viewer) {
-  background: var(--jic-glass-panel-sheen), var(--jic-glass-panel) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-glass-border) !important;
-  box-shadow: var(--jic-glass-shadow) !important;
+  background: var(--jic-glass-panel-sheen), var(--jic-glass-panel);
+  color: var(--jic-text);
+  border-color: var(--jic-glass-border);
+  box-shadow: var(--jic-glass-shadow);
   -webkit-backdrop-filter: var(--jic-glass-dense-filter);
   backdrop-filter: var(--jic-glass-dense-filter);
 }
@@ -158,9 +158,9 @@ html[data-theme] :is(.jic-popup-panel, .jic-image-viewer) {
 html[data-theme]
   :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
   :is(input:not([type='checkbox']):not([type='radio']), textarea, select) {
-  background: var(--jic-glass-panel-strong) !important;
-  color: var(--jic-text) !important;
-  border-color: var(--jic-glass-border) !important;
+  background: var(--jic-glass-panel-strong);
+  color: var(--jic-text);
+  border-color: var(--jic-glass-border);
   box-shadow: inset 0 1px 0 var(--jic-glass-highlight);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -184,8 +184,8 @@ html[data-theme]
     .jic-live-section
   )
   :is(button, a, [data-glass]) {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 /* Active state remains obvious across themes. */
@@ -195,10 +195,10 @@ html[data-theme]
     .jic-unified-subnav-link:is(.is-current, [aria-current='page']),
     [role='tab'][data-state='active']
   ) {
-  border-color: var(--jic-gold) !important;
+  border-color: var(--jic-gold);
   box-shadow:
     inset 0 -3px var(--jic-gold),
-    var(--jic-glass-shadow) !important;
+    var(--jic-glass-shadow);
   font-weight: 750;
 }
 
@@ -249,9 +249,9 @@ html[data-theme]
   ) {
   background:
     var(--jic-glass-action-sheen),
-    color-mix(in srgb, var(--jic-button-tint) var(--jic-button-tint-strength), transparent) !important;
-  color: var(--jic-button-ink) !important;
-  border-color: color-mix(in srgb, var(--jic-button-tint) 68%, var(--jic-glass-border)) !important;
+    color-mix(in srgb, var(--jic-button-tint) var(--jic-button-tint-strength), transparent);
+  color: var(--jic-button-ink);
+  border-color: color-mix(in srgb, var(--jic-button-tint) 68%, var(--jic-glass-border));
 }
 
 /* Donate feedback belongs to the donation actions, not the navigation triggers. */
@@ -264,11 +264,11 @@ html[data-theme] :is(.jic-footer-donate, .jic-unified-menu-donate) {
 html[data-theme]
   .jic-public-route
   :is(.jic-footer-donate, .jic-unified-menu-donate):is(:hover, :focus-visible) {
-  border-color: var(--jic-gold-strong) !important;
+  border-color: var(--jic-gold-strong);
 }
 
 html[data-theme] .jic-public-route .jic-footer-donate:is(:hover, :focus-visible) {
-  background-color: color-mix(in srgb, var(--jic-button-tint) 90%, var(--jic-action)) !important;
+  background-color: color-mix(in srgb, var(--jic-button-tint) 90%, var(--jic-action));
 }
 
 html[data-theme] .jic-public-route .jic-unified-menu-donate:is(:hover, :focus-visible) {
@@ -276,7 +276,7 @@ html[data-theme] .jic-public-route .jic-unified-menu-donate:is(:hover, :focus-vi
     in srgb,
     var(--jic-glass-control) 88%,
     var(--jic-gold) 12%
-  ) !important;
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -287,10 +287,10 @@ html[data-theme] .jic-public-route .jic-unified-menu-donate:is(:hover, :focus-vi
 
 /* Reading sections stay transparent; their content cards carry the material. */
 html[data-theme] .jic-public-route .page-transition > section {
-  background: transparent !important;
-  box-shadow: none !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 html[data-theme][data-surface='glass'] .jic-site-footer :is(a, p, small, .jic-footer-bottom) {
