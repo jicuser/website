@@ -4,14 +4,14 @@
   padding-top: 0;
 }
 .jic-inner-page h1 {
-  font-size: clamp(1.75rem, 4vw, 2.5rem) !important;
-  line-height: 1.15 !important;
-  margin-bottom: 12px !important;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.15;
+  margin-bottom: 12px;
   overflow-wrap: anywhere;
 }
 .jic-inner-page h2 {
-  font-size: clamp(1.25rem, 3vw, 1.75rem) !important;
-  line-height: 1.25 !important;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.25;
 }
 .jic-inner-page .text-lg {
   font-size: 1rem;
@@ -51,8 +51,8 @@
   padding-bottom: 0;
 }
 .jic-inner-page .jic-prayer-title h1 {
-  font-size: 1.5rem !important;
-  margin: 0 !important;
+  font-size: 1.5rem;
+  margin: 0;
 }
 .jic-prayer-table {
   background: var(--jic-surface);
