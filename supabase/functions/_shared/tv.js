@@ -545,7 +545,13 @@ export function publicSettings(input, paired = false) {
   );
   // The unapproved page gets public posters only. Private class text, links and input IDs never leak.
   if (!paired)
-    return { ...settings, scene_mode: 'normal', scenes: [newScene()], active_scene_id: 'scene-1' };
+    return {
+      ...settings,
+      scene_mode: 'normal',
+      scenes: [newScene()],
+      active_scene_id: 'scene-1',
+      scheduled_scenes: [],
+    };
   return { ...settings, scene_mode: tvScene(settings) };
 }
 export function activeTvScene(settings = {}) {
