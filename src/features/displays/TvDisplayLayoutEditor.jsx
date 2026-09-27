@@ -168,6 +168,22 @@ export default function TvDisplayLayoutEditor({
     setSelected(remaining[0]?.id || '');
   }
 
+  function changeBlockType(type) {
+    if (!allowBlocks || !layer || !type) return;
+    const next = {
+      id: layer.id,
+      type,
+      x: layer.x,
+      y: layer.y,
+      width: layer.width,
+      height: layer.height,
+    };
+    if (type === 'times') next.layout = orientation === 'portrait' ? 'vertical' : 'horizontal';
+    if (type === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
+    if (type === 'text') next.text = 'New notice';
+    updateLayer(next);
+  }
+
   function begin(event, item, resize = false) {
     if (event.button !== 0) return;
     event.preventDefault();
@@ -386,6 +402,20 @@ export default function TvDisplayLayoutEditor({
                 ))}
               </select>
             </label>
+
+            {allowBlocks && layer && (
+              <label>
+                Shows
+                <select value={layer.type} onChange={(event) => changeBlockType(event.target.value)}>
+                  <option value="poster">Poster</option>
+                  <option value="times">Prayer timetable</option>
+                  <option value="next">Next Salah</option>
+                  <option value="clock">Clock</option>
+                  <option value="brand">JIC logo</option>
+                  <option value="text">Text notice</option>
+                </select>
+              </label>
+            )}
 
             {layer?.type === 'times' && (
               <label>
