@@ -9,7 +9,7 @@ import { workflowChanged } from '@/lib/pageContent';
 export default function CustomFormsInbox({ auth, definitions, assignments, initialMine = false, initialKind = '', formId = null }) {
   const [filters, setFilters] = useState({
     search: '',
-    kind: formId ? 'custom' : initialKind,
+    kind: formId ? 'custom' : initialKind || 'custom',
     form: formId ? `form:${formId}` : '',
     status: 'new',
     from: '',
@@ -137,7 +137,7 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
     <section className={`custom-inbox ${compact ? 'is-compact' : ''}`}>
       <div className="workspace-header custom-inbox-header">
         <div>
-          <h2>Inbox</h2>
+          <h2>Form responses</h2>
           <span className="workspace-meta">
             {result.new_count} waiting · {result.done_count} completed
           </span>
@@ -199,11 +199,9 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
               )
             }
           >
-            <option value="">All permitted forms</option>
-            <option value="contact">Contact</option>
+            <option value="custom">All custom forms</option>
             <option value="madrassah">Madrassah</option>
             <option value="itikaaf">I’tikaf</option>
-            <option value="custom">All custom forms</option>
             {definitions.map((form) => (
               <option key={form.id} value={`form:${form.id}`}>
                 {form.title}
