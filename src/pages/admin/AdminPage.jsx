@@ -166,11 +166,11 @@ function DashboardSection({ onChoose }) {
       </div>
       <div className="admin-task-grid">
         {can('content') && (
-          <Link to="/">
+          <button type="button" onClick={() => onChoose('content')}>
             <Home />
-            <strong>Website</strong>
-            <span>Open the site, then choose Edit this page for pictures and text.</span>
-          </Link>
+            <strong>Website content</strong>
+            <span>Edit page text, pictures, sections and programme pages.</span>
+          </button>
         )}
         {tasks.map(([id, title, description, Icon]) => (
           <button key={id} aria-label={title} onClick={() => onChoose(id)}>
