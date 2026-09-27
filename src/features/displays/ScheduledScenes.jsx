@@ -56,6 +56,13 @@ export default function ScheduledScenes({ form, update, screenId }) {
     () => (orientation === 'portrait' ? DEFAULT_PORTRAIT_STANDBY_SCENE : DEFAULT_STANDBY_SCENE),
     [orientation],
   );
+  const resetLayout = useMemo(() => {
+    if (!scene) return defaultLayout;
+    const next = clone(defaultLayout);
+    next.id = scene.layouts?.[orientation]?.id || next.id;
+    next.name = scene.name;
+    return next;
+  }, [defaultLayout, orientation, scene]);
 
   function saveScenes(next) {
     update('scheduled_scenes', next);
@@ -224,10 +231,20 @@ export default function ScheduledScenes({ form, update, screenId }) {
             </div>
 
             <div className="admin-actions tv-scene-order-actions">
-              <button type="button" className="admin-button" onClick={() => moveScene(-1)}>
+              <button
+                type="button"
+                className="admin-button"
+                disabled={scenes.findIndex((item) => item.id === scene.id) === 0}
+                onClick={() => moveScene(-1)}
+              >
                 Move earlier
               </button>
-              <button type="button" className="admin-button" onClick={() => moveScene(1)}>
+              <button
+                type="button"
+                className="admin-button"
+                disabled={scenes.findIndex((item) => item.id === scene.id) === scenes.length - 1}
+                onClick={() => moveScene(1)}
+              >
                 Move later
               </button>
               <button type="button" className="admin-button" onClick={removeScene}>
@@ -245,7 +262,7 @@ export default function ScheduledScenes({ form, update, screenId }) {
             onChange={update}
             sceneOverride={scene.layouts[orientation]}
             onSceneChange={updateLayout}
-            resetScene={defaultLayout}
+            resetScene={resetLayout}
             allowBlocks
           />
         </>
