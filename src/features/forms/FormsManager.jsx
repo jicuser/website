@@ -374,7 +374,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
           <p>
             {view === 'schedule'
               ? 'Manage hall availability and recurring course/class times.'
-              : 'Manage live forms, where they are used and who handles each response.'}
+              : 'Forms, pages and response responsibility.'}
           </p>
         </div>
         {view === 'forms' && (auth.isOwner || auth.can('forms_manage')) ? (
@@ -423,17 +423,23 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
                   <b>{form.done_count}</b> completed
                   <b>{form.open_actions}</b> actions
                 </span>
-                <span>
-                  Responsible:{' '}
+                <span className="form-card-line">
+                  <b>Handled by</b>{' '}
                   {form.people
                     .filter((person) => person.role === 'responsible')
                     .map((person) => person.display_name || 'Staff member')
                     .join(', ') || 'Not assigned'}
                 </span>
-                <span>
+                <span className="form-card-line">
+                  <b>Shown on</b>{' '}
                   {form.pages?.length
-                    ? `${form.pages.length} linked page${form.pages.length === 1 ? '' : 's'}`
-                    : 'Standalone form'}
+                    ? form.pages
+                        .map(
+                          (page) =>
+                            `${page.title}${page.published ? '' : ' (hidden)'}`,
+                        )
+                        .join(' · ')
+                    : 'Standalone form only'}
                 </span>
               </button>
             ))}
