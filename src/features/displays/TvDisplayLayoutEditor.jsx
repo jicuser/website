@@ -46,13 +46,24 @@ function posterLabel(layer, index) {
   return `Poster ${(layer.poster_offset ?? index) + 1}`;
 }
 
-export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'standby', onChange }) {
+export default function TvDisplayLayoutEditor({
+  screenId,
+  settings,
+  preset = 'standby',
+  onChange,
+  sceneOverride = null,
+  onSceneChange = null,
+  titleOverride = '',
+  resetScene = null,
+  allowBlocks = false,
+}) {
   const orientation = settings.display_orientation === 'portrait' ? 'portrait' : 'landscape';
   const prayers = usePrayerTimes({ includeTomorrow: true });
   const programmes = usePosters();
   const { events, livestream } = useHomeLiveContent({ eventLimit: 50 });
   const fallback = defaultScene(orientation, preset);
   const scene =
+    sceneOverride ||
     settings.display_layouts?.[orientation]?.[preset] ||
     (orientation === 'landscape'
       ? preset === 'standby'
@@ -68,7 +79,7 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
   const [assetMessage, setAssetMessage] = useState('');
   const canvas = useRef(null);
   const drag = useRef(null);
-  const history = useSceneHistory(`${screenId}:${orientation}:${preset}`);
+  const history = useSceneHistory(`${screenId}:${orientation}:${preset}:${scene.id}`);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -103,11 +114,16 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
       : '';
 
   function setScene(next) {
+    const safe = { ...next, overlap: true };
+    if (onSceneChange) {
+      onSceneChange(safe);
+      return;
+    }
     onChange('display_layouts', {
       ...(settings.display_layouts || {}),
       [orientation]: {
         ...(settings.display_layouts?.[orientation] || {}),
-        [preset]: { ...next, overlap: true },
+        [preset]: safe,
       },
     });
   }
@@ -124,6 +140,32 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
     };
     if (record) commitScene(updated);
     else setScene(updated);
+  }
+
+  function addBlock(type) {
+    if (!allowBlocks || !type || scene.layers.length >= 12) return;
+    const id = `${type}-${crypto.randomUUID()}`;
+    const offset = (scene.layers.length * 7) % 35;
+    const next = {
+      id,
+      type,
+      x: 5 + offset,
+      y: 5 + offset,
+      width: type === 'brand' ? 22 : type === 'clock' || type === 'next' ? 35 : 40,
+      height: type === 'brand' ? 15 : type === 'clock' || type === 'next' ? 18 : 30,
+    };
+    if (type === 'times') next.layout = orientation === 'portrait' ? 'vertical' : 'horizontal';
+    if (type === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
+    if (type === 'text') next.text = 'New notice';
+    commitScene({ ...scene, layers: [...scene.layers, fitRect(next)] });
+    setSelected(id);
+  }
+
+  function removeSelectedBlock() {
+    if (!allowBlocks || !layer) return;
+    commitScene({ ...scene, layers: scene.layers.filter((item) => item.id !== layer.id) });
+    const remaining = scene.layers.filter((item) => item.id !== layer.id);
+    setSelected(remaining[0]?.id || '');
   }
 
   function begin(event, item, resize = false) {
@@ -197,7 +239,7 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
     muted: true,
   };
   const sampleTime = prayers.todaysTimes?.jamaah_isha || prayers.todaysTimes?.isha || '8:45 PM';
-  const sampleSequence = ['before', 'jamaah', 'dhikr'].includes(preset)
+  const sampleSequence = !sceneOverride && ['before', 'jamaah', 'dhikr'].includes(preset)
     ? {
         name: 'Isha',
         key: 'isha',
@@ -210,12 +252,15 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
     : null;
   const presetContent = sampleSequence ? (
     <TvPrayerScene sequence={sampleSequence} jummahNotice={settings.jummah_notice} settings={settings} />
-  ) : preset === 'jummah' ? (
+  ) : !sceneOverride && preset === 'jummah' ? (
     <TvSpecialNotice mode="jummah" settings={settings} fasting={null} />
-  ) : preset === 'ramadan' ? (
+  ) : !sceneOverride && preset === 'ramadan' ? (
     <TvSpecialNotice mode="taraweeh" settings={settings} fasting={null} />
   ) : null;
-  const presetLabel = settings.preset_names?.[preset] || (preset === 'standby' ? 'Standby' : preset);
+  const presetLabel =
+    titleOverride ||
+    settings.preset_names?.[preset] ||
+    (preset === 'standby' ? 'Standby' : preset);
 
   return (
     <section className="tv-layout-editor" aria-label={`${presetLabel} layout editor`}>
@@ -309,6 +354,27 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
       {!previewOnly && (
         <>
           <div className="tv-layout-controls">
+            {allowBlocks && (
+              <label>
+                Add block
+                <select
+                  value=""
+                  disabled={scene.layers.length >= 12}
+                  onChange={(event) => {
+                    addBlock(event.target.value);
+                    event.target.value = '';
+                  }}
+                >
+                  <option value="">Choose…</option>
+                  <option value="poster">Poster</option>
+                  <option value="times">Prayer timetable</option>
+                  <option value="next">Next Salah</option>
+                  <option value="clock">Clock</option>
+                  <option value="brand">JIC logo</option>
+                  <option value="text">Text notice</option>
+                </select>
+              </label>
+            )}
             <label>
               Block
               <select value={selected} onChange={(event) => setSelected(event.target.value)}>
@@ -337,6 +403,18 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
               </label>
             )}
 
+            {layer?.type === 'text' && (
+              <label>
+                Text
+                <textarea
+                  rows={3}
+                  maxLength={1200}
+                  value={layer.text || ''}
+                  onChange={(event) => updateLayer({ ...layer, text: event.target.value })}
+                />
+              </label>
+            )}
+
             {layer && (
               <button
                 type="button"
@@ -345,6 +423,17 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
                 disabled={layer.type === 'state'}
               >
                 {layer.hidden ? 'Show block' : 'Hide block'}
+              </button>
+            )}
+            {allowBlocks && layer && (
+              <button
+                type="button"
+                className="admin-button"
+                onClick={() => {
+                  if (window.confirm('Remove this block from the scene?')) removeSelectedBlock();
+                }}
+              >
+                Remove block
               </button>
             )}
           </div>
@@ -416,7 +505,9 @@ export default function TvDisplayLayoutEditor({ screenId, settings, preset = 'st
             className="admin-button tv-reset-layout"
             onClick={() => {
               if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
-              const reset = defaultScene(orientation, preset);
+              const reset = resetScene
+                ? cloneScene(resetScene)
+                : defaultScene(orientation, preset);
               commitScene(reset);
               setSelected(reset.layers[0]?.id || '');
             }}
