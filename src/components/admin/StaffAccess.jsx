@@ -284,7 +284,7 @@ export default function StaffAccess() {
                   Save permissions
                 </button>
               )}
-              {!row.permissions.length && !row.is_owner && <p>Public website access only.</p>}
+              {!row.permissions.length && !row.is_owner && <p>No admin access assigned.</p>}
             </details>
           );
         })
