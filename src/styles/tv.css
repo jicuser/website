@@ -53,10 +53,10 @@ html[data-theme] .jic-tv-display {
 }
 html[data-theme] .jic-tv-display .jic-unified-info {
   border-radius: calc(var(--tv-unit) * 0.833333);
-  background: var(--jic-bg-secondary) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: none !important;
+  background: var(--jic-bg-secondary);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 .jic-tv-logo {
   position: absolute;
@@ -162,7 +162,7 @@ html[data-theme] .jic-tv-stage {
   display: grid;
   min-height: 0;
   min-width: 0;
-  padding: 0 !important;
+  padding: 0;
   gap: calc(var(--tv-unit) * 0.833333);
 }
 /* Four full-height portrait posters advance together by one position. */
