@@ -44,15 +44,15 @@ html[data-theme='dark'] .jic-inner-route .jic-page-backdrop img {
   filter: brightness(1.12) saturate(0.9);
 }
 html[data-theme] .jic-public-route :is(.jic-public-main, .page-transition) {
-  background: transparent !important;
+  background: transparent;
 }
 html[data-theme] .jic-radio-player-page.jic-public-route {
-  background: transparent !important;
+  background: transparent;
 }
 html[data-theme]
   .jic-home-route
   :is(.jic-public-main, .jic-premium-home, .jic-feature-grid, .jic-upcoming-events, .jic-hero) {
-  background: transparent !important;
+  background: transparent;
 }
 html[data-theme] .jic-premium-home {
   min-height: 0;
@@ -74,7 +74,7 @@ html[data-theme] .jic-premium-home .jic-hero-inner {
 }
 html[data-theme] .jic-premium-home .jic-kicker {
   margin: 0 0 16px;
-  color: #f0d598 !important;
+  color: #f0d598;
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0.16em;
@@ -88,7 +88,7 @@ html[data-theme] .jic-premium-home .jic-hero h1 {
   font-size: clamp(42px, 5.4vw, 76px);
   line-height: 1.06;
   letter-spacing: -0.035em;
-  color: #fff !important;
+  color: #fff;
   text-shadow: 0 3px 18px #0006;
 }
 html[data-theme] .jic-premium-home .jic-gold-rule {
@@ -102,7 +102,7 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
   margin: 0;
   font-size: 18px;
   line-height: 1.5;
-  color: #f0f3f8 !important;
+  color: #f0f3f8;
   text-shadow: 0 2px 12px #0009;
 }
 .jic-hero-buttons {
@@ -412,9 +412,9 @@ html[data-theme] .jic-home-footer-strip {
 }
 html[data-theme='light'] .jic-premium-home .jic-hero :is(h1, .jic-hero-sub),
 html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming-events h2) {
-  color: #0c1930 !important;
+  color: #0c1930;
   text-shadow: none;
 }
 html[data-theme='light'] .jic-premium-home .jic-kicker {
-  color: #784217 !important;
+  color: #784217;
 }
