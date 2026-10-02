@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Plus, Save, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
+import { createImageUploader } from '@/lib/imageUpload';
 
 const blank = {
   section_key: '',
@@ -15,19 +16,7 @@ const blank = {
 
 async function uploadImage(file, folder) {
   if (!file) return '';
-  if (
-    !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
-    file.size > 8 * 1024 * 1024
-  ) {
-    throw new Error('Choose a JPG, PNG or WebP under 8 MB.');
-  }
-  const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[file.type];
-  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
-    .from('site-images')
-    .upload(path, file, { upsert: false });
-  if (error) throw error;
-  return supabase.storage.from('site-images').getPublicUrl(path).data.publicUrl;
+  return createImageUploader(supabase)(file, folder);
 }
 
 export default function PageSectionsEditor({ pagePath }) {

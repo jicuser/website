@@ -1,4 +1,5 @@
-import { IMAGE_ACCEPT, validateImage } from '@/lib/images';
+import { IMAGE_ACCEPT } from '@/lib/images';
+import { createImageUploader } from '@/lib/imageUpload';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -109,13 +110,7 @@ function formatDateTime(value) {
 }
 async function uploadImage(file, folder = 'admin') {
   if (!file) return null;
-  const ext = validateImage(file);
-  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
-    .from('site-images')
-    .upload(path, file, { cacheControl: '3600', upsert: false });
-  if (error) throw error;
-  return supabase.storage.from('site-images').getPublicUrl(path).data.publicUrl;
+  return createImageUploader(supabase)(file, folder);
 }
 
 function DashboardSection({ onChoose }) {

@@ -4,7 +4,7 @@
  */
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { validateImage } from '@/lib/images';
+import { createImageUploader } from '@/lib/imageUpload';
 import { useAuth } from '@/context/AuthContext';
 
 const ContentContext = createContext(null);
@@ -70,15 +70,9 @@ export function ContentProvider({ children }) {
 
   async function uploadImage(key, file) {
     if (!can('content')) throw new Error('You do not have permission to replace pictures.');
-    const ext = validateImage(file);
-    const path = `${key.replace(/\./g, '/')}-${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from('site-images')
-      .upload(path, file, { upsert: false });
-    if (uploadError) throw uploadError;
-    const { data } = supabase.storage.from('site-images').getPublicUrl(path);
-    await saveContent(key, data.publicUrl, 'image');
-    return data.publicUrl;
+    const publicUrl = await createImageUploader(supabase)(file, 'content');
+    await saveContent(key, publicUrl, 'image');
+    return publicUrl;
   }
 
   return (

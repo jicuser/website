@@ -1,4 +1,5 @@
-import { IMAGE_ACCEPT, validateImage } from '@/lib/images';
+import { IMAGE_ACCEPT } from '@/lib/images';
+import { createImageUploader } from '@/lib/imageUpload';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ImagePlus, Save, Trash2 } from 'lucide-react';
@@ -28,13 +29,7 @@ const DEFAULT_TILES = [
 
 async function uploadTileImage(file, key) {
   if (!file) return null;
-  const ext = validateImage(file);
-  const path = `home-tiles/${key}-${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
-    .from('site-images')
-    .upload(path, file, { cacheControl: '3600', upsert: false });
-  if (error) throw error;
-  return supabase.storage.from('site-images').getPublicUrl(path).data.publicUrl;
+  return createImageUploader(supabase)(file, 'home-tiles');
 }
 
 export default function TileContentAdminPage() {

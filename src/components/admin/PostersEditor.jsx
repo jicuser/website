@@ -7,7 +7,8 @@ import { useContent } from '@/context/ContentContext';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { supabase } from '@/lib/supabaseClient';
-import { IMAGE_ACCEPT, validateImage } from '@/lib/images';
+import { IMAGE_ACCEPT } from '@/lib/images';
+import { createImageUploader } from '@/lib/imageUpload';
 import PosterWorkflow from '@/features/content/PosterWorkflow';
 import '@/styles/content-workflow.css';
 
@@ -113,11 +114,7 @@ export default function PostersEditor({ registerBack }) {
     pending.current = true;
     setBusy(true);
     try {
-      const extension = validateImage(file);
-      const path = `posters/${crypto.randomUUID()}.${extension}`;
-      const { error } = await supabase.storage.from('site-images').upload(path, file);
-      if (error) throw error;
-      const url = supabase.storage.from('site-images').getPublicUrl(path).data.publicUrl;
+      const url = await createImageUploader(supabase)(file, 'posters');
       // Keep the upload attached to its original poster if the selection changes.
       setItems((previous) =>
         previous.map((poster) => {

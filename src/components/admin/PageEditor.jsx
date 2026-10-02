@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import { createImageUploader } from '@/lib/imageUpload';
 import { useContent } from '@/context/ContentContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { EDITABLE_PAGES, pageDefaults, pageKey } from '@/content/editablePages';
@@ -162,15 +163,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
     try {
       let next = { ...draft };
       if (pendingImage) {
-        const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[
-          pendingImage.type
-        ];
-        const path = `pages/${crypto.randomUUID()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from('site-images')
-          .upload(path, pendingImage, { upsert: false });
-        if (uploadError) throw uploadError;
-        next.image = supabase.storage.from('site-images').getPublicUrl(path).data.publicUrl;
+        next.image = await createImageUploader(supabase)(pendingImage, 'pages');
       }
       if (next.image && !/^https:\/\//i.test(next.image))
         throw new Error('Use an HTTPS image URL or upload a picture.');

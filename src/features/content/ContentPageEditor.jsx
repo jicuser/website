@@ -5,7 +5,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { checked } from '@/components/workspace/shared';
 import CustomFormsBuilder from '@/components/workspace/CustomFormsBuilder';
-import { IMAGE_ACCEPT, validateImage } from '@/lib/images';
+import { IMAGE_ACCEPT } from '@/lib/images';
+import { createImageUploader } from '@/lib/imageUpload';
 import {
   PAGE_PLACEMENTS,
   PAGE_KINDS,
@@ -126,10 +127,7 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
     setBusy(true);
     setMessage('');
     try {
-      const ext = validateImage(file);
-      const path = `pages/${crypto.randomUUID()}.${ext}`;
-      await checked(supabase.storage.from('site-images').upload(path, file, { upsert: false }));
-      patch({ image_url: supabase.storage.from('site-images').getPublicUrl(path).data.publicUrl });
+      patch({ image_url: await createImageUploader(supabase)(file, 'pages') });
     } catch (error) {
       setMessage(error.message);
     } finally {

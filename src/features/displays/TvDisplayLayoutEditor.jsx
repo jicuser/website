@@ -5,7 +5,7 @@ import {
 } from '../../../supabase/functions/_shared/tv.js';
 import { fitRect, layerStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
 import { supabase } from '@/lib/supabaseClient';
-import { validateImage } from '@/lib/images';
+import { createImageUploader } from '@/lib/imageUpload';
 import SceneCanvas from './SceneCanvas';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
@@ -232,11 +232,7 @@ export default function TvDisplayLayoutEditor({
     setUploading(true);
     setAssetMessage('');
     try {
-      const extension = validateImage(file);
-      const path = `tv-presets/${screenId}/${crypto.randomUUID()}.${extension}`;
-      const { error } = await supabase.storage.from('site-images').upload(path, file);
-      if (error) throw error;
-      const url = supabase.storage.from('site-images').getPublicUrl(path).data.publicUrl;
+      const url = await createImageUploader(supabase)(file, `tv-presets/${screenId}`);
       updateLayer({ ...layer, image_url: url, image_fit: layer.image_fit || 'contain' });
       setAssetMessage('Preset image selected.');
     } catch (error) {
