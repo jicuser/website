@@ -325,6 +325,7 @@ function ScreenDisplay({ screenId }) {
           onImageError={onImageError}
           livestream={livestream}
           presetContent={presetContent}
+          showFallbackBrand={false}
         />
         {connectionControl}
       </div>
@@ -367,6 +368,7 @@ function ScreenDisplay({ screenId }) {
             slide={slide}
             onImageError={onImageError}
             livestream={livestream}
+            showFallbackBrand={false}
           />
         ) : null}
         {connectionControl}

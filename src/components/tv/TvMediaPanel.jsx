@@ -4,6 +4,7 @@ import YouTubeScreenPlayer from './YouTubeScreenPlayer';
 import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
 import { youtubeVideoId } from '@/lib/video';
 import { inputLabel } from '@/lib/tvSceneState';
+import { layerImageStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
 
 // Each source fails independently, keeping the other panels visible.
 export default function TvMediaPanel({
@@ -76,7 +77,12 @@ export default function TvMediaPanel({
   if (poster?.kind === 'announcement') return <AnnouncementPoster poster={poster} />;
   return poster ? (
     <figure className="jic-tv-poster">
-      <img src={poster.image} alt={poster.alt} onError={() => onImageError(poster.image)} />
+      <img
+        src={poster.image}
+        alt={poster.alt}
+        style={layerImageStyle(layer)}
+        onError={() => onImageError(poster.image)}
+      />
       <figcaption>{poster.title}</figcaption>
     </figure>
   ) : (

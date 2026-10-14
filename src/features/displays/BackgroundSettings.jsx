@@ -208,6 +208,7 @@ export default function BackgroundSettings({
 
         <TvDisplayLayoutEditor
           screenId={screenId}
+          disabled={busy}
           settings={form}
           preset={preset}
           onChange={update}
@@ -220,7 +221,7 @@ export default function BackgroundSettings({
           hall={screenId !== 'shoe-area'}
           preset={preset}
         />
-        <ScheduledScenes form={form} update={update} screenId={screenId} />
+        <ScheduledScenes form={form} update={update} screenId={screenId} disabled={busy} />
       </fieldset>
 
       <div className="admin-actions tv-save-actions">

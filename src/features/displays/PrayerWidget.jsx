@@ -22,7 +22,8 @@ function JummahRow({ data }) {
     <div className="scene-jummah-row">
       {data.jummahTimes.slice(0, 2).map((item, index) => (
         <span key={item.name || index}>
-          {item.name || `Jummah ${index + 1}`} <strong>{displayTime(item.prayer)}</strong>
+          <span className="scene-jummah-name">{item.name || `Jummah ${index + 1}`}</span>
+          <strong>{displayTime(item.prayer)}</strong>
         </span>
       ))}
     </div>
@@ -31,7 +32,7 @@ function JummahRow({ data }) {
 
 function PrayerTable({ data, current, compact = false, showTomorrow = false }) {
   return (
-    <div className={`scene-prayer-table ${compact ? 'is-compact' : ''} ${showTomorrow ? 'has-tomorrow' : ''}`}>
+    <div className={`scene-prayer-table ${compact ? 'is-compact' : ''} ${showTomorrow ? 'has-tomorrow' : ''} ${data.jummahTimes?.length ? 'has-jummah' : ''}`}>
       <div className="scene-prayer-table-head" aria-hidden="true">
         <span>Salah</span>
         <span>Start</span>
@@ -77,7 +78,7 @@ function ClockFace({ now, current }) {
           timeZone: 'Europe/London',
           hour: '2-digit',
           minute: '2-digit',
-          hour12: false,
+          hour12: true,
         })}
       </strong>
       <span>{current?.name || 'Salah'}</span>
@@ -119,33 +120,11 @@ export default function PrayerWidget({ kind, prayers: data, now, layout = 'horiz
       </div>
     );
 
-  if (layout === 'compact')
-    return <PrayerTable data={data} current={current} compact />;
-
-  if (layout === 'vertical')
-    return (
-      <div className="scene-timetable is-vertical">
-        <div className="scene-timetable-prayers">
-          {prayers.map(([name, key, arabic]) => (
-            <div
-              key={key}
-              className={current?.key === key ? 'is-current' : ''}
-              aria-current={current?.key === key ? 'time' : undefined}
-            >
-              <span>
-                {name} <small lang="ar" dir="rtl">{arabic}</small>
-              </span>
-              <strong>{displayTime(data.todaysTimes?.[key])}</strong>
-              <small>Jama‘ah {jamaah(data, key)}</small>
-            </div>
-          ))}
-        </div>
-        <JummahRow data={data} />
-      </div>
-    );
+  if (layout === 'compact' || layout === 'vertical')
+    return <PrayerTable data={data} current={current} compact={layout === 'compact'} />;
 
   return (
-    <div className="scene-timetable">
+    <div className={`scene-timetable ${data.jummahTimes?.length ? 'has-jummah' : ''}`}>
       <div className="scene-timetable-prayers">
         {prayers.map(([name, key]) => (
           <div

@@ -69,6 +69,15 @@ export function layerStyle(layer) {
     height: `${layer.height}%`,
   };
 }
+// Shared by the editor preview and the TV so saved crops use the same coordinates.
+export function layerImageStyle(layer = {}) {
+  const position = (value) =>
+    Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 50;
+  return {
+    objectFit: layer.image_fit === 'cover' ? 'cover' : 'contain',
+    objectPosition: `${position(layer.image_position?.x)}% ${position(layer.image_position?.y)}%`,
+  };
+}
 const validId = (id) => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,64}$/.test(id);
 export function validateScenes(scenes, streamUrl, youtubeUrl) {
   if (!Array.isArray(scenes) || scenes.length < 1 || scenes.length > MAX_SCENES)
@@ -148,10 +157,25 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
           if (layer.image_url !== undefined && layer.image_url !== '') {
             item.image_url = streamUrl(layer.image_url);
           }
+        }
+        if (['state', 'poster', 'poster-next'].includes(layer.type)) {
           if (layer.image_fit !== undefined) {
             if (!['contain', 'cover'].includes(layer.image_fit))
-              throw new Error('Choose contain or cover for preset pictures.');
+              throw new Error('Choose fit or crop for pictures.');
             item.image_fit = layer.image_fit;
+          }
+          if (layer.image_position !== undefined) {
+            const position = layer.image_position;
+            if (
+              !position ||
+              typeof position !== 'object' ||
+              Array.isArray(position) ||
+              ['x', 'y'].some((axis) =>
+                !Number.isFinite(position[axis]) || position[axis] < 0 || position[axis] > 100,
+              )
+            )
+              throw new Error('Keep the picture crop position between 0 and 100.');
+            item.image_position = { x: position.x, y: position.y };
           }
         }
         if (['youtube', 'video', 'camera', 'input', 'schedule'].includes(layer.type)) {

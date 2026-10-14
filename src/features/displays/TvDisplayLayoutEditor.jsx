@@ -3,7 +3,7 @@ import {
   DEFAULT_TV_DISPLAY_LAYOUTS,
   PRAYER_TIMETABLE_LAYOUTS,
 } from '../../../supabase/functions/_shared/tv.js';
-import { fitRect, layerStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
+import { fitRect } from '../../../supabase/functions/_shared/tv-scenes.js';
 import { supabase } from '@/lib/supabaseClient';
 import { createImageUploader } from '@/lib/imageUpload';
 import SceneCanvas from './SceneCanvas';
@@ -13,7 +13,9 @@ import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLo
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import usePosters from '@/hooks/usePosters';
 import useSceneHistory from './useSceneHistory';
-import TvFinalPreview, { TvScaledPreview } from './TvFinalPreview';
+import TvFinalPreview from './TvFinalPreview';
+import LayoutCanvas from './LayoutCanvas';
+import EditorViewport from './EditorViewport';
 import { tvPresetLabel } from '@/lib/tvEditorLabels';
 
 const labels = {
@@ -57,6 +59,7 @@ export default function TvDisplayLayoutEditor({
   titleOverride = '',
   resetScene = null,
   allowBlocks = false,
+  disabled = false,
 }) {
   const orientation = settings.display_orientation === 'portrait' ? 'portrait' : 'landscape';
   const prayers = usePrayerTimes({ includeTomorrow: true });
@@ -73,14 +76,17 @@ export default function TvDisplayLayoutEditor({
       : null) ||
     fallback;
 
-  const [selected, setSelected] = useState(scene.layers[0]?.id || '');
+  const [selected, setSelected] = useState('');
   const [now, setNow] = useState(() => new Date());
   const [previewOnly, setPreviewOnly] = useState(false);
-  const [editingPosition, setEditingPosition] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [cropping, setCropping] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [snap, setSnap] = useState(true);
+  const expandButton = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [assetMessage, setAssetMessage] = useState('');
-  const canvas = useRef(null);
-  const drag = useRef(null);
+  const latestEditor = useRef(null);
   const history = useSceneHistory(`${screenId}:${orientation}:${preset}:${scene.id}`);
 
   useEffect(() => {
@@ -89,20 +95,18 @@ export default function TvDisplayLayoutEditor({
   }, []);
 
   useEffect(() => {
-    if (!scene.layers.some((item) => item.id === selected)) setSelected(scene.layers[0]?.id || '');
+    if (!scene.layers.some((item) => item.id === selected)) setSelected('');
   }, [scene.id, scene.layers, selected]);
 
   useEffect(() => {
     setPreviewOnly(false);
-    setEditingPosition(false);
+    setCropping(false);
     setAssetMessage('');
-    drag.current = null;
   }, [screenId, orientation, preset, scene.id]);
 
   useEffect(() => {
     setAssetMessage('');
-    setEditingPosition(false);
-    drag.current = null;
+    setCropping(false);
   }, [selected]);
 
   const layer = scene.layers.find((item) => item.id === selected) || null;
@@ -123,6 +127,7 @@ export default function TvDisplayLayoutEditor({
       : '';
 
   function setScene(next) {
+    if (disabled) return;
     const safe = { ...next, overlap: true };
     if (onSceneChange) {
       onSceneChange(safe);
@@ -152,7 +157,7 @@ export default function TvDisplayLayoutEditor({
   }
 
   function addBlock(type) {
-    if (!allowBlocks || !type || scene.layers.length >= 12) return;
+    if (disabled || !type || scene.layers.length >= 12) return;
     const id = `${type}-${crypto.randomUUID()}`;
     const offset = (scene.layers.length * 7) % 35;
     const next = {
@@ -168,17 +173,18 @@ export default function TvDisplayLayoutEditor({
     if (type === 'text') next.text = 'New notice';
     commitScene({ ...scene, layers: [...scene.layers, { ...next, ...fitRect(next) }] });
     setSelected(id);
+    setInspectorOpen(true);
   }
 
   function removeSelectedBlock() {
-    if (!allowBlocks || !layer) return;
+    if (disabled || !layer) return;
     commitScene({ ...scene, layers: scene.layers.filter((item) => item.id !== layer.id) });
-    const remaining = scene.layers.filter((item) => item.id !== layer.id);
-    setSelected(remaining[0]?.id || '');
+    setSelected('');
   }
 
   function changeBlockType(type) {
-    if (!allowBlocks || !layer || !type) return;
+    if (disabled || !layer || !type) return;
+    setCropping(false);
     const next = {
       id: layer.id,
       type,
@@ -193,58 +199,33 @@ export default function TvDisplayLayoutEditor({
     updateLayer(next);
   }
 
-  function begin(event, item, resize = false) {
-    if (event.button !== 0) return;
-    event.preventDefault();
-    event.stopPropagation();
-    setSelected(item.id);
-    const rect = canvas.current?.getBoundingClientRect();
-    if (!rect) return;
-    drag.current = {
-      item,
-      resize,
-      startX: event.clientX,
-      startY: event.clientY,
-      width: rect.width,
-      height: rect.height,
-      started: false,
-    };
-    event.currentTarget.setPointerCapture?.(event.pointerId);
+  function chooseLayer(id) {
+    setSelected(id);
+    setInspectorOpen(true);
+    setCropping(false);
   }
 
-  function move(event) {
-    const start = drag.current;
-    if (!start) return;
-    if (!start.started) {
-      if (Math.hypot(event.clientX - start.startX, event.clientY - start.startY) < 3) return;
-      history.checkpoint(scene);
-      start.started = true;
-    }
-    const dx = ((event.clientX - start.startX) / start.width) * 100;
-    const dy = ((event.clientY - start.startY) / start.height) * 100;
-    const raw = start.resize
-      ? { ...start.item, width: start.item.width + dx, height: start.item.height + dy }
-      : { ...start.item, x: start.item.x + dx, y: start.item.y + dy };
-    const fitted = fitRect(raw);
-    const grid = event.shiftKey ? 1 : 5;
-    const snapped = Object.fromEntries(
-      ['x', 'y', 'width', 'height'].map((key) => [key, Math.round(fitted[key] / grid) * grid]),
-    );
-    updateLayer({ ...start.item, ...fitRect({ ...fitted, ...snapped }) }, false);
+  function reorder(front) {
+    if (!layer) return;
+    const others = scene.layers.filter((item) => item.id !== layer.id);
+    commitScene({ ...scene, layers: front ? [...others, layer] : [layer, ...others] });
   }
 
-  function finish(event) {
-    event.stopPropagation();
-    drag.current = null;
-  }
+  const editorKey = `${screenId}:${orientation}:${preset}:${scene.id}`;
+  latestEditor.current = { key: editorKey, scene, updateLayer };
 
   async function uploadPresetImage(file) {
-    if (!file || layer?.type !== 'state' || uploading) return;
+    if (disabled || !file || layer?.type !== 'state' || uploading) return;
     setUploading(true);
     setAssetMessage('');
     try {
       const url = await createImageUploader(supabase)(file, `tv-presets/${screenId}`);
-      updateLayer({ ...layer, image_url: url, image_fit: layer.image_fit || 'contain' });
+      const current = latestEditor.current;
+      const target = current.scene.layers.find(
+        (item) => item.id === layer.id && item.type === 'state',
+      );
+      if (current.key !== editorKey || !target) return;
+      current.updateLayer({ ...target, image_url: url, image_fit: target.image_fit || 'contain' });
       setAssetMessage('Image added to this draft. Save changes to show it on the TV.');
     } catch (error) {
       setAssetMessage(error.message);
@@ -294,7 +275,14 @@ export default function TvDisplayLayoutEditor({
         : labels[item.type] || 'Content';
   const selectedLabel = layer ? contentLabel(layer, scene.layers.indexOf(layer)) : '';
 
-  return (
+  const canCrop = Boolean(
+    layer &&
+    (['poster', 'poster-next'].includes(layer.type) || (layer.type === 'state' && layer.image_url)),
+  );
+  useEffect(() => {
+    if (!canCrop || layer?.hidden) setCropping(false);
+  }, [canCrop, layer?.hidden]);
+  const editor = (
     <section className="tv-layout-editor" aria-label={`${presetLabel} layout editor`}>
       <div className="tv-layout-toolbar">
         <div>
@@ -305,7 +293,7 @@ export default function TvDisplayLayoutEditor({
           <button
             type="button"
             className="admin-button"
-            disabled={!history.canUndo}
+            disabled={disabled || !history.canUndo}
             onClick={() => history.undo(scene, setScene)}
           >
             Undo
@@ -313,26 +301,144 @@ export default function TvDisplayLayoutEditor({
           <button
             type="button"
             className="admin-button"
-            disabled={!history.canRedo}
+            disabled={disabled || !history.canRedo}
             onClick={() => history.redo(scene, setScene)}
           >
             Redo
           </button>
+          {!expanded && (
+            <button
+              ref={expandButton}
+              type="button"
+              className="admin-button"
+              onClick={() => setExpanded(true)}
+            >
+              Larger editor
+            </button>
+          )}
           <button type="button" className="admin-button" onClick={() => setPreviewOnly(true)}>
-            Full-screen preview
+            Preview
           </button>
         </div>
       </div>
 
+      <LayoutCanvas
+        key={editorKey}
+        layers={scene.layers}
+        selectedId={selected}
+        onSelect={chooseLayer}
+        onEdit={() => setInspectorOpen(true)}
+        onChange={(next) => updateLayer(next, false)}
+        onCheckpoint={() => history.checkpoint(scene)}
+        orientation={orientation}
+        disabled={disabled}
+        snap={snap}
+        crop={cropping && canCrop && !layer?.hidden}
+        labelFor={contentLabel}
+      >
+        <SceneCanvas
+          preview
+          showFallbackBrand={false}
+          tv={{ settings: previewSettings, paired: true, inputs: [] }}
+          screenId={screenId}
+          now={now}
+          prayers={prayers}
+          posters={posters}
+          slide={0}
+          onImageError={() => {}}
+          livestream={livestream}
+          presetContent={presetContent}
+        />
+      </LayoutCanvas>
+
+      {layer ? (
+        <div className="tv-selection-actions" aria-label="Selected content actions">
+          <strong>
+            {selectedLabel}
+            {layer.hidden ? ' · hidden' : ''}
+          </strong>
+          <div className="tv-selection-buttons">
+            <button
+              type="button"
+              className="admin-button"
+              aria-expanded={inspectorOpen}
+              onClick={() => setInspectorOpen((open) => !open)}
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              className="admin-button"
+              disabled={disabled}
+              onClick={() => updateLayer({ ...layer, hidden: !layer.hidden })}
+            >
+              {layer.hidden ? 'Show' : 'Hide'}
+            </button>
+            <button
+              type="button"
+              className="admin-button"
+              disabled={disabled}
+              onClick={removeSelectedBlock}
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              className="admin-button"
+              disabled={disabled || scene.layers.at(-1)?.id === layer.id}
+              onClick={() => reorder(true)}
+            >
+              To front
+            </button>
+            <button
+              type="button"
+              className="admin-button"
+              disabled={disabled || scene.layers[0]?.id === layer.id}
+              onClick={() => reorder(false)}
+            >
+              To back
+            </button>
+            {canCrop && (
+              <button
+                type="button"
+                className="admin-button"
+                disabled={disabled || layer.hidden}
+                aria-pressed={cropping}
+                onClick={() => {
+                  if (!cropping && layer.image_fit !== 'cover')
+                    updateLayer({
+                      ...layer,
+                      image_fit: 'cover',
+                      image_position: layer.image_position || { x: 50, y: 50 },
+                    });
+                  setCropping((active) => !active);
+                }}
+              >
+                {cropping ? 'Done cropping' : 'Crop image'}
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <p className="tv-layout-help">
+          Tap an item to edit it. Then drag it to move, or drag a corner to resize.
+        </p>
+      )}
+      {cropping && (
+        <p className="tv-layout-help">
+          Drag the image inside its frame. Drag a corner to change the crop area.
+        </p>
+      )}
+
       <div className="tv-layout-selection">
         <label>
-          Content to edit
+          Layers
           <select
             value={selected}
-            onChange={(event) => setSelected(event.target.value)}
-            disabled={!scene.layers.length}
+            disabled={disabled || !scene.layers.length}
+            onChange={(event) => chooseLayer(event.target.value)}
           >
-            {!scene.layers.length && <option value="">No content yet</option>}
+            <option value="">Select an item…</option>
             {scene.layers.map((item, index) => (
               <option key={item.id} value={item.id}>
                 {contentLabel(item, index)}
@@ -341,131 +447,33 @@ export default function TvDisplayLayoutEditor({
             ))}
           </select>
         </label>
-        <button
-          type="button"
-          className="admin-button"
-          aria-pressed={editingPosition}
-          disabled={!layer || layer.hidden}
-          onClick={() => setEditingPosition((value) => !value)}
-        >
-          {editingPosition ? 'Done positioning' : 'Move & resize'}
-        </button>
+        <label className="admin-check">
+          <input
+            type="checkbox"
+            checked={snap}
+            onChange={(event) => setSnap(event.target.checked)}
+          />
+          Snap to grid
+        </label>
       </div>
 
-      <div
-        ref={canvas}
-        className={`tv-layout-canvas ${orientation === 'portrait' ? 'is-portrait' : ''} ${editingPosition ? 'is-positioning' : ''}`}
-      >
-        {editingPosition && <div className="tv-layout-grid" aria-hidden="true" />}
-        <div className="tv-layout-render" aria-hidden="true">
-          <TvScaledPreview orientation={orientation}>
-            <SceneCanvas
-              preview
-              tv={{ settings: previewSettings, paired: true, inputs: [] }}
-              screenId={screenId}
-              now={now}
-              prayers={prayers}
-              posters={posters}
-              slide={0}
-              onImageError={() => {}}
-              livestream={livestream}
-              presetContent={presetContent}
-            />
-          </TvScaledPreview>
-        </div>
-
-        {editingPosition &&
-          scene.layers
-            .filter((item) => !item.hidden && item.id === selected)
-            .map((item) => (
-              <div
-                key={item.id}
-                role="button"
-                tabIndex={0}
-                aria-label={`Move ${selectedLabel}. Use arrow keys to move, or Shift and arrow keys to resize.`}
-                className={`tv-layout-box ${selected === item.id ? 'is-selected' : ''}`}
-                style={{ ...layerStyle(item), zIndex: 20 }}
-                onPointerDown={(event) => begin(event, item)}
-                onPointerMove={move}
-                onPointerUp={finish}
-                onKeyDown={(event) => {
-                  if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key))
-                    return;
-                  event.preventDefault();
-                  const horizontal = ['ArrowLeft', 'ArrowRight'].includes(event.key);
-                  const field = event.shiftKey
-                    ? horizontal
-                      ? 'width'
-                      : 'height'
-                    : horizontal
-                      ? 'x'
-                      : 'y';
-                  const delta = ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 1;
-                  updateLayer({ ...item, ...fitRect({ ...item, [field]: item[field] + delta }) });
-                }}
-                onPointerCancel={() => {
-                  drag.current = null;
-                }}
-                onFocus={() => setSelected(item.id)}
-              >
-                {selected === item.id && (
-                  <span
-                    className="tv-layout-resize"
-                    aria-hidden="true"
-                    onPointerDown={(event) => begin(event, item, true)}
-                  >
-                    <span>↘</span>
-                  </span>
-                )}
-              </div>
-            ))}
-      </div>
-
-      <p className="tv-layout-help">
-        {editingPosition
-          ? `Positioning: ${selectedLabel}. Drag the outlined area to move it, or drag its corner to resize.`
-          : 'Preview of your draft. Choose content above to edit its settings below.'}
-      </p>
-
-      {editingPosition && layer && (
-        <fieldset className="tv-layout-position">
-          <legend>Position & size (%)</legend>
-          {Object.entries({ x: 'From left', y: 'From top', width: 'Width', height: 'Height' }).map(
-            ([field, name]) => (
-              <label key={field}>
-                {name}
-                <input
-                  type="number"
-                  min={field === 'width' || field === 'height' ? 5 : 0}
-                  max={100}
-                  step={1}
-                  value={Math.round(layer[field])}
-                  onChange={(event) => {
-                    if (event.target.value === '') return;
-                    const number = Number(event.target.value);
-                    if (Number.isFinite(number))
-                      updateLayer({ ...layer, ...fitRect({ ...layer, [field]: number }) });
-                  }}
-                />
-              </label>
-            ),
-          )}
-        </fieldset>
-      )}
-
-      {layer && (
+      {layer && inspectorOpen && (
         <>
-          <fieldset className="tv-layout-controls">
+          <fieldset className="tv-layout-controls" disabled={disabled}>
             <legend>{selectedLabel} settings</legend>
 
-            {allowBlocks && layer && (
+            {layer && (
               <label>
                 Content type
                 <select
                   value={layer.type}
                   onChange={(event) => changeBlockType(event.target.value)}
                 >
-                  <option value="poster">Poster</option>
+                  {allowBlocks ? (
+                    <option value="poster">Poster</option>
+                  ) : (
+                    <option value="state">Automatic prayer message</option>
+                  )}
                   <option value="times">Prayer timetable</option>
                   <option value="next">Next prayer</option>
                   <option value="clock">Clock</option>
@@ -501,35 +509,6 @@ export default function TvDisplayLayoutEditor({
                   onChange={(event) => updateLayer({ ...layer, text: event.target.value })}
                 />
               </label>
-            )}
-
-            {layer.type !== 'state' && (
-              <button
-                type="button"
-                className="admin-button"
-                onClick={() => {
-                  updateLayer({ ...layer, hidden: !layer.hidden });
-                  setEditingPosition(false);
-                }}
-              >
-                {layer.hidden ? 'Show in this layout' : 'Hide in this layout'}
-              </button>
-            )}
-            {allowBlocks && layer && (
-              <button
-                type="button"
-                className="admin-button"
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      `Remove ${selectedLabel} from this layout? You can undo this before saving.`,
-                    )
-                  )
-                    removeSelectedBlock();
-                }}
-              >
-                Remove content
-              </button>
             )}
 
             {['poster', 'poster-next'].includes(layer?.type) && (
@@ -582,55 +561,88 @@ export default function TvDisplayLayoutEditor({
                     </button>
                   )}
                 </div>
-                {layer.image_url && (
-                  <label>
-                    Image fit
-                    <select
-                      value={layer.image_fit || 'contain'}
-                      onChange={(event) => updateLayer({ ...layer, image_fit: event.target.value })}
-                    >
-                      <option value="contain">Fit whole image</option>
-                      <option value="cover">Fill box</option>
-                    </select>
-                  </label>
-                )}
                 {assetMessage && <p role="status">{assetMessage}</p>}
               </div>
             )}
+            {canCrop && (
+              <label>
+                Image fit
+                <select
+                  value={layer.image_fit || 'contain'}
+                  onChange={(event) => {
+                    updateLayer({ ...layer, image_fit: event.target.value });
+                    setCropping(false);
+                  }}
+                >
+                  <option value="contain">Show whole image</option>
+                  <option value="cover">Fill frame / crop</option>
+                </select>
+              </label>
+            )}
+            <details className="tv-precise-position">
+              <summary>Position and size</summary>
+              <div className="tv-layout-position">
+                {Object.entries({
+                  x: 'From left',
+                  y: 'From top',
+                  width: 'Width',
+                  height: 'Height',
+                }).map(([field, name]) => (
+                  <label key={field}>
+                    {name} (%)
+                    <input
+                      type="number"
+                      min={field === 'width' || field === 'height' ? 5 : 0}
+                      max={100}
+                      step={1}
+                      value={Math.round(layer[field])}
+                      onChange={(event) => {
+                        const number = Number(event.target.value);
+                        if (event.target.value !== '' && Number.isFinite(number))
+                          updateLayer({ ...layer, ...fitRect({ ...layer, [field]: number }) });
+                      }}
+                    />
+                  </label>
+                ))}
+              </div>
+            </details>
           </fieldset>
         </>
       )}
 
-      {allowBlocks && (
-        <label className="tv-layout-add-content">
-          Add content to this layout
-          <select
-            value=""
-            disabled={scene.layers.length >= 12}
-            onChange={(event) => addBlock(event.target.value)}
-          >
-            <option value="">Choose content to add…</option>
+      <label className="tv-layout-add-content">
+        Add content
+        <select
+          value=""
+          disabled={disabled || scene.layers.length >= 12}
+          onChange={(event) => addBlock(event.target.value)}
+        >
+          <option value="">Choose content to add…</option>
+          {allowBlocks ? (
             <option value="poster">Poster</option>
-            <option value="times">Prayer timetable</option>
-            <option value="next">Next prayer</option>
-            <option value="clock">Clock</option>
-            <option value="brand">JIC logo</option>
-            <option value="text">Text notice</option>
-          </select>
-          {scene.layers.length >= 12 && (
-            <small>This layout has the maximum of 12 content items.</small>
+          ) : (
+            <option value="state">Automatic prayer message</option>
           )}
-        </label>
-      )}
+          <option value="times">Prayer timetable</option>
+          <option value="next">Next prayer</option>
+          <option value="clock">Clock</option>
+          <option value="brand">JIC logo</option>
+          <option value="text">Text notice</option>
+        </select>
+        {scene.layers.length >= 12 && (
+          <small>This layout has the maximum of 12 content items.</small>
+        )}
+      </label>
 
       <button
         type="button"
         className="admin-button tv-reset-layout"
+        disabled={disabled}
         onClick={() => {
           if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
           const reset = resetScene ? cloneScene(resetScene) : defaultScene(orientation, preset);
           commitScene(reset);
-          setSelected(reset.layers[0]?.id || '');
+          setSelected('');
         }}
       >
         Restore default layout
@@ -644,6 +656,7 @@ export default function TvDisplayLayoutEditor({
       >
         <SceneCanvas
           preview
+          showFallbackBrand={false}
           tv={{ settings: previewSettings, paired: true, inputs: [] }}
           screenId={screenId}
           now={now}
@@ -656,5 +669,16 @@ export default function TvDisplayLayoutEditor({
         />
       </TvFinalPreview>
     </section>
+  );
+  return (
+    <EditorViewport
+      suspended={previewOnly}
+      expanded={expanded}
+      title={presetLabel}
+      onClose={() => setExpanded(false)}
+      returnFocusRef={expandButton}
+    >
+      {editor}
+    </EditorViewport>
   );
 }

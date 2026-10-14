@@ -840,10 +840,12 @@ export default function AdminPage() {
   }[active];
 
   const auditName = user?.user_metadata?.audit_name || profile?.display_name || 'User';
+  const sectionName = allowed.find(([key]) => key === active)?.[1] || 'Admin';
+  const shortSaveLabel = saveLabel.split(' ')[0];
 
   return (
     <div className="admin-console min-h-screen bg-slate-100 text-slate-900">
-      <header className="admin-toolbar">
+      <header className="admin-account-header">
         <div className="admin-toolbar-title">
           <strong>JIC Admin</strong>
           <small>
@@ -861,13 +863,14 @@ export default function AdminPage() {
           </button>
           <button
             className="admin-button"
+            aria-label="View website"
             disabled={saving}
             onClick={() => {
               if (!dirty || window.confirm('Discard unsaved changes?')) navigate('/');
             }}
           >
             <Home size={18} />
-            View website
+            <span className="admin-website-label">View website</span>
           </button>
           <button
             className="admin-button"
@@ -879,14 +882,46 @@ export default function AdminPage() {
             <span>Sign out</span>
           </button>
         </div>
+      </header>
+      <div className="admin-toolbar">
+        <strong className="admin-desktop-current">{sectionName}</strong>
+        <nav className="admin-mobile-section" aria-label="Current admin section">
+          {active !== 'dashboard' && (
+            <button
+              className="admin-mobile-back"
+              disabled={saving}
+              aria-label="Back"
+              onClick={() => (sectionBack ? sectionBack() : chooseSection('dashboard'))}
+            >
+              <ArrowLeft size={18} aria-hidden="true" />
+              <span>Back</span>
+            </button>
+          )}
+          <strong className="admin-mobile-current">{sectionName}</strong>
+          {active !== 'dashboard' && (
+            <button
+              className="admin-mobile-overview"
+              disabled={saving}
+              aria-label="Overview"
+              onClick={() => chooseSection('dashboard')}
+            >
+              <Home size={18} aria-hidden="true" />
+              <span>Overview</span>
+            </button>
+          )}
+        </nav>
         {dirty && (
           <button
             className="admin-button primary admin-save-pending"
             disabled={saving}
+            aria-label={saving ? 'Saving…' : saveLabel}
             onClick={() => saveCurrent().catch(() => {})}
           >
-            <Save size={16} />
-            {saving ? 'Saving…' : saveLabel}
+            <Save size={16} aria-hidden="true" />
+            <span className="admin-save-label">{saving ? 'Saving…' : saveLabel}</span>
+            <span className="admin-save-short" aria-hidden="true">
+              {saving ? 'Saving…' : shortSaveLabel}
+            </span>
           </button>
         )}
         {status && (
@@ -894,28 +929,7 @@ export default function AdminPage() {
             {status}
           </p>
         )}
-        {active !== 'dashboard' && (
-          <nav className="admin-mobile-section" aria-label="Current admin section">
-            <button
-              className="admin-mobile-back"
-              disabled={saving}
-              onClick={() => (sectionBack ? sectionBack() : chooseSection('dashboard'))}
-            >
-              <ArrowLeft size={17} /> Back
-            </button>
-            <strong className="admin-mobile-current">
-              {allowed.find(([key]) => key === active)?.[1] || 'Admin'}
-            </strong>
-            <button
-              className="admin-mobile-overview"
-              disabled={saving}
-              onClick={() => chooseSection('dashboard')}
-            >
-              Overview
-            </button>
-          </nav>
-        )}
-      </header>
+      </div>
       <div className="admin-console-layout">
         <aside className="admin-navigation max-[800px]:hidden">
           <nav aria-label="Admin sections">

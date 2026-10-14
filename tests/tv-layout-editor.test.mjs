@@ -11,8 +11,10 @@ import { DEFAULT_TV_SETTINGS, validateSettings } from '../supabase/functions/_sh
 // Child rendering is separate; this fixture exercises draft edits and history.
 const stubs = {
   '@/lib/supabaseClient': 'export const supabase = {};',
-  '@/lib/imageUpload': 'export const createImageUploader = () => async () => "https://example.test/image.png";',
-  '@/components/sections/prayer-times/PrayerTimesLogic': 'export const usePrayerTimes = () => ({});',
+  '@/lib/imageUpload':
+    'export const createImageUploader = () => async () => "https://example.test/image.png";',
+  '@/components/sections/prayer-times/PrayerTimesLogic':
+    'export const usePrayerTimes = () => ({});',
   '@/hooks/useHomeLiveContent': 'export default () => ({ events: [], livestream: null });',
   '@/hooks/usePosters': 'export default () => [];',
   './SceneCanvas': 'export default function SceneCanvas() { return null; }',
@@ -20,24 +22,32 @@ const stubs = {
   '@/components/tv/TvSpecialNotice': 'export default function TvSpecialNotice() { return null; }',
 };
 const bundled = await build({
-  entryPoints: [new URL('../src/features/displays/TvDisplayLayoutEditor.jsx', import.meta.url).pathname],
+  entryPoints: [
+    new URL('../src/features/displays/TvDisplayLayoutEditor.jsx', import.meta.url).pathname,
+  ],
   bundle: true,
   platform: 'node',
   format: 'cjs',
   packages: 'external',
   write: false,
-  plugins: [{
-    name: 'editor-fixture',
-    setup(builder) {
-      builder.onResolve({ filter: /.*/ }, ({ path }) => {
-        if (Object.hasOwn(stubs, path)) return { path, namespace: 'fixture' };
-        if (!path.startsWith('@/')) return undefined;
-        const base = new URL(`../src/${path.slice(2)}`, import.meta.url).pathname;
-        return { path: [base, `${base}.js`, `${base}.jsx`].find(existsSync) };
-      });
-      builder.onLoad({ filter: /.*/, namespace: 'fixture' }, ({ path }) => ({ contents: stubs[path] }));
+  plugins: [
+    {
+      name: 'editor-fixture',
+      setup(builder) {
+        builder.onResolve({ filter: /.*/ }, ({ path }) => {
+          if (path.endsWith('.css')) return { path, namespace: 'empty-css' };
+          if (Object.hasOwn(stubs, path)) return { path, namespace: 'fixture' };
+          if (!path.startsWith('@/')) return undefined;
+          const base = new URL(`../src/${path.slice(2)}`, import.meta.url).pathname;
+          return { path: [base, `${base}.js`, `${base}.jsx`].find(existsSync) };
+        });
+        builder.onLoad({ filter: /.*/, namespace: 'fixture' }, ({ path }) => ({
+          contents: stubs[path],
+        }));
+        builder.onLoad({ filter: /.*/, namespace: 'empty-css' }, () => ({ contents: '' }));
+      },
     },
-  }],
+  ],
 });
 
 function editorFixture(extra = {}) {
@@ -45,16 +55,23 @@ function editorFixture(extra = {}) {
   let cursor = 0;
   let effects = [];
   let dirty = false;
-  const changed = (previous, next) => !previous || next.some((value, i) => !Object.is(value, previous[i]));
+  const changed = (previous, next) =>
+    !previous || next.some((value, i) => !Object.is(value, previous[i]));
   const hooks = {
     ...React,
     useState(initial) {
       const index = cursor++;
       if (!(index in slots)) slots[index] = typeof initial === 'function' ? initial() : initial;
-      return [slots[index], (value) => {
-        const next = typeof value === 'function' ? value(slots[index]) : value;
-        if (!Object.is(next, slots[index])) { slots[index] = next; dirty = true; }
-      }];
+      return [
+        slots[index],
+        (value) => {
+          const next = typeof value === 'function' ? value(slots[index]) : value;
+          if (!Object.is(next, slots[index])) {
+            slots[index] = next;
+            dirty = true;
+          }
+        },
+      ];
     },
     useRef(initial) {
       const index = cursor++;
@@ -63,7 +80,8 @@ function editorFixture(extra = {}) {
     },
     useCallback(callback, dependencies) {
       const index = cursor++;
-      if (changed(slots[index]?.dependencies, dependencies)) slots[index] = { callback, dependencies };
+      if (changed(slots[index]?.dependencies, dependencies))
+        slots[index] = { callback, dependencies };
       return slots[index].callback;
     },
     useEffect(effect, dependencies) {
@@ -71,14 +89,17 @@ function editorFixture(extra = {}) {
       if (changed(slots[index]?.dependencies, dependencies)) {
         const previous = slots[index];
         slots[index] = { dependencies };
-        effects.push(() => { previous?.cleanup?.(); slots[index].cleanup = effect(); });
+        effects.push(() => {
+          previous?.cleanup?.();
+          slots[index].cleanup = effect();
+        });
       }
     },
   };
   const require = createRequire(import.meta.url);
   const context = {
     module: { exports: {} },
-    require: (name) => name === 'react' ? hooks : require(name),
+    require: (name) => (name === 'react' ? hooks : require(name)),
     window: { setInterval: () => 1, clearInterval: () => {}, confirm: () => true },
   };
   runInNewContext(bundled.outputFiles[0].text, context);
@@ -124,93 +145,225 @@ function text(tree) {
   if (Array.isArray(tree)) return tree.map(text).join('');
   return text(tree.props?.children);
 }
-const button = (tree, name) => nodes(tree).find((node) => node.type === 'button' && text(node) === name);
-const byClass = (tree, name) => nodes(tree).find((node) => node.props?.className?.split(' ').includes(name));
-const select = (tree, name) => nodes(nodes(tree).find((node) => node.type === 'label' && text(node).startsWith(name)))
-  .find((node) => node.type === 'select');
+const button = (tree, name) =>
+  nodes(tree).find((node) => node.type === 'button' && text(node) === name);
+const component = (tree, name) => nodes(tree).find((node) => node.type?.name === name);
+const scene = (fixture) => fixture.props.settings.display_layouts.landscape[fixture.props.preset];
+const select = (tree, name) =>
+  nodes(nodes(tree).find((node) => node.type === 'label' && text(node).startsWith(name))).find(
+    (node) => node.type === 'select',
+  );
 
-test('choosing content keeps the preview clear and never writes a draft', () => {
+test('tapping content opens only its relevant settings and does not write a draft', () => {
   const fixture = editorFixture();
   let tree = fixture.render();
   assert.match(text(tree), /Before prayer/);
-  assert.ok(select(tree, 'Content to edit'));
-  assert.ok(button(tree, 'Full-screen preview'));
-  assert.equal(byClass(tree, 'tv-layout-box'), undefined);
-  assert.equal(byClass(tree, 'tv-layout-grid'), undefined);
-  const state = fixture.props.settings.display_layouts.landscape.before.layers.find((layer) => layer.type === 'state');
-  select(tree, 'Content to edit').props.onChange({ target: { value: state.id } });
+  assert.ok(select(tree, 'Layers'));
+  assert.ok(button(tree, 'Preview'));
+  assert.ok(button(tree, 'Larger editor'));
+  assert.equal(button(tree, 'Remove'), undefined, 'actions wait for a selection');
+  assert.equal(select(tree, 'Timetable style'), undefined);
+  const state = scene(fixture).layers.find((layer) => layer.type === 'state');
+  component(tree, 'LayoutCanvas').props.onSelect(state.id);
   tree = fixture.render();
   assert.match(text(tree), /Before prayer message settings/);
+  assert.ok(button(tree, 'Edit'));
+  assert.ok(button(tree, 'Remove'));
+  assert.ok(button(tree, 'Hide'));
   assert.equal(select(tree, 'Timetable style'), undefined);
-  assert.equal(byClass(tree, 'tv-layout-box'), undefined);
+  assert.equal(component(tree, 'LayoutCanvas').props.selectedId, state.id);
+  assert.equal(fixture.writes.length, 0);
+  button(tree, 'Edit').props.onClick();
+  tree = fixture.render();
+  assert.doesNotMatch(text(tree), /Before prayer message settings/);
   assert.equal(fixture.writes.length, 0);
 });
 
-test('moving content is explicit, bounded and undoable, without replacing other layouts', () => {
+test('one drag checkpoint undoes all its updates without replacing other layouts', () => {
   const fixture = editorFixture();
+  const original = structuredClone(fixture.props.settings);
   let tree = fixture.render();
-  const settingsBefore = structuredClone(fixture.props.settings);
-  button(tree, 'Move & resize').props.onClick();
+  const layer = scene(fixture).layers.find((item) => item.type === 'state');
+  component(tree, 'LayoutCanvas').props.onSelect(layer.id);
   tree = fixture.render();
-  assert.ok(byClass(tree, 'tv-layout-grid'));
-  assert.equal(nodes(tree).filter((node) => node.props?.className?.includes('tv-layout-box')).length, 1);
-  assert.equal(nodes(tree).filter((node) => node.type === 'input' && node.props.type === 'number').length, 4);
-  const moving = byClass(tree, 'tv-layout-box');
-  moving.props.onKeyDown({ key: 'ArrowDown', shiftKey: false, preventDefault() {} });
+  component(tree, 'LayoutCanvas').props.onCheckpoint();
+  component(tree, 'LayoutCanvas').props.onChange({ ...layer, x: 3, width: 90 });
   tree = fixture.render();
-  assert.equal(fixture.writes.length, 1);
+  component(tree, 'LayoutCanvas').props.onChange({ ...layer, x: 5, width: 90 });
+  tree = fixture.render();
+  assert.equal(fixture.writes.length, 2);
   assert.doesNotThrow(() => validateSettings(fixture.props.settings));
-  assert.deepEqual(fixture.props.settings.display_layouts.portrait, settingsBefore.display_layouts.portrait);
-  assert.deepEqual(fixture.props.settings.display_layouts.landscape.standby, settingsBefore.display_layouts.landscape.standby);
-  assert.notEqual(JSON.stringify(fixture.props.settings.display_layouts.landscape.before), JSON.stringify(settingsBefore.display_layouts.landscape.before));
-  assert.equal(button(tree, 'Undo').props.disabled, false);
+  assert.deepEqual(
+    fixture.props.settings.display_layouts.portrait,
+    original.display_layouts.portrait,
+  );
+  assert.deepEqual(
+    fixture.props.settings.display_layouts.landscape.standby,
+    original.display_layouts.landscape.standby,
+  );
   button(tree, 'Undo').props.onClick();
   tree = fixture.render();
-  assert.equal(JSON.stringify(fixture.props.settings.display_layouts.landscape.before), JSON.stringify(settingsBefore.display_layouts.landscape.before));
+  assert.equal(
+    JSON.stringify(scene(fixture)),
+    JSON.stringify(original.display_layouts.landscape.before),
+  );
+  assert.equal(button(tree, 'Undo').props.disabled, true, 'one undo reverses the entire drag');
   assert.equal(button(tree, 'Redo').props.disabled, false);
-  button(tree, 'Done positioning').props.onClick();
+  button(tree, 'Redo').props.onClick();
   tree = fixture.render();
-  assert.equal(byClass(tree, 'tv-layout-box'), undefined);
+  assert.equal(scene(fixture).layers.find((item) => item.id === layer.id).x, 5);
 });
 
-test('opening and closing full-screen preview retains editor selection and never saves', () => {
+test('every preset item, including automatic prayer content, can be removed and restored with Undo', () => {
+  for (const preset of ['standby', 'before', 'jamaah', 'dhikr', 'jummah', 'ramadan']) {
+    const originalLayers = DEFAULT_TV_SETTINGS.display_layouts.landscape[preset].layers;
+    for (const layer of originalLayers) {
+      const fixture = editorFixture({ preset });
+      let tree = fixture.render();
+      component(tree, 'LayoutCanvas').props.onSelect(layer.id);
+      tree = fixture.render();
+      button(tree, 'Remove').props.onClick();
+      tree = fixture.render();
+      assert.equal(
+        scene(fixture).layers.some((item) => item.id === layer.id),
+        false,
+        `${preset}: ${layer.type} removed`,
+      );
+      assert.equal(component(tree, 'LayoutCanvas').props.selectedId, '');
+      assert.doesNotThrow(() => validateSettings(fixture.props.settings));
+      button(tree, 'Undo').props.onClick();
+      fixture.render();
+      assert.equal(
+        JSON.stringify(scene(fixture).layers),
+        JSON.stringify(originalLayers),
+        `${preset}: ${layer.type} restored`,
+      );
+    }
+  }
+});
+
+test('cropping an uploaded image preserves its frame and saves focal position in the draft', () => {
+  const settings = structuredClone(DEFAULT_TV_SETTINGS);
+  const layer = settings.display_layouts.landscape.before.layers.find(
+    (item) => item.type === 'state',
+  );
+  layer.image_url = 'https://example.test/prayer.png';
+  const fixture = editorFixture({ settings });
+  let tree = fixture.render();
+  component(tree, 'LayoutCanvas').props.onSelect(layer.id);
+  tree = fixture.render();
+  button(tree, 'Crop image').props.onClick();
+  tree = fixture.render();
+  assert.equal(component(tree, 'LayoutCanvas').props.crop, true);
+  let image = scene(fixture).layers.find((item) => item.id === layer.id);
+  assert.equal(image.image_fit, 'cover');
+  assert.deepEqual(JSON.parse(JSON.stringify(image.image_position)), { x: 50, y: 50 });
+  component(tree, 'LayoutCanvas').props.onCheckpoint();
+  component(tree, 'LayoutCanvas').props.onChange({ ...image, image_position: { x: 30, y: 70 } });
+  tree = fixture.render();
+  image = scene(fixture).layers.find((item) => item.id === layer.id);
+  for (const key of ['x', 'y', 'width', 'height']) assert.equal(image[key], layer[key]);
+  assert.deepEqual(image.image_position, { x: 30, y: 70 });
+  assert.doesNotThrow(() => validateSettings(fixture.props.settings));
+  select(tree, 'Image fit').props.onChange({ target: { value: 'contain' } });
+  tree = fixture.render();
+  assert.equal(component(tree, 'LayoutCanvas').props.crop, false);
+  assert.equal(scene(fixture).layers.find((item) => item.id === layer.id).image_fit, 'contain');
+});
+
+test('preview and larger editor retain selection and never save a draft', () => {
   const fixture = editorFixture();
   let tree = fixture.render();
-  const chosen = select(tree, 'Content to edit').props.value;
-  button(tree, 'Full-screen preview').props.onClick();
+  const chosen = scene(fixture).layers[0].id;
+  component(tree, 'LayoutCanvas').props.onSelect(chosen);
   tree = fixture.render();
-  const preview = nodes(tree).find((node) => node.type?.name === 'TvFinalPreview');
-  assert.equal(preview.props.open, true);
-  assert.ok(button(tree, 'Full-screen preview'), 'trigger remains mounted for focus restoration');
-  preview.props.onClose();
+  button(tree, 'Preview').props.onClick();
   tree = fixture.render();
-  assert.equal(select(tree, 'Content to edit').props.value, chosen);
-  assert.equal(nodes(tree).find((node) => node.type?.name === 'TvFinalPreview').props.open, false);
+  assert.equal(component(tree, 'TvFinalPreview').props.open, true);
+  component(tree, 'TvFinalPreview').props.onClose();
+  tree = fixture.render();
+  assert.equal(component(tree, 'TvFinalPreview').props.open, false);
+  button(tree, 'Larger editor').props.onClick();
+  tree = fixture.render();
+  assert.equal(component(tree, 'EditorViewport').props.expanded, true);
+  component(tree, 'EditorViewport').props.onClose();
+  tree = fixture.render();
+  assert.equal(component(tree, 'EditorViewport').props.expanded, false);
+  assert.equal(component(tree, 'LayoutCanvas').props.selectedId, chosen);
   assert.equal(fixture.writes.length, 0);
-});
-
-test('tapping a selected item does not create an empty undo step, and another layout exits positioning', () => {
-  const fixture = editorFixture();
-  let tree = fixture.render();
-  button(tree, 'Move & resize').props.onClick();
-  tree = fixture.render();
-  byClass(tree, 'tv-layout-canvas').ref.current = {
-    getBoundingClientRect: () => ({ width: 320, height: 180 }),
-  };
-  const item = byClass(tree, 'tv-layout-box');
-  const pointer = {
-    button: 0, clientX: 50, clientY: 50, pointerId: 1,
-    preventDefault() {}, stopPropagation() {}, currentTarget: { setPointerCapture() {} },
-  };
-  item.props.onPointerDown(pointer);
-  item.props.onPointerMove({ ...pointer, clientX: 51 });
-  item.props.onPointerUp(pointer);
-  tree = fixture.render();
   assert.equal(button(tree, 'Undo').props.disabled, true);
-  assert.equal(fixture.writes.length, 0);
-  fixture.props.preset = 'jamaah';
+});
+
+test('hidden layers remain selectable and can be shown without rebuilding them', () => {
+  const settings = structuredClone(DEFAULT_TV_SETTINGS);
+  const layer = settings.display_layouts.landscape.before.layers[0];
+  layer.hidden = true;
+  const fixture = editorFixture({ settings });
+  let tree = fixture.render();
+  const selector = select(tree, 'Layers');
+  const option = nodes(selector).find(
+    (node) => node.type === 'option' && node.props.value === layer.id,
+  );
+  assert.match(text(option), /hidden/);
+  selector.props.onChange({ target: { value: layer.id } });
   tree = fixture.render();
-  assert.equal(byClass(tree, 'tv-layout-box'), undefined);
-  assert.equal(byClass(tree, 'tv-layout-grid'), undefined);
-  assert.match(text(tree), /Prayer in progress/);
+  assert.equal(fixture.writes.length, 0);
+  assert.ok(button(tree, 'Show'));
+  button(tree, 'Show').props.onClick();
+  fixture.render();
+  const restored = scene(fixture).layers.find((item) => item.id === layer.id);
+  assert.equal(restored.hidden, false);
+  assert.equal(restored.type, layer.type);
+  for (const key of ['x', 'y', 'width', 'height']) assert.equal(restored[key], layer[key]);
+});
+
+test('changing, hiding or restoring a cropped image exits cropping before further edits', () => {
+  for (const action of ['change type', 'hide', 'restore message']) {
+    const settings = structuredClone(DEFAULT_TV_SETTINGS);
+    const layer = settings.display_layouts.landscape.before.layers.find(
+      (item) => item.type === 'state',
+    );
+    layer.image_url = 'https://example.test/prayer.png';
+    const fixture = editorFixture({ settings });
+    let tree = fixture.render();
+    component(tree, 'LayoutCanvas').props.onSelect(layer.id);
+    tree = fixture.render();
+    button(tree, 'Crop image').props.onClick();
+    tree = fixture.render();
+    assert.equal(component(tree, 'LayoutCanvas').props.crop, true);
+    if (action === 'change type') {
+      select(tree, 'Content type').props.onChange({ target: { value: 'text' } });
+    } else {
+      button(tree, action === 'hide' ? 'Hide' : 'Restore prayer message').props.onClick();
+    }
+    tree = fixture.render();
+    assert.equal(component(tree, 'LayoutCanvas').props.crop, false, action);
+    assert.equal(button(tree, 'Done cropping'), undefined);
+    if (action === 'hide') {
+      assert.equal(button(tree, 'Crop image').props.disabled, true);
+      button(tree, 'Show').props.onClick();
+      tree = fixture.render();
+      assert.equal(
+        component(tree, 'LayoutCanvas').props.crop,
+        false,
+        'showing the item does not restart cropping',
+      );
+    } else {
+      assert.equal(button(tree, 'Crop image'), undefined, action);
+      assert.equal(select(tree, 'Image fit'), undefined);
+    }
+    const content = scene(fixture).layers.find((item) => item.id === layer.id);
+    assert.equal(content.type, action === 'change type' ? 'text' : 'state');
+    component(tree, 'LayoutCanvas').props.onCheckpoint();
+    component(tree, 'LayoutCanvas').props.onChange({ ...content, x: 5, width: 90 });
+    fixture.render();
+    const moved = scene(fixture).layers.find((item) => item.id === layer.id);
+    assert.equal(moved.x, 5);
+    assert.equal(moved.width, 90);
+    assert.deepEqual(
+      moved.image_position,
+      content.image_position,
+      'ordinary positioning does not alter the crop',
+    );
+  }
 });

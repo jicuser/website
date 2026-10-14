@@ -1,18 +1,19 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { Plus, Settings2, Link2 } from 'lucide-react';
 import {
   SOURCE_TYPES,
   MAX_SCENES,
-  fitRect,
   layerStyle,
 } from '../../../supabase/functions/_shared/tv-scenes.js';
 import SceneCanvas from './SceneCanvas';
+import LayoutCanvas from './LayoutCanvas';
+import useSceneHistory from './useSceneHistory';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import useTvPreview from '@/hooks/useTvPreview';
 import { inputLabel } from '@/lib/tvSceneState';
 import ContentEditorDialog from './ContentEditorDialog';
-import { SCENE_LAYOUTS, arrangeScene, layoutRegions, snapRect } from '@/lib/sceneLayouts';
+import { SCENE_LAYOUTS, arrangeScene, clearRegion, layoutRegions } from '@/lib/sceneLayouts';
 import { addStreamScene } from '@/lib/streamWorkspace';
 import { isSingleInputPresentation } from '@/lib/presentationMode';
 
@@ -46,8 +47,7 @@ export default function SceneEditor({
   const [editing, setEditing] = useState(null);
   const [snap, setSnap] = useState(true);
   const [showConnection, setShowConnection] = useState(false);
-  const canvas = useRef(null);
-  const drag = useRef(null);
+  const history = useSceneHistory(screenId);
   const [requestedMode, setRequestedMode] = useState(initialMode);
   const simpleAvailable = isSingleInputPresentation(value);
   const advanced = requestedMode === 'advanced' || !simpleAvailable;
@@ -58,6 +58,27 @@ export default function SceneEditor({
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    setSelected('');
+    setEditing(null);
+    setShowConnection(false);
+  }, [scene.id]);
+
+  const snapshot = () => ({ scenes: value.scenes, active_scene_id: value.active_scene_id });
+  const checkpoint = () => history.checkpoint(snapshot());
+  const restore = (saved) => onChange({ ...value, ...saved });
+
+  function change(next) {
+    if (disabled) return;
+    if (
+      JSON.stringify(snapshot()) !==
+      JSON.stringify({ scenes: next.scenes, active_scene_id: next.active_scene_id })
+    ) {
+      checkpoint();
+    }
+    onChange(next);
+  }
 
   function updateScene(next) {
     onChange({
@@ -95,65 +116,37 @@ export default function SceneEditor({
       )
     )
       return;
+    checkpoint();
     updateScene(arrangeScene(scene, count, preset));
     setSelected('');
   }
 
-  function begin(event, item, resize = false) {
-    if (disabled || !advanced || event.button !== 0) return;
-    event.stopPropagation();
-    setSelected(item.id);
-    const rect = canvas.current.getBoundingClientRect();
-    drag.current = {
-      item,
-      resize,
-      startX: event.clientX,
-      startY: event.clientY,
-      width: rect.width,
-      height: rect.height,
-      moved: false,
-    };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function move(event) {
-    const start = drag.current;
-    if (!start) return;
-    const pixelsX = event.clientX - start.startX;
-    const pixelsY = event.clientY - start.startY;
-    if (!start.moved && Math.hypot(pixelsX, pixelsY) < 5) return;
-    start.moved = true;
-    const dx = (pixelsX / start.width) * 100;
-    const dy = (pixelsY / start.height) * 100;
-    const next = {
-      ...start.item,
-      ...(start.resize
-        ? {
-            width: Math.min(start.item.width + dx, 100 - start.item.x),
-            height: Math.min(start.item.height + dy, 100 - start.item.y),
-          }
-        : { x: start.item.x + dx, y: start.item.y + dy }),
-    };
-    const rect = snap
-      ? snapRect(
-          next,
-          scene.layers.filter((item) => item.id !== next.id),
-          { resize: start.resize },
-        )
-      : fitRect(next);
-    updateLayer({ ...next, ...rect });
-  }
-
-  function finish(event, item) {
-    event.stopPropagation();
-    const start = drag.current;
-    drag.current = null;
-    if (start && !start.moved && !start.resize) edit(item);
-  }
-
   function reorder(front) {
+    checkpoint();
     const remaining = scene.layers.filter((item) => item.id !== layer.id);
     updateScene({ ...scene, layers: front ? [...remaining, layer] : [layer, ...remaining] });
+  }
+
+  function removeInput() {
+    if (disabled || !layer) return;
+    checkpoint();
+    updateScene({
+      ...scene,
+      layers:
+        scene.layers.length === 1
+          ? [clearRegion(layer)]
+          : scene.layers.filter((item) => item.id !== layer.id),
+    });
+    setSelected('');
+    closeDialog();
+  }
+
+  function selectInput(id) {
+    if (disabled) return;
+    const item = scene.layers.find((candidate) => candidate.id === id);
+    if (!item) return;
+    setSelected(id);
+    if (!advanced) edit(item);
   }
 
   return (
@@ -167,7 +160,7 @@ export default function SceneEditor({
           </h3>
           <p>
             {advanced
-              ? 'Add scenes and inputs, then drag to arrange them.'
+              ? 'Tap an input to select it. Drag it to move; use the corners to resize.'
               : 'Select one input, connect your device, then press Start presenting.'}
           </p>
         </div>
@@ -181,7 +174,7 @@ export default function SceneEditor({
             disabled={disabled}
             onChange={(event) => {
               setRequestedMode(event.target.value);
-              drag.current = null;
+              setSelected('');
             }}
           >
             <option value="simple" disabled={!simpleAvailable}>
@@ -198,7 +191,7 @@ export default function SceneEditor({
             className="admin-button"
             disabled={disabled || value.scenes.length >= MAX_SCENES}
             onClick={() => {
-              onChange(addStreamScene(value));
+              change(addStreamScene(value));
               setSelected('');
               closeDialog();
             }}
@@ -213,7 +206,7 @@ export default function SceneEditor({
               onClick={() => {
                 if (!window.confirm('Remove this scene and its inputs from this setup?')) return;
                 const scenes = value.scenes.filter((item) => item.id !== scene.id);
-                onChange({ ...value, scenes, active_scene_id: scenes[0].id });
+                change({ ...value, scenes, active_scene_id: scenes[0].id });
                 setSelected('');
                 closeDialog();
               }}
@@ -282,104 +275,83 @@ export default function SceneEditor({
         )}
       </div>
       <div className="scene-preview-column">
-        <div
-          ref={canvas}
-          className="scene-canvas scene-edit-canvas has-preview"
-          aria-label="Scene preview, 16 by 9"
-        >
-          <div className="scene-preview-content" aria-hidden="true">
-            <SceneCanvas
-              preview
-              tv={{ ...previewTv, settings: { ...value, muted: true } }}
-              screenId={screenId}
-              now={now}
-              prayers={prayers}
-              posters={posters}
-              slide={0}
-              onImageError={() => {}}
-              livestream={livestream}
-              localStreams={localStreams}
-            />
-          </div>
-          {!scene.layers.length && (
-            <div className="scene-empty">
-              <strong>Choose how many inputs you need above</strong>
-              <span>Your blank layout will appear here.</span>
-            </div>
+        <div className="scene-toolbar" aria-label="Layout controls">
+          {advanced && scene.layers.length > 0 && (
+            <label>
+              Input to edit
+              <select
+                value={selected}
+                disabled={disabled}
+                onChange={(event) => selectInput(event.target.value)}
+              >
+                <option value="">Tap an input or choose here</option>
+                {scene.layers.map((item, index) => (
+                  <option key={item.id} value={item.id}>
+                    Input {index + 1}: {sourceLabel(item)}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
-          {scene.layers.map((item, index) => (
-            <div
-              key={item.id}
-              tabIndex={disabled ? -1 : 0}
-              role="button"
-              aria-pressed={selected === item.id}
-              aria-label={`Input ${index + 1}: ${sourceLabel(item)}. ${advanced ? 'Press Enter to edit; arrow keys move; Shift and arrows resize.' : 'Press Enter to select or edit.'}`}
-              className={`scene-layer scene-edit-layer ${item.type === 'empty' ? 'is-empty' : ''} ${selected === item.id ? 'is-selected' : ''}`}
-              style={{ ...layerStyle(item), zIndex: index + 1 }}
-              onClick={() => {
-                if (!advanced) edit(item);
-              }}
-              onPointerDown={(event) => begin(event, item)}
-              onPointerMove={move}
-              onPointerUp={(event) => finish(event, item)}
-              onPointerCancel={() => {
-                drag.current = null;
-              }}
-              onFocus={() => setSelected(item.id)}
-              onKeyDown={(event) => {
-                if (disabled) return;
-                if (['Enter', ' '].includes(event.key)) {
-                  event.preventDefault();
-                  edit(item);
-                  return;
-                }
-                if (
-                  !advanced ||
-                  !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)
-                )
-                  return;
-                event.preventDefault();
-                const horizontal = ['ArrowLeft', 'ArrowRight'].includes(event.key);
-                const amount = ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 1;
-                const key = event.shiftKey
-                  ? horizontal
-                    ? 'width'
-                    : 'height'
-                  : horizontal
-                    ? 'x'
-                    : 'y';
-                updateLayer({ ...item, ...fitRect({ ...item, [key]: item[key] + amount }) });
-              }}
-            >
-              <span className={item.type === 'empty' ? 'scene-add-area' : 'scene-area-label'}>
-                {item.type === 'empty' && <b aria-hidden="true">+</b>}
-                {sourceLabel(item)}
-              </span>
-              {advanced && selected === item.id && (
-                <span
-                  className="scene-resize"
-                  aria-hidden="true"
-                  onPointerDown={(event) => begin(event, item, true)}
-                >
-                  ↘
-                </span>
-              )}
-            </div>
-          ))}
+          <button
+            type="button"
+            className="admin-button"
+            disabled={disabled || !history.canUndo}
+            onClick={() => history.undo(snapshot(), restore)}
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            className="admin-button"
+            disabled={disabled || !history.canRedo}
+            onClick={() => history.redo(snapshot(), restore)}
+          >
+            Redo
+          </button>
         </div>
+        <LayoutCanvas
+          key={`${screenId}:${scene.id}:${value.display_orientation}`}
+          layers={scene.layers}
+          selectedId={advanced ? selected : ''}
+          onSelect={selectInput}
+          onEdit={edit}
+          onChange={updateLayer}
+          onCheckpoint={checkpoint}
+          orientation={value.display_orientation}
+          disabled={disabled}
+          snap={snap}
+          labelFor={(item, index) => `Input ${index + 1}: ${sourceLabel(item)}`}
+        >
+          <SceneCanvas
+            preview
+            tv={{ ...previewTv, settings: { ...value, muted: true } }}
+            screenId={screenId}
+            now={now}
+            prayers={prayers}
+            posters={posters}
+            slide={0}
+            onImageError={() => {}}
+            livestream={livestream}
+            localStreams={localStreams}
+          />
+        </LayoutCanvas>
         <div className="scene-editor-footer">
           {advanced && (
             <label className="admin-check">
               <input
                 type="checkbox"
                 checked={snap}
+                disabled={disabled}
                 onChange={(event) => setSnap(event.target.checked)}
               />
-              Snap to edges and grid
+              Snap to grid
             </label>
           )}
           <small>
-            {advanced ? 'Inputs can overlap. Preview sound is muted.' : 'Preview sound is muted.'}
+            {advanced
+              ? 'Tap a selected input again to edit it. Preview sound is muted.'
+              : 'Preview sound is muted.'}
           </small>
         </div>
         {layer && (advanced || layer.type !== 'empty') && (
@@ -406,14 +378,14 @@ export default function SceneEditor({
                 onClick={() => edit(layer)}
               >
                 {layer.type !== 'empty' && <Settings2 size={18} aria-hidden="true" />}
-                {layer.type === 'empty' ? 'Select input type' : 'Input settings'}
+                {layer.type === 'empty' ? 'Select input type' : 'Edit input'}
               </button>
               {advanced && (
                 <>
                   <button
                     type="button"
                     className="admin-button"
-                    disabled={disabled}
+                    disabled={disabled || scene.layers.at(-1)?.id === layer.id}
                     onClick={() => reorder(true)}
                   >
                     Bring forward
@@ -421,12 +393,22 @@ export default function SceneEditor({
                   <button
                     type="button"
                     className="admin-button"
-                    disabled={disabled}
+                    disabled={disabled || scene.layers[0]?.id === layer.id}
                     onClick={() => reorder(false)}
                   >
                     Send back
                   </button>
                 </>
+              )}
+              {(layer.type !== 'empty' || scene.layers.length > 1) && (
+                <button
+                  type="button"
+                  className="admin-button"
+                  disabled={disabled}
+                  onClick={removeInput}
+                >
+                  Remove input
+                </button>
               )}
             </div>
           </div>
@@ -438,7 +420,7 @@ export default function SceneEditor({
           area={editing}
           scene={scene}
           value={value}
-          onChange={onChange}
+          onChange={change}
           disabled={disabled}
           posters={posters}
           renderDeviceInput={renderDeviceInput}

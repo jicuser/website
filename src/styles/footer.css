@@ -186,7 +186,6 @@
   }
 }
 
-
 /* Compact footer: social and contact controls stay in disciplined single rows. */
 .jic-footer-actions-compact {
   width: min(100% - 24px, 720px);
@@ -224,16 +223,15 @@
   }
   .jic-footer-actions-compact {
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-start;
     overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .jic-footer-actions-compact::-webkit-scrollbar {
-    display: none;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
   }
   .jic-footer-socials,
   .jic-footer-contact {
     flex: 0 0 auto;
+    width: auto;
   }
   .jic-footer-signature {
     flex-basis: 118px;

@@ -1,11 +1,16 @@
 /* Lightweight spiritual welcome and reflection surfaces. */
 .jic-spiritual-overlay {
+  --spiritual-overlay-gutter: 24px;
+  --spiritual-toast-offset: 88px;
   position: fixed;
   inset: 0;
   z-index: 120;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: max(var(--spiritual-overlay-gutter), env(safe-area-inset-top))
+    max(var(--spiritual-overlay-gutter), env(safe-area-inset-right))
+    max(var(--spiritual-overlay-gutter), env(safe-area-inset-bottom))
+    max(var(--spiritual-overlay-gutter), env(safe-area-inset-left));
   background: rgba(3, 9, 18, 0.34);
   -webkit-backdrop-filter: var(--jic-glass-overlay-filter);
   backdrop-filter: var(--jic-glass-overlay-filter);
@@ -16,6 +21,12 @@
 .jic-reflection-card {
   position: relative;
   width: min(680px, 100%);
+  max-height: calc(
+    100dvh - max(var(--spiritual-overlay-gutter), env(safe-area-inset-top)) -
+      max(var(--spiritual-overlay-gutter), env(safe-area-inset-bottom))
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--jic-glass-border, rgba(255, 255, 255, 0.18));
   border-radius: 28px;
   background:
@@ -76,8 +87,8 @@
   right: 14px;
   z-index: 2;
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   padding: 0;
   border: 1px solid var(--jic-glass-border, rgba(255, 255, 255, 0.18));
@@ -96,7 +107,7 @@
 }
 
 .jic-reflection-overlay {
-  inset: auto 18px 88px auto;
+  inset: auto 18px calc(var(--spiritual-toast-offset) + env(safe-area-inset-bottom)) auto;
   width: min(430px, calc(100% - 36px));
   height: auto;
   padding: 0;
@@ -109,11 +120,20 @@
 .jic-reflection-overlay.is-toast {
   animation: jic-reflection-in 240ms ease-out both;
 }
+.jic-reflection-overlay.is-toast .jic-reflection-card {
+  max-height: calc(
+    100dvh - var(--spiritual-toast-offset) - env(safe-area-inset-bottom) -
+      max(var(--spiritual-overlay-gutter), env(safe-area-inset-top))
+  );
+}
 
 .jic-reflection-overlay.is-spotlight {
   inset: 0;
   width: auto;
-  padding: 24px;
+  padding: max(var(--spiritual-overlay-gutter), env(safe-area-inset-top))
+    max(var(--spiritual-overlay-gutter), env(safe-area-inset-right))
+    max(var(--spiritual-overlay-gutter), env(safe-area-inset-bottom))
+    max(var(--spiritual-overlay-gutter), env(safe-area-inset-left));
   background: rgba(3, 9, 18, 0.28);
   -webkit-backdrop-filter: var(--jic-glass-overlay-filter);
   backdrop-filter: var(--jic-glass-overlay-filter);
@@ -172,7 +192,8 @@
 
 @media (max-width: 767px) {
   .jic-spiritual-overlay {
-    padding: 16px;
+    --spiritual-overlay-gutter: 16px;
+    --spiritual-toast-offset: 78px;
     -webkit-backdrop-filter: var(--jic-glass-overlay-filter);
     backdrop-filter: var(--jic-glass-overlay-filter);
   }
@@ -183,12 +204,8 @@
   }
 
   .jic-reflection-overlay.is-toast {
-    inset: auto 12px 78px;
+    inset: auto 12px calc(var(--spiritual-toast-offset) + env(safe-area-inset-bottom));
     width: calc(100% - 24px);
-  }
-
-  .jic-reflection-overlay.is-spotlight {
-    padding: 16px;
   }
 }
 

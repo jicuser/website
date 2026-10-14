@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { lockPageScroll } from '@/lib/pageScrollLock';
+import '@/styles/layout-canvas.css';
 
 // Render at TV dimensions before scaling, so minimum text and control sizes in
 // the display do not expand relative to the layout on a narrow admin screen.

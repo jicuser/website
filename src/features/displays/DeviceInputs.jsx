@@ -24,6 +24,7 @@ function DeviceInput({
   target,
   onStream,
   relayConfigured,
+  pendingChange = false,
 }) {
   const sourceName = name?.trim() || (capture === 'camera' ? 'Camera' : 'Screen share');
   const sharing = useTvPublisher(screenId, slot, {
@@ -88,6 +89,9 @@ function DeviceInput({
               : 'Ready to connect'}
         </small>
       </h4>
+      {pendingChange && (
+        <p role="status">The current device stays connected until you update the live layout.</p>
+      )}
       {!active && !embedded && (
         <p>This source is used in another scene. It can stay connected while you change scenes.</p>
       )}
@@ -281,10 +285,22 @@ export default function DeviceInputs({
     localStreams.current = next;
     streamsCallback.current?.(next);
   }, []);
-  const sources = tvInputSources(settings).filter(
-    (source) => !onlySlot || source.slot === onlySlot,
-  );
-  const savedSources = savedSettings ? tvInputSources(savedSettings) : sources;
+  const draftSources = tvInputSources(settings);
+  const savedSources = savedSettings ? tvInputSources(savedSettings) : draftSources;
+  const liveSources = !setupOnly && presentationId ? savedSources : [];
+  // Editing a draft must not unmount a source still used by the live display.
+  // Keep its capture type until the saved layout confirms the replacement.
+  const sources = [
+    ...draftSources.map((source) => {
+      const live = liveSources.find((item) => item.slot === source.slot);
+      return live && live.capture !== source.capture
+        ? { ...live, active: source.active, pendingChange: true }
+        : source;
+    }),
+    ...liveSources
+      .filter((live) => !draftSources.some((source) => source.slot === live.slot))
+      .map((source) => ({ ...source, active: false })),
+  ].filter((source) => !onlySlot || source.slot === onlySlot);
   const controls = sources.map((source) => (
     <DeviceInput
       key={source.slot}

@@ -368,11 +368,6 @@ export function validateSettings(input, screenId = '') {
           ? 'Standby layouts can use timetable, next prayer, clock, posters, logo and text only.'
           : 'Prayer preset layouts can use timetable, preset content, next prayer, clock, logo and text only.',
       );
-    if (
-      preset !== 'standby' &&
-      !checked.layers.some((layer) => layer.type === 'state' && !layer.hidden)
-    )
-      throw new Error('Each prayer preset needs a visible preset content block.');
     for (const layer of checked.layers) {
       if (layer.type !== 'times') continue;
       const original = source.layers.find((item) => item.id === layer.id);

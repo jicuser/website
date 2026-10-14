@@ -619,13 +619,25 @@ html[data-theme] .jic-tv-display.is-dhikr {
   flex-direction: column;
   font-size: 1.5cqw;
 }
+/* Each timetable measures its own box, including its height. This keeps short
+   saved blocks from drawing full-screen text over neighbouring prayers. */
+.scene-source-times {
+  container: prayer-block / size;
+}
 .scene-timetable {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
   background: #07090c;
   color: #f7f8fa;
+  overflow: hidden;
+}
+.scene-timetable.has-jummah {
+  grid-template-rows: minmax(0, 1fr) minmax(0, 22%);
 }
 .scene-timetable-prayers {
   display: grid;
@@ -636,8 +648,12 @@ html[data-theme] .jic-tv-display.is-dhikr {
 .scene-jummah-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  min-height: 0;
   border-top: 1px solid #3d4f63;
-  font-size: 1.55cqw;
+  font-size: min(1.55cqw, 9cqh);
+  line-height: 1.15;
+  overflow: hidden;
 }
 .scene-jummah-row > span {
   display: flex;
@@ -645,43 +661,40 @@ html[data-theme] .jic-tv-display.is-dhikr {
   justify-content: center;
   gap: 0.5em;
   min-width: 0;
-  padding: 0.5em;
+  min-height: 0;
+  padding-inline: 0.5em;
 }
-.scene-timetable.is-vertical {
-  grid-template-rows: minmax(0, 1fr) auto;
+.scene-jummah-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.scene-timetable.is-vertical .scene-timetable-prayers {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: repeat(6, minmax(0, 1fr));
-}
-.scene-timetable.is-vertical .scene-jummah-row {
-  grid-template-columns: minmax(0, 1fr);
-}
-.scene-source-times,
-.scene-source-next {
-  container-type: inline-size;
+.scene-jummah-row strong {
+  flex-shrink: 0;
+  font-size: inherit;
+  white-space: nowrap;
 }
 .scene-timetable-prayers > div {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3%;
+  min-width: 0;
+  min-height: 0;
+  gap: .15em;
   border-right: 1px solid #3d4f63;
-  font-size: 2.2cqw;
+  font-size: min(2.2cqw, 14cqh);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
 }
-.scene-timetable.is-vertical .scene-timetable-prayers > div {
-  border-right: 0;
-  border-bottom: 1px solid #3d4f63;
-}
-.scene-timetable strong {
-  font-size: 3.6cqw;
+.scene-timetable-prayers strong {
+  font-size: min(3.4cqw, 22cqh);
   color: #f0d791;
 }
-.scene-timetable small {
-  font-size: 1.6cqw;
+.scene-timetable-prayers small {
+  font-size: min(1.6cqw, 10cqh);
 }
-
 .scene-timetable-prayers > .is-current {
   background: #d5b56d22;
   box-shadow: inset 0 -3px #d5b56d;
@@ -763,15 +776,22 @@ html[data-theme] .jic-tv-display.is-portrait {
 }
 
 
-/* Alternative Salah timetable layouts, including prayer-board style. */
+/* Alternative Salah timetable layouts share single-line rows. Their size
+   depends on the assigned block, never on the phone or TV viewport. */
 .scene-prayer-table {
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   display: grid;
-  grid-template-rows: auto repeat(6, minmax(0, 1fr)) auto;
+  grid-template-rows: minmax(0, .65fr) repeat(6, minmax(0, 1fr));
   background: #090c10;
   color: #f6f7f8;
-  container-type: inline-size;
+  container: prayer-table / size;
+  overflow: hidden;
+}
+.scene-prayer-table.has-jummah {
+  grid-template-rows: minmax(0, .65fr) repeat(6, minmax(0, 1fr)) minmax(0, .8fr);
 }
 .scene-prayer-table-head,
 .scene-prayer-table-row {
@@ -779,21 +799,28 @@ html[data-theme] .jic-tv-display.is-portrait {
   grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr) minmax(0, .9fr);
   align-items: center;
   gap: 2%;
-  padding-inline: 4%;
+  min-width: 0;
+  min-height: 0;
+  padding-inline: 3%;
+  line-height: 1.15;
+}
+.scene-prayer-table-head > *,
+.scene-prayer-table-row > * {
+  min-width: 0;
+  white-space: nowrap;
 }
 .scene-prayer-table-head {
-  min-height: 9%;
   color: #aeb8c5;
-  font-size: 2.4cqw;
+  font-size: min(2.6cqw, 5cqh);
   border-bottom: 1px solid #3d4f63;
 }
 .scene-prayer-table-row {
   border-bottom: 1px solid #263341;
-  font-size: 2.7cqw;
+  font-size: min(3.1cqw, 6.6cqh);
 }
 .scene-prayer-table-row > strong {
   text-align: right;
-  font-size: 3.2cqw;
+  font-size: min(3.6cqw, 7cqh);
   font-variant-numeric: tabular-nums;
 }
 .scene-prayer-table-row.is-current {
@@ -803,7 +830,7 @@ html[data-theme] .jic-tv-display.is-portrait {
 .scene-prayer-name {
   display: flex;
   align-items: baseline;
-  gap: .5em;
+  gap: .4em;
   min-width: 0;
 }
 .scene-prayer-name small {
@@ -811,44 +838,48 @@ html[data-theme] .jic-tv-display.is-portrait {
   font-size: .78em;
   font-family: 'Noto Naskh Arabic', 'Geeza Pro', 'Segoe UI', Arial, sans-serif;
 }
+.scene-prayer-table .scene-jummah-row {
+  font-size: min(2.4cqw, 4.8cqh);
+}
 .scene-prayer-table.is-compact .scene-prayer-table-head,
 .scene-prayer-table.is-compact .scene-prayer-table-row {
   padding-inline: 2.5%;
 }
-.scene-prayer-table.is-compact .scene-prayer-table-head { font-size: 2.1cqw; }
-.scene-prayer-table.is-compact .scene-prayer-table-row { font-size: 2.3cqw; }
-.scene-prayer-table.is-compact .scene-prayer-table-row > strong { font-size: 2.7cqw; }
 
 .scene-salah-board {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: minmax(28%, .8fr) minmax(0, 1.5fr);
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr);
+  grid-template-rows: minmax(0, 1fr);
   background: #090c10;
   color: #f6f7f8;
   overflow: hidden;
 }
 .scene-salah-board > .scene-prayer-table {
-  min-width: 0;
   border-left: 1px solid #3d4f63;
 }
 .scene-salah-clock {
   min-width: 0;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 3%;
-  padding: 5%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+  overflow: hidden;
   background:
     radial-gradient(circle at 50% 30%, #18222c 0, #0b1016 58%, #06080b 100%);
 }
 .scene-salah-clock-face {
   position: relative;
-  width: min(82%, 36cqw);
+  flex-shrink: 0;
+  width: min(80cqw, 60cqh);
   aspect-ratio: 1;
-  border: .7cqw solid #8c99a8;
+  margin-bottom: 4cqh;
+  border: min(1.6cqw, 1.2cqh) solid #8c99a8;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 .5cqw #101820;
+  box-shadow: inset 0 0 0 min(1cqw, .75cqh) #101820;
 }
 .scene-salah-clock-face > i {
   --tick-angle: calc(var(--tick) * 30deg);
@@ -865,9 +896,9 @@ html[data-theme] .jic-tv-display.is-portrait {
 .scene-clock-hand {
   --angle: 0deg;
   position: absolute;
-  left: calc(50% - .55cqw);
+  left: 48.5%;
   bottom: 50%;
-  width: 1.1cqw;
+  width: 3%;
   border-radius: 999px;
   transform-origin: 50% 100%;
   transform: rotate(var(--angle));
@@ -890,50 +921,45 @@ html[data-theme] .jic-tv-display.is-portrait {
   background: #d39f27;
 }
 .scene-salah-clock > strong {
-  font-size: 5cqw;
+  font-size: min(15cqw, 12cqh);
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .scene-salah-clock > span {
   color: #a8ec74;
-  font-size: 2.3cqw;
+  font-size: min(10cqw, 8cqh);
+  line-height: 1.2;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.scene-canvas.is-portrait .scene-salah-board {
-  grid-template-columns: 1fr;
-  grid-template-rows: 30% minmax(0, 1fr);
-}
-.scene-canvas.is-portrait .scene-salah-clock {
-  grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
-  justify-items: start;
-  column-gap: 6%;
-  padding: 4%;
-}
-.scene-canvas.is-portrait .scene-salah-clock-face {
-  grid-row: 1 / span 2;
-  width: min(24cqw, 82%);
-}
-.scene-canvas.is-portrait .scene-salah-clock > strong { font-size: 7cqw; }
-.scene-canvas.is-portrait .scene-salah-clock > span { font-size: 3.5cqw; }
-.scene-canvas.is-portrait .scene-prayer-table-head { font-size: 3.1cqw; }
-.scene-canvas.is-portrait .scene-prayer-table-row { font-size: 3.2cqw; }
-.scene-canvas.is-portrait .scene-prayer-table-row > strong { font-size: 3.7cqw; }
-.scene-canvas.is-portrait .scene-timetable.is-vertical .scene-timetable-prayers > div {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 4%;
-  justify-items: start;
-  padding-inline: 5%;
-  font-size: 4cqw;
-}
-.scene-canvas.is-portrait .scene-timetable.is-vertical .scene-timetable-prayers > div > strong {
-  justify-self: end;
-  font-size: 4.8cqw;
-}
-.scene-canvas.is-portrait .scene-timetable.is-vertical .scene-timetable-prayers > div > small {
-  justify-self: end;
-  font-size: 3cqw;
+/* Tall blocks stack the clock above the table, even on landscape screens. */
+@container prayer-block (max-aspect-ratio: 3/4) {
+  .scene-salah-board {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 30%) minmax(0, 1fr);
+  }
+  .scene-salah-clock {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    justify-items: center;
+  }
+  .scene-salah-clock-face {
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: min(32cqw, 80cqh);
+    margin: 0;
+  }
+  .scene-salah-clock > span {
+    align-self: start;
+  }
+  .scene-salah-board > .scene-prayer-table {
+    border-left: 0;
+    border-top: 1px solid #3d4f63;
+  }
 }
 
 .scene-prayer-table.has-tomorrow .scene-prayer-table-head,
@@ -944,7 +970,7 @@ html[data-theme] .jic-tv-display.is-portrait {
 .scene-prayer-table.has-tomorrow .scene-prayer-table-row > :last-child {
   color: #9eabb8;
 }
-@media (max-aspect-ratio: 3/4) {
+@container prayer-table (max-aspect-ratio: 3/4) {
   .scene-prayer-table.has-tomorrow .scene-prayer-table-head > :last-child,
   .scene-prayer-table.has-tomorrow .scene-prayer-table-row > :last-child {
     display: none;
@@ -954,7 +980,6 @@ html[data-theme] .jic-tv-display.is-portrait {
     grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, .9fr));
   }
 }
-
 
 
 /* Shared geometry for resizable live-TV blocks. */

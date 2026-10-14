@@ -38,7 +38,7 @@ function ruleLabel(scene) {
   return scene.all_day ? `${days} · all day` : `${days} · ${scene.start_time}–${scene.end_time}`;
 }
 
-export default function ScheduledScenes({ form, update, screenId }) {
+export default function ScheduledScenes({ form, update, screenId, disabled = false }) {
   const scenes = form.scheduled_scenes || [];
   const orientation = form.display_orientation === 'portrait' ? 'portrait' : 'landscape';
   const [selected, setSelected] = useState(scenes[0]?.id || '');
@@ -255,6 +255,7 @@ export default function ScheduledScenes({ form, update, screenId }) {
           </div>
 
           <TvDisplayLayoutEditor
+            disabled={disabled}
             screenId={screenId}
             settings={form}
             preset={`scheduled-${scene.id}`}

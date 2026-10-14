@@ -1104,10 +1104,7 @@ html:not(.dark) .managed-page-section-copy {
 }
 
 /* One responsive console layout: compact navigation on phones, grouped sidebar on PCs. */
-.admin-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 30;
+.admin-account-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1115,6 +1112,21 @@ html:not(.dark) .managed-page-section-copy {
   gap: 10px;
   padding: 12px 20px;
   border-bottom: 1px solid var(--jic-border);
+}
+.admin-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 6px 20px;
+  border-bottom: 1px solid var(--jic-border);
+  background: var(--jic-surface);
+  color: var(--jic-text);
 }
 .admin-toolbar-title {
   display: grid;
@@ -1134,9 +1146,17 @@ html:not(.dark) .managed-page-section-copy {
   align-items: center;
   gap: 8px;
 }
+.admin-desktop-current {
+  flex: 1 1 auto;
+}
+.admin-save-short {
+  display: none;
+}
 .admin-toolbar-status {
   width: 100%;
+  margin: 0;
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 .admin-console-layout {
   display: grid;
@@ -1429,14 +1449,46 @@ html:not(.dark) .managed-page-section-copy {
   }
 }
 @media (max-width: 800px) {
-  .admin-toolbar {
-    padding: 10px 12px;
+  .admin-account-header {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 8px 10px;
   }
   .admin-toolbar-title {
-    width: 100%;
+    flex: 1 1 auto;
+  }
+  .admin-toolbar-title small {
+    max-width: 30vw;
   }
   .admin-toolbar-actions {
-    flex: 1;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+  .admin-toolbar-actions .admin-button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+  .admin-toolbar-actions .admin-button span:not(.admin-website-label) {
+    display: none;
+  }
+  .admin-toolbar {
+    gap: 6px;
+    padding: 6px 10px;
+  }
+  .admin-desktop-current,
+  .admin-save-label {
+    display: none;
+  }
+  .admin-save-short {
+    display: inline;
+  }
+  .admin-save-pending {
+    flex: 0 0 auto;
+    gap: 5px;
+    padding: 8px 10px;
+    white-space: nowrap;
   }
   .admin-desktop-label {
     display: none;
@@ -1453,11 +1505,38 @@ html:not(.dark) .managed-page-section-copy {
     display: none;
   }
   .admin-mobile-section {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 12px;
+    display: flex;
+    flex: 1 1 0;
     align-items: center;
-    font-size: 14px;
+    gap: 6px;
+    min-width: 0;
+  }
+  .admin-mobile-current {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 13px;
+  }
+  .admin-mobile-back,
+  .admin-mobile-overview {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid var(--jic-border);
+    border-radius: 10px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  .admin-mobile-overview > svg {
+    display: none;
   }
   .admin-main {
     padding: 16px 12px 32px;
@@ -1944,69 +2023,10 @@ html.dark .admin-console .admin-field-error {
   }
 }
 
-
-/* 2026 admin workspace refinement: compact shell, predictable mobile hierarchy. */
-.admin-mobile-section {
-  width: 100%;
-}
-.admin-mobile-nav-scroll {
-  display: flex;
-  gap: 6px;
-  min-width: 0;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: none;
-}
-.admin-mobile-nav-scroll::-webkit-scrollbar { display: none; }
-.admin-mobile-nav-scroll button,
-.admin-mobile-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  min-height: 38px;
-  padding: 7px 10px;
-  border: 1px solid #ffffff24;
-  border-radius: 10px;
-  font-size: 12px;
-}
-.admin-mobile-nav-scroll button[aria-current='page'] {
-  background: var(--jic-action);
-  color: #0c1930;
-}
 .poster-workspace-heading {
   margin-bottom: 14px;
 }
 @media (max-width: 800px) {
-  .admin-toolbar {
-    gap: 7px;
-    padding: 8px 10px;
-  }
-  .admin-toolbar-title {
-    width: auto;
-    flex: 1 1 120px;
-  }
-  .admin-toolbar-actions {
-    flex: 0 0 auto;
-    gap: 5px;
-  }
-  .admin-toolbar-actions .admin-button {
-    min-width: 40px;
-    min-height: 40px;
-    padding: 8px 10px;
-  }
-  .admin-toolbar-actions .admin-button span {
-    display: none;
-  }
-  .admin-mobile-section {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 7px;
-    align-items: center;
-  }
-  .admin-mobile-section:not(:has(.admin-mobile-back)) {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .admin-main {
     padding: 14px 12px 28px;
   }
@@ -2024,8 +2044,12 @@ html.dark .admin-console .admin-field-error {
     width: 24px;
     height: 24px;
   }
-  .admin-task-grid strong { font-size: 15px; }
-  .admin-task-grid span { font-size: 11px; }
+  .admin-task-grid strong {
+    font-size: 15px;
+  }
+  .admin-task-grid span {
+    font-size: 11px;
+  }
   .admin-page-picker {
     max-height: none;
   }
@@ -2042,72 +2066,17 @@ html.dark .admin-console .admin-field-error {
   }
 }
 
-
-/* Mobile admin navigation: a single compact rail, never a wrapping wall of links. */
-@media (max-width: 800px) {
-  .admin-mobile-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    overflow: hidden;
-    padding: 0 10px 8px;
+/* Keep navigation and saving on one row at the narrowest phone widths. */
+@media (max-width: 480px) {
+  .admin-toolbar-actions .admin-website-label,
+  .admin-mobile-back > span,
+  .admin-mobile-overview > span {
+    display: none;
   }
-  .admin-mobile-back {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-  .admin-mobile-nav-scroll {
-    flex: 1 1 auto;
-    min-width: 0;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .admin-mobile-nav-scroll button {
-    flex: 0 0 auto;
-    width: auto;
-    max-width: 168px;
-    min-height: 36px;
-    padding: 7px 9px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 12px;
-    line-height: 1;
-  }
-  .admin-mobile-nav-scroll button svg {
-    flex: 0 0 15px;
-    width: 15px;
-    height: 15px;
+  .admin-mobile-overview > svg {
+    display: block;
   }
 }
-
-@media (max-width: 800px) {
-  .admin-mobile-section {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    padding: 0 10px 8px;
-  }
-  .admin-mobile-current {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-align: center;
-    font-size: 13px;
-  }
-  .admin-mobile-overview {
-    min-height: 36px;
-    padding: 7px 9px;
-    border: 1px solid #ffffff24;
-    border-radius: 10px;
-    white-space: nowrap;
-    font-size: 12px;
-  }
-}
-
 
 .tv-screen-overview-grid {
   display: grid;
@@ -2150,7 +2119,6 @@ html.dark .admin-console .admin-field-error {
     order: -1;
   }
 }
-
 
 /* Staff access: creation stays inline with the account list. */
 .admin-staff-list-heading {

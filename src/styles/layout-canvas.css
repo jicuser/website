@@ -1,0 +1,222 @@
+/* Shared editing surface. The underlying TV render stays free of edit controls. */
+.layout-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-width: 0;
+  isolation: isolate;
+  overflow: visible;
+  background: #02050a;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  touch-action: pan-y;
+}
+.layout-canvas.is-portrait {
+  width: min(100%, 420px);
+  aspect-ratio: 9 / 16;
+  margin-inline: auto;
+}
+.layout-canvas-render {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.layout-layer-hit {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  appearance: none;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  background: transparent;
+  touch-action: pan-y;
+  cursor: pointer;
+}
+.layout-layer-hit.is-selected {
+  cursor: move;
+  touch-action: none;
+}
+.layout-layer-hit:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -4px;
+}
+.layout-layer-hit.is-empty {
+  border: 1px dashed var(--jic-gold);
+  background: #0c1729aa;
+}
+.layout-layer-hit.is-empty span {
+  font-size: clamp(10px, 2vw, 18px);
+}
+.layout-selection-frame {
+  position: absolute;
+  z-index: 30;
+  pointer-events: none;
+  border: 2px solid var(--jic-gold);
+}
+.layout-corner {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  pointer-events: auto;
+  touch-action: none;
+}
+.layout-corner span {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  background: var(--jic-gold);
+  box-shadow: 0 1px 3px #0008;
+}
+.layout-corner.is-nw {
+  top: -22px;
+  left: -22px;
+  cursor: nwse-resize;
+}
+.layout-corner.is-ne {
+  top: -22px;
+  right: -22px;
+  cursor: nesw-resize;
+}
+.layout-corner.is-sw {
+  bottom: -22px;
+  left: -22px;
+  cursor: nesw-resize;
+}
+.layout-corner.is-se {
+  bottom: -22px;
+  right: -22px;
+  cursor: nwse-resize;
+}
+.layout-corner:focus-visible span {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.layout-canvas.is-cropping .layout-selection-frame {
+  border-style: dashed;
+}
+.layout-canvas-empty {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: #b5c0cf;
+  font-size: 14px;
+  text-align: center;
+}
+
+.tv-scaled-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.tv-scaled-preview-content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+}
+.tv-scaled-preview-content .scene-player .scene-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.layout-editor-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1900;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  background: var(--jic-bg);
+  color: var(--jic-text);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+.layout-editor-dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--jic-border);
+  background: var(--jic-surface);
+}
+.layout-editor-dialog-heading > div {
+  display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.layout-editor-dialog-heading small {
+  color: var(--jic-muted);
+}
+.layout-editor-dialog-heading button {
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.layout-editor-dialog-content {
+  overflow: auto;
+  min-height: 0;
+  padding: 8px 16px 24px;
+  overscroll-behavior: contain;
+}
+.layout-editor-dialog-content .tv-layout-editor {
+  max-width: 1000px;
+  margin: 0 auto;
+  border: 0;
+}
+.tv-selection-actions {
+  display: grid;
+  gap: 8px;
+}
+.tv-selection-actions > strong {
+  font-size: 0.9rem;
+}
+.tv-selection-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tv-selection-buttons .admin-button {
+  min-height: 44px;
+  padding: 8px 12px;
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
+.tv-selection-buttons [aria-pressed='true'] {
+  background: var(--jic-gold);
+  color: #081322;
+}
+.tv-precise-position {
+  grid-column: 1 / -1;
+}
+.tv-precise-position summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.tv-layout-editor > .layout-canvas {
+  margin-block: 10px;
+}

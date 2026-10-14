@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { layerStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
+import { layerStyle, layerImageStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
 import TvMediaPanel from '@/components/tv/TvMediaPanel';
 import PrayerWidget from './PrayerWidget';
 
@@ -74,6 +74,7 @@ export default function SceneCanvas({
   localStreams = {},
   preview = false,
   presetContent = null,
+  showFallbackBrand = true,
 }) {
   const scene =
     tv.settings.scenes.find((s) => s.id === tv.settings.active_scene_id) || tv.settings.scenes[0];
@@ -118,7 +119,7 @@ export default function SceneCanvas({
                       className="scene-state-image"
                       src={layer.image_url}
                       alt=""
-                      style={{ objectFit: layer.image_fit || 'contain' }}
+                      style={layerImageStyle(layer)}
                     />
                   ) : (
                     presetContent
@@ -163,7 +164,7 @@ export default function SceneCanvas({
               )}
             </div>
           ))}
-        {!scene.layers.some((layer) => layer.type === 'brand') && (
+        {showFallbackBrand && !scene.layers.some((layer) => layer.type === 'brand') && (
           <div className="scene-brand">
             <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
           </div>
