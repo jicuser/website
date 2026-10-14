@@ -143,7 +143,7 @@ export default function DailyReminder() {
       <button
         type="button"
         aria-label="Show another daily reminder"
-        title="Tap for the next reminder. On phones, a new reminder appears after scrolling stops."
+        title="Show another reminder"
         onClick={advance}
       >
         <div>

@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import {
   ArrowLeft,
   ChevronDown,
+  ChevronRight,
   Heart,
   Home,
   LogIn,
@@ -18,13 +19,14 @@ import {
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
-import { MADRASSAH_TABS, MASJID_EXTENSION_TABS, NAV_GROUPS } from '@/content/nav';
+import { MADRASSAH_TABS, NAV_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useAppearance } from '@/context/AppearanceContext';
 import { useNavigationHistory } from '@/context/NavigationContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import { cn } from '@/lib/utils';
+import { activeNavigation } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
@@ -33,25 +35,6 @@ const MENU_GROUPS = [
   { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
   { name: 'Social Media', path: '/social-media', children: [] },
 ];
-
-// Related routes share one group of section links.
-function activeNavigation(pathname) {
-  if (pathname === '/madrassah' || pathname.startsWith('/madrassah/'))
-    return { name: 'Madrassah', children: MADRASSAH_TABS };
-  if (
-    pathname === '/projects/masjid-extension' ||
-    MASJID_EXTENSION_TABS.slice(1).some((item) => item.path === pathname)
-  )
-    return { name: 'Masjid Extension', children: MASJID_EXTENSION_TABS };
-  if (['/team', '/contact', '/financial-history', '/social-media'].includes(pathname))
-    return NAV_GROUPS.find((item) => item.name === 'About');
-  if (pathname.startsWith('/funerals')) return NAV_GROUPS.find((item) => item.name === 'Services');
-  return NAV_GROUPS.find((item) =>
-    item.path === '/'
-      ? pathname === '/'
-      : pathname === item.path || pathname.startsWith(`${item.path}/`),
-  );
-}
 
 export default function UnifiedHeader() {
   const { pathname } = useLocation();
@@ -76,9 +59,13 @@ export default function UnifiedHeader() {
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
   const navigation = useMemo(() => activeNavigation(pathname), [pathname]);
   const subtabs = navigation?.children || [];
-  const selected = subtabs
-    .filter((item) => pathname === item.path || pathname.startsWith(`${item.path}/`))
-    .sort((a, b) => b.path.length - a.path.length)[0]?.path;
+  const selected = navigation?.current?.path;
+  const menuSection =
+    pathname === '/social-media'
+      ? pathname
+      : navigation?.path === '/madrassah'
+        ? navigation.path
+        : navigation?.primaryPath;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
@@ -163,6 +150,7 @@ export default function UnifiedHeader() {
     const node = menuRef.current,
       previousOverflow = document.body.style.overflow;
     node.showModal();
+    if (menuSection) setExpandedMenuGroups((groups) => ({ ...groups, [menuSection]: true }));
     document.body.style.overflow = 'hidden';
     // React autofocus can run before showModal; explicitly focus the visible close control.
     menuCloseRef.current?.focus({ preventScroll: true });
@@ -170,7 +158,7 @@ export default function UnifiedHeader() {
       node.close();
       document.body.style.overflow = previousOverflow;
     };
-  }, [menuOpen]);
+  }, [menuOpen, menuSection]);
   useEffect(() => {
     const audio = audioRef.current;
     return () => {
@@ -282,16 +270,18 @@ export default function UnifiedHeader() {
               {quickMenuOpen && (
                 <nav id="jic-quick-menu" className="jic-quick-menu" aria-label="Main pages">
                   {MENU_GROUPS.map(({ name, path }) => (
-                    <NavLink
+                    <Link
                       key={path}
                       to={path}
-                      end={path === '/'}
+                      aria-current={
+                        path === menuSection ? (pathname === path ? 'page' : 'location') : undefined
+                      }
                       onClick={() => {
                         if (pathname === path) setQuickMenuOpen(false);
                       }}
                     >
                       {name}
-                    </NavLink>
+                    </Link>
                   ))}
                 </nav>
               )}
@@ -299,41 +289,76 @@ export default function UnifiedHeader() {
             <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">
               {NAV_GROUPS.map(({ name, path }) => (
                 <div className="jic-desktop-nav-group" key={path}>
-                  <NavLink to={path} end={path === '/'}>
+                  <Link
+                    to={path}
+                    className={navigation?.primaryPath === path ? 'active' : undefined}
+                    aria-current={
+                      navigation?.primaryPath === path
+                        ? pathname === path
+                          ? 'page'
+                          : 'location'
+                        : undefined
+                    }
+                  >
                     {name}
-                  </NavLink>
+                  </Link>
                 </div>
               ))}
             </nav>
-            <div className="jic-free-actions">
-              <Link to="/search" aria-label="Search site">
-                <Search size={20} />
-              </Link>
-              <button
-                type="button"
-                className="jic-theme-action"
-                onClick={toggleTheme}
-                aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-              >
-                {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
-                <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
-              </button>
-              <Link to="/" aria-label="Home">
-                <Home size={20} />
-              </Link>
-              <button
-                type="button"
-                onClick={() => setMenuOpen(true)}
-                className="jic-menu-trigger"
-                aria-label="Open navigation menu"
-                aria-expanded={menuOpen}
-                aria-controls="jic-site-menu"
-              >
-                <Menu size={22} />
-              </button>
+            <div className="jic-free-actions-slot">
+              <nav className="jic-free-actions" aria-label="Page controls" data-glass="dense">
+                <Link to="/search" aria-label="Search site">
+                  <Search size={20} />
+                </Link>
+                <button
+                  type="button"
+                  className="jic-theme-action"
+                  onClick={toggleTheme}
+                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                  title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+                >
+                  {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+                  <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+                </button>
+                <Link to="/" aria-label="Home">
+                  <Home size={20} />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(true)}
+                  className="jic-menu-trigger"
+                  aria-haspopup="dialog"
+                  aria-label="Open navigation menu"
+                  aria-expanded={menuOpen}
+                  aria-controls="jic-site-menu"
+                >
+                  <Menu size={22} />
+                </button>
+              </nav>
             </div>
           </div>
+          {navigation && navigation.path !== '/' && (
+            <nav className="jic-section-location" aria-label="Current section">
+              {navigation.primaryPath !== navigation.path && (
+                <>
+                  <Link to={navigation.primaryPath}>{navigation.primaryName}</Link>
+                  <ChevronRight size={14} aria-hidden="true" />
+                </>
+              )}
+              <Link
+                to={navigation.path}
+                aria-current={pathname === navigation.path ? 'page' : undefined}
+              >
+                {navigation.name}
+              </Link>
+              {navigation.current && navigation.current.path !== navigation.path && (
+                <>
+                  <ChevronRight size={14} aria-hidden="true" />
+                  <span aria-current="page">{navigation.current.name}</span>
+                </>
+              )}
+            </nav>
+          )}
           {subtabs.length > 0 && (
             <nav
               ref={subnavRef}
@@ -447,15 +472,21 @@ export default function UnifiedHeader() {
                   return (
                     <li className="jic-unified-menu-group" key={path}>
                       <div className="jic-unified-menu-row">
-                        <NavLink
+                        <Link
                           to={path}
-                          end
+                          aria-current={
+                            path === menuSection
+                              ? pathname === path
+                                ? 'page'
+                                : 'location'
+                              : undefined
+                          }
                           onClick={() => {
                             if (pathname === path) setMenuOpen(false);
                           }}
                         >
                           {name}
-                        </NavLink>
+                        </Link>
                         {subpages.length > 0 && (
                           <button
                             type="button"

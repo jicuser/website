@@ -196,7 +196,7 @@
   opacity: 0.5;
 }
 
-/* Unboxed branding and icons. The brand can shrink; touch targets stay 44px. */
+/* Branding stays in flow; the desktop action dock floats below the prayer strip. */
 .jic-free-nav-row {
   display: flex;
   align-items: center;
@@ -221,19 +221,37 @@
 .jic-brand-image {
   object-fit: contain;
 }
+.jic-free-actions-slot {
+  flex: 0 0 222px;
+  min-height: 58px;
+}
 .jic-free-actions {
+  position: fixed;
+  top: calc(var(--jic-prayer-sticky-offset) + 16px);
+  right: var(--jic-actions-inset);
+  z-index: 45;
   display: flex;
-  flex: 0 0 auto;
+  align-items: center;
   gap: 4px;
+  width: 222px;
+  padding: 6px;
+  border: 1px solid var(--jic-glass-border);
+  border-radius: 18px;
+  --jic-glass-panel: var(--jic-glass-panel-strong);
 }
 .jic-free-actions :is(a, button) {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
+  flex-shrink: 0;
   border: 0;
+  border-radius: 12px;
   background: transparent;
   color: var(--jic-text);
+}
+.jic-free-actions :is(a, button):is(:hover, :focus-visible) {
+  background: var(--jic-glass-control);
 }
 .jic-free-actions .jic-theme-action {
   width: auto;
@@ -250,6 +268,7 @@
   padding-top: 10px;
 }
 html {
+  --jic-actions-inset: max(24px, calc((100vw - 1440px) / 2 + 24px), env(safe-area-inset-right));
   --jic-prayer-sticky-offset: var(--jic-prayer-dock-height, 180px);
   scroll-padding-top: calc(var(--jic-prayer-sticky-offset) + 12px);
 }
@@ -259,8 +278,7 @@ html {
   --jic-glass-panel: var(--jic-glass-panel-strong);
   --jic-glass-control-filter: none;
   position: fixed;
-  inset: calc(var(--jic-prayer-sticky-offset) + 62px) max(12px, env(safe-area-inset-right)) auto
-    auto;
+  inset: calc(var(--jic-prayer-sticky-offset) + 82px) var(--jic-actions-inset) auto auto;
   width: min(340px, calc(100vw - 24px));
   height: auto;
   max-height: calc(100dvh - var(--jic-prayer-sticky-offset) - 150px);
@@ -391,7 +409,7 @@ html {
   background: var(--jic-glass-control);
   color: var(--jic-text);
 }
-.jic-menu-directory a[aria-current='page'] {
+.jic-menu-directory a[aria-current] {
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -489,7 +507,7 @@ html {
   fill: #dc2626;
 }
 @media (max-width: 767px) {
-  .jic-free-actions {
+  .jic-free-actions-slot {
     display: none;
   }
   .jic-mobile-quick-nav {
@@ -549,7 +567,7 @@ html {
     font-size: 0.9375rem;
     line-height: 1.35;
   }
-  .jic-quick-menu a[aria-current='page'] {
+  .jic-quick-menu a[aria-current] {
     border-left-color: currentColor;
     font-weight: 650;
   }
@@ -724,13 +742,12 @@ html {
   .jic-free-brand {
     flex-basis: 190px;
   }
-  .jic-free-actions {
-    gap: 7px;
-  }
 }
 @media (min-width: 1200px) {
   .jic-desktop-primary-nav {
     display: flex;
+    flex: 1;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 2px;
@@ -756,6 +773,9 @@ html {
     padding-top: 0;
   }
   .jic-prayer-dock {
+    position: static;
+  }
+  .jic-free-actions {
     position: static;
   }
   .jic-public-main {

@@ -108,7 +108,6 @@ html[data-theme]
     .jic-event-card,
     .jic-home-footer-strip,
     .jic-programme-card,
-    .jic-related .jic-swipe-rail > a,
     .jic-hall-intro,
     .jic-hall-calendar,
     .managed-page-content,
@@ -272,11 +271,7 @@ html[data-theme] .jic-public-route .jic-footer-donate:is(:hover, :focus-visible)
 }
 
 html[data-theme] .jic-public-route .jic-unified-menu-donate:is(:hover, :focus-visible) {
-  background-color: color-mix(
-    in srgb,
-    var(--jic-glass-control) 88%,
-    var(--jic-gold) 12%
-  );
+  background-color: color-mix(in srgb, var(--jic-glass-control) 88%, var(--jic-gold) 12%);
 }
 
 @media (prefers-reduced-motion: reduce) {

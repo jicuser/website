@@ -16,8 +16,8 @@
 | `liquid-glass.css`       | Glass tokens, public control/card material in both modes and accessibility fallbacks |
 | `admin.css`              | Staff workspace shell, editors, login and responsive behaviour                       |
 | `tv-admin.css`           | TV settings/editor controls only; never the live TV renderer                         |
-| `custom-forms.css`       | Form builder, response inbox and form-admin layout                                    |
-| `content-workflow.css`   | Posters, programme pages and structured content workflow                              |
+| `custom-forms.css`       | Form builder, response inbox and form-admin layout                                   |
+| `content-workflow.css`   | Posters, programme pages and structured content workflow                             |
 | `projects.css`           | Building project tiles                                                               |
 | `hall-booking.css`       | Hall availability calendar                                                           |
 | `worship.css`            | Worship pages and Qur'an reader                                                      |
@@ -31,7 +31,7 @@
 - Use `jic-prompt` for the current question or next-step label. It follows the readable gold accent in both themes and glass modes; keep explanatory text in the normal text colour. Primary actions use existing button variants, with green for starting a stream and red for ending it.
 - Do not use `!important` as a cascade patch. Put a rule in the stylesheet that owns the component and use a scoped selector. The only retained exception is the global reduced-motion accessibility fallback in `index.css`.
 - The live TV renderer is owned by `tv.css`; admin-only TV editing controls are owned by `tv-admin.css`. Do not duplicate the same selector in both.
-- Only the fixed prayer strip is measured by `ResizeObserver`; the unboxed logo and section tabs scroll with the page. On mobile, the script-style Menu word beside the logo opens a compact main-page list. Back, burger, Donate and theme actions stay at the bottom; the burger opens a full-page text directory. Do not add fixed top padding to every `main` element.
+- Only the fixed prayer strip is measured by `ResizeObserver`; the unboxed logo and section tabs scroll with the page. On mobile, the script-style Menu word beside the logo opens a compact main-page list. Back, burger, Donate and theme actions stay at the bottom; the burger opens a full-page text directory. Below the desktop prayer strip, page controls float in a compact dock with an in-flow slot keeping the logo and navigation clear. On short landscape screens the dock returns to normal flow. Mobile and tablet section breadcrumbs use the same route context as desktop highlights. Do not add fixed top padding to every `main` element.
 - Keep horizontal overflow inside the timetable or tab rail; do not hide all page overflow to disguise a sizing problem.
 - Preserve reduced-motion, reduced-transparency and no-blur fallbacks.
 - Use `npm run format` before committing. Comments should explain ownership or a reason, rather than a sequence of patches.
