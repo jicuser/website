@@ -233,7 +233,16 @@ export default function WorshipPage() {
         </div>
       )}
       {isQuran && <QuranReader />}
-      {isPrayer && <Cards items={salahSteps} />}
+      {isPrayer && (
+        <>
+          <Cards items={salahSteps} />
+          <div className="worship-reading-card">
+            <Link className="jic-button" to="/worship/janazah-guide">
+              Janazah prayer guide
+            </Link>
+          </div>
+        </>
+      )}
       {isJanazah && <Cards items={janazahSteps} />}
       {isDuas && <Cards items={duaCards} />}
       {isDailySalah && <DailySalah />}

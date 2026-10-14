@@ -108,14 +108,10 @@ export const NAV_ITEMS = [
 
 // Related destinations share a row in the compact footer.
 export const FOOTER_LINKS = [
-  { name: 'About', path: '/about' },
   { name: 'Contact Us', path: '/contact' },
-  { name: 'Prayer Times', path: '/prayer-times' },
-  { name: 'Phone wallpaper', path: '/prayer-times/monthly#phone-wallpaper' },
+  { name: 'Download Salah timetable', path: '/prayer-times/monthly#phone-wallpaper' },
   { name: 'Services', path: '/services' },
   { name: 'Masjid Building Works', path: '/projects' },
   { name: 'Education', path: '/education' },
-  { name: 'Madrassah', path: '/madrassah' },
   { name: 'Youth', path: '/youth' },
-  { name: 'Social Media', path: '/social-media' },
 ];

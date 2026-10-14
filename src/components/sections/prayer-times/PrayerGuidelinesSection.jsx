@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const PrayerGuidelinesSection = () => (
   <section className="py-16">
@@ -9,6 +10,14 @@ const PrayerGuidelinesSection = () => (
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
           Important information about prayers at Jamatia Islamic Centre.
         </p>
+        <nav className="mt-4 flex flex-wrap justify-center gap-3" aria-label="Prayer guides">
+          <Link className="jic-button" to="/worship/prayer-guide">
+            Salah guide
+          </Link>
+          <Link className="jic-button" to="/worship/janazah-guide">
+            Janazah prayer guide
+          </Link>
+        </nav>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">

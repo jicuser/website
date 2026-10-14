@@ -1,6 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { activeNavigation } from '../src/lib/publicNavigation.js';
+import { FOOTER_LINKS, NAV_GROUPS, MADRASSAH_TABS, WORSHIP_TABS } from '../src/content/nav.js';
+
+test('compact footer removes duplicate shortcuts without removing their pages', () => {
+  assert.deepEqual(
+    FOOTER_LINKS.map((item) => item.name),
+    [
+      'Contact Us',
+      'Download Salah timetable',
+      'Services',
+      'Masjid Building Works',
+      'Education',
+      'Youth',
+    ],
+  );
+  assert.equal(FOOTER_LINKS[1].path, '/prayer-times/monthly#phone-wallpaper');
+  assert.ok(NAV_GROUPS.some((item) => item.path === '/about'));
+  assert.ok(NAV_GROUPS.some((item) => item.path === '/prayer-times'));
+  assert.ok(MADRASSAH_TABS.some((item) => item.path === '/madrassah'));
+  assert.ok(
+    NAV_GROUPS.flatMap((item) => item.children).some((item) => item.path === '/social-media'),
+  );
+  assert.ok(WORSHIP_TABS.some((item) => item.path === '/worship/janazah-guide'));
+});
 
 test('public sections retain their own identity on overview pages', () => {
   for (const [path, name] of [
