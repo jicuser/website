@@ -32,6 +32,7 @@
 - Do not use `!important` as a cascade patch. Put a rule in the stylesheet that owns the component and use a scoped selector. The only retained exception is the global reduced-motion accessibility fallback in `index.css`.
 - The live TV renderer is owned by `tv.css`; admin-only TV editing controls are owned by `tv-admin.css`. Do not duplicate the same selector in both.
 - `ResizeObserver` measures the prayer panel and mobile controls. On phones they form one bottom dock; the combined height reserves page space and positions floating buttons. The logo and section tabs stay in document flow. On short landscape screens the prayer panel returns to normal flow. On desktop the prayer panel stays at the top with page controls floating below it. The menu shares their right alignment. Mobile and tablet section breadcrumbs use the same route context as desktop highlights. Do not add fixed top padding to every `main` element.
+- Desktop section dropdowns support mouse hover, button clicks and arrow-key navigation; Escape restores focus to the section button. Main section and submenu underlines share route context with mobile breadcrumbs.
 - Keep horizontal overflow inside the timetable or tab rail; do not hide all page overflow to disguise a sizing problem.
 - Preserve reduced-motion, reduced-transparency and no-blur fallbacks.
 - Use `npm run format` before committing. Comments should explain ownership or a reason, rather than a sequence of patches.

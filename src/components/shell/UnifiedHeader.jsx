@@ -25,6 +25,7 @@ import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useAppearance } from '@/context/AppearanceContext';
 import { useNavigationHistory } from '@/context/NavigationContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
+import DesktopNavigation from '@/components/shell/DesktopNavigation';
 import { cn } from '@/lib/utils';
 import { activeNavigation } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
@@ -295,25 +296,7 @@ export default function UnifiedHeader() {
                 </nav>
               )}
             </div>
-            <nav className="jic-desktop-primary-nav" aria-label="Primary navigation">
-              {NAV_GROUPS.map(({ name, path }) => (
-                <div className="jic-desktop-nav-group" key={path}>
-                  <Link
-                    to={path}
-                    className={navigation?.primaryPath === path ? 'active' : undefined}
-                    aria-current={
-                      navigation?.primaryPath === path
-                        ? pathname === path
-                          ? 'page'
-                          : 'location'
-                        : undefined
-                    }
-                  >
-                    {name}
-                  </Link>
-                </div>
-              ))}
-            </nav>
+            <DesktopNavigation navigation={navigation} />
             <div className="jic-free-actions-slot">
               <nav className="jic-free-actions" aria-label="Page controls" data-glass="dense">
                 <Link to="/search" aria-label="Search site">

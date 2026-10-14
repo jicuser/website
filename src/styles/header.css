@@ -782,18 +782,75 @@ html {
     gap: 2px;
     min-width: 0;
   }
-  .jic-desktop-nav-group > a {
-    display: block;
-    padding: 9px 7px;
+  .jic-desktop-nav-group {
+    position: relative;
+    min-width: 0;
+  }
+  .jic-desktop-nav-group:has([aria-expanded='true']) {
+    z-index: 46;
+  }
+  .jic-desktop-nav-group > :is(a, button) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 44px;
+    padding: 8px 6px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    background: transparent;
     font-size: 0.875rem;
+    font-weight: 600;
     line-height: 1.2;
-    border-radius: 8px;
     color: var(--jic-text-secondary);
     white-space: nowrap;
   }
-  .jic-desktop-nav-group > a:is(:hover, .active) {
-    background: var(--jic-glass-control);
+  .jic-desktop-nav-group > :is(a, button):is(:hover, [aria-current], [aria-expanded='true']) {
+    border-bottom-color: var(--jic-gold);
     color: var(--jic-text);
+  }
+  .jic-desktop-section-trigger svg {
+    flex-shrink: 0;
+    transition: transform 150ms ease;
+  }
+  .jic-desktop-section-trigger[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
+  .jic-desktop-dropdown {
+    --jic-glass-panel: var(--jic-glass-panel-strong);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 248px;
+    max-height: min(420px, 50dvh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 6px;
+    border: 1px solid var(--jic-glass-border);
+    border-radius: 0 12px 12px 12px;
+  }
+  .jic-desktop-nav-group:nth-last-child(-n + 2) .jic-desktop-dropdown {
+    left: auto;
+    right: 0;
+  }
+  .jic-desktop-dropdown a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: var(--jic-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  .jic-desktop-dropdown a:is(:hover, :focus-visible, [aria-current]) {
+    color: var(--jic-text);
+    background: var(--jic-glass-control);
+    text-decoration: underline;
+    text-decoration-color: var(--jic-gold);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
   }
 }
 /* On short landscape screens the header scrolls away so the page stays usable. */
