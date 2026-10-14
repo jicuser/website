@@ -5,10 +5,10 @@
 }
 .jic-footer-inner {
   display: grid;
-  gap: 18px;
+  gap: 12px;
   width: min(100%, 1200px);
   margin-inline: auto;
-  padding: 24px 16px 12px;
+  padding: 18px 16px 8px;
 }
 .jic-footer-brand {
   display: flex;
@@ -35,7 +35,7 @@
 .jic-footer-content {
   display: grid;
   align-content: start;
-  gap: 16px;
+  gap: 6px;
   min-width: 0;
 }
 .jic-footer-links-inline {
@@ -70,7 +70,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px 24px;
+  gap: 8px 12px;
   min-width: 0;
 }
 .jic-footer-socials,
@@ -105,7 +105,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 1 140px;
+  flex: 0 0 auto;
   min-width: 0;
   min-height: 44px;
   padding: 10px 20px;
@@ -146,9 +146,9 @@
 }
 @media (min-width: 768px) {
   .jic-footer-inner {
-    grid-template-columns: 168px minmax(0, 1fr);
-    gap: 20px 40px;
-    padding: 24px 24px 12px;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 12px 24px;
+    padding: 18px 24px 8px;
   }
   .jic-footer-brand {
     flex-direction: column;
@@ -157,25 +157,23 @@
   }
   .jic-footer-signature {
     flex: 0 0 auto;
-    width: 156px;
+    width: 132px;
   }
   .jic-footer-donate {
     flex: 0 0 auto;
-    width: 140px;
+    width: auto;
   }
   .jic-footer-links-inline {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     gap: 0 16px;
+    max-width: 700px;
   }
   .jic-footer-bottom {
     grid-column: 1 / -1;
   }
   .jic-footer-legal {
     justify-content: center;
-  }
-}
-@media (min-width: 1100px) {
-  .jic-footer-links-inline {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }

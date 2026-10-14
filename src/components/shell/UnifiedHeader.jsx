@@ -44,6 +44,7 @@ export default function UnifiedHeader() {
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
+    mobileControlsRef = useRef(null),
     audioRef = useRef(null),
     menuRef = useRef(null),
     quickMenuRef = useRef(null),
@@ -112,17 +113,25 @@ export default function UnifiedHeader() {
       window.removeEventListener('jic-open-donation', openDonation);
     };
   }, []);
-  // Measure before paint so larger phone text cannot sit beneath the header.
+  // Shared measurements keep content, floating actions and phone safe areas clear.
   useLayoutEffect(() => {
-    const node = prayerDockRef.current;
-    const update = () =>
-      document.documentElement.style.setProperty(
+    const prayer = prayerDockRef.current;
+    const controls = mobileControlsRef.current;
+    const update = () => {
+      const style = document.documentElement.style;
+      style.setProperty(
         '--jic-prayer-dock-height',
-        `${Math.ceil(node.getBoundingClientRect().height)}px`,
+        `${Math.ceil(prayer.getBoundingClientRect().height)}px`,
       );
+      style.setProperty(
+        '--jic-mobile-controls-height',
+        `${Math.ceil(controls.getBoundingClientRect().height)}px`,
+      );
+    };
     update();
     const observer = new ResizeObserver(update);
-    observer.observe(node);
+    observer.observe(prayer);
+    observer.observe(controls);
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
@@ -379,7 +388,7 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
-      <nav className="jic-mobile-controls" aria-label="Quick navigation">
+      <nav ref={mobileControlsRef} className="jic-mobile-controls" aria-label="Quick navigation">
         <button
           type="button"
           onClick={() => {

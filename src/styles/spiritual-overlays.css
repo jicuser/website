@@ -193,7 +193,7 @@
 @media (max-width: 767px) {
   .jic-spiritual-overlay {
     --spiritual-overlay-gutter: 16px;
-    --spiritual-toast-offset: 78px;
+    --spiritual-toast-offset: calc(var(--jic-mobile-dock-height, 72px) + 8px);
     -webkit-backdrop-filter: var(--jic-glass-overlay-filter);
     backdrop-filter: var(--jic-glass-overlay-filter);
   }

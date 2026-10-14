@@ -22,9 +22,6 @@ export default function Footer() {
           <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home">
             <JamatiaLogo variant="compact" />
           </Link>
-          <button type="button" onClick={openDonation} className="jic-footer-donate">
-            Donate
-          </button>
         </div>
         <div className="jic-footer-content">
           <nav className="jic-footer-links-inline" aria-label="Footer links">
@@ -80,6 +77,9 @@ export default function Footer() {
                 <Mail size={20} aria-hidden="true" />
               </a>
             </nav>
+            <button type="button" onClick={openDonation} className="jic-footer-donate">
+              Donate
+            </button>
           </div>
         </div>
         <div className="jic-footer-bottom">

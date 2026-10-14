@@ -111,8 +111,8 @@ export default function PrayerTimeBar({
                       {shortTime(todaysTimes?.[key])}
                     </strong>
                     <em>
-                      <small>{jamaah ? 'Jama’ah' : '—'}</small>
-                      {jamaah ? shortTime(todaysTimes?.[jamaah]) : '—'}
+                      <small>{jamaah ? 'Jama’ah' : ''}</small>
+                      {jamaah ? shortTime(todaysTimes?.[jamaah]) : ''}
                     </em>
                   </div>
                 </Item>
