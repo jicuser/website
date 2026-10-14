@@ -11,8 +11,10 @@ import PageEditor from '@/components/admin/PageEditor';
 import '@/styles/content-workflow.css';
 import '@/styles/workspace.css';
 import '@/styles/custom-forms.css';
+import '@/styles/programme-page-manager.css';
 
 export function ContentPageCatalogue() {
+  const { can } = useAuth();
   const read = useCallback(
     (signal) =>
       checked(
@@ -23,11 +25,14 @@ export function ContentPageCatalogue() {
   const { data: pages, loading, error, reload } = useAdminRecords(read);
   const [editing, setEditing] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [section, setSection] = useState('all');
+  const [query, setQuery] = useState('');
   if (editing)
     return (
       <ContentPageEditor
         key={editing.id || 'new'}
         page={editing.id ? editing : null}
+        initialPlacement={editing.placement}
         onClose={() => setEditing(null)}
         onSaved={(page) => {
           setEditing(page);
@@ -35,31 +40,67 @@ export function ContentPageCatalogue() {
         }}
       />
     );
-  const listed = (pages || []).filter(
-    (page) => filter === 'all' || (filter === 'live' ? page.published : !page.published),
-  );
+  const search = query.trim().toLocaleLowerCase();
+  const listed = (pages || []).filter((page) => {
+    const placement = PAGE_PLACEMENTS.find(([path]) => path === page.placement)?.[1] || '';
+    return (
+      (section === 'all' || page.placement === section) &&
+      (filter === 'all' || (filter === 'live' ? page.published : !page.published)) &&
+      (!search || `${page.title} ${page.slug} ${placement}`.toLocaleLowerCase().includes(search))
+    );
+  });
+  function clearFilters() {
+    setSection('all');
+    setFilter('all');
+    setQuery('');
+  }
   return (
     <section className="content-pages-manager">
       <div className="admin-heading">
         <div>
           <h2>Programme pages</h2>
           <p>
-            Choose where a page appears and link its registration form. Hidden pages retain their
-            responses and actions.
+            Choose a website section, then open a page to edit, move or show/hide it. Forms and
+            responses are managed separately.
           </p>
         </div>
-        <button className="admin-button primary" onClick={() => setEditing({})}>
+        <button
+          className="admin-button primary"
+          onClick={() => setEditing({ placement: section === 'all' ? '/education' : section })}
+        >
           Create page
         </button>
       </div>
-      <label>
-        Show pages
-        <select value={filter} onChange={(event) => setFilter(event.target.value)}>
-          <option value="all">All pages</option>
-          <option value="live">Visible on website</option>
-          <option value="hidden">Draft / hidden</option>
-        </select>
-      </label>
+      <div className="programme-page-filters">
+        <label>
+          Website section
+          <select value={section} onChange={(event) => setSection(event.target.value)}>
+            <option value="all">All sections</option>
+            {PAGE_PLACEMENTS.map(([path, label]) => (
+              <option key={path} value={path}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Search pages
+          <input
+            type="search"
+            value={query}
+            placeholder="Page title or address"
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </label>
+        <label>
+          Visibility
+          <select value={filter} onChange={(event) => setFilter(event.target.value)}>
+            <option value="all">Visible and hidden</option>
+            <option value="live">Visible on website</option>
+            <option value="hidden">Hidden from website</option>
+          </select>
+        </label>
+      </div>
       {error && (
         <p role="alert">
           {error}{' '}
@@ -69,13 +110,28 @@ export function ContentPageCatalogue() {
         </p>
       )}
       {loading && !pages && <p role="status">Loading pages…</p>}
+      {!loading && !error && (
+        <p className="programme-page-count" role="status">
+          {listed.length} {listed.length === 1 ? 'page' : 'pages'} shown
+          {section !== 'all' || filter !== 'all' || query ? (
+            <button className="admin-button" onClick={clearFilters}>
+              Clear filters
+            </button>
+          ) : null}
+        </p>
+      )}
       <div className="content-form-grid">
         {listed.map((page) => (
-          <article className="admin-panel" key={page.id}>
-            <span className="content-status">{page.published ? 'Page live' : 'Page hidden'}</span>
+          <article className="admin-panel programme-page-card" key={page.id}>
+            <span className="content-status">
+              {page.published ? 'Visible on website' : 'Hidden from website'}
+            </span>
             <h3>{page.title}</h3>
             <p>
-              {PAGE_PLACEMENTS.find(([path]) => path === page.placement)?.[1] || page.placement}
+              <span>Website section: </span>
+              <strong>
+                {PAGE_PLACEMENTS.find(([path]) => path === page.placement)?.[1] || page.placement}
+              </strong>
             </p>
             <div className="admin-actions">
               <button
@@ -90,7 +146,7 @@ export function ContentPageCatalogue() {
                   View page
                 </Link>
               )}
-              {page.form_id && (
+              {page.form_id && can('forms') && (
                 <Link className="admin-button" to={`/admin?section=forms&form=${page.form_id}`}>
                   Form & responses
                 </Link>
@@ -100,7 +156,11 @@ export function ContentPageCatalogue() {
         ))}
       </div>
       {!loading && !error && !listed.length && (
-        <p>No pages in this view. Create one here or from a poster.</p>
+        <p>
+          {pages?.length
+            ? 'No pages match these filters. Clear the filters or choose another section.'
+            : 'No programme pages yet. Create a page here or from a poster.'}
+        </p>
       )}
     </section>
   );

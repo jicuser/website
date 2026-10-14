@@ -95,3 +95,21 @@ test('repeated save clicks do not send the same request twice', async () => {
   assert.equal(await first, true);
   assert.equal(calls, 1);
 });
+
+test('a local editor save blocks global saves until its request finishes', async () => {
+  let calls = 0;
+  const workspace = saveWorkspace([]);
+  const id = Symbol('blocks');
+  workspace.register(
+    id,
+    async () => {
+      calls += 1;
+    },
+    { dirty: true, saving: true },
+  );
+  assert.equal(await workspace.saveCurrent(), false);
+  assert.equal(calls, 0);
+  workspace.updateState(id, { saving: false });
+  assert.equal(await workspace.saveCurrent(), true);
+  assert.equal(calls, 1);
+});

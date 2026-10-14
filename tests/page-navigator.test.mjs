@@ -1,0 +1,169 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+import { runInNewContext } from 'node:vm';
+import { build } from 'esbuild';
+import React from 'react';
+import { EDITABLE_PAGES } from '../src/content/editablePages.js';
+import { NAV_GROUPS } from '../src/content/nav.js';
+import { buildPageNavigator, findNavigatorPages } from '../src/lib/pageNavigator.js';
+
+const sections = buildPageNavigator(EDITABLE_PAGES);
+
+test('page navigator keeps each canonical page once within the public website hierarchy', () => {
+  assert.deepEqual(
+    sections.map((section) => section.name),
+    NAV_GROUPS.map((section) => section.name),
+  );
+  const pages = sections.flatMap((section) => section.pages);
+  assert.equal(pages.length, EDITABLE_PAGES.length);
+  assert.equal(new Set(pages.map((page) => page.path)).size, pages.length);
+  for (const page of EDITABLE_PAGES) {
+    assert.equal(pages.find((item) => item.path === page.path).name, page.name);
+  }
+});
+
+test('nested pages retain clear names inside Education, Services and Building Works', () => {
+  const find = (path) =>
+    sections.flatMap((section) => section.pages).find((page) => page.path === path);
+  assert.equal(find('/madrassah').section, 'Education');
+  assert.equal(find('/madrassah/policies').section, 'Education');
+  assert.equal(find('/madrassah/policies').label, 'Madrassah · Policies');
+  assert.equal(find('/projects/masjid-extension/timeline').label, 'Masjid Extension · Timeline');
+  assert.equal(find('/funerals/contact-support').section, 'Services');
+  assert.equal(find('/contact').section, 'About');
+});
+
+test('page search spans sections, tolerates whitespace and finds URL or name', () => {
+  assert.deepEqual(
+    findNavigatorPages(sections, '  EDUCATION   policies ').map((page) => page.path),
+    ['/madrassah/policies'],
+  );
+  assert.deepEqual(
+    findNavigatorPages(sections, '/prayer-times/monthly').map((page) => page.path),
+    ['/prayer-times/monthly'],
+  );
+  assert.ok(findNavigatorPages(sections, "qur'an").some((page) => page.path === '/worship/quran'));
+  assert.equal(findNavigatorPages(sections, 'no such destination').length, 0);
+});
+
+const bundled = await build({
+  entryPoints: [new URL('../src/components/admin/PageNavigator.jsx', import.meta.url).pathname],
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  packages: 'external',
+  write: false,
+  loader: { '.css': 'empty' },
+  alias: { '@': new URL('../src', import.meta.url).pathname },
+});
+const require = createRequire(import.meta.url);
+
+function harness(props) {
+  const state = [];
+  let index = 0;
+  const context = {
+    module: { exports: {} },
+    require: (name) =>
+      name === 'react'
+        ? {
+            ...React,
+            useId: () => 'page-test',
+            useEffect: () => {},
+            useState: (initial) => {
+              const key = index++;
+              if (!(key in state)) state[key] = typeof initial === 'function' ? initial() : initial;
+              return [
+                state[key],
+                (value) => {
+                  state[key] = typeof value === 'function' ? value(state[key]) : value;
+                },
+              ];
+            },
+          }
+        : require(name),
+  };
+  runInNewContext(bundled.outputFiles[0].text, context);
+  return () => {
+    index = 0;
+    return context.module.exports.default(props);
+  };
+}
+
+function nodes(tree, match) {
+  if (!tree || typeof tree !== 'object') return [];
+  const children = React.Children.toArray(tree.props?.children);
+  return [...(match(tree) ? [tree] : []), ...children.flatMap((child) => nodes(child, match))];
+}
+const input = (tree, suffix) => nodes(tree, (node) => node.props?.id === `page-test-${suffix}`)[0];
+
+test('browsing a section does not navigate or discard the currently edited page', () => {
+  const calls = [];
+  const render = harness({
+    selected: '/madrassah/policies',
+    onSelectPage: (path) => calls.push(path),
+  });
+  let tree = render();
+  assert.equal(input(tree, 'section').props.value, 'Education');
+  assert.equal(input(tree, 'page').props.value, '/madrassah/policies');
+  assert.equal(nodes(tree, (node) => node.props?.['aria-current'] === 'page').length, 1);
+  input(tree, 'section').props.onChange({ target: { value: 'Services' } });
+  tree = render();
+  assert.deepEqual(calls, []);
+  assert.equal(input(tree, 'section').props.value, 'Services');
+  assert.equal(input(tree, 'page').props.value, '');
+  assert.ok(
+    nodes(tree, (node) => node.type === 'strong').some(
+      (node) => node.props.children === 'Education',
+    ),
+  );
+});
+
+test('opening a page delegates to the parent guard and never updates selected optimistically', () => {
+  const calls = [];
+  const render = harness({ selected: '/education', onSelectPage: (path) => calls.push(path) });
+  let tree = render();
+  input(tree, 'page').props.onChange({ target: { value: '/education/courses' } });
+  assert.deepEqual(calls, ['/education/courses']);
+  tree = render();
+  assert.equal(input(tree, 'page').props.value, '/education');
+  input(tree, 'page').props.onChange({ target: { value: '/education' } });
+  assert.deepEqual(calls, ['/education/courses']);
+});
+
+test('search finds other sections without opening anything and offers an empty result state', () => {
+  const calls = [];
+  const render = harness({ selected: '/education', onSelectPage: (path) => calls.push(path) });
+  input(render(), 'search').props.onChange({ target: { value: 'Janazah' } });
+  let tree = render();
+  const results = nodes(
+    tree,
+    (node) => node.type === 'nav' && node.props['aria-label'] === 'Page search results',
+  )[0];
+  const buttons = nodes(results, (node) => node.type === 'button');
+  assert.equal(buttons.length, 1);
+  assert.deepEqual(calls, []);
+  buttons[0].props.onClick();
+  assert.deepEqual(calls, ['/worship/janazah-guide']);
+  input(tree, 'search').props.onChange({ target: { value: 'no such destination' } });
+  tree = render();
+  assert.ok(
+    nodes(tree, (node) => node.type === 'p').some(
+      (node) => node.props.children === 'No matching pages. Try a different name.',
+    ),
+  );
+});
+
+test('saving disables navigation and guards against a programmatic page selection', () => {
+  const calls = [];
+  const render = harness({
+    selected: '/education',
+    disabled: true,
+    onSelectPage: (path) => calls.push(path),
+  });
+  const tree = render();
+  for (const node of nodes(tree, (node) => ['input', 'select', 'button'].includes(node.type)))
+    assert.equal(node.props.disabled, true);
+  input(tree, 'page').props.onChange({ target: { value: '/education/courses' } });
+  assert.deepEqual(calls, []);
+});

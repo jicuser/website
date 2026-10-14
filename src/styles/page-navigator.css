@@ -1,0 +1,127 @@
+/* One owner for the section → page chooser; it does not change public navigation. */
+.page-navigator {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 18px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.page-navigator > label,
+.page-navigator__search {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--jic-text-secondary);
+}
+.page-navigator__current {
+  display: grid;
+  gap: 3px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--jic-border);
+  overflow-wrap: anywhere;
+}
+.page-navigator__current > span:last-child:not(.admin-eyebrow) {
+  font-size: 13px;
+  color: var(--jic-text-secondary);
+}
+.page-navigator select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+.page-navigator__search > span {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 4px;
+  align-items: center;
+}
+.page-navigator__search > .page-navigator__search-label {
+  display: flex;
+  gap: 6px;
+}
+.page-navigator__search input {
+  min-width: 0;
+}
+.page-navigator__search input::-webkit-search-cancel-button {
+  display: none;
+}
+.page-navigator__search button {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+}
+.page-navigator__count {
+  margin: 0 0 8px;
+  color: var(--jic-text-secondary);
+  font-size: 12px;
+}
+.page-navigator__pages nav {
+  display: grid;
+  gap: 4px;
+  max-height: min(420px, 48dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 3px;
+}
+.page-navigator__pages button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--jic-text);
+  text-align: left;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.page-navigator__pages button > span {
+  display: grid;
+  gap: 3px;
+}
+.page-navigator__pages button > svg {
+  flex-shrink: 0;
+}
+.page-navigator__pages button small {
+  color: var(--jic-text-secondary);
+  font-size: 11px;
+}
+.page-navigator__pages button[aria-current='page'] {
+  background: color-mix(in srgb, var(--jic-gold) 14%, var(--jic-surface));
+  border-color: var(--jic-gold);
+  font-weight: 700;
+}
+.page-navigator :is(button, input, select):focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 2px;
+}
+.page-navigator button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+@media (hover: hover) {
+  .page-navigator__pages button:not(:disabled):hover {
+    background: color-mix(in srgb, var(--jic-gold) 10%, var(--jic-surface));
+  }
+}
+@media (min-width: 801px) {
+  .page-navigator .page-navigator__page-select {
+    display: none;
+  }
+}
+@media (max-width: 800px) {
+  .page-navigator__pages:not(.is-searching) {
+    display: none;
+  }
+}

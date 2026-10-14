@@ -1,0 +1,217 @@
+/* Additional website content: one draft and one save action for the whole list. */
+.page-blocks {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  margin-bottom: 22px;
+  border: 1px solid var(--jic-border);
+  border-radius: 22px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.page-blocks__heading,
+.page-blocks__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.page-blocks__heading {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.page-blocks__heading > div {
+  flex: 1 1 250px;
+}
+.page-blocks h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 750;
+}
+.page-blocks h4 {
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.page-blocks p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.page-blocks__hint {
+  color: var(--jic-text-secondary);
+}
+.page-blocks__list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.page-blocks__card {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+}
+.page-blocks__list .is-dragging > .page-blocks__card {
+  border-color: var(--jic-gold);
+  box-shadow: 0 0 0 2px var(--jic-gold);
+}
+.page-blocks__row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 8px;
+  align-items: start;
+}
+.page-blocks__drag,
+.page-blocks__order button,
+.page-blocks__pictures button {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.page-blocks__drag {
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+.page-blocks__drag:active {
+  cursor: grabbing;
+}
+.page-blocks__toggle {
+  display: grid;
+  gap: 4px;
+  min-height: 44px;
+  padding: 5px 0;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.page-blocks__toggle strong {
+  font-size: 15px;
+}
+.page-blocks__toggle span {
+  color: var(--jic-text-secondary);
+  font-size: 12px;
+}
+.page-blocks__toggle small {
+  color: var(--jic-gold-strong);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.page-blocks__order {
+  display: grid;
+  gap: 4px;
+}
+.page-blocks__visibility {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.page-blocks__visibility input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--jic-action);
+}
+.page-blocks__editor {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  margin: 10px 0 0;
+  padding: 16px 0 0;
+  border: 0;
+  border-top: 1px solid var(--jic-border);
+}
+.page-blocks__editor > label:not(.admin-button) {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 650;
+}
+.page-blocks__editor > .admin-button {
+  justify-self: start;
+}
+.page-blocks__media {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.page-blocks__media > div {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+.page-blocks__background {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 9px;
+  background: var(--jic-bg-secondary);
+}
+.page-blocks__pictures {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+}
+.page-blocks__pictures > div {
+  display: grid;
+  gap: 5px;
+}
+.page-blocks__pictures img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.page-blocks__pictures button {
+  justify-self: end;
+}
+.page-blocks__empty {
+  padding: 18px;
+  border: 1px dashed var(--jic-border);
+  border-radius: 12px;
+  color: var(--jic-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.page-blocks__save {
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--jic-border);
+}
+.page-blocks :is(button, input, select, textarea):focus-visible,
+.page-blocks .admin-button:focus-within {
+  outline: 2px solid var(--jic-gold-strong);
+  outline-offset: 3px;
+}
+.page-blocks button:disabled,
+.page-blocks fieldset:disabled .admin-button {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 600px) {
+  .page-blocks {
+    padding: 14px;
+  }
+  .page-blocks__media {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .page-blocks__actions > .admin-button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}

@@ -663,35 +663,6 @@ html:not(.dark) .admin-eyebrow {
   gap: 22px;
   align-items: start;
 }
-.admin-page-picker {
-  position: sticky;
-  top: 88px;
-  padding: 15px;
-  max-height: calc(100vh - 120px);
-  overflow: auto;
-}
-.admin-page-picker h4 {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  opacity: 0.55;
-  margin: 17px 10px 5px;
-}
-.admin-page-picker nav button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-align: left;
-  width: 100%;
-  padding: 9px 10px;
-  border-radius: 9px;
-  color: #475567;
-  font-size: 12px;
-}
-.admin-page-picker nav button.selected {
-  background: #eac76e55;
-  color: #563e0b;
-}
 .admin-search {
   position: relative;
 }
@@ -703,12 +674,6 @@ html:not(.dark) .admin-eyebrow {
 .admin-panel .admin-search input {
   padding-left: 33px;
   font-size: 13px;
-}
-.admin-page-picker small {
-  display: flex;
-  gap: 6px;
-  margin-top: 18px;
-  font-size: 10px;
 }
 .admin-page-main {
   min-width: 0;
@@ -805,15 +770,6 @@ html:not(.dark) .admin-eyebrow {
   .admin-page-layout {
     grid-template-columns: 1fr;
   }
-  .admin-page-picker {
-    position: static;
-    max-height: 220px;
-  }
-  .admin-page-picker nav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
   .admin-shortcuts {
     grid-template-columns: 1fr;
   }
@@ -851,107 +807,6 @@ html:not(.dark) .admin-eyebrow {
 
 /* Admin content editors and managed page sections. */
 
-.admin-section-create,
-.admin-section-card {
-  display: grid;
-  gap: 14px;
-}
-.admin-section-create {
-  padding: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  border-radius: 18px;
-  background: #fff;
-  margin-bottom: 18px;
-}
-.admin-section-create label,
-.admin-section-card label {
-  display: grid;
-  gap: 7px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #334155;
-}
-.admin-section-create input,
-.admin-section-create textarea,
-.admin-section-card input,
-.admin-section-card textarea {
-  width: 100%;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  padding: 10px 12px;
-  background: #fff;
-  color: #0f172a;
-  outline: none;
-}
-.admin-section-create input:focus,
-.admin-section-create textarea:focus,
-.admin-section-card input:focus,
-.admin-section-card textarea:focus {
-  border-color: #d6a833;
-  box-shadow: 0 0 0 3px rgba(214, 168, 51, 0.12);
-}
-.admin-section-list {
-  display: grid;
-  gap: 16px;
-}
-.admin-section-card {
-  padding: 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  background: #fff;
-}
-.admin-section-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.admin-section-media {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.admin-section-media > div {
-  display: grid;
-  gap: 9px;
-  align-content: start;
-}
-.admin-section-media > div > span {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-.admin-section-media img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 14px;
-  border: 1px solid #e2e8f0;
-}
-.admin-section-thumbs {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-.admin-section-thumbs > div {
-  position: relative;
-}
-.admin-section-thumbs img {
-  height: 90px;
-}
-.admin-section-thumbs button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.82);
-  color: #fff;
-  border: 0;
-}
 .admin-check {
   display: flex;
   grid-template-columns: auto 1fr;
@@ -1024,16 +879,6 @@ html:not(.dark) .managed-page-section-copy {
 }
 
 @media (max-width: 767px) {
-  .admin-section-media {
-    grid-template-columns: 1fr;
-  }
-  .admin-section-card-head {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .admin-section-thumbs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .managed-page-section-inner {
     padding: 38px 18px;
   }
@@ -2028,12 +1873,6 @@ html.dark .admin-console .admin-field-error {
   }
   .admin-task-grid span {
     font-size: 11px;
-  }
-  .admin-page-picker {
-    max-height: none;
-  }
-  .admin-page-picker nav {
-    grid-template-columns: minmax(0, 1fr);
   }
   .admin-search svg {
     top: 50%;

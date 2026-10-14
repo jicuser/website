@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Search,
   ExternalLink,
   Save,
   Upload,
@@ -13,7 +12,7 @@ import {
 import { supabase } from '@/lib/supabaseClient';
 import { createImageUploader } from '@/lib/imageUpload';
 import { useContent } from '@/context/ContentContext';
-import { useRegisterAdminSave } from '@/context/AdminSaveContext';
+import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import {
   EDITABLE_PAGES,
   editablePagePath,
@@ -24,10 +23,10 @@ import {
 import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
 import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
+import PageNavigator from '@/components/admin/PageNavigator';
 
 export default function PageEditor({ initialPath = '/', inline = false, onSelectPage }) {
   const [selected, setSelected] = useState(() => editablePagePath(initialPath));
-  const [query, setQuery] = useState('');
   const [draft, setDraft] = useState({});
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -40,6 +39,7 @@ export default function PageEditor({ initialPath = '/', inline = false, onSelect
   const [pendingPreview, setPendingPreview] = useState('');
   const previewUrlRef = useRef('');
   const { refreshContent } = useContent();
+  const { saving: workspaceSaving } = useAdminSave();
   const page = EDITABLE_PAGES.find((item) => item.path === selected);
   const additionalContent = supplementalContentPaths.has(selected);
 
@@ -104,7 +104,7 @@ export default function PageEditor({ initialPath = '/', inline = false, onSelect
   };
 
   const choose = (path) => {
-    if (busy) return;
+    if (busy || workspaceSaving) return;
     path = editablePagePath(path);
     if (onSelectPage) {
       onSelectPage(path);
@@ -187,16 +187,13 @@ export default function PageEditor({ initialPath = '/', inline = false, onSelect
     }
   }, [dirty, busy, loading, draft, pendingImage, persist, clearPendingPreview]);
 
-  useRegisterAdminSave(save, dirty && !busy && !loading, 'Save page');
+  useRegisterAdminSave(save, dirty && !loading, 'Save page', busy);
 
   const removePicture = () => {
     clearPendingPreview();
     change('image', '');
   };
 
-  const visible = EDITABLE_PAGES.filter((item) =>
-    `${item.name} ${item.group}`.toLowerCase().includes(query.toLowerCase()),
-  );
   const shownImage = pendingPreview || draft.image || '';
 
   return (
@@ -219,39 +216,11 @@ export default function PageEditor({ initialPath = '/', inline = false, onSelect
       )}
       <div className={inline ? 'admin-inline-page' : 'admin-page-layout'}>
         {!inline && (
-          <aside className="admin-panel admin-page-picker">
-            <label className="admin-search">
-              <Search size={16} />
-              <input
-                aria-label="Find a page"
-                placeholder="Find a page…"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-            <nav aria-label="Pages to edit">
-              {[...new Set(visible.map((item) => item.group))].map((group) => (
-                <div key={group}>
-                  <h4>{group}</h4>
-                  {visible
-                    .filter((item) => item.group === group)
-                    .map((item) => (
-                      <button
-                        disabled={busy}
-                        key={item.path}
-                        onClick={() => choose(item.path)}
-                        className={selected === item.path ? 'selected' : ''}
-                        aria-current={selected === item.path ? 'page' : undefined}
-                      >
-                        {item.name}
-                        <span>›</span>
-                      </button>
-                    ))}
-                </div>
-              ))}
-            </nav>
-            {!visible.length && <p>No pages match. Try another name.</p>}
-          </aside>
+          <PageNavigator
+            selected={selected}
+            onSelectPage={choose}
+            disabled={busy || workspaceSaving}
+          />
         )}
 
         <div className="admin-page-main">
@@ -361,7 +330,11 @@ export default function PageEditor({ initialPath = '/', inline = false, onSelect
               </article>
             </section>
           )}
-          <PageSectionsEditor pagePath={selected} />
+          <PageSectionsEditor
+            key={selected}
+            pagePath={selected}
+            onSaved={() => setRevision((current) => current + 1)}
+          />
           {!inline && (
             <section className="admin-panel">
               <div className="admin-heading">

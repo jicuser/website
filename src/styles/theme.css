@@ -258,13 +258,6 @@ td {
   background: color-mix(in srgb, var(--jic-gold) 8%, var(--jic-surface));
   border-color: color-mix(in srgb, var(--jic-gold) 35%, var(--jic-border));
 }
-.admin-page-picker nav button {
-  color: var(--jic-text-secondary);
-}
-.admin-page-picker nav button.selected {
-  background: color-mix(in srgb, var(--jic-gold) 14%, var(--jic-surface));
-  color: var(--jic-text);
-}
 
 .bg-green-50 {
   background: color-mix(in srgb, var(--jic-success) 10%, var(--jic-surface));

@@ -12,7 +12,7 @@ import { posterPlacementLabel } from '@/lib/programmePlacement';
 
 export default function PosterWorkflow({ poster, onEditPoster }) {
   const { can } = useAuth();
-  const { dirty } = useAdminSave();
+  const { dirty, saving } = useAdminSave();
   const [tab, setTab] = useState('overview');
   const [pageBusy, setPageBusy] = useState(false);
   const [pageMessage, setPageMessage] = useState('');
@@ -65,11 +65,21 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
   };
   const choose = (next) => {
     if (
+      saving ||
+      pageBusy ||
       tab === next ||
       (dirty && !window.confirm('Discard unsaved changes before changing this view?'))
     )
       return;
     setTab(next);
+  };
+  const guardFormNavigation = (event) => {
+    if (
+      saving ||
+      pageBusy ||
+      (dirty && !window.confirm('Discard unsaved page/form changes and open this form?'))
+    )
+      event.preventDefault();
   };
   return (
     <section className="poster-workflow">
@@ -92,7 +102,11 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
           {page ? 'Page' : 'Add page'}
         </button>
         {page?.form_id && can('forms') && (
-          <Link className="admin-button" to={`/admin?section=forms&form=${page.form_id}`}>
+          <Link
+            className="admin-button"
+            to={`/admin?section=forms&form=${page.form_id}`}
+            onClick={guardFormNavigation}
+          >
             Form & responses
           </Link>
         )}
@@ -192,7 +206,11 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
                   : 'Off · no registration form linked.'}
               </p>
               {page?.form_id && can('forms') ? (
-                <Link className="admin-button" to={`/admin?section=forms&form=${page.form_id}`}>
+                <Link
+                  className="admin-button"
+                  to={`/admin?section=forms&form=${page.form_id}`}
+                  onClick={guardFormNavigation}
+                >
                   Open form & responses
                 </Link>
               ) : (

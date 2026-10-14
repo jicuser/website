@@ -1,7 +1,40 @@
 # Website maintenance status
 
-Updated 14 September 2026. Current scope: refine the existing website and admin.
+Updated 14 October 2026. Current scope: refine the existing website and admin.
 Apps, remote push and hosting migration are deferred.
+
+## October admin page-workspace refinement
+
+The section/page navigator and programme catalogue use existing public navigation
+names. Programme placement, page visibility and form acceptance remain distinct.
+The content-block workspace uses a single page draft with reorder, move, visibility,
+undo and explicit save; built-in page features are not presented as freely movable
+blocks. See `content-workflow.md` for the model and next-phase boundaries.
+
+Managed migration `20261014232721 atomic_page_sections` maps to source
+`20261014231930_atomic_page_sections.sql`. It adds a caller-permission atomic save
+RPC and timestamp hardening, and revokes TRUNCATE/REFERENCES/TRIGGER from public
+client roles. Post-deployment queries confirmed RLS remains enabled, anonymous
+execution is denied, authenticated execution is available, and broad truncate
+grants are absent. The table was empty before and after deployment; no visitor
+content, form responses or staff accounts were changed as a test.
+
+The security advisor returned the same pre-existing findings before and after:
+two authenticated-callable form SECURITY DEFINER functions, disabled leaked-password
+protection, and informational RLS-without-policy notices for deliberately restricted
+backend tables. These findings were not silently “fixed” by opening permissions.
+Review the form functions' intended internal authorisation and the Auth setting
+separately; this release is not a whole-project security certification.
+
+- [SECURITY DEFINER review guidance](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)
+- [Password protection guidance](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
+- [RLS policy notice guidance](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)
+
+Real-phone drag behaviour and visual acceptance remain separate checks; local
+browser execution is unavailable in this environment. Database and component
+tests are used here without claiming physical-device acceptance.
+Final local `npm run validate` passed lint, all 455 tests and the production build.
+The existing optional HLS chunk-size warning remains; no limits were raised to hide it.
 
 ## Boundaries
 

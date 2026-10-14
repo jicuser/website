@@ -13,7 +13,7 @@ const AdminSaveContext = createContext(null);
 export function AdminSaveProvider({ children }) {
   const entriesRef = useRef(new Map());
   const saveInFlight = useRef(false);
-  const [summary, setSummary] = useState({ dirtyCount: 0, label: 'Save changes' });
+  const [summary, setSummary] = useState({ dirtyCount: 0, busyCount: 0, label: 'Save changes' });
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
 
@@ -21,6 +21,7 @@ export function AdminSaveProvider({ children }) {
     const dirtyEntries = [...entriesRef.current.values()].filter((entry) => entry.dirty);
     setSummary({
       dirtyCount: dirtyEntries.length,
+      busyCount: [...entriesRef.current.values()].filter((entry) => entry.saving).length,
       label:
         dirtyEntries.length === 1
           ? dirtyEntries[0].label
@@ -35,6 +36,7 @@ export function AdminSaveProvider({ children }) {
       entriesRef.current.set(id, {
         handler,
         dirty: Boolean(options.dirty),
+        saving: Boolean(options.saving),
         label: options.label || 'Save changes',
       });
       refreshSummary();
@@ -56,6 +58,9 @@ export function AdminSaveProvider({ children }) {
           ? { dirty: Boolean(next.dirty) }
           : {}),
         ...(next.label ? { label: next.label } : {}),
+        ...(Object.prototype.hasOwnProperty.call(next, 'saving')
+          ? { saving: Boolean(next.saving) }
+          : {}),
       });
       refreshSummary();
     },
@@ -64,6 +69,7 @@ export function AdminSaveProvider({ children }) {
 
   const saveCurrent = useCallback(async () => {
     if (saveInFlight.current) return false;
+    if ([...entriesRef.current.values()].some((entry) => entry.saving)) return false;
     const dirtyEntries = [...entriesRef.current.entries()].filter(([, entry]) => entry.dirty);
     if (!dirtyEntries.length) return false;
 
@@ -103,7 +109,7 @@ export function AdminSaveProvider({ children }) {
       saveCurrent,
       dirty: summary.dirtyCount > 0,
       dirtyCount: summary.dirtyCount,
-      saving,
+      saving: saving || summary.busyCount > 0,
       label: summary.label,
       status,
     }),
@@ -119,7 +125,7 @@ export function useAdminSave() {
   return context;
 }
 
-export function useRegisterAdminSave(save, dirty, label = 'Save changes') {
+export function useRegisterAdminSave(save, dirty, label = 'Save changes', saving = false) {
   const { register, updateState } = useAdminSave();
   const idRef = useRef(Symbol(label));
   const saveRef = useRef(save);
@@ -128,8 +134,11 @@ export function useRegisterAdminSave(save, dirty, label = 'Save changes') {
   const invokeLatest = useCallback(() => saveRef.current(), []);
 
   useEffect(
-    () => register(idRef.current, invokeLatest, { dirty, label }),
+    () => register(idRef.current, invokeLatest, { dirty, label, saving }),
     [register, invokeLatest],
   );
-  useEffect(() => updateState(idRef.current, { dirty, label }), [updateState, dirty, label]);
+  useEffect(
+    () => updateState(idRef.current, { dirty, label, saving }),
+    [updateState, dirty, label, saving],
+  );
 }

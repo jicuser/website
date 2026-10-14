@@ -89,12 +89,12 @@ test('A poster opens its linked page and the same form responses without copying
 
 test('Pages can be created and hidden without erasing a linked form or changing its address',async({page},testInfo)=>{
   const {state,admin}=await fixture(page);await admin('content');
-  await page.getByRole('button',{name:'Pages & programmes',exact:true}).click();
+  await page.getByRole('button',{name:'Programme pages',exact:true}).click();
   await page.getByRole('button',{name:'Edit Arabic course',exact:true}).click();
-  await page.getByLabel('Page visible',{exact:true}).uncheck();
-  await page.getByRole('combobox',{name:'Place page under',exact:true}).selectOption('/education');
+  await page.getByLabel('Show page on website',{exact:true}).uncheck();
+  await page.getByRole('combobox',{name:'Website section',exact:true}).selectOption('/education');
   page.once('dialog', dialog => dialog.accept());
-  await page.getByRole('button',{name:'Save page settings',exact:true}).last().click();
+  await page.getByRole('button',{name:'Save page changes',exact:true}).last().click();
   await expect.poll(()=>state.page.published).toBe(false);
   expect(state.page.form_id).toBe(id(10));expect(state.page.slug).toBe('arabic-course');expect(state.form.enabled).toBe(true);
   await page.screenshot({path:testInfo.outputPath('page-editor.png'),fullPage:true});
