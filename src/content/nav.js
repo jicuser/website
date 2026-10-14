@@ -106,6 +106,14 @@ export const NAV_ITEMS = [
   { name: 'Contact Us', path: '/contact' },
 ];
 
+// The full menu and admin page browser share this order. Madrassah and social
+// channels are explicit shortcuts here, while desktop navigation stays compact.
+export const PUBLIC_MENU_GROUPS = [
+  ...NAV_GROUPS,
+  { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
+  { name: 'Social Media', path: '/social-media', children: [] },
+];
+
 // Related destinations share a row in the compact footer.
 export const FOOTER_LINKS = [
   { name: 'Contact Us', path: '/contact' },

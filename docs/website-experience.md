@@ -30,6 +30,41 @@ Website pages has two views:
 
 The current view and selected existing page are kept in the address so a refresh reopens them. Switching editors checks for unsaved changes, including changes in nested page sections. Saving publishes content; it does not require a second publish operation for existing pages. Programme pages retain their own visibility controls.
 
+The existing-page browser uses the same vertical section order as the complete
+public menu, from `PUBLIC_MENU_GROUPS`. Expand one section to reveal its pages;
+opening a section does not change the edited page or discard its draft. Each page
+has a distinct edit button and saved-website view link. Madrassah and Social Media
+keep their explicit menu shortcuts here; visitor-facing parent breadcrumbs still
+place Madrassah within Education. Search spans every section. The selected editing
+location remains visible while browsing elsewhere, and saves lock page switching.
+
+### Next public navigation and reminder decision
+
+The proposed phone layout separates frequent navigation from secondary utilities:
+keep Home/Back, Donate and Menu consistently reachable; put Search and theme tools
+near the top and retain access through the menu. Branding may leave the viewport
+with normal page scrolling. Do not hide all escape/navigation controls at once.
+Keep the existing prayer-panel idle/scroll rules and compact three-row footer.
+This proposal has not yet moved the live public controls.
+
+An obvious homepage action, **Set Salah reminders**, should open one dedicated
+settings page: independent start-time and Jama'ah switches, independent minutes-before
+choices, selected prayers and a clear delivery/status control. Do not treat a local
+saved preference or a browser permission prompt as proof that alerts are scheduled.
+
+Delivery still needs a product decision before implementation. Home-Screen web push
+on iPhone requires installation and permission; scheduled alerts also need a server
+sender, subscriptions and lifecycle/error handling. A calendar export is an alternate
+flow, not an equivalent notification service: it has calendar-specific import and
+alert rules, and snapshots do not automatically follow changed prayer times. Google
+Calendar's bulk ICS import is a computer workflow. Neither delivery method is enabled
+by this menu refinement, and no reminder button points to an inactive feature.
+
+References checked 15 October 2026:
+
+- [Apple/WebKit Home-Screen web push](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/)
+- [Google Calendar import workflow](https://support.google.com/calendar/answer/37118?hl=en)
+
 The existing page editor states where its content appears:
 
 - Home: edits the home introduction.

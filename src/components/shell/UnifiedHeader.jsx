@@ -19,7 +19,7 @@ import {
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
-import { MADRASSAH_TABS, NAV_GROUPS } from '@/content/nav';
+import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useAppearance } from '@/context/AppearanceContext';
@@ -32,12 +32,6 @@ import { activeNavigation } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
-
-const MENU_GROUPS = [
-  ...NAV_GROUPS,
-  { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
-  { name: 'Social Media', path: '/social-media', children: [] },
-];
 
 export default function UnifiedHeader() {
   const { pathname, key: routeKey } = useLocation();
@@ -295,7 +289,7 @@ export default function UnifiedHeader() {
               </button>
               {quickMenuOpen && (
                 <nav id="jic-quick-menu" className="jic-quick-menu" aria-label="Main pages">
-                  {MENU_GROUPS.map(({ name, path }) => (
+                  {PUBLIC_MENU_GROUPS.map(({ name, path }) => (
                     <Link
                       key={path}
                       to={path}
@@ -500,7 +494,7 @@ export default function UnifiedHeader() {
           <div className="jic-unified-menu-scroll">
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
-                {MENU_GROUPS.map(({ name, path, children }) => {
+                {PUBLIC_MENU_GROUPS.map(({ name, path, children }) => {
                   const subpages = children.filter((child) => child.path !== path);
                   const expanded = Boolean(expandedMenuGroups[path]);
                   const childrenId = `jic-menu-${path.slice(1) || 'home'}-children`;

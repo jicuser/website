@@ -1,19 +1,27 @@
 import { activeNavigation } from './publicNavigation.js';
+import { PUBLIC_MENU_GROUPS } from '../content/nav.js';
 
-// Reuse the visitor-facing hierarchy: URL prefixes alone do not connect Contact
-// to About, funeral pages to Services, or Madrassah to Education.
+// Match the complete public menu. Give explicit menu shortcuts their own group,
+// then use route metadata to connect Contact/About and funeral pages/Services.
 export function buildPageNavigator(pages) {
-  const sections = new Map();
+  const sections = new Map(
+    PUBLIC_MENU_GROUPS.map(({ name, path }) => [name, { name, path, pages: [] }]),
+  );
   for (const page of pages) {
     const navigation = activeNavigation(page.path);
-    const section = navigation?.primaryName || page.group;
-    const nested = navigation && navigation.name !== navigation.primaryName;
+    const shortcut =
+      PUBLIC_MENU_GROUPS.find((group) => group.path === page.path) ||
+      PUBLIC_MENU_GROUPS.find(
+        (group) => group.path === '/madrassah' && page.path.startsWith('/madrassah/'),
+      );
+    const section = shortcut?.name || navigation?.primaryName || page.group;
+    const nested = !shortcut && navigation && navigation.name !== navigation.primaryName;
     const label =
       nested && page.path !== navigation.path ? `${navigation.name} · ${page.name}` : page.name;
     if (!sections.has(section)) sections.set(section, { name: section, pages: [] });
     sections.get(section).pages.push({ ...page, section, label });
   }
-  return [...sections.values()];
+  return [...sections.values()].filter((section) => section.pages.length);
 }
 
 const normalise = (value) =>

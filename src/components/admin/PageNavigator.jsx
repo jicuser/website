@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useState } from 'react';
-import { ChevronRight, Search, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, ExternalLink, Search, X } from 'lucide-react';
 import { EDITABLE_PAGES } from '@/content/editablePages';
 import { buildPageNavigator, findNavigatorPages } from '@/lib/pageNavigator';
 import '@/styles/page-navigator.css';
@@ -12,21 +12,45 @@ export default function PageNavigator({ selected, onSelectPage, disabled = false
     section.pages.some((page) => page.path === selected),
   );
   const editingPage = editingSection?.pages.find((page) => page.path === selected);
-  const [browsing, setBrowsing] = useState(editingSection?.name || sections[0].name);
+  const [expanded, setExpanded] = useState(editingSection?.name || '');
   const [query, setQuery] = useState('');
-  const browsingSection = sections.find((section) => section.name === browsing) || sections[0];
   const searching = Boolean(query.trim());
-  const visible = searching ? findNavigatorPages(sections, query) : browsingSection.pages;
-  const selectedInSection = browsingSection.pages.some((page) => page.path === selected);
+  const results = searching ? findNavigatorPages(sections, query) : [];
 
   useEffect(() => {
-    setBrowsing(editingSection?.name || sections[0].name);
+    setExpanded(editingSection?.name || '');
     setQuery('');
   }, [selected, editingSection]);
 
   const choose = (path) => {
     if (!disabled && path && path !== selected) onSelectPage(path);
   };
+  const pageRow = (page, overview = false) => (
+    <li className="page-navigator__page" key={page.path}>
+      <button
+        type="button"
+        disabled={disabled}
+        data-page-path={page.path}
+        aria-current={selected === page.path ? 'page' : undefined}
+        onClick={() => choose(page.path)}
+      >
+        <span>
+          <span>{overview ? 'Overview' : page.label}</span>
+          {searching && <small>{page.section}</small>}
+        </span>
+        <ChevronRight size={15} aria-hidden="true" />
+      </button>
+      <a
+        href={page.path}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`View ${page.name} website page`}
+        title="View saved website page"
+      >
+        <ExternalLink size={16} aria-hidden="true" />
+      </a>
+    </li>
+  );
 
   return (
     <aside className="page-navigator" aria-label="Choose a website page">
@@ -37,50 +61,10 @@ export default function PageNavigator({ selected, onSelectPage, disabled = false
           <span>{editingPage.label}</span>
         )}
       </div>
-
-      <label htmlFor={`${id}-section`}>
-        Website section
-        <select
-          id={`${id}-section`}
-          value={browsingSection.name}
-          disabled={disabled}
-          onChange={(event) => {
-            setBrowsing(event.target.value);
-            setQuery('');
-          }}
-        >
-          {sections.map((section) => (
-            <option key={section.name} value={section.name}>
-              {section.name} ({section.pages.length})
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {!searching && (
-        <label className="page-navigator__page-select" htmlFor={`${id}-page`}>
-          Page to edit
-          <select
-            id={`${id}-page`}
-            value={selectedInSection ? selected : ''}
-            disabled={disabled}
-            onChange={(event) => choose(event.target.value)}
-          >
-            <option value="" disabled>
-              Choose a page…
-            </option>
-            {browsingSection.pages.map((page) => (
-              <option key={page.path} value={page.path}>
-                {page.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-
       <div className="page-navigator__search">
         <label className="page-navigator__search-label" htmlFor={`${id}-search`}>
-          <Search size={16} aria-hidden="true" /> Find any page
+          <Search size={16} aria-hidden="true" />
+          Find any page
         </label>
         <span>
           <input
@@ -103,32 +87,57 @@ export default function PageNavigator({ selected, onSelectPage, disabled = false
           )}
         </span>
       </div>
-
-      <div className={`page-navigator__pages ${searching ? 'is-searching' : ''}`}>
-        <p className="page-navigator__count" role="status">
-          {searching
-            ? `${visible.length} ${visible.length === 1 ? 'page found' : 'pages found'}`
-            : `Pages in ${browsingSection.name}`}
-        </p>
-        <nav aria-label={searching ? 'Page search results' : `Pages in ${browsingSection.name}`}>
-          {visible.map((page) => (
-            <button
-              type="button"
-              key={page.path}
-              disabled={disabled}
-              aria-current={selected === page.path ? 'page' : undefined}
-              onClick={() => choose(page.path)}
-            >
-              <span>
-                <span>{page.label}</span>
-                {searching && <small>{page.section}</small>}
-              </span>
-              <ChevronRight size={15} aria-hidden="true" />
-            </button>
-          ))}
+      <p className="page-navigator__hint">
+        Choose a section, then a page to edit. The arrow beside a page opens its saved website view.
+      </p>
+      {searching ? (
+        <nav className="page-navigator__results" aria-label="Page search results">
+          <p className="page-navigator__count" role="status">
+            {results.length} {results.length === 1 ? 'page found' : 'pages found'}
+          </p>
+          <ul>{results.map((page) => pageRow(page))}</ul>
+          {!results.length && <p>No matching pages. Try a different name.</p>}
         </nav>
-        {searching && !visible.length && <p>No matching pages. Try a different name.</p>}
-      </div>
+      ) : (
+        <nav className="page-navigator__directory" aria-label="Website sections">
+          <ul>
+            {sections.map((section, index) => {
+              const leaf = section.pages.length === 1;
+              const open = expanded === section.name;
+              const current = editingSection?.name === section.name;
+              const panelId = `${id}-section-${index}`;
+              return (
+                <li key={section.name}>
+                  <button
+                    className="page-navigator__section"
+                    type="button"
+                    disabled={disabled}
+                    data-section={section.name}
+                    aria-current={current ? (leaf ? 'page' : 'location') : undefined}
+                    aria-expanded={leaf ? undefined : open}
+                    aria-controls={leaf ? undefined : panelId}
+                    onClick={() => {
+                      if (disabled) return;
+                      if (leaf) choose(section.pages[0].path);
+                      else setExpanded(open ? '' : section.name);
+                    }}
+                  >
+                    <span>{section.name}</span>
+                    {!leaf && (
+                      <ChevronDown size={18} aria-hidden="true" className={open ? 'is-open' : ''} />
+                    )}
+                  </button>
+                  {!leaf && (
+                    <ul id={panelId} className="page-navigator__children" hidden={!open}>
+                      {section.pages.map((page) => pageRow(page, page.path === section.path))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      )}
     </aside>
   );
 }

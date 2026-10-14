@@ -36,6 +36,14 @@ tests are used here without claiming physical-device acceptance.
 Final local `npm run validate` passed lint, all 455 tests and the production build.
 The existing optional HLS chunk-size warning remains; no limits were raised to hide it.
 
+The follow-up menu-style refinement on 15 October 2026 replaces the admin's two
+dropdowns with an inline section/page directory using the complete public menu
+order. Saved-page view links are separate from guarded editing actions. Madrassah
+and Social Media have their explicit shortcut groups. Fresh validation passed lint,
+457 tests and the production build. Public-control relocation and phone reminder
+delivery remain proposed, not activated; the delivery choice is documented in
+`website-experience.md`.
+
 ## Boundaries
 
 Preserve the current desktop/mobile appearance and working casting, TV, radio and

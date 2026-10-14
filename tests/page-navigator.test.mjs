@@ -5,7 +5,7 @@ import { runInNewContext } from 'node:vm';
 import { build } from 'esbuild';
 import React from 'react';
 import { EDITABLE_PAGES } from '../src/content/editablePages.js';
-import { NAV_GROUPS } from '../src/content/nav.js';
+import { PUBLIC_MENU_GROUPS } from '../src/content/nav.js';
 import { buildPageNavigator, findNavigatorPages } from '../src/lib/pageNavigator.js';
 
 const sections = buildPageNavigator(EDITABLE_PAGES);
@@ -13,7 +13,7 @@ const sections = buildPageNavigator(EDITABLE_PAGES);
 test('page navigator keeps each canonical page once within the public website hierarchy', () => {
   assert.deepEqual(
     sections.map((section) => section.name),
-    NAV_GROUPS.map((section) => section.name),
+    PUBLIC_MENU_GROUPS.map((section) => section.name),
   );
   const pages = sections.flatMap((section) => section.pages);
   assert.equal(pages.length, EDITABLE_PAGES.length);
@@ -26,17 +26,18 @@ test('page navigator keeps each canonical page once within the public website hi
 test('nested pages retain clear names inside Education, Services and Building Works', () => {
   const find = (path) =>
     sections.flatMap((section) => section.pages).find((page) => page.path === path);
-  assert.equal(find('/madrassah').section, 'Education');
-  assert.equal(find('/madrassah/policies').section, 'Education');
-  assert.equal(find('/madrassah/policies').label, 'Madrassah · Policies');
+  assert.equal(find('/madrassah').section, 'Madrassah');
+  assert.equal(find('/madrassah/policies').section, 'Madrassah');
+  assert.equal(find('/madrassah/policies').label, 'Policies');
   assert.equal(find('/projects/masjid-extension/timeline').label, 'Masjid Extension · Timeline');
   assert.equal(find('/funerals/contact-support').section, 'Services');
   assert.equal(find('/contact').section, 'About');
+  assert.equal(find('/social-media').section, 'Social Media');
 });
 
 test('page search spans sections, tolerates whitespace and finds URL or name', () => {
   assert.deepEqual(
-    findNavigatorPages(sections, '  EDUCATION   policies ').map((page) => page.path),
+    findNavigatorPages(sections, '  MADRASSAH   policies ').map((page) => page.path),
     ['/madrassah/policies'],
   );
   assert.deepEqual(
@@ -96,6 +97,8 @@ function nodes(tree, match) {
   return [...(match(tree) ? [tree] : []), ...children.flatMap((child) => nodes(child, match))];
 }
 const input = (tree, suffix) => nodes(tree, (node) => node.props?.id === `page-test-${suffix}`)[0];
+const section = (tree, name) => nodes(tree, (node) => node.props?.['data-section'] === name)[0];
+const page = (tree, path) => nodes(tree, (node) => node.props?.['data-page-path'] === path)[0];
 
 test('browsing a section does not navigate or discard the currently edited page', () => {
   const calls = [];
@@ -104,17 +107,17 @@ test('browsing a section does not navigate or discard the currently edited page'
     onSelectPage: (path) => calls.push(path),
   });
   let tree = render();
-  assert.equal(input(tree, 'section').props.value, 'Education');
-  assert.equal(input(tree, 'page').props.value, '/madrassah/policies');
+  assert.equal(section(tree, 'Madrassah').props['aria-expanded'], true);
+  assert.equal(page(tree, '/madrassah/policies').props['aria-current'], 'page');
   assert.equal(nodes(tree, (node) => node.props?.['aria-current'] === 'page').length, 1);
-  input(tree, 'section').props.onChange({ target: { value: 'Services' } });
+  section(tree, 'Services').props.onClick();
   tree = render();
   assert.deepEqual(calls, []);
-  assert.equal(input(tree, 'section').props.value, 'Services');
-  assert.equal(input(tree, 'page').props.value, '');
+  assert.equal(section(tree, 'Services').props['aria-expanded'], true);
+  assert.equal(section(tree, 'Madrassah').props['aria-expanded'], false);
   assert.ok(
     nodes(tree, (node) => node.type === 'strong').some(
-      (node) => node.props.children === 'Education',
+      (node) => node.props.children === 'Madrassah',
     ),
   );
 });
@@ -123,11 +126,11 @@ test('opening a page delegates to the parent guard and never updates selected op
   const calls = [];
   const render = harness({ selected: '/education', onSelectPage: (path) => calls.push(path) });
   let tree = render();
-  input(tree, 'page').props.onChange({ target: { value: '/education/courses' } });
+  page(tree, '/education/courses').props.onClick();
   assert.deepEqual(calls, ['/education/courses']);
   tree = render();
-  assert.equal(input(tree, 'page').props.value, '/education');
-  input(tree, 'page').props.onChange({ target: { value: '/education' } });
+  assert.equal(page(tree, '/education').props['aria-current'], 'page');
+  page(tree, '/education').props.onClick();
   assert.deepEqual(calls, ['/education/courses']);
 });
 
@@ -164,6 +167,46 @@ test('saving disables navigation and guards against a programmatic page selectio
   const tree = render();
   for (const node of nodes(tree, (node) => ['input', 'select', 'button'].includes(node.type)))
     assert.equal(node.props.disabled, true);
-  input(tree, 'page').props.onChange({ target: { value: '/education/courses' } });
+  page(tree, '/education/courses').props.onClick();
+  section(tree, 'Services').props.onClick();
+  assert.deepEqual(calls, []);
+});
+
+test('admin sections use the screenshot menu order and Home is a direct destination', () => {
+  const calls = [];
+  const render = harness({ selected: '/education', onSelectPage: (path) => calls.push(path) });
+  const tree = render();
+  assert.deepEqual(
+    nodes(tree, (node) => Boolean(node.props?.['data-section'])).map(
+      (node) => node.props['data-section'],
+    ),
+    [
+      'Home',
+      'About',
+      'Prayer Times',
+      'Worship',
+      'Services',
+      'Masjid Building Works',
+      'Education',
+      'Youth',
+      'Madrassah',
+      'Social Media',
+    ],
+  );
+  assert.equal(section(tree, 'Home').props['aria-expanded'], undefined);
+  section(tree, 'Home').props.onClick();
+  assert.deepEqual(calls, ['/']);
+});
+
+test('page viewing uses a separate saved-website link without changing the editor', () => {
+  const calls = [];
+  const render = harness({ selected: '/education', onSelectPage: (path) => calls.push(path) });
+  const link = nodes(
+    render(),
+    (node) => node.type === 'a' && node.props.href === '/education/courses',
+  )[0];
+  assert.equal(link.props.target, '_blank');
+  assert.equal(link.props.rel, 'noreferrer');
+  assert.equal(link.props['aria-label'], 'View Adult Classes website page');
   assert.deepEqual(calls, []);
 });
