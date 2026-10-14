@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAdminSave } from '@/context/AdminSaveContext';
 import { useAuth } from '@/context/AuthContext';
@@ -42,7 +42,7 @@ export function ContentPageCatalogue() {
     <section className="content-pages-manager">
       <div className="admin-heading">
         <div>
-          <h2>Pages & programmes</h2>
+          <h2>Programme pages</h2>
           <p>
             Choose where a page appears and link its registration form. Hidden pages retain their
             responses and actions.
@@ -107,12 +107,39 @@ export function ContentPageCatalogue() {
 }
 
 export default function ContentPages({ initialPath = '/' }) {
-  const { dirty } = useAdminSave();
+  const { dirty, saving } = useAdminSave();
   const { can } = useAuth();
-  const [tab, setTab] = useState('site');
+  const [params, setParams] = useSearchParams();
+  const tab = params.get('view') === 'pages' ? 'pages' : 'site';
   function choose(next) {
-    if (tab === next || (dirty && !window.confirm('Discard unsaved page changes?'))) return;
-    setTab(next);
+    if (saving || tab === next || (dirty && !window.confirm('Discard unsaved page changes?')))
+      return;
+    setParams(
+      (current) => {
+        const updated = new URLSearchParams(current);
+        updated.set('view', next);
+        return updated;
+      },
+      { replace: true },
+    );
+  }
+  function choosePage(path) {
+    if (
+      saving ||
+      path === initialPath ||
+      (dirty && !window.confirm('Discard unsaved changes and open another page?'))
+    )
+      return;
+    setParams(
+      (current) => {
+        const updated = new URLSearchParams(current);
+        updated.set('section', 'content');
+        updated.set('view', 'site');
+        updated.set('page', path);
+        return updated;
+      },
+      { replace: true },
+    );
   }
   return (
     <div>
@@ -122,14 +149,14 @@ export default function ContentPages({ initialPath = '/' }) {
           aria-pressed={tab === 'site'}
           onClick={() => choose('site')}
         >
-          Site text & pictures
+          Existing pages
         </button>
         <button
           className="admin-button"
           aria-pressed={tab === 'pages'}
           onClick={() => choose('pages')}
         >
-          Pages & programmes
+          Programme pages
         </button>
         {can('team') && (
           <Link className="admin-button" to="/admin?section=team">
@@ -137,7 +164,11 @@ export default function ContentPages({ initialPath = '/' }) {
           </Link>
         )}
       </nav>
-      {tab === 'site' ? <PageEditor initialPath={initialPath} /> : <ContentPageCatalogue />}
+      {tab === 'site' ? (
+        <PageEditor key={initialPath} initialPath={initialPath} onSelectPage={choosePage} />
+      ) : (
+        <ContentPageCatalogue />
+      )}
     </div>
   );
 }

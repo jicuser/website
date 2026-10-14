@@ -106,14 +106,14 @@ export default function PrayerTimeBar({
                 >
                   <span>{label}</span>
                   <div>
-                    <strong>
+                    <span className="jic-prayer-start">
                       <small>Start</small>
                       {shortTime(todaysTimes?.[key])}
-                    </strong>
-                    <em>
+                    </span>
+                    <strong className="jic-prayer-jamaah">
                       <small>{jamaah ? 'Jama’ah' : ''}</small>
                       {jamaah ? shortTime(todaysTimes?.[jamaah]) : ''}
-                    </em>
+                    </strong>
                   </div>
                 </Item>
               ))}

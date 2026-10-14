@@ -1,59 +1,32 @@
 import React from 'react';
-import { BookOpen, UserPlus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { BookOpen, GraduationCap, UserPlus } from 'lucide-react';
+import PageHeading from '@/components/PageHeading';
+import PageChoices from '@/components/PageChoices';
 
-const educationTiles = [
+const choices = [
   {
-    title: 'Madrassah',
-    description: 'Pupil classes, enrolment and parent information.',
     path: '/madrassah',
-    icon: BookOpen,
+    description: 'Classes, pupil enrolment and parent information.',
+    icon: GraduationCap,
   },
   {
-    title: 'Adult Courses & Classes',
-    description: 'Adult learning and current courses.',
     path: '/education/courses',
+    description: 'Course details and registration for adult learners.',
     icon: BookOpen,
   },
   {
-    title: 'Enrolment',
-    description: 'Choose pupil or adult registration.',
     path: '/education/enrolment',
+    description: 'Find the right registration route for a child or an adult.',
     icon: UserPlus,
   },
 ];
-
 export default function EducationPage() {
   return (
     <div className="page-transition">
-      <section className="pt-8 pb-10 md:pt-10 md:pb-14">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto mb-6 max-w-3xl text-center md:mb-8">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Education</p>
-            <h1 className="mt-2 text-2xl font-semibold text-foreground md:text-4xl">
-              Learn at Jamatia Islamic Centre
-            </h1>
-           </div>
-
-          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-            {educationTiles.map(({ title, description, path, icon: Icon }) => (
-              <Link
-                key={path}
-                to={path}
-                className="group rounded-2xl border border-border/70 bg-card/80 px-4 py-5 text-center no-underline shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:p-5"
-              >
-                <span className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <strong className="block text-sm text-foreground md:text-base">{title}</strong>
-                <span className="mt-1 hidden text-xs leading-relaxed text-muted-foreground md:block">
-                  {description}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PageHeading title="Education">
+        Find classes, course details and enrolment information.
+      </PageHeading>
+      <PageChoices items={choices} label="Education choices" />
     </div>
   );
 }

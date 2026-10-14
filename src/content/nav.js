@@ -11,18 +11,18 @@ export const MASJID_EXTENSION_TABS = [
 ];
 
 export const MADRASSAH_TABS = [
-  { name: 'Madrassah Home', path: '/madrassah' },
+  { name: 'Overview', path: '/madrassah' },
   { name: 'Pupil Enrolment', path: '/madrassah/enrolment' },
   { name: 'Classes', path: '/madrassah/classes-courses' },
-  { name: 'Student Portal', path: '/madrassah/student-portal' },
+  { name: 'Student Information', path: '/madrassah/student-portal' },
   { name: 'Contact Madrassah', path: '/madrassah/contact' },
   { name: 'Policies', path: '/madrassah/policies' },
 ];
 
 export const EDUCATION_TABS = [
-  { name: 'Education Home', path: '/education' },
-  { name: 'Adult Courses & Classes', path: '/education/courses' },
-  { name: 'Choose Enrolment', path: '/education/enrolment' },
+  { name: 'Overview', path: '/education' },
+  { name: 'Adult Classes', path: '/education/courses' },
+  { name: 'Enrolment', path: '/education/enrolment' },
   { name: 'Madrassah', path: '/madrassah' },
 ];
 
@@ -91,7 +91,7 @@ export const NAV_GROUPS = [
     children: [
       { name: 'Overview', path: '/youth' },
       { name: 'Activities', path: '/youth/activities' },
-      { name: "I'tikaf Form", path: '/youth/itikaf' },
+      { name: "I'tikaf Registration", path: '/youth/itikaf' },
       { name: 'Trips & Events', path: '/youth/trips-events' },
       { name: 'Volunteering', path: '/youth/volunteering' },
       { name: 'Classes & Skills', path: '/youth/classes-skills' },

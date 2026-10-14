@@ -16,10 +16,16 @@ const CallToActionSection = () => (
           Begin Your Journey of Islamic Learning
         </h2>
         <p className="text-lg mb-8 max-w-2xl mx-auto">
-          Enroll in our Madrassah today and give yourself or your children the gift of Islamic
-          knowledge and spiritual growth.
+          Apply for a pupil place or contact the Madrassah about classes and admissions.
         </p>
-        <div className="flex flex-wrap justify-center gap-4"></div>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button asChild>
+            <Link to="/madrassah/enrolment">Pupil Enrolment</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/madrassah/contact">Contact Madrassah</Link>
+          </Button>
+        </div>
       </motion.div>
     </div>
   </section>

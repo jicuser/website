@@ -39,7 +39,11 @@ export default function TodaysPrayerTimesSection({ currentDate, todaysTimes }) {
               >
                 <th scope="row">{name}</th>
                 <td>{todaysTimes[key]}</td>
-                <td>{todaysTimes[`jamaah_${key}`] || '—'}</td>
+                <td>
+                  <strong className="jic-prayer-jamaah">
+                    {key === 'sunrise' ? '' : todaysTimes[`jamaah_${key}`] || '—'}
+                  </strong>
+                </td>
               </tr>
             ))}
           </tbody>

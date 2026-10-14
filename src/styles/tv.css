@@ -131,11 +131,11 @@ html[data-theme] .jic-tv-display .jic-today-prayer > div {
   justify-content: center;
   gap: calc(var(--tv-unit) * 0.2);
 }
-html[data-theme] .jic-tv-display .jic-today-prayer strong {
+html[data-theme] .jic-tv-display .jic-today-prayer .jic-prayer-jamaah {
   line-height: 1.05;
   font-size: calc(var(--tv-unit) * 4.5);
 }
-html[data-theme] .jic-tv-display .jic-today-prayer em {
+html[data-theme] .jic-tv-display .jic-today-prayer .jic-prayer-start {
   line-height: 1.05;
   font-size: calc(var(--tv-unit) * 4);
   font-weight: 600;
@@ -352,7 +352,6 @@ html[data-theme] .jic-tv-stage {
   line-height: 1.9;
   max-width: calc(var(--tv-unit) * 62.5);
 }
-
 
 /* The after-salah board uses the whole frame; other display modes keep their layout. */
 html[data-theme] .jic-tv-display.is-dhikr {
@@ -681,7 +680,7 @@ html[data-theme] .jic-tv-display.is-dhikr {
   justify-content: center;
   min-width: 0;
   min-height: 0;
-  gap: .15em;
+  gap: 0.15em;
   border-right: 1px solid #3d4f63;
   font-size: min(2.2cqw, 14cqh);
   line-height: 1.15;
@@ -699,7 +698,6 @@ html[data-theme] .jic-tv-display.is-dhikr {
   background: #d5b56d22;
   box-shadow: inset 0 -3px #d5b56d;
 }
-
 
 /* Shared display geometry for configurable landscape and portrait layouts. */
 .jic-tv-shell.is-portrait {
@@ -753,7 +751,6 @@ html[data-theme] .jic-tv-display.is-portrait {
   line-height: 2;
 }
 
-
 .scene-state-block {
   width: 100%;
   height: 100%;
@@ -775,7 +772,6 @@ html[data-theme] .jic-tv-display.is-portrait {
   height: 100%;
 }
 
-
 /* Alternative Salah timetable layouts share single-line rows. Their size
    depends on the assigned block, never on the phone or TV viewport. */
 .scene-prayer-table {
@@ -784,19 +780,19 @@ html[data-theme] .jic-tv-display.is-portrait {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(0, .65fr) repeat(6, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 0.65fr) repeat(6, minmax(0, 1fr));
   background: #090c10;
   color: #f6f7f8;
   container: prayer-table / size;
   overflow: hidden;
 }
 .scene-prayer-table.has-jummah {
-  grid-template-rows: minmax(0, .65fr) repeat(6, minmax(0, 1fr)) minmax(0, .8fr);
+  grid-template-rows: minmax(0, 0.65fr) repeat(6, minmax(0, 1fr)) minmax(0, 0.8fr);
 }
 .scene-prayer-table-head,
 .scene-prayer-table-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr) minmax(0, .9fr);
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr) minmax(0, 0.9fr);
   align-items: center;
   gap: 2%;
   min-width: 0;
@@ -830,12 +826,12 @@ html[data-theme] .jic-tv-display.is-portrait {
 .scene-prayer-name {
   display: flex;
   align-items: baseline;
-  gap: .4em;
+  gap: 0.4em;
   min-width: 0;
 }
 .scene-prayer-name small {
   color: #b9c2cd;
-  font-size: .78em;
+  font-size: 0.78em;
   font-family: 'Noto Naskh Arabic', 'Geeza Pro', 'Segoe UI', Arial, sans-serif;
 }
 .scene-prayer-table .scene-jummah-row {
@@ -850,7 +846,7 @@ html[data-theme] .jic-tv-display.is-portrait {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr);
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.5fr);
   grid-template-rows: minmax(0, 1fr);
   background: #090c10;
   color: #f6f7f8;
@@ -868,8 +864,7 @@ html[data-theme] .jic-tv-display.is-portrait {
   justify-content: center;
   container-type: size;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 30%, #18222c 0, #0b1016 58%, #06080b 100%);
+  background: radial-gradient(circle at 50% 30%, #18222c 0, #0b1016 58%, #06080b 100%);
 }
 .scene-salah-clock-face {
   position: relative;
@@ -879,7 +874,7 @@ html[data-theme] .jic-tv-display.is-portrait {
   margin-bottom: 4cqh;
   border: min(1.6cqw, 1.2cqh) solid #8c99a8;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 min(1cqw, .75cqh) #101820;
+  box-shadow: inset 0 0 0 min(1cqw, 0.75cqh) #101820;
 }
 .scene-salah-clock-face > i {
   --tick-angle: calc(var(--tick) * 30deg);
@@ -964,7 +959,7 @@ html[data-theme] .jic-tv-display.is-portrait {
 
 .scene-prayer-table.has-tomorrow .scene-prayer-table-head,
 .scene-prayer-table.has-tomorrow .scene-prayer-table-row {
-  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, .86fr));
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 0.86fr));
 }
 .scene-prayer-table.has-tomorrow .scene-prayer-table-head > :last-child,
 .scene-prayer-table.has-tomorrow .scene-prayer-table-row > :last-child {
@@ -977,10 +972,9 @@ html[data-theme] .jic-tv-display.is-portrait {
   }
   .scene-prayer-table.has-tomorrow .scene-prayer-table-head,
   .scene-prayer-table.has-tomorrow .scene-prayer-table-row {
-    grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, .9fr));
+    grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, 0.9fr));
   }
 }
-
 
 /* Shared geometry for resizable live-TV blocks. */
 .scene-source-clock,

@@ -115,7 +115,7 @@ for (const width of [320, 390, 1280]) {
     await expect(page.locator('.admin-mobile-section')).toHaveCount(1);
     if (width < 801) {
       await expect(page.getByRole('button', { name: 'Back', exact: true })).toBeVisible();
-      await expect(page.locator('.admin-mobile-current')).toHaveText('Posters & content');
+      await expect(page.locator('.admin-mobile-current')).toHaveText('Posters');
       await expect(page.getByRole('button', { name: 'Overview', exact: true })).toBeVisible();
       await page.evaluate(() => scrollTo(0, 800));
       const box = await page.locator('.admin-mobile-section').boundingBox();

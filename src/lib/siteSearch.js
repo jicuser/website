@@ -1,5 +1,4 @@
-import { NAV_GROUPS, MADRASSAH_TABS, MASJID_EXTENSION_TABS } from '../content/nav.js';
-import { standaloneSections } from '../content/sectionRoutes.js';
+import { PUBLIC_PAGES } from '../content/pageDirectory.js';
 import { SOCIAL_CHANNELS } from '../content/socials.js';
 
 const aliases = {
@@ -12,23 +11,9 @@ const aliases = {
   '/radio': 'listen audio live radio stream',
   '/social-media': 'social media facebook instagram youtube tiktok twitter x videos livestream',
 };
-const pages = new Map();
-for (const group of NAV_GROUPS) {
-  pages.set(group.path, { title: group.name, path: group.path, section: group.name });
-  for (const child of group.children) {
-    if (child.path !== group.path && !pages.has(child.path))
-      pages.set(child.path, { title: child.name, path: child.path, section: group.name });
-  }
-}
-for (const [path, section, title] of standaloneSections)
-  if (!pages.has(`/${path}`)) pages.set(`/${path}`, { path: `/${path}`, title, section });
-for (const child of [...MADRASSAH_TABS, ...MASJID_EXTENSION_TABS])
-  if (!pages.has(child.path))
-    pages.set(child.path, {
-      title: child.name === 'Overview' ? 'Madrassah' : child.name,
-      path: child.path,
-      section: child.path.startsWith('/madrassah') ? 'Madrassah' : 'Building works',
-    });
+const pages = new Map(
+  PUBLIC_PAGES.map(({ name, path, group }) => [path, { title: name, path, section: group }]),
+);
 pages.set('/radio', { title: 'JIC Radio', path: '/radio', section: 'Listen live' });
 pages.set('/privacy', { title: 'Privacy', path: '/privacy', section: 'Website information' });
 for (const channel of SOCIAL_CHANNELS)

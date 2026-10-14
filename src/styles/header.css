@@ -103,12 +103,12 @@
 .jic-today-prayer > div {
   display: contents;
 }
-.jic-today-prayer strong {
+.jic-today-prayer .jic-prayer-jamaah {
   font-size: 1rem;
   line-height: 1.5;
   color: var(--jic-gold);
 }
-.jic-today-prayer em {
+.jic-today-prayer .jic-prayer-start {
   font-size: 0.875rem;
   line-height: 1.5;
   font-style: normal;
@@ -746,11 +746,11 @@ html {
     line-height: 1.4;
     color: var(--jic-text-secondary);
   }
-  .jic-today-prayer strong {
+  .jic-today-prayer .jic-prayer-jamaah {
     font-size: 1.125rem;
     line-height: 1.2;
   }
-  .jic-today-prayer em {
+  .jic-today-prayer .jic-prayer-start {
     font-size: 1rem;
     line-height: 1.2;
   }

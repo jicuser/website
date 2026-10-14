@@ -1,4 +1,5 @@
 import React from 'react';
+import PageHeading from '@/components/PageHeading';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Building2, Droplets, Hammer, Image, School, Users } from 'lucide-react';
 
@@ -36,6 +37,9 @@ const EXTENSION_AREAS = [
 export default function ProjectsPage() {
   return (
     <div className="page-transition">
+      <PageHeading title="Masjid Building Works">
+        Explore the extension, appeals and project updates.
+      </PageHeading>
       <section className="bg-background py-6 md:py-8">
         <div className="container mx-auto px-4">
           <div className="grid gap-4 md:grid-cols-3">

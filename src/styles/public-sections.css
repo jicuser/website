@@ -63,6 +63,11 @@
   border-bottom: 1px solid var(--jic-border);
   font-size: 1rem;
 }
+.jic-prayer-schedule .jic-prayer-jamaah,
+.jic-service-prayer .jic-prayer-jamaah {
+  color: var(--jic-gold-strong);
+  font-weight: 750;
+}
 .jic-prayer-schedule .is-current {
   background: color-mix(in srgb, var(--jic-gold) 13%, transparent);
 }
@@ -260,4 +265,90 @@
   .education-enrolment-card {
     padding: 14px;
   }
+}
+
+/* Section introductions and destination cards use the same hierarchy on every device. */
+.jic-page-heading {
+  width: min(100%, 1152px);
+  margin-inline: auto;
+  padding: 24px 16px 16px;
+}
+.jic-page-heading p {
+  max-width: 65ch;
+  margin: 0;
+  color: var(--jic-text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+.jic-page-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 12px;
+  width: min(100%, 1152px);
+  margin-inline: auto;
+  padding: 0 16px 24px;
+}
+.jic-page-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 16px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.jic-page-choice > svg {
+  flex-shrink: 0;
+  color: var(--jic-gold-strong);
+}
+.jic-page-choice > span {
+  flex: 1;
+  min-width: 0;
+}
+.jic-page-choice strong,
+.jic-page-choice span > span {
+  display: block;
+}
+.jic-page-choice span > span {
+  margin-top: 4px;
+  color: var(--jic-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.jic-page-choice:is(:hover, :focus-visible) {
+  border-color: var(--jic-gold);
+}
+
+.managed-page-content {
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid var(--jic-border);
+  border-radius: 20px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  overflow: hidden;
+}
+.managed-page-content :is(h1, h2) {
+  line-height: 1.2;
+  font-weight: 600;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.managed-page-content p {
+  white-space: pre-line;
+  line-height: 1.65;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
+.managed-page-content img {
+  width: 100%;
+  max-height: 560px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin-top: 20px;
+}
+.jic-page-addition {
+  width: min(calc(100% - 32px), 1024px);
+  margin: 24px auto;
 }

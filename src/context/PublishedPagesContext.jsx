@@ -2,10 +2,12 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 const PublishedPagesContext = createContext([]);
+const PublishedPagesStatusContext = createContext({ loading: true, error: false });
 
 // Public metadata only; one reader serves the poster links and section catalogue.
 export function PublishedPagesProvider({ children }) {
   const [pages, setPages] = useState([]);
+  const [status, setStatus] = useState({ loading: true, error: false });
   useEffect(() => {
     const controller = new AbortController();
     let timer;
@@ -18,9 +20,13 @@ export function PublishedPagesProvider({ children }) {
         const { data, error } = await supabase
           .rpc('list_site_pages')
           .abortSignal(controller.signal);
-        if (!controller.signal.aborted) setPages(!error && Array.isArray(data) ? data : []);
+        if (error) throw error;
+        if (!controller.signal.aborted) {
+          setPages(Array.isArray(data) ? data : []);
+          setStatus({ loading: false, error: false });
+        }
       } catch {
-        if (!controller.signal.aborted) setPages([]);
+        if (!controller.signal.aborted) setStatus({ loading: false, error: true });
       } finally {
         reading = false;
         if (!controller.signal.aborted)
@@ -42,7 +48,12 @@ export function PublishedPagesProvider({ children }) {
       window.removeEventListener('content-workflow-updated', visible);
     };
   }, []);
-  return <PublishedPagesContext.Provider value={pages}>{children}</PublishedPagesContext.Provider>;
+  return (
+    <PublishedPagesStatusContext.Provider value={status}>
+      <PublishedPagesContext.Provider value={pages}>{children}</PublishedPagesContext.Provider>
+    </PublishedPagesStatusContext.Provider>
+  );
 }
 
 export const usePublishedPages = () => useContext(PublishedPagesContext);
+export const usePublishedPagesStatus = () => useContext(PublishedPagesStatusContext);

@@ -8,19 +8,23 @@ import {
   Smartphone,
   Monitor,
   ArrowUpRight,
-  Lock,
   Image as ImageIcon,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { createImageUploader } from '@/lib/imageUpload';
 import { useContent } from '@/context/ContentContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
-import { EDITABLE_PAGES, pageDefaults, pageKey } from '@/content/editablePages';
+import {
+  EDITABLE_PAGES,
+  pageDefaults,
+  pageKey,
+  supplementalContentPaths,
+} from '@/content/editablePages';
 import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
 import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 
-export default function PageEditor({ initialPath = '/', inline = false }) {
+export default function PageEditor({ initialPath = '/', inline = false, onSelectPage }) {
   const [selected, setSelected] = useState(() =>
     EDITABLE_PAGES.some((item) => item.path === initialPath) ? initialPath : '/',
   );
@@ -38,6 +42,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
   const previewUrlRef = useRef('');
   const { refreshContent } = useContent();
   const page = EDITABLE_PAGES.find((item) => item.path === selected);
+  const additionalContent = supplementalContentPaths.has(selected);
 
   const clearPendingPreview = useCallback(() => {
     if (previewUrlRef.current) {
@@ -101,6 +106,10 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
 
   const choose = (path) => {
     if (busy) return;
+    if (onSelectPage) {
+      onSelectPage(path);
+      return;
+    }
     if (dirty && !window.confirm('Discard unsaved changes and open another page?')) return;
     clearPendingPreview();
     setSelected(path);
@@ -169,7 +178,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
         throw new Error('Use an HTTPS image URL or upload a picture.');
       await persist(next);
       clearPendingPreview();
-      setMessage('Saved.');
+      setMessage('Saved to the website.');
     } catch (saveError) {
       setError(saveError.message);
       throw saveError;
@@ -195,7 +204,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
       <div className="admin-heading">
         <div>
           <span className="admin-eyebrow">WEBSITE</span>
-          <h2>Pages & pictures</h2>
+          <h2>Edit website pages</h2>
         </div>
         <Link className="admin-button" to="/admin/home-tiles">
           Home tiles <ArrowUpRight size={16} />
@@ -220,7 +229,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
                 onChange={(event) => setQuery(event.target.value)}
               />
             </label>
-            <nav>
+            <nav aria-label="Pages to edit">
               {[...new Set(visible.map((item) => item.group))].map((group) => (
                 <div key={group}>
                   <h4>{group}</h4>
@@ -232,6 +241,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
                         key={item.path}
                         onClick={() => choose(item.path)}
                         className={selected === item.path ? 'selected' : ''}
+                        aria-current={selected === item.path ? 'page' : undefined}
                       >
                         {item.name}
                         <span>›</span>
@@ -240,9 +250,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
                 </div>
               ))}
             </nav>
-            <small>
-              <Lock size={12} /> Navigation is fixed.
-            </small>
+            {!visible.length && <p>No pages match. Try another name.</p>}
           </aside>
         )}
 
@@ -251,6 +259,11 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
             <div className="admin-heading">
               <div>
                 <h3>{page.name}</h3>
+                <p>
+                  {additionalContent
+                    ? 'Add information below this page’s main content. Save to publish it on the website.'
+                    : 'Edit this page’s introduction. Save to publish your changes on the website.'}
+                </p>
               </div>
               <a href={selected} target="_blank" rel="noreferrer" className="admin-button">
                 Open page <ExternalLink size={15} />
@@ -268,7 +281,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
             )}
             <fieldset disabled={busy || loading}>
               <label>
-                Heading
+                {additionalContent ? 'Additional heading' : 'Page heading'}
                 <textarea
                   rows="2"
                   value={draft.title || ''}
@@ -276,7 +289,7 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
                 />
               </label>
               <label>
-                Information
+                {additionalContent ? 'Additional information' : 'Introduction'}
                 <textarea
                   rows="6"
                   value={draft.body || ''}
@@ -319,13 +332,21 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
                 <Save size={16} />
                 {busy ? 'Saving…' : 'Save page'}
               </button>
-              <small>{dirty ? 'Unsaved changes' : 'Saved'}</small>
+              <small>
+                {loading
+                  ? 'Loading…'
+                  : error
+                    ? 'Check the error above'
+                    : dirty
+                      ? 'Unsaved changes'
+                      : 'Up to date'}
+              </small>
             </div>
           </section>
 
           {!inline && (
             <section className="admin-panel">
-              <span className="admin-eyebrow">PREVIEW · {dirty ? 'DRAFT' : 'SAVED'}</span>
+              <span className="admin-eyebrow">CONTENT PREVIEW · {dirty ? 'UNSAVED' : 'SAVED'}</span>
               <article className="admin-draft-card">
                 {shownImage ? (
                   <img src={shownImage} alt="Page picture preview" />
@@ -345,7 +366,8 @@ export default function PageEditor({ initialPath = '/', inline = false }) {
             <section className="admin-panel">
               <div className="admin-heading">
                 <div>
-                  <h3>Website preview</h3>
+                  <h3>Saved website preview</h3>
+                  {dirty && <p>Save your changes to update this preview.</p>}
                 </div>
                 <div className="admin-actions">
                   <button

@@ -19,7 +19,7 @@ export default function AdminBar() {
       await signOut();
       setEditing(false);
     } catch (err) {
-      setError(err.message || 'Could not log out. Please try again.');
+      setError(err.message || 'Could not sign out. Please try again.');
     } finally {
       setSigningOut(false);
     }
@@ -45,7 +45,7 @@ export default function AdminBar() {
         )}
         <button type="button" onClick={handleSignOut} disabled={signingOut} aria-busy={signingOut}>
           <LogOut size={17} aria-hidden="true" />
-          {signingOut ? 'Logging out…' : 'Log out'}
+          {signingOut ? 'Signing out…' : 'Sign out'}
         </button>
         {error && (
           <p className="jic-admin-bar-error" role="alert">

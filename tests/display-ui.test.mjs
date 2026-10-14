@@ -150,3 +150,21 @@ test('the display header can show all six prayers without next-prayer details, w
   );
   assert.match(website, /Next:.*Asr/);
 });
+
+test('Jama’ah values carry prayer emphasis and Sunrise has no invented congregation time', () => {
+  const markup = renderToStaticMarkup(
+    React.createElement(PrayerTimeBar, {
+      todaysTimes: { fajr: '6:14 AM', jamaah_fajr: '6:45 AM', sunrise: '7:31 AM' },
+      currentDate: new Date('2026-10-14T06:00:00Z'),
+      interactive: false,
+      showContact: false,
+      showNext: false,
+    }),
+  );
+  assert.match(markup, /class="jic-prayer-start"><small>Start<\/small>6:14<\/span>/);
+  assert.match(markup, /<strong class="jic-prayer-jamaah"><small>Jama’ah<\/small>6:45<\/strong>/);
+  assert.match(
+    markup,
+    /Sunrise[\s\S]*?jic-prayer-start[\s\S]*?7:31<\/span><strong class="jic-prayer-jamaah"><small><\/small><\/strong>/,
+  );
+});

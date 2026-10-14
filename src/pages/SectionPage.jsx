@@ -5,6 +5,14 @@ import ManagedPageContent from '@/components/ManagedPageContent';
 import { SITE } from '@/content/site';
 
 const PAGE_ACTIONS = {
+  '/services/daily-prayers': [
+    { label: 'Today’s prayer times', to: '/prayer-times', icon: CalendarDays },
+  ],
+  '/services/jummah': [{ label: 'Jummah times', to: '/prayer-times/jummah', icon: CalendarDays }],
+  '/services/quran-classes': [{ label: 'Find classes', to: '/education', icon: GraduationCap }],
+  '/services/community-services': [
+    { label: 'Community services', to: '/services/community', icon: ArrowRight },
+  ],
   '/projects/community-hall': [
     { label: 'Book the hall', to: '/services/hall-booking', icon: CalendarDays },
     { label: 'Contact JIC', to: '/contact', icon: Mail },
@@ -28,6 +36,19 @@ const PAGE_ACTIONS = {
     { label: 'Funeral support', to: '/funerals/contact-support', icon: ArrowRight },
     { label: `Call ${SITE.phone}`, href: `tel:${SITE.phone.replace(/\s/g, '')}`, icon: Phone },
   ],
+  '/funerals/contact-support': [
+    { label: `Call ${SITE.phone}`, href: `tel:${SITE.phone.replace(/\s/g, '')}`, icon: Phone },
+    { label: 'Contact the centre', to: '/contact', icon: Mail },
+  ],
+  '/funerals/what-to-do': [
+    { label: 'Contact for funeral support', to: '/funerals/contact-support', icon: Phone },
+  ],
+  '/madrassah/student-portal': [
+    { label: 'Contact Madrassah', to: '/madrassah/contact', icon: Mail },
+  ],
+  '/madrassah/policies': [
+    { label: 'Ask about Madrassah policies', to: '/madrassah/contact', icon: Mail },
+  ],
 };
 
 export default function SectionPage({
@@ -38,10 +59,12 @@ export default function SectionPage({
   backLabel = 'Back',
 }) {
   const { pathname } = useLocation();
-  const actions = PAGE_ACTIONS[pathname] || [];
+  const actions = PAGE_ACTIONS[pathname] || [
+    { label: 'Contact the centre', to: '/contact', icon: Mail },
+  ];
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+    <section className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
       <div className="max-w-3xl">
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
           {eyebrow}
@@ -84,6 +107,6 @@ export default function SectionPage({
           </div>
         )}
       </div>
-    </main>
+    </section>
   );
 }

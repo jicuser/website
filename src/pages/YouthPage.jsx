@@ -2,9 +2,10 @@ import React from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { BookOpen, Heart, Trophy } from 'lucide-react';
+import PageHeading from '@/components/PageHeading';
 import ItikaafRegistrationForm from '@/components/sections/youth/ItikaafRegistrationForm';
 
-const PAGE_TITLE = 'Youth Programs | Jamatia Islamic Centre';
+const PAGE_TITLE = 'Youth | Jamatia Islamic Centre';
 const META_DESCRIPTION = 'Youth programmes and activities at Jamatia Islamic Centre.';
 
 const activities = [
@@ -91,7 +92,12 @@ export default function YouthPage({ view = 'overview' }) {
         </title>
         <meta name="description" content={META_DESCRIPTION} />
       </Helmet>
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
+        {view === 'overview' && (
+          <PageHeading title="Youth">
+            Activities, learning and opportunities for young people.
+          </PageHeading>
+        )}
         {view === 'itikaf' ? <YouthRegistrationSection /> : <YouthActivitiesSection />}
       </div>
     </>

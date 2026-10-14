@@ -1,18 +1,15 @@
-import { NAV_GROUPS } from './nav';
-import { standaloneSections } from './sectionRoutes';
-import { IMAGES } from './images';
-export const EDITABLE_PAGES = Array.from(
-  new Map(
-    [
-      ...NAV_GROUPS.flatMap((g) => [
-        { name: g.name, path: g.path, group: g.name },
-        ...g.children.map((c) => ({ ...c, group: g.name })),
-      ]),
-      ...standaloneSections.map(([path, group, name]) => ({ path: `/${path}`, group, name })),
-    ].map((p) => [p.path, p]),
-  ).values(),
-);
+import { PUBLIC_PAGES } from './pageDirectory.js';
+import { standaloneSections } from './sectionRoutes.js';
+import { IMAGES } from './images.js';
+
+export const EDITABLE_PAGES = PUBLIC_PAGES;
 export const pageKey = (path) => `page:${path}`;
+const mainContentPaths = new Set(standaloneSections.map(([path]) => `/${path}`));
+export const supplementalContentPaths = new Set(
+  PUBLIC_PAGES.filter((page) => page.path !== '/' && !mainContentPaths.has(page.path)).map(
+    (page) => page.path,
+  ),
+);
 export const pageDefaults = (page) =>
   page.path === '/'
     ? {
@@ -20,18 +17,4 @@ export const pageDefaults = (page) =>
         body: 'Worship. Learn. Grow. Together.\nA stronger community for a brighter tomorrow.',
         image: IMAGES.homeHero,
       }
-    : { title: page.name, body: '', image: '' };
-export const overviewPaths = new Set([
-  '/about',
-  '/services',
-  '/projects',
-  '/education',
-  '/madrassah',
-  '/youth',
-  '/team',
-  '/contact',
-  '/financial-history',
-  '/prayer-times',
-  '/prayer-times/monthly',
-  '/prayer-times/jummah',
-]);
+    : { title: supplementalContentPaths.has(page.path) ? '' : page.name, body: '', image: '' };

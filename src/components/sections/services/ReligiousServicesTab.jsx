@@ -35,7 +35,8 @@ const religiousServices = [
   {
     icon: <Heart className="h-10 w-10 text-primary" />,
     title: 'Funeral support',
-    description: 'Send the essential details privately so a member of the centre team can contact you.',
+    description:
+      'Send the essential details privately so a member of the centre team can contact you.',
     to: '/forms/funeral-enquiry',
   },
   {
@@ -63,7 +64,9 @@ const PrayerTimeRow = ({ label, begins, jamaah, current }) => (
   >
     <td className="p-3 font-medium">{label}</td>
     <td className="p-3">{begins || 'N/A'}</td>
-    <td className="p-3">{jamaah || 'N/A'}</td>
+    <td className="p-3">
+      <strong className="jic-prayer-jamaah">{jamaah || 'N/A'}</strong>
+    </td>
   </tr>
 );
 
@@ -81,7 +84,9 @@ const ReligiousServicesTab = () => {
                 <div className="mb-4 p-3 rounded-full bg-primary/10">{service.icon}</div>
                 <h3 className="text-xl font-bold mb-2">{service.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300">{service.description}</p>
-                {service.to && <span className="mt-4 font-semibold text-primary">Open enquiry form →</span>}
+                {service.to && (
+                  <span className="mt-4 font-semibold text-primary">Open enquiry form →</span>
+                )}
               </CardContent>
             </Card>
           );
@@ -94,7 +99,11 @@ const ReligiousServicesTab = () => {
               transition={{ duration: 0.5, delay: index * 0.08 }}
             >
               {service.to ? (
-                <Link to={service.to} className="block h-full" aria-label={`Open ${service.title} form`}>
+                <Link
+                  to={service.to}
+                  className="block h-full"
+                  aria-label={`Open ${service.title} form`}
+                >
                   {card}
                 </Link>
               ) : (

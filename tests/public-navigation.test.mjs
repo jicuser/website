@@ -27,8 +27,8 @@ test('subsections select the specific page instead of their overview prefix', ()
     ['/prayer-times/jummah', '/prayer-times', 'Jummah'],
     ['/about/history', '/about', 'Our History'],
     ['/services/hall-booking', '/services', 'Hall Booking'],
-    ['/education/enrolment', '/education', 'Choose Enrolment'],
-    ['/youth/itikaf', '/youth', "I'tikaf Form"],
+    ['/education/enrolment', '/education', 'Enrolment'],
+    ['/youth/itikaf', '/youth', "I'tikaf Registration"],
     ['/worship/quran', '/worship', 'Read Qur’an'],
   ]) {
     const section = activeNavigation(path);
@@ -58,7 +58,12 @@ test('funeral details retain Services and the Funeral Services subsection', () =
 });
 
 test('Madrassah keeps its own tabs within the Education parent section', () => {
-  for (const path of ['/madrassah', '/madrassah/enrolment', '/madrassah/classes-courses', '/madrassah/policies']) {
+  for (const path of [
+    '/madrassah',
+    '/madrassah/enrolment',
+    '/madrassah/classes-courses',
+    '/madrassah/policies',
+  ]) {
     const section = activeNavigation(path);
     assert.equal(section.name, 'Madrassah', path);
     assert.equal(section.path, '/madrassah', path);
@@ -95,9 +100,17 @@ test('extension pages and legacy aliases keep Building Works parent and extensio
 
 test('unrelated pages and lookalike prefixes do not claim an incorrect section', () => {
   for (const path of [
-    '/search', '/privacy', '/forms/event-registration', '/pages/community-event',
-    '/unknown', '/about-us', '/prayer-times-extra', '/educationn', '/funeralsxyz',
-    '/projects2', '/madrassah-other',
+    '/search',
+    '/privacy',
+    '/forms/event-registration',
+    '/pages/community-event',
+    '/unknown',
+    '/about-us',
+    '/prayer-times-extra',
+    '/educationn',
+    '/funeralsxyz',
+    '/projects2',
+    '/madrassah-other',
   ]) {
     assert.equal(activeNavigation(path), null, path);
   }

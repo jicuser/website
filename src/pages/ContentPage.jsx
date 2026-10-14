@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
+import { SITE } from '@/content/site';
 import { supabase } from '@/lib/supabaseClient';
 import { PAGE_PLACEMENTS, pageProblem } from '@/lib/pageContent';
 
@@ -64,6 +66,11 @@ function Page({ slug }) {
   ];
   return (
     <article className="mx-auto max-w-5xl px-4 py-8">
+      <Helmet>
+        <title>
+          {page.title} | {SITE.name}
+        </title>
+      </Helmet>
       <Link to={page.placement}>
         ← {PAGE_PLACEMENTS.find(([path]) => path === page.placement)?.[1] || 'Back'}
       </Link>

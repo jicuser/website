@@ -4,6 +4,7 @@ import { ArrowRight, Expand } from 'lucide-react';
 import usePosters from '@/hooks/usePosters';
 import { usePublishedPages } from '@/context/PublishedPagesContext';
 import { pageUrl } from '@/lib/pageContent';
+import { posterAppearsOnPage } from '@/lib/programmePlacement';
 import ImageViewer from '@/components/ImageViewer';
 import SwipeRail from '@/components/SwipeRail';
 import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
@@ -14,18 +15,23 @@ export default function ProgrammePosters() {
   const pages = usePublishedPages();
   const [selected, setSelected] = useState(null);
   const group = pathname === '/' ? 'home' : pathname.split('/')[1];
-  const posters = programmes.filter((item) => {
-    if (pathname === '/education/courses') return pages.some(page => page.source_poster_id === item.id && page.placement === pathname);
-    return item.groups.includes(group);
-  }).map(item => {
-    const page = pages.find(candidate => candidate.source_poster_id === item.id);
-    return page ? { ...item, to: pageUrl(page), registration: page.registration } : item;
-  });
+  const posters = programmes
+    .filter((item) => posterAppearsOnPage(item, pathname, pages))
+    .map((item) => {
+      const page = pages.find((candidate) => candidate.source_poster_id === item.id);
+      return page ? { ...item, to: pageUrl(page), registration: page.registration } : item;
+    });
   if (!posters.length) return null;
   return (
     <>
       <SwipeRail
-        title={group === 'home' ? 'What’s on & learning' : 'Classes & gatherings'}
+        title={
+          group === 'home'
+            ? 'What’s on'
+            : ['education', 'madrassah', 'worship'].includes(group)
+              ? 'Classes & gatherings'
+              : 'Notices & activities'
+        }
         className="jic-programmes"
       >
         {posters.map((item) => (
@@ -53,7 +59,11 @@ export default function ProgrammePosters() {
               <p>{item.schedule}</p>
               <p>{item.detail}</p>
               <Link to={item.to === pathname ? '/contact' : item.to}>
-                {item.registration && item.registration !== 'none' ? 'Details & registration' : item.to === pathname ? 'Enquire at the centre' : 'Explore programme'}{' '}
+                {item.registration && item.registration !== 'none'
+                  ? 'Details & registration'
+                  : item.to === pathname
+                    ? 'Enquire at the centre'
+                    : 'Explore programme'}{' '}
                 <ArrowRight size={16} />
               </Link>
             </div>

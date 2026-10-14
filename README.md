@@ -55,6 +55,7 @@ For the mobile reminder and Prayer Times navigation checks, run `npx playwright 
 once, then `npm run test:browser`. These use local fixture data, including a paused network
 response, and do not connect to the live database.
 
+- [Website experience and page ownership](docs/website-experience.md)
 - [Editing guide](docs/editing.md)
 - [Code map](CODEBASE_MAP.md)
 - [Style ownership](src/styles/README.md)

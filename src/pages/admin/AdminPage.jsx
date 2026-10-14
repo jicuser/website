@@ -39,6 +39,7 @@ import { displayTime } from '@/lib/timetable';
 import { fromDateTimeLocal, toDateTimeLocal } from '@/lib/dateTime';
 import TeamEditor from '@/components/admin/TeamEditor';
 import FormsInbox from '@/components/admin/FormsInbox';
+import { ADMIN_SECTIONS, ADMIN_GROUPS } from '@/content/adminNavigation';
 
 const input =
   'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-amber-500';
@@ -49,40 +50,31 @@ const primary = `${btn} bg-amber-400 text-slate-950 hover:bg-amber-300`;
 const ghost = `${btn} border border-slate-300 bg-white text-slate-700 hover:bg-slate-50`;
 const danger = `${btn} bg-red-50 text-red-700 hover:bg-red-100`;
 
-const SECTIONS = [
-  ['dashboard', 'Overview', Activity, 'dashboard'],
-  ['prayer', 'Timetable & Jummah', Clock3, 'prayer_times'],
-  ['events', 'Events', CalendarDays, 'events'],
-  ['posters', 'Posters & content', FileText, 'content'],
-  ['announcements', 'Notices', Megaphone, 'announcements'],
-  ['livestream', 'Livestream', Radio, 'livestream'],
-  ['tv', 'TV & screens', Monitor, 'tv'],
-  ['content', 'Website pages', FileText, 'content'],
-  ['team', 'Team profiles', Users, 'team'],
-  ['messages', 'Messages', MessageSquare, 'forms_contact'],
-  ['forms', 'Forms', FileText, 'forms'],
-  ['users', 'Staff & access', ShieldCheck, 'users'],
-  ['audit', 'Audit log', Activity, 'audit'],
-];
-const SECTION_GROUPS = [
-  [
-    'Manage',
-    [
-      'dashboard',
-      'content',
-      'team',
-      'posters',
-      'events',
-      'announcements',
-      'messages',
-      'forms',
-      'prayer',
-      'tv',
-      'livestream',
-    ],
-  ],
-  ['People & system', ['users', 'audit']],
-];
+const SECTION_ICONS = {
+  dashboard: Activity,
+  prayer: Clock3,
+  events: CalendarDays,
+  posters: FileText,
+  announcements: Megaphone,
+  livestream: Radio,
+  tv: Monitor,
+  content: FileText,
+  team: Users,
+  messages: MessageSquare,
+  forms: FileText,
+  users: ShieldCheck,
+  audit: Activity,
+};
+const SECTIONS = ADMIN_SECTIONS.map(({ id, name, permission }) => [
+  id,
+  name,
+  SECTION_ICONS[id],
+  permission,
+]);
+const SECTION_GROUPS = ADMIN_GROUPS.map((group) => [
+  group,
+  ADMIN_SECTIONS.filter((section) => section.group === group).map((section) => section.id),
+]);
 
 function Field({ title, children, className = '' }) {
   return (
@@ -130,63 +122,37 @@ async function uploadImage(file, folder = 'admin') {
 
 function DashboardSection({ onChoose }) {
   const { can } = useAuth();
-  const tasks = [
-    ['tv', 'TV & screens', 'Normal displays, prayer sequence and presentations.', Monitor, 'tv'],
-    [
-      'prayer',
-      'Prayer times',
-      'Today’s times, monthly timetable and Jummah.',
-      Clock3,
-      'prayer_times',
-    ],
-    ['events', 'Events', 'Upcoming events and dated programmes.', CalendarDays, 'events'],
-    [
-      'posters',
-      'Posters & content',
-      'Posters, linked pages, registration and display placement.',
-      FileText,
-      'content',
-    ],
-    ['announcements', 'Notices', 'Short community updates and alerts.', Megaphone, 'announcements'],
-    ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
-    ['team', 'Team profiles', 'People shown on the Meet the Team page.', Users, 'team'],
-    [
-      'messages',
-      'Messages',
-      'Contact Us messages from the website.',
-      MessageSquare,
-      'forms_contact',
-    ],
-    ['forms', 'Forms', 'Registration forms, responses and assigned actions.', FileText, 'forms'],
-    ['users', 'Staff access', 'Choose who can edit and control TVs.', Users, 'users'],
-  ].filter(([, , , , permission]) => can(permission));
+  const tasks = ADMIN_SECTIONS.filter(
+    (section) => section.id !== 'dashboard' && can(section.permission),
+  );
   return (
     <div>
       <div className="admin-heading">
-        <div>
-          <span className="admin-eyebrow">JAMATIA ISLAMIC CENTRE</span>
-          <h2>What would you like to do?</h2>
-        </div>
+        <h2>What would you like to do?</h2>
       </div>
-      <div className="admin-task-grid">
-        {can('content') && (
-          <button type="button" onClick={() => onChoose('content')}>
-            <Home />
-            <strong>Website pages</strong>
-            <span>Edit page text, pictures, sections and programme pages.</span>
-          </button>
-        )}
-        {tasks.map(([id, title, description, Icon]) => (
-          <button key={id} aria-label={title} onClick={() => onChoose(id)}>
-            <Icon />
-            <strong>{title}</strong>
-            <span>{description}</span>
-          </button>
-        ))}
-      </div>
+      {ADMIN_GROUPS.filter((group) => tasks.some((task) => task.group === group)).map((group) => (
+        <section className="admin-task-group" key={group} aria-label={group}>
+          <h3>{group}</h3>
+          <div className="admin-task-grid">
+            {tasks
+              .filter((task) => task.group === group)
+              .map(({ id, name, description }) => {
+                const Icon = SECTION_ICONS[id];
+                return (
+                  <button key={id} type="button" aria-label={name} onClick={() => onChoose(id)}>
+                    <Icon aria-hidden="true" />
+                    <strong>{name}</strong>
+                    <span>{description}</span>
+                  </button>
+                );
+              })}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
+
 function TvSection({ registerBack }) {
   return <StreamSetup registerBack={registerBack} />;
 }
@@ -830,7 +796,7 @@ export default function AdminPage() {
     messages: (
       <FormsInbox
         kind="contact"
-        title="Messages"
+        title="Contact messages"
         description="Messages sent through Contact Us. Registration and application responses stay in Forms."
       />
     ),
