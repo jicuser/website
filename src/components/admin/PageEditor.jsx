@@ -16,6 +16,7 @@ import { useContent } from '@/context/ContentContext';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import {
   EDITABLE_PAGES,
+  editablePagePath,
   pageDefaults,
   pageKey,
   supplementalContentPaths,
@@ -25,9 +26,7 @@ import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 
 export default function PageEditor({ initialPath = '/', inline = false, onSelectPage }) {
-  const [selected, setSelected] = useState(() =>
-    EDITABLE_PAGES.some((item) => item.path === initialPath) ? initialPath : '/',
-  );
+  const [selected, setSelected] = useState(() => editablePagePath(initialPath));
   const [query, setQuery] = useState('');
   const [draft, setDraft] = useState({});
   const [busy, setBusy] = useState(false);
@@ -106,6 +105,7 @@ export default function PageEditor({ initialPath = '/', inline = false, onSelect
 
   const choose = (path) => {
     if (busy) return;
+    path = editablePagePath(path);
     if (onSelectPage) {
       onSelectPage(path);
       return;

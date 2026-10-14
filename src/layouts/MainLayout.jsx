@@ -9,6 +9,7 @@ import RelatedContent from '@/components/RelatedContent';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import PublishedPageLinks from '@/features/content/PublishedPageLinks';
 import { PublishedPagesProvider } from '@/context/PublishedPagesContext';
+import { ProgrammeJourneyProvider } from '@/context/ProgrammeJourneyContext';
 import DailyReminder from '@/components/shell/DailyReminder';
 import SpiritualOverlays from '@/components/shell/SpiritualOverlays';
 import Footer from '@/components/shell/Footer';
@@ -22,7 +23,9 @@ export default function MainLayout() {
   return (
     <PublicPrayerTimesProvider>
       <PublishedPagesProvider>
-        <PublicLayout />
+        <ProgrammeJourneyProvider>
+          <PublicLayout />
+        </ProgrammeJourneyProvider>
       </PublishedPagesProvider>
     </PublicPrayerTimesProvider>
   );

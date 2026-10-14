@@ -14,7 +14,6 @@ export const standaloneSections = [
     'Extension Timeline',
     '/projects/masjid-extension',
   ],
-  ['projects/timeline', 'Masjid Extension', 'Extension Timeline', '/projects/masjid-extension'],
   [
     'projects/main-prayer-hall',
     'Masjid Extension',
@@ -24,12 +23,6 @@ export const standaloneSections = [
   ['projects/wudu-area', 'Masjid Extension', 'Wudu & Facilities', '/projects/masjid-extension'],
   ['projects/community-hall', 'Masjid Extension', 'Community Hall', '/projects/masjid-extension'],
   ['projects/madrassah-floor', 'Masjid Extension', 'Madrassah Floor', '/projects/masjid-extension'],
-  [
-    'projects/madrassah-building',
-    'Masjid Extension',
-    'Madrassah Floor',
-    '/projects/masjid-extension',
-  ],
   ['projects/current-appeals', 'Masjid Building Works', 'Current Appeals', '/projects'],
   ['projects/gallery', 'Masjid Building Works', 'Updates & Gallery', '/projects'],
   ['projects/how-to-support', 'Masjid Building Works', 'Support the Works', '/projects'],

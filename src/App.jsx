@@ -7,7 +7,9 @@ import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
 import { AdminSaveProvider } from '@/context/AdminSaveContext';
 import { NavigationProvider } from '@/context/NavigationContext';
 import { standaloneSections } from '@/content/sectionRoutes';
+import { PAGE_ALIASES } from '@/content/pageAliases';
 import MainLayout from '@/layouts/MainLayout';
+import CanonicalPageRedirect from '@/components/shell/CanonicalPageRedirect';
 import RouteScrollReset from '@/components/shell/RouteScrollReset';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
@@ -137,6 +139,9 @@ function AppRoutes() {
               <Route path="services/hall-booking" element={<HallBookingPage />} />
               <Route path="projects" element={<ProjectsPage />} />
               <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
+              {Object.keys(PAGE_ALIASES).map((path) => (
+                <Route key={path} path={path.slice(1)} element={<CanonicalPageRedirect />} />
+              ))}
 
               <Route path="education" element={<EducationPage />} />
               <Route path="education/courses" element={<AdultCoursesPage />} />

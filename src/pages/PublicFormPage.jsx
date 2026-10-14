@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import { useAuth } from '@/context/AuthContext';
+import { useRegisterProgrammeJourney } from '@/context/ProgrammeJourneyContext';
+import { SITE } from '@/content/site';
 import { supabase } from '@/lib/supabaseClient';
 import { formAction, visibleAnswers } from '@/lib/customForms';
+import { programmeForForm, programmeSlugFromSearch } from '@/lib/programmeJourney';
 import { checked } from '@/components/workspace/shared';
 import CustomFormsFields from '@/components/workspace/CustomFormsFields';
 import {
@@ -26,6 +30,12 @@ export default function PublicFormPage() {
 
 function PublicForm({ slug }) {
   const auth = useAuth();
+  const { search } = useLocation();
+  const requestedProgramme = programmeSlugFromSearch(search);
+  const journeyKey = `${slug}:${requestedProgramme || ''}`;
+  const [programmeState, setProgrammeState] = useState(null);
+  const programme = programmeState?.key === journeyKey ? programmeState.programme : null;
+  useRegisterProgrammeJourney(programme);
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,6 +46,25 @@ function PublicForm({ slug }) {
   const attempt = useRef(crypto.randomUUID());
   const mounted = useRef(true);
   const activeUploads = useRef(new Map());
+  useEffect(() => {
+    if (!requestedProgramme) return undefined;
+    const controller = new AbortController();
+    supabase
+      .rpc('get_site_page', { p_slug: requestedProgramme })
+      .abortSignal(controller.signal)
+      .then(({ data, error }) => {
+        if (!controller.signal.aborted)
+          setProgrammeState({
+            key: journeyKey,
+            programme: error ? null : programmeForForm(data, slug, requestedProgramme),
+          });
+      })
+      .catch(() => {
+        // Optional programme context must never prevent a direct form submission.
+        if (!controller.signal.aborted) setProgrammeState({ key: journeyKey, programme: null });
+      });
+    return () => controller.abort();
+  }, [journeyKey, requestedProgramme, slug]);
   useEffect(() => {
     mounted.current = true;
     checked(supabase.rpc('get_public_form', { p_slug: slug }))
@@ -116,7 +145,17 @@ function PublicForm({ slug }) {
 
   return (
     <div className="community-workspace public-custom-form">
+      {form?.title && (
+        <Helmet>
+          <title>{`${form.title} | ${SITE.name}`}</title>
+        </Helmet>
+      )}
       <div className="workspace-wrap">
+        {programme && !receipt && (
+          <p>
+            <Link to={programme.to}>← Back to {programme.title}</Link>
+          </p>
+        )}
         {loading ? (
           <p role="status">Loading form…</p>
         ) : receipt ? (
@@ -132,7 +171,9 @@ function PublicForm({ slug }) {
               <p>Keep this reference if you need to contact the centre about your response.</p>
             )}
             <p>
-              <Link to="/">Back to the website</Link>
+              <Link to={programme?.to || '/'}>
+                {programme ? `Back to ${programme.title}` : 'Back to the website'}
+              </Link>
             </p>
           </div>
         ) : form ? (
@@ -173,7 +214,9 @@ function PublicForm({ slug }) {
           >
             <h1>{form.title}</h1>
             <p>{form.description}</p>
-            <p className="workspace-meta">Submitting this form does not confirm a place. The centre will review your details.</p>
+            <p className="workspace-meta">
+              Submitting this form does not confirm a place. The centre will review your details.
+            </p>
             <fieldset disabled={busy}>
               <CustomFormsFields
                 fields={form.schema.fields}

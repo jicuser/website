@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { IMAGE_ACCEPT } from '@/lib/images';
 import { createImageUploader } from '@/lib/imageUpload';
 import PosterWorkflow from '@/features/content/PosterWorkflow';
+import { posterPlacementLabel } from '@/lib/programmePlacement';
 import '@/styles/content-workflow.css';
 
 export default function PostersEditor({ registerBack }) {
@@ -145,50 +146,58 @@ export default function PostersEditor({ registerBack }) {
           </div>
         </div>
       )}
-      {!item && <div className="admin-poster-picker">
-        {items.map((poster) => (
+      {!item && (
+        <div className="admin-poster-picker">
+          {items.map((poster) => (
+            <button
+              type="button"
+              className="admin-button flex-col min-w-0"
+              key={poster.id}
+              disabled={busy}
+              aria-pressed={selected === poster.id}
+              onClick={() => {
+                if (selected === poster.id) {
+                  revealEditor();
+                  return;
+                }
+                if (!canLeaveLinkedEditor()) return;
+                setEditingPoster(false);
+                setSelected(poster.id);
+              }}
+            >
+              {poster.kind === 'announcement' ? (
+                <span className="poster-type-label">Text & pictures</span>
+              ) : (
+                posterImage(poster.image) && <img src={poster.image} alt="" loading="lazy" />
+              )}
+              <span className="w-full">
+                <strong>{poster.title || 'New poster'}</strong>
+              </span>
+              <span className="workspace-meta">
+                {poster.kind === 'announcement' ? 'Announcement' : 'Image poster'} · Tap to manage
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+      {!item && (
+        <div className="admin-actions">
           <button
-            type="button"
-            className="admin-button flex-col min-w-0"
-            key={poster.id}
-            disabled={busy}
-            aria-pressed={selected === poster.id}
-            onClick={() => {
-              if (selected === poster.id) {
-                revealEditor();
-                return;
-              }
-              if (!canLeaveLinkedEditor()) return;
-              setEditingPoster(false);
-              setSelected(poster.id);
-            }}
+            className="admin-button"
+            disabled={busy || items.length >= 100}
+            onClick={() => add('image')}
           >
-            {poster.kind === 'announcement' ? (
-              <span className="poster-type-label">Text & pictures</span>
-            ) : (
-              posterImage(poster.image) && <img src={poster.image} alt="" loading="lazy" />
-            )}
-            <span className="w-full"><strong>{poster.title || 'New poster'}</strong></span>
-            <span className="workspace-meta">{poster.kind === 'announcement' ? 'Announcement' : 'Image poster'} · Tap to manage</span>
+            + Add image poster
           </button>
-        ))}
-      </div>}
-      {!item && <div className="admin-actions">
-        <button
-          className="admin-button"
-          disabled={busy || items.length >= 100}
-          onClick={() => add('image')}
-        >
-          + Add image poster
-        </button>
-        <button
-          className="admin-button"
-          disabled={busy || items.length >= 100}
-          onClick={() => add('announcement')}
-        >
-          + Add announcement poster
-        </button>
-      </div>}
+          <button
+            className="admin-button"
+            disabled={busy || items.length >= 100}
+            onClick={() => add('announcement')}
+          >
+            + Add announcement poster
+          </button>
+        </div>
+      )}
       {item && (
         <div ref={editor} tabIndex={-1} className="poster-management">
           <div className="poster-mobile-backbar">
@@ -347,8 +356,12 @@ export default function PostersEditor({ registerBack }) {
                     </div>
                   </>
                 )}
-                <h4>Poster / tile placement</h4>
-                <p>Choose where this poster card appears. A dedicated page and registration form are separate settings on the poster overview.</p>
+                <h4>Poster locations</h4>
+                <p>
+                  Choose overview pages for this poster. It will not repeat on their enrolment,
+                  contact or information pages. A linked programme page can add its own listing
+                  location.
+                </p>
                 {POSTER_DESTINATIONS.map((group) => (
                   <label className="admin-check" key={group}>
                     <input
@@ -363,7 +376,7 @@ export default function PostersEditor({ registerBack }) {
                         )
                       }
                     />
-                    {group === 'home' ? 'Home page' : group}
+                    {posterPlacementLabel(group)}
                   </label>
                 ))}
                 <label>
@@ -402,13 +415,15 @@ export default function PostersEditor({ registerBack }) {
           )}
         </div>
       )}
-      {dirty && <button
-        className="admin-button primary"
-        disabled={busy}
-        onClick={() => save().catch((error) => setMessage(error.message))}
-      >
-        Publish posters
-      </button>}
+      {dirty && (
+        <button
+          className="admin-button primary"
+          disabled={busy}
+          onClick={() => save().catch((error) => setMessage(error.message))}
+        >
+          Publish posters
+        </button>
+      )}
       {message && <p role="status">{message}</p>}
     </section>
   );

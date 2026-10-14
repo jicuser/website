@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { activeNavigation } from '@/lib/publicNavigation';
 
 const SECTIONS = {
   about: { to: '/about', title: 'About JIC' },
@@ -59,6 +60,10 @@ const RELATED = {
 
 export default function RelatedContent() {
   const { pathname } = useLocation();
+  const navigation = activeNavigation(pathname);
+  const overviewDestinations = new Set(
+    navigation?.path === pathname ? navigation.children.map((item) => item.path) : [],
+  );
   const root = pathname.split('/')[1];
   const group =
     pathname === '/services/community'
@@ -76,7 +81,7 @@ export default function RelatedContent() {
                 : root;
   const links = (RELATED[group] || [])
     .map((key) => SECTIONS[key])
-    .filter((item) => item.to !== pathname);
+    .filter((item) => item.to !== pathname && !overviewDestinations.has(item.to));
   if (!links.length) return null;
   return (
     <nav className="jic-related jic-rail-section" aria-label="Related pages">

@@ -4,6 +4,8 @@ import { Helmet } from 'react-helmet';
 import { SITE } from '@/content/site';
 import { supabase } from '@/lib/supabaseClient';
 import { PAGE_PLACEMENTS, pageProblem } from '@/lib/pageContent';
+import { programmeRegistrationPath } from '@/lib/programmeJourney';
+import { useRegisterProgrammeJourney } from '@/context/ProgrammeJourneyContext';
 
 export default function ContentPage() {
   const { slug } = useParams();
@@ -13,6 +15,7 @@ export default function ContentPage() {
 function Page({ slug }) {
   const [state, setState] = useState({ page: null, loading: true, error: '' });
   const [retry, setRetry] = useState(0);
+  useRegisterProgrammeJourney(state.page);
   useEffect(() => {
     const controller = new AbortController();
     setState({ page: null, loading: true, error: '' });
@@ -64,6 +67,7 @@ function Page({ slug }) {
   const label = { interest: 'Register interest', application: 'Apply', registration: 'Register' }[
     page.registration
   ];
+  const registrationPath = programmeRegistrationPath(page);
   return (
     <article className="mx-auto max-w-5xl px-4 py-8">
       <Helmet>
@@ -105,10 +109,10 @@ function Page({ slug }) {
                     ? 'Application required'
                     : 'Registration required'}
               </h2>
-              {page.form?.open && page.form.slug ? (
+              {page.form?.open && registrationPath ? (
                 <Link
                   className="inline-flex rounded-xl bg-primary text-primary-foreground px-5 py-3 mt-3 font-semibold"
-                  to={`/forms/${encodeURIComponent(page.form.slug)}`}
+                  to={registrationPath}
                 >
                   {label}
                 </Link>

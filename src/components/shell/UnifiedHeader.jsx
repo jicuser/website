@@ -24,11 +24,13 @@ import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useAppearance } from '@/context/AppearanceContext';
 import { useNavigationHistory } from '@/context/NavigationContext';
+import { useProgrammeJourney } from '@/context/ProgrammeJourneyContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import DesktopNavigation from '@/components/shell/DesktopNavigation';
 import { cn } from '@/lib/utils';
 import { activeNavigation } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
+import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
 const MENU_GROUPS = [
@@ -38,7 +40,7 @@ const MENU_GROUPS = [
 ];
 
 export default function UnifiedHeader() {
-  const { pathname } = useLocation();
+  const { pathname, key: routeKey } = useLocation();
   const navigate = useNavigate();
   const { canGoBack, previousPath } = useNavigationHistory();
   const showHome = pathname === '/' || !canGoBack || previousPath === '/';
@@ -58,8 +60,17 @@ export default function UnifiedHeader() {
   const [menuOpen, setMenuOpen] = useState(false),
     [donationOpen, setDonationOpen] = useState(false);
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
+  const prayerDockHidden = usePrayerDockVisibility(
+    prayerDockRef,
+    routeKey,
+    menuOpen || donationOpen || quickMenuOpen,
+  );
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
-  const navigation = useMemo(() => activeNavigation(pathname), [pathname]);
+  const programme = useProgrammeJourney();
+  const navigation = useMemo(
+    () => activeNavigation(programme?.placement || pathname),
+    [programme?.placement, pathname],
+  );
   const subtabs = navigation?.children || [];
   const selected = navigation?.current?.path;
   const menuSection =
@@ -139,7 +150,7 @@ export default function UnifiedHeader() {
     const nav = subnavRef.current;
     if (!nav) return undefined;
     const centreCurrent = () => {
-      const current = nav.querySelector('[aria-current="page"]');
+      const current = nav.querySelector('[aria-current]');
       if (!current || nav.scrollWidth <= nav.clientWidth) {
         nav.scrollLeft = 0;
         return;
@@ -154,7 +165,7 @@ export default function UnifiedHeader() {
     const observer = new ResizeObserver(centreCurrent);
     observer.observe(nav);
     return () => observer.disconnect();
-  }, [pathname]);
+  }, [pathname, selected]);
   useLayoutEffect(() => {
     if (!menuOpen) return undefined;
     const node = menuRef.current,
@@ -239,7 +250,12 @@ export default function UnifiedHeader() {
         aria-hidden="true"
       />
       <header className="jic-unified-header">
-        <div ref={prayerDockRef} className="jic-prayer-dock">
+        <div
+          ref={prayerDockRef}
+          className={cn('jic-prayer-dock', prayerDockHidden && 'is-scroll-hidden')}
+          aria-hidden={prayerDockHidden || undefined}
+          inert={prayerDockHidden ? '' : undefined}
+        >
           <PrayerTimeBar
             todaysTimes={todaysTimes}
             jummahTimes={jummahTimes}
@@ -346,7 +362,28 @@ export default function UnifiedHeader() {
               {navigation.current && navigation.current.path !== navigation.path && (
                 <>
                   <ChevronRight size={14} aria-hidden="true" />
-                  <span aria-current="page">{navigation.current.name}</span>
+                  {programme ? (
+                    <Link to={navigation.current.path}>{navigation.current.name}</Link>
+                  ) : (
+                    <span aria-current="page">{navigation.current.name}</span>
+                  )}
+                </>
+              )}
+              {programme && (
+                <>
+                  <ChevronRight size={14} aria-hidden="true" />
+                  <Link
+                    to={programme.to}
+                    aria-current={pathname === programme.to ? 'page' : undefined}
+                  >
+                    {programme.title}
+                  </Link>
+                  {pathname.startsWith('/forms/') && (
+                    <>
+                      <ChevronRight size={14} aria-hidden="true" />
+                      <span aria-current="page">Form</span>
+                    </>
+                  )}
                 </>
               )}
             </nav>
@@ -361,7 +398,13 @@ export default function UnifiedHeader() {
                 <Link
                   key={`${item.path}-${item.name}`}
                   to={item.path}
-                  aria-current={item.path === selected ? 'page' : undefined}
+                  aria-current={
+                    item.path === selected
+                      ? pathname === item.path
+                        ? 'page'
+                        : 'location'
+                      : undefined
+                  }
                   className={cn('jic-unified-subnav-link', item.path === selected && 'is-current')}
                 >
                   {item.name}

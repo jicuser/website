@@ -7,6 +7,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useAdminSave } from '@/context/AdminSaveContext';
 import ContentPageEditor from './ContentPageEditor';
 import { pageUrl } from '@/lib/pageContent';
+import { pageName } from '@/content/pageDirectory';
+import { posterPlacementLabel } from '@/lib/programmePlacement';
 
 export default function PosterWorkflow({ poster, onEditPoster }) {
   const { can } = useAuth();
@@ -31,10 +33,15 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
   const setPageVisible = async (visible) => {
     if (!page || pageBusy) return;
     if (dirty) {
-      window.alert('Save or discard the current page/form changes before changing page visibility.');
+      window.alert(
+        'Save or discard the current page/form changes before changing page visibility.',
+      );
       return;
     }
-    if (!visible && !window.confirm('Hide this dedicated page? Its linked form and responses are kept.'))
+    if (
+      !visible &&
+      !window.confirm('Hide this dedicated page? Its linked form and responses are kept.')
+    )
       return;
     setPageBusy(true);
     setPageMessage('');
@@ -135,10 +142,10 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
 
           <div className="poster-setup-grid">
             <section className="admin-panel">
-              <strong>Poster / tile placement</strong>
+              <strong>Poster locations</strong>
               <p>
                 {poster.groups?.length
-                  ? `Shown on: ${poster.groups.map((group) => (group === 'home' ? 'Home' : group)).join(', ')}`
+                  ? `Overview pages: ${poster.groups.map(posterPlacementLabel).join(', ')}`
                   : 'Not currently shown on public website sections.'}
               </p>
               <button className="admin-button" onClick={onEditPoster}>
@@ -159,7 +166,7 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
                     />
                     {page.published ? 'Page visible on website' : 'Page hidden'}
                   </label>
-                  <p>Placed under: {page.placement || 'website'}</p>
+                  <p>Listed on: {pageName(page.placement) || 'Website'}</p>
                 </>
               ) : (
                 <p>Off · this poster has no dedicated page.</p>
@@ -197,7 +204,6 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
           </div>
         </>
       )}
-
     </section>
   );
 }

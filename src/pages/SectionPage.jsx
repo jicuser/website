@@ -21,10 +21,6 @@ const PAGE_ACTIONS = {
     { label: 'Visit Madrassah', to: '/madrassah', icon: GraduationCap },
     { label: 'Classes & Courses', to: '/madrassah/classes-courses', icon: ArrowRight },
   ],
-  '/projects/madrassah-building': [
-    { label: 'Visit Madrassah', to: '/madrassah', icon: GraduationCap },
-    { label: 'Classes & Courses', to: '/madrassah/classes-courses', icon: ArrowRight },
-  ],
   '/projects/main-prayer-hall': [
     { label: 'Prayer times', to: '/prayer-times', icon: CalendarDays },
   ],

@@ -1,0 +1,175 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { observePrayerDockScroll } from '../src/lib/prayerDockScroll.js';
+
+function eventTarget() {
+  const listeners = new Map();
+  return {
+    addEventListener(type, listener) {
+      if (!listeners.has(type)) listeners.set(type, new Set());
+      listeners.get(type).add(listener);
+    },
+    removeEventListener(type, listener) {
+      listeners.get(type)?.delete(listener);
+    },
+    emit(type, event = {}) {
+      listeners.get(type)?.forEach((listener) => listener(event));
+    },
+    listenerCount() {
+      return [...listeners.values()].reduce((count, entries) => count + entries.size, 0);
+    },
+  };
+}
+
+function fixture() {
+  let now = 0;
+  let timerId = 0;
+  const timers = new Map();
+  const changes = [];
+  const document = { ...eventTarget(), activeElement: null };
+  const panelControl = {};
+  const panel = { ...eventTarget(), contains: (node) => node === panelControl };
+  const media = { ...eventTarget(), matches: false };
+  const browser = {
+    ...eventTarget(),
+    document,
+    innerWidth: 390,
+    scrollY: 100,
+    matchMedia: () => media,
+    setTimeout(callback, delay) {
+      timers.set(++timerId, { callback, at: now + delay });
+      return timerId;
+    },
+    clearTimeout(id) {
+      timers.delete(id);
+    },
+  };
+  const cleanup = observePrayerDockScroll({
+    panel,
+    browser,
+    onChange: (value) => changes.push(value),
+  });
+  return {
+    browser,
+    document,
+    panel,
+    panelControl,
+    media,
+    changes,
+    cleanup,
+    scroll(y, target = document) {
+      browser.scrollY = y;
+      browser.emit('scroll', { target });
+    },
+    advance(ms) {
+      now += ms;
+      for (const [id, timer] of timers) {
+        if (timer.at <= now) {
+          timers.delete(id);
+          timer.callback();
+        }
+      }
+    },
+  };
+}
+
+test('small movements do not hide the panel; sustained scrolling hides it once', () => {
+  const f = fixture();
+  f.scroll(105);
+  f.advance(700);
+  f.scroll(111);
+  assert.deepEqual(f.changes, []);
+  f.scroll(117);
+  f.scroll(250);
+  assert.deepEqual(f.changes, [true]);
+});
+
+test('momentum in either direction postpones return until 700ms after the last movement', () => {
+  const f = fixture();
+  f.scroll(130);
+  f.advance(650);
+  f.scroll(120);
+  f.advance(699);
+  assert.deepEqual(f.changes, [true]);
+  f.advance(1);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('nested rails and horizontal-only scroll events do not hide or delay the panel', () => {
+  const f = fixture();
+  f.scroll(100, {});
+  f.scroll(100);
+  assert.deepEqual(f.changes, []);
+  f.scroll(150);
+  f.advance(500);
+  f.scroll(150);
+  f.scroll(150, {});
+  f.advance(200);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('focused and pressed prayer controls stay available during page movements', () => {
+  const f = fixture();
+  f.document.activeElement = f.panelControl;
+  f.scroll(200);
+  assert.deepEqual(f.changes, []);
+  f.document.activeElement = null;
+  f.panel.emit('pointerdown');
+  f.scroll(300);
+  assert.deepEqual(f.changes, []);
+  f.browser.emit('pointercancel');
+  f.scroll(320);
+  assert.deepEqual(f.changes, [true]);
+  f.document.activeElement = f.panelControl;
+  f.panel.emit('focusin');
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('short landscape keeps the in-flow panel visible and orientation changes restore it', () => {
+  const f = fixture();
+  f.scroll(200);
+  f.media.matches = true;
+  f.media.emit('change');
+  f.scroll(300);
+  f.advance(1000);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('returning to the page top, resizing and reopening a tab restore the panel', () => {
+  const f = fixture();
+  f.scroll(200);
+  f.scroll(0);
+  f.scroll(-20);
+  assert.deepEqual(f.changes, [true, false]);
+  f.scroll(100);
+  f.browser.innerWidth = 700;
+  f.browser.emit('resize');
+  f.scroll(200);
+  f.document.emit('visibilitychange');
+  assert.deepEqual(f.changes, [true, false, true, false, true, false]);
+});
+
+test('height-only browser-bar resizing cannot make the panel flicker during a gesture', () => {
+  const f = fixture();
+  f.scroll(200);
+  f.advance(300);
+  f.browser.emit('resize');
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(250);
+  f.advance(699);
+  assert.deepEqual(f.changes, [true]);
+  f.advance(1);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('route changes and unmount can cancel all pending callbacks and listeners', () => {
+  const f = fixture();
+  f.scroll(200);
+  f.cleanup();
+  f.advance(1000);
+  f.scroll(400);
+  assert.deepEqual(f.changes, [true]);
+  for (const target of [f.browser, f.panel, f.document, f.media]) {
+    assert.equal(target.listenerCount(), 0);
+  }
+});

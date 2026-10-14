@@ -1,4 +1,5 @@
 import { MADRASSAH_TABS, MASJID_EXTENSION_TABS, NAV_GROUPS } from '../content/nav.js';
+import { canonicalPagePath } from '../content/pageAliases.js';
 
 const matchesPath = (pathname, path) =>
   pathname === path || (path !== '/' && pathname.startsWith(`${path}/`));
@@ -15,13 +16,8 @@ const nestedSections = [
 
 // Child destinations can live outside the parent URL (for example About → Contact).
 // Use the same section identity for desktop highlights, mobile breadcrumbs and menus.
-const routeAliases = {
-  '/projects/timeline': '/projects/masjid-extension/timeline',
-  '/projects/madrassah-building': '/projects/madrassah-floor',
-};
-
 export function activeNavigation(pathname) {
-  pathname = routeAliases[pathname] || pathname;
+  pathname = canonicalPagePath(pathname);
   const nested = nestedSections.find(
     (section) =>
       matchesPath(pathname, section.path) ||

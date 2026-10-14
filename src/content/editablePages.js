@@ -1,9 +1,14 @@
 import { PUBLIC_PAGES } from './pageDirectory.js';
 import { standaloneSections } from './sectionRoutes.js';
 import { IMAGES } from './images.js';
+import { canonicalPagePath } from './pageAliases.js';
 
 export const EDITABLE_PAGES = PUBLIC_PAGES;
-export const pageKey = (path) => `page:${path}`;
+export const pageKey = (path) => `page:${canonicalPagePath(path)}`;
+export function editablePagePath(path) {
+  const canonicalPath = canonicalPagePath(path);
+  return EDITABLE_PAGES.some((page) => page.path === canonicalPath) ? canonicalPath : '/';
+}
 const mainContentPaths = new Set(standaloneSections.map(([path]) => `/${path}`));
 export const supplementalContentPaths = new Set(
   PUBLIC_PAGES.filter((page) => page.path !== '/' && !mainContentPaths.has(page.path)).map(

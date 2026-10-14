@@ -111,7 +111,7 @@
   }
   .jic-scroll-top {
     right: max(16px, env(safe-area-inset-right));
-    bottom: calc(var(--jic-mobile-dock-height, 72px) + 8px);
+    bottom: calc(var(--jic-mobile-visible-dock-height, 72px) + 8px);
   }
 }
 @media (min-width: 1025px) {

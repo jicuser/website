@@ -10,6 +10,16 @@
   margin: auto;
   padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0
     max(8px, env(safe-area-inset-left));
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 160ms ease,
+    visibility 160ms;
+}
+.jic-prayer-dock.is-scroll-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 .jic-unified-inner {
   width: min(1440px, 100%);
@@ -228,6 +238,7 @@
 .jic-free-actions {
   position: fixed;
   top: calc(var(--jic-prayer-sticky-offset) + 16px);
+  transition: top 160ms ease;
   right: var(--jic-actions-inset);
   z-index: 45;
   display: flex;
@@ -269,8 +280,12 @@
 }
 html {
   --jic-actions-inset: max(24px, calc((100vw - 1440px) / 2 + 24px), env(safe-area-inset-right));
-  --jic-prayer-sticky-offset: var(--jic-prayer-dock-height, 180px);
+  --jic-prayer-visible-height: var(--jic-prayer-dock-height, 180px);
+  --jic-prayer-sticky-offset: var(--jic-prayer-visible-height);
   scroll-padding-top: calc(var(--jic-prayer-sticky-offset) + 12px);
+}
+html[data-prayer-dock-hidden='true'] {
+  --jic-prayer-visible-height: 0px;
 }
 
 /* Native dialog supplies focus trapping, Escape handling and a separate scroll area. */
@@ -512,7 +527,10 @@ html {
     --jic-mobile-dock-height: calc(
       var(--jic-prayer-dock-height, 160px) + var(--jic-mobile-controls-height, 60px)
     );
-    scroll-padding-bottom: calc(var(--jic-mobile-dock-height) + 12px);
+    --jic-mobile-visible-dock-height: calc(
+      var(--jic-prayer-visible-height) + var(--jic-mobile-controls-height, 60px)
+    );
+    scroll-padding-bottom: calc(var(--jic-mobile-visible-dock-height) + 12px);
   }
   .jic-unified-header {
     padding-top: 0;
@@ -671,7 +689,7 @@ html {
     outline-offset: -2px;
   }
   .jic-public-route .jic-admin-bar {
-    bottom: calc(var(--jic-mobile-dock-height) + 8px);
+    bottom: calc(var(--jic-mobile-visible-dock-height) + 8px);
   }
   .jic-daily-reminder {
     position: sticky;
@@ -687,7 +705,9 @@ html {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .jic-daily-reminder {
+  .jic-daily-reminder,
+  .jic-prayer-dock,
+  .jic-free-actions {
     transition: none;
   }
 }
@@ -872,6 +892,7 @@ html {
   html {
     --jic-prayer-sticky-offset: 0px;
     --jic-mobile-dock-height: var(--jic-mobile-controls-height, 60px);
+    --jic-mobile-visible-dock-height: var(--jic-mobile-controls-height, 60px);
     scroll-padding-top: 12px;
   }
 }
