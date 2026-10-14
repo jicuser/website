@@ -13,7 +13,7 @@ const AdminSaveContext = createContext(null);
 export function AdminSaveProvider({ children }) {
   const entriesRef = useRef(new Map());
   const saveInFlight = useRef(false);
-  const [summary, setSummary] = useState({ dirtyCount: 0, label: 'Save to database' });
+  const [summary, setSummary] = useState({ dirtyCount: 0, label: 'Save changes' });
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
 
@@ -26,7 +26,7 @@ export function AdminSaveProvider({ children }) {
           ? dirtyEntries[0].label
           : dirtyEntries.length > 1
             ? 'Save all changes'
-            : 'Save to database',
+            : 'Save changes',
     });
   }, []);
 
@@ -35,7 +35,7 @@ export function AdminSaveProvider({ children }) {
       entriesRef.current.set(id, {
         handler,
         dirty: Boolean(options.dirty),
-        label: options.label || 'Save to database',
+        label: options.label || 'Save changes',
       });
       refreshSummary();
       return () => {
@@ -72,7 +72,13 @@ export function AdminSaveProvider({ children }) {
     setStatus('');
     try {
       for (const [, entry] of dirtyEntries) {
-        await entry.handler();
+        // A cancelled confirmation is not a successful save. Stop here so a
+        // later editor is not saved after the user has cancelled this action.
+        if ((await entry.handler()) === false) {
+          refreshSummary();
+          setStatus('Save cancelled. Unsaved changes remain.');
+          return false;
+        }
       }
       // Editors own their saved baseline. They may still contain edits made
       // during a request, so completing a request cannot mark them clean here.
@@ -113,7 +119,7 @@ export function useAdminSave() {
   return context;
 }
 
-export function useRegisterAdminSave(save, dirty, label = 'Save to database') {
+export function useRegisterAdminSave(save, dirty, label = 'Save changes') {
   const { register, updateState } = useAdminSave();
   const idRef = useRef(Symbol(label));
   const saveRef = useRef(save);

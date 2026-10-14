@@ -89,7 +89,7 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
         'Hide this page? Its form, responses and actions will be kept. The form may still be open from other links.',
       )
     )
-      return;
+      return false;
     saving.current = true;
     setBusy(true);
     setMessage('');
@@ -286,9 +286,7 @@ export default function ContentPageEditor({ page, poster, onSaved, onClose }) {
             Registration
             <select
               value={draft.registration}
-              onChange={(event) =>
-                patch({ registration: event.target.value })
-              }
+              onChange={(event) => patch({ registration: event.target.value })}
             >
               {REGISTRATION_TYPES.map(([value, label]) => (
                 <option key={value} value={value}>

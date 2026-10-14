@@ -113,3 +113,65 @@ test('Public programme page offers the linked registration form and closed pages
   await expect(page.getByText('This page is not available.')).toBeVisible();
   expect(state.errors).toEqual([]);
 });
+
+test('form tabs survive refresh and browser Back returns to the preceding tab', async ({ page }) => {
+  const { state, admin } = await fixture(page);
+  await admin();
+  await page.locator('.content-form-card').filter({ hasText: 'Course interest' }).click();
+  await page.getByRole('button', { name: 'Responses (1)', exact: true }).click();
+  await expect(page).toHaveURL(/tab=responses/);
+  await page.getByRole('button', { name: 'Actions (1)', exact: true }).click();
+  await expect(page).toHaveURL(/tab=actions/);
+  await page.goBack();
+  await expect(page.getByRole('button', { name: 'Responses (1)', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Responses (1)', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  expect(state.errors).toEqual([]);
+});
+
+test('toolbar Back protects an unfinished new form', async ({ page }) => {
+  const { state, admin } = await fixture(page);
+  await admin();
+  await page.getByRole('button', { name: 'New form', exact: true }).click();
+  await page.getByLabel('Form title', { exact: true }).fill('New class registration');
+  page.once('dialog', dialog => dialog.dismiss());
+  await page.locator('.admin-mobile-back').click();
+  await expect(page.getByLabel('Form title', { exact: true })).toHaveValue('New class registration');
+  page.once('dialog', dialog => dialog.accept());
+  await page.locator('.admin-mobile-back').click();
+  await expect(page.getByRole('heading', { name: 'Forms', exact: true })).toBeVisible();
+  expect(state.writes).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
+test('toolbar Back closes only the existing form editor after confirming unsaved changes', async ({ page }) => {
+  const { state, admin } = await fixture(page);
+  await admin();
+  await page.locator('.content-form-card').filter({ hasText: 'Course interest' }).click();
+  await page.getByRole('button', { name: 'Edit form & assignments', exact: true }).click();
+  await page.getByLabel('Form title', { exact: true }).fill('Unsaved title');
+  page.once('dialog', dialog => dialog.dismiss());
+  await page.locator('.admin-mobile-back').click();
+  await expect(page.getByLabel('Form title', { exact: true })).toHaveValue('Unsaved title');
+  page.once('dialog', dialog => dialog.accept());
+  await page.locator('.admin-mobile-back').click();
+  await expect(page.getByRole('heading', { name: 'Course interest', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`form=${id(10)}`));
+  expect(state.writes).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
+test('Draft and Closed filters do not display live service forms', async ({ page }) => {
+  const { admin } = await fixture(page);
+  await admin();
+  const cards = page.locator('.content-form-card');
+  await expect(cards.filter({ hasText: 'Madrassah enquiry' })).toBeVisible();
+  for (const status of ['Draft', 'Closed']) {
+    await page.getByRole('combobox', { name: 'Show forms' }).selectOption(status);
+    await expect(cards).toHaveCount(0);
+    await expect(page.getByText('No forms match this view.')).toBeVisible();
+  }
+  await page.getByRole('combobox', { name: 'Show forms' }).selectOption('Live');
+  await expect(cards.filter({ hasText: 'Madrassah enquiry' })).toBeVisible();
+  await expect(cards.filter({ hasText: 'Course interest' })).toBeVisible();
+});

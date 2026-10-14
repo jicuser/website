@@ -5,7 +5,7 @@ import { hasSceneContent, nameProblem } from '../../supabase/functions/_shared/t
 import { createStreamScene, streamSettings } from '@/lib/streamWorkspace';
 import { recoverStreamWorkspace, streamEndSnapshot } from '@/lib/streamRecovery';
 
-export default function useStreamSetup(screenId, userId) {
+export default function useStreamSetup(screenId, userId, { presentationWorkspace = true } = {}) {
   const key = `jic-stream-workspace:${userId}:${screenId}`;
   const [data, setData] = useState(null);
   const [form, setForm] = useState(null);
@@ -59,31 +59,34 @@ export default function useStreamSetup(screenId, userId) {
         if (!loaded.current) {
           loaded.current = true;
           setRevision(next.updated_at);
-          let draft = null;
-          try {
-            draft = JSON.parse(sessionStorage.getItem(key));
-          } catch {
-            /* A missing or damaged browser draft must not hide a server session. */
-          }
-          if (draft?.pendingSave?.settings?.scenes?.length) setPendingSave(draft.pendingSave);
-          const restored = recoverStreamWorkspace(next, draft);
-          if (restored) {
-            setSavedTemplate(restored.savedTemplate);
-            setStreamName(restored.streamName);
-            setForm(restored.form ? normaliseTvSettings(restored.form) : null);
-            setStage(
-              restored.managedId || (restored.form && !nameProblem(restored.streamName, 'stream name'))
-                ? 3
-                : 2,
-            );
-            setRevision(restored.revision);
-            setManagedId(restored.managedId);
-            setBaseline(restored.baseline);
-            setMessage(
-              restored.recoveredLive
-                ? 'An unfinished stream was recovered. Check its inputs or end the stream below.'
-                : 'Setup restored. If you were sharing, reopen that input to start capture again.',
-            );
+          if (presentationWorkspace) {
+            let draft = null;
+            try {
+              draft = JSON.parse(sessionStorage.getItem(key));
+            } catch {
+              /* A missing or damaged browser draft must not hide a server session. */
+            }
+            if (draft?.pendingSave?.settings?.scenes?.length) setPendingSave(draft.pendingSave);
+            const restored = recoverStreamWorkspace(next, draft);
+            if (restored) {
+              setSavedTemplate(restored.savedTemplate);
+              setStreamName(restored.streamName);
+              setForm(restored.form ? normaliseTvSettings(restored.form) : null);
+              setStage(
+                restored.managedId ||
+                  (restored.form && !nameProblem(restored.streamName, 'stream name'))
+                  ? 3
+                  : 2,
+              );
+              setRevision(restored.revision);
+              setManagedId(restored.managedId);
+              setBaseline(restored.baseline);
+              setMessage(
+                restored.recoveredLive
+                  ? 'A presentation is already live. Check its inputs or end the presentation below.'
+                  : 'Presentation draft restored. Reconnect any camera or screen you want to share.',
+              );
+            }
           }
         }
       } catch (error) {
@@ -97,10 +100,12 @@ export default function useStreamSetup(screenId, userId) {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [refresh, key]);
+  }, [refresh, key, presentationWorkspace]);
 
   useEffect(() => {
-    if (!loaded.current) return;
+    // Opening automatic display settings must never create, rewrite or remove
+    // a presentation draft that belongs to a separate editing workspace.
+    if (!presentationWorkspace || !loaded.current) return;
     try {
       if ((!form || stage !== 3) && !pendingSave && !streamName) {
         sessionStorage.removeItem(key);
@@ -124,7 +129,18 @@ export default function useStreamSetup(screenId, userId) {
         'Your browser could not keep this draft. Keep this page open; settings can be saved when ending the stream.',
       );
     }
-  }, [form, stage, revision, managedId, baseline, savedTemplate, pendingSave, streamName, key]);
+  }, [
+    form,
+    stage,
+    revision,
+    managedId,
+    baseline,
+    savedTemplate,
+    pendingSave,
+    streamName,
+    key,
+    presentationWorkspace,
+  ]);
 
   useEffect(() => {
     if (managedId && data && data.presentation?.id !== managedId) {

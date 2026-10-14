@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import usePosters from '@/hooks/usePosters';
+import { useAdminSave } from '@/context/AdminSaveContext';
 
 export default function NormalSettings({ form, update, currentEvents, hall, preset = 'standby' }) {
   const programmes = usePosters();
+  const { dirty, saving } = useAdminSave();
 
   if (preset === 'standby') {
     return (
@@ -11,10 +13,21 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
         <details className="admin-panel">
           <summary>Posters & rotation</summary>
           <p>
-            Choose which posters are available to this display. Their position and size are controlled
-            in the visual layout above.
+            Choose which posters are available to this display. Their position and size are
+            controlled in the visual layout above.
           </p>
-          <Link to="/admin?section=posters">Edit posters & content →</Link>
+          <Link
+            to="/admin?section=posters"
+            onClick={(event) => {
+              if (
+                saving ||
+                (dirty && !window.confirm('Discard unsaved display changes and open posters?'))
+              )
+                event.preventDefault();
+            }}
+          >
+            Edit posters & content →
+          </Link>
           <div className="admin-poster-picker">
             {programmes.map((item) => (
               <label key={item.id}>
@@ -87,14 +100,14 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
   if (!hall)
     return (
       <section className="admin-panel">
-        <p>The Shoe Area uses the standby layout only. Prayer-hall presets are disabled there.</p>
+        <p>The Shoe Area uses the everyday display only.</p>
       </section>
     );
 
   if (preset === 'before')
     return (
       <section className="admin-panel tv-preset-settings">
-        <h3>Before Jama‘ah</h3>
+        <h3>Before prayer</h3>
         <label className="admin-check">
           <input
             type="checkbox"
@@ -104,14 +117,16 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
           Use automatic prayer screens
         </label>
         <label>
-          Show this preset before Jama‘ah
+          Show the reminder before Jama‘ah
           <select
             value={form.jamaah_lead_minutes ?? 1}
             onChange={(event) => update('jamaah_lead_minutes', Number(event.target.value))}
           >
             {[0, 1, 2, 3, 5, 10].map((minutes) => (
               <option key={minutes} value={minutes}>
-                {minutes === 0 ? 'Do not show before Jama‘ah' : `${minutes} minute${minutes === 1 ? '' : 's'} before`}
+                {minutes === 0
+                  ? 'Do not show before Jama‘ah'
+                  : `${minutes} minute${minutes === 1 ? '' : 's'} before`}
               </option>
             ))}
           </select>
@@ -130,10 +145,8 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
   if (preset === 'jamaah')
     return (
       <section className="admin-panel tv-preset-settings">
-        <h3>Jama‘ah screen</h3>
-        <p>
-          This appears from Jama‘ah time until the configured Dhikr start for that prayer.
-        </p>
+        <h3>Prayer in progress</h3>
+        <p>This appears from Jama‘ah time until the configured Dhikr start for that prayer.</p>
         <label>
           Main message
           <input
@@ -181,17 +194,13 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
             </label>
           ))}
         </div>
-        <p className="workspace-meta">
-          The preview above uses the real Dhikr renderer so Arabic spacing and sizing match the TV
-          renderer rather than a separate mock-up.
-        </p>
       </section>
     );
 
   if (preset === 'jummah')
     return (
       <section className="admin-panel tv-preset-settings">
-        <h3>Jummah preset</h3>
+        <h3>Friday prayers</h3>
         <label className="admin-check">
           <input
             type="checkbox"
@@ -254,7 +263,7 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
           onChange={(event) => update('taraweeh_dua', event.target.value)}
         />
       </label>
-      <p>Blank uses Qur’an 2:201. The preview above shows the exact TV notice renderer.</p>
+      <p>Leave blank to use Qur’an 2:201.</p>
     </section>
   );
 }

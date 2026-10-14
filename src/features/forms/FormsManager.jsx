@@ -64,14 +64,31 @@ function useLegacyFormCounts(kindKey) {
   return useAdminRecords(read);
 }
 
-export function FormWorkspace({ formId, initialTab = 'overview', onClose }) {
+export function FormWorkspace({ formId, onClose, registerBack }) {
   const auth = useAuth();
+  const [params, setParams] = useSearchParams();
   const { data: forms, loading, error, reload } = useFormSummaries();
   const form = forms?.find((item) => item.id === formId);
-  const [tab, setTab] = useState(initialTab);
+  const tab = ['overview', 'responses', 'actions'].includes(params.get('tab'))
+    ? params.get('tab')
+    : 'overview';
   const [editor, setEditor] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const closeEditor = useCallback(() => setEditor(null), []);
+  const chooseTab = (next) => {
+    if (tab === next) return;
+    setParams((current) => {
+      const updated = new URLSearchParams(current);
+      updated.set('tab', next);
+      return updated;
+    });
+  };
+  useEffect(() => {
+    if (!registerBack || editor) return undefined;
+    registerBack(onClose);
+    return () => registerBack(null);
+  }, [registerBack, editor, onClose]);
   async function act(work) {
     if (busy) return;
     setBusy(true);
@@ -88,7 +105,8 @@ export function FormWorkspace({ formId, initialTab = 'overview', onClose }) {
     return (
       <CustomFormsBuilder
         definition={editor}
-        onClose={() => setEditor(null)}
+        registerBack={registerBack}
+        onClose={closeEditor}
         onSaved={() => {
           setEditor(null);
           reload();
@@ -129,21 +147,21 @@ export function FormWorkspace({ formId, initialTab = 'overview', onClose }) {
         <button
           className="admin-button"
           aria-pressed={tab === 'overview'}
-          onClick={() => setTab('overview')}
+          onClick={() => chooseTab('overview')}
         >
           Information & people
         </button>
         <button
           className="admin-button"
           aria-pressed={tab === 'responses'}
-          onClick={() => setTab('responses')}
+          onClick={() => chooseTab('responses')}
         >
           Responses ({form.new_count + form.done_count})
         </button>
         <button
           className="admin-button"
           aria-pressed={tab === 'actions'}
-          onClick={() => setTab('actions')}
+          onClick={() => chooseTab('actions')}
         >
           Actions ({form.open_actions})
         </button>
@@ -301,8 +319,8 @@ function EntryTiles({ auth, loading, onChoose, onCreate }) {
     <div className="admin-task-grid forms-entry-tiles">
       <button onClick={() => onChoose({ view: 'forms' })}>
         <FileText />
-        <strong>Live forms</strong>
-        <span>Contact Us, service forms, drafts and closed forms.</span>
+        <strong>All forms</strong>
+        <span>Registration and service forms, including drafts and closed forms.</span>
       </button>
       {(auth.isOwner || auth.can('forms_manage')) && (
         <button onClick={onCreate}>
@@ -377,6 +395,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
   const actionCount = forms.reduce((total, form) => total + Number(form.open_actions || 0), 0);
   const [status, setStatus] = useState('all');
   const listed = forms.filter((form) => status === 'all' || formStatus(form) === status);
+  const showLegacy = status === 'all' || status === 'Live';
 
   return (
     <section className="community-workspace custom-forms-admin">
@@ -405,7 +424,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
       {error && <p role="alert">{error}</p>}
 
       {view === 'home' ? (
-        <p className="mt-4">Choose an area above. Live Forms now opens the form list directly.</p>
+        <p className="mt-4">Choose an area above.</p>
       ) : view === 'schedule' ? (
         <ScheduleManager />
       ) : view === 'forms' ? (
@@ -434,13 +453,15 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
           </label>
           {loading && !data && <p role="status">Loading forms…</p>}
           <div className="content-form-grid">
-            <LegacyFormCards
-              auth={auth}
-              onChoose={onChoose}
-              counts={legacyCounts}
-              loading={legacyLoading}
-              error={legacyError}
-            />
+            {showLegacy && (
+              <LegacyFormCards
+                auth={auth}
+                onChoose={onChoose}
+                counts={legacyCounts}
+                loading={legacyLoading}
+                error={legacyError}
+              />
+            )}
             {listed.map((form) => (
               <button
                 className="admin-panel content-form-card"
@@ -475,8 +496,8 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
               </button>
             ))}
           </div>
-          {!loading && !listed.length && !error && (
-            <p>No custom forms match this view. Existing forms are still shown above.</p>
+          {!loading && !listed.length && !error && (!showLegacy || !legacyKinds.length) && (
+            <p>No forms match this view.</p>
           )}
         </>
       ) : (
@@ -529,17 +550,21 @@ export default function FormsManager({ registerBack }) {
     },
     [dirty, setParams],
   );
+  const closeCreation = useCallback(() => setCreating(false), []);
+  const closeWorkspace = useCallback(() => choose({ view: 'forms' }), [choose]);
   useEffect(() => {
-    if (!registerBack) return undefined;
-    if (creating) registerBack(() => setCreating(false));
-    else if (select || view !== 'forms') registerBack(() => choose({ view: 'forms' }));
+    // Nested editors register their own Back action so their unsaved-change
+    // checks apply to the toolbar as well as their local Close button.
+    if (!registerBack || creating || select) return undefined;
+    if (view !== 'forms') registerBack(() => choose({ view: 'forms' }));
     else registerBack(null);
     return () => registerBack(null);
   }, [registerBack, creating, select, view, choose]);
   if (creating)
     return (
       <CustomFormsBuilder
-        onClose={() => setCreating(false)}
+        registerBack={registerBack}
+        onClose={closeCreation}
         onSaved={(saved) => {
           setCreating(false);
           setParams({ section: 'forms', form: saved.id });
@@ -549,10 +574,10 @@ export default function FormsManager({ registerBack }) {
   if (select)
     return (
       <FormWorkspace
-        key={`${select}:${params.get('tab') || 'overview'}`}
+        key={select}
         formId={select}
-        initialTab={params.get('tab') || 'overview'}
-        onClose={() => choose({ view: 'forms' })}
+        registerBack={registerBack}
+        onClose={closeWorkspace}
       />
     );
   return (

@@ -6,12 +6,12 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('admin forms workspace exposes live forms, responses and schedule as distinct destinations', async () => {
   const source = await read('src/features/forms/FormsManager.jsx');
-  assert.match(source, /<strong>Live forms<\/strong>/);
+  assert.match(source, /<strong>All forms<\/strong>/);
   assert.match(source, /onChoose\(\{ view: 'forms' \}\)/);
   assert.match(source, /<strong>Schedule<\/strong>/);
   assert.match(source, /<ScheduleManager \/>/);
   assert.match(source, /const view = params\.get\('view'\) \|\| 'forms'/);
-  assert.match(source, /Contact Us/);
+  assert.match(source, /Registration and service forms/);
 });
 
 test('service forms are seeded into the existing custom forms engine', async () => {

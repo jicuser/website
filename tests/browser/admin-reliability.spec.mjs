@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { DEFAULT_TV_SETTINGS } from '../../supabase/functions/_shared/tv.js';
 
 const owner = {
   id: '10000000-0000-4000-8000-000000000001', display_name: 'Centre owner',
@@ -10,8 +11,8 @@ const member = {
 };
 
 // Intercept external data only. The application router, Auth provider and editors run unchanged.
-async function openAdmin(page, { actor = owner, section = 'posters', deletionFails = false } = {}) {
-  const errors = [], writes = [];
+async function openAdmin(page, { actor = owner, section = 'posters', deletionFails = false, tvState = null } = {}) {
+  const errors = [], writes = [], tvReads = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
   await page.route('**/*', async route => {
@@ -32,6 +33,12 @@ async function openAdmin(page, { actor = owner, section = 'posters', deletionFai
         refresh_token: 'local-test-only', token_type: 'bearer', expires_in: 3600, expires_at: expires };
     } else if (url.pathname.endsWith('/rpc/get_my_profile')) data = actor;
     else if (url.pathname.endsWith('/profiles')) data = [actor, member];
+    else if (url.pathname.endsWith('/functions/v1/tv-control') && tvState) {
+      const body = route.request().postDataJSON();
+      if (body.action === 'admin') tvReads.push(body.screenId);
+      else writes.push(body);
+      data = { ...tvState, id: body.screenId };
+    }
     else if (url.pathname.endsWith('/functions/v1/manage-user')) {
       const body = route.request().postDataJSON();
       writes.push(body);
@@ -53,7 +60,41 @@ async function openAdmin(page, { actor = owner, section = 'posters', deletionFai
   await expect(page.locator('.admin-toolbar')).toBeVisible();
   await page.goto(`/admin?section=${section}`);
   await expect(page.locator('.admin-toolbar')).toBeVisible();
-  return { errors, writes };
+  return { errors, writes, tvReads };
+}
+
+for (const existingDraft of [false, true]) {
+  test(`automatic display keeps presentation storage untouched (${existingDraft ? 'existing draft' : 'no draft'})`, async ({ page }) => {
+    const key = `jic-stream-workspace:${owner.id}:mens-main`;
+    const settings = structuredClone(DEFAULT_TV_SETTINGS);
+    settings.scene_mode = 'teaching';
+    settings.scenes = [{ id: 'lesson', name: 'Lesson', layers: [{ id: 'clock', type: 'clock', x: 0, y: 0, width: 100, height: 100 }] }];
+    settings.active_scene_id = 'lesson';
+    const draft = existingDraft ? JSON.stringify({
+      form: { ...settings, muted: false }, baseline: settings, managedId: 'live-session',
+      streamName: 'Unpublished lesson', stage: 3, revision: '2026-10-14T09:00:00Z',
+    }) : null;
+    await page.addInitScript(({ key, draft }) => {
+      if (draft) sessionStorage.setItem(key, draft);
+      else sessionStorage.removeItem(key);
+    }, { key, draft });
+    const evidence = await openAdmin(page, { section: 'tv', tvState: {
+      settings, updated_at: '2026-10-14T10:00:00Z', presentation: { id: 'live-session' },
+      templates: [], inputs: [], devices: [], relayConfigured: false,
+    } });
+    await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
+    await expect(page.getByLabel('Layout to edit', { exact: true })).toBeVisible();
+    const readCount = evidence.tvReads.filter(screen => screen === 'mens-main').length;
+    // Automatic settings still poll the server after their initial load.
+    await expect.poll(() => evidence.tvReads.filter(screen => screen === 'mens-main').length,
+      { timeout: 8000 }).toBeGreaterThan(readCount);
+    expect(await page.evaluate(key => sessionStorage.getItem(key), key)).toBe(draft);
+    await page.getByRole('button', { name: 'Back to screens', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Current screens', exact: true })).toBeVisible();
+    expect(await page.evaluate(key => sessionStorage.getItem(key), key)).toBe(draft);
+    expect(evidence.writes).toEqual([]);
+    expect(evidence.errors).toEqual([]);
+  });
 }
 
 for (const width of [320, 390, 1280]) {

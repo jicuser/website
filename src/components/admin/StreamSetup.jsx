@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Radio } from 'lucide-react';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { useAuth } from '@/context/AuthContext';
-import { useRegisterAdminSave } from '@/context/AdminSaveContext';
+import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import usePosters from '@/hooks/usePosters';
 import useStreamSetup from '@/hooks/useStreamSetup';
@@ -32,7 +32,7 @@ function standbySummary(settings = {}) {
   const posters = Array.isArray(settings.poster_ids) ? settings.poster_ids.length : 0;
   if (posters) parts.push(`${posters} poster${posters === 1 ? '' : 's'}`);
   if (settings.include_events) parts.push('event posters');
-  return parts.length ? parts.join(' · ') : 'Blank standby layout';
+  return parts.length ? parts.join(' · ') : 'No everyday content selected';
 }
 
 function ScreenOverview({ onOpen }) {
@@ -70,17 +70,17 @@ function ScreenOverview({ onOpen }) {
         <div>
           <span className="admin-eyebrow">TV & SCREENS</span>
           <h2>Current screens</h2>
-          <p>See what each screen is doing now, then manage its standby display or present.</p>
+          <p>Choose a screen, then edit its automatic display or start a presentation.</p>
         </div>
-        <button
-          className="admin-button"
-          disabled={loading}
-          onClick={() => load()}
-        >
+        <button className="admin-button" disabled={loading} onClick={() => load()}>
           {loading ? 'Checking…' : 'Refresh status'}
         </button>
       </div>
-      {message && <p className="stream-feedback" role="status">{message}</p>}
+      {message && (
+        <p className="stream-feedback" role="status">
+          {message}
+        </p>
+      )}
       <div className="tv-screen-overview-grid">
         {TV_SCREENS.map((screen) => {
           const state = states[screen.id];
@@ -91,40 +91,53 @@ function ScreenOverview({ onOpen }) {
               <div className="tv-screen-overview-title">
                 <div>
                   <strong>{screen.label}</strong>
-                  <span className="content-status">{presenting ? 'Presenting' : 'Standby'}</span>
+                  <span className="content-status">
+                    {data
+                      ? presenting
+                        ? 'Presentation active'
+                        : 'Automatic display'
+                      : loading
+                        ? 'Checking…'
+                        : 'Status unavailable'}
+                  </span>
                 </div>
                 {state?.error && <small>Could not read live status</small>}
               </div>
               <p>
                 {data
                   ? presenting
-                    ? 'A presentation is active. Standby settings are kept underneath it.'
-                    : `Standby: ${standbySummary(data.settings)}`
+                    ? 'A presentation is active. Automatic layouts return when it ends.'
+                    : `Everyday display: ${standbySummary(data.settings)}`
                   : loading
                     ? 'Checking current display…'
-                    : 'Open the screen to manage its standby display.'}
+                    : 'Open the screen to edit its automatic display.'}
               </p>
-              {data?.settings?.prayer_enabled !== false && screen.id !== 'shoe-area' && (
+              {data && data.settings?.prayer_enabled !== false && screen.id !== 'shoe-area' && (
                 <small>Prayer sequence is automatic.</small>
               )}
               <div className="admin-actions">
                 <button className="admin-button" onClick={() => onOpen(screen.id, false, true)}>
-                  Standby display
+                  Edit automatic display
                 </button>
-                {screen.id !== 'shoe-area' && (
-                  presenting ? (
-                    <button className="admin-button primary" onClick={() => onOpen(screen.id, false, false)}>
+                {screen.id !== 'shoe-area' &&
+                  (presenting ? (
+                    <button
+                      className="admin-button primary"
+                      onClick={() => onOpen(screen.id, false, false)}
+                    >
                       Manage live presentation
                     </button>
                   ) : (
-                    <button className="admin-button primary" onClick={() => onOpen(screen.id, true, false)}>
+                    <button
+                      className="admin-button primary"
+                      onClick={() => onOpen(screen.id, true, false)}
+                    >
                       Quick present
                     </button>
-                  )
-                )}
+                  ))}
                 {screen.id !== 'shoe-area' && !presenting && (
                   <button className="admin-button" onClick={() => onOpen(screen.id, false, false)}>
-                    Advanced
+                    Presentation setup
                   </button>
                 )}
               </div>
@@ -138,53 +151,25 @@ function ScreenOverview({ onOpen }) {
 
 export default function StreamSetup({ registerBack }) {
   const { user } = useAuth();
-  const openKey = `jic-stream-open:${user.id}`;
-  const [openHall, setOpenHall] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem(openKey);
-      return TV_SCREENS.some((screen) => screen.id === saved) ? saved : '';
-    } catch {
-      return '';
-    }
-  });
+  const [openHall, setOpenHall] = useState('');
   const [quickStart, setQuickStart] = useState(false);
   const [backgroundOnly, setBackgroundOnly] = useState(false);
+  const closeWorkspace = useCallback(() => {
+    setQuickStart(false);
+    setBackgroundOnly(false);
+    setOpenHall('');
+    window.scrollTo({ top: 0 });
+  }, []);
   const openWorkspace = (screenId, quick = false, background = false) => {
-    try {
-      sessionStorage.setItem(openKey, screenId);
-    } catch {
-      /* Server sessions can still be recovered without browser storage. */
-    }
     setQuickStart(quick);
     setBackgroundOnly(background);
     setOpenHall(screenId);
+    window.scrollTo({ top: 0 });
   };
   const switchScreen = (screenId) => {
-    try {
-      sessionStorage.setItem(openKey, screenId);
-    } catch {
-      /* Storage is optional. */
-    }
     setOpenHall(screenId);
+    window.scrollTo({ top: 0 });
   };
-  useEffect(() => {
-    if (!registerBack) return undefined;
-    if (openHall) {
-      registerBack(() => {
-        setQuickStart(false);
-        setBackgroundOnly(false);
-        setOpenHall('');
-        try {
-          sessionStorage.removeItem(openKey);
-        } catch {
-          /* Storage is optional. */
-        }
-      });
-    } else {
-      registerBack(null);
-    }
-    return () => registerBack(null);
-  }, [registerBack, openHall, openKey]);
   if (openHall)
     return (
       <HallWorkspace
@@ -194,16 +179,8 @@ export default function StreamSetup({ registerBack }) {
         quickStart={quickStart}
         backgroundOnly={backgroundOnly}
         onSwitchScreen={switchScreen}
-        onBack={() => {
-          try {
-            sessionStorage.removeItem(openKey);
-          } catch {
-            /* Storage is optional. */
-          }
-          setQuickStart(false);
-          setBackgroundOnly(false);
-          setOpenHall('');
-        }}
+        onBack={closeWorkspace}
+        registerBack={registerBack}
       />
     );
   return (
@@ -213,10 +190,21 @@ export default function StreamSetup({ registerBack }) {
   );
 }
 
-function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onSwitchScreen, onBack }) {
-  const setup = useStreamSetup(screenId, userId);
+function HallWorkspace({
+  screenId,
+  userId,
+  quickStart,
+  backgroundOnly,
+  onSwitchScreen,
+  onBack,
+  registerBack,
+}) {
+  const setup = useStreamSetup(screenId, userId, {
+    presentationWorkspace: !backgroundOnly && screenId !== 'shoe-area',
+  });
   const { data, form, stage, busy } = setup;
-  const [backgroundOpen, setBackgroundOpen] = useState(backgroundOnly);
+  const { dirty, saving } = useAdminSave();
+  const leaveRef = useRef(null);
   const [nameError, setNameError] = useState('');
   const [targets, setTargets] = useState({});
   const [localStreams, setLocalStreams] = useState({});
@@ -248,48 +236,63 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onSwitchS
     setup.build('Quick presentation');
   }, [quickStart, hall, setup.data, setup.stage, setup.form]);
 
-  useRegisterAdminSave(setup.publish, setup.started && setup.dirty, 'Update live layout');
+  leaveRef.current = () => {
+    if (busy || saving) return;
+    if (backgroundOnly || !hall) {
+      if (dirty && !window.confirm('Discard unsaved display changes and return to screens?'))
+        return;
+    } else if (form) {
+      if (
+        !window.confirm(
+          'Leave this setup and discard unpublished changes? Local camera and screen sharing will stop. An active presentation will remain running.',
+        )
+      )
+        return;
+      setup.discard();
+    }
+    onBack();
+  };
+  useEffect(() => {
+    registerBack?.(() => leaveRef.current());
+    return () => registerBack?.(null);
+  }, [registerBack]);
+
+  useRegisterAdminSave(
+    setup.publish,
+    !backgroundOnly && setup.started && setup.dirty,
+    'Update live layout',
+  );
   return (
     <div className="stream-setup admin-tv-editor">
       <div className="stream-setup-heading">
         <div>
           <span className="admin-eyebrow stream-step-indicator jic-prompt">
             {backgroundOnly
-              ? 'STANDBY DISPLAY'
+              ? 'AUTOMATIC DISPLAY'
               : hall
                 ? setup.started
                   ? 'PRESENTATION LIVE'
                   : quickStart
                     ? 'QUICK PRESENT'
-                    : 'ADVANCED PRESENTATION'
-                : 'STANDBY DISPLAY'}
+                    : 'PRESENTATION SETUP'
+                : 'AUTOMATIC DISPLAY'}
           </span>
           <h2>{screen.label}</h2>
         </div>
         <button
           className="admin-button"
-          disabled={busy}
-          onClick={() => {
-            if (
-              form &&
-              !window.confirm(
-                'Leave this setup? Local camera and screen sharing will stop. End the presentation first if you want to save its settings.',
-              )
-            )
-              return;
-            setup.discard();
-            onBack();
-          }}
+          disabled={busy || saving}
+          onClick={() => leaveRef.current()}
         >
           Back to screens
         </button>
       </div>
-      {setup.message && (
+      {setup.message && (!backgroundOnly || !data) && (
         <p className="stream-feedback" role="status">
           {setup.message}
         </p>
       )}
-      {setup.pendingSave && (
+      {!backgroundOnly && setup.pendingSave && (
         <StreamSaveDialog
           screenId={screenId}
           ended
@@ -303,13 +306,15 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onSwitchS
           }}
           onSaved={() => {
             setup.setPendingSave(null);
-            setup.setMessage('Presentation ended and settings saved. Screens return to the standby display.');
+            setup.setMessage(
+              'Presentation ended and settings saved. Screens return to their automatic display.',
+            );
             setup.refresh().catch((error) => setup.setMessage(`Settings saved. ${error.message}`));
           }}
         />
       )}
       {!data ? (
-        <p>Loading presentation settings…</p>
+        <p>Loading screen settings…</p>
       ) : (
         <>
           {hall && !quickStart && !backgroundOnly && (
@@ -331,31 +336,36 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onSwitchS
               loadBlocked={loadBlocked}
             />
           )}
-          {!quickStart && !backgroundOnly && <details className="admin-panel stream-address">
-            <summary>Display webpage address</summary>
-            <p>
-              Keep this permanent address open on each viewing device. Enter the six-digit code from
-              its corner below after starting your presentation.
-            </p>
-            <a href={url} target="_blank" rel="noreferrer">
-              {url}
-            </a>
-            <button
-              className="admin-button"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(url);
-                  setup.setMessage('Display webpage address copied.');
-                } catch {
-                  setup.setMessage('Select and copy the display webpage address above.');
-                }
-              }}
-            >
-              Copy address
-            </button>
-          </details>}
+          {!quickStart && !backgroundOnly && (
+            <details className="admin-panel stream-address">
+              <summary>Display webpage address</summary>
+              <p>
+                Keep this permanent address open on each viewing device. Enter the six-digit code
+                from its corner below after starting your presentation.
+              </p>
+              <a href={url} target="_blank" rel="noreferrer">
+                {url}
+              </a>
+              <button
+                className="admin-button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    setup.setMessage('Display webpage address copied.');
+                  } catch {
+                    setup.setMessage('Select and copy the display webpage address above.');
+                  }
+                }}
+              >
+                Copy address
+              </button>
+            </details>
+          )}
           {hall && !backgroundOnly && data.presentation && (
-            <section className="admin-panel stream-live-status" aria-label="Active presentation session">
+            <section
+              className="admin-panel stream-live-status"
+              aria-label="Active presentation session"
+            >
               <div className="admin-actions">
                 <Radio size={18} aria-hidden="true" />
                 <strong>Presentation still live</strong>
@@ -559,7 +569,7 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onSwitchS
             />
           )}
           {hall && !backgroundOnly && setup.started && <SessionOutput screenId={screenId} />}
-          {backgroundOnly ? (
+          {(backgroundOnly || !hall) && (
             <BackgroundSettings
               screenId={screenId}
               data={data}
@@ -567,25 +577,6 @@ function HallWorkspace({ screenId, userId, quickStart, backgroundOnly, onSwitchS
               onRefresh={setup.refresh}
               onSwitchScreen={onSwitchScreen}
             />
-          ) : (
-            (stage === 2 || !hall) && (
-              <details
-                className="admin-panel"
-                open={!hall || backgroundOpen}
-                onToggle={(event) => setBackgroundOpen(event.currentTarget.open)}
-              >
-                <summary>Standby display settings</summary>
-                {(backgroundOpen || !hall) && (
-                  <BackgroundSettings
-                    screenId={screenId}
-                    data={data}
-                    currentEvents={currentEvents}
-                    onRefresh={setup.refresh}
-                    onSwitchScreen={onSwitchScreen}
-                  />
-                )}
-              </details>
-            )
           )}
         </>
       )}

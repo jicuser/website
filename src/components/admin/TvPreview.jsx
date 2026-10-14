@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { publicSettings } from '../../../supabase/functions/_shared/tv.js';
+import { tvPresetLabel } from '@/lib/tvEditorLabels';
 
 // Normal drafts use the real display renderer, but never publish or send private sources.
 export default function TvPreview({ screenId, label, settings, previewState = 'standby' }) {
@@ -45,7 +46,7 @@ export default function TvPreview({ screenId, label, settings, previewState = 's
     <div ref={box} className={`admin-tv-preview ${portrait ? 'is-portrait' : ''}`}>
       <iframe
         ref={frame}
-        title={`${label} ${previewState} draft preview`}
+        title={`${label}: ${tvPresetLabel(previewState, settings.preset_names)} draft preview`}
         src={`/tv179/${screenId}?preview=normal`}
         onLoad={send}
         style={{ width: `${baseWidth}px`, height: `${baseHeight}px`, transform: `scale(${scale})` }}

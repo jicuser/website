@@ -13,21 +13,22 @@ import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLo
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import usePosters from '@/hooks/usePosters';
 import useSceneHistory from './useSceneHistory';
-import TvFinalPreview from './TvFinalPreview';
+import TvFinalPreview, { TvScaledPreview } from './TvFinalPreview';
+import { tvPresetLabel } from '@/lib/tvEditorLabels';
 
 const labels = {
   times: 'Prayer timetable',
-  next: 'Next Salah',
-  clock: 'Clock & date',
+  next: 'Next prayer',
+  clock: 'Clock',
   poster: 'Poster',
   'poster-next': 'Poster',
   brand: 'JIC logo',
-  state: 'Preset content',
-  text: 'Notice',
+  state: 'Prayer message',
+  text: 'Text notice',
 };
 
 const prayerStyles = [
-  ['horizontal', 'Across cards'],
+  ['horizontal', 'Prayer cards in a row'],
   ['compact', 'Compact table'],
   ['clock-table', 'Clock + table'],
   ['vertical', 'Vertical table'],
@@ -75,6 +76,7 @@ export default function TvDisplayLayoutEditor({
   const [selected, setSelected] = useState(scene.layers[0]?.id || '');
   const [now, setNow] = useState(() => new Date());
   const [previewOnly, setPreviewOnly] = useState(false);
+  const [editingPosition, setEditingPosition] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [assetMessage, setAssetMessage] = useState('');
   const canvas = useRef(null);
@@ -87,14 +89,21 @@ export default function TvDisplayLayoutEditor({
   }, []);
 
   useEffect(() => {
-    if (!scene.layers.some((item) => item.id === selected))
-      setSelected(scene.layers[0]?.id || '');
+    if (!scene.layers.some((item) => item.id === selected)) setSelected(scene.layers[0]?.id || '');
   }, [scene.id, scene.layers, selected]);
 
   useEffect(() => {
     setPreviewOnly(false);
+    setEditingPosition(false);
     setAssetMessage('');
-  }, [screenId, orientation, preset]);
+    drag.current = null;
+  }, [screenId, orientation, preset, scene.id]);
+
+  useEffect(() => {
+    setAssetMessage('');
+    setEditingPosition(false);
+    drag.current = null;
+  }, [selected]);
 
   const layer = scene.layers.find((item) => item.id === selected) || null;
   const posters = [
@@ -189,7 +198,6 @@ export default function TvDisplayLayoutEditor({
     event.preventDefault();
     event.stopPropagation();
     setSelected(item.id);
-    history.checkpoint(scene);
     const rect = canvas.current?.getBoundingClientRect();
     if (!rect) return;
     drag.current = {
@@ -199,6 +207,7 @@ export default function TvDisplayLayoutEditor({
       startY: event.clientY,
       width: rect.width,
       height: rect.height,
+      started: false,
     };
     event.currentTarget.setPointerCapture?.(event.pointerId);
   }
@@ -206,6 +215,11 @@ export default function TvDisplayLayoutEditor({
   function move(event) {
     const start = drag.current;
     if (!start) return;
+    if (!start.started) {
+      if (Math.hypot(event.clientX - start.startX, event.clientY - start.startY) < 3) return;
+      history.checkpoint(scene);
+      start.started = true;
+    }
     const dx = ((event.clientX - start.startX) / start.width) * 100;
     const dy = ((event.clientY - start.startY) / start.height) * 100;
     const raw = start.resize
@@ -214,10 +228,7 @@ export default function TvDisplayLayoutEditor({
     const fitted = fitRect(raw);
     const grid = event.shiftKey ? 1 : 5;
     const snapped = Object.fromEntries(
-      ['x', 'y', 'width', 'height'].map((key) => [
-        key,
-        Math.round(fitted[key] / grid) * grid,
-      ]),
+      ['x', 'y', 'width', 'height'].map((key) => [key, Math.round(fitted[key] / grid) * grid]),
     );
     updateLayer({ ...start.item, ...fitRect({ ...fitted, ...snapped }) }, false);
   }
@@ -234,7 +245,7 @@ export default function TvDisplayLayoutEditor({
     try {
       const url = await createImageUploader(supabase)(file, `tv-presets/${screenId}`);
       updateLayer({ ...layer, image_url: url, image_fit: layer.image_fit || 'contain' });
-      setAssetMessage('Preset image selected.');
+      setAssetMessage('Image added to this draft. Save changes to show it on the TV.');
     } catch (error) {
       setAssetMessage(error.message);
     } finally {
@@ -251,28 +262,37 @@ export default function TvDisplayLayoutEditor({
     muted: true,
   };
   const sampleTime = prayers.todaysTimes?.jamaah_isha || prayers.todaysTimes?.isha || '8:45 PM';
-  const sampleSequence = !sceneOverride && ['before', 'jamaah', 'dhikr'].includes(preset)
-    ? {
-        name: 'Isha',
-        key: 'isha',
-        time: sampleTime,
-        phase: preset,
-        secondsToJamaah:
-          preset === 'before' ? Math.max(1, (settings.jamaah_lead_minutes || 1) * 60) : 0,
-        dhikrSeconds: preset === 'dhikr' ? 60 : 0,
-      }
-    : null;
+  const sampleSequence =
+    !sceneOverride && ['before', 'jamaah', 'dhikr'].includes(preset)
+      ? {
+          name: 'Isha',
+          key: 'isha',
+          time: sampleTime,
+          phase: preset,
+          secondsToJamaah:
+            preset === 'before' ? Math.max(1, (settings.jamaah_lead_minutes || 1) * 60) : 0,
+          dhikrSeconds: preset === 'dhikr' ? 60 : 0,
+        }
+      : null;
   const presetContent = sampleSequence ? (
-    <TvPrayerScene sequence={sampleSequence} jummahNotice={settings.jummah_notice} settings={settings} />
+    <TvPrayerScene
+      sequence={sampleSequence}
+      jummahNotice={settings.jummah_notice}
+      settings={settings}
+    />
   ) : !sceneOverride && preset === 'jummah' ? (
     <TvSpecialNotice mode="jummah" settings={settings} fasting={null} />
   ) : !sceneOverride && preset === 'ramadan' ? (
     <TvSpecialNotice mode="taraweeh" settings={settings} fasting={null} />
   ) : null;
-  const presetLabel =
-    titleOverride ||
-    settings.preset_names?.[preset] ||
-    (preset === 'standby' ? 'Standby' : preset);
+  const presetLabel = titleOverride || tvPresetLabel(preset, settings.preset_names);
+  const contentLabel = (item, index) =>
+    ['poster', 'poster-next'].includes(item.type)
+      ? posterLabel(item, index)
+      : item.type === 'state'
+        ? `${presetLabel} message`
+        : labels[item.type] || 'Content';
+  const selectedLabel = layer ? contentLabel(layer, scene.layers.indexOf(layer)) : '';
 
   return (
     <section className="tv-layout-editor" aria-label={`${presetLabel} layout editor`}>
@@ -298,114 +318,156 @@ export default function TvDisplayLayoutEditor({
           >
             Redo
           </button>
-          <button
-            type="button"
-            className="admin-button"
-            aria-pressed={previewOnly}
-            onClick={() => setPreviewOnly((value) => !value)}
-          >
-            {previewOnly ? 'Close preview' : 'Preview TV'}
+          <button type="button" className="admin-button" onClick={() => setPreviewOnly(true)}>
+            Full-screen preview
           </button>
         </div>
       </div>
 
+      <div className="tv-layout-selection">
+        <label>
+          Content to edit
+          <select
+            value={selected}
+            onChange={(event) => setSelected(event.target.value)}
+            disabled={!scene.layers.length}
+          >
+            {!scene.layers.length && <option value="">No content yet</option>}
+            {scene.layers.map((item, index) => (
+              <option key={item.id} value={item.id}>
+                {contentLabel(item, index)}
+                {item.hidden ? ' · hidden' : ''}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          className="admin-button"
+          aria-pressed={editingPosition}
+          disabled={!layer || layer.hidden}
+          onClick={() => setEditingPosition((value) => !value)}
+        >
+          {editingPosition ? 'Done positioning' : 'Move & resize'}
+        </button>
+      </div>
+
       <div
         ref={canvas}
-        className={`tv-layout-canvas ${orientation === 'portrait' ? 'is-portrait' : ''} ${previewOnly ? 'is-final-preview' : ''}`}
+        className={`tv-layout-canvas ${orientation === 'portrait' ? 'is-portrait' : ''} ${editingPosition ? 'is-positioning' : ''}`}
       >
-        {!previewOnly && <div className="tv-layout-grid" aria-hidden="true" />}
+        {editingPosition && <div className="tv-layout-grid" aria-hidden="true" />}
         <div className="tv-layout-render" aria-hidden="true">
-          <SceneCanvas
-            preview
-            tv={{ settings: previewSettings, paired: true, inputs: [] }}
-            screenId={screenId}
-            now={now}
-            prayers={prayers}
-            posters={posters}
-            slide={0}
-            onImageError={() => {}}
-            livestream={livestream}
-            presetContent={presetContent}
-          />
+          <TvScaledPreview orientation={orientation}>
+            <SceneCanvas
+              preview
+              tv={{ settings: previewSettings, paired: true, inputs: [] }}
+              screenId={screenId}
+              now={now}
+              prayers={prayers}
+              posters={posters}
+              slide={0}
+              onImageError={() => {}}
+              livestream={livestream}
+              presetContent={presetContent}
+            />
+          </TvScaledPreview>
         </div>
 
-        {!previewOnly &&
+        {editingPosition &&
           scene.layers
-            .filter((item) => !item.hidden)
+            .filter((item) => !item.hidden && item.id === selected)
             .map((item) => (
               <div
                 key={item.id}
                 role="button"
                 tabIndex={0}
-                aria-label={`${labels[item.type] || 'Block'} layout`}
-                aria-pressed={selected === item.id}
+                aria-label={`Move ${selectedLabel}. Use arrow keys to move, or Shift and arrow keys to resize.`}
                 className={`tv-layout-box ${selected === item.id ? 'is-selected' : ''}`}
                 style={{ ...layerStyle(item), zIndex: 20 }}
                 onPointerDown={(event) => begin(event, item)}
                 onPointerMove={move}
                 onPointerUp={finish}
+                onKeyDown={(event) => {
+                  if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key))
+                    return;
+                  event.preventDefault();
+                  const horizontal = ['ArrowLeft', 'ArrowRight'].includes(event.key);
+                  const field = event.shiftKey
+                    ? horizontal
+                      ? 'width'
+                      : 'height'
+                    : horizontal
+                      ? 'x'
+                      : 'y';
+                  const delta = ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 1;
+                  updateLayer({ ...item, ...fitRect({ ...item, [field]: item[field] + delta }) });
+                }}
                 onPointerCancel={() => {
                   drag.current = null;
                 }}
                 onFocus={() => setSelected(item.id)}
               >
-                {selected === item.id && <span>{labels[item.type] || 'Block'}</span>}
                 {selected === item.id && (
                   <span
                     className="tv-layout-resize"
                     aria-hidden="true"
                     onPointerDown={(event) => begin(event, item, true)}
                   >
-                    ↘
+                    <span>↘</span>
                   </span>
                 )}
               </div>
             ))}
       </div>
 
-      {!previewOnly && (
-        <>
-          <div className="tv-layout-controls">
-            {allowBlocks && (
-              <label>
-                Add block
-                <select
-                  value=""
-                  disabled={scene.layers.length >= 12}
+      <p className="tv-layout-help">
+        {editingPosition
+          ? `Positioning: ${selectedLabel}. Drag the outlined area to move it, or drag its corner to resize.`
+          : 'Preview of your draft. Choose content above to edit its settings below.'}
+      </p>
+
+      {editingPosition && layer && (
+        <fieldset className="tv-layout-position">
+          <legend>Position & size (%)</legend>
+          {Object.entries({ x: 'From left', y: 'From top', width: 'Width', height: 'Height' }).map(
+            ([field, name]) => (
+              <label key={field}>
+                {name}
+                <input
+                  type="number"
+                  min={field === 'width' || field === 'height' ? 5 : 0}
+                  max={100}
+                  step={1}
+                  value={Math.round(layer[field])}
                   onChange={(event) => {
-                    addBlock(event.target.value);
-                    event.target.value = '';
+                    if (event.target.value === '') return;
+                    const number = Number(event.target.value);
+                    if (Number.isFinite(number))
+                      updateLayer({ ...layer, ...fitRect({ ...layer, [field]: number }) });
                   }}
-                >
-                  <option value="">Choose…</option>
-                  <option value="poster">Poster</option>
-                  <option value="times">Prayer timetable</option>
-                  <option value="next">Next Salah</option>
-                  <option value="clock">Clock</option>
-                  <option value="brand">JIC logo</option>
-                  <option value="text">Text notice</option>
-                </select>
+                />
               </label>
-            )}
-            <label>
-              Block
-              <select value={selected} onChange={(event) => setSelected(event.target.value)}>
-                {scene.layers.map((item, index) => (
-                  <option key={item.id} value={item.id}>
-                    {['poster', 'poster-next'].includes(item.type) ? posterLabel(item, index) : labels[item.type] || 'Block'}
-                    {item.hidden ? ' · hidden' : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
+            ),
+          )}
+        </fieldset>
+      )}
+
+      {layer && (
+        <>
+          <fieldset className="tv-layout-controls">
+            <legend>{selectedLabel} settings</legend>
 
             {allowBlocks && layer && (
               <label>
-                Shows
-                <select value={layer.type} onChange={(event) => changeBlockType(event.target.value)}>
+                Content type
+                <select
+                  value={layer.type}
+                  onChange={(event) => changeBlockType(event.target.value)}
+                >
                   <option value="poster">Poster</option>
                   <option value="times">Prayer timetable</option>
-                  <option value="next">Next Salah</option>
+                  <option value="next">Next prayer</option>
                   <option value="clock">Clock</option>
                   <option value="brand">JIC logo</option>
                   <option value="text">Text notice</option>
@@ -441,14 +503,16 @@ export default function TvDisplayLayoutEditor({
               </label>
             )}
 
-            {layer && (
+            {layer.type !== 'state' && (
               <button
                 type="button"
                 className="admin-button"
-                onClick={() => updateLayer({ ...layer, hidden: !layer.hidden })}
-                disabled={layer.type === 'state'}
+                onClick={() => {
+                  updateLayer({ ...layer, hidden: !layer.hidden });
+                  setEditingPosition(false);
+                }}
               >
-                {layer.hidden ? 'Show block' : 'Hide block'}
+                {layer.hidden ? 'Show in this layout' : 'Hide in this layout'}
               </button>
             )}
             {allowBlocks && layer && (
@@ -456,92 +520,121 @@ export default function TvDisplayLayoutEditor({
                 type="button"
                 className="admin-button"
                 onClick={() => {
-                  if (window.confirm('Remove this block from the scene?')) removeSelectedBlock();
+                  if (
+                    window.confirm(
+                      `Remove ${selectedLabel} from this layout? You can undo this before saving.`,
+                    )
+                  )
+                    removeSelectedBlock();
                 }}
               >
-                Remove block
+                Remove content
               </button>
             )}
-          </div>
 
-          {['poster', 'poster-next'].includes(layer?.type) && (
-            <label className="tv-layer-content-picker">
-              Poster in this box
-              <select
-                value={selectedPosterId}
-                onChange={(event) =>
-                  updateLayer({
-                    ...layer,
-                    poster_ids: event.target.value ? [event.target.value] : undefined,
-                  })
-                }
-              >
-                <option value="">Rotate automatically</option>
-                {posters.map((poster) => (
-                  <option key={poster.id} value={poster.id}>
-                    {poster.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+            {['poster', 'poster-next'].includes(layer?.type) && (
+              <label className="tv-layer-content-picker">
+                Poster to show
+                <select
+                  value={selectedPosterId}
+                  onChange={(event) =>
+                    updateLayer({
+                      ...layer,
+                      poster_ids: event.target.value ? [event.target.value] : undefined,
+                    })
+                  }
+                >
+                  <option value="">Rotate automatically</option>
+                  {posters.map((poster) => (
+                    <option key={poster.id} value={poster.id}>
+                      {poster.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
 
-          {layer?.type === 'state' && (
-            <div className="tv-state-asset-picker">
-              <strong>Preset artwork</strong>
-              <p>Keep the live preset, or use a JPG/PNG image for this scene.</p>
-              <div className="admin-actions">
-                <label className="admin-button tv-upload-button">
-                  {uploading ? 'Uploading…' : 'Choose JPG / PNG'}
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    disabled={uploading}
-                    onChange={(event) => uploadPresetImage(event.target.files?.[0])}
-                  />
-                </label>
+            {layer?.type === 'state' && (
+              <div className="tv-state-asset-picker">
+                <strong>Prayer message or image</strong>
+                <p>
+                  {layer.image_url
+                    ? 'Your image replaces the automatic prayer message in this area.'
+                    : 'This area shows the automatic prayer message. You can replace it with an image.'}
+                </p>
+                <div className="admin-actions">
+                  <label className="admin-button tv-upload-button">
+                    {uploading ? 'Uploading…' : 'Choose JPG / PNG'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      disabled={uploading}
+                      onChange={(event) => uploadPresetImage(event.target.files?.[0])}
+                    />
+                  </label>
+                  {layer.image_url && (
+                    <button
+                      type="button"
+                      className="admin-button"
+                      onClick={() => updateLayer({ ...layer, image_url: '', image_fit: 'contain' })}
+                    >
+                      Restore prayer message
+                    </button>
+                  )}
+                </div>
                 {layer.image_url && (
-                  <button
-                    type="button"
-                    className="admin-button"
-                    onClick={() => updateLayer({ ...layer, image_url: '', image_fit: 'contain' })}
-                  >
-                    Use live preset
-                  </button>
+                  <label>
+                    Image fit
+                    <select
+                      value={layer.image_fit || 'contain'}
+                      onChange={(event) => updateLayer({ ...layer, image_fit: event.target.value })}
+                    >
+                      <option value="contain">Fit whole image</option>
+                      <option value="cover">Fill box</option>
+                    </select>
+                  </label>
                 )}
+                {assetMessage && <p role="status">{assetMessage}</p>}
               </div>
-              {layer.image_url && (
-                <label>
-                  Image fit
-                  <select
-                    value={layer.image_fit || 'contain'}
-                    onChange={(event) => updateLayer({ ...layer, image_fit: event.target.value })}
-                  >
-                    <option value="contain">Fit whole image</option>
-                    <option value="cover">Fill box</option>
-                  </select>
-                </label>
-              )}
-              {assetMessage && <p role="status">{assetMessage}</p>}
-            </div>
-          )}
-
-          <button
-            type="button"
-            className="admin-button tv-reset-layout"
-            onClick={() => {
-              if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
-              const reset = resetScene
-                ? cloneScene(resetScene)
-                : defaultScene(orientation, preset);
-              commitScene(reset);
-              setSelected(reset.layers[0]?.id || '');
-            }}
-          >
-            Reset this {orientation} layout
-          </button>
+            )}
+          </fieldset>
         </>
       )}
+
+      {allowBlocks && (
+        <label className="tv-layout-add-content">
+          Add content to this layout
+          <select
+            value=""
+            disabled={scene.layers.length >= 12}
+            onChange={(event) => addBlock(event.target.value)}
+          >
+            <option value="">Choose content to add…</option>
+            <option value="poster">Poster</option>
+            <option value="times">Prayer timetable</option>
+            <option value="next">Next prayer</option>
+            <option value="clock">Clock</option>
+            <option value="brand">JIC logo</option>
+            <option value="text">Text notice</option>
+          </select>
+          {scene.layers.length >= 12 && (
+            <small>This layout has the maximum of 12 content items.</small>
+          )}
+        </label>
+      )}
+
+      <button
+        type="button"
+        className="admin-button tv-reset-layout"
+        onClick={() => {
+          if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
+          const reset = resetScene ? cloneScene(resetScene) : defaultScene(orientation, preset);
+          commitScene(reset);
+          setSelected(reset.layers[0]?.id || '');
+        }}
+      >
+        Restore default layout
+      </button>
 
       <TvFinalPreview
         open={previewOnly}

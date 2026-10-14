@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { FIELD_TYPES, validateDraft } from '@/lib/customForms';
 import { checked, Field } from './shared';
@@ -25,7 +25,7 @@ const initial = () => ({
   },
 });
 
-export default function CustomFormsBuilder({ definition, initialDraft = {}, onClose, onSaved }) {
+export default function CustomFormsBuilder({ definition, initialDraft = {}, onClose, onSaved, registerBack }) {
   const [draft, setDraft] = useState(() =>
     definition
       ? { ...definition, manager_ids: [], responsible_ids: [], watcher_ids: [] }
@@ -40,7 +40,14 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
   const [preview, setPreview] = useState(false);
   const [previewAnswers, setPreviewAnswers] = useState({});
   const patch = (value) => { setDirty(true); setDraft((current) => ({ ...current, ...value })); };
-  const close = () => { if (!dirty || window.confirm('Discard unsaved form changes?')) onClose(); };
+  const close = useCallback(() => {
+    if (!busy && (!dirty || window.confirm('Discard unsaved form changes?'))) onClose();
+  }, [busy, dirty, onClose]);
+  useEffect(() => {
+    if (!registerBack) return undefined;
+    registerBack(close);
+    return () => registerBack(null);
+  }, [registerBack, close]);
   useEffect(() => {
     const warn = event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } };
     window.addEventListener('beforeunload', warn);

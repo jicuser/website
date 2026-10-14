@@ -57,7 +57,7 @@ const SECTIONS = [
   ['announcements', 'Notices', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
   ['tv', 'TV & screens', Monitor, 'tv'],
-  ['content', 'Website', FileText, 'content'],
+  ['content', 'Website pages', FileText, 'content'],
   ['team', 'Team profiles', Users, 'team'],
   ['messages', 'Messages', MessageSquare, 'forms_contact'],
   ['forms', 'Forms', FileText, 'forms'],
@@ -65,7 +65,22 @@ const SECTIONS = [
   ['audit', 'Audit log', Activity, 'audit'],
 ];
 const SECTION_GROUPS = [
-  ['Manage', ['dashboard', 'content', 'team', 'posters', 'events', 'announcements', 'messages', 'forms', 'prayer', 'tv', 'livestream']],
+  [
+    'Manage',
+    [
+      'dashboard',
+      'content',
+      'team',
+      'posters',
+      'events',
+      'announcements',
+      'messages',
+      'forms',
+      'prayer',
+      'tv',
+      'livestream',
+    ],
+  ],
   ['People & system', ['users', 'audit']],
 ];
 
@@ -142,13 +157,7 @@ function DashboardSection({ onChoose }) {
       MessageSquare,
       'forms_contact',
     ],
-    [
-      'forms',
-      'Forms',
-      'Registration forms, responses and assigned actions.',
-      FileText,
-      'forms',
-    ],
+    ['forms', 'Forms', 'Registration forms, responses and assigned actions.', FileText, 'forms'],
     ['users', 'Staff access', 'Choose who can edit and control TVs.', Users, 'users'],
   ].filter(([, , , , permission]) => can(permission));
   return (
@@ -163,7 +172,7 @@ function DashboardSection({ onChoose }) {
         {can('content') && (
           <button type="button" onClick={() => onChoose('content')}>
             <Home />
-            <strong>Website content</strong>
+            <strong>Website pages</strong>
             <span>Edit page text, pictures, sections and programme pages.</span>
           </button>
         )}
@@ -796,14 +805,15 @@ export default function AdminPage() {
   const setActive = (key) => setParams({ section: key });
 
   const chooseSection = (key) => {
+    if (saving) return;
     if (key === active || !allowed.some((item) => item[0] === key)) return;
-    if (dirty && active !== 'tv' && !window.confirm('Discard unsaved changes?')) return;
+    if (dirty && !window.confirm('Discard unsaved changes?')) return;
     setSectionBack(null);
     setActive(key);
   };
   const safeSignOut = async () => {
-    if (dirty && active !== 'tv' && !window.confirm('Sign out and discard unsaved changes?'))
-      return;
+    if (saving) return;
+    if (dirty && !window.confirm('Sign out and discard unsaved changes?')) return;
     await signOut();
   };
 
@@ -851,15 +861,20 @@ export default function AdminPage() {
           </button>
           <button
             className="admin-button"
+            disabled={saving}
             onClick={() => {
-              if (!dirty || active === 'tv' || window.confirm('Discard unsaved changes?'))
-                navigate('/');
+              if (!dirty || window.confirm('Discard unsaved changes?')) navigate('/');
             }}
           >
             <Home size={18} />
-            Website
+            View website
           </button>
-          <button className="admin-button" onClick={safeSignOut} aria-label="Sign out">
+          <button
+            className="admin-button"
+            disabled={saving}
+            onClick={safeSignOut}
+            aria-label="Sign out"
+          >
             <LogOut size={18} />
             <span>Sign out</span>
           </button>
@@ -883,6 +898,7 @@ export default function AdminPage() {
           <nav className="admin-mobile-section" aria-label="Current admin section">
             <button
               className="admin-mobile-back"
+              disabled={saving}
               onClick={() => (sectionBack ? sectionBack() : chooseSection('dashboard'))}
             >
               <ArrowLeft size={17} /> Back
@@ -890,7 +906,11 @@ export default function AdminPage() {
             <strong className="admin-mobile-current">
               {allowed.find(([key]) => key === active)?.[1] || 'Admin'}
             </strong>
-            <button className="admin-mobile-overview" onClick={() => chooseSection('dashboard')}>
+            <button
+              className="admin-mobile-overview"
+              disabled={saving}
+              onClick={() => chooseSection('dashboard')}
+            >
               Overview
             </button>
           </nav>
@@ -908,6 +928,7 @@ export default function AdminPage() {
                     .map(([key, name, Icon]) => (
                       <button
                         key={key}
+                        disabled={saving}
                         onClick={() => chooseSection(key)}
                         aria-current={active === key ? 'page' : undefined}
                       >
