@@ -1,22 +1,37 @@
-import React, { useEffect, useId, useRef } from 'react';
+import React, { useLayoutEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { lockPageScroll } from '@/lib/pageScrollLock';
 
 export default function ImageViewer({ image, onClose, children }) {
   const dialog = useRef(null);
   const heading = useId();
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = dialog.current;
-    const previousOverflow = document.body.style.overflow;
-    node.showModal();
-    document.body.style.overflow = 'hidden';
+    const opener = document.activeElement;
+    const unlock = lockPageScroll();
+    try {
+      node.showModal();
+    } catch (error) {
+      unlock();
+      throw error;
+    }
     return () => {
       node.close();
-      document.body.style.overflow = previousOverflow;
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
+      unlock();
     };
   }, []);
   return createPortal(
-    <dialog ref={dialog} className="jic-image-viewer" aria-labelledby={heading} onCancel={onClose}>
+    <dialog
+      ref={dialog}
+      className="jic-image-viewer"
+      aria-labelledby={heading}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+    >
       <div className="jic-image-viewer-heading">
         <h2 id={heading}>{image.title}</h2>
         <button type="button" onClick={onClose} aria-label="Close image preview" autoFocus>

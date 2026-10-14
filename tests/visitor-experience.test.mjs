@@ -306,7 +306,7 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
     assert.ok(calls.some(([text]) => text === 'October 2026 Prayer Times'));
     assert.ok(calls.some(([text]) => text === '31'));
     const model = buildMonthlyTimetable(rows);
-    const timeCalls = calls.filter(([, , y]) => y > 650 && y < 2510);
+    const timeCalls = calls.filter(([, , y]) => y > 590 && y < 2510);
     assert.equal(timeCalls.filter(([text]) => text === '5:15').length, 31);
     assert.equal(
       model.rows.filter((row) => row.cells.find((cell) => cell.key === 'fajr_jamah').value === '—')
@@ -315,11 +315,17 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
     );
     assert.ok(timeCalls.filter(([text]) => text === '—').length >= 31);
     assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1290 && y >= 300 && y < 2796));
+    assert.ok(
+      calls.every(([text]) => !/12-hour|Gold rows|same time as above|Adhan time shown/.test(text)),
+    );
     calls.length = 0;
     assert.equal(createMonthlyTimetableCanvas(rows, 'October 2026'), canvas);
     assert.equal(canvas.width, 1800);
     assert.equal(canvas.height, 2220);
     assert.ok(calls.some(([text]) => text === '31'));
+    assert.ok(
+      calls.every(([text]) => !/12-hour|Gold rows|same time as above|Adhan time shown/.test(text)),
+    );
     assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1800 && y >= 0 && y < 2220));
   } finally {
     if (previous === undefined) delete globalThis.document;

@@ -160,10 +160,6 @@ export default function WallpaperDownload({ monthlyPrayerTimes, currentMonth, ju
       {problem && !preview && <p role="alert">{problem}</p>}
       {preview && (
         <ImageViewer image={preview} onClose={() => setPreviewKey('')}>
-          <p>
-            Download saves a JPEG to your browser’s downloads. On iPhone, use Share / Save to save
-            to Photos, or open the image and press and hold it.
-          </p>
           {problem && <p role="alert">{problem}</p>}
           {preview.canShare && (
             <button type="button" onClick={share}>

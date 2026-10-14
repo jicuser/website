@@ -141,7 +141,11 @@
   color: var(--jic-text-secondary);
 }
 html[data-theme] .jic-image-viewer {
-  width: min(900px, calc(100vw - 24px));
+  box-sizing: border-box;
+  width: min(900px, calc(100% - 24px));
+  max-width: calc(100% - 24px);
+  min-width: 0;
+  max-height: calc(100vh - 24px);
   max-height: calc(100dvh - 24px);
   margin: auto;
   padding: 0;
@@ -149,8 +153,13 @@ html[data-theme] .jic-image-viewer {
   border-radius: 16px;
   background: var(--jic-surface);
   color: var(--jic-text);
-  overflow: auto;
+  overflow: hidden;
+  overscroll-behavior: contain;
   box-shadow: 0 24px 80px #0007;
+}
+.jic-image-viewer[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 .jic-image-viewer::backdrop {
   background: #000b;
@@ -169,6 +178,8 @@ html[data-theme] .jic-image-viewer {
   border-bottom: 1px solid var(--jic-border);
 }
 .jic-image-viewer-heading h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 18px;
   line-height: 1.3;
   font-weight: 650;
@@ -183,11 +194,16 @@ html[data-theme] .jic-image-viewer {
   border-radius: 10px;
 }
 .jic-image-viewer-scroll {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   padding: 12px;
   background: var(--jic-bg-secondary);
 }
 .jic-image-viewer-scroll img {
-  width: auto;
+  display: block;
+  width: 100%;
   height: auto;
   max-width: 100%;
   max-height: 66dvh;
@@ -197,6 +213,11 @@ html[data-theme] .jic-image-viewer {
   user-select: auto;
 }
 .jic-image-viewer-actions {
+  min-width: 0;
+  max-height: 40vh;
+  max-height: 40dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -212,6 +233,8 @@ html[data-theme] .jic-image-viewer {
 }
 .jic-image-viewer-actions :is(a, button),
 .jic-wallpaper-control > :is(a, button) {
+  max-width: 100%;
+  white-space: normal;
   display: inline-flex;
   align-items: center;
   justify-content: center;

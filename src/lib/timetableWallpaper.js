@@ -62,22 +62,11 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
     weight: 700,
     maxWidth: tableWidth,
   });
-  drawText(
-    ctx,
-    'Birmingham · Start / Jamat · 12-hour times',
-    middle,
-    brandY + (phone ? 120 : 130),
-    {
-      size: phone ? 25 : 29,
-      color: colors.muted,
-    },
-  );
-
-  const top = phone ? 530 : 250;
+  const top = phone ? 470 : 190;
   const groupHeight = phone ? 74 : 78;
   const labelHeight = phone ? 46 : 54;
   const body = top + groupHeight + labelHeight;
-  // Reserve room for the legend and next Jummah even in a 31-day month.
+  // Reserve room for Jummah and the website address even in a 31-day month.
   const rowHeight = Math.min(
     phone ? 60 : 52,
     Math.floor((canvas.height - body - 225) / timetable.rows.length),
@@ -171,20 +160,8 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
   drawRule(ctx, left + tableWidth, top, left + tableWidth, end);
   drawRule(ctx, left, body, left + tableWidth, body);
 
-  let footerY = end + 48;
-  drawText(ctx, '" = same time as above · Gold rows = Friday', middle, footerY, {
-    size: phone ? 26 : 30,
-    color: colors.muted,
-  });
-  if (timetable.combinedMaghrib) {
-    footerY += 40;
-    drawText(ctx, 'Maghrib Jamat is at the Adhan time shown.', middle, footerY, {
-      size: phone ? 24 : 28,
-      color: colors.muted,
-    });
-  }
+  const footerY = end + 48;
   if (jummahTimes?.length) {
-    footerY += 44;
     drawText(
       ctx,
       `Next Jummah · ${jummahTimes.map((time) => `${time.name}: ${time.prayer}`).join(' · ')}`,

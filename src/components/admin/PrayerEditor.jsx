@@ -128,7 +128,7 @@ export default function PrayerEditor() {
       if (dirtyJummah) await saveJummah();
       if (dirtyDay) await saveDay();
       notifyUpdated();
-      setMessage('Saved to database.');
+      setMessage('Timetable saved.');
     } catch (saveError) {
       setError(saveError.message);
       throw saveError;
@@ -144,7 +144,7 @@ export default function PrayerEditor() {
     try {
       await task();
       notifyUpdated();
-      setMessage('Saved to database.');
+      setMessage('Timetable saved.');
     } catch (saveError) {
       setError(saveError.message);
     } finally {

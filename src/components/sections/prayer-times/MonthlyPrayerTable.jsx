@@ -27,7 +27,6 @@ export default function MonthlyPrayerTable({
           <h3>
             {currentMonth} {year} Prayer Times
           </h3>
-          <p>12-hour times · Gold rows: Friday · &quot; means the same time as above</p>
         </div>
       </header>
       {timetable.rows.length === 0 ? (
@@ -137,7 +136,6 @@ export default function MonthlyPrayerTable({
             </table>
           </div>
           <div className="monthly-timetable-notes">
-            {timetable.combinedMaghrib && <p>Maghrib Jama‘ah is at the Adhan time shown.</p>}
             {jummahTimes.length > 0 && (
               <p>
                 <strong>Next Jummah</strong>
