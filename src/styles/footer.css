@@ -1,4 +1,4 @@
-/* Footer layout owner. Theme colours and glass materials remain shared. */
+/* Footer geometry lives here; colours and glass materials are shared. */
 .jic-site-footer {
   border-top: 1px solid var(--jic-border);
   color: var(--jic-text);
@@ -8,22 +8,104 @@
   gap: 12px;
   width: min(100%, 1200px);
   margin-inline: auto;
-  padding: 18px 16px 8px;
+  padding: 16px;
 }
-.jic-footer-brand {
+.jic-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 12px;
+  min-width: 0;
+}
+.jic-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 4px 0;
+  border-radius: 4px;
+  color: var(--jic-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.jic-footer-links a:hover,
+.jic-footer-legal a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.jic-footer-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+.jic-footer-icons {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  width: 100%;
+  max-width: 428px;
+  min-width: 0;
+}
+.jic-footer-icons a {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 44px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  background: var(--jic-glass-control);
+  color: var(--jic-text);
+}
+.jic-footer-icons a svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+.jic-footer-icons a:hover {
+  border-color: var(--jic-gold);
+}
+.jic-footer-donate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 8px 20px;
+  --jic-button-tint: #d1d5db;
+  --jic-button-ink: #111827;
+  border: 1px solid var(--jic-button-tint);
+  border-radius: 8px;
+  background: var(--jic-button-tint);
+  color: var(--jic-button-ink);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+.jic-footer-bottom {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: center;
+  gap: 12px;
   min-width: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--jic-border);
 }
 .jic-footer-signature {
   display: flex;
   align-items: center;
-  flex: 0 1 132px;
-  min-width: 0;
+  flex: 0 0 64px;
   min-height: 44px;
-  border-radius: 8px;
+  border-radius: 4px;
 }
 .jic-footer-signature .brand-lockup,
 .jic-footer-signature img {
@@ -32,148 +114,43 @@
   height: auto;
   margin: 0;
 }
-.jic-footer-content {
-  display: grid;
-  align-content: start;
-  gap: 6px;
-  min-width: 0;
-}
-.jic-footer-links-inline {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 12px;
-  min-width: 0;
-}
-.jic-footer-links-inline a {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  min-height: 44px;
-  padding: 6px 4px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--jic-text);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
-  text-align: left;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-.jic-footer-links-inline a:hover,
-.jic-footer-legal a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.jic-footer-actions-compact {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-  min-width: 0;
-}
-.jic-footer-socials,
-.jic-footer-contact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  min-width: 0;
-  max-width: 100%;
-}
-.jic-footer-socials a,
-.jic-footer-contact a {
-  display: grid;
-  place-items: center;
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--jic-border);
-  border-radius: 10px;
-  background: var(--jic-glass-control);
-  color: var(--jic-text);
-}
-.jic-footer-socials a svg,
-.jic-footer-contact a svg {
-  flex-shrink: 0;
-}
-.jic-footer-socials a:hover,
-.jic-footer-contact a:hover {
-  border-color: var(--jic-gold);
-}
-.jic-footer-donate {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  min-width: 0;
-  min-height: 44px;
-  padding: 10px 20px;
-  --jic-button-tint: #d1d5db;
-  --jic-button-ink: #111827;
-  border: 1px solid var(--jic-button-tint);
-  border-radius: 14px;
-  background: var(--jic-button-tint);
-  color: var(--jic-button-ink);
-  font-size: 15px;
-  font-weight: 800;
-}
-.jic-footer-bottom {
-  min-width: 0;
-  padding-top: 8px;
-  border-top: 1px solid var(--jic-border);
-}
 .jic-footer-legal {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
   gap: 0 8px;
+  min-width: 0;
   margin: 0;
   color: var(--jic-text-secondary);
   font-size: 0.75rem;
   line-height: 1.5;
+  text-align: center;
+}
+.jic-footer-privacy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 .jic-footer-legal a {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding-inline: 4px;
+  min-height: 32px;
   border-radius: 4px;
 }
 .jic-site-footer :is(a, button):focus-visible {
   outline: 2px solid var(--jic-gold);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
-@media (min-width: 768px) {
+@media (min-width: 600px) {
   .jic-footer-inner {
-    grid-template-columns: 132px minmax(0, 1fr);
-    gap: 12px 24px;
-    padding: 18px 24px 8px;
+    padding-inline: 24px;
   }
-  .jic-footer-brand {
-    flex-direction: column;
-    justify-content: flex-start;
+  .jic-footer-links {
+    column-gap: 16px;
+  }
+  .jic-footer-actions {
+    flex-direction: row;
     gap: 12px;
-  }
-  .jic-footer-signature {
-    flex: 0 0 auto;
-    width: 132px;
-  }
-  .jic-footer-donate {
-    flex: 0 0 auto;
-    width: auto;
-  }
-  .jic-footer-links-inline {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 0 16px;
-    max-width: 700px;
-  }
-  .jic-footer-bottom {
-    grid-column: 1 / -1;
-  }
-  .jic-footer-legal {
-    justify-content: center;
   }
 }
