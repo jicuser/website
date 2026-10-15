@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CalendarDays, Clock3, Plus, Save, Trash2, X } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
+import { courseInput, hallInput, saveScheduleRecord } from '@/lib/scheduleInput';
 
 const WEEKDAYS = [
   [1, 'Monday'],
@@ -34,11 +35,6 @@ function normaliseTime(value) {
   return value ? String(value).slice(0, 5) : '';
 }
 
-function validateTimes(start, end) {
-  if (start && end && end <= start) return 'End time must be after start time.';
-  return '';
-}
-
 function CoursePlanner({ rows }) {
   const byDay = useMemo(
     () =>
@@ -61,7 +57,9 @@ function CoursePlanner({ rows }) {
         <div>
           <span className="admin-eyebrow">AUTO PLANNER</span>
           <h3 id="weekly-course-planner">Weekly course & class planner</h3>
-          <p>Any active course with an assigned day appears here automatically. Do not add it twice.</p>
+          <p>
+            Any active course with an assigned day appears here automatically. Do not add it twice.
+          </p>
         </div>
       </div>
       <div className="content-summary-grid">
@@ -100,16 +98,28 @@ export default function ScheduleManager() {
   const [error, setError] = useState('');
 
   const load = useCallback(async () => {
+    if (!canManage) return;
     setError('');
-    const [courseResult, hallResult] = await Promise.all([
-      supabase.from('course_schedule').select('*').order('day_of_week').order('start_time'),
-      supabase.from('hall_bookings').select('*').order('booking_date').order('start_time'),
-    ]);
-    if (courseResult.error) setError(courseResult.error.message);
-    if (hallResult.error) setError((current) => current || hallResult.error.message);
-    setCourses(courseResult.data || []);
-    setHallRows(hallResult.data || []);
-  }, []);
+    try {
+      const [courseResult, hallResult] = await Promise.all([
+        supabase
+          .from('course_schedule')
+          .select('id,title,day_of_week,start_time,end_time,location,active,planner_visible')
+          .order('day_of_week')
+          .order('start_time'),
+        supabase
+          .from('hall_bookings')
+          .select('id,booking_date,start_time,end_time,status')
+          .order('booking_date', { ascending: false })
+          .order('start_time'),
+      ]);
+      if (courseResult.error || hallResult.error) throw new Error('load');
+      setCourses(courseResult.data || []);
+      setHallRows(hallResult.data || []);
+    } catch {
+      setError('The schedule could not be loaded. Check your access and connection, then refresh.');
+    }
+  }, [canManage]);
 
   useEffect(() => {
     void load();
@@ -117,79 +127,70 @@ export default function ScheduleManager() {
 
   async function saveCourse(event) {
     event.preventDefault();
+    if (!canManage || busy) return;
     setMessage('');
     setError('');
-    if (!course.title.trim()) {
-      setError('Add a course or class name.');
-      return;
-    }
-    const timeProblem = validateTimes(course.start_time, course.end_time);
-    if (timeProblem) {
-      setError(timeProblem);
+    try {
+      courseInput(course);
+    } catch (failure) {
+      setError(failure.message);
       return;
     }
     setBusy(true);
-    const payload = {
-      ...course,
-      title: course.title.trim(),
-      day_of_week: Number(course.day_of_week),
-      start_time: course.start_time || null,
-      end_time: course.end_time || null,
-      location: course.location.trim() || 'Jamatia Islamic Centre',
-    };
-    const result = editingCourse
-      ? await supabase.from('course_schedule').update(payload).eq('id', editingCourse)
-      : await supabase.from('course_schedule').insert(payload);
-    setBusy(false);
-    if (result.error) {
-      setError(result.error.message);
-      return;
+    try {
+      await saveScheduleRecord(supabase, 'course_schedule', editingCourse, course);
+      setCourse(blankCourse);
+      setEditingCourse(null);
+      setMessage('Course schedule saved. The weekly planner has been updated.');
+      await load();
+    } catch {
+      setError('The course was not saved. Check your access and connection, then try again.');
+    } finally {
+      setBusy(false);
     }
-    setCourse(blankCourse);
-    setEditingCourse(null);
-    setMessage('Course schedule saved. The weekly planner has been updated.');
-    await load();
   }
 
   async function saveHall(event) {
     event.preventDefault();
+    if (!canManage || busy) return;
     setMessage('');
     setError('');
-    if (!hall.booking_date) {
-      setError('Choose the hall date.');
-      return;
-    }
-    const timeProblem = validateTimes(hall.start_time, hall.end_time);
-    if (timeProblem) {
-      setError(timeProblem);
+    try {
+      hallInput(hall);
+    } catch (failure) {
+      setError(failure.message);
       return;
     }
     setBusy(true);
-    const payload = {
-      ...hall,
-      start_time: hall.start_time || null,
-      end_time: hall.end_time || null,
-    };
-    const result = editingHall
-      ? await supabase.from('hall_bookings').update(payload).eq('id', editingHall)
-      : await supabase.from('hall_bookings').insert(payload);
-    setBusy(false);
-    if (result.error) {
-      setError(result.error.message);
-      return;
+    try {
+      await saveScheduleRecord(supabase, 'hall_bookings', editingHall, hall);
+      setHall(blankHall);
+      setEditingHall(null);
+      setMessage('Hall availability saved. An enquiry is not a confirmed booking.');
+      await load();
+    } catch {
+      setError('The hall status was not saved. Check your access and connection, then try again.');
+    } finally {
+      setBusy(false);
     }
-    setHall(blankHall);
-    setEditingHall(null);
-    setMessage('Hall availability saved. The public hall calendar will use this status.');
-    await load();
   }
 
   async function remove(table, id, label) {
+    if (!canManage || busy || !['course_schedule', 'hall_bookings'].includes(table)) return;
     if (!window.confirm(`Delete this ${label}?`)) return;
     setError('');
-    const { error: failure } = await supabase.from(table).delete().eq('id', id);
-    if (failure) setError(failure.message);
-    else await load();
+    setMessage('');
+    setBusy(true);
+    try {
+      const result = await supabase.from(table).delete().eq('id', id).select('id').single();
+      if (result.error || !result.data?.id) throw new Error('delete');
+      setMessage(`${label} deleted.`);
+      await load();
+    } catch {
+      setError('Nothing was deleted. Check your access and connection, then try again.');
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (!canManage)
@@ -242,6 +243,7 @@ export default function ScheduleManager() {
               Course or class
               <input
                 value={course.title}
+                maxLength={160}
                 onChange={(event) => setCourse({ ...course, title: event.target.value })}
                 required
               />
@@ -250,7 +252,9 @@ export default function ScheduleManager() {
               Day
               <select
                 value={course.day_of_week}
-                onChange={(event) => setCourse({ ...course, day_of_week: Number(event.target.value) })}
+                onChange={(event) =>
+                  setCourse({ ...course, day_of_week: Number(event.target.value) })
+                }
               >
                 {WEEKDAYS.map(([value, label]) => (
                   <option key={value} value={value}>
@@ -281,6 +285,7 @@ export default function ScheduleManager() {
               Location
               <input
                 value={course.location}
+                maxLength={240}
                 onChange={(event) => setCourse({ ...course, location: event.target.value })}
               />
             </label>
@@ -444,7 +449,10 @@ export default function ScheduleManager() {
                 </div>
               ))
             ) : (
-              <p>No hall dates have been set yet. Unlisted dates show as available once the live schedule is enabled.</p>
+              <p>
+                No hall dates have been set yet. Unlisted dates show as available once the live
+                schedule is enabled.
+              </p>
             )}
           </div>
         </section>

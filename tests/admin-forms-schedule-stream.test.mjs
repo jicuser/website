@@ -56,7 +56,7 @@ test('presentation status is server-derived and quick present skips the naming s
 test('public service pages link to the requested forms', async () => {
   const hall = await read('src/pages/HallBookingPage.jsx');
   const services = await read('src/components/sections/services/ReligiousServicesTab.jsx');
-  assert.match(hall, /to="\/forms\/hall-booking"/);
+  assert.match(hall, /\/forms\/hall-booking/);
   assert.match(services, /\/forms\/nikah-enquiry/);
   assert.match(services, /\/forms\/funeral-enquiry/);
 });

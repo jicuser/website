@@ -1,4 +1,12 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ArrowLeft,
   ChevronDown,
@@ -15,10 +23,10 @@ import {
   X,
   ExternalLink,
   Search,
+  Clock3,
 } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
-import WonderfulDonationModal from '@/components/donations/WonderfulDonationModal';
 import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
@@ -33,6 +41,8 @@ import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
+const WonderfulDonationModal = lazy(() => import('@/components/donations/WonderfulDonationModal'));
+
 export default function UnifiedHeader() {
   const { pathname, key: routeKey } = useLocation();
   const navigate = useNavigate();
@@ -46,6 +56,7 @@ export default function UnifiedHeader() {
     menuRef = useRef(null),
     quickMenuRef = useRef(null),
     quickMenuButtonRef = useRef(null),
+    actionsSlotRef = useRef(null),
     menuCloseRef = useRef(null),
     subnavRef = useRef(null);
   const [playing, setPlaying] = useState(false),
@@ -54,7 +65,8 @@ export default function UnifiedHeader() {
   const [menuOpen, setMenuOpen] = useState(false),
     [donationOpen, setDonationOpen] = useState(false);
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
-  const prayerDockHidden = usePrayerDockVisibility(
+  const [actionsFloating, setActionsFloating] = useState(false);
+  const { hidden: prayerDockHidden, toggle: togglePrayerDock } = usePrayerDockVisibility(
     prayerDockRef,
     routeKey,
     menuOpen || donationOpen || quickMenuOpen,
@@ -76,6 +88,15 @@ export default function UnifiedHeader() {
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
+
+  useEffect(() => {
+    if (!window.IntersectionObserver || !actionsSlotRef.current) return undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      setActionsFloating(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+    });
+    observer.observe(actionsSlotRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Close when navigation commits, so a slow page cannot expose the old screen.
   useLayoutEffect(() => {
@@ -245,6 +266,7 @@ export default function UnifiedHeader() {
       />
       <header className="jic-unified-header">
         <div
+          id="jic-prayer-dock"
           ref={prayerDockRef}
           className={cn('jic-prayer-dock', prayerDockHidden && 'is-scroll-hidden')}
           aria-hidden={prayerDockHidden || undefined}
@@ -307,8 +329,16 @@ export default function UnifiedHeader() {
               )}
             </div>
             <DesktopNavigation navigation={navigation} />
-            <div className="jic-free-actions-slot">
-              <nav className="jic-free-actions" aria-label="Page controls" data-glass="dense">
+            <div className="jic-free-actions-slot" ref={actionsSlotRef}>
+              <nav
+                className={cn(
+                  'jic-free-actions',
+                  actionsFloating && 'is-floating',
+                  prayerDockHidden && 'is-scroll-hidden',
+                )}
+                aria-label="Page controls"
+                data-glass="dense"
+              >
                 <Link to="/search" aria-label="Search site">
                   <Search size={20} />
                 </Link>
@@ -322,13 +352,13 @@ export default function UnifiedHeader() {
                   {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
                   <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
                 </button>
-                <Link to="/" aria-label="Home">
+                <Link to="/" aria-label="Home" className="jic-desktop-action">
                   <Home size={20} />
                 </Link>
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
-                  className="jic-menu-trigger"
+                  className="jic-menu-trigger jic-desktop-action"
                   aria-haspopup="dialog"
                   aria-label="Open navigation menu"
                   aria-expanded={menuOpen}
@@ -428,21 +458,14 @@ export default function UnifiedHeader() {
           <Heart className="jic-donate-heart" size={21} aria-hidden="true" />
           <span>Donate</span>
         </button>
-        <Link to="/search" aria-label="Search site">
-          <Search size={21} aria-hidden="true" />
-          <span>Search</span>
-        </Link>
         <button
           type="button"
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          onClick={togglePrayerDock}
+          aria-expanded={!prayerDockHidden}
+          aria-controls="jic-prayer-dock"
         >
-          {theme === 'dark' ? (
-            <Sun size={21} aria-hidden="true" />
-          ) : (
-            <Moon size={21} aria-hidden="true" />
-          )}
-          <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+          <Clock3 size={21} aria-hidden="true" />
+          <span>Prayer times</span>
         </button>
         <button
           type="button"
@@ -492,6 +515,9 @@ export default function UnifiedHeader() {
             </button>
           </div>
           <div className="jic-unified-menu-scroll">
+            <Link to="/search" className="jic-menu-search">
+              <Search size={18} /> Search the website
+            </Link>
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
                 {PUBLIC_MENU_GROUPS.map(({ name, path, children }) => {
@@ -589,7 +615,20 @@ export default function UnifiedHeader() {
           </div>
         </dialog>
       )}
-      <WonderfulDonationModal open={donationOpen} onClose={() => setDonationOpen(false)} />
+      {donationOpen && (
+        <Suspense
+          fallback={
+            <div className="jic-donation-loading" role="status">
+              Loading donation details…{' '}
+              <button type="button" onClick={() => setDonationOpen(false)}>
+                Cancel
+              </button>
+            </div>
+          }
+        >
+          <WonderfulDonationModal open onClose={() => setDonationOpen(false)} />
+        </Suspense>
+      )}
     </>
   );
 }

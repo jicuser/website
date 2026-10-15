@@ -1,12 +1,13 @@
 /* Hall booking monthly availability calendar. */
 .jic-hall-calendar-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
 }
-.jic-hall-calendar-head h1 {
+.jic-hall-calendar-head h2 {
   font-size: clamp(1.35rem, 3vw, 2rem);
   font-weight: 800;
   line-height: 1.1;
@@ -28,8 +29,8 @@
   gap: 7px;
 }
 .jic-hall-month-controls button {
-  min-width: 42px;
-  min-height: 42px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0 12px;
   border: 1px solid var(--jic-border);
   border-radius: 13px;
@@ -76,6 +77,34 @@
   justify-content: space-between;
   overflow: hidden;
   color: var(--jic-text);
+  text-align: left;
+  background: var(--jic-surface);
+}
+.jic-hall-day:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.jic-hall-day[aria-pressed='true'] {
+  border: 2px solid var(--jic-gold);
+  background: var(--jic-glass-panel-strong);
+}
+.jic-hall-day:focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 2px;
+}
+.jic-hall-page > h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.jic-booking-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 16px 0 24px;
+  padding-left: 20px;
+  list-style: decimal;
+  color: var(--jic-text-secondary);
 }
 .jic-hall-day::before {
   content: '';
@@ -156,6 +185,9 @@
 .jic-hall-legend i.is-closed {
   background: #64748b;
 }
+.jic-hall-legend i.is-unknown {
+  background: #94a3b8;
+}
 .jic-hall-contact {
   display: flex;
   align-items: center;
@@ -195,8 +227,8 @@
     align-items: flex-start;
   }
   .jic-hall-month-controls button {
-    min-width: 38px;
-    min-height: 38px;
+    min-width: 44px;
+    min-height: 44px;
     padding: 0 9px;
   }
   .jic-hall-weekdays,

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
+import GuideResource from '@/components/GuideResource';
 
 const QURAN_API = 'https://api.alquran.cloud/v1';
 const QURAN_FALLBACK = 'https://quran.com';
@@ -235,15 +236,43 @@ export default function WorshipPage() {
       {isQuran && <QuranReader />}
       {isPrayer && (
         <>
+          <header className="jic-guide-heading">
+            <h1>Salah guide</h1>
+            <p>
+              Use the full guide for the prayer method and rulings. The steps below are a short
+              refresher; ask the Imam if you are unsure.
+            </p>
+          </header>
+          <GuideResource guide="salah" />
           <Cards items={salahSteps} />
           <div className="worship-reading-card">
             <Link className="jic-button" to="/worship/janazah-guide">
               Janazah prayer guide
             </Link>
+            <Link className="jic-button" to="/prayer-times/reminders">
+              Set Salah reminders
+            </Link>
           </div>
         </>
       )}
-      {isJanazah && <Cards items={janazahSteps} />}
+      {isJanazah && (
+        <>
+          <header className="jic-guide-heading">
+            <h1>Janazah prayer guide</h1>
+            <p>
+              A short refresher alongside the full Hanafi guide. Follow the Imam when joining the
+              congregation.
+            </p>
+          </header>
+          <GuideResource guide="janazah" />
+          <Cards items={janazahSteps} />
+          <div className="worship-reading-card">
+            <Link className="jic-button" to="/forms/funeral-enquiry">
+              Ask about funeral support
+            </Link>
+          </div>
+        </>
+      )}
       {isDuas && <Cards items={duaCards} />}
       {isDailySalah && <DailySalah />}
       {isDalail && (

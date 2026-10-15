@@ -26,7 +26,10 @@ function fixture() {
   let timerId = 0;
   const timers = new Map();
   const changes = [];
-  const document = { ...eventTarget(), activeElement: null };
+  const footer = {};
+  let intersect;
+  let disconnected = false;
+  const document = { ...eventTarget(), activeElement: null, querySelector: () => footer };
   const panelControl = {};
   const panel = { ...eventTarget(), contains: (node) => node === panelControl };
   const media = { ...eventTarget(), matches: false };
@@ -36,6 +39,17 @@ function fixture() {
     innerWidth: 390,
     scrollY: 100,
     matchMedia: () => media,
+    IntersectionObserver: class {
+      constructor(callback) {
+        intersect = callback;
+      }
+      observe(element) {
+        assert.equal(element, footer);
+      }
+      disconnect() {
+        disconnected = true;
+      }
+    },
     setTimeout(callback, delay) {
       timers.set(++timerId, { callback, at: now + delay });
       return timerId;
@@ -57,6 +71,9 @@ function fixture() {
     media,
     changes,
     cleanup,
+    toggle: () => cleanup.toggle(),
+    footer: (visible) => intersect([{ isIntersecting: visible }]),
+    disconnected: () => disconnected,
     scroll(y, target = document) {
       browser.scrollY = y;
       browser.emit('scroll', { target });
@@ -172,4 +189,44 @@ test('route changes and unmount can cancel all pending callbacks and listeners',
   for (const target of [f.browser, f.panel, f.document, f.media]) {
     assert.equal(target.listenerCount(), 0);
   }
+  assert.equal(f.disconnected(), true);
+});
+
+test('the mobile footer remains clear at rest, with an explicit tap to reveal times', () => {
+  const f = fixture();
+  f.footer(true);
+  f.advance(1000);
+  assert.deepEqual(f.changes, [true]);
+  f.toggle();
+  assert.deepEqual(f.changes, [true, false]);
+  f.scroll(200);
+  f.advance(700);
+  assert.deepEqual(f.changes, [true, false, true]);
+  f.footer(false);
+  assert.deepEqual(f.changes, [true, false, true, false]);
+});
+
+test('typing hides the prayer panel until focus leaves the field', () => {
+  const f = fixture();
+  f.document.activeElement = { matches: () => true };
+  f.document.emit('focusin');
+  f.advance(0);
+  f.scroll(200);
+  f.advance(1000);
+  assert.deepEqual(f.changes, [true]);
+  f.document.activeElement = null;
+  f.document.emit('focusout');
+  f.advance(0);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('a tap can collapse the panel, while desktop footer visibility does not hide it', () => {
+  const f = fixture();
+  f.toggle();
+  f.advance(1000);
+  assert.deepEqual(f.changes, [true]);
+  f.toggle();
+  f.browser.innerWidth = 1280;
+  f.footer(true);
+  assert.deepEqual(f.changes, [true, false]);
 });

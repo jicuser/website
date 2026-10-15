@@ -347,6 +347,33 @@ html[data-prayer-dock-hidden='true'] {
   gap: 8px;
   margin-block: 8px 0;
 }
+.jic-menu-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-block: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+}
+.jic-donation-loading {
+  position: fixed;
+  inset: 35% 16px auto;
+  z-index: 100;
+  width: min(360px, calc(100% - 32px));
+  margin-inline: auto;
+  padding: 20px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-bg);
+}
+.jic-donation-loading button {
+  display: block;
+  min-height: 44px;
+  margin-top: 8px;
+  text-decoration: underline;
+}
 .jic-menu-appearance button {
   display: flex;
   justify-content: center;
@@ -524,9 +551,6 @@ html[data-prayer-dock-hidden='true'] {
 @media (max-width: 767px) {
   html {
     --jic-prayer-sticky-offset: 0px;
-    --jic-mobile-dock-height: calc(
-      var(--jic-prayer-dock-height, 160px) + var(--jic-mobile-controls-height, 60px)
-    );
     --jic-mobile-visible-dock-height: calc(
       var(--jic-prayer-visible-height) + var(--jic-mobile-controls-height, 60px)
     );
@@ -555,6 +579,34 @@ html[data-prayer-dock-hidden='true'] {
     padding-block: 2px;
   }
   .jic-free-actions-slot {
+    display: flex;
+    flex: 1 0 100%;
+    justify-content: flex-end;
+    min-height: 48px;
+  }
+  .jic-free-nav-row {
+    flex-wrap: wrap;
+  }
+  .jic-free-actions {
+    position: static;
+    width: auto;
+    padding: 2px;
+    border-radius: 12px;
+    transition:
+      opacity 160ms ease,
+      visibility 160ms;
+  }
+  .jic-free-actions.is-floating {
+    position: fixed;
+    top: max(8px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+  }
+  .jic-free-actions.is-floating.is-scroll-hidden:not(:focus-within) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .jic-free-actions .jic-desktop-action {
     display: none;
   }
   .jic-mobile-quick-nav {
@@ -652,14 +704,16 @@ html[data-prayer-dock-hidden='true'] {
     font-weight: 600;
   }
   .jic-public-route {
-    padding-bottom: calc(var(--jic-mobile-dock-height) + 12px);
+    /* The prayer panel yields to the footer. Reserve only the persistent bar,
+       never change page height as the panel appears or disappears. */
+    padding-bottom: calc(var(--jic-mobile-controls-height, 60px) + 12px);
   }
   .jic-mobile-controls {
     position: fixed;
     inset: auto 0 0;
     z-index: 50;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     padding: 4px max(8px, env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom))
       max(8px, env(safe-area-inset-left));
     background: var(--jic-glass-panel-strong);
@@ -692,16 +746,8 @@ html[data-prayer-dock-hidden='true'] {
     bottom: calc(var(--jic-mobile-visible-dock-height) + 8px);
   }
   .jic-daily-reminder {
-    position: sticky;
     width: calc(100% - 32px);
     margin-inline: auto;
-    top: calc(var(--jic-prayer-sticky-offset) + 6px);
-    z-index: 30;
-    transition: opacity 650ms ease;
-  }
-  .jic-daily-reminder.is-scrolling:not(:focus-within) {
-    opacity: 0;
-    pointer-events: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -883,15 +929,18 @@ html[data-prayer-dock-hidden='true'] {
     max-height: none;
     overflow: visible;
   }
-  .jic-free-actions {
+  .jic-free-actions,
+  .jic-free-actions.is-floating {
     position: static;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
   .jic-public-main {
     padding-top: 10px;
   }
   html {
     --jic-prayer-sticky-offset: 0px;
-    --jic-mobile-dock-height: var(--jic-mobile-controls-height, 60px);
     --jic-mobile-visible-dock-height: var(--jic-mobile-controls-height, 60px);
     scroll-padding-top: 12px;
   }

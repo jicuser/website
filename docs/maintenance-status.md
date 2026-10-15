@@ -3,6 +3,62 @@
 Updated 15 October 2026. Current scope: refine the existing website and admin.
 Opt-in Salah web push is approved; native apps and hosting migration remain deferred.
 
+## October service enquiries and public controls
+
+The live website linked to three absent service forms; both schedule tables were
+also missing. Source `20261015003000_service_enquiries.sql` was applied as managed
+`20261015010658 service_enquiries`. It creates four separately named forms (Nikah,
+funeral support, hall booking, community) using the existing versioned engine and
+assigns the active owner as manager/responsible person. Existing forms, closures,
+staff assignments and responses are never overwritten. No example classes were
+published, and no test enquiry was submitted to production.
+
+Service buttons now open these forms instead of call-number buttons. Admin → Forms
+can filter service enquiries/bookings separately from registrations. General contact
+messages stay separate. The hall calendar loads only the selected month's four
+public status fields, distinguishes unknown/part-day dates, carries a selected date
+into the enquiry, and never treats an enquiry as a confirmed booking. Staff schedule
+mutations use explicit fields and confirm a returned row before claiming success.
+The database restricts writes to Events-authorised staff, including column grants;
+course planning is not public and no visitor details appear in hall availability.
+
+Mobile controls are Home/Back, Donate, Prayer times and Menu. Search/appearance sit
+below the branding and float after that row scrolls away. Prayer times hide after
+12px of page movement and return after 700ms idle, except while typing or the footer
+is visible. The explicit Prayer times toggle can reveal them there. The daily
+religious reminder remains in document flow; unrelated posters/pop-ups are omitted
+on enquiry, contact, hall-booking and notification-setup pages. Footer rows keep the
+icons together and logo beside the legal line; mobile bottom padding reserves only
+the persistent navigation, avoiding a blank prayer-panel-sized gap.
+
+Salah and Janazah guide cards link to the official Dawat-e-Islami English PDFs and
+Urdu library editions, with publisher-hosted book thumbnails and attribution. Full
+books are neither copied nor repackaged. Sources verified 15 October 2026:
+[Laws of Salah](https://www.dawateislami.net/bookslibrary/en/laws-of-salah) and
+[Method of Funeral Salah](https://www.dawateislami.net/bookslibrary/en/method-of-funeral-salah).
+
+Performance checks: timetable refreshes now use two requests instead of four (or
+five with tomorrow), selecting only needed fields and sharing one date-range
+snapshot. Overlapping refreshes are deduplicated and unmount aborts requests.
+Donation code loads only when requested. Initial JavaScript measured with
+`npm run build -- --manifest` and `node scripts/measure-entry-bundle.mjs` went from
+819,299 bytes / 267,441 gzip to 816,432 bytes / 266,843 gzip at this checkpoint.
+This is a small bundle saving, not a demonstrated Core Web Vitals improvement.
+The optional HLS size warning remains. Production dependency audit: zero findings.
+
+Validation passed lint, 494 Node/database tests and a production build. Added browser
+regressions exercise the real mobile footer/toggle and enquiry flow with mocked
+external data; local browser execution is unavailable, so those require CI. Physical
+iPhone/Android delivery, keyboard behaviour and visual acceptance remain separate.
+The reminder scheduler is enabled and its live heartbeat is recent; opening the
+homepage or settings still never requests notification permission automatically.
+
+Security review found no new advisor warnings for this migration. Existing warnings
+remain: two intentionally authenticated-callable form SECURITY DEFINER functions,
+disabled leaked-password protection, and pg_net's non-relocatable extension metadata.
+Private backend tables intentionally have no client RLS policies. Do not describe
+this bounded review as a whole-site penetration test or full security certification.
+
 ## October admin page-workspace refinement
 
 The section/page navigator and programme catalogue use existing public navigation
@@ -40,7 +96,7 @@ The follow-up menu-style refinement on 15 October 2026 replaces the admin's two
 dropdowns with an inline section/page directory using the complete public menu
 order. Saved-page view links are separate from guarded editing actions. Madrassah
 and Social Media have their explicit shortcut groups. Fresh validation passed lint,
-457 tests and the production build. Public-control relocation remains proposed.
+457 tests and the production build. Public-control relocation is covered above.
 The subsequent opt-in Salah reminder release is documented in `salah-reminders.md`.
 
 ## Boundaries
@@ -156,7 +212,7 @@ template deletion and mount preservation before release.
 | WEB-12    | TV fit/delay                              | Obtain real viewport/source geometry and timings; preserve working transport.                                                                                                                        |
 | WEB-13    | Dependencies/release hygiene              | CI remains enabled. Review deprecation and optional HLS size warnings separately; do not hide them by raising limits.                                                                                |
 
-Deferred: apps/store signing/cloud builds, remote push, payment/media workers,
+Deferred: apps/store signing/cloud builds, payment/media workers,
 Vercel/Cloudflare/DNS migration, new paid services and retention/deletion policy changes.
 Frontend rollback reference: `86c881ea8e36fc8983a7706056a17752972e5801`. Revert focused
 source changes instead of erasing Git history or collected data. Keep this tracker

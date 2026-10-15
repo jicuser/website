@@ -1,15 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, CalendarDays, Phone } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { SITE } from '@/content/site';
+import { hallDateStatus, hallMonthRange } from '@/lib/serviceEnquiries';
 
 const STATUS_META = {
-  available: { label: 'Available', className: 'is-available' },
+  available: { label: 'Enquire', className: 'is-available' },
   pending: { label: 'Pending', className: 'is-pending' },
   booked: { label: 'Booked', className: 'is-booked' },
   closed: { label: 'Unavailable', className: 'is-closed' },
   unknown: { label: 'Check availability', className: 'is-unknown' },
+  partial: { label: 'Check times', className: 'is-pending' },
 };
 
 const pad = (value) => String(value).padStart(2, '0');
@@ -18,20 +19,6 @@ const isoDate = (date) =>
 const monthLabel = (date) =>
   new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' }).format(date);
 
-const normaliseStatus = (value) => {
-  const status = String(value || '')
-    .toLowerCase()
-    .trim();
-  if (['booked', 'confirmed', 'paid'].includes(status)) return 'booked';
-  if (['pending', 'reserved', 'provisional', 'hold'].includes(status)) return 'pending';
-  if (['available', 'free', 'open'].includes(status)) return 'available';
-  if (['closed', 'unavailable', 'blocked', 'cancelled'].includes(status)) return 'closed';
-  return 'unknown';
-};
-
-const getRecordDate = (row) =>
-  row.booking_date || row.event_date || row.date || row.start_date || null;
-
 export default function HallBookingPage() {
   const [month, setMonth] = useState(
     () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -39,33 +26,32 @@ export default function HallBookingPage() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [liveSchedule, setLiveSchedule] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
 
   useEffect(() => {
     let active = true;
+    setSelectedDate('');
+    const controller = new AbortController();
     const load = async () => {
       setLoading(true);
-      const first = new Date(month.getFullYear(), month.getMonth(), 1);
-      const last = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+      const { first, last } = hallMonthRange(month.getFullYear(), month.getMonth());
 
       try {
-        const { data, error } = await supabase.from('hall_bookings').select('*');
+        const { data, error } = await supabase
+          .from('hall_bookings')
+          .select('booking_date,start_time,end_time,status')
+          .gte('booking_date', first)
+          .lte('booking_date', last)
+          .order('booking_date')
+          .limit(1000)
+          .abortSignal(controller.signal);
         if (!active) return;
 
         if (error) {
           setRecords([]);
           setLiveSchedule(false);
         } else {
-          const monthRows = (data || []).filter((row) => {
-            const raw = getRecordDate(row);
-            if (!raw) return false;
-            const date = new Date(raw);
-            return (
-              !Number.isNaN(date.getTime()) &&
-              date >= first &&
-              date <= new Date(last.getFullYear(), last.getMonth(), last.getDate(), 23, 59, 59)
-            );
-          });
-          setRecords(monthRows);
+          setRecords(data || []);
           setLiveSchedule(true);
         }
       } catch {
@@ -81,25 +67,9 @@ export default function HallBookingPage() {
     load();
     return () => {
       active = false;
+      controller.abort();
     };
   }, [month]);
-
-  const statusByDate = useMemo(() => {
-    const map = new Map();
-    records.forEach((row) => {
-      const raw = getRecordDate(row);
-      if (!raw) return;
-      const date = new Date(raw);
-      if (Number.isNaN(date.getTime())) return;
-
-      const key = isoDate(date);
-      const status = normaliseStatus(row.status || row.booking_status || row.state);
-      const existing = map.get(key);
-      const rank = { booked: 4, pending: 3, closed: 2, available: 1, unknown: 0 };
-      if (!existing || rank[status] > rank[existing]) map.set(key, status);
-    });
-    return map;
-  }, [records]);
 
   const days = useMemo(() => {
     const first = new Date(month.getFullYear(), month.getMonth(), 1);
@@ -117,6 +87,16 @@ export default function HallBookingPage() {
 
   return (
     <div className="jic-hall-page mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <h1>Hall booking</h1>
+      <p>
+        Choose a date and send an enquiry. The team will check your event details and confirm
+        availability.
+      </p>
+      <ol className="jic-booking-steps" aria-label="How booking works">
+        <li>Send an enquiry</li>
+        <li>Staff review your request</li>
+        <li>Receive confirmation</li>
+      </ol>
       <section
         className="jic-hall-calendar rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-3xl sm:p-6"
         aria-labelledby="hall-calendar-title"
@@ -126,7 +106,7 @@ export default function HallBookingPage() {
             <p className="jic-hall-kicker">
               <CalendarDays size={15} /> Monthly schedule
             </p>
-            <h1 id="hall-calendar-title">{monthLabel(month)}</h1>
+            <h2 id="hall-calendar-title">{monthLabel(month)}</h2>
           </div>
           <div className="jic-hall-month-controls">
             <button type="button" onClick={() => changeMonth(-1)} aria-label="Previous month">
@@ -150,6 +130,7 @@ export default function HallBookingPage() {
             <strong>Check availability</strong>.
           </div>
         )}
+        {loading && <p role="status">Checking published dates…</p>}
 
         <div className="jic-hall-weekdays" aria-hidden="true">
           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
@@ -163,25 +144,31 @@ export default function HallBookingPage() {
                 <div key={`blank-${index}`} className="jic-hall-day is-empty" aria-hidden="true" />
               );
             const key = isoDate(date);
-            const status = liveSchedule ? statusByDate.get(key) || 'available' : 'unknown';
+            const status = liveSchedule ? hallDateStatus(records, key) : 'unknown';
             const meta = STATUS_META[status];
             const today = key === isoDate(new Date());
+            const unavailable = key < isoDate(new Date()) || ['closed', 'booked'].includes(status);
             return (
-              <div
+              <button
+                type="button"
                 key={key}
                 className={`jic-hall-day ${meta.className} ${today ? 'is-today' : ''}`}
+                disabled={loading || unavailable}
+                aria-pressed={selectedDate === key}
+                aria-label={`${date.toLocaleDateString('en-GB')} · ${meta.label}`}
+                onClick={() => setSelectedDate(key)}
                 title={`${date.toLocaleDateString('en-GB')} · ${meta.label}`}
               >
                 <span className="jic-hall-date">{date.getDate()}</span>
                 <span className="jic-hall-status">{meta.label}</span>
-              </div>
+              </button>
             );
           })}
         </div>
 
         <div className="jic-hall-legend" aria-label="Availability key">
           {Object.entries(STATUS_META)
-            .filter(([key]) => ['available', 'pending', 'booked', 'closed'].includes(key))
+            .filter(([key]) => ['unknown', 'partial', 'booked', 'closed'].includes(key))
             .map(([key, meta]) => (
               <span key={key}>
                 <i className={meta.className} />
@@ -192,19 +179,22 @@ export default function HallBookingPage() {
 
         <div className="jic-hall-contact">
           <div>
-            <strong>Interested in a date?</strong>
+            <strong>
+              {selectedDate
+                ? `Selected: ${new Date(`${selectedDate}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`
+                : 'Interested in a date?'}
+            </strong>
             <span>
-              Check the calendar, then send a booking request. A request is not confirmed until staff
-              approve the date.
+              Check the calendar, then send a booking request. A request is not confirmed until
+              staff approve the date.
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link to="/forms/hall-booking">
-              <CalendarDays size={17} /> Request hall booking
+            <Link
+              to={selectedDate ? `/forms/hall-booking?date=${selectedDate}` : '/forms/hall-booking'}
+            >
+              <CalendarDays size={17} /> Send booking enquiry
             </Link>
-            <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}>
-              <Phone size={17} /> Call {SITE.phone}
-            </a>
           </div>
         </div>
       </section>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { londonDate, displayTime, defaultJummah } from '@/lib/timetable';
+import { loadPrayerSnapshot } from '@/lib/prayerSnapshot';
 const formatTime = displayTime;
 const formatMonthRecord = (pt) => {
   const dateObj = new Date(pt.d_date + 'T00:00:00');
@@ -38,41 +39,18 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
     [error, setError] = useState('');
   useEffect(() => {
     let alive = true;
+    let inFlight = false;
+    const controller = new AbortController();
     const load = async () => {
-      const today = londonDate(),
-        [year, month] = today.split('-').map(Number);
-      const days = new Date(Date.UTC(year, month, 0)).getUTCDate();
-      const tomorrow = new Date(today + 'T12:00:00Z');
-      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      const friday = new Date(today + 'T12:00:00Z');
-      friday.setUTCDate(friday.getUTCDate() + ((5 - friday.getUTCDay() + 7) % 7));
+      if (inFlight || !alive) return;
+      inFlight = true;
       try {
-        const [daily, monthly, settings, fridayRow, nextDay] = await Promise.all([
-          supabase.from('prayer_times').select('*').eq('d_date', today).maybeSingle(),
-          supabase
-            .from('prayer_times')
-            .select('*')
-            .gte('d_date', `${year}-${String(month).padStart(2, '0')}-01`)
-            .lte('d_date', `${year}-${String(month).padStart(2, '0')}-${days}`)
-            .order('d_date'),
-          supabase
-            .from('page_content')
-            .select('content_value')
-            .eq('content_key', 'jummah_settings')
-            .maybeSingle(),
-          supabase
-            .from('prayer_times')
-            .select('*')
-            .eq('d_date', friday.toISOString().slice(0, 10))
-            .maybeSingle(),
-          includeTomorrow
-            ? supabase
-                .from('prayer_times')
-                .select('d_date,fajr_begins,maghrib_begins')
-                .eq('d_date', tomorrow.toISOString().slice(0, 10))
-                .maybeSingle()
-            : Promise.resolve({ data: null }),
-        ]);
+        const { daily, monthly, settings, fridayRow, nextDay } = await loadPrayerSnapshot(
+          supabase,
+          londonDate(),
+          includeTomorrow,
+          controller.signal,
+        );
         if (!alive) return;
         const failed = daily.error || monthly.error || settings.error || fridayRow.error;
         setError(failed ? 'Timetable could not be loaded. Please contact the centre.' : '');
@@ -133,6 +111,7 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
           setMonth([]);
         }
       } finally {
+        inFlight = false;
         if (alive) setLoading(false);
       }
     };
@@ -142,6 +121,7 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
     window.addEventListener('jic-content-updated', load);
     return () => {
       alive = false;
+      controller.abort();
       clearInterval(timer);
       window.removeEventListener('focus', load);
       window.removeEventListener('jic-content-updated', load);

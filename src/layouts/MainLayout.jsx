@@ -37,6 +37,9 @@ function PublicLayout() {
   const preview = new URLSearchParams(search).get('preview') === '1';
   const isHome = pathname === '/';
   const isDiscovery = ['/search', '/social-media'].includes(pathname);
+  const isTask =
+    pathname.startsWith('/forms/') ||
+    ['/contact', '/prayer-times/reminders', '/services/hall-booking'].includes(pathname);
 
   return (
     <div
@@ -61,14 +64,14 @@ function PublicLayout() {
             <ManagedPageContent optional headingLevel={2} className="jic-page-addition" />
           )}
           <ManagedPageSections key={pathname} />
-          {!isHome && !isDiscovery && <ProgrammePosters />}
-          {!isDiscovery && <PublishedPageLinks />}
-          {!isDiscovery && <RelatedContent />}
+          {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
+          {!isDiscovery && !isTask && <PublishedPageLinks />}
+          {!isDiscovery && !isTask && <RelatedContent />}
         </div>
       </main>
       <Footer />
       <ScrollToTop />
-      {!preview && <SpiritualOverlays />}
+      {!preview && !isTask && <SpiritualOverlays />}
       {isAdmin && !preview && <AdminBar />}
     </div>
   );

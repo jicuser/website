@@ -5,7 +5,7 @@
 }
 .jic-footer-inner {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   width: min(100%, 1200px);
   margin-inline: auto;
   padding: 16px;
@@ -97,7 +97,7 @@
   justify-content: center;
   gap: 12px;
   min-width: 0;
-  padding-top: 12px;
+  padding-top: 8px;
   border-top: 1px solid var(--jic-border);
 }
 .jic-footer-signature {

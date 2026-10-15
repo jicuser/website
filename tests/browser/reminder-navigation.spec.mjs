@@ -23,7 +23,11 @@ async function setup(page, { welcome = false } = {}) {
   await page.route('**/preview-api/**', async (route) => {
     if (holdRequests) await gate;
     const url = new URL(route.request().url());
-    const date = url.searchParams.get('d_date')?.replace('eq.', '') || '2026-09-13';
+    const filters = url.searchParams.getAll('d_date');
+    const first = filters.find((value) => value.startsWith('gte.'))?.slice(4);
+    const last = filters.find((value) => value.startsWith('lte.'))?.slice(4);
+    const date =
+      filters.find((value) => value.startsWith('eq.'))?.slice(3) || first || '2026-09-13';
     const row = {
       d_date: date,
       fajr_begins: '05:15',
@@ -39,9 +43,17 @@ async function setup(page, { welcome = false } = {}) {
       isha_jamah: '21:00',
       is_ramadan: false,
     };
+    const rows = [];
+    for (
+      let day = new Date(`${date}T12:00:00Z`);
+      day.toISOString().slice(0, 10) <= (last || date);
+      day.setUTCDate(day.getUTCDate() + 1)
+    ) {
+      rows.push({ ...row, d_date: day.toISOString().slice(0, 10) });
+    }
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify(url.pathname.endsWith('/prayer_times') ? [row] : []),
+      body: JSON.stringify(url.pathname.endsWith('/prayer_times') ? rows : []),
     });
   });
   await page.goto('/');
@@ -85,6 +97,34 @@ test('a scroll gesture dismisses salawat without trapping the page', async ({ pa
   await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await expect(welcome).toBeHidden({ timeout: 500 });
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+});
+
+test('mobile footer stays uncovered and Prayer times can be opened explicitly', async ({
+  page,
+}, testInfo) => {
+  await setup(page);
+  await expect(
+    page.getByRole('navigation', { name: 'Quick navigation' }).getByRole('button'),
+  ).toHaveCount(4);
+  await page.locator('.jic-site-footer').scrollIntoViewIfNeeded();
+  const dock = page.locator('#jic-prayer-dock');
+  await expect(dock).toHaveAttribute('aria-hidden', 'true');
+  await page.waitForTimeout(800);
+  await expect(dock).toHaveAttribute('aria-hidden', 'true');
+  const iconPositions = await page
+    .locator('.jic-footer-icons a')
+    .evaluateAll((icons) => icons.map((icon) => Math.round(icon.getBoundingClientRect().top)));
+  expect(iconPositions).toHaveLength(9);
+  expect(new Set(iconPositions).size).toBe(1);
+  await page.screenshot({ path: testInfo.outputPath('compact-mobile-footer.png') });
+  const toggle = page
+    .getByRole('navigation', { name: 'Quick navigation' })
+    .getByRole('button', { name: 'Prayer times', exact: true });
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(dock).not.toHaveAttribute('aria-hidden', 'true');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 });
 
 test('quick Menu stays open until a slow Prayer Times route is ready', async ({ page }) => {

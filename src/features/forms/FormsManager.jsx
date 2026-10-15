@@ -11,6 +11,7 @@ import CustomFormsInbox from '@/components/workspace/CustomFormsInbox';
 import FormActions from './FormActions';
 import ScheduleManager from './ScheduleManager';
 import { formStatus, workflowChanged, pageUrl } from '@/lib/pageContent';
+import { SERVICE_ENQUIRIES, serviceEnquiry } from '@/lib/serviceEnquiries';
 import '@/styles/workspace.css';
 import '@/styles/custom-forms.css';
 import '@/styles/content-workflow.css';
@@ -131,7 +132,10 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
     );
   const assignments = form.people.map((person) => ({ ...person, form_id: form.id }));
   return (
-    <section className="community-workspace custom-forms-admin" aria-label={`${form.title} management`}>
+    <section
+      className="community-workspace custom-forms-admin"
+      aria-label={`${form.title} management`}
+    >
       <div className="admin-heading">
         <div>
           <h3>{form.title}</h3>
@@ -190,9 +194,11 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
               {form.people.map((person) => (
                 <div key={`${person.user_id}-${person.role}`}>
                   <dt>
-                    {{ responsible: 'Responsible', manager: 'Form editor', watcher: 'Following' }[
-                      person.role
-                    ]}
+                    {
+                      { responsible: 'Responsible', manager: 'Form editor', watcher: 'Following' }[
+                        person.role
+                      ]
+                    }
                   </dt>
                   <dd>
                     {person.display_name || 'Staff member'}
@@ -205,6 +211,14 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
             <p>Choose a responsible person before publishing.</p>
           )}
           <h4>Where this form is used</h4>
+          {serviceEnquiry(form.slug) && (
+            <p>
+              <Link to={serviceEnquiry(form.slug).page} target="_blank" rel="noreferrer">
+                {serviceEnquiry(form.slug).pageName}
+              </Link>{' '}
+              · Service enquiry button
+            </p>
+          )}
           {form.pages?.length ? (
             form.pages.map((page) => (
               <p key={page.id}>
@@ -218,12 +232,12 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
                 · {page.placement} · {page.published ? 'Page live' : 'Page hidden'}
               </p>
             ))
-          ) : (
+          ) : !serviceEnquiry(form.slug) ? (
             <p>Standalone form. Link it from a poster or content page when needed.</p>
-          )}
+          ) : null}
           <p>
-            Assignments apply to future responses. Reassign existing unfinished actions in Actions when
-            responsibility changes.
+            Assignments apply to future responses. Reassign existing unfinished actions in Actions
+            when responsibility changes.
           </p>
           <div className="admin-actions">
             {form.can_manage && (
@@ -233,7 +247,9 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
                 onClick={() =>
                   act(async () =>
                     setEditor(
-                      await checked(supabase.from('custom_forms').select('*').eq('id', form.id).single()),
+                      await checked(
+                        supabase.from('custom_forms').select('*').eq('id', form.id).single(),
+                      ),
                     ),
                   )
                 }
@@ -292,7 +308,7 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
                       })
                     }
                   >
-                    {form.enabled ? 'Close registrations' : 'Reopen registrations'}
+                    {form.enabled ? 'Close form' : 'Reopen form'}
                   </button>
                 )}
               </>
@@ -368,7 +384,9 @@ function LegacyFormCards({ auth, onChoose, counts, loading, error }) {
           <b>{loading && !summary ? '…' : summary?.done_count || 0}</b> completed
           <b>{loading && !summary ? '…' : summary?.total || 0}</b> total
         </span>
-        {error && <span className="workspace-meta">Counts unavailable · tap to open responses</span>}
+        {error && (
+          <span className="workspace-meta">Counts unavailable · tap to open responses</span>
+        )}
       </button>
     );
   });
@@ -394,8 +412,14 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
     legacyKinds.reduce((total, kind) => total + Number(legacyCounts?.[kind]?.new_count || 0), 0);
   const actionCount = forms.reduce((total, form) => total + Number(form.open_actions || 0), 0);
   const [status, setStatus] = useState('all');
-  const listed = forms.filter((form) => status === 'all' || formStatus(form) === status);
-  const showLegacy = status === 'all' || status === 'Live';
+  const [category, setCategory] = useState('all');
+  const listed = forms.filter(
+    (form) =>
+      (status === 'all' || formStatus(form) === status) &&
+      (category === 'all' ||
+        (category === 'services' ? !!serviceEnquiry(form.slug) : !serviceEnquiry(form.slug))),
+  );
+  const showLegacy = category !== 'services' && (status === 'all' || status === 'Live');
 
   return (
     <section className="community-workspace custom-forms-admin">
@@ -437,11 +461,27 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
             <span>
               <strong>Inbox</strong>
               <small>
-                {loading || legacyLoading ? 'Loading…' : `${waitingCount} waiting · ${actionCount} actions`}
+                {loading || legacyLoading
+                  ? 'Loading…'
+                  : `${waitingCount} waiting · ${actionCount} actions`}
               </small>
             </span>
             <b>Open</b>
           </button>
+          <label>
+            Form type
+            <select value={category} onChange={(event) => setCategory(event.target.value)}>
+              <option value="all">All forms</option>
+              <option value="services">Service enquiries & bookings</option>
+              <option value="other">Registrations & other forms</option>
+            </select>
+          </label>
+          {category === 'services' && (
+            <p className="workspace-meta">
+              {SERVICE_ENQUIRIES.map((item) => item.pageName).join(' · ')}. Open a form to edit its
+              questions, assign staff or see responses.
+            </p>
+          )}
           <label>
             Show forms
             <select value={status} onChange={(event) => setStatus(event.target.value)}>
@@ -484,14 +524,12 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
                 </span>
                 <span className="form-card-line">
                   <b>Shown on</b>{' '}
-                  {form.pages?.length
-                    ? form.pages
-                        .map(
-                          (page) =>
-                            `${page.title}${page.published ? '' : ' (hidden)'}`,
-                        )
-                        .join(' · ')
-                    : 'Standalone form only'}
+                  {serviceEnquiry(form.slug)?.pageName ||
+                    (form.pages?.length
+                      ? form.pages
+                          .map((page) => `${page.title}${page.published ? '' : ' (hidden)'}`)
+                          .join(' · ')
+                      : 'Standalone form only')}
                 </span>
               </button>
             ))}

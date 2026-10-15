@@ -1,8 +1,8 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, CalendarDays, GraduationCap, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, GraduationCap, Mail } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import ManagedPageContent from '@/components/ManagedPageContent';
-import { SITE } from '@/content/site';
+import { serviceEnquiryForPath } from '@/lib/serviceEnquiries';
 
 const PAGE_ACTIONS = {
   '/services/daily-prayers': [
@@ -24,20 +24,8 @@ const PAGE_ACTIONS = {
   '/projects/main-prayer-hall': [
     { label: 'Prayer times', to: '/prayer-times', icon: CalendarDays },
   ],
-  '/services/nikah': [
-    { label: 'Contact JIC', to: '/contact', icon: Mail },
-    { label: `Call ${SITE.phone}`, href: `tel:${SITE.phone.replace(/\s/g, '')}`, icon: Phone },
-  ],
-  '/funerals': [
-    { label: 'Funeral support', to: '/funerals/contact-support', icon: ArrowRight },
-    { label: `Call ${SITE.phone}`, href: `tel:${SITE.phone.replace(/\s/g, '')}`, icon: Phone },
-  ],
-  '/funerals/contact-support': [
-    { label: `Call ${SITE.phone}`, href: `tel:${SITE.phone.replace(/\s/g, '')}`, icon: Phone },
-    { label: 'Contact the centre', to: '/contact', icon: Mail },
-  ],
   '/funerals/what-to-do': [
-    { label: 'Contact for funeral support', to: '/funerals/contact-support', icon: Phone },
+    { label: 'Send a funeral support enquiry', to: '/forms/funeral-enquiry', icon: Mail },
   ],
   '/madrassah/student-portal': [
     { label: 'Contact Madrassah', to: '/madrassah/contact', icon: Mail },
@@ -55,9 +43,16 @@ export default function SectionPage({
   backLabel = 'Back',
 }) {
   const { pathname } = useLocation();
-  const actions = PAGE_ACTIONS[pathname] || [
-    { label: 'Contact the centre', to: '/contact', icon: Mail },
-  ];
+  const enquiry = serviceEnquiryForPath(pathname);
+  const actions = (enquiry
+    ? [
+        {
+          label: `Send ${enquiry.title.toLowerCase()}${enquiry.slug === 'funeral-enquiry' ? ' enquiry' : ''}`,
+          to: `/forms/${enquiry.slug}`,
+          icon: Mail,
+        },
+      ]
+    : PAGE_ACTIONS[pathname]) || [{ label: 'Contact the centre', to: '/contact', icon: Mail }];
 
   return (
     <section className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
@@ -65,7 +60,7 @@ export default function SectionPage({
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
           {eyebrow}
         </p>
-        <ManagedPageContent fallbackTitle={title} fallbackBody={intro} />
+        <ManagedPageContent fallbackTitle={title} fallbackBody={enquiry?.description || intro} />
 
         {(actions.length > 0 || backTo) && (
           <div className="mt-5 flex flex-wrap gap-2">

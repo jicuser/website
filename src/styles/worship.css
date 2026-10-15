@@ -1,4 +1,53 @@
 /* Worship hub, guides and Qur'an reader. */
+.jic-guide-heading {
+  margin-bottom: 20px;
+  max-width: 70ch;
+}
+.jic-guide-heading h1 {
+  margin-bottom: 8px;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+}
+.jic-guide-resource {
+  display: grid;
+  grid-template-columns: clamp(72px, 20vw, 112px) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+}
+.jic-guide-cover img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.jic-guide-resource h2 {
+  margin-bottom: 8px;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+.jic-guide-resource p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.jic-guide-resource .jic-guide-source,
+.jic-guide-resource .jic-guide-credit {
+  color: var(--jic-text-secondary);
+  font-size: 0.75rem;
+}
+.jic-guide-resource .worship-external-links {
+  margin-block: 12px;
+}
+.jic-guide-resource .worship-external-links a {
+  min-height: 44px;
+}
+.jic-guide-credit a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .worship-page {
   width: min(1120px, calc(100% - 24px));
   margin: 0 auto;

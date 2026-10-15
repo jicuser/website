@@ -7,6 +7,7 @@ import { SITE } from '@/content/site';
 import { supabase } from '@/lib/supabaseClient';
 import { formAction, visibleAnswers } from '@/lib/customForms';
 import { programmeForForm, programmeSlugFromSearch } from '@/lib/programmeJourney';
+import { serviceEnquiry, hallFormPrefill } from '@/lib/serviceEnquiries';
 import { checked } from '@/components/workspace/shared';
 import CustomFormsFields from '@/components/workspace/CustomFormsFields';
 import {
@@ -39,7 +40,8 @@ function PublicForm({ slug }) {
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [answers, setAnswers] = useState({});
+  const service = serviceEnquiry(slug);
+  const [answers, setAnswers] = useState(() => hallFormPrefill(slug, search));
   const [uploads, setUploads] = useState({});
   const [busy, setBusy] = useState(false);
   const [receipt, setReceipt] = useState('');
@@ -156,12 +158,24 @@ function PublicForm({ slug }) {
             <Link to={programme.to}>← Back to {programme.title}</Link>
           </p>
         )}
+        {service && !programme && !receipt && (
+          <p>
+            <Link to={service.page}>← Back to {service.pageName}</Link>
+          </p>
+        )}
         {loading ? (
           <p role="status">Loading form…</p>
         ) : receipt ? (
           <div className="workspace-card">
             <h1>Thank you</h1>
-            <p>Your response has been received.</p>
+            <p>
+              {service
+                ? 'Your enquiry has been received. The centre’s team can use your contact details to follow up.'
+                : 'Your response has been received.'}
+            </p>
+            {['nikah-enquiry', 'hall-booking'].includes(slug) && (
+              <p>This does not confirm a booking or date.</p>
+            )}
             <p className="workspace-meta">Reference: {receipt}</p>
             {auth.user ? (
               <Link className="workspace-button" to="/contact">
@@ -215,7 +229,9 @@ function PublicForm({ slug }) {
             <h1>{form.title}</h1>
             <p>{form.description}</p>
             <p className="workspace-meta">
-              Submitting this form does not confirm a place. The centre will review your details.
+              {service
+                ? 'Your message goes to the centre’s team. Any requested date or booking needs separate confirmation.'
+                : 'Submitting this form does not confirm a place. The centre will review your details.'}
             </p>
             <fieldset disabled={busy}>
               <CustomFormsFields
@@ -230,14 +246,18 @@ function PublicForm({ slug }) {
               Fields marked * are required. <Link to="/privacy">How we use your information</Link>
             </p>
             <button disabled={busy || Object.values(uploads).some((item) => item?.busy)}>
-              {busy ? 'Sending…' : 'Send response'}
+              {busy ? 'Sending…' : service ? 'Send enquiry' : 'Send response'}
             </button>
           </form>
         ) : (
           !error && (
             <div className="workspace-card">
-              <h1>Form unavailable</h1>
-              <p>This form may have closed or its address may have changed.</p>
+              <h1>{service ? `${service.title} is currently closed` : 'Form unavailable'}</h1>
+              <p>
+                {service
+                  ? 'You can still send a general message to the centre.'
+                  : 'This form may have closed or its address may have changed.'}
+              </p>
               <Link to="/contact">Contact the centre</Link>
             </div>
           )
