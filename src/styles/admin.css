@@ -1973,3 +1973,8 @@ html.dark .admin-console .admin-field-error {
     grid-template-columns: 1fr;
   }
 }
+
+.admin-access-requests { margin: 24px 0; }
+.admin-access-request { display: grid; gap: 14px; }
+.admin-access-request h4 { margin: 0; font-size: 17px; }
+.admin-access-request p { margin: 4px 0 0; }
