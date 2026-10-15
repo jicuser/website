@@ -29,16 +29,6 @@ export default function StaffAccess() {
     if (error) throw error;
     setRows(data || []);
   }, []);
-  const loadRequests = useCallback(async () => {
-    const result = await invoke({ action: 'list_access_requests' });
-    setRequests(result.requests || []);
-  }, [invoke]);
-  useEffect(() => {
-    if (!allowed) return;
-    Promise.all([load(), loadRequests()])
-      .catch(() => setNotice({ error: true, text: 'People or access requests could not be loaded. Please refresh.' }))
-      .finally(() => setLoading(false));
-  }, [allowed, load, loadRequests]);
   const invoke = useCallback(async (body) => {
     const { data, error } = await supabase.functions.invoke('manage-user', { body });
     if (error) {
@@ -51,6 +41,16 @@ export default function StaffAccess() {
     if (!data?.ok) throw new Error(data?.error || 'The request could not be completed.');
     return data;
   }, []);
+  const loadRequests = useCallback(async () => {
+    const result = await invoke({ action: 'list_access_requests' });
+    setRequests(result.requests || []);
+  }, [invoke]);
+  useEffect(() => {
+    if (!allowed) return;
+    Promise.all([load(), loadRequests()])
+      .catch(() => setNotice({ error: true, text: 'People or access requests could not be loaded. Please refresh.' }))
+      .finally(() => setLoading(false));
+  }, [allowed, load, loadRequests]);
   const run = useCallback(async (action, work, rethrow = false) => {
     if (inFlight.current) {
       if (rethrow) throw new Error('Please wait for the current request.');
