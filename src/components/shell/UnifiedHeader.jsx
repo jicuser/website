@@ -50,6 +50,13 @@ import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMedi
 
 const WonderfulDonationModal = lazy(() => import('@/components/donations/WonderfulDonationModal'));
 
+// One compact time per obligatory congregation. Full start and jama'ah times
+// remain available when visitors expand the dock.
+const compactJamaahTime = (value) => {
+  const formatted = displayTime(value);
+  return formatted === '—' ? '—' : formatted.replace(/\s+/g, '').toLowerCase();
+};
+
 export default function UnifiedHeader() {
   const { getContent } = useContent();
   const { user } = useAuth();
@@ -60,7 +67,7 @@ export default function UnifiedHeader() {
   const { canGoBack, previousPath } = useNavigationHistory();
   const showHome = pathname === '/' || !canGoBack || previousPath === '/';
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
-  const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
+  const { todaysTimes, jummahTimes, currentDate, isLoadingPrayerTimes } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
     mobileBannerRef = useRef(null),
     mobileControlsRef = useRef(null),
@@ -114,6 +121,24 @@ export default function UnifiedHeader() {
   const availability = useRadioAvailability(streamUrl);
   const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
   const next = nextCongregation(todaysTimes, jummahTimes, currentDate);
+  const isFriday =
+    currentDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London', weekday: 'short' }) ===
+    'Fri';
+  const todayCongregations = [
+    { name: 'Fajr', time: todaysTimes?.jamaah_fajr },
+    {
+      name: isFriday ? 'Jummah' : 'Dhuhr',
+      time: isFriday ? jummahTimes?.[0]?.prayer : todaysTimes?.jamaah_dhuhr,
+    },
+    { name: 'Asr', time: todaysTimes?.jamaah_asr },
+    { name: 'Maghrib', time: todaysTimes?.jamaah_maghrib },
+    { name: 'Isha', time: todaysTimes?.jamaah_isha },
+  ];
+  const accessibleJamaahTimes = todaysTimes
+    ? todayCongregations.map(({ name, time }) => `${name} ${displayTime(time)}`).join(', ')
+    : isLoadingPrayerTimes
+      ? 'Loading times'
+      : 'Times unavailable';
 
   const toggleTimetable = () => {
     if (prayerDockHidden) {
@@ -483,17 +508,40 @@ export default function UnifiedHeader() {
               type="button"
               onClick={toggleTimetable}
               className="jic-mobile-prayer-toggle"
-              aria-label={`${prayerExpanded ? 'Hide' : 'Show'} today’s salah times${next ? `. Next jama’ah: ${next.name} at ${displayTime(next.time)}` : ''}`}
+              aria-label={`${prayerExpanded ? 'Hide' : 'Show'} full prayer timetable. Today's jama'ah times: ${accessibleJamaahTimes}`}
               aria-expanded={prayerExpanded}
               aria-controls="jic-prayer-details"
             >
               <Clock3 size={18} aria-hidden="true" />
-              <span>Today’s salah times</span>
-              {next && (
-                <small>
-                  Next · {next.name} <strong>{displayTime(next.time)}</strong>
-                </small>
-              )}
+              <span className="jic-mobile-prayer-toggle-content">
+                <span className="jic-mobile-prayer-heading">
+                  Today’s salah times <small>Jama’ah</small>
+                </span>
+                {todaysTimes ? (
+                  <span className="jic-mobile-prayer-times">
+                    {todayCongregations.map(({ name, time }) => (
+                      <span
+                        key={name}
+                        className={cn(
+                          'jic-mini-prayer',
+                          (next?.name === name ||
+                            (name === 'Jummah' && next?.name === 'Jummah 1')) &&
+                            'is-next',
+                        )}
+                      >
+                        <span className="jic-mini-prayer-name">{name}</span>
+                        <strong className="jic-mini-prayer-time">{compactJamaahTime(time)}</strong>
+                      </span>
+                    ))}
+                  </span>
+                ) : (
+                  <span className="jic-mobile-prayer-empty" role="status">
+                    {isLoadingPrayerTimes
+                      ? 'Loading today’s times…'
+                      : 'Today’s timetable is unavailable'}
+                  </span>
+                )}
+              </span>
               <ChevronDown size={18} aria-hidden="true" />
             </button>
           </div>
