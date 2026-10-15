@@ -7,6 +7,7 @@ import {
   Play,
   Radio,
   Users,
+  Video,
   Building2,
   ArrowRight,
   Megaphone,
