@@ -88,7 +88,7 @@ export default function StaffAccess() {
     [invoke, pending, run],
   );
   useRegisterAdminSave(save, Object.keys(pending).length > 0, 'Save permissions');
-  if (!allowed) return <p>You need staff-management permission to open this section.</p>;
+  if (!allowed) return <p>You need people-management permission to open this section.</p>;
   const invite = (event) => {
     event.preventDefault();
     run('invite', async () => {
@@ -104,7 +104,7 @@ export default function StaffAccess() {
   };
   return (
     <div className="admin-staff-access">
-      <h2>Staff access</h2>
+      <h2>People & permissions</h2>
       <p>Tick exactly what each person can manage. Labels never select permissions for you.</p>
       {notice && (
         <p
@@ -146,9 +146,9 @@ export default function StaffAccess() {
           </button>
         </fieldset>
       </form>
-      <h3>Current staff</h3>
+      <h3>Current people</h3>
       {loading ? (
-        <p role="status">Loading staff…</p>
+        <p role="status">Loading people…</p>
       ) : (
         rows.map((row) => {
           const own = row.id === user?.id;
@@ -166,7 +166,7 @@ export default function StaffAccess() {
                 {row.is_active ? 'Enabled' : 'Disabled'}
               </summary>
               {row.is_owner ? (
-                <p>Owner access is protected and cannot be reassigned here.</p>
+                <p>Owner access is protected and cannot be changed here.</p>
               ) : (
                 <AccessChecklist
                   actor={profile}
@@ -230,7 +230,7 @@ export default function StaffAccess() {
                   Save permissions
                 </button>
               )}
-              {!row.permissions.length && !row.is_owner && <p>Public website access only.</p>}
+              {!row.permissions.length && !row.is_owner && <p>Website access only.</p>}
             </details>
           );
         })
