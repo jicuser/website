@@ -23,6 +23,8 @@
   line-height: 1.6;
 }
 .monthly-timetable-scroll {
+  /* Contain absolutely positioned screen-reader text within the scrolling table. */
+  position: relative;
   overflow-x: auto;
   overscroll-behavior-x: contain;
 }

@@ -83,7 +83,10 @@ for (const existingDraft of [false, true]) {
       templates: [], inputs: [], devices: [], relayConfigured: false,
     } });
     await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
-    await expect(page.getByLabel('Layout to edit', { exact: true })).toBeVisible();
+    // Use the accessible combobox name; the wrapping label's raw text also contains its options.
+    const layout = page.getByRole('combobox', { name: 'Layout to edit', exact: true });
+    await expect(layout).toBeVisible();
+    await expect(layout).toHaveValue('standby');
     const readCount = evidence.tvReads.filter(screen => screen === 'mens-main').length;
     // Automatic settings still poll the server after their initial load.
     await expect.poll(() => evidence.tvReads.filter(screen => screen === 'mens-main').length,
