@@ -161,6 +161,7 @@ test('owner builds a draft and publishes with responsible people and task routin
     .getByRole('group', { name: 'Responsible people', exact: true })
     .getByLabel('Preview owner')
     .check();
+  await page.getByText('Access & automatic action', { exact: true }).click();
   await page.getByLabel('Automatic action').fill('Call back');
   await page.getByLabel('Due within (hours)').fill('24');
   await page.getByRole('button', { name: 'Preview questions', exact: true }).click();
@@ -176,7 +177,7 @@ test('owner builds a draft and publishes with responsible people and task routin
   expect(errors).toEqual([]);
 });
 
-test('response inbox searches server-side, posts portal reply and assigns action', async ({
+test('response inbox searches server-side, saves an internal note and assigns action', async ({
   page,
 }, testInfo) => {
   const queries = [],
@@ -218,15 +219,15 @@ test('response inbox searches server-side, posts portal reply and assigns action
     },
   });
   await page.goto('/portal?tab=forms&mine=true');
-  await page.getByLabel('Search all answers').fill('Example');
+  await page.getByLabel('Search', { exact: true }).fill('Example');
   await expect.poll(() => queries.some((query) => query.p_search === 'Example')).toBe(true);
   await page.locator('.custom-response summary').click();
   await page
-    .getByLabel('Reply in the portal')
+    .getByLabel('Internal note')
     .fill('Thank you. When would be a good time to call?');
-  await page.getByRole('button', { name: 'Send portal reply', exact: true }).click();
+  await page.getByRole('button', { name: 'Save staff note', exact: true }).click();
   await expect.poll(() => replies.length).toBe(1);
-  expect(replies[0].p_internal).toBe(false);
+  expect(replies[0].p_internal).toBe(true);
   await page.getByRole('button', { name: 'Assign action', exact: true }).click();
   await page.getByRole('combobox', { name: 'Responsible person', exact: true }).selectOption(owner);
   await page.getByRole('button', { name: 'Assign action', exact: true }).last().click();
@@ -236,30 +237,21 @@ test('response inbox searches server-side, posts portal reply and assigns action
   expect(errors).toEqual([]);
 });
 
-test('fees use exact pence and retain manual confirmation retry identity', async ({ page }) => {
-  let fees = [];
+test('fees area retains exact pence and manual confirmation retry identity', async ({ page }) => {
+  let fees = [{
+    id: 'fee-preview',
+    title: 'Course materials',
+    currency: 'GBP',
+    amount_minor: 1205,
+    outstanding_minor: 1205,
+    paid_minor: 0,
+    status: 'unpaid',
+  }];
   const confirmations = [];
   const errors = await setup(page, {
     signedIn: true,
     handle: async (path, body, route) => {
       let data;
-      if (path.endsWith('/search_form_submissions'))
-        data = {
-          rows: [
-            {
-              id: responseId,
-              kind: 'custom',
-              custom_form_id: formId,
-              status: 'new',
-              created_at: '2026-09-13T10:00:00Z',
-              payload: { name: 'Example' },
-              schema_snapshot: { title: form.title, fields: [] },
-            },
-          ],
-          total: 1,
-          new_count: 1,
-          done_count: 0,
-        };
       if (path.endsWith('/list_fee_requests'))
         data = {
           rows: fees,
@@ -268,23 +260,6 @@ test('fees use exact pence and retain manual confirmation retry identity', async
             GBP: fees.reduce((sum, fee) => sum + fee.outstanding_minor, 0),
           },
         };
-      if (path.endsWith('/create_fee_request')) {
-        expect(body.p_amount_minor).toBe(1205);
-        expect(body.p_form_id).toBe(responseId);
-        expect(body.p_idempotency_key).toMatch(/^[a-f0-9-]{36}$/);
-        fees = [
-          {
-            id: 'fee-preview',
-            title: body.p_title,
-            currency: 'GBP',
-            amount_minor: body.p_amount_minor,
-            outstanding_minor: body.p_amount_minor,
-            paid_minor: 0,
-            status: 'unpaid',
-          },
-        ];
-        data = 'fee-preview';
-      }
       if (path.endsWith('/confirm_fee_payment')) {
         confirmations.push(body);
         if (confirmations.length === 1) {
@@ -309,24 +284,18 @@ test('fees use exact pence and retain manual confirmation retry identity', async
       }
     },
   });
-  await page.goto('/portal?tab=forms&mine=true');
-  await page.locator('.custom-response summary').click();
-  await page.getByRole('button', { name: 'Add fee request', exact: true }).click();
-  await page.getByLabel('Fee description', { exact: true }).fill('Course materials');
-  await page.getByLabel('Amount (£)', { exact: true }).fill('12.05');
-  await page.getByRole('button', { name: 'Create fee request', exact: true }).click();
+  await page.goto('/portal?tab=fees');
+  await expect(page.getByText('£12.05 · Unpaid', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Confirm a payment received', exact: true }).click();
   await page.getByLabel('Receipt or bank reference').fill('Cash receipt 0042');
   await page.getByLabel('I have checked that this payment was received.').check();
   await page.getByRole('button', { name: 'Record manual confirmation', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Try again.');
-  await expect(page.getByLabel('Amount received (£)', { exact: true })).toHaveAttribute(
-    'readonly',
-    '',
-  );
+  await expect(page.getByLabel('Amount received (£)', { exact: true })).toHaveAttribute('readonly', '');
   await expect(page.getByLabel('Receipt or bank reference')).toHaveAttribute('readonly', '');
   await page.getByRole('button', { name: 'Record manual confirmation', exact: true }).click();
   await expect.poll(() => confirmations.length).toBe(2);
+  expect(confirmations[0].p_idempotency_key).toMatch(/^[a-f0-9-]{36}$/);
   expect(confirmations[0].p_idempotency_key).toBe(confirmations[1].p_idempotency_key);
   expect(confirmations[1].p_amount_minor).toBe(1205);
   await expect(page.getByText('£12.05 · Paid', { exact: true })).toBeVisible();
@@ -384,7 +353,7 @@ test('course upload removes an unattached object if metadata save fails', async 
   expect(errors).toEqual([]);
 });
 
-test('optional email requires recipient review and remains an explicit separate action', async ({
+test('response email offers an external draft without sending from the portal', async ({
   page,
 }) => {
   const queued = [];
@@ -422,24 +391,13 @@ test('optional email requires recipient review and remains an explicit separate 
   });
   await page.goto('/portal?tab=forms&mine=true');
   await page.locator('.custom-response summary').click();
-  await page.getByRole('button', { name: 'Compose an email reply', exact: true }).click();
-  await page.getByLabel('Email message', { exact: true }).fill('Thank you for getting in touch.');
-  await page.getByRole('button', { name: 'Queue this email', exact: true }).click();
+  const draft = page.getByRole('link', { name: 'Open email draft', exact: true });
+  const destination = new URL(await draft.getAttribute('href'));
+  expect(destination.protocol).toBe('mailto:');
+  expect(decodeURIComponent(destination.pathname)).toBe('example@example.org');
+  expect(destination.searchParams.get('subject')).toBe('Re: Volunteer registration');
+  await expect(page.getByRole('button', { name: 'Queue this email', exact: true })).toHaveCount(0);
   expect(queued).toHaveLength(0);
-  await page
-    .getByLabel('I have checked the recipient and message, and want to send this email.')
-    .check();
-  await page.getByLabel('Email recipient', { exact: true }).fill('updated@example.org');
-  await expect(
-    page.getByLabel('I have checked the recipient and message, and want to send this email.'),
-  ).not.toBeChecked();
-  await page
-    .getByLabel('I have checked the recipient and message, and want to send this email.')
-    .check();
-  await page.getByRole('button', { name: 'Queue this email', exact: true }).click();
-  await expect.poll(() => queued.length).toBe(1);
-  expect(queued[0].p_acknowledged).toBe(true);
-  expect(queued[0].p_recipient).toBe('updated@example.org');
   expect(errors).toEqual([]);
 });
 
@@ -452,9 +410,8 @@ test('public draft clears when the signed-in identity changes', async ({ page })
     await supabase.auth.signOut({ scope: 'local' });
   });
   await expect(page.getByLabel('Your name')).toHaveValue('');
-  await expect(
-    page.getByText('Sign in before completing this form to keep replies in your account.'),
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Send response', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Your name')).toBeEditable();
   expect(errors).toEqual([]);
 });
 
