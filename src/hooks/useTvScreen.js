@@ -38,6 +38,9 @@ export default function useTvScreen(screenId, { normalPreview = false } = {}) {
   const refresh = useCallback(() => setRevision((value) => value + 1), []);
 
   useEffect(() => {
+    // An embedded draft receives only public settings from its parent. It must
+    // not create a viewer identity, poll hall status or join a live stream.
+    if (normalPreview) return undefined;
     const controller = new AbortController();
     let timer;
     let polling = false;

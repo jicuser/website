@@ -35,8 +35,9 @@ async function openAdmin(page, { actor = owner, section = 'posters', deletionFai
     else if (url.pathname.endsWith('/profiles')) data = [actor, member];
     else if (url.pathname.endsWith('/functions/v1/tv-control') && tvState) {
       const body = route.request().postDataJSON();
-      if (body.action === 'admin') tvReads.push(body.screenId);
+      if (['admin', 'status'].includes(body.action)) tvReads.push(body.screenId);
       else writes.push(body);
+      if (body.action === 'save-background') tvState = { ...tvState, settings: body.settings, updated_at: '2026-10-15T11:00:00Z' };
       data = { ...tvState, id: body.screenId };
     }
     else if (url.pathname.endsWith('/functions/v1/manage-user')) {
@@ -61,6 +62,45 @@ async function openAdmin(page, { actor = owner, section = 'posters', deletionFai
   await page.goto(`/admin?section=${section}`);
   await expect(page.locator('.admin-toolbar')).toBeVisible();
   return { errors, writes, tvReads };
+}
+
+for (const width of [390, 1280]) {
+  test(`board picker previews, restores and explicitly saves at ${width}px`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
+    const original = structuredClone(DEFAULT_TV_SETTINGS);
+    const evidence = await openAdmin(page, { section: 'tv', tvState: {
+      settings: original, updated_at: '2026-10-14T10:00:00Z', presentation: null,
+      templates: [], inputs: [], devices: [], relayConfigured: false,
+    } });
+    await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
+    const picker = page.getByRole('region', { name: 'Choose a starting layout' });
+    await picker.getByRole('button', { name: /^Countdown A large/ }).click();
+    await expect(picker.locator('iframe')).toBeVisible();
+    await expect(picker.frameLocator('iframe').locator('[data-board-layout="countdown"]')).toBeVisible();
+    expect(evidence.writes).toEqual([]);
+    await picker.getByRole('button', { name: 'After-prayer dhikr', exact: true }).click();
+    await expect(picker.frameLocator('iframe').locator('.tv-dhikr')).toBeVisible();
+    await picker.getByRole('button', { name: 'Everyday display', exact: true }).click();
+    await page.screenshot({ path: testInfo.outputPath(`board-picker-${width}.png`), fullPage: true });
+    await picker.getByRole('button', { name: 'Use Countdown', exact: true }).click();
+    await expect(page.locator('.tv-layout-editor [data-board-layout="countdown"]')).toBeVisible();
+    expect(evidence.writes).toEqual([]);
+    await picker.getByRole('button', { name: 'Restore previous layout', exact: true }).click();
+    await expect(page.locator('.tv-layout-editor [data-board-layout="countdown"]')).toHaveCount(0);
+    await picker.getByRole('button', { name: /^Timetable & notices Prayer/ }).click();
+    await picker.getByRole('button', { name: 'Use Timetable & notices', exact: true }).click();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.locator('.tv-save-actions').getByRole('button', { name: 'Save display settings', exact: true }).click();
+    await expect.poll(() => evidence.writes.length).toBe(1);
+    const save = evidence.writes[0];
+    expect(save.action).toBe('save-background');
+    expect(save.expectedUpdatedAt).toBe('2026-10-14T10:00:00Z');
+    expect(save.settings.display_layouts.landscape.standby.id).toBe('standby-board-classic-landscape');
+    expect(save.settings.display_layouts.portrait).toEqual(original.display_layouts.portrait);
+    for (const preset of ['before', 'jamaah', 'dhikr', 'jummah', 'ramadan'])
+      expect(save.settings.display_layouts.landscape[preset]).toEqual(original.display_layouts.landscape[preset]);
+    expect(evidence.errors).toEqual([]);
+  });
 }
 
 for (const existingDraft of [false, true]) {

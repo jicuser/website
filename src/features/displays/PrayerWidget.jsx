@@ -1,7 +1,7 @@
 import React from 'react';
 import { displayTime } from '@/lib/timetable';
 import { currentPrayer } from '@/lib/currentPrayer';
-import { nextPrayer } from '@/lib/nextPrayer';
+import { tvNextCongregation, countdownParts } from '@/lib/tvCountdown';
 
 const prayers = [
   ['Fajr', 'fajr', 'فجر'],
@@ -16,12 +16,15 @@ function jamaah(data, key) {
   return key === 'sunrise' ? '—' : displayTime(data.todaysTimes?.[`jamaah_${key}`]);
 }
 
-function JummahRow({ data }) {
+function JummahRow({ data, current }) {
   if (!data.jummahTimes?.length) return null;
   return (
     <div className="scene-jummah-row">
       {data.jummahTimes.slice(0, 2).map((item, index) => (
-        <span key={item.name || index}>
+        <span
+          key={item.name || index}
+          className={current?.name === `Jummah ${index + 1}` ? 'is-current' : ''}
+        >
           <span className="scene-jummah-name">{item.name || `Jummah ${index + 1}`}</span>
           <strong>{displayTime(item.prayer)}</strong>
         </span>
@@ -32,7 +35,9 @@ function JummahRow({ data }) {
 
 function PrayerTable({ data, current, compact = false, showTomorrow = false }) {
   return (
-    <div className={`scene-prayer-table ${compact ? 'is-compact' : ''} ${showTomorrow ? 'has-tomorrow' : ''} ${data.jummahTimes?.length ? 'has-jummah' : ''}`}>
+    <div
+      className={`scene-prayer-table ${compact ? 'is-compact' : ''} ${showTomorrow ? 'has-tomorrow' : ''} ${data.jummahTimes?.length ? 'has-jummah' : ''}`}
+    >
       <div className="scene-prayer-table-head" aria-hidden="true">
         <span>Salah</span>
         <span>Start</span>
@@ -47,14 +52,18 @@ function PrayerTable({ data, current, compact = false, showTomorrow = false }) {
         >
           <span className="scene-prayer-name">
             <b>{name}</b>
-            {!compact && <small lang="ar" dir="rtl">{arabic}</small>}
+            {!compact && (
+              <small lang="ar" dir="rtl">
+                {arabic}
+              </small>
+            )}
           </span>
           <strong>{displayTime(data.todaysTimes?.[key])}</strong>
           <strong>{jamaah(data, key)}</strong>
           {showTomorrow && <strong>{displayTime(data.tomorrowsTimes?.[key])}</strong>}
         </div>
       ))}
-      <JummahRow data={data} />
+      <JummahRow data={data} current={current} />
     </div>
   );
 }
@@ -86,31 +95,54 @@ function ClockFace({ now, current }) {
   );
 }
 
-export default function PrayerWidget({ kind, prayers: data, now, layout = 'horizontal' }) {
+export default function PrayerWidget({
+  kind,
+  prayers: data,
+  now,
+  layout = 'horizontal',
+  highlightNext = false,
+}) {
+  const next = kind === 'next' || highlightNext ? tvNextCongregation(data, now) : null;
   if (kind === 'next') {
-    const next = nextPrayer(data.todaysTimes, now);
     return (
       <div className="scene-next">
         {next ? (
           <>
-            <strong>
-              Next: {next.name} · {displayTime(next.time)}
+            <p className="scene-next-label">
+              {next.tomorrow ? 'Tomorrow’s first jama’ah' : 'Next jama’ah'}
+            </p>
+            <strong className="scene-next-heading">
+              {next.name} <span>· {displayTime(next.time)}</span>
             </strong>
-            <span>
-              {Math.floor(next.minutesLeft / 60) > 0
-                ? `${Math.floor(next.minutesLeft / 60)}h `
-                : ''}
-              {next.minutesLeft % 60}m remaining
+            <div
+              className="scene-countdown"
+              aria-label={`${countdownParts(next.seconds).join(':')} until jama’ah`}
+            >
+              {countdownParts(next.seconds).map((value, index) => (
+                <span key={index}>
+                  <b>{value}</b>
+                  <small>{['Hours', 'Minutes', 'Seconds'][index]}</small>
+                </span>
+              ))}
+            </div>
+            <span className="scene-next-detail">
+              {next.seconds === 0
+                ? 'Jama’ah now'
+                : `${Math.floor(next.seconds / 3600)}h ${Math.floor((next.seconds % 3600) / 60)}m until jama’ah`}
             </span>
           </>
         ) : (
-          <span>Timetable unavailable</span>
+          <span>Awaiting the next published jama’ah time</span>
         )}
       </div>
     );
   }
 
-  const current = currentPrayer(data.todaysTimes, now);
+  const current = highlightNext
+    ? next?.tomorrow
+      ? null
+      : next
+    : currentPrayer(data.todaysTimes, now);
 
   if (layout === 'clock-table')
     return (
@@ -138,7 +170,7 @@ export default function PrayerWidget({ kind, prayers: data, now, layout = 'horiz
           </div>
         ))}
       </div>
-      <JummahRow data={data} />
+      <JummahRow data={data} current={current} />
     </div>
   );
 }

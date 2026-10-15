@@ -1,6 +1,26 @@
 # Hall streams and display webpages
 
-Each hall has one permanent `/tv179/<hall>` webpage. The address stays the same when a stream starts, changes scenes or ends. When no stream is running, it shows public posters, prayer times and scheduled notices. An active stream shows its selected scene to approved viewers. Display webpages always use a black background and light text, regardless of the website theme. The large prayer timetable remains at the top, with next-prayer details and countdown in the footer.
+Each hall has one permanent `/tv179/<hall>` webpage. The address stays the same when a stream starts, changes scenes or ends. When no stream is running, it shows public posters, prayer times and scheduled notices. An active stream shows its selected scene to approved viewers. Display webpages use their own dark theme, regardless of the website theme.
+
+## Choose a prayer board layout
+
+In **TV screens → Edit automatic display → Everyday display**, choose the screen and its shape. **Choose a starting layout** offers:
+
+- **Timetable & notices:** a timetable and rotating notice, with a compact next-jama’ah footer.
+- **Countdown:** a large next-jama’ah countdown with the prayer timetable below.
+- **Noticeboard:** a large poster area with the prayer timetable below.
+
+Each has landscape and portrait arrangements in JIC navy, gold and teal. Tap a card to preview it using the real renderer and published timetable. The moment buttons show the existing before-prayer, prayer, dhikr, Friday and Ramadan layouts without changing the live screen. These are forced previews, not a claim that those states are active now.
+
+**Use [layout]** replaces only the current orientation’s everyday layout in the draft. **Restore previous layout** reverses that selection. The other orientation, scheduled scenes, automatic prayer layouts and presentation inputs remain untouched. The custom editor can still move, resize, hide or replace the blocks. **Save display settings** publishes the draft through the existing revision-checked Supabase save.
+
+The new boards highlight the next congregation; Friday uses the published Jummah sessions. Countdown explicitly means **jama’ah**, not the start of the prayer window. After Isha, tomorrow’s actual dated timetable supplies the next time. Missing or stale data shows an unavailable message, never an invented Fajr. Countdown respects Europe/London and the British clock changes. Small next-prayer blocks remain summaries; larger blocks show hours, minutes and seconds.
+
+The before-prayer scene now counts down to jama’ah. The old generated “1 minute” title is replaced by “Jama‘ah begins shortly”; custom staff messages are preserved. Embedded draft previews do not allocate viewer credentials or poll the hall-control service.
+
+These layouts use existing scene fields, so no new database migration or Edge Function deployment is needed. Deploy the frontend, then choose and save the desired layout for each screen. Existing saved layouts are not automatically replaced.
+
+The Labbaik reference was reviewed at https://uselabbaik.com/prayer-board. Its public examples also show prayer-restriction warnings, colour choices, scheduled announcements and donation/event QR codes. Those are separate features: this change does not add Zawwal calculations, new religious timings, QR appeals or offline timetable caching. Existing JIC prayer and dhikr configuration remains authoritative.
 
 ## Set up a stream
 

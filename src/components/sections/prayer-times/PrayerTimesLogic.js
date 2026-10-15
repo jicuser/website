@@ -3,6 +3,24 @@ import { supabase } from '@/lib/supabaseClient';
 import { londonDate, displayTime, defaultJummah } from '@/lib/timetable';
 import { loadPrayerSnapshot } from '@/lib/prayerSnapshot';
 const formatTime = displayTime;
+const formatDayRecord = (d) =>
+  d
+    ? {
+        d_date: d.d_date,
+        fajr: formatTime(d.fajr_begins),
+        sunrise: formatTime(d.sunrise),
+        dhuhr: formatTime(d.zuhr_begins),
+        asr: formatTime(d.asr_begins),
+        maghrib: formatTime(d.maghrib_begins),
+        isha: formatTime(d.isha_begins),
+        jamaah_fajr: formatTime(d.fajr_jamah),
+        jamaah_dhuhr: formatTime(d.zuhr_jamah),
+        jamaah_asr: formatTime(d.asr_jamah),
+        jamaah_maghrib: formatTime(d.maghrib_jamah),
+        jamaah_isha: formatTime(d.isha_jamah),
+        is_ramadan: d.is_ramadan,
+      }
+    : null;
 const formatMonthRecord = (pt) => {
   const dateObj = new Date(pt.d_date + 'T00:00:00');
   return {
@@ -55,34 +73,8 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
         const failed = daily.error || monthly.error || settings.error || fridayRow.error;
         setError(failed ? 'Timetable could not be loaded. Please contact the centre.' : '');
         const d = daily.error ? null : daily.data;
-        setToday(
-          d
-            ? {
-                d_date: d.d_date,
-                fajr: formatTime(d.fajr_begins),
-                sunrise: formatTime(d.sunrise),
-                dhuhr: formatTime(d.zuhr_begins),
-                asr: formatTime(d.asr_begins),
-                maghrib: formatTime(d.maghrib_begins),
-                isha: formatTime(d.isha_begins),
-                jamaah_fajr: formatTime(d.fajr_jamah),
-                jamaah_dhuhr: formatTime(d.zuhr_jamah),
-                jamaah_asr: formatTime(d.asr_jamah),
-                jamaah_maghrib: formatTime(d.maghrib_jamah),
-                jamaah_isha: formatTime(d.isha_jamah),
-                is_ramadan: d.is_ramadan,
-              }
-            : null,
-        );
-        setTomorrow(
-          nextDay.data && !nextDay.error
-            ? {
-                d_date: nextDay.data.d_date,
-                fajr: formatTime(nextDay.data.fajr_begins),
-                maghrib: formatTime(nextDay.data.maghrib_begins),
-              }
-            : null,
-        );
+        setToday(formatDayRecord(d));
+        setTomorrow(formatDayRecord(nextDay.error ? null : nextDay.data));
         setMonth(monthly.error ? [] : (monthly.data || []).map(formatMonthRecord));
         const j = {
           ...defaultJummah,

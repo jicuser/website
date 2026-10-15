@@ -1,0 +1,184 @@
+/* Prayer boards use the same saved blocks as the custom editor. Colour and
+   framing are scoped to the new presets; existing layouts keep their design. */
+.scene-canvas.is-prayer-board {
+  background: #071827;
+  color: #f6f3ea;
+}
+.is-prayer-board .scene-layer {
+  border-radius: 1cqw;
+}
+.is-prayer-board .scene-brand-block,
+.is-prayer-board .scene-clock {
+  background: transparent;
+}
+.is-prayer-board .scene-brand-block img {
+  object-position: left center;
+}
+.is-prayer-board .scene-clock {
+  justify-content: flex-end;
+  gap: 1.6cqw;
+  text-align: right;
+  padding: 0;
+}
+.is-prayer-board .scene-clock time {
+  color: #f3ce86;
+  font-size: 3.2cqw;
+  white-space: nowrap;
+}
+.is-prayer-board .scene-clock-date {
+  max-width: 22ch;
+  font-size: 1.4cqw;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #bcd0dc;
+}
+.is-prayer-board.is-portrait .scene-clock {
+  flex-direction: column-reverse;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.7cqw;
+}
+.is-prayer-board.is-portrait .scene-clock time {
+  font-size: 5cqw;
+}
+.is-prayer-board.is-portrait .scene-clock-date {
+  max-width: none;
+  font-size: 2.1cqw;
+}
+.is-prayer-board .scene-prayer-table,
+.is-prayer-board .scene-timetable {
+  background: #102b40;
+  padding: 1.5%;
+}
+.is-prayer-board .scene-prayer-table-head {
+  color: #c2d5df;
+}
+.is-prayer-board .scene-prayer-table-row > strong:last-child {
+  color: #f3ce86;
+}
+.is-prayer-board .scene-prayer-table-row.is-current,
+.is-prayer-board .scene-timetable-prayers > .is-current,
+.is-prayer-board .scene-jummah-row > .is-current {
+  background: #135c5b;
+  color: #fff;
+  box-shadow: inset 0 -3px #66e0ca;
+}
+.is-prayer-board .scene-prayer-name small {
+  color: #c2d5df;
+}
+.is-prayer-board .scene-timetable-prayers strong {
+  color: #f3ce86;
+}
+.is-prayer-board .jic-tv-poster {
+  margin: 0;
+  background: #102b40;
+}
+.is-prayer-board .jic-tv-poster img {
+  padding: 1%;
+}
+.is-prayer-board .jic-tv-empty {
+  background: #102b40;
+  color: #c2d5df;
+}
+
+/* Countdown follows its block's size, so small footer blocks remain compact
+   and a large block becomes a readable countdown without a new stored type. */
+.scene-source-next {
+  container: next-prayer / size;
+}
+.scene-source-next .scene-next {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2%;
+  padding: 1% 2%;
+  font-size: min(3cqw, 24cqh);
+  line-height: 1.25;
+}
+.scene-next-label {
+  margin: 0;
+  font-size: 0.8em;
+}
+.scene-next-heading {
+  font-size: 1em;
+}
+.scene-next-detail {
+  font-size: 0.85em;
+}
+.scene-countdown {
+  display: none;
+}
+.is-prayer-board .scene-next {
+  background: #103c43;
+  color: #f6f3ea;
+}
+.is-prayer-board .scene-next-label {
+  color: #9ee8d8;
+}
+.is-prayer-board .scene-next-heading span {
+  color: #f3ce86;
+}
+@container next-prayer (max-aspect-ratio: 4/1) {
+  .scene-source-next .scene-next {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3cqh;
+    padding: 5cqh 3cqw;
+    font-size: min(4cqw, 6cqh);
+  }
+  .scene-next-heading {
+    font-size: 1.5em;
+  }
+  .scene-next-heading span {
+    display: block;
+    font-size: 0.66em;
+    margin-top: 0.3em;
+  }
+  .scene-next-label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .scene-countdown {
+    display: flex;
+    justify-content: center;
+    gap: 5cqw;
+    font-variant-numeric: tabular-nums;
+  }
+  .scene-countdown > span {
+    display: grid;
+    gap: 1cqh;
+  }
+  .scene-countdown b {
+    font-size: min(17cqw, 24cqh);
+    line-height: 1;
+    font-weight: 650;
+  }
+  .scene-countdown small {
+    font-size: min(2.5cqw, 3.5cqh);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .scene-next-detail {
+    display: none;
+  }
+}
+.scene-state-block .jic-tv-prayer-scene.has-countdown {
+  container: iqamah-message / size;
+  gap: 3cqh;
+  padding: 3%;
+}
+.scene-state-block .has-countdown h1 {
+  font-size: min(4cqw, 8cqh);
+}
+.scene-state-block .has-countdown > p {
+  font-size: min(2.5cqw, 5cqh);
+  margin: 0;
+}
+.scene-state-block .has-countdown .tv-iqamah-countdown {
+  color: #f3ce86;
+  font-variant-numeric: tabular-nums;
+  font-size: min(15cqw, 30cqh);
+  line-height: 1.1;
+  font-weight: 650;
+}
