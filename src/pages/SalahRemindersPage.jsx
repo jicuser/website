@@ -104,8 +104,9 @@ export default function SalahRemindersPage() {
     JSON.stringify(settings) !== JSON.stringify(state.saved.preferences);
   return (
     <div className="salah-reminders jic-page-shell">
-      <PageHeading title="Salah reminders">
-        Choose reminders for the five daily prayers at Jamatia Islamic Centre.
+      <PageHeading title="Set up Salah alerts">
+        Get a notification on this device before Salah begins or before jama’ah. Choose your
+        prayers and how many minutes before you want an alert.
       </PageHeading>
       <section className="salah-reminders__panel" aria-label="Reminder settings">
         <div className="salah-reminders__status">
@@ -142,10 +143,10 @@ export default function SalahRemindersPage() {
                 <strong>Add to Home Screen</strong>.
               </li>
               <li>
-                Open Jamatia from that icon, return here and tap <strong>Enable reminders</strong>.
+                Open Jamatia from that icon, return here and tap <strong>Enable Salah alerts</strong>.
               </li>
             </ol>
-            <p>Your iPhone will ask for notification permission when you enable reminders.</p>
+            <p>Your iPhone will ask for notification permission when you enable Salah alerts.</p>
           </div>
         )}
         {state?.support === 'blocked' && (
@@ -243,7 +244,7 @@ export default function SalahRemindersPage() {
             }
             onClick={() => act('save')}
           >
-            {busy ? 'Please wait…' : state?.active ? 'Save reminder settings' : 'Enable reminders'}
+            {busy ? 'Please wait…' : state?.active ? 'Save alert settings' : 'Enable Salah alerts'}
           </button>
           {state?.active && (
             <button
@@ -252,7 +253,7 @@ export default function SalahRemindersPage() {
               disabled={busy || !state.config.ready}
               onClick={() => act('test')}
             >
-              Send test reminder
+              Send test alert
             </button>
           )}
           {(state?.active || state?.saved?.active) && (
@@ -262,7 +263,7 @@ export default function SalahRemindersPage() {
               disabled={busy}
               onClick={() => act('off')}
             >
-              Turn off reminders
+              Turn off Salah alerts
             </button>
           )}
           <button

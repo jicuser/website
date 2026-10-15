@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { AdminSaveProvider } from '@/context/AdminSaveContext';
 import { supabase } from '@/lib/supabaseClient';
 import Tasks, { Notifications } from '@/components/workspace/Tasks';
 import Learning from '@/components/workspace/Learning';
@@ -318,7 +319,9 @@ function Workspace({ auth }) {
           />
         )}
         {tab === 'forms' && (
-          <CustomFormsWorkspace auth={auth} initialMine={params.get('mine') === 'true'} />
+          <AdminSaveProvider>
+            <CustomFormsWorkspace auth={auth} initialMine={params.get('mine') === 'true'} />
+          </AdminSaveProvider>
         )}
         {tab === 'talks' && auth.isOwner && <SermonManager />}
         {tab === 'fees' && <FeeLedger canManage={auth.isOwner} />}

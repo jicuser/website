@@ -85,9 +85,33 @@ test('home shortcuts fit small phones and prayer details expand only on request'
   await expect(details).toBeHidden();
   await expect(prayerButton).toBeFocused();
 
+  await expect(page.locator('.jic-hero').getByRole('link', { name: /My account|Sign in|portal/i }))
+    .toHaveCount(0);
+  await expect(page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }))
+    .toHaveAttribute('href', '/prayer-times/reminders');
+  await expect(page.getByRole('navigation', { name: 'Quick navigation' })
+    .getByRole('link', { name: 'Sign in', exact: true })).toHaveAttribute('href', '/portal');
+
   for (const width of [320, 390, 767]) {
     await page.setViewportSize({ width, height: 844 });
-    await expect(page.locator('.jic-home-shortcuts').getByRole('link')).toHaveCount(3);
+    await expect(page.locator('.jic-home-shortcuts').getByRole('link')).toHaveCount(4);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const servicePositions = await page.locator('.jic-home-shortcuts').evaluate((nav) => {
+      const links = [...nav.querySelectorAll('a')];
+      const prayer = document.querySelector('.jic-home-prayer').getBoundingClientRect();
+      const dockTop = document.querySelector('#jic-prayer-dock').getBoundingClientRect().top;
+      return {
+        firstLinks: links.slice(0, 2).map((link) => link.getAttribute('href')),
+        servicesVisible: links.slice(0, 2).every((link) => {
+          const box = link.getBoundingClientRect();
+          return box.top >= 0 && box.bottom < dockTop;
+        }),
+        servicesBeforePrayer: nav.getBoundingClientRect().bottom < prayer.top,
+      };
+    });
+    expect(servicePositions.firstLinks).toEqual(['/funerals', '/services/nikah']);
+    expect(servicePositions.servicesVisible, 'Janazah and Nikah visible without scrolling').toBe(true);
+    expect(servicePositions.servicesBeforePrayer).toBe(true);
     const overflow = await page
       .locator('.jic-home-shortcuts')
       .evaluate(
@@ -107,6 +131,43 @@ test('home shortcuts fit small phones and prayer details expand only on request'
     .getByRole('link', { name: /Janazah/ })
     .click();
   await expect(page).toHaveURL('/funerals');
+});
+
+test('desktop timetable stays compact and links to the next congregation', async ({ page }, testInfo) => {
+  await page.clock.setFixedTime(new Date('2026-10-15T09:00:00Z'));
+  await setup(page);
+  for (const width of [1024, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const dock = page.locator('#jic-prayer-dock');
+    await expect(page.locator('#jic-prayer-details')).toBeVisible();
+    await expect(dock.locator('.jic-today-prayer')).toHaveCount(6);
+    await expect(dock.locator('.is-next')).toContainText('Dhuhr');
+    await expect(dock.locator('.jic-next-prayer-summary')).toContainText('Next jama’ah · Dhuhr');
+    const sizes = await dock.evaluate((node) => ({
+      height: node.getBoundingClientRect().height,
+      overflow: document.documentElement.scrollWidth > innerWidth + 1,
+      linksFit: [...node.querySelectorAll('.jic-today-prayer')].every(
+        (link) => link.scrollWidth <= link.clientWidth + 1,
+      ),
+    }));
+    expect(sizes.height).toBeLessThan(width >= 1100 ? 106 : 150);
+    expect(sizes.overflow).toBe(false);
+    expect(sizes.linksFit).toBe(true);
+    if (width === 1440)
+      await page.screenshot({ path: testInfo.outputPath('homepage-compact-desktop.png') });
+  }
+});
+
+test('Nikah and Salah alert setup open the intended public pages', async ({ page }) => {
+  await setup(page);
+  await page.locator('.jic-home-shortcuts').getByRole('link', { name: /Nikah/ }).click();
+  await expect(page).toHaveURL('/services/nikah');
+  await page.goto('/');
+  await page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }).click();
+  await expect(page).toHaveURL('/prayer-times/reminders');
+  await expect(page.getByRole('heading', { name: 'Set up Salah alerts', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Enable Salah alerts', exact: true })).toBeVisible();
 });
 
 for (const target of ['card', 'background']) {

@@ -6,14 +6,15 @@ Reviewed 15 October 2026 against the live JIC website, the supplied six-screen a
 
 | Position             | Content                                                                                | Purpose                                                                         |
 | -------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Welcome              | Centre identity, short introduction, Visit the Centre, My account                      | Orient new visitors and give returning users a direct sign-in route.            |
-| Daily information    | Next published congregation, prayer start or khutbah time, timetable, reminders, radio | Keep related prayer actions together. Friday uses the two Jummah sessions.      |
-| Explore JIC          | Courses, Madrassah, Janazah, Donate                                                    | Four frequent tasks with consistent sizing and short descriptions.              |
+| Welcome & services   | Centre identity, short introduction, Janazah, Nikah, courses, Madrassah and directions | Put essential services before the prayer card on phones. |
+| Daily information    | Next published congregation, prayer start or khutbah time, full timetable, Set up Salah alerts, radio | Keep related prayer actions together in a compact card. Friday uses published Jummah sessions. |
 | Updates              | Published notice, an enabled live stream, programme posters, upcoming events           | Use real content. A live banner only appears with an enabled, valid stream URL. |
 | Community & services | Services, building works, youth                                                        | Keep secondary destinations discoverable without crowding the first screen.     |
 | Stay connected       | Friday times, published broadcast player, WhatsApp                                     | Continue into the existing pages and channels.                                  |
 
-The photograph remains behind the welcome area. The content below has a plain theme-aware background. CMS hero text and the existing four editable destination tiles are retained; destinations follow page-visibility settings. Video remains click-to-load. Donate opens the existing donation flow.
+The photograph remains behind the welcome area. The content below has a plain theme-aware background. CMS hero text, destination titles and images are retained; destinations follow page-visibility settings. The Madrassah shortcut uses the concise action label “Learn & enrol”. Video remains click-to-load. Donate opens the existing donation flow.
+
+Sign in / My account is a session-aware navigation link, not a second hero action. On phones it sits beside Home, Donate, Prayer times and Menu. On desktop it replaces the redundant Home utility icon; the logo still links home. The desktop prayer bar retains all six times, highlights the next congregation and places Jummah and radio alongside the daily times at wide widths.
 
 On phones, search and theme controls scroll with the header. The bottom prayer row starts compact; opening the full timetable is an explicit action. The panel still yields to the footer and focused fields. The Home control returns to the top on the homepage, replacing the overlapping floating arrow there. This is a responsive website update, not an App Store release.
 
@@ -41,7 +42,7 @@ A targeted public GitHub search for the official domain did not identify a verif
 
 | User           | Starting point                    | Relevant work                                                                       |
 | -------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
-| Visitor        | Homepage                          | Prayer, directions, courses, enrolment, Janazah, events, giving.                    |
+| Visitor        | Homepage                          | Prayer, directions, courses, enrolment, Janazah, Nikah, events, giving.                    |
 | Account holder | My account                        | Profile, requests and only the modules enabled for their account.                   |
 | Parent         | My account → My family            | Children, attendance, learning, fees and messages, once those modules are deployed. |
 | Teacher        | Approved account → Teaching       | Assigned classes, registers, lessons, progress and authorised messaging.            |

@@ -4,6 +4,8 @@ import { MapPin, Phone } from 'lucide-react';
 import { SITE } from '@/content/site';
 import { currentPrayer } from '@/lib/currentPrayer';
 import { nextPrayer } from '@/lib/nextPrayer';
+import { nextCongregation } from '@/lib/nextCongregation';
+import { displayTime } from '@/lib/timetable';
 import { cn } from '@/lib/utils';
 
 const PRAYERS = [
@@ -60,8 +62,11 @@ export default function PrayerTimeBar({
   showContact = true,
   showTimes = true,
   showNext = true,
+  highlightNext = false,
 }) {
   const current = currentPrayer(todaysTimes, currentDate);
+  const upcoming = highlightNext ? nextCongregation(todaysTimes, jummahTimes, currentDate) : null;
+  const upcomingName = upcoming?.name.startsWith('Jummah') ? 'Dhuhr' : upcoming?.name;
   const Item = interactive ? Link : 'div';
   const destination = (path) => (interactive ? { to: path } : {});
 
@@ -79,13 +84,30 @@ export default function PrayerTimeBar({
           </a>
         </div>
       )}
-      {showNext && (
-        <NextPrayerSummary
-          todaysTimes={todaysTimes}
-          currentDate={currentDate}
-          interactive={interactive}
-        />
-      )}
+      {showNext &&
+        (highlightNext ? (
+          <div className="jic-prayer-legend">
+            <Item {...destination('/prayer-times')} className="jic-next-prayer-summary">
+              {upcoming ? (
+                <>
+                  <strong>Next jama’ah · {upcoming.name}</strong>
+                  <span className="jic-next-jamaah-time">{displayTime(upcoming.time)}</span>
+                  <span className="jic-prayer-countdown">
+                    {upcoming.beginsLabel} {displayTime(upcoming.begins)}
+                  </span>
+                </>
+              ) : (
+                'Today’s prayer timetable'
+              )}
+            </Item>
+          </div>
+        ) : (
+          <NextPrayerSummary
+            todaysTimes={todaysTimes}
+            currentDate={currentDate}
+            interactive={interactive}
+          />
+        ))}
       {showTimes && (
         <>
           <div className="jic-prayer-table-scroll">
@@ -100,7 +122,11 @@ export default function PrayerTimeBar({
                 <Item
                   key={key}
                   {...destination('/prayer-times')}
-                  className={cn('jic-today-prayer', current?.key === key && 'is-current')}
+                  className={cn(
+                    'jic-today-prayer',
+                    !highlightNext && current?.key === key && 'is-current',
+                    upcomingName === label && 'is-next',
+                  )}
                   aria-current={current?.key === key ? 'time' : undefined}
                   aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}
                 >

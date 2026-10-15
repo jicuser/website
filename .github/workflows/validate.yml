@@ -23,8 +23,14 @@ jobs:
           package-manager-cache: false
       - run: npm ci
       - run: npm run validate
+        env:
+          # Validation builds are never deployed and do not need production credentials.
+          VITE_SUPABASE_URL: https://ci-validation.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_ci_validation_only
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - name: Check workspace forms with their test-only feature flag
+        run: npx playwright test --config playwright.forms.config.mjs
       - name: Save browser verification evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

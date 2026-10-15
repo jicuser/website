@@ -44,7 +44,7 @@ export default function HomePrayerCard() {
             Full timetable <ArrowRight size={15} aria-hidden="true" />
           </Link>
           <Link to="/prayer-times/reminders">
-            <Bell size={16} aria-hidden="true" /> Reminders
+            <Bell size={16} aria-hidden="true" /> Set up Salah alerts
           </Link>
         </div>
       </div>
