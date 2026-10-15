@@ -183,7 +183,8 @@ function Workspace({ auth }) {
         <button onClick={auth.signOut}>Sign out</button>
         {auth.isAdmin && <Link to="/admin">Website admin</Link>}
       </div>
-      <WorkspaceOverview data={data} auth={auth} onTabChange={setTab} />\n      <nav className="workspace-tabs" aria-label="Workspace">
+      <WorkspaceOverview data={data} auth={auth} onTabChange={setTab} />
+      <nav className="workspace-tabs" aria-label="Workspace">
         {options.map(([id, title]) => (
           <button
             key={id}
