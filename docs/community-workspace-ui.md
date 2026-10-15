@@ -34,3 +34,26 @@ Use [the API contract](community-workspace-api.md) for exact table columns and R
 ## Later additions and release
 
 The initial delivery above has since been extended with the custom form builder, private attachments and ZIP bundles, threaded replies, exports of matching responses, fee records, guardian/department-head links, marks and course resources. Use [current forms](forms-website.md), [learning extensions](learning-extensions-api.md), [fee contracts](fees-api.md) and [website release steps](WEBSITE-RELEASE.md) for the current source. Live account/provider setup and publication are separate from source verification.
+
+
+## JIC integrated platform delivery brief — 15 October 2026
+
+Product direction: build the JIC website and future iOS/Android app from one permissioned Supabase domain model. The supplied Labbaik screenshots are functional inspiration only, not licensed UI assets or branding. Preserve JIC's navy/gold visual identity, responsive glass material system, and public no-login service enquiry routes.
+
+Implementation rules:
+- Build user journeys end to end without requesting approval for routine UI, component and navigation decisions. Do not represent source-only features as deployed or enabled.
+- Keep public enquiries available without accounts. Allow applicants to request an account and authorised staff to link verified enquiries to an identity; do not auto-merge based on name/email alone.
+- Separate member, parent/guardian, pupil, teacher, office, finance, administrator, and designated safeguarding lead capabilities; enforce server-side permissions and RLS, never rely on hidden tabs.
+- Use stable IDs, scoped ownership, idempotent writes, immutable financial and certificate events, secure provider webhooks and audit trails. Build additive, reviewed migrations and test against staging before activating flags.
+- Share domain contracts and backend operations between web and app; use native push and deep links only after permission/notification configuration. Support passwordless magic links and optional configured OAuth without bypassing account approval.
+
+Delivery order:
+1. Portal foundation: role-aware home, household links, enquiries, bookings, certificates, donations, payments and notifications. Responsive four-item public bottom bar and accessible menu remain distinct from private portal navigation.
+2. Madrassah: one-tap session register, parent-reported absences, attendance history, guardian alerts, teacher QR check-in/out (with replay protection), and learning records.
+3. Curriculum: configurable Qa'idah and Qur'an levels, Islamic studies units, kitab chapters, Hifz Sabaq/Sabaq Para/Dhor and Juz map, salah steps, assessments, oral/written exams, marks, merits and parent-readable progress.
+4. Finance: one ledger linking payer, student, booking and purpose; one-off/weekly/monthly/termly/yearly billing, sibling discount policy, card/cash/bank reconciliation, Stripe-hosted payment methods, verified subscriptions and failure retries. Keep masjid and madrassah settlement entities explicit; never store raw card details.
+5. Communications and learning: opt-in WhatsApp/SMS/email event templates, delivery receipts, reminders, online class links, authorised attendance capture, consent-based recording links, optional external Drive/Dropbox OAuth.
+6. Restricted operations: safeguarding concerns, designated lead workflow, DBS expiry alerts, staff hours and payroll export. Payroll tax and statutory forms require separately validated UK payroll compliance before release.
+7. Optional engagement: merit achievements and age-appropriate educational quizzes/games with safeguarding review.
+
+Definition of done for each module: accessible mobile/desktop flows; permission matrix and RLS tests; audit and error states; staging migrations; browser and API tests; data privacy/retention review; documented release flags and rollback. Do not enable live payments, safeguarding, payroll or child data flows without validated backend and provider configuration.
