@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useRef, useState } from 'react';
 import NormalSettings from './NormalSettings';
 import TvDisplayLayoutEditor from './TvDisplayLayoutEditor';
 import ScheduledScenes from './ScheduledScenes';
+import TvBoardPicker from './TvBoardPicker';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { TV_PRESET_KEYS } from '../../../supabase/functions/_shared/tv.js';
@@ -205,6 +206,16 @@ export default function BackgroundSettings({
             </label>
           )}
         </div>
+
+        {preset === 'standby' && (
+          <TvBoardPicker
+            key={`${screenId}:${form.display_orientation}:${revision}`}
+            screenId={screenId}
+            settings={form}
+            onChange={update}
+            disabled={busy}
+          />
+        )}
 
         <TvDisplayLayoutEditor
           screenId={screenId}

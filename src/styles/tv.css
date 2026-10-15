@@ -719,13 +719,15 @@ html[data-theme] .jic-tv-display.is-portrait {
   width: min(100vw, 56.25dvh);
 }
 .scene-brand-block {
+  position: relative;
   width: 100%;
   height: 100%;
-  display: grid;
-  place-items: center;
+  display: block;
   background: #000;
 }
 .scene-brand-block img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;

@@ -1,13 +1,25 @@
 import React from 'react';
 import { TV_DHIKR } from '@/content/tvReminders';
+import { countdownParts } from '@/lib/tvCountdown';
 export default function TvPrayerScene({ sequence, jummahNotice, settings = {} }) {
   if (sequence.phase === 'before')
     return (
-      <section className="jic-tv-prayer-scene" aria-label="Upcoming congregation notice">
+      <section
+        className="jic-tv-prayer-scene has-countdown"
+        aria-label="Upcoming congregation notice"
+      >
         <p className="jic-tv-scene-label">
           {sequence.name} · {sequence.time}
         </p>
-        <h1>{settings.before_jamaah_message || 'Jama‘ah begins in 1 minute'}</h1>
+        <h1>
+          {!settings.before_jamaah_message ||
+          settings.before_jamaah_message === 'Jama‘ah begins in 1 minute'
+            ? 'Jama‘ah begins shortly'
+            : settings.before_jamaah_message}
+        </h1>
+        <p className="tv-iqamah-countdown" aria-label="Time until jama’ah">
+          {countdownParts(sequence.secondsToJamaah).slice(1).join(':')}
+        </p>
         <p>Please finish conversations and prepare for salah.</p>
       </section>
     );
@@ -72,7 +84,8 @@ export default function TvPrayerScene({ sequence, jummahNotice, settings = {} })
 
 function DhikrCount({ count }) {
   const digits = String(count).replace(/\d/g, (digit) => '٠١٢٣٤٥٦٧٨٩'[Number(digit)]);
-  const label = count === 1 ? 'مَرَّةٌ وَاحِدَةٌ' : `${digits} ${count < 11 ? 'مَرَّاتٍ' : 'مَرَّةً'}`;
+  const label =
+    count === 1 ? 'مَرَّةٌ وَاحِدَةٌ' : `${digits} ${count < 11 ? 'مَرَّاتٍ' : 'مَرَّةً'}`;
   return (
     <span className="tv-dhikr-count" aria-label={label}>
       {digits} ×
