@@ -9,6 +9,7 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
   let previousY = Math.max(0, browser.scrollY);
   let previousWidth = browser.innerWidth;
   let distance = 0;
+  let upwardDistance = 0;
   let hidden = false;
   let pointerInside = false;
   let footerVisible = false;
@@ -39,6 +40,7 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
     browser.clearTimeout(idleTimer);
     idleTimer = undefined;
     distance = 0;
+    upwardDistance = 0;
     previousY = Math.max(0, browser.scrollY);
     settle();
   };
@@ -49,10 +51,19 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
       show();
       return;
     }
-    const movement = Math.abs(y - previousY);
+    const delta = y - previousY;
+    const movement = Math.abs(delta);
     previousY = y;
     if (!movement) return;
     manualOpen = null;
+    if (browser.innerWidth < 768 && delta < 0) {
+      upwardDistance += movement;
+      distance = 0;
+      if (upwardDistance >= PRAYER_DOCK_SCROLL_DISTANCE) {
+        show();
+        return;
+      }
+    } else upwardDistance = 0;
     distance += movement;
     if (!hidden && distance >= PRAYER_DOCK_SCROLL_DISTANCE) {
       setHidden(true);

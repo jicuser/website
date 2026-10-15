@@ -3,10 +3,7 @@ import { Plus, Save, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 
-const DEFAULT_TICKER = [
-  { label: 'NEXT PRAYER', text: 'Live prayer information is shown automatically.' },
-  { label: 'JUMMAH', text: 'Friday khutbah and jama‘ah times are shown automatically.' },
-];
+const DEFAULT_TICKER = [];
 
 const DEFAULT_REMINDERS = [
   { type: 'Qur’an', text: 'Remember Me; I will remember you.', source: 'Qur’an 2:152' },
@@ -157,6 +154,10 @@ export default function HeaderContentEditor() {
       {message && <div className="admin-success">{message}</div>}
 
       <h4 className="mb-3 font-semibold">Rolling banner extras</h4>
+      <p className="mb-3 text-sm">
+        The phone banner includes the next jama’ah and published Jummah times automatically. Add
+        community announcements below. Visitors can pause the banner to read them.
+      </p>
       <div className="space-y-3">
         {ticker.map((item, index) => (
           <div
