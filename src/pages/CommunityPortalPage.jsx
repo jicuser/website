@@ -47,6 +47,28 @@ const tables = [
 const empty = () => Object.fromEntries(tables.map((name) => [name, []]));
 export default function CommunityPortalPage() {
   const auth = useAuth();
+  const [magicEmail, setMagicEmail] = useState('');
+  const [magicBusy, setMagicBusy] = useState(false);
+  const [magicNotice, setMagicNotice] = useState('');
+  const [magicError, setMagicError] = useState('');
+  const requestMagicLink = async (event) => {
+    event.preventDefault();
+    setMagicBusy(true);
+    setMagicError('');
+    setMagicNotice('');
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: magicEmail.trim(),
+        options: { emailRedirectTo: `${window.location.origin}/portal`, shouldCreateUser: false },
+      });
+      if (error) throw error;
+      setMagicNotice('If this email has an eligible account, a sign-in link will arrive shortly.');
+    } catch {
+      setMagicError('Unable to send a sign-in link right now. Please try again later.');
+    } finally {
+      setMagicBusy(false);
+    }
+  };
 
   return (
     <div className="community-workspace">
@@ -77,6 +99,28 @@ export default function CommunityPortalPage() {
             />
             <Link to="/account/recovery">Forgot your password?</Link>
             <GoogleSignInButton />
+            <div className="workspace-card">
+              <h3>Sign in without a password</h3>
+              <p className="workspace-meta">Already have an approved JIC account? Request a secure email sign-in link.</p>
+              <form className="workspace-form" onSubmit={requestMagicLink}>
+                <label className="workspace-field">
+                  <span>Email address</span>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    required
+                    maxLength={254}
+                    value={magicEmail}
+                    onChange={(event) => setMagicEmail(event.target.value)}
+                  />
+                </label>
+                <button type="submit" disabled={magicBusy}>
+                  {magicBusy ? 'Sending…' : 'Email me a sign-in link'}
+                </button>
+              </form>
+              {magicNotice && <p role="status">{magicNotice}</p>}
+              {magicError && <p role="alert">{magicError}</p>}
+            </div>
             <p className="workspace-meta">
               Need access? <Link to="/account/request">Request a JIC account</Link>
             </p>
