@@ -47,13 +47,15 @@ Donation code loads only when requested. Initial JavaScript measured with
 This is a small bundle saving, not a demonstrated Core Web Vitals improvement.
 The optional HLS size warning remains. Production dependency audit: zero findings.
 
-Validation passed lint, 494 Node/database tests and a production build. Added browser
-regressions exercise the real mobile footer/toggle and enquiry flow with mocked
-external data; local browser execution is unavailable, so those run in CI. The first
-CI pass exposed a monthly-table overflow: absolutely positioned screen-reader
-labels needed a containing block inside the scroll area. That is now explicit;
-the time labels and horizontal scrolling are preserved. Physical
-iPhone/Android delivery, keyboard behaviour and visual acceptance remain separate.
+Validation passed lint, 494 Node/database tests and a production build. All 32
+browser flows passed in [CI run 38667211528](https://github.com/jicuser/website/actions/runs/38667211528),
+including narrow timetable previews, mobile footer/toggle, enquiry submission and
+admin workflows with mocked external data. CI exposed monthly-table overflow:
+absolutely positioned screen-reader labels needed a containing block inside the
+scroll area. That is now explicit; time labels and horizontal scrolling remain.
+Preview restoration is checked from the actual pointer-opening position, accounting
+for browser click scrolling around floating controls. Physical iPhone/Android
+delivery, keyboard behaviour and visual acceptance remain separate checks.
 The reminder scheduler is enabled and its live heartbeat is recent; opening the
 homepage or settings still never requests notification permission automatically.
 The public-page fetch was denied by the site's country-access restriction (HTTP
