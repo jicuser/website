@@ -4,6 +4,10 @@ import {
   Bell,
   BookOpen,
   CalendarDays,
+  Award,
+  Heart,
+  Mail,
+  Wallet,
   CheckCircle2,
   ClipboardList,
   Users,
@@ -150,6 +154,10 @@ function WorkspaceOverview({ data, auth, onTabChange }) {
     (data.learning_guardians || []).some((row) => row.user_id === userId);
 
   const cards = [
+    [Mail, 'My enquiries', 'Follow up with JIC about services and registrations.', 'enquiries'],
+    [CalendarDays, 'Bookings', 'View available hall and community booking services.', 'bookings'],
+    [Heart, 'Donations', 'Support JIC and its community projects.', 'donations'],
+    ...(CERTIFICATES_ENABLED ? [[Award, 'My certificates', 'View and verify issued JIC records.', 'certificates']] : []),
     ...(family
       ? [[Users, 'My family', 'Open children, attendance, progress and fees.', 'learning']]
       : []),
@@ -163,6 +171,7 @@ function WorkspaceOverview({ data, auth, onTabChange }) {
           ],
         ]
       : []),
+    ...(family || auth.isOwner ? [[Wallet, 'Fees and receipts', 'Review charges and confirmed payments.', 'fees']] : []),
     ...(auth.isAdmin
       ? [[CheckCircle2, 'Administration', 'Review tasks, forms, content and staff work.', 'admin']]
       : []),
@@ -185,7 +194,17 @@ function WorkspaceOverview({ data, auth, onTabChange }) {
             className="workspace-overview-card workspace-overview-action"
             key={title}
             aria-label={title}
-            onClick={() => (tab === 'admin' ? window.location.assign('/admin') : onTabChange(tab))}
+            onClick={() => {
+              const destinations = {
+                admin: '/admin',
+                enquiries: '/services',
+                bookings: '/services/hall-booking',
+                donations: '/donate',
+                certificates: '/account/certificates',
+              };
+              if (destinations[tab]) window.location.assign(destinations[tab]);
+              else onTabChange(tab);
+            }}
           >
             <span className="workspace-overview-icon">
               <Icon size={19} />
