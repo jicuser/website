@@ -68,6 +68,10 @@ export default function CommunityPortalPage() {
               autoComplete="current-password"
             />
             <Link to="/account/recovery">Forgot your password?</Link>
+            <button type="button" onClick={auth.signInWithGoogle}>Continue with Google</button>
+            <p className="workspace-meta">
+              Need access? <Link to="/account/request">Request a JIC account</Link>
+            </p>
           </ActionForm>
         ) : !auth.profile?.is_active ? (
           <div>
