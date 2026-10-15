@@ -103,10 +103,8 @@ const MORE_CARDS = [
 
 function CommunityAccessStrip() {
   const links = [
-    [Users, 'Community portal', 'Family updates, learning and staff tools.', '/portal'],
-    [Video, 'Live lessons', 'Join a class when your teacher opens the room.', '/portal?tab=learning'],
+    [Users, 'Community portal', 'Family updates, live lessons, learning and staff tools.', '/portal'],
     [BookOpen, 'Courses & Madrassah', 'Find classes, enrolment and learning information.', '/madrassah'],
-    [HeartHandshake, 'Janazah & support', 'Guidance, contacts and community help.', '/worship/janazah-guide'],
   ];
   return (
     <section className="jic-community-access" aria-labelledby="community-access-title">
