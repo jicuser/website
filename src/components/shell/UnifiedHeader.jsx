@@ -1,4 +1,5 @@
 import { useContent } from '@/context/ContentContext';
+import { useAuth } from '@/context/AuthContext';
 import { isPageVisible, visibleNavigation, pageSectionKey } from '@/lib/pageVisibility';
 import React, {
   lazy,
@@ -16,6 +17,7 @@ import {
   Heart,
   Home,
   LogIn,
+  User,
   Menu,
   Moon,
   Pause,
@@ -49,6 +51,8 @@ const WonderfulDonationModal = lazy(() => import('@/components/donations/Wonderf
 
 export default function UnifiedHeader() {
   const { getContent } = useContent();
+  const { user } = useAuth();
+  const accountLabel = user ? 'My account' : 'Sign in';
   const menuGroups = visibleNavigation(PUBLIC_MENU_GROUPS, getContent);
   const { pathname, key: routeKey } = useLocation();
   const navigate = useNavigate();
@@ -331,6 +335,8 @@ export default function UnifiedHeader() {
               todaysTimes={todaysTimes}
               jummahTimes={jummahTimes}
               currentDate={currentDate}
+              showContact={false}
+              highlightNext
               radio={
                 <div className="jic-header-radio">
                   {radioButton}
@@ -407,8 +413,13 @@ export default function UnifiedHeader() {
                   {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
                   <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
                 </button>
-                <Link to="/" aria-label="Home" className="jic-desktop-action">
-                  <Home size={20} />
+                <Link
+                  to="/portal"
+                  aria-label={accountLabel}
+                  title={accountLabel}
+                  className="jic-desktop-action"
+                >
+                  <User size={20} aria-hidden="true" />
                 </Link>
                 <button
                   type="button"
@@ -523,6 +534,10 @@ export default function UnifiedHeader() {
           <Clock3 size={21} aria-hidden="true" />
           <span>Prayer times</span>
         </button>
+        <Link to="/portal" aria-current={pathname === '/portal' ? 'page' : undefined}>
+          <User size={21} aria-hidden="true" />
+          <span>{accountLabel}</span>
+        </Link>
         <button
           type="button"
           className="jic-bottom-menu-trigger"

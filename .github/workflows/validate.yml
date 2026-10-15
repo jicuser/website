@@ -23,6 +23,10 @@ jobs:
           package-manager-cache: false
       - run: npm ci
       - run: npm run validate
+        env:
+          # Validation builds are never deployed and do not need production credentials.
+          VITE_SUPABASE_URL: https://ci-validation.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_ci_validation_only
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - name: Save browser verification evidence

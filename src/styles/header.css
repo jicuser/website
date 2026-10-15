@@ -1,6 +1,6 @@
 /* Public header layout. Shared colours and materials come from theme.css and liquid-glass.css. */
 .jic-unified-header {
-  padding-top: var(--jic-prayer-dock-height, 180px);
+  padding-top: var(--jic-prayer-dock-height, 112px);
 }
 .jic-prayer-dock {
   position: fixed;
@@ -127,7 +127,8 @@
 .jic-today-prayer small {
   display: none;
 }
-.jic-today-prayer.is-current {
+.jic-today-prayer.is-current,
+.jic-today-prayer.is-next {
   border-bottom-color: var(--jic-gold);
   background: color-mix(in srgb, var(--jic-gold) 9%, transparent);
 }
@@ -186,8 +187,14 @@
   line-height: 1.2;
   color: var(--jic-text);
 }
-.jic-radio-flat > svg {
-  color: #8b929c;
+.jic-prayer-dock .jic-radio-flat,
+.jic-prayer-dock .jic-radio-flat > svg,
+.jic-next-jamaah-time {
+  color: var(--jic-gold);
+}
+.jic-next-jamaah-time {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 .jic-radio-flat small {
   display: none;
@@ -766,7 +773,7 @@ html[data-prayer-dock-hidden='true'] {
     inset: auto 0 0;
     z-index: 50;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     padding: 4px max(8px, env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom))
       max(8px, env(safe-area-inset-left));
     background: var(--jic-glass-panel-strong);
@@ -786,7 +793,10 @@ html[data-prayer-dock-hidden='true'] {
     border: 0;
     border-radius: 10px;
     color: inherit;
-    font-size: 0.75rem;
+    font-size: clamp(0.6875rem, 3vw, 0.75rem);
+  }
+  .jic-mobile-controls [aria-current='page'] {
+    color: var(--jic-gold);
   }
   .jic-bottom-menu-trigger svg {
     color: var(--jic-gold);
@@ -889,6 +899,40 @@ html[data-prayer-dock-hidden='true'] {
   }
   .jic-free-brand {
     flex-basis: 190px;
+  }
+}
+/* Keep the complete desktop timetable, with Jummah and radio beside it
+   when there is room. Narrower tablets retain a separate utility row. */
+@media (min-width: 1100px) {
+  .jic-prayer-dock .jic-unified-info {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+  .jic-prayer-dock .jic-prayer-legend {
+    grid-column: 1 / -1;
+    padding-block: 3px;
+  }
+  .jic-prayer-dock .jic-prayer-table-scroll {
+    min-width: 0;
+  }
+  .jic-prayer-dock .jic-today-prayer {
+    gap: 2px;
+    min-height: 60px;
+    padding-block: 3px;
+  }
+  .jic-prayer-dock .jic-header-live-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+    border-top: 0;
+    border-inline-start: 1px solid var(--jic-border);
+  }
+  .jic-prayer-dock .jic-jummah-compact {
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+  .jic-prayer-dock .jic-header-radio {
+    align-items: center;
   }
 }
 @media (min-width: 1200px) {

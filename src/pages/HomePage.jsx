@@ -126,14 +126,6 @@ export default function HomePage() {
   const hasLiveStream = Boolean(livestream?.enabled && safeWebUrl(livestream.stream_url));
   const shortcuts = [
     {
-      key: 'courses',
-      title: 'Courses',
-      text: 'Find a class',
-      to: '/education/courses',
-      icon: BookOpen,
-    },
-    cards.find((card) => card.key === 'madrassah'),
-    {
       key: 'janazah',
       title: 'Janazah',
       text: 'Funeral support',
@@ -141,11 +133,22 @@ export default function HomePage() {
       icon: HeartHandshake,
     },
     {
-      key: 'donate',
-      title: 'Donate',
-      text: 'Support your masjid',
+      key: 'nikah',
+      title: 'Nikah',
+      text: 'Marriage services',
+      to: '/services/nikah',
       icon: Heart,
-      onClick: () => window.dispatchEvent(new Event('jic-open-donation')),
+    },
+    {
+      key: 'courses',
+      title: 'Courses',
+      text: 'Find a class',
+      to: '/education/courses',
+      icon: BookOpen,
+    },
+    {
+      ...cards.find((card) => card.key === 'madrassah'),
+      text: 'Learn & enrol',
     },
   ].filter((card) => !card.to || isPageVisible(getContent, card.to));
   const communityCards = cards.filter(
@@ -165,14 +168,14 @@ export default function HomePage() {
               {hero.body ||
                 'Worship. Learn. Grow. Together.\nA stronger community for a brighter tomorrow.'}
             </p>
-            <div className="jic-hero-buttons">
-              <Link to="/contact#map" className="jic-primary-cta">
-                Visit the Centre <ArrowRight size={18} />
-              </Link>
-              <Link to="/portal" className="jic-secondary-cta">
-                <Users size={18} aria-hidden="true" /> My account
-              </Link>
-            </div>
+            <nav className="jic-home-shortcuts" aria-label="Services and learning">
+              {shortcuts.map(({ key, ...card }) => (
+                <HomeDestination key={key} {...card} />
+              ))}
+            </nav>
+            <Link to="/contact#map" className="jic-home-visit">
+              Visit the Centre <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
           <HomePrayerCard />
         </div>
@@ -186,15 +189,6 @@ export default function HomePage() {
             <span>{announcement.body}</span>
           </section>
         )}
-
-        <section className="jic-home-section" aria-labelledby="home-explore-title">
-          <h2 id="home-explore-title">Explore JIC</h2>
-          <nav className="jic-home-shortcuts" aria-label="Popular destinations">
-            {shortcuts.map(({ key, ...card }) => (
-              <HomeDestination key={key} {...card} />
-            ))}
-          </nav>
-        </section>
 
         {hasLiveStream && (
           <a href="#live" className="jic-home-live-banner">
