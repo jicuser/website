@@ -39,7 +39,10 @@ export default function CommunityPortalPage() {
           <h1>Community portal</h1>
           <p className="workspace-lead">A calm place for learning, family updates, live lessons and JIC work.</p>
           <WorkspacePreview />
-          <Link to="/education">Back to education</Link>
+          <div className="workspace-actions">
+            <Link className="workspace-button" to="/account/request">Request an account</Link>
+            <Link to="/education">Back to education</Link>
+          </div>
         </div>
       </div>
     );
