@@ -48,7 +48,7 @@ export default function CommunityPortalPage() {
     <div className="community-workspace">
       <div className="workspace-wrap">
         <header className="workspace-header">
-          <h1>Community portal</h1>
+          <h1>JIC Portal</h1>
           <div className="workspace-actions">
             {CERTIFICATES_ENABLED && auth.user && auth.profile?.is_active && <Link to="/account/certificates">My certificates</Link>}
             <Link to="/">Website</Link>
