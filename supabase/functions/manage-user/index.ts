@@ -38,6 +38,71 @@ Deno.serve(async (req) => {
     if (raw.length > 8000) throw new Error('Request is too large.');
     const body = JSON.parse(raw);
     const setup = accountSetupUrl(Deno.env.get('JIC_SITE_URL'));
+    if (body.action === 'list_access_requests') {
+      const { data, error } = await db
+        .from('account_access_requests')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true })
+        .limit(100);
+      if (error) throw error;
+      return Response.json({ ok: true, requests: data || [] }, { headers });
+    }
+    if (body.action === 'reject_access_request') {
+      if (typeof body.request_id !== 'string') throw new Error('Choose an access request.');
+      const { error } = await db
+        .from('account_access_requests')
+        .update({ status: 'rejected', reviewed_at: new Date().toISOString(), reviewed_by: user.id })
+        .eq('id', body.request_id)
+        .eq('status', 'pending');
+      if (error) throw error;
+      return Response.json({ ok: true }, { headers });
+    }
+    if (body.action === 'approve_access_request') {
+      if (typeof body.request_id !== 'string') throw new Error('Choose an access request.');
+      const access = validateDelegation(actor, validateAccess(body));
+      const { data: request, error: requestError } = await db
+        .from('account_access_requests')
+        .select('*')
+        .eq('id', body.request_id)
+        .eq('status', 'pending')
+        .single();
+      if (requestError || !request) throw new Error('This access request is no longer pending.');
+      const email = String(request.email).trim().toLowerCase();
+      let targetUser;
+      const users = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      targetUser = users.data.users.find((item) => item.email?.toLowerCase() === email);
+      if (!targetUser) {
+        const invited = await db.auth.admin.inviteUserByEmail(email, {
+          data: { display_name: request.display_name },
+          redirectTo: setup,
+        });
+        if (invited.error || !invited.data.user)
+          throw new Error(invited.error?.message || 'Invitation could not be created.');
+        targetUser = invited.data.user;
+      }
+      const { error: grantError } = await db.rpc('manage_staff_access', {
+        actor: user.id,
+        target: targetUser.id,
+        new_permissions: access.permissions,
+        new_kinds: access.staff_kinds,
+        enabled: true,
+      });
+      if (grantError) throw grantError;
+      const { error: markError } = await db
+        .from('account_access_requests')
+        .update({
+          status: 'approved',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user.id,
+          auth_user_id: targetUser.id,
+          requested_permissions: access.permissions,
+        })
+        .eq('id', request.id)
+        .eq('status', 'pending');
+      if (markError) throw markError;
+      return Response.json({ ok: true }, { headers });
+    }
     if (body.action === 'invite') {
       const access = validateDelegation(actor, validateAccess(body));
       const email = String(body.email || '')
