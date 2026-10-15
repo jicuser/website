@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
       const email = String(request.email).trim().toLowerCase();
       let targetUser;
       const users = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      if (users.error) throw users.error;
       targetUser = users.data.users.find((item) => item.email?.toLowerCase() === email);
       if (!targetUser) {
         const invited = await db.auth.admin.inviteUserByEmail(email, {
