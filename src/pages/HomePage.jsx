@@ -216,8 +216,8 @@ export default function HomePage() {
         </section>
       )}
 
-      <nav className="jic-feature-grid" aria-label="Explore the centre">
-        {[...cards, ...MORE_CARDS].map(({ key, title, text, to, icon: Icon, img }) => (
+      <nav className="jic-feature-grid" aria-label="Main destinations">
+        {cards.map(({ key, title, text, to, icon: Icon, img }) => (
           <Link
             to={to}
             className={cn('jic-feature-card', !img && 'is-glass-only')}
@@ -233,6 +233,20 @@ export default function HomePage() {
           </Link>
         ))}
       </nav>
+      <details className="jic-more-destinations">
+        <summary>More from JIC <ArrowRight size={16} aria-hidden="true" /></summary>
+        <nav className="jic-feature-grid jic-feature-grid-secondary" aria-label="More destinations">
+          {MORE_CARDS.map(({ key, title, text, to, icon: Icon }) => (
+            <Link to={to} className="jic-feature-card is-glass-only" key={key}>
+              <Icon className="jic-card-icon" aria-hidden="true" />
+              <div className="jic-card-copy">
+                <h2>{title}</h2>
+                <p>{text}</p>
+              </div>
+            </Link>
+          ))}
+        </nav>
+      </details>
 
       <ProgrammePosters />
 
