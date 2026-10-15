@@ -37,7 +37,8 @@ export default function CommunityPortalPage() {
       <div className="community-workspace">
         <div className="workspace-wrap">
           <h1>Community portal</h1>
-          <p>The student and staff workspace is being prepared.</p>
+          <p className="workspace-lead">A calm place for learning, family updates, live lessons and JIC work.</p>
+          <WorkspacePreview />
           <Link to="/education">Back to education</Link>
         </div>
       </div>
