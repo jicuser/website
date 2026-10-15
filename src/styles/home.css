@@ -438,3 +438,10 @@ html[data-theme='light'] .jic-premium-home .jic-kicker {
 html[data-theme='light'] .jic-community-access { background: rgba(255,250,240,.94); color: #0c1930; border-color: rgba(12,25,48,.12); }
 html[data-theme='light'] .jic-community-access-card { border-color: rgba(12,25,48,.12); }
 html[data-theme='light'] .jic-section-heading > p, html[data-theme='light'] .jic-community-access-card small { color: rgba(12,25,48,.68); }
+
+.jic-more-destinations { width: min(1200px, calc(100% - 32px)); margin: 0 auto 22px; }
+.jic-more-destinations summary { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; padding: 10px 14px; border: 1px solid var(--jic-border, rgba(255,255,255,.16)); border-radius: 999px; color: var(--jic-muted, rgba(255,255,255,.78)); }
+.jic-more-destinations summary::-webkit-details-marker { display: none; }
+.jic-more-destinations[open] summary { color: var(--jic-gold, #d39f27); border-color: var(--jic-gold, #d39f27); }
+.jic-feature-grid-secondary { margin-top: 12px; }
+@media (min-width: 1024px) { .jic-more-destinations { display: none; } }
