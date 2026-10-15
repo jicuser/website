@@ -154,9 +154,9 @@ function WorkspaceOverview({ data, auth, onTabChange }) {
     (data.learning_guardians || []).some((row) => row.user_id === userId);
 
   const cards = [
-    [Mail, 'My enquiries', 'Follow up with JIC about services and registrations.', 'enquiries'],
-    [CalendarDays, 'Bookings', 'View available hall and community booking services.', 'bookings'],
-    [Heart, 'Donations', 'Support JIC and its community projects.', 'donations'],
+    [Mail, 'Enquiries and services', 'Contact JIC and follow up through the available service channels.', 'enquiries'],
+    [CalendarDays, 'Request a booking', 'Explore hall availability and submit a booking enquiry.', 'bookings'],
+    [Heart, 'Support JIC', 'Visit the donation page; personal donation history is not linked yet.', 'donations'],
     ...(CERTIFICATES_ENABLED ? [[Award, 'My certificates', 'View and verify issued JIC records.', 'certificates']] : []),
     ...(family
       ? [[Users, 'My family', 'Open children, attendance, progress and fees.', 'learning']]
