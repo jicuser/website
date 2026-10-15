@@ -136,9 +136,17 @@ test('owner builds a draft and publishes with responsible people and task routin
 }, testInfo) => {
   const saved = [];
   const published = [];
+  const updatedAt = '2026-10-15T10:00:00Z';
   const errors = await setup(page, {
     signedIn: true,
     handle: async (path, body, route) => {
+      if (path.endsWith('/custom_forms') && new URL(route.request().url()).searchParams.has('id')) {
+        await route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({ ...form, updated_at: updatedAt }),
+        });
+        return true;
+      }
       if (path.endsWith('/save_custom_form')) {
         saved.push(body.p_form);
         await route.fulfill({ contentType: 'application/json', body: JSON.stringify(formId) });
@@ -157,10 +165,7 @@ test('owner builds a draft and publishes with responsible people and task routin
   await page.getByLabel('Form address', { exact: true }).fill('volunteer-registration');
   await page.getByRole('button', { name: 'Save and publish', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Choose at least one responsible person');
-  await page
-    .getByRole('group', { name: 'Responsible people', exact: true })
-    .getByLabel('Preview owner')
-    .check();
+  await page.locator('.custom-form-routing').getByLabel('Preview owner').check();
   await page.getByText('Access & automatic action', { exact: true }).click();
   await page.getByLabel('Automatic action').fill('Call back');
   await page.getByLabel('Due within (hours)').fill('24');
@@ -173,7 +178,7 @@ test('owner builds a draft and publishes with responsible people and task routin
   expect(saved[0].responsible_ids).toEqual([owner]);
   expect(saved[0].task_title).toBe('Call back');
   expect(saved[0].due_hours).toBe(24);
-  expect(published).toEqual([{ p_form_id: formId }]);
+  expect(published).toEqual([{ p_form_id: formId, p_expected_updated_at: updatedAt }]);
   expect(errors).toEqual([]);
 });
 
@@ -222,9 +227,7 @@ test('response inbox searches server-side, saves an internal note and assigns ac
   await page.getByLabel('Search', { exact: true }).fill('Example');
   await expect.poll(() => queries.some((query) => query.p_search === 'Example')).toBe(true);
   await page.locator('.custom-response summary').click();
-  await page
-    .getByLabel('Internal note')
-    .fill('Thank you. When would be a good time to call?');
+  await page.getByLabel('Internal note').fill('Thank you. When would be a good time to call?');
   await page.getByRole('button', { name: 'Save staff note', exact: true }).click();
   await expect.poll(() => replies.length).toBe(1);
   expect(replies[0].p_internal).toBe(true);
@@ -238,15 +241,17 @@ test('response inbox searches server-side, saves an internal note and assigns ac
 });
 
 test('fees area retains exact pence and manual confirmation retry identity', async ({ page }) => {
-  let fees = [{
-    id: 'fee-preview',
-    title: 'Course materials',
-    currency: 'GBP',
-    amount_minor: 1205,
-    outstanding_minor: 1205,
-    paid_minor: 0,
-    status: 'unpaid',
-  }];
+  let fees = [
+    {
+      id: 'fee-preview',
+      title: 'Course materials',
+      currency: 'GBP',
+      amount_minor: 1205,
+      outstanding_minor: 1205,
+      paid_minor: 0,
+      status: 'unpaid',
+    },
+  ];
   const confirmations = [];
   const errors = await setup(page, {
     signedIn: true,
@@ -291,7 +296,10 @@ test('fees area retains exact pence and manual confirmation retry identity', asy
   await page.getByLabel('I have checked that this payment was received.').check();
   await page.getByRole('button', { name: 'Record manual confirmation', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Try again.');
-  await expect(page.getByLabel('Amount received (£)', { exact: true })).toHaveAttribute('readonly', '');
+  await expect(page.getByLabel('Amount received (£)', { exact: true })).toHaveAttribute(
+    'readonly',
+    '',
+  );
   await expect(page.getByLabel('Receipt or bank reference')).toHaveAttribute('readonly', '');
   await page.getByRole('button', { name: 'Record manual confirmation', exact: true }).click();
   await expect.poll(() => confirmations.length).toBe(2);
