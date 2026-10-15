@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
       ? body.requested_features.filter((item) => typeof item === 'string').slice(0, 12)
       : [];
     if (name.length < 2 || name.length > 120) throw new Error('Enter your name.');
-    if (email.length > 254 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       throw new Error('Enter a valid email address.');
     if (!['parent_guardian', 'student', 'teacher', 'volunteer', 'imam', 'office'].includes(role))
       throw new Error('Choose how you are connected to JIC.');
