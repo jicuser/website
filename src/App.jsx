@@ -42,6 +42,7 @@ const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AccountSetupPage = lazy(() => import('@/pages/admin/AccountSetupPage'));
 const AccountRecoveryPage = lazy(() => import('@/pages/AccountRecoveryPage'));
+const AccountRequestPage = lazy(() => import('@/pages/AccountRequestPage'));
 const ShareDevicePage = lazy(() => import('@/pages/admin/ShareDevicePage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const TileContentAdminPage = lazy(() => import('@/pages/admin/TileContentAdminPage'));
@@ -75,6 +76,7 @@ function AppRoutes() {
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin/setup" element={<AccountSetupPage />} />
             <Route path="/account/recovery" element={<AccountRecoveryPage />} />
+            <Route path="/account/request" element={<AccountRequestPage />} />
             <Route
               path="/admin/share/:screenId"
               element={
