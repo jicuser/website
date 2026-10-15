@@ -1,3 +1,5 @@
+import { useContent } from '@/context/ContentContext';
+import { isPageVisible } from '@/lib/pageVisibility';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail } from 'lucide-react';
@@ -10,6 +12,7 @@ import useCommunityLink from '@/hooks/useCommunityLink';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 
 export default function Footer() {
+  const { getContent } = useContent();
   const whatsapp = useCommunityLink();
   const year = new Date().getFullYear();
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${SITE.name}, ${SITE.address.full}`)}`;
@@ -19,11 +22,13 @@ export default function Footer() {
     <footer className="jic-site-footer">
       <div className="jic-footer-inner">
         <nav className="jic-footer-links" aria-label="Footer links">
-          {FOOTER_LINKS.map(({ name, path }) => (
-            <Link key={path} to={path}>
-              {name}
-            </Link>
-          ))}
+          {FOOTER_LINKS.filter((page) => isPageVisible(getContent, page.path)).map(
+            ({ name, path }) => (
+              <Link key={path} to={path}>
+                {name}
+              </Link>
+            ),
+          )}
         </nav>
         <div className="jic-footer-actions">
           <nav className="jic-footer-icons" aria-label="Social media and contact links">

@@ -1,4 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import { PUBLIC_MENU_GROUPS } from '@/content/nav';
+import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
+import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
+import { useContent } from '@/context/ContentContext';
+import { EDITABLE_PAGES } from '@/content/editablePages';
+import { buildPageNavigator } from '@/lib/pageNavigator';
+import { isPageVisible, pageVisibilityKey, pageSectionKey } from '@/lib/pageVisibility';
+import '@/styles/page-directory.css';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAdminSave } from '@/context/AdminSaveContext';
@@ -13,7 +21,7 @@ import '@/styles/workspace.css';
 import '@/styles/custom-forms.css';
 import '@/styles/programme-page-manager.css';
 
-export function ContentPageCatalogue() {
+export function ContentPageCatalogue({ initialCreate = false }) {
   const { can } = useAuth();
   const read = useCallback(
     (signal) =>
@@ -23,10 +31,35 @@ export function ContentPageCatalogue() {
     [],
   );
   const { data: pages, loading, error, reload } = useAdminRecords(read);
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState(initialCreate ? { placement: '/education' } : null);
   const [filter, setFilter] = useState('all');
   const [section, setSection] = useState('all');
   const [query, setQuery] = useState('');
+  const [visibilityBusy, setVisibilityBusy] = useState(null);
+  const [visibilityError, setVisibilityError] = useState('');
+  async function togglePublished(page) {
+    if (visibilityBusy) return;
+    setVisibilityBusy(page.id);
+    setVisibilityError('');
+    try {
+      const saved = await checked(
+        supabase.rpc('save_site_page', {
+          p_page: {
+            ...page,
+            published: !page.published,
+            expected_updated_at: page.updated_at || null,
+          },
+        }),
+      );
+      if (!saved?.id) throw new Error('The visibility change was not saved.');
+      reload();
+      window.dispatchEvent(new Event('content-workflow-updated'));
+    } catch (error) {
+      setVisibilityError(error.message || 'Could not update page visibility.');
+    } finally {
+      setVisibilityBusy(null);
+    }
+  }
   if (editing)
     return (
       <ContentPageEditor
@@ -120,13 +153,30 @@ export function ContentPageCatalogue() {
           ) : null}
         </p>
       )}
+      {visibilityError && <p role="alert">{visibilityError}</p>}
       <div className="content-form-grid">
         {listed.map((page) => (
           <article className="admin-panel programme-page-card" key={page.id}>
             <span className="content-status">
               {page.published ? 'Visible on website' : 'Hidden from website'}
             </span>
-            <h3>{page.title}</h3>
+            <div className="page-directory__row">
+              <h3>
+                <button className="page-directory__name" onClick={() => setEditing(page)}>
+                  {page.title}
+                </button>
+              </h3>
+              <button
+                className="page-directory__toggle"
+                role="switch"
+                aria-label={`Show ${page.title} on website`}
+                aria-checked={page.published}
+                disabled={Boolean(visibilityBusy)}
+                onClick={() => togglePublished(page)}
+              >
+                {page.published ? 'On' : 'Off'}
+              </button>
+            </div>
             <p>
               <span>Website section: </span>
               <strong>
@@ -166,69 +216,222 @@ export function ContentPageCatalogue() {
   );
 }
 
-export default function ContentPages({ initialPath = '/' }) {
+export default function ContentPages({ initialPath = '/', registerBack }) {
   const { dirty, saving } = useAdminSave();
-  const { can } = useAuth();
+  const { getContent, saveContent } = useContent();
   const [params, setParams] = useSearchParams();
-  const tab = params.get('view') === 'pages' ? 'pages' : 'site';
-  function choose(next) {
-    if (saving || tab === next || (dirty && !window.confirm('Discard unsaved page changes?')))
-      return;
-    setParams(
-      (current) => {
-        const updated = new URLSearchParams(current);
-        updated.set('view', next);
-        return updated;
-      },
-      { replace: true },
-    );
+  const [query, setQuery] = useState('');
+  const [busy, setBusy] = useState(null);
+  const [message, setMessage] = useState('');
+  const [mode, setMode] = useState('view');
+  const tab = params.get('view');
+  const opened = params.has('page');
+  const selected = EDITABLE_PAGES.find((page) => page.path === initialPath);
+  useEffect(() => {
+    if (!opened && tab !== 'pages' && tab !== 'add') return;
+    registerBack?.(() => {
+      if (saving || (dirty && !window.confirm('Discard unsaved page changes?'))) return;
+      setParams({ section: 'content' });
+    });
+    return () => registerBack?.(null);
+  }, [opened, tab, dirty, saving, registerBack, setParams]);
+  function navigate(path, view = 'site') {
+    if (saving || (dirty && !window.confirm('Discard unsaved page changes?'))) return;
+    setMode('view');
+    setParams((current) => {
+      const updated = new URLSearchParams(current);
+      updated.set('view', view);
+      if (path) updated.set('page', path);
+      else updated.delete('page');
+      return updated;
+    });
   }
-  function choosePage(path) {
-    if (
-      saving ||
-      path === initialPath ||
-      (dirty && !window.confirm('Discard unsaved changes and open another page?'))
-    )
-      return;
-    setParams(
-      (current) => {
-        const updated = new URLSearchParams(current);
-        updated.set('section', 'content');
-        updated.set('view', 'site');
-        updated.set('page', path);
-        return updated;
-      },
-      { replace: true },
-    );
+  async function toggle(page) {
+    if (busy) return;
+    setBusy(page.path);
+    setMessage('');
+    try {
+      const visible = isPageVisible(getContent, page.path);
+      await saveContent(pageVisibilityKey(page.path), visible ? 'false' : 'true');
+      setMessage(`${page.name} is now ${visible ? 'hidden' : 'visible'}.`);
+    } catch (error) {
+      setMessage(error.message || 'Could not save visibility. Try again.');
+    } finally {
+      setBusy(null);
+    }
   }
-  return (
-    <div>
-      <nav className="admin-actions" aria-label="Website content">
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'site'}
-          onClick={() => choose('site')}
-        >
-          Existing pages
+  async function movePage(section) {
+    if (!selected || busy || saving) return;
+    setBusy(selected.path);
+    setMessage('');
+    try {
+      await saveContent(pageSectionKey(selected.path), section);
+      setMessage('Page moved. Its website address has stayed the same.');
+    } catch (error) {
+      setMessage(error.message || 'Could not move this page.');
+    } finally {
+      setBusy(null);
+    }
+  }
+  if (tab === 'pages' || tab === 'add')
+    return (
+      <>
+        <button className="admin-button" onClick={() => navigate(null)}>
+          ← All pages
         </button>
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'pages'}
-          onClick={() => choose('pages')}
-        >
-          Programme pages
-        </button>
-        {can('team') && (
-          <Link className="admin-button" to="/admin?section=team">
-            Team profiles
-          </Link>
+        <ContentPageCatalogue initialCreate={tab === 'add'} />
+      </>
+    );
+  if (opened && selected)
+    return (
+      <section className="page-workspace">
+        <div className="admin-heading">
+          <button className="admin-button" onClick={() => navigate(null)}>
+            ← All pages
+          </button>
+          <h2>{selected.name}</h2>
+        </div>
+        <nav className="admin-actions" aria-label="Page actions">
+          <button
+            className="admin-button"
+            aria-pressed={mode === 'view'}
+            onClick={() => {
+              if (!dirty || window.confirm('Discard unsaved page changes?')) setMode('view');
+            }}
+            disabled={saving}
+          >
+            View
+          </button>
+          <button
+            className="admin-button"
+            aria-pressed={mode === 'edit'}
+            onClick={() => setMode('edit')}
+          >
+            Edit content & layout
+          </button>
+          <a className="admin-button" href={selected.path} target="_blank" rel="noreferrer">
+            Open website ↗
+          </a>
+        </nav>
+        {!PUBLIC_MENU_GROUPS.some((group) => group.path === selected.path) && (
+          <label>
+            Menu section
+            <select
+              aria-label="Move page to section"
+              disabled={Boolean(busy) || saving || dirty}
+              value={getContent(pageSectionKey(selected.path), '')}
+              onChange={(event) => movePage(event.target.value)}
+            >
+              <option value="">Original section</option>
+              {PUBLIC_MENU_GROUPS.filter((group) => group.children?.length).map((group) => (
+                <option key={group.path} value={group.path}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+          </label>
         )}
-      </nav>
-      {tab === 'site' ? (
-        <PageEditor key={initialPath} initialPath={initialPath} onSelectPage={choosePage} />
-      ) : (
-        <ContentPageCatalogue />
-      )}
-    </div>
+        {message && <p role="status">{message}</p>}
+        {mode === 'edit' ? (
+          <PageEditor key={initialPath} initialPath={initialPath} workspace />
+        ) : (
+          <iframe
+            className="page-workspace__preview"
+            title={`${selected.name} website preview`}
+            src={`${selected.path}?preview=1`}
+          />
+        )}
+      </section>
+    );
+  const sections = buildPageNavigator(EDITABLE_PAGES).map((section) => ({
+    ...section,
+    pages: [...section.pages],
+  }));
+  for (const section of sections) {
+    for (const page of [...section.pages]) {
+      const destination = sections.find(
+        (candidate) => candidate.path === getContent(pageSectionKey(page.path), ''),
+      );
+      if (
+        destination &&
+        destination !== section &&
+        !PUBLIC_MENU_GROUPS.some((group) => group.path === page.path)
+      ) {
+        section.pages = section.pages.filter((candidate) => candidate.path !== page.path);
+        destination.pages.push(page);
+      }
+    }
+  }
+  const matching = query.trim().toLowerCase();
+  return (
+    <section className="page-directory">
+      <div className="admin-heading">
+        <h2>Website pages</h2>
+        <button className="admin-button primary" onClick={() => navigate(null, 'add')}>
+          ＋ Add page
+        </button>
+      </div>
+      <div className="admin-actions">
+        <button className="admin-button" onClick={() => navigate(null, 'pages')}>
+          Manage added pages
+        </button>
+        <Link className="admin-button" to="/admin/home-tiles">
+          Home tiles
+        </Link>
+      </div>
+      <details className="admin-panel">
+        <summary>Website settings</summary>
+        <HeaderContentEditor />
+        <CommunityLinksEditor />
+      </details>
+      <label className="page-directory__search">
+        Find a page
+        <input
+          type="search"
+          placeholder="Page name or section…"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </label>
+      {message && <p role="status">{message}</p>}
+      <p>Open a page to view or edit it. Switch off to hide it without deleting its content.</p>
+      {sections.map((section) => {
+        const pages = section.pages.filter(
+          (page) => !matching || `${page.name} ${section.name}`.toLowerCase().includes(matching),
+        );
+        if (!pages.length) return null;
+        return (
+          <details
+            className="admin-panel page-directory__section"
+            key={section.name}
+            open={matching ? true : undefined}
+          >
+            <summary>
+              {section.name}
+              <small>{pages.length} pages</small>
+            </summary>
+            {pages.map((page) => (
+              <div className="page-directory__row" key={page.path}>
+                <button className="page-directory__name" onClick={() => navigate(page.path)}>
+                  {page.label || page.name}
+                  <span aria-hidden="true">›</span>
+                </button>
+                <button
+                  type="button"
+                  className="page-directory__toggle"
+                  role="switch"
+                  aria-checked={isPageVisible(getContent, page.path)}
+                  aria-label={`Show ${page.name} on website`}
+                  disabled={Boolean(busy) || page.path === '/'}
+                  onClick={() => toggle(page)}
+                >
+                  {isPageVisible(getContent, page.path) ? 'On' : 'Off'}
+                </button>
+              </div>
+            ))}
+          </details>
+        );
+      })}
+    </section>
   );
 }

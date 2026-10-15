@@ -791,7 +791,13 @@ export default function AdminPage() {
     posters: <PostersEditor key={user?.id} registerBack={registerBack} />,
     announcements: <AnnouncementsSection />,
     livestream: <LivestreamSection />,
-    content: <ContentPages key={user?.id} initialPath={params.get('page') || '/'} />,
+    content: (
+      <ContentPages
+        key={user?.id}
+        initialPath={params.get('page') || '/'}
+        registerBack={registerBack}
+      />
+    ),
     team: <TeamEditor uploadImage={uploadImage} />,
     messages: (
       <FormsInbox

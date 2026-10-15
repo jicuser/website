@@ -1,3 +1,5 @@
+import { useContent } from '@/context/ContentContext';
+import { isPageVisible, visibleNavigation, pageSectionKey } from '@/lib/pageVisibility';
 import React, {
   lazy,
   Suspense,
@@ -27,7 +29,7 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
-import { PUBLIC_MENU_GROUPS } from '@/content/nav';
+import { PUBLIC_MENU_GROUPS, NAV_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useAppearance } from '@/context/AppearanceContext';
@@ -44,6 +46,8 @@ import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMedi
 const WonderfulDonationModal = lazy(() => import('@/components/donations/WonderfulDonationModal'));
 
 export default function UnifiedHeader() {
+  const { getContent } = useContent();
+  const menuGroups = visibleNavigation(PUBLIC_MENU_GROUPS, getContent);
   const { pathname, key: routeKey } = useLocation();
   const navigate = useNavigate();
   const { canGoBack, previousPath } = useNavigationHistory();
@@ -73,11 +77,24 @@ export default function UnifiedHeader() {
   );
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
   const programme = useProgrammeJourney();
-  const navigation = useMemo(
+  const originalNavigation = useMemo(
     () => activeNavigation(programme?.placement || pathname),
     [programme?.placement, pathname],
   );
-  const subtabs = navigation?.children || [];
+  const movedSection = menuGroups.find(
+    (group) => group.path === getContent(pageSectionKey(pathname), ''),
+  );
+  const navigation = movedSection
+    ? {
+        ...movedSection,
+        primaryPath: movedSection.path,
+        primaryName: movedSection.name,
+        current: movedSection.children.find((page) => page.path === pathname),
+      }
+    : originalNavigation;
+  const subtabs = (navigation?.children || []).filter((page) =>
+    isPageVisible(getContent, page.path),
+  );
   const selected = navigation?.current?.path;
   const menuSection =
     pathname === '/social-media'
@@ -311,7 +328,7 @@ export default function UnifiedHeader() {
               </button>
               {quickMenuOpen && (
                 <nav id="jic-quick-menu" className="jic-quick-menu" aria-label="Main pages">
-                  {PUBLIC_MENU_GROUPS.map(({ name, path }) => (
+                  {menuGroups.map(({ name, path }) => (
                     <Link
                       key={path}
                       to={path}
@@ -328,7 +345,10 @@ export default function UnifiedHeader() {
                 </nav>
               )}
             </div>
-            <DesktopNavigation navigation={navigation} />
+            <DesktopNavigation
+              navigation={navigation}
+              groups={visibleNavigation(NAV_GROUPS, getContent)}
+            />
             <div className="jic-free-actions-slot" ref={actionsSlotRef}>
               <nav
                 className={cn(
@@ -520,7 +540,7 @@ export default function UnifiedHeader() {
             </Link>
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
-                {PUBLIC_MENU_GROUPS.map(({ name, path, children }) => {
+                {menuGroups.map(({ name, path, children }) => {
                   const subpages = children.filter((child) => child.path !== path);
                   const expanded = Boolean(expandedMenuGroups[path]);
                   const childrenId = `jic-menu-${path.slice(1) || 'home'}-children`;

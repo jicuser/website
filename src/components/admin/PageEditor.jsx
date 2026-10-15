@@ -25,7 +25,12 @@ import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 import PageNavigator from '@/components/admin/PageNavigator';
 
-export default function PageEditor({ initialPath = '/', inline = false, onSelectPage }) {
+export default function PageEditor({
+  initialPath = '/',
+  inline = false,
+  workspace = false,
+  onSelectPage,
+}) {
   const [selected, setSelected] = useState(() => editablePagePath(initialPath));
   const [draft, setDraft] = useState({});
   const [busy, setBusy] = useState(false);
@@ -198,24 +203,26 @@ export default function PageEditor({ initialPath = '/', inline = false, onSelect
 
   return (
     <div className="admin-workspace">
-      <div className="admin-heading">
-        <div>
-          <span className="admin-eyebrow">WEBSITE</span>
-          <h2>Edit website pages</h2>
+      {!workspace && (
+        <div className="admin-heading">
+          <div>
+            <span className="admin-eyebrow">WEBSITE</span>
+            <h2>Edit website pages</h2>
+          </div>
+          <Link className="admin-button" to="/admin/home-tiles">
+            Home tiles <ArrowUpRight size={16} />
+          </Link>
         </div>
-        <Link className="admin-button" to="/admin/home-tiles">
-          Home tiles <ArrowUpRight size={16} />
-        </Link>
-      </div>
-      {!inline && (
+      )}
+      {!inline && !workspace && (
         <details className="admin-panel">
           <summary>Site-wide text & community links</summary>
           <HeaderContentEditor />
           <CommunityLinksEditor />
         </details>
       )}
-      <div className={inline ? 'admin-inline-page' : 'admin-page-layout'}>
-        {!inline && (
+      <div className={inline || workspace ? 'admin-inline-page' : 'admin-page-layout'}>
+        {!inline && !workspace && (
           <PageNavigator
             selected={selected}
             onSelectPage={choose}

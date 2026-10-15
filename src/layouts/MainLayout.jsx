@@ -1,3 +1,5 @@
+import { useContent } from '@/context/ContentContext';
+import { isPageVisible } from '@/lib/pageVisibility';
 import React, { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import ManagedPageContent from '@/components/ManagedPageContent';
@@ -34,6 +36,8 @@ export default function MainLayout() {
 function PublicLayout() {
   const { pathname, search } = useLocation();
   const { isAdmin } = useAuth();
+  const { getContent } = useContent();
+  const visible = isPageVisible(getContent, pathname) || isAdmin;
   const preview = new URLSearchParams(search).get('preview') === '1';
   const isHome = pathname === '/';
   const isDiscovery = ['/search', '/social-media'].includes(pathname);
@@ -50,24 +54,32 @@ function PublicLayout() {
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
         <DailyReminder />
-        <div>
-          <Suspense
-            fallback={
-              <p className="jic-page-loading" role="status">
-                Loading page…
-              </p>
-            }
-          >
-            <Outlet />
-          </Suspense>
-          {supplementalContentPaths.has(pathname) && (
-            <ManagedPageContent optional headingLevel={2} className="jic-page-addition" />
-          )}
-          <ManagedPageSections key={pathname} />
-          {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
-          {!isDiscovery && !isTask && <PublishedPageLinks />}
-          {!isDiscovery && !isTask && <RelatedContent />}
-        </div>
+        {visible ? (
+          <div>
+            <Suspense
+              fallback={
+                <p className="jic-page-loading" role="status">
+                  Loading page…
+                </p>
+              }
+            >
+              <Outlet />
+            </Suspense>
+            {supplementalContentPaths.has(pathname) && (
+              <ManagedPageContent optional headingLevel={2} className="jic-page-addition" />
+            )}
+            <ManagedPageSections key={pathname} />
+            {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
+            {!isDiscovery && !isTask && <PublishedPageLinks />}
+            {!isDiscovery && !isTask && <RelatedContent />}
+          </div>
+        ) : (
+          <section className="jic-page-loading">
+            <h1>Page unavailable</h1>
+            <p>This page is currently hidden.</p>
+            <a href="/">Return home</a>
+          </section>
+        )}
       </main>
       <Footer />
       <ScrollToTop />

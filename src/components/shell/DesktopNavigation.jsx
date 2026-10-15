@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { NAV_GROUPS } from '@/content/nav';
 
-export default function DesktopNavigation({ navigation }) {
+export default function DesktopNavigation({ navigation, groups = NAV_GROUPS }) {
   const location = useLocation();
   const { pathname } = location;
   const [openPath, setOpenPath] = useState(null);
@@ -65,7 +65,7 @@ export default function DesktopNavigation({ navigation }) {
 
   return (
     <nav ref={navRef} className="jic-desktop-primary-nav" aria-label="Primary navigation">
-      {NAV_GROUPS.map(({ name, path, children }) => {
+      {groups.map(({ name, path, children }) => {
         const open = openPath === path;
         const current = navigation?.primaryPath === path;
         const id = `jic-desktop-${path.slice(1) || 'home'}`;
