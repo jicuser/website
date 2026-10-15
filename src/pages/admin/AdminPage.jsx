@@ -53,12 +53,12 @@ const SECTIONS = [
   ['posters', 'Posters & announcements', FileText, 'content'],
   ['announcements', 'Announcements', Megaphone, 'announcements'],
   ['livestream', 'Livestream', Radio, 'livestream'],
-  ['tv', 'Hall streams', Monitor, 'tv'],
-  ['app_content', 'App images & reading', FileText, 'content'],
+  ['tv', 'TV & hall screens', Monitor, 'tv'],
+  ['app_content', 'App content & reading', FileText, 'content'],
   ['content', 'Website & pages', FileText, 'content'],
   ['team', 'Meet the team', Users, 'team'],
-  ['forms', 'Forms inbox', FileText, 'forms'],
-  ['users', 'Staff & access', ShieldCheck, 'users'],
+  ['forms', 'Forms & registrations', FileText, 'forms'],
+  ['users', 'People & permissions', ShieldCheck, 'users'],
   ['audit', 'Audit log', Activity, 'audit'],
 ];
 const SECTION_GROUPS = [
@@ -119,7 +119,7 @@ async function uploadImage(file, folder = 'admin') {
 function DashboardSection({ onChoose }) {
   const { can } = useAuth();
   const tasks = [
-    ['tv', 'Hall streams', 'Choose a hall, show a class or return to posters.', Monitor, 'tv'],
+    ['tv', 'TV & hall screens', 'Choose a hall, show a class or return to posters.', Monitor, 'tv'],
     [
       'prayer',
       'Prayer times',
@@ -127,11 +127,11 @@ function DashboardSection({ onChoose }) {
       Clock3,
       'prayer_times',
     ],
-    ['events', 'Events & posters', 'Add a poster, date and event details.', CalendarDays, 'events'],
+    ['events', 'Events & posters', 'Add a date, poster and clear event details.', CalendarDays, 'events'],
     [
       'posters',
       'Posters & announcements',
-      'Edit pictures and announcement text; choose where posters appear.',
+      'Edit artwork and notices, then choose where they appear.',
       FileText,
       'content',
     ],
@@ -139,12 +139,12 @@ function DashboardSection({ onChoose }) {
     ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
     [
       'forms',
-      'Forms inbox',
-      'Read messages and registrations, then mark them completed.',
+      'Forms & registrations',
+      'Review messages and registrations, then mark them completed.',
       FileText,
       'forms',
     ],
-    ['users', 'Staff access', 'Choose who can edit and control TVs.', Users, 'users'],
+    ['users', 'People & permissions', 'Choose who can edit content and control TVs.', Users, 'users'],
   ].filter(([, , , , permission]) => can(permission));
   return (
     <div>
