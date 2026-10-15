@@ -16,6 +16,8 @@ export default function StaffAccess() {
   const [name, setName] = useState('');
   const [access, setAccess] = useState(emptyAccess);
   const [pending, setPending] = useState({});
+  const [requests, setRequests] = useState([]);
+  const [requestDrafts, setRequestDrafts] = useState({});
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState('');
   const inFlight = useRef(false);
@@ -27,12 +29,16 @@ export default function StaffAccess() {
     if (error) throw error;
     setRows(data || []);
   }, []);
+  const loadRequests = useCallback(async () => {
+    const result = await invoke({ action: 'list_access_requests' });
+    setRequests(result.requests || []);
+  }, [invoke]);
   useEffect(() => {
     if (!allowed) return;
-    load()
-      .catch(() => setNotice({ error: true, text: 'Staff could not be loaded. Please refresh.' }))
+    Promise.all([load(), loadRequests()])
+      .catch(() => setNotice({ error: true, text: 'People or access requests could not be loaded. Please refresh.' }))
       .finally(() => setLoading(false));
-  }, [allowed, load]);
+  }, [allowed, load, loadRequests]);
   const invoke = useCallback(async (body) => {
     const { data, error } = await supabase.functions.invoke('manage-user', { body });
     if (error) {
@@ -89,6 +95,21 @@ export default function StaffAccess() {
   );
   useRegisterAdminSave(save, Object.keys(pending).length > 0, 'Save permissions');
   if (!allowed) return <p>You need people-management permission to open this section.</p>;
+  const approveRequest = async (request) => {
+    const draft = requestDrafts[request.id] || { permissions: [], staff_kinds: [] };
+    await run(`approve-${request.id}`, async () => {
+      await invoke({ action: 'approve_access_request', request_id: request.id, ...draft });
+      setNotice({ text: 'Request approved. An account invitation has been sent.' });
+      await Promise.all([load(), loadRequests()]);
+    });
+  };
+  const rejectRequest = async (request) => {
+    await run(`reject-${request.id}`, async () => {
+      await invoke({ action: 'reject_access_request', request_id: request.id });
+      setRequests((current) => current.filter((item) => item.id !== request.id));
+      setNotice({ text: 'Request declined.' });
+    });
+  };
   const invite = (event) => {
     event.preventDefault();
     run('invite', async () => {
@@ -146,6 +167,15 @@ export default function StaffAccess() {
           </button>
         </fieldset>
       </form>
+      <AccessRequests
+        requests={requests}
+        drafts={requestDrafts}
+        setDrafts={setRequestDrafts}
+        busy={busy}
+        actor={profile}
+        onApprove={approveRequest}
+        onReject={rejectRequest}
+      />
       <h3>Current people</h3>
       {loading ? (
         <p role="status">Loading people…</p>
@@ -240,5 +270,50 @@ export default function StaffAccess() {
         they already have.
       </p>
     </div>
+  );
+}
+
+
+function AccessRequests({ requests, drafts, setDrafts, busy, actor, onApprove, onReject }) {
+  if (!requests.length) return null;
+  return (
+    <section className="admin-access-requests" aria-labelledby="access-requests-title">
+      <div className="admin-heading">
+        <div>
+          <span className="admin-eyebrow">PENDING</span>
+          <h3 id="access-requests-title">Account requests</h3>
+        </div>
+        <span className="admin-hint">{requests.length} waiting</span>
+      </div>
+      {requests.map((request) => {
+        const value = drafts[request.id] || { permissions: [], staff_kinds: [] };
+        return (
+          <article className="admin-panel admin-access-request" key={request.id}>
+            <div>
+              <h4>{request.display_name}</h4>
+              <p>{request.email} · {request.requested_role.replace('_', ' ')}</p>
+              {request.requested_features?.length > 0 && (
+                <p className="admin-hint">Asked for: {request.requested_features.join(', ')}</p>
+              )}
+              {request.message && <p>{request.message}</p>}
+            </div>
+            <AccessChecklist
+              actor={actor}
+              value={value}
+              onChange={(next) => setDrafts((current) => ({ ...current, [request.id]: next }))}
+              disabled={Boolean(busy)}
+            />
+            <div className="admin-actions">
+              <button className="admin-button primary" disabled={Boolean(busy)} onClick={() => onApprove(request)}>
+                Approve and invite
+              </button>
+              <button className="admin-button" disabled={Boolean(busy)} onClick={() => onReject(request)}>
+                Decline
+              </button>
+            </div>
+          </article>
+        );
+      })}
+    </section>
   );
 }
