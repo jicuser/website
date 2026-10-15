@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { ArrowRight, Bell, BookOpen, CheckCircle2, Users, Video } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -82,6 +83,29 @@ export default function CommunityPortalPage() {
     </div>
   );
 }
+function WorkspacePreview() {
+  const tiles = [
+    [Video, 'Live lessons', 'Private rooms, automatic attendance and recordings.'],
+    [Users, 'My family', 'Children, progress, homework, fees and teacher messages.'],
+    [BookOpen, 'Courses & Madrassah', 'Browse classes, enrol and keep learning in one place.'],
+    [Bell, 'Updates and reminders', 'Important JIC notices appear when they matter.'],
+  ];
+  return <div className="workspace-preview-grid">{tiles.map(([Icon, title, text]) => <article className="workspace-overview-card" key={title}><span className="workspace-overview-icon"><Icon size={19} /></span><h2>{title}</h2><p>{text}</p></article>)}</div>;
+}
+
+function WorkspaceOverview({ data, auth, onTabChange }) {
+  const userId = auth.user?.id;
+  const teaching = auth.isOwner || data.learning_staff.some((row) => row.user_id === userId) || (data.learning_department_heads || []).some((row) => row.user_id === userId);
+  const family = data.learning_students.some((row) => row.user_id === userId || row.guardian_id === userId) || (data.learning_guardians || []).some((row) => row.user_id === userId);
+  const live = data.learning_sessions.find((row) => row.live || row.status === 'live');
+  const cards = [
+    ...(family ? [[Users, 'My family', 'Open children, attendance, progress and fees.', 'learning']] : []),
+    ...(teaching ? [[BookOpen, 'Teaching workspace', 'Take registers, add progress and manage classes.', 'learning']] : []),
+    [Video, live ? 'Live lesson available' : 'Live lessons', live ? live.title : 'Join a private room when your class starts.', 'learning'],
+    ...(auth.isAdmin ? [[CheckCircle2, 'Administration', 'Review tasks, forms, content and staff work.', 'tasks']] : []),
+  ];
+  return <section className="workspace-overview" aria-label="Workspace overview"><div className="workspace-overview-heading"><div><p className="workspace-kicker">Your JIC workspace</p><h2>What needs your attention?</h2></div><span className="workspace-status"><span /> Secure account</span></div><div className="workspace-overview-grid">{cards.map(([Icon, title, text, tab]) => <button type="button" className="workspace-overview-card workspace-overview-action" key={title} onClick={() => onTabChange(tab)}><span className="workspace-overview-icon"><Icon size={19} /></span><span><strong>{title}</strong><small>{text}</small></span><ArrowRight size={16} /></button>)}</div></section>;
+}
 function Workspace({ auth }) {
   const [params] = useSearchParams();
   const formId = params.get('form');
@@ -158,7 +182,7 @@ function Workspace({ auth }) {
         <button onClick={auth.signOut}>Sign out</button>
         {auth.isAdmin && <Link to="/admin">Website admin</Link>}
       </div>
-      <nav className="workspace-tabs" aria-label="Workspace">
+      <WorkspaceOverview data={data} auth={auth} onTabChange={setTab} />\n      <nav className="workspace-tabs" aria-label="Workspace">
         {options.map(([id, title]) => (
           <button
             key={id}
