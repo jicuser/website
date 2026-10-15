@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const role = String(body.requested_role || '');
     const message = String(body.message || '').trim().slice(0, 2000);
     const features = Array.isArray(body.requested_features)
-      ? body.requested_features.filter((item) => typeof item === 'string').slice(0, 12)
+      ? body.requested_features.filter((item) => typeof item === 'string' && item.length <= 80).slice(0, 12)
       : [];
     if (name.length < 2 || name.length > 120) throw new Error('Enter your name.');
     if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
