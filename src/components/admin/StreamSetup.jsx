@@ -57,7 +57,7 @@ export default function StreamSetup() {
       <h2>
         <span className="jic-prompt">Choose your stream</span>
       </h2>
-      <p>Choose the hall where you want to show your stream.</p>
+      <p>Choose the hall or screen where you want to show the stream.</p>
       <label>
         Hall stream
         <select value={selected} onChange={(event) => setSelected(event.target.value)}>
@@ -190,7 +190,7 @@ function HallWorkspace({ screenId, userId, onBack }) {
           {hall && stage === 2 && (
             <section className="admin-panel">
               <h3>
-                <span className="jic-prompt">Name your stream</span>
+                <span className="jic-prompt">Name this screen</span>
               </h3>
               <form
                 noValidate
@@ -205,9 +205,9 @@ function HallWorkspace({ screenId, userId, onBack }) {
                   setup.build(setup.streamName);
                 }}
               >
-                <p>You can change this name when saving settings after the stream ends.</p>
+                <p>You can change this name later from the saved screen settings.</p>
                 <label>
-                  <span className="jic-prompt">Stream name (required)</span>
+                  <span className="jic-prompt">Screen name (required)</span>
                   <input
                     value={setup.streamName}
                     required
