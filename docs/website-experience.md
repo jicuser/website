@@ -52,13 +52,13 @@ settings page: independent start-time and Jama'ah switches, independent minutes-
 choices, selected prayers and a clear delivery/status control. Do not treat a local
 saved preference or a browser permission prompt as proof that alerts are scheduled.
 
-Delivery still needs a product decision before implementation. Home-Screen web push
-on iPhone requires installation and permission; scheduled alerts also need a server
-sender, subscriptions and lifecycle/error handling. A calendar export is an alternate
-flow, not an equivalent notification service: it has calendar-specific import and
-alert rules, and snapshots do not automatically follow changed prayer times. Google
-Calendar's bulk ICS import is a computer workflow. Neither delivery method is enabled
-by this menu refinement, and no reminder button points to an inactive feature.
+Opt-in web push is now implemented. The homepage button opens settings without
+requesting permission. Only Enable reminders requests permission and enrols this
+device. iPhone users add the website to their Home Screen first; instructions appear
+on the settings page. Independent start/Jama'ah lead times follow the published
+five-daily-prayer timetable. Send test and Turn off operate on this device only.
+Phone Focus settings, connectivity and platform delivery can delay notifications;
+they are not guaranteed alarms. See `salah-reminders.md` for operation and verification.
 
 References checked 15 October 2026:
 

@@ -1,5 +1,10 @@
 project_id = "jic-website"
 
+[functions.salah-reminders]
+# Scheduler uses its dedicated Vault proof; visitor writes use a private device
+# capability. Public configuration contains only readiness and the VAPID public key.
+verify_jwt = false
+
 [functions.tv-control]
 # Public posters, staff JWTs and paired-TV tokens have separate handler checks.
 # All staff mutations still require getUser() and an active trusted database role.

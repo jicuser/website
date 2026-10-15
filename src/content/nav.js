@@ -57,6 +57,7 @@ export const NAV_GROUPS = [
       { name: 'Today', path: '/prayer-times' },
       { name: 'Monthly Timetable', path: '/prayer-times/monthly' },
       { name: 'Jummah', path: '/prayer-times/jummah' },
+      { name: 'Salah Reminders', path: '/prayer-times/reminders' },
     ],
   },
   { name: 'Worship', path: '/worship', children: WORSHIP_TABS },

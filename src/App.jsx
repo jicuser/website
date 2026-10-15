@@ -28,6 +28,7 @@ const MadrassahEnrolmentPage = lazy(() => import('@/pages/MadrassahEnrolmentPage
 const MadrassahPage = lazy(() => import('@/pages/MadrassahPage'));
 const MasjidExtensionPage = lazy(() => import('@/pages/MasjidExtensionPage'));
 const PrayerTimesPage = lazy(() => import('@/pages/PrayerTimesPage'));
+const SalahRemindersPage = lazy(() => import('@/pages/SalahRemindersPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const ProjectsPage = lazy(() => import('@/pages/ProjectsPage'));
 const SectionPage = lazy(() => import('@/pages/SectionPage'));
@@ -123,6 +124,7 @@ function AppRoutes() {
                 path="prayer-times/jummah"
                 element={<PrayerTimesPage key="jummah" initialTab="jummah" />}
               />
+              <Route path="prayer-times/reminders" element={<SalahRemindersPage />} />
 
               <Route path="worship" element={<WorshipPage />} />
               <Route path="worship/quran" element={<WorshipPage />} />

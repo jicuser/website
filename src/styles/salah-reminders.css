@@ -1,0 +1,134 @@
+.salah-reminders {
+  width: min(100% - 32px, 780px);
+  margin: 30px auto;
+}
+.salah-reminders__panel {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid var(--jic-border);
+  border-radius: 22px;
+  background: var(--jic-surface);
+}
+.salah-reminders__status,
+.salah-reminders__message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.salah-reminders__status > svg {
+  color: var(--jic-gold-strong);
+  flex-shrink: 0;
+}
+.salah-reminders__choices {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.salah-reminders__choice {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+}
+.salah-reminders__switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+.salah-reminders input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--jic-gold-strong);
+  flex-shrink: 0;
+}
+.salah-reminders__minutes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.salah-reminders__minutes input {
+  width: 74px;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--jic-border);
+  border-radius: 9px;
+}
+.salah-reminders__prayers summary {
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+}
+.salah-reminders__prayers > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.salah-reminders__prayers label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.salah-reminders__setup {
+  padding: 16px;
+  border-left: 3px solid var(--jic-gold-strong);
+  background: color-mix(in srgb, var(--jic-gold) 6%, var(--jic-surface));
+}
+.salah-reminders__setup ol {
+  padding-left: 22px;
+  display: grid;
+  gap: 10px;
+}
+.salah-reminders__setup svg {
+  display: inline;
+  vertical-align: middle;
+}
+.salah-reminders__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.salah-reminders__actions > button {
+  min-height: 44px;
+}
+.salah-reminders button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.salah-reminders__hint {
+  font-size: 13px;
+  color: var(--jic-text-secondary);
+  line-height: 1.6;
+}
+.salah-reminders__error {
+  color: var(--jic-error);
+}
+.salah-reminders__timetable {
+  display: inline-block;
+  padding: 16px 0;
+}
+.salah-reminders :is(button, input, summary, a):focus-visible {
+  outline: 2px solid var(--jic-gold-strong);
+  outline-offset: 3px;
+}
+@media (max-width: 480px) {
+  .salah-reminders__panel {
+    padding: 16px;
+  }
+  .salah-reminders__actions > button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+.jic-reminder-entry {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 14px;
+  min-height: 44px;
+}

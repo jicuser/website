@@ -86,6 +86,7 @@ larger builder complete.
 
 ## Operational boundary
 
-This integration does not activate an app, remote push, payment processing, SMTP
+This page-editor integration does not activate an app, remote push, payment processing, SMTP
 transport or media workers. Website deployment, backend migration, email delivery
 and physical-device acceptance are separate verification steps.
+Opt-in Salah web push is a separate release documented in `salah-reminders.md`.

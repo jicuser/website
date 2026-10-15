@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Mail,
   Share2,
+  Bell,
 } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
@@ -26,6 +27,7 @@ import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
 import { displayTime } from '@/lib/timetable';
 import { cn } from '@/lib/utils';
+import '@/styles/salah-reminders.css';
 
 const DEFAULT_CARDS = [
   {
@@ -171,6 +173,10 @@ export default function HomePage() {
               <Play size={17} fill="currentColor" /> Watch Live
             </a>
           </div>
+          <Link to="/prayer-times/reminders" className="jic-secondary-cta jic-reminder-entry">
+            <Bell size={18} aria-hidden="true" /> Set Salah reminders{' '}
+            <ArrowRight size={17} aria-hidden="true" />
+          </Link>
         </div>
       </section>
 

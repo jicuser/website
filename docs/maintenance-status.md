@@ -1,7 +1,7 @@
 # Website maintenance status
 
-Updated 14 October 2026. Current scope: refine the existing website and admin.
-Apps, remote push and hosting migration are deferred.
+Updated 15 October 2026. Current scope: refine the existing website and admin.
+Opt-in Salah web push is approved; native apps and hosting migration remain deferred.
 
 ## October admin page-workspace refinement
 
@@ -40,9 +40,8 @@ The follow-up menu-style refinement on 15 October 2026 replaces the admin's two
 dropdowns with an inline section/page directory using the complete public menu
 order. Saved-page view links are separate from guarded editing actions. Madrassah
 and Social Media have their explicit shortcut groups. Fresh validation passed lint,
-457 tests and the production build. Public-control relocation and phone reminder
-delivery remain proposed, not activated; the delivery choice is documented in
-`website-experience.md`.
+457 tests and the production build. Public-control relocation remains proposed.
+The subsequent opt-in Salah reminder release is documented in `salah-reminders.md`.
 
 ## Boundaries
 
@@ -60,15 +59,15 @@ Poster detail-page seed and regression: `2e1ed986b7cd6aa8770f16772e6d6f25f8af12b
 Both were fast-forwarded to `main` after successful CI. The maintenance branch
 retains the checkpoints; no code-generation or write-back workflow runs in production.
 
-| Area | Released work | Remaining acceptance or limitation |
-| --- | --- | --- |
-| Admin Forms | Current forms, creation and Responses & actions tiles; live/draft/closed filtering; named responsibility; linked-page information. | Test with the organisation's real operator accounts. No live form was published on an invented staff assignment. |
-| Form builder | Fields, conditions, optional attachments, responsible people, editors/followers, draft and published versions. | Choose the actual responsible people and review questions before opening registration. |
-| Responses and actions | Shared private records, notes/replies, completion, eligible reassignment and refreshed summaries. | Changing default responsibility affects future responses; reassign existing actions explicitly. Completing a task is not admission to a course. |
-| Poster management | Poster selection opens overview, artwork editing, Page & registration, Responses and Actions. | Responses/actions require a linked form and authorised staff access. |
-| Page creation | Create from a poster or Pages & programmes; choose type, placement, picture, optional existing/new form, preview and visibility. | Visibility controls apply to these created content pages, not protected system routes or every existing fixed page. |
-| Public detail pages | Stable /pages/:slug addresses, selected section listings and /forms/:slug registration. Hidden pages are unavailable; hiding does not delete or close a shared form. | Real public submission-to-operator acceptance remains a separate live test. |
-| Adult Education | Separate /education/courses route and navigation; legacy /madrassah/classes-courses redirects there. Madrasah remains separate. | A structured weekly-schedule editor and wider categorisation of existing content remain refinements. |
+| Area                  | Released work                                                                                                                                                        | Remaining acceptance or limitation                                                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Admin Forms           | Current forms, creation and Responses & actions tiles; live/draft/closed filtering; named responsibility; linked-page information.                                   | Test with the organisation's real operator accounts. No live form was published on an invented staff assignment.                                |
+| Form builder          | Fields, conditions, optional attachments, responsible people, editors/followers, draft and published versions.                                                       | Choose the actual responsible people and review questions before opening registration.                                                          |
+| Responses and actions | Shared private records, notes/replies, completion, eligible reassignment and refreshed summaries.                                                                    | Changing default responsibility affects future responses; reassign existing actions explicitly. Completing a task is not admission to a course. |
+| Poster management     | Poster selection opens overview, artwork editing, Page & registration, Responses and Actions.                                                                        | Responses/actions require a linked form and authorised staff access.                                                                            |
+| Page creation         | Create from a poster or Pages & programmes; choose type, placement, picture, optional existing/new form, preview and visibility.                                     | Visibility controls apply to these created content pages, not protected system routes or every existing fixed page.                             |
+| Public detail pages   | Stable /pages/:slug addresses, selected section listings and /forms/:slug registration. Hidden pages are unavailable; hiding does not delete or close a shared form. | Real public submission-to-operator acceptance remains a separate live test.                                                                     |
+| Adult Education       | Separate /education/courses route and navigation; legacy /madrassah/classes-courses redirects there. Madrasah remains separate.                                      | A structured weekly-schedule editor and wider categorisation of existing content remain refinements.                                            |
 
 ### Existing poster pages
 
@@ -146,16 +145,16 @@ template deletion and mount preservation before release.
 
 ## Other remaining work
 
-| ID | Work | Status |
-| --- | --- | --- |
-| WEB-01/02 | Mobile poster/admin navigation | Previously released and retained. Confirm physical-phone editing. |
-| WEB-03 | Owner account deletion | Released and retained. Related history/uploads can intentionally block deletion. |
-| WEB-04/05 | Invitation destination and branded emails | Production fallback and templates saved. Hosted URL override/allowlist, Auth templates and approved SMTP sender still need configuration verification and a fresh email test. |
-| WEB-06 | Original phone security warning | Not reproduced; exact cause still unconfirmed. No TLS verification bypass used. |
-| WEB-10 | Loading/navigation performance | Global route/auth timing investigation remains open. Do not hide errors or weaken permission checks. |
-| WEB-11 | Repository refinement | Remove unnecessary personal placeholders, obsolete instructions and conflicting code only after classification; no blanket rename or history rewrite. Temporary integration generators were removed. |
-| WEB-12 | TV fit/delay | Obtain real viewport/source geometry and timings; preserve working transport. |
-| WEB-13 | Dependencies/release hygiene | CI remains enabled. Review deprecation and optional HLS size warnings separately; do not hide them by raising limits. |
+| ID        | Work                                      | Status                                                                                                                                                                                               |
+| --------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-01/02 | Mobile poster/admin navigation            | Previously released and retained. Confirm physical-phone editing.                                                                                                                                    |
+| WEB-03    | Owner account deletion                    | Released and retained. Related history/uploads can intentionally block deletion.                                                                                                                     |
+| WEB-04/05 | Invitation destination and branded emails | Production fallback and templates saved. Hosted URL override/allowlist, Auth templates and approved SMTP sender still need configuration verification and a fresh email test.                        |
+| WEB-06    | Original phone security warning           | Not reproduced; exact cause still unconfirmed. No TLS verification bypass used.                                                                                                                      |
+| WEB-10    | Loading/navigation performance            | Global route/auth timing investigation remains open. Do not hide errors or weaken permission checks.                                                                                                 |
+| WEB-11    | Repository refinement                     | Remove unnecessary personal placeholders, obsolete instructions and conflicting code only after classification; no blanket rename or history rewrite. Temporary integration generators were removed. |
+| WEB-12    | TV fit/delay                              | Obtain real viewport/source geometry and timings; preserve working transport.                                                                                                                        |
+| WEB-13    | Dependencies/release hygiene              | CI remains enabled. Review deprecation and optional HLS size warnings separately; do not hide them by raising limits.                                                                                |
 
 Deferred: apps/store signing/cloud builds, remote push, payment/media workers,
 Vercel/Cloudflare/DNS migration, new paid services and retention/deletion policy changes.

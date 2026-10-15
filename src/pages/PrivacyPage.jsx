@@ -17,7 +17,7 @@ const PrivacyPage = () => {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
               Privacy Policy
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-8">Last Updated: May 31, 2025</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-8">Last Updated: October 15, 2026</p>
 
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
@@ -81,6 +81,21 @@ const PrivacyPage = () => {
                 </li>
               </ul>
 
+              <h2 className="text-2xl font-bold mt-8 mb-4">Optional Salah Reminders</h2>
+              <p>
+                Reminders are off unless you choose to enable them and allow notifications. We store
+                your device’s push subscription, a private device-access proof and your chosen
+                prayers and timing settings. No account, name or telephone number is needed. Your
+                browser’s notification provider delivers encrypted notifications to the device. The
+                subscription is not published or used for advertising.
+              </p>
+              <p>
+                Use Turn off reminders on the reminder page to remove this device’s subscription and
+                settings. Unusable subscriptions are removed after the provider reports them
+                expired. Delivery receipts are kept for up to eight days to prevent duplicates;
+                hashed request-rate limits are kept for up to two days to limit abuse. Notifications
+                can be delayed or silenced by phone settings or network conditions.
+              </p>
               <h2 className="text-2xl font-bold mt-8 mb-4">Data Security</h2>
               <p>
                 We implement appropriate security measures to protect your personal information from
