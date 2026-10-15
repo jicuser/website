@@ -61,6 +61,7 @@ export default function UnifiedHeader() {
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
+    mobileSummaryRef = useRef(null),
     mobileControlsRef = useRef(null),
     audioRef = useRef(null),
     menuRef = useRef(null),
@@ -182,11 +183,16 @@ export default function UnifiedHeader() {
   useLayoutEffect(() => {
     const prayer = prayerDockRef.current;
     const controls = mobileControlsRef.current;
+    const summary = mobileSummaryRef.current;
     const update = () => {
       const style = document.documentElement.style;
       style.setProperty(
         '--jic-prayer-dock-height',
         `${Math.ceil(prayer.getBoundingClientRect().height)}px`,
+      );
+      style.setProperty(
+        '--jic-mobile-strip-height',
+        `${Math.ceil(summary.getBoundingClientRect().height)}px`,
       );
       style.setProperty(
         '--jic-mobile-controls-height',
@@ -197,6 +203,7 @@ export default function UnifiedHeader() {
     const observer = new ResizeObserver(update);
     observer.observe(prayer);
     observer.observe(controls);
+    observer.observe(summary);
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
@@ -314,18 +321,17 @@ export default function UnifiedHeader() {
           aria-hidden={prayerDockHidden || undefined}
           inert={prayerDockHidden ? '' : undefined}
         >
-          <div className="jic-mobile-prayer-summary" data-glass="dense">
+          <div ref={mobileSummaryRef} className="jic-mobile-prayer-summary">
             <button
               type="button"
               onClick={toggleTimetable}
               className="jic-mobile-prayer-toggle"
+              aria-label={next ? `Next jama’ah: ${next.name} at ${displayTime(next.time)}. Show prayer times` : 'Show prayer times'}
               aria-expanded={prayerExpanded}
               aria-controls="jic-prayer-details"
             >
-              <span>
-                <strong>{next ? `Next jama’ah · ${next.name}` : 'Prayer timetable'}</strong>
-                <small>{next ? displayTime(next.time) : 'View today’s times'}</small>
-              </span>
+              <span>{next ? `Next · ${next.name}` : 'Prayer times'}</span>
+              {next && <strong>{displayTime(next.time)}</strong>}
               <ChevronDown size={18} aria-hidden="true" />
             </button>
             {radioButton}
@@ -504,7 +510,15 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
-      <nav ref={mobileControlsRef} className="jic-mobile-controls" aria-label="Quick navigation">
+      <div ref={mobileControlsRef} className="jic-mobile-dock">
+        <div className="jic-mobile-jummah" aria-label="Friday congregation times">
+          {[0, 1].map((index) => (
+            <span key={index}>
+              Jummah {index + 1} <strong>{displayTime(jummahTimes?.[index]?.prayer) || '—'}</strong>
+            </span>
+          ))}
+        </div>
+        <nav className="jic-mobile-controls" aria-label="Quick navigation">
         <button
           type="button"
           onClick={() => {
@@ -549,7 +563,8 @@ export default function UnifiedHeader() {
           <Menu size={22} aria-hidden="true" />
           <span>Menu</span>
         </button>
-      </nav>
+        </nav>
+      </div>
       {radioError && (
         <span className="sr-only" role="status">
           Radio could not start. Press Radio to retry.

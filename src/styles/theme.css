@@ -1,6 +1,7 @@
 /* Canonical JIC colour system. Layout belongs to component styles; translucency belongs to liquid-glass.css. */
 :root {
-  --jic-action: #d6af62;
+  --jic-action: #e2b45d;
+  --jic-teal: #087b70;
   --jic-logo-metal: #89501b;
   --jic-logo-ink: #0c1930;
   --background: 0 0% 100%;
@@ -55,14 +56,15 @@
   --input: 213 26% 20%;
   --ring: 43 75% 56%;
   --jic-bg: #080f1d;
-  --jic-bg-secondary: #0f1a2b;
-  --jic-surface: #152238;
+  --jic-bg-secondary: #0b2036;
+  --jic-surface: #112a43;
+  --jic-teal: #5cddc4;
   --jic-text: #f4f6fa;
   --jic-text-secondary: #b7c3d5;
   --jic-muted: #9baac0;
   --jic-border: #263241;
-  --jic-gold: #d6af62;
-  --jic-gold-strong: #e6c784;
+  --jic-gold: #e9bc67;
+  --jic-gold-strong: #f3ce86;
   --jic-live: #ff375f;
   --jic-success: #30d158;
   --jic-warning: #ffd60a;

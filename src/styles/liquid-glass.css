@@ -43,16 +43,19 @@ html[data-theme] {
 }
 
 html[data-theme='dark'] {
-  --jic-glass-control: rgba(10, 25, 45, 0.48);
-  --jic-glass-tile: rgba(10, 25, 45, 0.48);
-  --jic-glass-panel: rgba(10, 25, 45, 0.5);
-  --jic-glass-panel-strong: rgba(10, 25, 45, 0.64);
-  --jic-glass-border: rgba(255, 255, 255, 0.15);
-  --jic-glass-highlight: rgba(255, 255, 255, 0.18);
-  --jic-glass-shadow: 0 12px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --jic-glass-control: rgba(9, 29, 51, 0.72);
+  --jic-glass-tile: rgba(11, 33, 56, 0.78);
+  --jic-glass-panel: rgba(10, 29, 50, 0.84);
+  --jic-glass-panel-strong: rgba(9, 27, 47, 0.94);
+  --jic-glass-border: rgba(143, 178, 207, 0.24);
+  --jic-glass-highlight: rgba(172, 204, 229, 0.10);
+  --jic-glass-shadow: 0 12px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(172, 204, 229, 0.10);
+  --jic-glass-control-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.08), transparent 65%);
+  --jic-glass-tile-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.06), transparent 65%);
+  --jic-glass-panel-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.04), transparent 65%);
   --jic-glass-ink: #ffffff;
   --jic-glass-muted: #edf2f8;
-  --jic-glass-accent: #ffe0a0;
+  --jic-glass-accent: #e9bc67;
 }
 
 html[data-theme][data-surface='glass'] :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer) {
@@ -138,7 +141,6 @@ html[data-theme]
     .jic-unified-info,
     .jic-unified-menu,
     .jic-daily-reminder > button,
-    .jic-mobile-controls,
     .jic-prayer-schedule,
     .jic-quick-menu,
     .jic-site-footer
@@ -173,7 +175,6 @@ html[data-theme]
     .jic-unified-menu,
     .jic-unified-info,
     .jic-quick-menu,
-    .jic-mobile-controls,
     .jic-site-footer,
     .jic-programme-card,
     .jic-home-footer-strip,
