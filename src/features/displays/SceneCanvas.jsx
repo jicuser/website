@@ -152,7 +152,10 @@ export default function SceneCanvas({
                 </div>
               ) : layer.type === 'brand' ? (
                 <div className="scene-brand-block">
-                  <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
+                  <img
+                    src={boardLayout ? '/brand/jic-wordmark-dark.svg' : '/brand/jic-pillars-dark.svg'}
+                    alt="Jamatia Islamic Centre"
+                  />
                 </div>
               ) : layer.type === 'text' ? (
                 <p className="scene-text" dir="auto">

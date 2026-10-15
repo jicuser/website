@@ -36,28 +36,29 @@ export function tvBoardLayout(id, orientation = 'landscape') {
     layer('brand', 3, 2, portrait ? 30 : 22, portrait ? 7 : 10),
     layer('clock', portrait ? 35 : 47, 2, portrait ? 62 : 50, portrait ? 7 : 10),
   ];
+  // Keep the bottom 5% clear for the screen's separate connection code.
   let body;
   if (id === 'classic') {
     body = portrait
       ? [
           layer('times', 3, 11, 94, 37, { layout: 'vertical' }),
           layer('poster', 3, 50, 94, 38),
-          layer('next', 3, 90, 94, 8),
+          layer('next', 3, 90, 94, 5),
         ]
       : [
           layer('times', 3, 15, 47, 70, { layout: 'vertical' }),
           layer('poster', 52, 15, 45, 70),
-          layer('next', 3, 88, 94, 10),
+          layer('next', 3, 88, 94, 7),
         ];
   } else {
     body = portrait
       ? [
           layer(id === 'countdown' ? 'next' : 'poster', 3, 11, 94, 50),
-          layer('times', 3, 63, 94, 35, { layout: 'vertical' }),
+          layer('times', 3, 63, 94, 32, { layout: 'vertical' }),
         ]
       : [
           layer(id === 'countdown' ? 'next' : 'poster', 3, 15, 94, 54),
-          layer('times', 3, 72, 94, 26, { layout: 'horizontal' }),
+          layer('times', 3, 72, 94, 23, { layout: 'horizontal' }),
         ];
   }
   return {

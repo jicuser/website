@@ -75,6 +75,32 @@ for (const width of [390, 1280]) {
     await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
     const picker = page.getByRole('region', { name: 'Choose a starting layout' });
     await picker.getByRole('button', { name: /^Countdown A large/ }).click();
+    const cardContrast = await picker.evaluate(element => {
+      const root = document.documentElement;
+      const originalTheme = root.getAttribute('data-theme');
+      const luminance = color => {
+        const channels = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => {
+          const channel = value / 255;
+          return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+        });
+        return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+      };
+      const results = [];
+      for (const theme of ['light', 'dark']) {
+        root.setAttribute('data-theme', theme);
+        for (const card of element.querySelectorAll('.tv-board-choices > button')) {
+          const background = luminance(getComputedStyle(card).backgroundColor);
+          for (const text of card.querySelectorAll('strong, strong + span')) {
+            const foreground = luminance(getComputedStyle(text).color);
+            results.push((Math.max(background, foreground) + 0.05) / (Math.min(background, foreground) + 0.05));
+          }
+        }
+      }
+      if (originalTheme === null) root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme', originalTheme);
+      return results;
+    });
+    expect(Math.min(...cardContrast)).toBeGreaterThanOrEqual(4.5);
     await expect(picker.locator('iframe')).toBeVisible();
     await expect(picker.frameLocator('iframe').locator('[data-board-layout="countdown"]')).toBeVisible();
     expect(evidence.writes).toEqual([]);

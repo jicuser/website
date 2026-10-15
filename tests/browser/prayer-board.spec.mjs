@@ -31,8 +31,12 @@ async function setup(page, settings, at = '2026-10-15T12:10:17Z') {
     const url = new URL(route.request().url());
     let data = [];
     if (url.pathname.endsWith('/prayer_times')) data = [row('2026-10-15'), row('2026-10-16')];
-    if (url.pathname.endsWith('/functions/v1/tv-control'))
-      data = { displayMode: 'normal', settings, paired: false, inputs: [] };
+    if (url.pathname.endsWith('/functions/v1/tv-control')) {
+      const { action } = route.request().postDataJSON();
+      data = action === 'display-code'
+        ? { code: '123456', expires_at: '2026-10-15T13:00:00Z' }
+        : { displayMode: 'normal', settings, paired: false, inputs: [] };
+    }
     return route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
   });
   return errors;
@@ -61,6 +65,23 @@ for (const orientation of ['landscape', 'portrait']) {
       await expect(board).toHaveAttribute('data-board-layout', id);
       await expect(board).toContainText('1:45 PM');
       await expect(board.locator('.scene-clock-date')).toContainText('15 October 2026');
+      await expect(page.locator('.display-code-number')).toBeVisible();
+      await expect(page.locator('.display-code-error')).toHaveCount(0);
+      expect(await board.locator('.scene-brand-block img').evaluate((img) => {
+        const bounds = img.closest('.scene-layer').getBoundingClientRect();
+        const rect = img.getBoundingClientRect();
+        return img.complete && img.naturalWidth > 0
+          && rect.top >= bounds.top - 1 && rect.left >= bounds.left - 1
+          && rect.bottom <= bounds.bottom + 1 && rect.right <= bounds.right + 1;
+      })).toBe(true);
+      expect(await page.locator('.display-code-number').evaluate((code) => {
+        const rect = code.getBoundingClientRect();
+        return [...document.querySelectorAll('.scene-layer')].every((layer) => {
+          const bounds = layer.getBoundingClientRect();
+          return rect.bottom <= bounds.top || rect.top >= bounds.bottom
+            || rect.right <= bounds.left || rect.left >= bounds.right;
+        });
+      })).toBe(true);
       if (id === 'countdown') {
         await expect(board.locator('.scene-countdown')).toBeVisible();
         await expect(board.locator('.scene-next-heading')).toContainText('Dhuhr');

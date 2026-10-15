@@ -44,16 +44,18 @@
   background: var(--jic-surface);
   color: var(--jic-text);
 }
-.tv-board-choices > button[aria-pressed='true'] {
+.tv-board-picker .tv-board-choices > button[aria-pressed='true'] {
   border-color: var(--jic-gold);
   box-shadow: inset 0 0 0 1px var(--jic-gold);
+  background: var(--jic-surface);
+  color: var(--jic-text);
 }
 .tv-board-choices strong {
   display: block;
   margin-bottom: 5px;
 }
 .tv-board-choices strong + span {
-  color: var(--jic-muted);
+  color: var(--jic-text-secondary);
   font-size: 0.85rem;
   line-height: 1.5;
   display: block;
@@ -126,7 +128,7 @@
   background: var(--jic-surface);
   font-size: 0.85rem;
 }
-.tv-board-moments button[aria-pressed='true'] {
+.tv-board-picker .tv-board-moments button[aria-pressed='true'] {
   background: var(--jic-text);
   color: var(--jic-bg);
 }
