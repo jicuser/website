@@ -48,11 +48,11 @@ const danger = `${btn} bg-red-50 text-red-700 hover:bg-red-100`;
 
 const SECTIONS = [
   ['dashboard', 'Overview', Activity, 'dashboard'],
-  ['prayer', 'Timetable & Jummah', Clock3, 'prayer_times'],
+  ['prayer', 'Prayer timetable & Jummah', Clock3, 'prayer_times'],
   ['events', 'Events', CalendarDays, 'events'],
   ['posters', 'Posters & announcements', FileText, 'content'],
   ['announcements', 'Announcements', Megaphone, 'announcements'],
-  ['livestream', 'Livestream', Radio, 'livestream'],
+  ['livestream', 'Main livestream', Radio, 'livestream'],
   ['tv', 'TV & hall screens', Monitor, 'tv'],
   ['app_content', 'App content & reading', FileText, 'content'],
   ['content', 'Website & pages', FileText, 'content'],
@@ -136,7 +136,7 @@ function DashboardSection({ onChoose }) {
       'content',
     ],
     ['announcements', 'Notices', 'Keep the community up to date.', Megaphone, 'announcements'],
-    ['livestream', 'Livestream', 'Choose the website’s live video.', Radio, 'livestream'],
+    ['livestream', 'Main livestream', 'Choose the website’s live video.', Radio, 'livestream'],
     [
       'forms',
       'Forms & registrations',
