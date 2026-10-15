@@ -545,7 +545,11 @@ html[data-prayer-dock-hidden='true'] {
   font-display: swap;
 }
 /* Mobile: an inline compact menu and a separate full directory in the bottom bar. */
-.jic-mobile-dock,
+.jic-mobile-dock {
+  display: contents;
+}
+.jic-mobile-controls,
+.jic-mobile-jummah,
 .jic-mobile-info-banner,
 .jic-mobile-prayer-summary,
 .jic-mobile-quick-nav {
@@ -576,14 +580,15 @@ html[data-prayer-dock-hidden='true'] {
     padding-top: 6px;
   }
   .jic-prayer-dock {
-    inset: auto 12px calc(var(--jic-mobile-controls-height, 90px) + 10px);
+    position: absolute;
+    inset: auto 12px calc(100% + 10px);
     display: flex;
     flex-direction: column-reverse;
     width: min(420px, calc(100% - 24px));
     padding: 0;
     border: 1px solid var(--jic-glass-border);
     border-radius: 28px;
-    background: var(--jic-glass-panel-strong);
+    background: var(--jic-bg-secondary);
     box-shadow: 0 4px 20px #0003;
     max-height: calc(
       100dvh - var(--jic-mobile-controls-height, 90px) - var(--jic-mobile-strip-height, 44px) - 24px
@@ -710,6 +715,12 @@ html[data-prayer-dock-hidden='true'] {
   }
   .jic-free-actions svg {
     filter: drop-shadow(0 1px 2px var(--jic-bg));
+  }
+  .jic-public-route:has(:is(input, textarea, select, [contenteditable='true']):focus)
+    .jic-free-actions {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
   .jic-free-actions .jic-theme-action {
     width: 44px;
@@ -1173,7 +1184,7 @@ html[data-prayer-dock-hidden='true'] {
   }
 }
 /* On short landscape screens the header scrolls away so the page stays usable. */
-@media (max-height: 500px) and (orientation: landscape) {
+@media (min-width: 768px) and (max-height: 500px) and (orientation: landscape) {
   .jic-unified-header {
     padding-top: 0;
   }

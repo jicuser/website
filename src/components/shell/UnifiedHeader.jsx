@@ -318,61 +318,6 @@ export default function UnifiedHeader() {
           notices={getContent('header_ticker_items', '[]')}
           radio={radioButton}
         />
-        <div
-          id="jic-prayer-dock"
-          ref={prayerDockRef}
-          className={cn(
-            'jic-prayer-dock',
-            prayerDockHidden && 'is-scroll-hidden',
-            prayerExpanded && 'is-expanded',
-          )}
-          aria-hidden={prayerDockHidden || undefined}
-          inert={prayerDockHidden ? '' : undefined}
-        >
-          <div className="jic-mobile-prayer-summary">
-            <button
-              type="button"
-              onClick={toggleTimetable}
-              className="jic-mobile-prayer-toggle"
-              aria-label={`${prayerExpanded ? 'Hide' : 'Show'} today’s salah times${next ? `. Next jama’ah: ${next.name} at ${displayTime(next.time)}` : ''}`}
-              aria-expanded={prayerExpanded}
-              aria-controls="jic-prayer-details"
-            >
-              <Clock3 size={18} aria-hidden="true" />
-              <span>Today’s salah times</span>
-              {next && (
-                <small>
-                  Next · {next.name} <strong>{displayTime(next.time)}</strong>
-                </small>
-              )}
-              <ChevronDown size={18} aria-hidden="true" />
-            </button>
-          </div>
-          <div id="jic-prayer-details" className="jic-prayer-details">
-            <PrayerTimeBar
-              todaysTimes={todaysTimes}
-              jummahTimes={jummahTimes}
-              currentDate={currentDate}
-              showContact={false}
-              highlightNext
-              radio={
-                <div className="jic-header-radio">
-                  {radioButton}
-                  <a
-                    href="/radio"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Open JIC Radio player"
-                    title="Open player"
-                    onClick={() => audioRef.current?.pause()}
-                  >
-                    <ExternalLink size={15} />
-                  </a>
-                </div>
-              }
-            />
-          </div>
-        </div>
         <div className="jic-unified-inner">
           <div className="jic-free-nav-row">
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
@@ -522,6 +467,61 @@ export default function UnifiedHeader() {
         </div>
       </header>
       <div ref={mobileControlsRef} className="jic-mobile-dock">
+        <div
+          id="jic-prayer-dock"
+          ref={prayerDockRef}
+          className={cn(
+            'jic-prayer-dock',
+            prayerDockHidden && 'is-scroll-hidden',
+            prayerExpanded && 'is-expanded',
+          )}
+          aria-hidden={prayerDockHidden || undefined}
+          inert={prayerDockHidden ? '' : undefined}
+        >
+          <div className="jic-mobile-prayer-summary">
+            <button
+              type="button"
+              onClick={toggleTimetable}
+              className="jic-mobile-prayer-toggle"
+              aria-label={`${prayerExpanded ? 'Hide' : 'Show'} today’s salah times${next ? `. Next jama’ah: ${next.name} at ${displayTime(next.time)}` : ''}`}
+              aria-expanded={prayerExpanded}
+              aria-controls="jic-prayer-details"
+            >
+              <Clock3 size={18} aria-hidden="true" />
+              <span>Today’s salah times</span>
+              {next && (
+                <small>
+                  Next · {next.name} <strong>{displayTime(next.time)}</strong>
+                </small>
+              )}
+              <ChevronDown size={18} aria-hidden="true" />
+            </button>
+          </div>
+          <div id="jic-prayer-details" className="jic-prayer-details">
+            <PrayerTimeBar
+              todaysTimes={todaysTimes}
+              jummahTimes={jummahTimes}
+              currentDate={currentDate}
+              showContact={false}
+              highlightNext
+              radio={
+                <div className="jic-header-radio">
+                  {radioButton}
+                  <a
+                    href="/radio"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open JIC Radio player"
+                    title="Open player"
+                    onClick={() => audioRef.current?.pause()}
+                  >
+                    <ExternalLink size={15} />
+                  </a>
+                </div>
+              }
+            />
+          </div>
+        </div>
         <div className="jic-mobile-jummah" aria-label="Friday congregation times">
           {[0, 1].map((index) => (
             <span key={index}>

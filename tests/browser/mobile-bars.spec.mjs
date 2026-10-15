@@ -58,7 +58,7 @@ test('mobile ticker, floating controls and timetable pill fit the visible viewpo
     expect(size.stripHeight).toBeLessThanOrEqual(46);
     expect(Math.abs(size.bottomGap), JSON.stringify(size)).toBeLessThanOrEqual(1);
     expect(size.navInsideDock).toBe(true);
-    expect(size.pillAboveNav).toBe(true);
+    expect(size.pillAboveNav, JSON.stringify(size)).toBe(true);
     expect(size.pillHeight).toBeLessThanOrEqual(58);
     expect(size.floating).toBe('fixed');
     expect(size.unboxed).toBe('rgba(0, 0, 0, 0)');
