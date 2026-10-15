@@ -105,7 +105,7 @@ export default function StaffAccess() {
   return (
     <div className="admin-staff-access">
       <h2>People & permissions</h2>
-      <p>Tick exactly what each person can manage. Labels never select permissions for you.</p>
+      <p>Select the areas this person can manage. You can change these permissions later.</p>
       {notice && (
         <p
           className={notice.error ? 'admin-error' : 'admin-success'}
@@ -160,7 +160,7 @@ export default function StaffAccess() {
           return (
             <details className="admin-panel" key={row.id}>
               <summary>
-                {row.display_name || 'Staff member'}
+                {row.display_name || 'Person'}
                 {own ? ' (you)' : ''} ·{' '}
                 {row.is_owner ? 'Owner' : `${row.permissions.length} permissions`} ·{' '}
                 {row.is_active ? 'Enabled' : 'Disabled'}
