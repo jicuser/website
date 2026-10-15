@@ -13,7 +13,6 @@ import {
   Megaphone,
   Info,
   GraduationCap,
-  HeartHandshake,
   Mail,
   Share2,
 } from 'lucide-react';
