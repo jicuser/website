@@ -24,12 +24,8 @@ test('mobile prayer strip and bottom bar fit the visible viewport', async ({ pag
         visualHeight: visualViewport?.height,
         visualWidth: visualViewport?.width,
         scale: visualViewport?.scale,
-        overflowing: [...document.querySelectorAll('body *')].filter((el) => {
-          const box = el.getBoundingClientRect();
-          return box.width > 0 && (box.right > document.documentElement.clientWidth + 1 || box.left < -1);
-        }).slice(0, 12).map((el) => ({ tag: el.tagName, class: el.className, right: el.getBoundingClientRect().right })),
         stripHeight: strip.height,
-        bottomGap: innerHeight - dock.bottom,
+        bottomGap: (visualViewport ? visualViewport.offsetTop + visualViewport.height : innerHeight) - dock.bottom,
         navInsideDock: nav.bottom <= dock.bottom,
         overflow: document.documentElement.scrollWidth > innerWidth + 1,
         targets: [...document.querySelectorAll('.jic-mobile-controls > *, .jic-mobile-prayer-summary button')]
