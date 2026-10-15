@@ -16,8 +16,7 @@ test('banner uses published congregation times and custom announcements', () => 
 test('missing times and malformed optional content do not invent a congregation', () => {
   for (const saved of ['invalid', '{}', 'null', '[null, 1, {"text": ""}]']) {
     const items = headerTickerItems(null, [], saved);
-    assert.equal(items.length, 1);
-    assert.equal(items[0].label, 'Salah');
+    assert.deepEqual(items, []);
   }
 });
 
@@ -32,5 +31,5 @@ test('old admin instructions are not displayed as announcements', () => {
     ]),
   );
   assert.deepEqual(items.at(-1), { label: 'Update', text: 'Community update' });
-  assert.equal(items.length, 2);
+  assert.equal(items.length, 1);
 });
