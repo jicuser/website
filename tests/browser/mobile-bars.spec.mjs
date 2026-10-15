@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('mobile prayer strip and bottom bar fit the visible viewport', async ({ page }, testInfo) => {
+test('mobile prayer strip and bottom bar fit the visible viewport', async ({ page, browserName }, testInfo) => {
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
   await page.route('**/preview-api/**', (route) => route.fulfill({ contentType: 'application/json', body: '[]' }));
   await page.goto('/');
@@ -17,6 +17,17 @@ test('mobile prayer strip and bottom bar fit the visible viewport', async ({ pag
       const nav = document.querySelector('.jic-mobile-controls').getBoundingClientRect();
       return {
         top: strip.top,
+        innerWidth,
+        innerHeight,
+        clientWidth: document.documentElement.clientWidth,
+        clientHeight: document.documentElement.clientHeight,
+        visualHeight: visualViewport?.height,
+        visualWidth: visualViewport?.width,
+        scale: visualViewport?.scale,
+        overflowing: [...document.querySelectorAll('body *')].filter((el) => {
+          const box = el.getBoundingClientRect();
+          return box.width > 0 && (box.right > document.documentElement.clientWidth + 1 || box.left < -1);
+        }).slice(0, 12).map((el) => ({ tag: el.tagName, class: el.className, right: el.getBoundingClientRect().right })),
         stripHeight: strip.height,
         bottomGap: innerHeight - dock.bottom,
         navInsideDock: nav.bottom <= dock.bottom,
@@ -27,7 +38,7 @@ test('mobile prayer strip and bottom bar fit the visible viewport', async ({ pag
     });
     expect(size.top).toBe(0);
     expect(size.stripHeight).toBeLessThanOrEqual(46);
-    expect(Math.abs(size.bottomGap)).toBeLessThanOrEqual(1);
+    expect(Math.abs(size.bottomGap), JSON.stringify(size)).toBeLessThanOrEqual(1);
     expect(size.navInsideDock).toBe(true);
     expect(size.overflow).toBe(false);
     expect(size.targets).toBe(true);
@@ -42,4 +53,31 @@ test('mobile prayer strip and bottom bar fit the visible viewport', async ({ pag
     return { startsBelow: details.top >= strip.bottom, endsAboveBottom: details.bottom < document.querySelector('.jic-mobile-dock').getBoundingClientRect().top };
   });
   expect(bounds).toEqual({ startsBelow: true, endsAboveBottom: true });
+  if (browserName === 'chromium') {
+    // Chromium can emulate non-zero CSS safe areas; this is not physical iOS testing.
+    await page.keyboard.press('Escape');
+    const client = await page.context().newCDPSession(page);
+    await client.send('Emulation.setSafeAreaInsetsOverride', {
+      insets: { top: 47, bottom: 34, left: 0, right: 0 },
+    });
+    await expect.poll(() => page.locator('.jic-mobile-dock').evaluate((node) =>
+      Number.parseFloat(getComputedStyle(node).paddingBottom))).toBe(34);
+    const safe = await page.evaluate(() => {
+      const strip = document.querySelector('.jic-mobile-prayer-summary');
+      const dock = document.querySelector('.jic-mobile-dock').getBoundingClientRect();
+      const nav = document.querySelector('.jic-mobile-controls').getBoundingClientRect();
+      const button = strip.querySelector('button').getBoundingClientRect();
+      return {
+        topPadding: Number.parseFloat(getComputedStyle(strip).paddingTop),
+        buttonBelowNotch: button.top >= 47,
+        bottomPadding: dock.bottom - nav.bottom,
+        bottomGap: innerHeight - dock.bottom,
+      };
+    });
+    expect(safe.topPadding).toBe(47);
+    expect(safe.buttonBelowNotch).toBe(true);
+    expect(safe.bottomPadding).toBe(34);
+    expect(Math.abs(safe.bottomGap)).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: testInfo.outputPath('mobile-emulated-safe-areas.png') });
+  }
 });

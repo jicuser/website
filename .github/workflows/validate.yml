@@ -27,11 +27,14 @@ jobs:
           # Validation builds are never deployed and do not need production credentials.
           VITE_SUPABASE_URL: https://ci-validation.supabase.co
           VITE_SUPABASE_ANON_KEY: sb_publishable_ci_validation_only
-      - run: npx playwright install --with-deps chromium webkit
+      - id: browsers
+        run: npx playwright install --with-deps chromium webkit
       - run: npm run test:browser
       - name: Check phone bars in WebKit
+        if: ${{ !cancelled() && steps.browsers.outcome == 'success' }}
         run: npx playwright test --config playwright.mobile.config.mjs
       - name: Check workspace forms and certificates with test-only feature flags
+        if: ${{ !cancelled() && steps.browsers.outcome == 'success' }}
         run: npx playwright test --config playwright.forms.config.mjs
       - name: Save browser verification evidence
         if: always()
