@@ -1,7 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import PageLoadBoundary from '@/components/PageLoadBoundary';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 
 import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
 import { AdminSaveProvider } from '@/context/AdminSaveContext';
@@ -12,7 +11,7 @@ import MainLayout from '@/layouts/MainLayout';
 import CanonicalPageRedirect from '@/components/shell/CanonicalPageRedirect';
 import RouteScrollReset from '@/components/shell/RouteScrollReset';
 import HomePage from '@/pages/HomePage';
-import NotFoundPage from '@/pages/NotFoundPage';
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const CommunityPortalPage = lazy(() => import('@/pages/CommunityPortalPage'));
 const SermonArchive = lazy(() =>
@@ -72,120 +71,118 @@ function AppRoutes() {
         }
       >
         <RouteScrollReset />
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route path="/portal" element={<CommunityPortalPage />} />
-            <Route path="/radio" element={<RadioPlayerPage />} />
-            <Route path="/tv179" element={<TvDisplayPage />} />
-            <Route path="/tv179/:screenId" element={<TvDisplayPage />} />
-            <Route path="/tv" element={<Navigate to="/tv179" replace />} />
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/admin/setup" element={<AccountSetupPage />} />
-            <Route path="/account/recovery" element={<AccountRecoveryPage />} />
-            <Route path="/account/request" element={<AccountRequestPage />} />
+        <Routes>
+          <Route path="/portal" element={<CommunityPortalPage />} />
+          <Route path="/radio" element={<RadioPlayerPage />} />
+          <Route path="/tv179" element={<TvDisplayPage />} />
+          <Route path="/tv179/:screenId" element={<TvDisplayPage />} />
+          <Route path="/tv" element={<Navigate to="/tv179" replace />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/setup" element={<AccountSetupPage />} />
+          <Route path="/account/recovery" element={<AccountRecoveryPage />} />
+          <Route path="/account/request" element={<AccountRequestPage />} />
+          <Route
+            path="/admin/share/:screenId"
+            element={
+              <ProtectedAdminRoute permission="tv">
+                <ShareDevicePage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedAdminRoute>
+                <AdminSaveProvider>
+                  <AdminPage />
+                </AdminSaveProvider>
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/home-tiles"
+            element={
+              <ProtectedAdminRoute permission="content">
+                <TileContentAdminPage />
+              </ProtectedAdminRoute>
+            }
+          />
+
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<HomePage />} />
+
+            <Route path="about" element={<AboutPage />} />
+            <Route path="team" element={<TeamPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="talks" element={<SermonArchive />} />
+            <Route path="financial-history" element={<FinancialHistoryPage />} />
+            <Route path="privacy" element={<PrivacyPage />} />
+            <Route path="social-media" element={<SocialMediaPage />} />
+            <Route path="search" element={<SearchPage />} />
+
             <Route
-              path="/admin/share/:screenId"
-              element={
-                <ProtectedAdminRoute permission="tv">
-                  <ShareDevicePage />
-                </ProtectedAdminRoute>
-              }
+              path="prayer-times"
+              element={<PrayerTimesPage key="today" initialTab="today" />}
             />
             <Route
-              path="/admin"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminSaveProvider>
-                    <AdminPage />
-                  </AdminSaveProvider>
-                </ProtectedAdminRoute>
-              }
+              path="prayer-times/monthly"
+              element={<PrayerTimesPage key="monthly" initialTab="daily" />}
             />
             <Route
-              path="/admin/home-tiles"
-              element={
-                <ProtectedAdminRoute permission="content">
-                  <TileContentAdminPage />
-                </ProtectedAdminRoute>
-              }
+              path="prayer-times/jummah"
+              element={<PrayerTimesPage key="jummah" initialTab="jummah" />}
             />
+            <Route path="prayer-times/reminders" element={<SalahRemindersPage />} />
 
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<HomePage />} />
+            <Route path="worship" element={<WorshipPage />} />
+            <Route path="worship/quran" element={<WorshipPage />} />
+            <Route path="worship/dalail-al-khayrat" element={<WorshipPage />} />
+            <Route path="worship/daily-duas" element={<WorshipPage />} />
+            <Route path="worship/prayer-guide" element={<WorshipPage />} />
+            <Route path="worship/janazah-guide" element={<WorshipPage />} />
+            <Route path="worship/daily-salah" element={<WorshipPage />} />
 
-              <Route path="about" element={<AboutPage />} />
-              <Route path="team" element={<TeamPage />} />
-              <Route path="contact" element={<ContactPage />} />
-              <Route path="talks" element={<SermonArchive />} />
-              <Route path="financial-history" element={<FinancialHistoryPage />} />
-              <Route path="privacy" element={<PrivacyPage />} />
-              <Route path="social-media" element={<SocialMediaPage />} />
-              <Route path="search" element={<SearchPage />} />
+            <Route path="services" element={<ServicesPage />} />
+            <Route path="services/religious" element={<ServicesPage />} />
+            <Route path="services/education" element={<ServicesPage />} />
+            <Route path="services/community" element={<ServicesPage />} />
+            <Route path="services/hall-booking" element={<HallBookingPage />} />
+            <Route path="projects" element={<ProjectsPage />} />
+            <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
+            {Object.keys(PAGE_ALIASES).map((path) => (
+              <Route key={path} path={path.slice(1)} element={<CanonicalPageRedirect />} />
+            ))}
 
+            <Route path="education" element={<EducationPage />} />
+            <Route path="education/courses" element={<AdultCoursesPage />} />
+            <Route path="education/enrolment" element={<EducationEnrolmentPage />} />
+            <Route path="forms/:slug" element={<PublicFormPage />} />
+            <Route path="pages/:slug" element={<ContentPage />} />
+            <Route path="madrassah" element={<MadrassahPage />} />
+            <Route path="madrassah/classes-courses" element={<ClassesCoursesPage />} />
+            <Route path="madrassah/enrolment" element={<MadrassahEnrolmentPage />} />
+
+            <Route path="youth" element={<YouthPage />} />
+            <Route path="youth/itikaf" element={<YouthPage view="itikaf" />} />
+
+            {standaloneSections.map(([path, eyebrow, title, backTo]) => (
               <Route
-                path="prayer-times"
-                element={<PrayerTimesPage key="today" initialTab="today" />}
+                key={path}
+                path={path}
+                element={
+                  <SectionPage
+                    eyebrow={eyebrow}
+                    title={title}
+                    backTo={backTo}
+                    backLabel={`Back to ${eyebrow}`}
+                  />
+                }
               />
-              <Route
-                path="prayer-times/monthly"
-                element={<PrayerTimesPage key="monthly" initialTab="daily" />}
-              />
-              <Route
-                path="prayer-times/jummah"
-                element={<PrayerTimesPage key="jummah" initialTab="jummah" />}
-              />
-              <Route path="prayer-times/reminders" element={<SalahRemindersPage />} />
+            ))}
 
-              <Route path="worship" element={<WorshipPage />} />
-              <Route path="worship/quran" element={<WorshipPage />} />
-              <Route path="worship/dalail-al-khayrat" element={<WorshipPage />} />
-              <Route path="worship/daily-duas" element={<WorshipPage />} />
-              <Route path="worship/prayer-guide" element={<WorshipPage />} />
-              <Route path="worship/janazah-guide" element={<WorshipPage />} />
-              <Route path="worship/daily-salah" element={<WorshipPage />} />
-
-              <Route path="services" element={<ServicesPage />} />
-              <Route path="services/religious" element={<ServicesPage />} />
-              <Route path="services/education" element={<ServicesPage />} />
-              <Route path="services/community" element={<ServicesPage />} />
-              <Route path="services/hall-booking" element={<HallBookingPage />} />
-              <Route path="projects" element={<ProjectsPage />} />
-              <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
-              {Object.keys(PAGE_ALIASES).map((path) => (
-                <Route key={path} path={path.slice(1)} element={<CanonicalPageRedirect />} />
-              ))}
-
-              <Route path="education" element={<EducationPage />} />
-              <Route path="education/courses" element={<AdultCoursesPage />} />
-              <Route path="education/enrolment" element={<EducationEnrolmentPage />} />
-              <Route path="forms/:slug" element={<PublicFormPage />} />
-              <Route path="pages/:slug" element={<ContentPage />} />
-              <Route path="madrassah" element={<MadrassahPage />} />
-              <Route path="madrassah/classes-courses" element={<ClassesCoursesPage />} />
-              <Route path="madrassah/enrolment" element={<MadrassahEnrolmentPage />} />
-
-              <Route path="youth" element={<YouthPage />} />
-              <Route path="youth/itikaf" element={<YouthPage view="itikaf" />} />
-
-              {standaloneSections.map(([path, eyebrow, title, backTo]) => (
-                <Route
-                  key={path}
-                  path={path}
-                  element={
-                    <SectionPage
-                      eyebrow={eyebrow}
-                      title={title}
-                      backTo={backTo}
-                      backLabel={`Back to ${eyebrow}`}
-                    />
-                  }
-                />
-              ))}
-
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
-        </AnimatePresence>
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
       </Suspense>
     </PageLoadBoundary>
   );

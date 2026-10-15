@@ -1,3 +1,4 @@
+import { googleSignInAvailable } from '@/lib/googleSignIn';
 import { createClient } from '@supabase/supabase-js';
 import { createTabAuthOptions } from '@/lib/tabAuthStorage';
 
@@ -13,3 +14,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: createTabAuthOptions(supabaseUrl),
 });
+
+export const getGoogleSignInAvailability = (signal) =>
+  googleSignInAvailable({ url: supabaseUrl, apiKey: supabaseAnonKey, signal });

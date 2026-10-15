@@ -14,7 +14,9 @@
     "test:browser": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "validate": "npm run check && npm test && npm run build"
+    "validate": "npm run check && npm test && npm run build",
+    "build:images": "node scripts/optimize-public-images.mjs",
+    "check:startup": "node scripts/check-startup-budget.mjs"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.1",

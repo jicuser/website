@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Bell,
@@ -7,7 +7,6 @@ import {
   Play,
   Radio,
   Users,
-  Video,
   Building2,
   ArrowRight,
   Megaphone,
@@ -23,7 +22,6 @@ import ProgrammePosters from '@/components/ProgrammePosters';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useContent } from '@/context/ContentContext';
-import { supabase } from '@/lib/supabaseClient';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
 import { displayTime } from '@/lib/timetable';
@@ -101,74 +99,54 @@ const MORE_CARDS = [
   },
 ];
 
-function CommunityAccessStrip() {
-  const links = [
-    [Users, 'Community portal', 'Sign in to your account and approved staff tools.', '/portal'],
-    [BookOpen, 'Courses & Madrassah', 'Find classes and enrolment information.', '/education'],
-  ];
+function HomeQuickLinks() {
   return (
-    <section className="jic-community-access" aria-labelledby="community-access-title">
-      <div className="jic-section-heading">
-        <div>
-          <h2 id="community-access-title">Learning & your account</h2>
-        </div>
-      </div>
-      <div className="jic-community-access-grid">
-        {links.map(([Icon, title, text, to]) => (
-          <Link to={to} key={title} className="jic-community-access-card">
-            <span className="jic-community-access-icon">
-              <Icon size={19} />
-            </span>
-            <span>
-              <strong>{title}</strong>
-              <small>{text}</small>
-            </span>
-            <ArrowRight size={16} aria-hidden="true" />
-          </Link>
-        ))}
-      </div>
-    </section>
+    <nav className="jic-home-quicklinks" aria-label="Learning and account">
+      <Link to="/portal">
+        <Users size={18} aria-hidden="true" />
+        My account
+        <ArrowRight size={16} aria-hidden="true" />
+      </Link>
+      <Link to="/education/courses">
+        <BookOpen size={18} aria-hidden="true" />
+        Courses
+        <ArrowRight size={16} aria-hidden="true" />
+      </Link>
+    </nav>
   );
 }
 
 function useHomeTiles() {
-  const [cards, setCards] = useState(DEFAULT_CARDS);
-  useEffect(() => {
-    supabase
-      .from('page_content')
-      .select('content_value')
-      .eq('content_key', 'home_tiles')
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (error || !data?.content_value) return;
-        try {
-          const saved = JSON.parse(data.content_value);
-          if (!Array.isArray(saved)) return;
-          setCards(
-            DEFAULT_CARDS.map((base) => {
-              const edit = saved.find((item) => item.key === base.key);
-              if (!edit) return base;
-              return {
-                ...base,
-                title:
-                  base.key === 'projects' && edit.title === 'Projects'
-                    ? base.title
-                    : edit.title || base.title,
-                text: edit.text || base.text,
-                img: typeof edit.image === 'string' ? edit.image : base.img,
-              };
-            }),
-          );
-        } catch {}
+  const { getContent } = useContent();
+  const raw = getContent('home_tiles', null);
+  return useMemo(() => {
+    try {
+      const saved = JSON.parse(raw);
+      if (!Array.isArray(saved)) return DEFAULT_CARDS;
+      return DEFAULT_CARDS.map((base) => {
+        const edit = saved.find((item) => item.key === base.key);
+        if (!edit) return base;
+        return {
+          ...base,
+          title:
+            base.key === 'projects' && edit.title === 'Projects'
+              ? base.title
+              : edit.title || base.title,
+          text: edit.text || base.text,
+          img: typeof edit.image === 'string' ? edit.image : base.img,
+        };
       });
-  }, []);
-  return cards;
+    } catch {
+      return DEFAULT_CARDS;
+    }
+  }, [raw]);
 }
 
 export default function HomePage() {
   const { events, announcement, livestream } = useHomeLiveContent();
   const whatsapp = useCommunityLink();
   const cards = useHomeTiles();
+  const [playingUrl, setPlayingUrl] = useState(null);
   const { jummahTimes } = usePublicPrayerTimes();
   const { getContent } = useContent();
   let hero = {};
@@ -211,7 +189,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <CommunityAccessStrip />
+      <HomeQuickLinks />
 
       {announcement && (
         <section className="jic-announcement jic-popup-surface">
@@ -316,12 +294,23 @@ export default function HomePage() {
           </div>
           {embedUrl ? (
             <div className="jic-live-frame">
-              <iframe
-                src={embedUrl}
-                title={livestream.title || 'JIC Live'}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
+              {playingUrl === embedUrl ? (
+                <iframe
+                  src={`${embedUrl}?autoplay=1`}
+                  title={livestream.title || 'JIC Live'}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="jic-live-play"
+                  onClick={() => setPlayingUrl(embedUrl)}
+                >
+                  <Play size={30} aria-hidden="true" />
+                  <span>Play {livestream.title || 'JIC Live'}</span>
+                </button>
+              )}
             </div>
           ) : (
             <a

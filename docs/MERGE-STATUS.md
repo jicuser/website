@@ -4,7 +4,7 @@ The community branch is integrated with main without replacing the newer content
 
 ## Release state
 
-- Website account entry and password/Google sign-in are available at `/portal`. Google still requires provider and redirect configuration in Supabase.
+- Website account entry and password sign-in are available at `/portal`. Google is offered only after the live Auth settings confirm it is enabled, and checked again before redirecting. The current project has Google disabled; configure its OAuth client credentials and redirect allowlist in Supabase before offering it.
 - With `VITE_ENABLE_WORKSPACE=false`, signed-in members see an account page; authorised staff can open administration. Family/learning modules are not advertised as live.
 - Keep `VITE_ENABLE_WORKSPACE=false`. The historical workspace migrations overlap the deployed website forms schema. They are retained under `tests/fixtures/legacy-workspace` for isolated regression tests, not in the deployable migration directory. A new additive upgrade and full migration-chain test are required before activation.
 - Account requests are separately disabled by default. Keep `VITE_ENABLE_ACCOUNT_REQUESTS=false` and server `ACCOUNT_REQUESTS_ENABLED` unset until deployed and reviewed, including rate limiting and transactional approval. Existing staff invitations continue to work.

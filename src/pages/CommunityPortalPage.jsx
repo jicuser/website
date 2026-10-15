@@ -17,6 +17,7 @@ import Manage from '@/components/workspace/Manage';
 import CustomFormsWorkspace from '@/components/workspace/CustomFormsWorkspace';
 import { SermonManager } from '@/components/workspace/Sermons';
 import FeeLedger from '@/components/workspace/FeeLedger';
+import GoogleSignInButton from '@/components/account/GoogleSignInButton';
 import { ActionForm, TextField, checked } from '@/components/workspace/shared';
 import '@/styles/workspace.css';
 
@@ -40,7 +41,6 @@ const tables = [
 const empty = () => Object.fromEntries(tables.map((name) => [name, []]));
 export default function CommunityPortalPage() {
   const auth = useAuth();
-  const [signInError, setSignInError] = useState('');
 
   return (
     <div className="community-workspace">
@@ -67,20 +67,7 @@ export default function CommunityPortalPage() {
               autoComplete="current-password"
             />
             <Link to="/account/recovery">Forgot your password?</Link>
-            <button
-              type="button"
-              onClick={async () => {
-                setSignInError('');
-                try {
-                  await auth.signInWithGoogle();
-                } catch (error) {
-                  setSignInError(error.message);
-                }
-              }}
-            >
-              Continue with Google
-            </button>
-            {signInError && <p role="alert">{signInError}</p>}
+            <GoogleSignInButton />
             <p className="workspace-meta">
               Need access? <Link to="/account/request">Request a JIC account</Link>
             </p>

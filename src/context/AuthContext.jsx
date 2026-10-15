@@ -7,7 +7,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase, getGoogleSignInAvailability } from '@/config/supabase';
+import { startGoogleSignIn } from '@/lib/googleSignIn';
 import { createAuthRecovery, INITIAL_AUTH_STATE } from '@/lib/authRecovery';
 import { hasPermission, hasAdminAccess } from '../../supabase/functions/_shared/access.js';
 
@@ -35,13 +36,11 @@ export function AuthProvider({ children }) {
     (email, password) => recovery.current.signIn(email, password),
     [],
   );
-  const signInWithGoogle = useCallback(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/portal` },
-    });
-    if (error) throw error;
-  }, []);
+  const signInWithGoogle = useCallback(
+    () =>
+      startGoogleSignIn(supabase, getGoogleSignInAvailability, `${window.location.origin}/portal`),
+    [],
+  );
   const signOut = useCallback(() => recovery.current.signOut(), []);
   const refreshProfile = useCallback(() => recovery.current.retry(), []);
   const { user, profile } = state;

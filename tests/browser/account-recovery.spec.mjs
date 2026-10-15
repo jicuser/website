@@ -87,7 +87,7 @@ test('portal login remains available while learning tools are disabled', async (
   const errors = await setup(page);
   await page.goto('/portal');
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Continue with Google' })).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
@@ -102,4 +102,16 @@ test('signed-in members do not request undeployed learning tables', async ({ pag
   expect(requests.some((url) => url.includes('/learning_'))).toBe(false);
   await expect(page.getByRole('link', { name: 'Open administration' })).toHaveCount(0);
   expect(errors).toEqual([]);
+});
+
+test('Google is offered only when the live provider is enabled', async ({ page }) => {
+  await setup(page);
+  await page.route('**/auth/v1/settings', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ external: { google: true } }),
+    }),
+  );
+  await page.goto('/portal');
+  await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
 });

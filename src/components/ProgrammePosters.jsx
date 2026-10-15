@@ -1,3 +1,4 @@
+import { OPTIMIZED_IMAGES } from '@/content/optimizedImages';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Expand } from 'lucide-react';
@@ -47,7 +48,14 @@ export default function ProgrammePosters() {
                 onClick={() => setSelected(item)}
                 aria-label={`View ${item.title} poster`}
               >
-                <img src={item.image} alt={item.alt} loading="lazy" width="1224" height="1730" />
+                <img
+                  src={OPTIMIZED_IMAGES[item.image] || item.image}
+                  decoding="async"
+                  alt={item.alt}
+                  loading="lazy"
+                  width="1224"
+                  height="1730"
+                />
                 <span>
                   <Expand size={16} /> View poster
                 </span>
