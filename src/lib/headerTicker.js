@@ -8,7 +8,7 @@ const legacyMessages = new Set([
 export function headerTickerItems(next, jummahTimes = [], saved = '[]') {
   const items = next
     ? [{ label: 'Next jama’ah', text: `${next.name} · ${displayTime(next.time)}` }]
-    : [{ label: 'Salah', text: 'Open today’s timetable using the pill below' }];
+    : [];
   const friday = jummahTimes
     .map((session, index) => {
       const time = displayTime(session?.prayer);
