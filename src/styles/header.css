@@ -574,6 +574,9 @@ html[data-prayer-dock-hidden='true'] {
     padding: 0;
     background: var(--jic-bg-secondary);
     max-height: calc(100dvh - var(--jic-mobile-controls-height, 90px) - 16px);
+    overflow: visible;
+  }
+  .jic-prayer-dock.is-expanded {
     overflow-y: auto;
     overscroll-behavior: contain;
   }

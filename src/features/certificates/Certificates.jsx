@@ -31,6 +31,7 @@ function useRows({ table, userId, staff, filter, page, revision }) {
 
 function RequestForm({ onSaved, onCancel }) {
   const key = useRef(crypto.randomUUID());
+  const previousPayload = useRef('');
   const sending = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -39,15 +40,18 @@ function RequestForm({ onSaved, onCancel }) {
       event.preventDefault();
       if (sending.current) return;
       const data = new FormData(event.currentTarget);
+      const payload = {
+        p_kind: data.get('kind'), p_recipient_name: data.get('recipient_name'),
+        p_event_date: data.get('event_date') || null, p_notes: data.get('notes'),
+      };
+      const fingerprint = JSON.stringify(payload);
+      if (previousPayload.current && previousPayload.current !== fingerprint) key.current = crypto.randomUUID();
+      previousPayload.current = fingerprint;
       sending.current = true;
       setBusy(true);
       setError('');
       try {
-        const result = await supabase.rpc('request_certificate', {
-          p_kind: data.get('kind'), p_recipient_name: data.get('recipient_name'),
-          p_event_date: data.get('event_date') || null, p_notes: data.get('notes'),
-          p_client_key: key.current,
-        });
+        const result = await supabase.rpc('request_certificate', { ...payload, p_client_key: key.current });
         if (result.error) throw result.error;
         onSaved();
       } catch {
@@ -239,7 +243,7 @@ export function CertificateWorkspace({ staff = false }) {
       data.error ? <p role="alert">{data.error} <button type="button" onClick={refresh}>Try again</button></p> :
         !data.rows.length ? <div className="certificate-empty"><Award size={30} aria-hidden="true" /><h3>{tab === 'requests' ? 'No requests here' : 'No certificates yet'}</h3><p>{staff ? 'New requests and issued records will appear here.' : 'Once the office issues a certificate, you can open it here.'}</p></div> :
           <div className="certificate-list">{data.rows.map((row) => <article className="certificate-card" key={row.id}>
-            <div className="certificate-row-title"><h3>{certificateKind(row.kind)}</h3><span className={row.revoked_at || row.status === 'declined' ? 'certificate-badge is-revoked' : 'certificate-badge'}>{tab === 'certificates' ? (row.revoked_at ? 'Revoked' : 'Issued') : row.status === 'pending' ? 'Awaiting review' : row.status}</span></div>
+            <div className="certificate-row-title"><h3>{certificateKind(row.kind)}</h3><span className={row.revoked_at || row.status === 'declined' ? 'certificate-badge is-revoked' : 'certificate-badge'}>{tab === 'certificates' ? (row.revoked_at ? 'Revoked' : 'Issued') : row.status === 'pending' ? 'Awaiting review' : row.status === 'issued' ? 'Issued' : 'Declined'}</span></div>
             <p><strong>{row.recipient_name}</strong></p>
             <p className="certificate-help">{certificateDate(row.issued_at || row.created_at)}{row.reference ? ` · ${row.reference}` : ''}</p>
             {tab === 'certificates' ? <button type="button" onClick={() => setSelected(row.id)}>View certificate</button> : <>

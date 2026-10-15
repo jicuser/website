@@ -35,6 +35,7 @@ test('certificate requests, immutable issuance and minimal public verification a
   await t.test('an active applicant can request once and only see their own records', async () => {
     requestId = await as(id(5), () => request(100));
     assert.equal(await as(id(5), () => request(100)), requestId);
+    await as(id(5), () => assert.rejects(request(100, 'Changed recipient'), /different details/));
     assert.equal((await as(id(5), () => db.query('select * from certificate_requests'))).rows.length, 1);
     assert.equal((await as(id(4), () => db.query('select * from certificate_requests'))).rows.length, 0);
     await as(id(5), () => assert.rejects(db.query("update certificate_requests set status='issued'"), /permission denied/));

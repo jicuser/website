@@ -8,6 +8,11 @@ on:
         type: boolean
         default: false
         required: true
+      certificates:
+        description: Enable certificates only after the staged certificate schema and issuer access are activated
+        type: boolean
+        default: false
+        required: true
 
 permissions:
   contents: read
@@ -20,6 +25,7 @@ jobs:
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       VITE_ENABLE_WORKSPACE: ${{ inputs.workspace && 'true' || 'false' }}
+      VITE_ENABLE_CERTIFICATES: ${{ inputs.certificates && 'true' || 'false' }}
       VITE_WONDERFUL_DONATE_URL: ${{ vars.VITE_WONDERFUL_DONATE_URL }}
       VITE_MEDIA_RELAY_URL: ${{ vars.VITE_MEDIA_RELAY_URL }}
     steps:

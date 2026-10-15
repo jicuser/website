@@ -105,13 +105,19 @@ for each row execute function private.protect_issued_certificate();
 create function private.request_certificate(
   p_kind text, p_recipient_name text, p_event_date date, p_notes text, p_client_key uuid
 ) returns uuid language plpgsql security definer set search_path = '' as $$
-declare actor uuid = auth.uid(); result uuid;
+declare actor uuid = auth.uid(); result uuid; previous public.certificate_requests;
 begin
   perform 1 from public.profiles where id = actor and is_active for update;
   if not found then raise exception 'An active account is required'; end if;
   if p_client_key is null then raise exception 'A request key is required'; end if;
-  select id into result from public.certificate_requests where applicant_id = actor and client_key = p_client_key;
-  if result is not null then return result; end if;
+  select * into previous from public.certificate_requests where applicant_id = actor and client_key = p_client_key;
+  if found then
+    if previous.kind is distinct from p_kind or previous.recipient_name is distinct from trim(p_recipient_name)
+      or previous.event_date is distinct from p_event_date or previous.notes is distinct from trim(coalesce(p_notes,'')) then
+      raise exception 'This request key already belongs to different details; start a new request';
+    end if;
+    return previous.id;
+  end if;
   if (select count(*) from public.certificate_requests where applicant_id = actor and created_at > now() - interval '1 day') >= 5
     then raise exception 'You have reached the daily request limit'; end if;
   if p_event_date > current_date then raise exception 'The event date cannot be in the future'; end if;
