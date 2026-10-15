@@ -35,6 +35,13 @@ export function AuthProvider({ children }) {
     (email, password) => recovery.current.signIn(email, password),
     [],
   );
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/portal` },
+    });
+    if (error) throw error;
+  }, []);
   const signOut = useCallback(() => recovery.current.signOut(), []);
   const refreshProfile = useCallback(() => recovery.current.retry(), []);
   const { user, profile } = state;
@@ -45,8 +52,8 @@ export function AuthProvider({ children }) {
     [user, profile],
   );
   const value = useMemo(
-    () => ({ ...state, isAdmin, isOwner, can, signIn, signInMember, signOut, refreshProfile }),
-    [state, isAdmin, isOwner, can, signIn, signInMember, signOut, refreshProfile],
+    () => ({ ...state, isAdmin, isOwner, can, signIn, signInMember, signInWithGoogle, signOut, refreshProfile }),
+    [state, isAdmin, isOwner, can, signIn, signInMember, signInWithGoogle, signOut, refreshProfile],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
