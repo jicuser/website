@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Bell,
   BookOpen,
   CalendarDays,
   Play,
@@ -11,6 +12,7 @@ import {
   Megaphone,
   Info,
   GraduationCap,
+  HeartHandshake,
   Mail,
   Share2,
 } from 'lucide-react';
@@ -98,6 +100,35 @@ const MORE_CARDS = [
   },
 ];
 
+function CommunityAccessStrip() {
+  const links = [
+    [Users, 'Community portal', 'Family updates, learning and staff tools.', '/portal'],
+    [Video, 'Live lessons', 'Join a class when your teacher opens the room.', '/portal?tab=learning'],
+    [BookOpen, 'Courses & Madrassah', 'Find classes, enrolment and learning information.', '/madrassah'],
+    [HeartHandshake, 'Janazah & support', 'Guidance, contacts and community help.', '/worship/janazah-guide'],
+  ];
+  return (
+    <section className="jic-community-access" aria-labelledby="community-access-title">
+      <div className="jic-section-heading">
+        <div>
+          <p className="jic-kicker">JIC connected</p>
+          <h2 id="community-access-title">Everything the community needs, in the right place.</h2>
+        </div>
+        <p>Use the website for public information, or open the portal for your family, classes and JIC work.</p>
+      </div>
+      <div className="jic-community-access-grid">
+        {links.map(([Icon, title, text, to]) => (
+          <Link to={to} key={title} className="jic-community-access-card">
+            <span className="jic-community-access-icon"><Icon size={19} /></span>
+            <span><strong>{title}</strong><small>{text}</small></span>
+            <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function useHomeTiles() {
   const [cards, setCards] = useState(DEFAULT_CARDS);
   useEffect(() => {
@@ -173,6 +204,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <CommunityAccessStrip />
 
       {announcement && (
         <section className="jic-announcement jic-popup-surface">
