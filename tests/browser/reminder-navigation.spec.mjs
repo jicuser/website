@@ -66,6 +66,49 @@ async function setup(page, { welcome = false } = {}) {
   };
 }
 
+test('home shortcuts fit small phones and prayer details expand only on request', async ({
+  page,
+}, testInfo) => {
+  await setup(page);
+  const dock = page.locator('#jic-prayer-dock');
+  const details = page.locator('#jic-prayer-details');
+  const prayerButton = page
+    .getByRole('navigation', { name: 'Quick navigation' })
+    .getByRole('button', { name: 'Prayer times', exact: true });
+  await expect(details).toBeHidden();
+  await expect(prayerButton).toHaveAttribute('aria-expanded', 'false');
+  expect(await dock.evaluate((node) => node.getBoundingClientRect().height)).toBeLessThan(84);
+  await prayerButton.click();
+  await expect(details).toBeVisible();
+  await expect(details).toContainText('5:15');
+  await page.keyboard.press('Escape');
+  await expect(details).toBeHidden();
+  await expect(prayerButton).toBeFocused();
+
+  for (const width of [320, 390, 767]) {
+    await page.setViewportSize({ width, height: 844 });
+    await expect(page.locator('.jic-home-shortcuts').getByRole('link')).toHaveCount(3);
+    const overflow = await page
+      .locator('.jic-home-shortcuts')
+      .evaluate(
+        (node) =>
+          node.scrollWidth > node.clientWidth + 1 ||
+          document.documentElement.scrollWidth > innerWidth + 1,
+      );
+    expect(overflow, `Home overflow at ${width}px`).toBe(false);
+    await page.locator('.jic-home-shortcuts').scrollIntoViewIfNeeded();
+    await expect(page.locator('.jic-free-actions')).toHaveCSS('position', 'static');
+    await expect(page.getByRole('button', { name: 'Scroll to top', exact: true })).toBeHidden();
+    if (width === 390)
+      await page.screenshot({ path: testInfo.outputPath('homepage-grouped-mobile.png') });
+  }
+  await page
+    .locator('.jic-home-shortcuts')
+    .getByRole('link', { name: /Janazah/ })
+    .click();
+  await expect(page).toHaveURL('/funerals');
+});
+
 for (const target of ['card', 'background']) {
   test(`salawat closes immediately when tapping the ${target}`, async ({ page }, testInfo) => {
     await setup(page, { welcome: true });

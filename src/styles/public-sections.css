@@ -110,8 +110,8 @@
     gap: 24px;
   }
   .jic-scroll-top {
-    right: max(16px, env(safe-area-inset-right));
-    bottom: calc(var(--jic-mobile-visible-dock-height, 72px) + 8px);
+    /* The bottom Home control already returns to the top on the homepage. */
+    display: none;
   }
 }
 @media (min-width: 1025px) {

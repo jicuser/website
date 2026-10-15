@@ -535,6 +535,7 @@ html[data-prayer-dock-hidden='true'] {
 }
 /* Mobile: an inline compact menu and a separate full directory in the bottom bar. */
 .jic-mobile-controls,
+.jic-mobile-prayer-summary,
 .jic-mobile-quick-nav {
   display: none;
 }
@@ -567,25 +568,80 @@ html[data-prayer-dock-hidden='true'] {
     overscroll-behavior: contain;
   }
   .jic-prayer-dock .jic-unified-info {
-    border-radius: 16px 16px 0 0;
+    border-radius: 0;
     border-bottom: 0;
   }
+  .jic-prayer-details {
+    display: none;
+  }
+  .jic-prayer-dock.is-expanded .jic-prayer-details {
+    display: block;
+  }
+  .jic-mobile-prayer-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px max(12px, env(safe-area-inset-right)) 4px max(12px, env(safe-area-inset-left));
+    border: 1px solid var(--jic-border);
+    border-radius: 16px 16px 0 0;
+    color: var(--jic-text);
+  }
+  .jic-mobile-prayer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 8px;
+    min-width: 0;
+    min-height: 44px;
+    text-align: left;
+    background: transparent;
+    color: inherit;
+    border: 0;
+  }
+  .jic-mobile-prayer-toggle strong,
+  .jic-mobile-prayer-toggle small {
+    display: block;
+    line-height: 1.35;
+    font-size: 0.75rem;
+  }
+  .jic-mobile-prayer-toggle small {
+    color: var(--jic-gold);
+    font-variant-numeric: tabular-nums;
+  }
+  .jic-mobile-prayer-toggle svg {
+    flex-shrink: 0;
+  }
+  .jic-mobile-prayer-toggle[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
+  .jic-mobile-prayer-summary .jic-radio-flat {
+    min-height: 44px;
+    padding-inline: 10px;
+    border-inline-start: 1px solid var(--jic-border);
+  }
+  .jic-prayer-dock .jic-header-radio,
   .jic-prayer-dock .jic-prayer-legend {
-    gap: 1px 8px;
-    padding: 4px 8px;
-    font-size: 0.6875rem;
+    display: none;
+  }
+  .jic-prayer-dock .jic-header-live-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .jic-prayer-dock .jic-today-prayer {
     padding-block: 2px;
   }
   .jic-free-actions-slot {
     display: flex;
-    flex: 1 0 100%;
+    flex: 0 0 auto;
     justify-content: flex-end;
     min-height: 48px;
   }
   .jic-free-nav-row {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+  }
+  .jic-free-brand {
+    flex-basis: 154px;
+    margin-right: auto;
   }
   .jic-free-actions {
     position: static;
@@ -596,15 +652,12 @@ html[data-prayer-dock-hidden='true'] {
       opacity 160ms ease,
       visibility 160ms;
   }
-  .jic-free-actions.is-floating {
-    position: fixed;
-    top: max(8px, env(safe-area-inset-top));
-    right: max(12px, env(safe-area-inset-right));
+  .jic-free-actions .jic-theme-action {
+    width: 44px;
+    min-width: 44px;
   }
-  .jic-free-actions.is-floating.is-scroll-hidden:not(:focus-within) {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+  .jic-free-actions .jic-theme-action span {
+    display: none;
   }
   .jic-free-actions .jic-desktop-action {
     display: none;

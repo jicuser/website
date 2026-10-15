@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Bell,
   BookOpen,
   CalendarDays,
   Play,
@@ -10,23 +9,22 @@ import {
   Building2,
   ArrowRight,
   Megaphone,
-  Info,
-  GraduationCap,
-  Mail,
-  Share2,
+  Heart,
+  HeartHandshake,
 } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
 import useCommunityLink from '@/hooks/useCommunityLink';
 import ProgrammePosters from '@/components/ProgrammePosters';
+import HomePrayerCard from '@/components/home/HomePrayerCard';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useContent } from '@/context/ContentContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
 import { displayTime } from '@/lib/timetable';
+import { isPageVisible } from '@/lib/pageVisibility';
 import { cn } from '@/lib/utils';
-import '@/styles/salah-reminders.css';
 
 const DEFAULT_CARDS = [
   {
@@ -66,53 +64,23 @@ const DEFAULT_CARDS = [
     img: '',
   },
 ];
-const MORE_CARDS = [
-  { key: 'about', title: 'About', text: 'Our centre and community.', to: '/about', icon: Info },
-  {
-    key: 'prayer-times',
-    title: 'Prayer Times',
-    text: 'Today, monthly and Jummah.',
-    to: '/prayer-times',
-    icon: CalendarDays,
-  },
-  {
-    key: 'worship',
-    title: 'Worship',
-    text: 'Qur’an, prayers and du‘as.',
-    to: '/worship',
-    icon: BookOpen,
-  },
-  {
-    key: 'education',
-    title: 'Education',
-    text: 'Learning for all ages.',
-    to: '/education',
-    icon: GraduationCap,
-  },
-  { key: 'contact', title: 'Contact', text: 'Visit or get in touch.', to: '/contact', icon: Mail },
-  {
-    key: 'social-media',
-    title: 'Social Media',
-    text: 'Our channels, videos and community updates.',
-    to: '/social-media',
-    icon: Share2,
-  },
-];
-
-function HomeQuickLinks() {
+function HomeDestination({ title, text, to, icon: Icon, img, onClick }) {
+  const Tag = to ? Link : 'button';
   return (
-    <nav className="jic-home-quicklinks" aria-label="Learning and account">
-      <Link to="/portal">
-        <Users size={18} aria-hidden="true" />
-        My account
-        <ArrowRight size={16} aria-hidden="true" />
-      </Link>
-      <Link to="/education/courses">
-        <BookOpen size={18} aria-hidden="true" />
-        Courses
-        <ArrowRight size={16} aria-hidden="true" />
-      </Link>
-    </nav>
+    <Tag
+      {...(to ? { to } : { type: 'button', onClick })}
+      className={cn('jic-home-destination', img && 'has-image')}
+      style={img ? { '--card-image': `url("${img}")` } : undefined}
+    >
+      <span className="jic-home-destination-icon">
+        <Icon size={21} aria-hidden="true" />
+      </span>
+      <span className="jic-home-destination-copy">
+        <strong>{title}</strong>
+        <small>{text}</small>
+      </span>
+      <ArrowRight size={16} className="jic-home-destination-arrow" aria-hidden="true" />
+    </Tag>
   );
 }
 
@@ -151,192 +119,224 @@ export default function HomePage() {
   const { getContent } = useContent();
   let hero = {};
   try {
-    hero = JSON.parse(getContent('page:/', '{}'));
+    hero = JSON.parse(getContent('page:/', '{}')) || {};
   } catch {}
   const liveUrl = safeWebUrl(livestream?.stream_url) || SITE.socials.youtube;
   const embedUrl = useMemo(() => youtubeEmbedUrl(livestream?.stream_url), [livestream]);
+  const hasLiveStream = Boolean(livestream?.enabled && safeWebUrl(livestream.stream_url));
+  const shortcuts = [
+    {
+      key: 'courses',
+      title: 'Courses',
+      text: 'Find a class',
+      to: '/education/courses',
+      icon: BookOpen,
+    },
+    cards.find((card) => card.key === 'madrassah'),
+    {
+      key: 'janazah',
+      title: 'Janazah',
+      text: 'Funeral support',
+      to: '/funerals',
+      icon: HeartHandshake,
+    },
+    {
+      key: 'donate',
+      title: 'Donate',
+      text: 'Support your masjid',
+      icon: Heart,
+      onClick: () => window.dispatchEvent(new Event('jic-open-donation')),
+    },
+  ].filter((card) => !card.to || isPageVisible(getContent, card.to));
+  const communityCards = cards.filter(
+    (card) => card.key !== 'madrassah' && isPageVisible(getContent, card.to),
+  );
 
   return (
     <div className="jic-premium-home">
       <section className="jic-hero">
         <div className="jic-hero-inner">
-          <p className="jic-kicker">JAMATIA ISLAMIC CENTRE · BIRMINGHAM</p>
-          <h1 style={{ whiteSpace: 'pre-line' }}>
-            {hero.title || 'A place for faith.\nA home for community.'}
-          </h1>
-          <div className="jic-gold-rule" />
-          <p className="jic-hero-sub" style={{ whiteSpace: 'pre-line' }}>
-            {hero.body ||
-              'Worship. Learn. Grow. Together.\nA stronger community for a brighter tomorrow.'}
-          </p>
-          <div className="jic-hero-buttons">
-            <Link to="/contact#map" className="jic-primary-cta">
-              Visit the Centre <ArrowRight size={18} />
-            </Link>
-            <a
-              href={liveUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="jic-secondary-cta jic-watch-live"
-            >
-              <Play size={17} fill="currentColor" /> Watch Live
-            </a>
+          <div className="jic-hero-copy">
+            <p className="jic-kicker">JAMATIA ISLAMIC CENTRE · BIRMINGHAM</p>
+            <h1 style={{ whiteSpace: 'pre-line' }}>
+              {hero.title || 'A place for faith.\nA home for community.'}
+            </h1>
+            <p className="jic-hero-sub" style={{ whiteSpace: 'pre-line' }}>
+              {hero.body ||
+                'Worship. Learn. Grow. Together.\nA stronger community for a brighter tomorrow.'}
+            </p>
+            <div className="jic-hero-buttons">
+              <Link to="/contact#map" className="jic-primary-cta">
+                Visit the Centre <ArrowRight size={18} />
+              </Link>
+              <Link to="/portal" className="jic-secondary-cta">
+                <Users size={18} aria-hidden="true" /> My account
+              </Link>
+            </div>
           </div>
-          <Link to="/prayer-times/reminders" className="jic-secondary-cta jic-reminder-entry">
-            <Bell size={18} aria-hidden="true" /> Set Salah reminders{' '}
-            <ArrowRight size={17} aria-hidden="true" />
-          </Link>
+          <HomePrayerCard />
         </div>
       </section>
 
-      <HomeQuickLinks />
+      <div className="jic-home-content">
+        {announcement && (
+          <section className="jic-announcement jic-popup-surface">
+            <Megaphone size={18} />
+            <strong>{announcement.title}</strong>
+            <span>{announcement.body}</span>
+          </section>
+        )}
 
-      {announcement && (
-        <section className="jic-announcement jic-popup-surface">
-          <Megaphone size={18} />
-          <strong>{announcement.title}</strong>
-          <span>{announcement.body}</span>
-        </section>
-      )}
-
-      <nav className="jic-feature-grid" aria-label="Main destinations">
-        {cards.map(({ key, title, text, to, icon: Icon, img }) => (
-          <Link
-            to={to}
-            className={cn('jic-feature-card', !img && 'is-glass-only')}
-            data-glass={!img ? 'frosted' : undefined}
-            key={key}
-            style={img ? { '--card-image': `url("${img}")` } : undefined}
-          >
-            <Icon className="jic-card-icon" aria-hidden="true" />
-            <div className="jic-card-copy">
-              <h2>{title}</h2>
-              <p>{text}</p>
-            </div>
-          </Link>
-        ))}
-      </nav>
-      <details className="jic-more-destinations">
-        <summary>
-          More from JIC <ArrowRight size={16} aria-hidden="true" />
-        </summary>
-        <nav className="jic-feature-grid jic-feature-grid-secondary" aria-label="More destinations">
-          {MORE_CARDS.map(({ key, title, text, to, icon: Icon }) => (
-            <Link to={to} className="jic-feature-card is-glass-only" key={key}>
-              <Icon className="jic-card-icon" aria-hidden="true" />
-              <div className="jic-card-copy">
-                <h2>{title}</h2>
-                <p>{text}</p>
-              </div>
-            </Link>
-          ))}
-        </nav>
-      </details>
-
-      <ProgrammePosters />
-
-      {events.length > 0 && (
-        <section className="jic-upcoming-events" aria-labelledby="upcoming-events-title">
-          <h2 id="upcoming-events-title">Upcoming events</h2>
-          <div className="jic-event-cards">
-            {events.map((event) => (
-              <article key={event.id} className="jic-event-card">
-                {safeWebUrl(event.poster_url) && (
-                  <img src={event.poster_url} alt={`${event.title} poster`} loading="lazy" />
-                )}
-                <h3>{event.title}</h3>
-                <p>
-                  <time dateTime={event.event_date}>
-                    {new Date(`${event.event_date}T12:00:00`).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </time>
-                  {event.start_time ? ` · ${displayTime(event.start_time)}` : ''}
-                </p>
-                {event.location && <p>{event.location}</p>}
-                {event.description && <p>{event.description}</p>}
-                {safeWebUrl(event.registration_url) && (
-                  <a href={safeWebUrl(event.registration_url)} target="_blank" rel="noreferrer">
-                    Event details & registration
-                  </a>
-                )}
-              </article>
+        <section className="jic-home-section" aria-labelledby="home-explore-title">
+          <h2 id="home-explore-title">Explore JIC</h2>
+          <nav className="jic-home-shortcuts" aria-label="Popular destinations">
+            {shortcuts.map(({ key, ...card }) => (
+              <HomeDestination key={key} {...card} />
             ))}
-          </div>
+          </nav>
         </section>
-      )}
 
-      <section className="jic-event-strip">
-        <div className="jic-event-label">
-          <CalendarDays size={17} />
-          <span>Friday Sermon</span>
-        </div>
-        <div className="jic-event-main">
-          <strong>
-            {jummahTimes.map((t, i) => `${i === 0 ? '1st' : '2nd'} Jamaat ${t.prayer}`).join(' · ')}
-          </strong>
-          <span>Every Friday</span>
-        </div>
-        <Link to="/prayer-times/jummah" className="jic-event-arrow" aria-label="View Jummah times">
-          ›
-        </Link>
-      </section>
-
-      {livestream?.enabled && livestream.stream_url && (
-        <section id="live" className="jic-live-section">
-          <div className="jic-live-heading">
-            <span>
-              <Radio size={15} /> Live
+        {hasLiveStream && (
+          <a href="#live" className="jic-home-live-banner">
+            <span className="jic-home-live-badge">
+              <Radio size={16} aria-hidden="true" /> Live now
             </span>
-            <h2>{livestream.title || 'JIC Live'}</h2>
-          </div>
-          {embedUrl ? (
-            <div className="jic-live-frame">
-              {playingUrl === embedUrl ? (
-                <iframe
-                  src={`${embedUrl}?autoplay=1`}
-                  title={livestream.title || 'JIC Live'}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
-              ) : (
-                <button
-                  type="button"
-                  className="jic-live-play"
-                  onClick={() => setPlayingUrl(embedUrl)}
-                >
-                  <Play size={30} aria-hidden="true" />
-                  <span>Play {livestream.title || 'JIC Live'}</span>
-                </button>
-              )}
-            </div>
-          ) : (
-            <a
-              className="jic-primary-cta jic-watch-live"
-              href={liveUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Watch Live on YouTube
-            </a>
-          )}
-        </section>
-      )}
+            <strong>{livestream.title || 'JIC Live'}</strong>
+            <span>
+              Watch <ArrowRight size={17} aria-hidden="true" />
+            </span>
+          </a>
+        )}
 
-      <section className="jic-home-footer-strip">
-        <div>
-          <WhatsAppIcon size={24} />
+        <ProgrammePosters />
+
+        {events.length > 0 && (
+          <section className="jic-upcoming-events" aria-labelledby="upcoming-events-title">
+            <h2 id="upcoming-events-title">Upcoming events</h2>
+            <div className="jic-event-cards">
+              {events.map((event) => (
+                <article key={event.id} className="jic-event-card">
+                  {safeWebUrl(event.poster_url) && (
+                    <img src={event.poster_url} alt={`${event.title} poster`} loading="lazy" />
+                  )}
+                  <h3>{event.title}</h3>
+                  <p>
+                    <time dateTime={event.event_date}>
+                      {new Date(`${event.event_date}T12:00:00`).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </time>
+                    {event.start_time ? ` · ${displayTime(event.start_time)}` : ''}
+                  </p>
+                  {event.location && <p>{event.location}</p>}
+                  {event.description && <p>{event.description}</p>}
+                  {safeWebUrl(event.registration_url) && (
+                    <a href={safeWebUrl(event.registration_url)} target="_blank" rel="noreferrer">
+                      Event details & registration
+                    </a>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {communityCards.length > 0 && (
+          <section className="jic-home-section" aria-labelledby="home-community-title">
+            <h2 id="home-community-title">Community & services</h2>
+            <nav className="jic-home-community-grid" aria-label="Community and services">
+              {communityCards.map(({ key, ...card }) => (
+                <HomeDestination key={key} {...card} />
+              ))}
+            </nav>
+          </section>
+        )}
+
+        {jummahTimes.length > 0 && (
+          <section className="jic-event-strip">
+            <div className="jic-event-label">
+              <CalendarDays size={17} />
+              <span>Friday Sermon</span>
+            </div>
+            <div className="jic-event-main">
+              <strong>
+                {jummahTimes
+                  .map((t, i) => `${i === 0 ? '1st' : '2nd'} Jamaat ${t.prayer}`)
+                  .join(' · ')}
+              </strong>
+              <span>Every Friday</span>
+            </div>
+            <Link
+              to="/prayer-times/jummah"
+              className="jic-event-arrow"
+              aria-label="View Jummah times"
+            >
+              ›
+            </Link>
+          </section>
+        )}
+
+        {hasLiveStream && (
+          <section id="live" className="jic-live-section">
+            <div className="jic-live-heading">
+              <span>
+                <Radio size={15} /> Live
+              </span>
+              <h2>{livestream.title || 'JIC Live'}</h2>
+            </div>
+            {embedUrl ? (
+              <div className="jic-live-frame">
+                {playingUrl === embedUrl ? (
+                  <iframe
+                    src={`${embedUrl}?autoplay=1`}
+                    title={livestream.title || 'JIC Live'}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    className="jic-live-play"
+                    onClick={() => setPlayingUrl(embedUrl)}
+                  >
+                    <Play size={30} aria-hidden="true" />
+                    <span>Play {livestream.title || 'JIC Live'}</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <a
+                className="jic-primary-cta jic-watch-live"
+                href={liveUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Watch Live on YouTube
+              </a>
+            )}
+          </section>
+        )}
+
+        <section className="jic-home-footer-strip">
           <div>
-            <strong>Join our WhatsApp Community</strong>
-            <small>Official JIC updates and announcements</small>
+            <WhatsAppIcon size={24} />
+            <div>
+              <strong>Join our WhatsApp Community</strong>
+              <small>Official JIC updates and announcements</small>
+            </div>
           </div>
-        </div>
-        <a className="jic-community-join" href={whatsapp} target="_blank" rel="noopener noreferrer">
-          Join WhatsApp <ArrowRight size={17} />
-        </a>
-      </section>
+          <a
+            className="jic-community-join"
+            href={whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Join WhatsApp <ArrowRight size={17} />
+          </a>
+        </section>
+      </div>
     </div>
   );
 }

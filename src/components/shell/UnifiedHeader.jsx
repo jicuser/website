@@ -41,6 +41,8 @@ import { cn } from '@/lib/utils';
 import { activeNavigation } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
+import { nextCongregation } from '@/lib/nextCongregation';
+import { displayTime } from '@/lib/timetable';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
 const WonderfulDonationModal = lazy(() => import('@/components/donations/WonderfulDonationModal'));
@@ -60,7 +62,7 @@ export default function UnifiedHeader() {
     menuRef = useRef(null),
     quickMenuRef = useRef(null),
     quickMenuButtonRef = useRef(null),
-    actionsSlotRef = useRef(null),
+    prayerToggleRef = useRef(null),
     menuCloseRef = useRef(null),
     subnavRef = useRef(null);
   const [playing, setPlaying] = useState(false),
@@ -69,7 +71,7 @@ export default function UnifiedHeader() {
   const [menuOpen, setMenuOpen] = useState(false),
     [donationOpen, setDonationOpen] = useState(false);
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
-  const [actionsFloating, setActionsFloating] = useState(false);
+  const [prayerExpanded, setPrayerExpanded] = useState(false);
   const { hidden: prayerDockHidden, toggle: togglePrayerDock } = usePrayerDockVisibility(
     prayerDockRef,
     routeKey,
@@ -105,24 +107,39 @@ export default function UnifiedHeader() {
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
+  const next = nextCongregation(todaysTimes, jummahTimes, currentDate);
+
+  const toggleTimetable = () => {
+    if (prayerDockHidden) {
+      togglePrayerDock();
+      setPrayerExpanded(true);
+    } else setPrayerExpanded((expanded) => !expanded);
+  };
 
   useEffect(() => {
-    if (!window.IntersectionObserver || !actionsSlotRef.current) return undefined;
-    const observer = new IntersectionObserver(([entry]) => {
-      setActionsFloating(!entry.isIntersecting && entry.boundingClientRect.top < 0);
-    });
-    observer.observe(actionsSlotRef.current);
-    return () => observer.disconnect();
-  }, []);
+    if (prayerDockHidden) setPrayerExpanded(false);
+  }, [prayerDockHidden]);
+  useEffect(() => {
+    if (!prayerExpanded) return undefined;
+    const close = (event) => {
+      if (event.key !== 'Escape') return;
+      setPrayerExpanded(false);
+      prayerToggleRef.current?.focus();
+    };
+    document.addEventListener('keydown', close);
+    return () => document.removeEventListener('keydown', close);
+  }, [prayerExpanded]);
 
   // Close when navigation commits, so a slow page cannot expose the old screen.
   useLayoutEffect(() => {
     setMenuOpen(false);
     setQuickMenuOpen(false);
+    setPrayerExpanded(false);
   }, [pathname]);
   useEffect(() => {
     if (menuOpen || donationOpen) setQuickMenuOpen(false);
-  }, [menuOpen, donationOpen]);
+    if (menuOpen || donationOpen || quickMenuOpen) setPrayerExpanded(false);
+  }, [menuOpen, donationOpen, quickMenuOpen]);
   useEffect(() => {
     if (!quickMenuOpen) return undefined;
     const closeOutside = (event) => {
@@ -285,30 +302,52 @@ export default function UnifiedHeader() {
         <div
           id="jic-prayer-dock"
           ref={prayerDockRef}
-          className={cn('jic-prayer-dock', prayerDockHidden && 'is-scroll-hidden')}
+          className={cn(
+            'jic-prayer-dock',
+            prayerDockHidden && 'is-scroll-hidden',
+            prayerExpanded && 'is-expanded',
+          )}
           aria-hidden={prayerDockHidden || undefined}
           inert={prayerDockHidden ? '' : undefined}
         >
-          <PrayerTimeBar
-            todaysTimes={todaysTimes}
-            jummahTimes={jummahTimes}
-            currentDate={currentDate}
-            radio={
-              <div className="jic-header-radio">
-                {radioButton}
-                <a
-                  href="/radio"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Open JIC Radio player"
-                  title="Open player"
-                  onClick={() => audioRef.current?.pause()}
-                >
-                  <ExternalLink size={15} />
-                </a>
-              </div>
-            }
-          />
+          <div className="jic-mobile-prayer-summary" data-glass="dense">
+            <button
+              type="button"
+              onClick={toggleTimetable}
+              className="jic-mobile-prayer-toggle"
+              aria-expanded={prayerExpanded}
+              aria-controls="jic-prayer-details"
+            >
+              <span>
+                <strong>{next ? `Next jama’ah · ${next.name}` : 'Prayer timetable'}</strong>
+                <small>{next ? displayTime(next.time) : 'View today’s times'}</small>
+              </span>
+              <ChevronDown size={18} aria-hidden="true" />
+            </button>
+            {radioButton}
+          </div>
+          <div id="jic-prayer-details" className="jic-prayer-details">
+            <PrayerTimeBar
+              todaysTimes={todaysTimes}
+              jummahTimes={jummahTimes}
+              currentDate={currentDate}
+              radio={
+                <div className="jic-header-radio">
+                  {radioButton}
+                  <a
+                    href="/radio"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open JIC Radio player"
+                    title="Open player"
+                    onClick={() => audioRef.current?.pause()}
+                  >
+                    <ExternalLink size={15} />
+                  </a>
+                </div>
+              }
+            />
+          </div>
         </div>
         <div className="jic-unified-inner">
           <div className="jic-free-nav-row">
@@ -349,13 +388,9 @@ export default function UnifiedHeader() {
               navigation={navigation}
               groups={visibleNavigation(NAV_GROUPS, getContent)}
             />
-            <div className="jic-free-actions-slot" ref={actionsSlotRef}>
+            <div className="jic-free-actions-slot">
               <nav
-                className={cn(
-                  'jic-free-actions',
-                  actionsFloating && 'is-floating',
-                  prayerDockHidden && 'is-scroll-hidden',
-                )}
+                className={cn('jic-free-actions', prayerDockHidden && 'is-scroll-hidden')}
                 aria-label="Page controls"
                 data-glass="dense"
               >
@@ -479,10 +514,11 @@ export default function UnifiedHeader() {
           <span>Donate</span>
         </button>
         <button
+          ref={prayerToggleRef}
           type="button"
-          onClick={togglePrayerDock}
-          aria-expanded={!prayerDockHidden}
-          aria-controls="jic-prayer-dock"
+          onClick={toggleTimetable}
+          aria-expanded={prayerExpanded && !prayerDockHidden}
+          aria-controls="jic-prayer-details"
         >
           <Clock3 size={21} aria-hidden="true" />
           <span>Prayer times</span>
