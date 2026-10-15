@@ -29,7 +29,8 @@ is visible. The explicit Prayer times toggle can reveal them there. The daily
 religious reminder remains in document flow; unrelated posters/pop-ups are omitted
 on enquiry, contact, hall-booking and notification-setup pages. Footer rows keep the
 icons together and logo beside the legal line; mobile bottom padding reserves only
-the persistent navigation, avoiding a blank prayer-panel-sized gap.
+the persistent navigation, avoiding a blank prayer-panel-sized gap. The floating
+back-to-top control also yields to the footer so it cannot cover Privacy.
 
 Salah and Janazah guide cards link to the official Dawat-e-Islami English PDFs and
 Urdu library editions, with publisher-hosted book thumbnails and attribution. Full
@@ -48,10 +49,16 @@ The optional HLS size warning remains. Production dependency audit: zero finding
 
 Validation passed lint, 494 Node/database tests and a production build. Added browser
 regressions exercise the real mobile footer/toggle and enquiry flow with mocked
-external data; local browser execution is unavailable, so those require CI. Physical
+external data; local browser execution is unavailable, so those run in CI. The first
+CI pass exposed a monthly-table overflow: absolutely positioned screen-reader
+labels needed a containing block inside the scroll area. That is now explicit;
+the time labels and horizontal scrolling are preserved. Physical
 iPhone/Android delivery, keyboard behaviour and visual acceptance remain separate.
 The reminder scheduler is enabled and its live heartbeat is recent; opening the
 homepage or settings still never requests notification permission automatically.
+The public-page fetch was denied by the site's country-access restriction (HTTP
+403), so serving the latest frontend on the public domain must be checked from an
+allowed location. No geographic block or TLS/security setting was bypassed.
 
 Security review found no new advisor warnings for this migration. Existing warnings
 remain: two intentionally authenticated-callable form SECURITY DEFINER functions,

@@ -111,6 +111,7 @@ test('mobile footer stays uncovered and Prayer times can be opened explicitly', 
   await expect(dock).toHaveAttribute('aria-hidden', 'true');
   await page.waitForTimeout(800);
   await expect(dock).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.getByRole('button', { name: 'Scroll to top', exact: true })).toHaveCount(0);
   const iconPositions = await page
     .locator('.jic-footer-icons a')
     .evaluateAll((icons) => icons.map((icon) => Math.round(icon.getBoundingClientRect().top)));

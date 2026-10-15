@@ -58,8 +58,8 @@ for (const width of [320, 390]) {
     await openTimetable(page);
     const table = page.locator('.monthly-timetable-scroll');
     // Screen-reader time labels must scroll with their cells, not escape to the page.
-    expect(await table.locator('.sr-only').first().evaluate((node) =>
-      node.offsetParent === node.closest('.monthly-timetable-scroll'),
+    expect(await table.locator('.sr-only').evaluateAll((nodes) =>
+      nodes.every((node) => node.closest('.monthly-timetable-scroll').contains(node.offsetParent)),
     )).toBe(true);
     await table.evaluate((node) => {
       node.scrollLeft = 240;
