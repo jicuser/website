@@ -102,7 +102,7 @@ function LegacyFormsInbox() {
     <div className="space-y-4">
       <div className="admin-heading">
         <div>
-          <h2>Forms inbox</h2>
+          <h2>Forms & registrations</h2>
           <p>Messages and registrations you have permission to manage.</p>
         </div>
         <button
