@@ -570,13 +570,6 @@ export default function UnifiedHeader() {
             />
           </div>
         </div>
-        <div className="jic-mobile-jummah" aria-label="Friday congregation times">
-          {[0, 1].map((index) => (
-            <span key={index}>
-              Jummah {index + 1} <strong>{displayTime(jummahTimes?.[index]?.prayer) || '—'}</strong>
-            </span>
-          ))}
-        </div>
         <nav className="jic-mobile-controls" aria-label="Quick navigation">
           <button
             type="button"
@@ -607,10 +600,6 @@ export default function UnifiedHeader() {
             <Clock3 size={21} aria-hidden="true" />
             <span>Prayer times</span>
           </button>
-          <Link to="/portal" aria-current={pathname === '/portal' ? 'page' : undefined}>
-            <User size={21} aria-hidden="true" />
-            <span>{accountLabel}</span>
-          </Link>
           <button
             type="button"
             className="jic-bottom-menu-trigger"
