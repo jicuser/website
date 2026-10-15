@@ -89,7 +89,7 @@ test('A poster opens its linked page and the same form responses without copying
 
 test('Pages can be created and hidden without erasing a linked form or changing its address',async({page},testInfo)=>{
   const {state,admin}=await fixture(page);await admin('content');
-  await page.getByRole('button',{name:'Programme pages',exact:true}).click();
+  await page.getByRole('button',{name:'Manage added pages',exact:true}).click();
   await page.getByRole('button',{name:'Edit Arabic course',exact:true}).click();
   await page.getByLabel('Show page on website',{exact:true}).uncheck();
   await page.getByRole('combobox',{name:'Website section',exact:true}).selectOption('/education');
@@ -174,4 +174,25 @@ test('Draft and Closed filters do not display live service forms', async ({ page
   await page.getByRole('combobox', { name: 'Show forms' }).selectOption('Live');
   await expect(cards.filter({ hasText: 'Madrassah enquiry' })).toBeVisible();
   await expect(cards.filter({ hasText: 'Course interest' })).toBeVisible();
+});
+
+
+test('Page directory opens a focused workspace and Add page opens a new draft', async ({page}, testInfo) => {
+  const {state,admin}=await fixture(page);
+  await page.setViewportSize({width:390,height:844});
+  await admin('content');
+  await expect(page.getByRole('button',{name:'＋ Add page',exact:true})).toBeVisible();
+  await expect(page.locator('.page-workspace__preview')).toHaveCount(0);
+  await page.locator('.page-directory__section summary').filter({hasText:'About'}).click();
+  // Every row has a separate visibility control and a page-opening action.
+  await expect(page.locator('.page-directory__section[open] [role="switch"]').first()).toBeVisible();
+  await page.locator('.page-directory__section[open] .page-directory__name').first().click();
+  await expect(page.locator('.page-workspace__preview')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Edit content & layout',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'← All pages',exact:true}).click();
+  await page.getByRole('button',{name:'＋ Add page',exact:true}).click();
+  await expect(page.getByLabel('Page title',{exact:true})).toBeVisible();
+  await expect(page.getByLabel('Page title',{exact:true})).toHaveValue('');
+  await page.screenshot({path:testInfo.outputPath('new-page-mobile.png'),fullPage:true});
+  expect(state.errors).toEqual([]);
 });
