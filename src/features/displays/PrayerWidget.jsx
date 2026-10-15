@@ -112,7 +112,7 @@ export default function PrayerWidget({
               {next.tomorrow ? 'Tomorrow’s first jama’ah' : 'Next jama’ah'}
             </p>
             <strong className="scene-next-heading">
-              {next.name} <span>· {displayTime(next.time)}</span>
+              {next.name} <span>{displayTime(next.time)}</span>
             </strong>
             <div
               className="scene-countdown"

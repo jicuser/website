@@ -30,13 +30,21 @@ function londonInstant(day, minutes) {
 export function tvNextCongregation(data = {}, now = new Date()) {
   if (!Number.isFinite(now.getTime())) return null;
   const today = londonDay(now);
+  // Tomorrow alone cannot establish that all of today's congregations passed.
+  if (data.todaysTimes?.d_date !== today) return null;
   const nextDate = new Date(`${today}T12:00:00Z`);
   nextDate.setUTCDate(nextDate.getUTCDate() + 1);
   const tomorrow = nextDate.toISOString().slice(0, 10);
-  const current =
-    data.todaysTimes?.d_date === today
-      ? nextCongregation(data.todaysTimes, data.jummahTimes, now)
-      : null;
+  const current = nextCongregation(data.todaysTimes, data.jummahTimes, now);
+  if (
+    !current &&
+    !nextCongregation(
+      { d_date: today, jamaah_isha: data.todaysTimes.jamaah_isha },
+      [],
+      new Date(londonInstant(today, 0)),
+    )
+  )
+    return null;
   const next =
     current ||
     (data.tomorrowsTimes?.d_date === tomorrow
@@ -46,7 +54,7 @@ export function tvNextCongregation(data = {}, now = new Date()) {
           new Date(londonInstant(tomorrow, 0)),
         )
       : null);
-  if (!next) return null;
+  if (!next || (!current && next.name !== 'Fajr')) return null;
   const key = next.name.startsWith('Jummah') ? 'jummah' : next.name.toLowerCase();
   const at = londonInstant(current ? today : tomorrow, next.at);
   return {

@@ -113,7 +113,7 @@ test('certificate staff review a request only after checking the record', async 
   expect(decisions).toHaveLength(0);
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Issue certificate', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('Decision saved');
+  await expect(page.getByRole('status').filter({ hasText: 'Decision saved.' })).toBeVisible();
   expect(decisions).toEqual([{ p_request_id: requestId, p_decision: 'issue', p_statement: 'Approved ceremony record.', p_note: '' }]);
   expect(errors).toEqual([]);
 });

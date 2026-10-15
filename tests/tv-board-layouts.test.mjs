@@ -106,6 +106,35 @@ test('invalid or missing records never generate a countdown', () => {
   assert.equal(at('invalid', {}), null);
   assert.equal(at('2026-10-15T12:00:00Z', {}), null);
   assert.equal(
+    at('2026-10-15T12:00:00Z', { tomorrowsTimes: times('2026-10-16') }),
+    null,
+    'tomorrow alone does not establish the next congregation',
+  );
+  assert.equal(
+    at('2026-10-15T12:00:00Z', {
+      todaysTimes: times('2026-10-14'),
+      tomorrowsTimes: times('2026-10-16'),
+    }),
+    null,
+    'a stale today row does not skip straight to tomorrow',
+  );
+  assert.equal(
+    at('2026-10-15T22:00:00Z', {
+      todaysTimes: { d_date: '2026-10-15' },
+      tomorrowsTimes: times('2026-10-16'),
+    }),
+    null,
+    'an incomplete today row cannot establish that Isha passed',
+  );
+  assert.equal(
+    at('2026-10-15T22:00:00Z', {
+      todaysTimes: times('2026-10-15'),
+      tomorrowsTimes: { ...times('2026-10-16'), jamaah_fajr: null },
+    }),
+    null,
+    'a missing Fajr time does not skip to tomorrow’s Dhuhr',
+  );
+  assert.equal(
     at('2026-10-15T12:00:00Z', { todaysTimes: { d_date: '2026-10-15', jamaah_isha: '25:00' } }),
     null,
   );

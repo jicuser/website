@@ -102,6 +102,9 @@
 .scene-next-heading {
   font-size: 1em;
 }
+.scene-next-heading span::before {
+  content: '· ';
+}
 .scene-next-detail {
   font-size: 0.85em;
 }
@@ -134,6 +137,9 @@
     display: block;
     font-size: 0.66em;
     margin-top: 0.3em;
+  }
+  .scene-next-heading span::before {
+    content: none;
   }
   .scene-next-label {
     text-transform: uppercase;
