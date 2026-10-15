@@ -1,6 +1,4 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
-import { accountSetupUrl } from '../manage-user/site-url.mjs';
-import { STAFF_KINDS, hasPermission, validateAccess } from '../_shared/access.js';
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
