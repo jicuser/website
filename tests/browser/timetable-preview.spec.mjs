@@ -58,20 +58,44 @@ for (const width of [320, 390]) {
     await openTimetable(page);
     const table = page.locator('.monthly-timetable-scroll');
     // Screen-reader time labels must scroll with their cells, not escape to the page.
-    expect(await table.locator('.sr-only').evaluateAll((nodes) =>
-      nodes.every((node) => node.closest('.monthly-timetable-scroll').contains(node.offsetParent)),
-    )).toBe(true);
+    expect(
+      await table
+        .locator('.sr-only')
+        .evaluateAll((nodes) =>
+          nodes.every((node) =>
+            node.closest('.monthly-timetable-scroll').contains(node.offsetParent),
+          ),
+        ),
+    ).toBe(true);
     await table.evaluate((node) => {
       node.scrollLeft = 240;
     });
     for (const format of ['monthly timetable', 'phone wallpaper']) {
       const trigger = page.getByRole('button', { name: `Preview ${format}`, exact: true });
       await trigger.scrollIntoViewIfNeeded();
-      const before = await pageGeometry(page);
-      expect(before.width).toBeLessThanOrEqual(width);
+      // A pointer click can scroll again to avoid the floating controls. Record
+      // the actual opening position, after that browser action has completed.
+      const positioned = await pageGeometry(page);
+      await trigger.evaluate((node) => {
+        node.addEventListener(
+          'pointerdown',
+          () => {
+            window.previewOpeningGeometry = {
+              width: document.documentElement.scrollWidth,
+              scale: visualViewport.scale,
+              y: scrollY,
+              bodyOverflow: document.body.style.overflow,
+            };
+          },
+          { once: true },
+        );
+      });
       await trigger.click();
+      const before = await page.evaluate(() => window.previewOpeningGeometry);
+      expect(before.width).toBeLessThanOrEqual(width);
       const dialog = page.getByRole('dialog');
       await expect(dialog).toBeVisible();
+      const frozenTop = await page.evaluate(() => document.body.style.top);
       const bounds = await dialog.evaluate((node) => {
         const box = node.getBoundingClientRect();
         const image = node.querySelector('img').getBoundingClientRect();
@@ -92,6 +116,11 @@ for (const width of [320, 390]) {
       await page.screenshot({ path: testInfo.outputPath(`${format.replaceAll(' ', '-')}.png`) });
       await page.getByRole('button', { name: 'Close image preview', exact: true }).click();
       await expect(dialog).toHaveCount(0);
+      await testInfo.attach(`${format}-scroll-geometry`, {
+        body: JSON.stringify({ positioned, before, frozenTop, after: await pageGeometry(page) }),
+        contentType: 'application/json',
+      });
+      expect(Number.parseFloat(frozenTop)).toBe(-before.y);
       await expect.poll(async () => (await pageGeometry(page)).y).toBeCloseTo(before.y, 0);
       const after = await pageGeometry(page);
       expect(after.width).toBeLessThanOrEqual(width);
