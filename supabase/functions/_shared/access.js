@@ -14,6 +14,7 @@ export const PERMISSIONS = [
   ['forms_itikaaf', 'I’tikaf registrations'],
   ['forms_manage', 'Create and manage registration forms'],
   ['forms_custom', 'All custom form responses'],
+  ['certificates', 'Review, issue and revoke certificates'],
   ['users', 'Staff accounts and access'],
   ['audit', 'Activity history'],
   ['delete_content', 'Delete content in permitted sections'],

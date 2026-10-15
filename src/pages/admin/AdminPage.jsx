@@ -1,6 +1,6 @@
 import { IMAGE_ACCEPT } from '@/lib/images';
 import { createImageUploader } from '@/lib/imageUpload';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   CalendarDays,
@@ -42,6 +42,8 @@ import TeamEditor from '@/components/admin/TeamEditor';
 import FormsInbox from '@/components/admin/FormsInbox';
 import { ADMIN_SECTIONS, ADMIN_GROUPS } from '@/content/adminNavigation';
 
+const CertificatesManager = lazy(() => import('@/features/certificates/Certificates'));
+
 const input =
   'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-amber-500';
 const label = 'mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500';
@@ -64,6 +66,7 @@ const SECTION_ICONS = {
   team: Users,
   messages: MessageSquare,
   forms: FileText,
+  certificates: ShieldCheck,
   users: ShieldCheck,
   audit: Activity,
 };
@@ -810,6 +813,7 @@ export default function AdminPage() {
       />
     ),
     forms: <FormsManager key={user?.id} registerBack={registerBack} />,
+    certificates: <Suspense fallback={<p role="status">Loading certificates…</p>}><CertificatesManager /></Suspense>,
     users: <StaffAccess />,
     audit: <AuditSection />,
   }[active];

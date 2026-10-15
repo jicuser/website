@@ -29,7 +29,7 @@ export default function AccessChecklist({ value, onChange, actor, disabled = fal
       </div>
       <h4>What can they manage?</h4>
       <div className="admin-access-grid">
-        {PERMISSIONS.map(([id, label]) => (
+        {PERMISSIONS.filter(([id]) => id !== 'certificates' || import.meta.env.VITE_ENABLE_CERTIFICATES === 'true').map(([id, label]) => (
           <label key={id} className="admin-check">
             <input
               type="checkbox"

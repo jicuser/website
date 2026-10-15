@@ -55,7 +55,7 @@ html[data-theme='dark'] {
   --jic-glass-panel-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.04), transparent 65%);
   --jic-glass-ink: #ffffff;
   --jic-glass-muted: #edf2f8;
-  --jic-glass-accent: #f0c572;
+  --jic-glass-accent: #f3ce86;
 }
 
 html[data-theme][data-surface='glass'] :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer) {
