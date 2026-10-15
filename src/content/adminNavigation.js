@@ -1,5 +1,12 @@
 /** Shared labels, permissions and purposes for the staff dashboard and navigation. */
 export const ADMIN_SECTIONS = [
+  ...(import.meta.env?.VITE_ENABLE_CERTIFICATES === 'true' ? [{
+    id: 'certificates',
+    name: 'Certificates',
+    permission: 'certificates',
+    group: 'Enquiries & forms',
+    description: 'Review requests, issue certificates and manage verification.',
+  }] : []),
   ...(import.meta.env?.VITE_ENABLE_WORKSPACE === 'true'
     ? [
         {

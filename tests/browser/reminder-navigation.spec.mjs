@@ -99,7 +99,7 @@ test('home shortcuts fit small phones and prayer details expand only on request'
     const servicePositions = await page.locator('.jic-home-shortcuts').evaluate((nav) => {
       const links = [...nav.querySelectorAll('a')];
       const prayer = document.querySelector('.jic-home-prayer').getBoundingClientRect();
-      const dockTop = document.querySelector('#jic-prayer-dock').getBoundingClientRect().top;
+      const dockTop = document.querySelector('.jic-mobile-dock').getBoundingClientRect().top;
       return {
         firstLinks: links.slice(0, 2).map((link) => link.getAttribute('href')),
         servicesVisible: links.slice(0, 2).every((link) => {

@@ -14,6 +14,8 @@ import HomePage from '@/pages/HomePage';
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const CommunityPortalPage = lazy(() => import('@/pages/CommunityPortalPage'));
+const CertificatesPage = lazy(() => import('@/pages/CertificatesPage'));
+const VerifyCertificatePage = lazy(() => import('@/pages/VerifyCertificatePage'));
 const SermonArchive = lazy(() =>
   import('@/components/workspace/Sermons').then((module) => ({ default: module.SermonArchive })),
 );
@@ -73,6 +75,8 @@ function AppRoutes() {
         <RouteScrollReset />
         <Routes>
           <Route path="/portal" element={<CommunityPortalPage />} />
+          <Route path="/account/certificates" element={<CertificatesPage />} />
+          <Route path="/verify/:token" element={<VerifyCertificatePage />} />
           <Route path="/radio" element={<RadioPlayerPage />} />
           <Route path="/tv179" element={<TvDisplayPage />} />
           <Route path="/tv179/:screenId" element={<TvDisplayPage />} />

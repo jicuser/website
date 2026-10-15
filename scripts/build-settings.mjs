@@ -50,8 +50,8 @@ export function validateBuildSettings(env) {
   )
     throw new Error('The public anon key and Supabase URL belong to different projects.');
 
-  if (![undefined, '', 'true', 'false'].includes(env.VITE_ENABLE_WORKSPACE))
-    throw new Error(
-      'VITE_ENABLE_WORKSPACE must be true or false. Enable it only after backend activation.',
-    );
+  for (const name of ['VITE_ENABLE_WORKSPACE', 'VITE_ENABLE_CERTIFICATES']) {
+    if (![undefined, '', 'true', 'false'].includes(env[name]))
+      throw new Error(`${name} must be true or false. Enable it only after backend activation.`);
+  }
 }

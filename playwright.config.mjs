@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/browser',
   // Workspace-only flows use their feature-enabled server in playwright.forms.config.mjs.
-  testIgnore: 'custom-forms.spec.mjs',
+  testIgnore: ['custom-forms.spec.mjs', 'certificates.spec.mjs'],
   workers: 1,
   timeout: 20000,
   use: {

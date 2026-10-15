@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { CERTIFICATES_ENABLED } from '@/lib/certificates';
 import { AdminSaveProvider } from '@/context/AdminSaveContext';
 import { supabase } from '@/lib/supabaseClient';
 import Tasks, { Notifications } from '@/components/workspace/Tasks';
@@ -48,7 +49,10 @@ export default function CommunityPortalPage() {
       <div className="workspace-wrap">
         <header className="workspace-header">
           <h1>Community portal</h1>
-          <Link to="/">Website</Link>
+          <div className="workspace-actions">
+            {CERTIFICATES_ENABLED && auth.user && auth.profile?.is_active && <Link to="/account/certificates">My certificates</Link>}
+            <Link to="/">Website</Link>
+          </div>
         </header>
         {auth.loading ? (
           <p role="status">Checking your account…</p>
