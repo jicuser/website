@@ -230,12 +230,20 @@ function Workspace({ auth }) {
     window.addEventListener('focus', refresh);
     return () => window.removeEventListener('focus', refresh);
   }, [auth.refreshProfile]);
+  const userId = auth.user?.id;
+  const isTeacher =
+    auth.isOwner ||
+    data.learning_staff.some((row) => row.user_id === userId) ||
+    (data.learning_department_heads || []).some((row) => row.user_id === userId);
+  const hasFamily =
+    data.learning_students.some((row) => row.user_id === userId || row.guardian_id === userId) ||
+    (data.learning_guardians || []).some((row) => row.user_id === userId);
   const options = [
-    ['learning', 'My learning'],
-    ['tasks', 'Actions'],
-    ['notifications', 'Notifications'],
-    ['forms', 'Forms and replies'],
-    ['fees', 'Fees'],
+    ['learning', isTeacher ? 'Learning & teaching' : 'My learning'],
+    ['tasks', 'My actions'],
+    ['notifications', 'Updates'],
+    ['forms', 'Forms & replies'],
+    ...(hasFamily || auth.isOwner ? [['fees', 'Fees']] : []),
     ...(auth.isOwner ? [['manage', 'Manage learning']] : []),
     ...(auth.isOwner ? [['talks', 'Talks']] : []),
   ];
