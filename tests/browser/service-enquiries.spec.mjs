@@ -46,10 +46,7 @@ test('hall enquiry keeps the selected date, hides prayer controls while typing, 
   await page.getByLabel('Email for our reply').fill('visitor@example.org');
   await page.getByLabel('How can we help?').fill('Please check the hall for a community meeting.');
   const pageControls = page.getByRole('navigation', { name: 'Page controls' });
-  await expect(pageControls).toHaveCSS('position', 'static');
-  const controlsBox = await pageControls.boundingBox();
-  const fieldBox = await page.getByLabel('How can we help?').boundingBox();
-  expect(controlsBox.y + controlsBox.height).toBeLessThanOrEqual(fieldBox.y);
+  await expect(pageControls).toBeHidden();
   await page.screenshot({ path: testInfo.outputPath('service-enquiry.png') });
   await page.getByRole('button', { name: 'Send enquiry', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();

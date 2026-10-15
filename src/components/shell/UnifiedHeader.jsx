@@ -39,6 +39,7 @@ import { useNavigationHistory } from '@/context/NavigationContext';
 import { useProgrammeJourney } from '@/context/ProgrammeJourneyContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import DesktopNavigation from '@/components/shell/DesktopNavigation';
+import MobileInfoBanner from '@/components/shell/MobileInfoBanner';
 import { cn } from '@/lib/utils';
 import { activeNavigation } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
@@ -61,7 +62,7 @@ export default function UnifiedHeader() {
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
-    mobileSummaryRef = useRef(null),
+    mobileBannerRef = useRef(null),
     mobileControlsRef = useRef(null),
     audioRef = useRef(null),
     menuRef = useRef(null),
@@ -183,7 +184,7 @@ export default function UnifiedHeader() {
   useLayoutEffect(() => {
     const prayer = prayerDockRef.current;
     const controls = mobileControlsRef.current;
-    const summary = mobileSummaryRef.current;
+    const banner = mobileBannerRef.current;
     const update = () => {
       const style = document.documentElement.style;
       style.setProperty(
@@ -192,7 +193,7 @@ export default function UnifiedHeader() {
       );
       style.setProperty(
         '--jic-mobile-strip-height',
-        `${Math.ceil(summary.getBoundingClientRect().height)}px`,
+        `${Math.ceil(banner.getBoundingClientRect().height)}px`,
       );
       style.setProperty(
         '--jic-mobile-controls-height',
@@ -203,7 +204,7 @@ export default function UnifiedHeader() {
     const observer = new ResizeObserver(update);
     observer.observe(prayer);
     observer.observe(controls);
-    observer.observe(summary);
+    observer.observe(banner);
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
@@ -310,57 +311,13 @@ export default function UnifiedHeader() {
         aria-hidden="true"
       />
       <header className="jic-unified-header">
-        <div
-          id="jic-prayer-dock"
-          ref={prayerDockRef}
-          className={cn(
-            'jic-prayer-dock',
-            prayerDockHidden && 'is-scroll-hidden',
-            prayerExpanded && 'is-expanded',
-          )}
-          aria-hidden={prayerDockHidden || undefined}
-          inert={prayerDockHidden ? '' : undefined}
-        >
-          <div ref={mobileSummaryRef} className="jic-mobile-prayer-summary">
-            <button
-              type="button"
-              onClick={toggleTimetable}
-              className="jic-mobile-prayer-toggle"
-              aria-label={next ? `Next jama’ah: ${next.name} at ${displayTime(next.time)}. Show prayer times` : 'Show prayer times'}
-              aria-expanded={prayerExpanded}
-              aria-controls="jic-prayer-details"
-            >
-              <span>{next ? `Next · ${next.name}` : 'Prayer times'}</span>
-              {next && <strong>{displayTime(next.time)}</strong>}
-              <ChevronDown size={18} aria-hidden="true" />
-            </button>
-            {radioButton}
-          </div>
-          <div id="jic-prayer-details" className="jic-prayer-details">
-            <PrayerTimeBar
-              todaysTimes={todaysTimes}
-              jummahTimes={jummahTimes}
-              currentDate={currentDate}
-              showContact={false}
-              highlightNext
-              radio={
-                <div className="jic-header-radio">
-                  {radioButton}
-                  <a
-                    href="/radio"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Open JIC Radio player"
-                    title="Open player"
-                    onClick={() => audioRef.current?.pause()}
-                  >
-                    <ExternalLink size={15} />
-                  </a>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <MobileInfoBanner
+          ref={mobileBannerRef}
+          next={next}
+          jummahTimes={jummahTimes}
+          notices={getContent('header_ticker_items', '[]')}
+          radio={radioButton}
+        />
         <div className="jic-unified-inner">
           <div className="jic-free-nav-row">
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
@@ -404,7 +361,6 @@ export default function UnifiedHeader() {
               <nav
                 className={cn('jic-free-actions', prayerDockHidden && 'is-scroll-hidden')}
                 aria-label="Page controls"
-                data-glass="dense"
               >
                 <Link to="/search" aria-label="Search site">
                   <Search size={20} />
@@ -511,6 +467,61 @@ export default function UnifiedHeader() {
         </div>
       </header>
       <div ref={mobileControlsRef} className="jic-mobile-dock">
+        <div
+          id="jic-prayer-dock"
+          ref={prayerDockRef}
+          className={cn(
+            'jic-prayer-dock',
+            prayerDockHidden && 'is-scroll-hidden',
+            prayerExpanded && 'is-expanded',
+          )}
+          aria-hidden={prayerDockHidden || undefined}
+          inert={prayerDockHidden ? '' : undefined}
+        >
+          <div className="jic-mobile-prayer-summary">
+            <button
+              type="button"
+              onClick={toggleTimetable}
+              className="jic-mobile-prayer-toggle"
+              aria-label={`${prayerExpanded ? 'Hide' : 'Show'} today’s salah times${next ? `. Next jama’ah: ${next.name} at ${displayTime(next.time)}` : ''}`}
+              aria-expanded={prayerExpanded}
+              aria-controls="jic-prayer-details"
+            >
+              <Clock3 size={18} aria-hidden="true" />
+              <span>Today’s salah times</span>
+              {next && (
+                <small>
+                  Next · {next.name} <strong>{displayTime(next.time)}</strong>
+                </small>
+              )}
+              <ChevronDown size={18} aria-hidden="true" />
+            </button>
+          </div>
+          <div id="jic-prayer-details" className="jic-prayer-details">
+            <PrayerTimeBar
+              todaysTimes={todaysTimes}
+              jummahTimes={jummahTimes}
+              currentDate={currentDate}
+              showContact={false}
+              highlightNext
+              radio={
+                <div className="jic-header-radio">
+                  {radioButton}
+                  <a
+                    href="/radio"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open JIC Radio player"
+                    title="Open player"
+                    onClick={() => audioRef.current?.pause()}
+                  >
+                    <ExternalLink size={15} />
+                  </a>
+                </div>
+              }
+            />
+          </div>
+        </div>
         <div className="jic-mobile-jummah" aria-label="Friday congregation times">
           {[0, 1].map((index) => (
             <span key={index}>
@@ -519,50 +530,50 @@ export default function UnifiedHeader() {
           ))}
         </div>
         <nav className="jic-mobile-controls" aria-label="Quick navigation">
-        <button
-          type="button"
-          onClick={() => {
-            if (pathname === '/') window.scrollTo({ top: 0, behavior: 'smooth' });
-            else if (canGoBack) navigate(-1);
-            else navigate('/');
-          }}
-        >
-          {showHome ? (
-            <Home size={21} aria-hidden="true" />
-          ) : (
-            <ArrowLeft size={21} aria-hidden="true" />
-          )}
-          <span>{showHome ? 'Home' : 'Back'}</span>
-        </button>
-        <button type="button" onClick={() => setDonationOpen(true)}>
-          <Heart className="jic-donate-heart" size={21} aria-hidden="true" />
-          <span>Donate</span>
-        </button>
-        <button
-          ref={prayerToggleRef}
-          type="button"
-          onClick={toggleTimetable}
-          aria-expanded={prayerExpanded && !prayerDockHidden}
-          aria-controls="jic-prayer-details"
-        >
-          <Clock3 size={21} aria-hidden="true" />
-          <span>Prayer times</span>
-        </button>
-        <Link to="/portal" aria-current={pathname === '/portal' ? 'page' : undefined}>
-          <User size={21} aria-hidden="true" />
-          <span>{accountLabel}</span>
-        </Link>
-        <button
-          type="button"
-          className="jic-bottom-menu-trigger"
-          onClick={() => setMenuOpen(true)}
-          aria-expanded={menuOpen}
-          aria-controls="jic-site-menu"
-          aria-haspopup="dialog"
-        >
-          <Menu size={22} aria-hidden="true" />
-          <span>Menu</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (pathname === '/') window.scrollTo({ top: 0, behavior: 'smooth' });
+              else if (canGoBack) navigate(-1);
+              else navigate('/');
+            }}
+          >
+            {showHome ? (
+              <Home size={21} aria-hidden="true" />
+            ) : (
+              <ArrowLeft size={21} aria-hidden="true" />
+            )}
+            <span>{showHome ? 'Home' : 'Back'}</span>
+          </button>
+          <button type="button" onClick={() => setDonationOpen(true)}>
+            <Heart className="jic-donate-heart" size={21} aria-hidden="true" />
+            <span>Donate</span>
+          </button>
+          <button
+            ref={prayerToggleRef}
+            type="button"
+            onClick={toggleTimetable}
+            aria-expanded={prayerExpanded && !prayerDockHidden}
+            aria-controls="jic-prayer-details"
+          >
+            <Clock3 size={21} aria-hidden="true" />
+            <span>Prayer times</span>
+          </button>
+          <Link to="/portal" aria-current={pathname === '/portal' ? 'page' : undefined}>
+            <User size={21} aria-hidden="true" />
+            <span>{accountLabel}</span>
+          </Link>
+          <button
+            type="button"
+            className="jic-bottom-menu-trigger"
+            onClick={() => setMenuOpen(true)}
+            aria-expanded={menuOpen}
+            aria-controls="jic-site-menu"
+            aria-haspopup="dialog"
+          >
+            <Menu size={22} aria-hidden="true" />
+            <span>Menu</span>
+          </button>
         </nav>
       </div>
       {radioError && (

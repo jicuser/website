@@ -112,6 +112,15 @@ test('momentum in either direction postpones return until 700ms after the last m
   assert.deepEqual(f.changes, [true, false]);
 });
 
+test('scrolling back up reveals the mobile timetable pill without waiting for idle', () => {
+  const f = fixture();
+  f.scroll(200);
+  f.scroll(195);
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(185);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
 test('nested rails and horizontal-only scroll events do not hide or delay the panel', () => {
   const f = fixture();
   f.scroll(100, {});

@@ -121,7 +121,7 @@ test('home shortcuts fit small phones and prayer details expand only on request'
       );
     expect(overflow, `Home overflow at ${width}px`).toBe(false);
     await page.locator('.jic-home-shortcuts').scrollIntoViewIfNeeded();
-    await expect(page.locator('.jic-free-actions')).toHaveCSS('position', 'static');
+    await expect(page.locator('.jic-free-actions')).toHaveCSS('position', 'fixed');
     await expect(page.getByRole('button', { name: 'Scroll to top', exact: true })).toBeHidden();
     if (width === 390)
       await page.screenshot({ path: testInfo.outputPath('homepage-grouped-mobile.png') });
