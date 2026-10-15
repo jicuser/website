@@ -113,7 +113,6 @@ export const PUBLIC_MENU_GROUPS = [
   ...NAV_GROUPS,
   { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
   { name: 'Social Media', path: '/social-media', children: [] },
-  { name: 'Portal', path: '/portal', children: [] },
 ];
 
 // Related destinations share a row in the compact footer.
