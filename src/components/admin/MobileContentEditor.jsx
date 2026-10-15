@@ -66,13 +66,13 @@ export default function MobileContentEditor() {
   useRegisterAdminSave(save, dirty && !busy, 'Publish app content');
   return (
     <section className="admin-panel">
-      <h2>App images & reading</h2>
+      <h2>App content & reading</h2>
       <p>
         Published images and reading texts are public. Only publish approved texts with their source
         and reference; student records belong in the private portal.
       </p>
       <fieldset disabled={busy} className="scene-properties">
-        <legend>App images</legend>
+        <legend>App images and links</legend>
         {[
           ['hero', 'Home background'],
           ['headerLight', 'Logo for light mode'],
