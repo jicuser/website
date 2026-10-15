@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Bell,
   BookOpen,
   CalendarDays,
   Play,
   Radio,
   Users,
+  Video,
   Building2,
   ArrowRight,
   Megaphone,
@@ -13,7 +15,6 @@ import {
   GraduationCap,
   Mail,
   Share2,
-  Bell,
 } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
@@ -100,6 +101,36 @@ const MORE_CARDS = [
   },
 ];
 
+function CommunityAccessStrip() {
+  const links = [
+    [Users, 'Community portal', 'Sign in to your account and approved staff tools.', '/portal'],
+    [BookOpen, 'Courses & Madrassah', 'Find classes and enrolment information.', '/education'],
+  ];
+  return (
+    <section className="jic-community-access" aria-labelledby="community-access-title">
+      <div className="jic-section-heading">
+        <div>
+          <h2 id="community-access-title">Learning & your account</h2>
+        </div>
+      </div>
+      <div className="jic-community-access-grid">
+        {links.map(([Icon, title, text, to]) => (
+          <Link to={to} key={title} className="jic-community-access-card">
+            <span className="jic-community-access-icon">
+              <Icon size={19} />
+            </span>
+            <span>
+              <strong>{title}</strong>
+              <small>{text}</small>
+            </span>
+            <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function useHomeTiles() {
   const [cards, setCards] = useState(DEFAULT_CARDS);
   useEffect(() => {
@@ -180,6 +211,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <CommunityAccessStrip />
+
       {announcement && (
         <section className="jic-announcement jic-popup-surface">
           <Megaphone size={18} />
@@ -188,8 +221,8 @@ export default function HomePage() {
         </section>
       )}
 
-      <nav className="jic-feature-grid" aria-label="Explore the centre">
-        {[...cards, ...MORE_CARDS].map(({ key, title, text, to, icon: Icon, img }) => (
+      <nav className="jic-feature-grid" aria-label="Main destinations">
+        {cards.map(({ key, title, text, to, icon: Icon, img }) => (
           <Link
             to={to}
             className={cn('jic-feature-card', !img && 'is-glass-only')}
@@ -205,6 +238,22 @@ export default function HomePage() {
           </Link>
         ))}
       </nav>
+      <details className="jic-more-destinations">
+        <summary>
+          More from JIC <ArrowRight size={16} aria-hidden="true" />
+        </summary>
+        <nav className="jic-feature-grid jic-feature-grid-secondary" aria-label="More destinations">
+          {MORE_CARDS.map(({ key, title, text, to, icon: Icon }) => (
+            <Link to={to} className="jic-feature-card is-glass-only" key={key}>
+              <Icon className="jic-card-icon" aria-hidden="true" />
+              <div className="jic-card-copy">
+                <h2>{title}</h2>
+                <p>{text}</p>
+              </div>
+            </Link>
+          ))}
+        </nav>
+      </details>
 
       <ProgrammePosters />
 

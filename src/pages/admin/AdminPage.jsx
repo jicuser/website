@@ -28,6 +28,7 @@ import {
 import FormsManager from '@/features/forms/FormsManager';
 import StaffAccess from '@/components/admin/StaffAccess';
 import StreamSetup from '@/components/admin/StreamSetup';
+import MobileContentEditor from '@/components/admin/MobileContentEditor';
 import PostersEditor from '@/components/admin/PostersEditor';
 import PrayerEditor from '@/components/admin/PrayerEditor';
 import ContentPages from '@/features/content/ContentPages';
@@ -51,6 +52,7 @@ const ghost = `${btn} border border-slate-300 bg-white text-slate-700 hover:bg-s
 const danger = `${btn} bg-red-50 text-red-700 hover:bg-red-100`;
 
 const SECTION_ICONS = {
+  app_content: FileText,
   dashboard: Activity,
   prayer: Clock3,
   events: CalendarDays,
@@ -789,6 +791,7 @@ export default function AdminPage() {
     prayer: <PrayerEditor />,
     events: <EventsSection />,
     posters: <PostersEditor key={user?.id} registerBack={registerBack} />,
+    app_content: <MobileContentEditor />,
     announcements: <AnnouncementsSection />,
     livestream: <LivestreamSection />,
     content: (

@@ -19,3 +19,15 @@ verify_jwt = true
 # Private downloads/exports require a verified user JWT and database authorisation.
 # The handler rejects unverified user credentials; the public key grants no staff access.
 verify_jwt = false
+
+[functions.manage-user]
+verify_jwt = false
+
+[functions.push-worker]
+verify_jwt = false
+
+[functions.payment-webhook]
+verify_jwt = false
+
+[functions.request-access]
+verify_jwt = false

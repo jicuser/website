@@ -126,7 +126,6 @@
   }
 }
 
-
 /* Forms admin: keep daily work simple; advanced controls stay available on demand. */
 .custom-form-routing {
   display: grid;
@@ -172,7 +171,7 @@
 }
 .custom-inbox-quick {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(180px, .9fr) minmax(180px, .9fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(180px, 0.9fr) minmax(180px, 0.9fr);
   gap: 10px;
   align-items: end;
 }
@@ -242,6 +241,6 @@
   }
   .custom-inbox-status-tabs button {
     padding-inline: 6px;
-    font-size: .88rem;
+    font-size: 0.88rem;
   }
 }

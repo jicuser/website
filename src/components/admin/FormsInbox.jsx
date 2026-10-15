@@ -4,7 +4,11 @@ import { supabase } from '@/lib/supabaseClient';
 
 const names = { contact: 'Contact', madrassah: 'Madrassah', itikaaf: 'I’tikaf' };
 
-export default function FormsInbox({ kind = null, title = 'Forms inbox', description = 'Submissions you have permission to manage.' }) {
+export default function FormsInbox({
+  kind = null,
+  title = 'Forms inbox',
+  description = 'Submissions you have permission to manage.',
+}) {
   const [status, setStatus] = useState('new');
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);

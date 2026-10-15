@@ -1,5 +1,16 @@
 /** Shared labels, permissions and purposes for the staff dashboard and navigation. */
 export const ADMIN_SECTIONS = [
+  ...(import.meta.env?.VITE_ENABLE_WORKSPACE === 'true'
+    ? [
+        {
+          id: 'app_content',
+          name: 'App content',
+          permission: 'content',
+          group: 'Website content',
+          description: 'Manage reading and content shared with the app.',
+        },
+      ]
+    : []),
   { id: 'dashboard', name: 'Overview', permission: 'dashboard', group: 'Admin' },
   {
     id: 'content',

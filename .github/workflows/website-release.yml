@@ -1,0 +1,43 @@
+name: Prepare website release
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace:
+        description: Enable forms, learning and tasks after the matching backend has been activated
+        type: boolean
+        default: false
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_ENABLE_WORKSPACE: ${{ inputs.workspace && 'true' || 'false' }}
+      VITE_WONDERFUL_DONATE_URL: ${{ vars.VITE_WONDERFUL_DONATE_URL }}
+      VITE_MEDIA_RELAY_URL: ${{ vars.VITE_MEDIA_RELAY_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - name: Confirm Hostinger route fallback is included
+        run: test -s dist/.htaccess && test -s dist/index.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: website-dist-${{ github.sha }}
+          path: dist/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

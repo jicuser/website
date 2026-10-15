@@ -85,7 +85,7 @@ export default function AccountSetupPage() {
           </Link>
           <span className="admin-login-secure">
             <ShieldCheck size={15} />
-            JIC staff
+            Account setup
           </span>
         </div>
         <div className="admin-login-brand">
@@ -102,8 +102,8 @@ export default function AccountSetupPage() {
         ) : saved ? (
           <div role="status">
             <p>Your password is saved.</p>
-            <Link className="admin-button" to={isAdmin ? '/admin' : '/admin/login'}>
-              {isAdmin ? 'Continue to Admin' : 'Continue to sign in'}
+            <Link className="admin-button" to={isAdmin ? '/admin' : '/portal'}>
+              {isAdmin ? 'Continue to Admin' : 'Continue to your portal'}
             </Link>
           </div>
         ) : (
@@ -144,10 +144,15 @@ export default function AccountSetupPage() {
               </form>
             ) : (
               <Link className="admin-login-back" to="/admin/login">
-                Already have a password? Sign in
+                Staff sign in
               </Link>
             )}
           </>
+        )}
+        {!checking && !saved && !account && (
+          <Link className="admin-login-back" to="/portal">
+            Student and guardian sign in
+          </Link>
         )}
       </section>
     </main>

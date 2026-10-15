@@ -1,5 +1,7 @@
 # JIC production deployment
 
+For the current app/workspace rollout, use [the website release steps](docs/WEBSITE-RELEASE.md). They cover the exact build flag, prepared Hostinger artifact, account recovery and rollback. The sections below retain the existing installation history.
+
 ## 1. Supabase database/security
 
 1. Back up the existing Supabase database.
@@ -23,10 +25,13 @@ Configure the build environment with:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+- `VITE_ENABLE_WORKSPACE=false` until the shared workspace backend is activated and verified, then `true` for a fresh build.
 
 The anon key is designed for browser use; Row Level Security is what protects data.
 
 ## 3. GitHub -> Hostinger
+
+Hostinger's static Advanced → Git integration copies files; it does not by itself establish a Vite build pipeline. This source repository ignores `dist`. Use the existing Node/Vite deployment configuration or upload the prepared static artifact as described in the current release guide.
 
 Recommended production branch: `main`.
 
@@ -41,7 +46,7 @@ The included `public/.htaccess` is copied into `dist` and provides SPA route fal
 
 ## 4. Smoke test after deploy
 
-Team categories require `supabase/migrations/20260913114538_team_member_groups.sql` before this frontend. It adds the optional `member_group` field using the existing team permissions. In Admin → Team, assign each profile to Founder members, Management committee, Trustees or Staff. Existing unassigned profiles remain visible under Our team until assigned.
+Team categories require `supabase/migrations/20260913114724_team_member_groups.sql` before this frontend. It adds the optional `member_group` field using the existing team permissions. In Admin → Team, assign each profile to Founder members, Management committee, Trustees or Staff. Existing unassigned profiles remain visible under Our team until assigned.
 
 - `/` loads normally.
 - `/prayer-times` loads and shows database rows for today/month.
@@ -84,3 +89,5 @@ The connected Supabase project's security advisor still reports leaked-password 
 ## Permanent TV address and setup code
 
 Apply `supabase/migrations/20260912083609_tv_browser_setup.sql` before the matching `tv-control` function and frontend. It adds private browser setup and saved-layout acknowledgements. Existing approved TVs keep working; new TVs enter their six-digit code in Admin. See [TV operation](docs/tv-display.md). Normal and Class / Teach are the only modes; an empty or expired class resolves to Normal.
+
+The team-group migration is already present in the connected JIC database under version20260913114724. Its repository filename was aligned after comparing the stored SQL byte-for-byte (apart from the trailing newline); do not run the same ALTER again. The six community workspace migrations are separate and remain pending.

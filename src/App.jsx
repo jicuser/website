@@ -14,6 +14,10 @@ import RouteScrollReset from '@/components/shell/RouteScrollReset';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
+const CommunityPortalPage = lazy(() => import('@/pages/CommunityPortalPage'));
+const SermonArchive = lazy(() =>
+  import('@/components/workspace/Sermons').then((module) => ({ default: module.SermonArchive })),
+);
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
@@ -43,6 +47,8 @@ const SearchPage = lazy(() => import('@/pages/SearchPage'));
 
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AccountSetupPage = lazy(() => import('@/pages/admin/AccountSetupPage'));
+const AccountRecoveryPage = lazy(() => import('@/pages/AccountRecoveryPage'));
+const AccountRequestPage = lazy(() => import('@/pages/AccountRequestPage'));
 const ShareDevicePage = lazy(() => import('@/pages/admin/ShareDevicePage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const TileContentAdminPage = lazy(() => import('@/pages/admin/TileContentAdminPage'));
@@ -68,12 +74,15 @@ function AppRoutes() {
         <RouteScrollReset />
         <AnimatePresence mode="wait">
           <Routes>
+            <Route path="/portal" element={<CommunityPortalPage />} />
             <Route path="/radio" element={<RadioPlayerPage />} />
             <Route path="/tv179" element={<TvDisplayPage />} />
             <Route path="/tv179/:screenId" element={<TvDisplayPage />} />
             <Route path="/tv" element={<Navigate to="/tv179" replace />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin/setup" element={<AccountSetupPage />} />
+            <Route path="/account/recovery" element={<AccountRecoveryPage />} />
+            <Route path="/account/request" element={<AccountRequestPage />} />
             <Route
               path="/admin/share/:screenId"
               element={
@@ -107,6 +116,7 @@ function AppRoutes() {
               <Route path="about" element={<AboutPage />} />
               <Route path="team" element={<TeamPage />} />
               <Route path="contact" element={<ContactPage />} />
+              <Route path="talks" element={<SermonArchive />} />
               <Route path="financial-history" element={<FinancialHistoryPage />} />
               <Route path="privacy" element={<PrivacyPage />} />
               <Route path="social-media" element={<SocialMediaPage />} />

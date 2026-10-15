@@ -83,6 +83,9 @@ export default function AdminLoginPage() {
             </button>
           </div>
         )}
+        <Link className="admin-login-back" to="/account/recovery">
+          Forgot your password?
+        </Link>
         {user && !isAdmin && !loading && !profileError && (
           <p className="admin-login-error" role="alert">
             This account does not have JIC administration access.

@@ -18,6 +18,8 @@ export default function StaffAccess() {
   const [access, setAccess] = useState(emptyAccess);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [pending, setPending] = useState({});
+  const [requests, setRequests] = useState([]);
+  const [requestDrafts, setRequestDrafts] = useState({});
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState('');
   const inFlight = useRef(false);
@@ -29,12 +31,6 @@ export default function StaffAccess() {
     if (error) throw error;
     setRows(data || []);
   }, []);
-  useEffect(() => {
-    if (!allowed) return;
-    load()
-      .catch(() => setNotice({ error: true, text: 'Staff could not be loaded. Please refresh.' }))
-      .finally(() => setLoading(false));
-  }, [allowed, load]);
   const invoke = useCallback(async (body) => {
     const { data, error } = await supabase.functions.invoke('manage-user', { body });
     if (error) {
@@ -47,6 +43,22 @@ export default function StaffAccess() {
     if (!data?.ok) throw new Error(data?.error || 'The request could not be completed.');
     return data;
   }, []);
+  const loadRequests = useCallback(async () => {
+    if (import.meta.env.VITE_ENABLE_ACCOUNT_REQUESTS !== 'true') return;
+    const result = await invoke({ action: 'list_access_requests' });
+    setRequests(result.requests || []);
+  }, [invoke]);
+  useEffect(() => {
+    if (!allowed) return;
+    Promise.all([load(), loadRequests()])
+      .catch(() =>
+        setNotice({
+          error: true,
+          text: 'People or access requests could not be loaded. Please refresh.',
+        }),
+      )
+      .finally(() => setLoading(false));
+  }, [allowed, load, loadRequests]);
   const run = useCallback(async (action, work, rethrow = false) => {
     if (inFlight.current) {
       if (rethrow) throw new Error('Please wait for the current request.');
@@ -90,7 +102,22 @@ export default function StaffAccess() {
     [invoke, pending, run],
   );
   useRegisterAdminSave(save, Object.keys(pending).length > 0, 'Save permissions');
-  if (!allowed) return <p>You need staff-management permission to open this section.</p>;
+  if (!allowed) return <p>You need people-management permission to open this section.</p>;
+  const approveRequest = async (request) => {
+    const draft = requestDrafts[request.id] || { permissions: [], staff_kinds: [] };
+    await run(`approve-${request.id}`, async () => {
+      await invoke({ action: 'approve_access_request', request_id: request.id, ...draft });
+      setNotice({ text: 'Request approved. Access has been updated.' });
+      await Promise.all([load(), loadRequests()]);
+    });
+  };
+  const rejectRequest = async (request) => {
+    await run(`reject-${request.id}`, async () => {
+      await invoke({ action: 'reject_access_request', request_id: request.id });
+      setRequests((current) => current.filter((item) => item.id !== request.id));
+      setNotice({ text: 'Request declined.' });
+    });
+  };
   const invite = (event) => {
     event.preventDefault();
     run('invite', async () => {
@@ -183,8 +210,17 @@ export default function StaffAccess() {
         </form>
       )}
 
+      <AccessRequests
+        requests={requests}
+        drafts={requestDrafts}
+        setDrafts={setRequestDrafts}
+        busy={busy}
+        actor={profile}
+        onApprove={approveRequest}
+        onReject={rejectRequest}
+      />
       {loading ? (
-        <p role="status">Loading staff…</p>
+        <p role="status">Loading people…</p>
       ) : (
         rows.map((row) => {
           const own = row.id === user?.id;
@@ -196,13 +232,13 @@ export default function StaffAccess() {
           return (
             <details className="admin-panel" key={row.id}>
               <summary>
-                {row.display_name || 'Staff member'}
+                {row.display_name || 'Person'}
                 {own ? ' (you)' : ''} ·{' '}
                 {row.is_owner ? 'Owner' : `${row.permissions.length} permissions`} ·{' '}
                 {row.is_active ? 'Enabled' : 'Disabled'}
               </summary>
               {row.is_owner ? (
-                <p>Owner access is protected and cannot be reassigned here.</p>
+                <p>Owner access is protected and cannot be changed here.</p>
               ) : (
                 <AccessChecklist
                   actor={profile}
@@ -263,16 +299,24 @@ export default function StaffAccess() {
                 disabled={Boolean(busy)}
                 hasPendingChanges={Boolean(pending[row.id])}
                 onDelete={(confirmation) =>
-                  run(`delete-${row.id}`, async () => {
-                    const result = await invoke({ action: 'delete', user_id: row.id, confirmation });
-                    setRows((current) => current.filter((item) => item.id !== row.id));
-                    setPending((current) => {
-                      const remaining = { ...current };
-                      delete remaining[row.id];
-                      return remaining;
-                    });
-                    setNotice({ text: result.warning || 'Staff account deleted.' });
-                  }, true)
+                  run(
+                    `delete-${row.id}`,
+                    async () => {
+                      const result = await invoke({
+                        action: 'delete',
+                        user_id: row.id,
+                        confirmation,
+                      });
+                      setRows((current) => current.filter((item) => item.id !== row.id));
+                      setPending((current) => {
+                        const remaining = { ...current };
+                        delete remaining[row.id];
+                        return remaining;
+                      });
+                      setNotice({ text: result.warning || 'Staff account deleted.' });
+                    },
+                    true,
+                  )
                 }
               />
               {pending[row.id] && (
@@ -294,5 +338,59 @@ export default function StaffAccess() {
         they already have.
       </p>
     </div>
+  );
+}
+
+function AccessRequests({ requests, drafts, setDrafts, busy, actor, onApprove, onReject }) {
+  if (!requests.length) return null;
+  return (
+    <section className="admin-access-requests" aria-labelledby="access-requests-title">
+      <div className="admin-heading">
+        <div>
+          <span className="admin-eyebrow">PENDING</span>
+          <h3 id="access-requests-title">Account requests</h3>
+        </div>
+        <span className="admin-hint">{requests.length} waiting</span>
+      </div>
+      {requests.map((request) => {
+        const value = drafts[request.id] || { permissions: [], staff_kinds: [] };
+        return (
+          <article className="admin-panel admin-access-request" key={request.id}>
+            <div>
+              <h4>{request.display_name}</h4>
+              <p>
+                {request.email} · {request.requested_role.replace('_', ' ')}
+              </p>
+              {request.requested_features?.length > 0 && (
+                <p className="admin-hint">Asked for: {request.requested_features.join(', ')}</p>
+              )}
+              {request.message && <p>{request.message}</p>}
+            </div>
+            <AccessChecklist
+              actor={actor}
+              value={value}
+              onChange={(next) => setDrafts((current) => ({ ...current, [request.id]: next }))}
+              disabled={Boolean(busy)}
+            />
+            <div className="admin-actions">
+              <button
+                className="admin-button primary"
+                disabled={Boolean(busy)}
+                onClick={() => onApprove(request)}
+              >
+                Approve and invite
+              </button>
+              <button
+                className="admin-button"
+                disabled={Boolean(busy)}
+                onClick={() => onReject(request)}
+              >
+                Decline
+              </button>
+            </div>
+          </article>
+        );
+      })}
+    </section>
   );
 }

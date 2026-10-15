@@ -6,7 +6,14 @@ import { collectPages, downloadBlob, submissionsCsv } from '@/lib/formDownloads'
 import { checked, dateLabel, Field } from './shared';
 import { workflowChanged } from '@/lib/pageContent';
 
-export default function CustomFormsInbox({ auth, definitions, assignments, initialMine = false, initialKind = '', formId = null }) {
+export default function CustomFormsInbox({
+  auth,
+  definitions,
+  assignments,
+  initialMine = false,
+  initialKind = '',
+  formId = null,
+}) {
   const [filters, setFilters] = useState({
     search: '',
     kind: formId ? 'custom' : initialKind || 'custom',
@@ -65,7 +72,7 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
   }, [filters, page, revision]);
 
   useEffect(() => {
-    const refresh = () => setRevision(value => value + 1);
+    const refresh = () => setRevision((value) => value + 1);
     window.addEventListener('content-workflow-updated', refresh);
     return () => window.removeEventListener('content-workflow-updated', refresh);
   }, []);
@@ -251,7 +258,10 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
           <button disabled={loading || Boolean(exportStatus) || !result.total} onClick={exportCsv}>
             Download CSV
           </button>
-          <button disabled={loading || Boolean(exportStatus) || !selected.length} onClick={exportZip}>
+          <button
+            disabled={loading || Boolean(exportStatus) || !selected.length}
+            onClick={exportZip}
+          >
             Download selected attachments
           </button>
           {exportStatus && exportController.current && (
@@ -316,7 +326,8 @@ export default function CustomFormsInbox({ auth, definitions, assignments, initi
         </button>
       </div>
       <p className="workspace-meta custom-inbox-footnote">
-        Downloads use the filters above. Attachment download works with selected responses from one form.
+        Downloads use the filters above. Attachment download works with selected responses from one
+        form.
       </p>
     </section>
   );
@@ -356,8 +367,12 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
     if (!open) return undefined;
     if (row.kind !== 'custom') {
       let active = true;
-      checked(supabase.rpc('task_assignees', { p_form_id: row.id })).then(data => active && setPeople(data || [])).catch(() => active && setMessage('Assigned people could not be loaded.'));
-      return () => { active = false; };
+      checked(supabase.rpc('task_assignees', { p_form_id: row.id }))
+        .then((data) => active && setPeople(data || []))
+        .catch(() => active && setMessage('Assigned people could not be loaded.'));
+      return () => {
+        active = false;
+      };
     }
     let active = true;
     setLoading(true);
@@ -428,7 +443,6 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
   return (
     <article className="workspace-card custom-response">
       <details onToggle={(event) => setOpen(event.currentTarget.open)}>
-
         <summary>
           {formTitle(row)} · {row.payload?.name || row.payload?.attendee_name || 'Response'}
           <span className="workspace-meta">
@@ -497,11 +511,11 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
             >
               {row.status === 'new' ? 'Mark completed' : 'Reopen'}
             </button>
-            {(
+            {
               <button disabled={busy} onClick={() => setShowTask(!showTask)}>
                 Assign action
               </button>
-            )}
+            }
             {email && (
               <a
                 className="workspace-button"
@@ -520,12 +534,17 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
               const data = new FormData(event.currentTarget);
               run(async () => {
                 await checked(
-                  supabase.rpc(row.kind === 'custom' ? 'assign_custom_form_task' : 'create_work_task', {
-                    ...(row.kind === 'custom' ? { p_submission_id: row.id } : { p_form_id: row.id }),
-                    p_assigned_to: data.get('assignee'),
-                    p_title: data.get('title'),
-                    p_due_at: data.get('due') ? new Date(data.get('due')).toISOString() : null,
-                  }),
+                  supabase.rpc(
+                    row.kind === 'custom' ? 'assign_custom_form_task' : 'create_work_task',
+                    {
+                      ...(row.kind === 'custom'
+                        ? { p_submission_id: row.id }
+                        : { p_form_id: row.id }),
+                      p_assigned_to: data.get('assignee'),
+                      p_title: data.get('title'),
+                      p_due_at: data.get('due') ? new Date(data.get('due')).toISOString() : null,
+                    },
+                  ),
                 );
                 setShowTask(false);
                 workflowChanged();

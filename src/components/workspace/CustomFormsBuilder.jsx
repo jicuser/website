@@ -25,7 +25,13 @@ const initial = () => ({
   },
 });
 
-export default function CustomFormsBuilder({ definition, initialDraft = {}, onClose, onSaved, registerBack }) {
+export default function CustomFormsBuilder({
+  definition,
+  initialDraft = {},
+  onClose,
+  onSaved,
+  registerBack,
+}) {
   const [draft, setDraft] = useState(() =>
     definition
       ? { ...definition, manager_ids: [], responsible_ids: [], watcher_ids: [] }
@@ -39,7 +45,10 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
   const [dirty, setDirty] = useState(Boolean(initialDraft.title));
   const [preview, setPreview] = useState(false);
   const [previewAnswers, setPreviewAnswers] = useState({});
-  const patch = (value) => { setDirty(true); setDraft((current) => ({ ...current, ...value })); };
+  const patch = (value) => {
+    setDirty(true);
+    setDraft((current) => ({ ...current, ...value }));
+  };
   const close = useCallback(() => {
     if (!busy && (!dirty || window.confirm('Discard unsaved form changes?'))) onClose();
   }, [busy, dirty, onClose]);
@@ -49,7 +58,12 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
     return () => registerBack(null);
   }, [registerBack, close]);
   useEffect(() => {
-    const warn = event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } };
+    const warn = (event) => {
+      if (dirty) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
@@ -93,7 +107,8 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
   }, [definition]);
 
   async function save(publish) {
-    if (busy || loading || loadFailed) throw new Error('Wait for the form and assignments to finish loading.');
+    if (busy || loading || loadFailed)
+      throw new Error('Wait for the form and assignments to finish loading.');
     const invalid = validateDraft(draft);
     if (invalid) {
       setMessage(invalid);
@@ -123,17 +138,22 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
           },
         }),
       );
-      setDraft(current => ({ ...current, id }));
+      setDraft((current) => ({ ...current, id }));
       const stored = await checked(supabase.from('custom_forms').select('*').eq('id', id).single());
-      setDraft(current => ({ ...current, ...stored }));
+      setDraft((current) => ({ ...current, ...stored }));
       setDirty(false);
       if (publish) {
-        const version = await checked(supabase.rpc('publish_custom_form', { p_form_id: id, p_expected_updated_at: stored.updated_at }));
+        const version = await checked(
+          supabase.rpc('publish_custom_form', {
+            p_form_id: id,
+            p_expected_updated_at: stored.updated_at,
+          }),
+        );
         patch({ published_version: version });
         setMessage(`Published version ${version}. The public form is ready to share.`);
       } else setMessage('Draft saved. Publish when it is ready for responses.');
       const saved = await checked(supabase.from('custom_forms').select('*').eq('id', id).single());
-      setDraft(current => ({ ...current, ...saved }));
+      setDraft((current) => ({ ...current, ...saved }));
       setDirty(false);
       workflowChanged();
       await onSaved(saved);
@@ -297,35 +317,35 @@ export default function CustomFormsBuilder({ definition, initialDraft = {}, onCl
             ))}
           </div>
           <div className="workspace-grid">
-          <Field label="Automatic action">
-            <input
-              value={draft.task_title}
-              maxLength={160}
-              list="custom-actions"
-              onChange={(event) => patch({ task_title: event.target.value })}
-            />
-          </Field>
-          <Field label="Due within (hours)">
-            <input
-              type="number"
-              min={1}
-              max={8760}
-              value={draft.due_hours}
-              onChange={(event) => patch({ due_hours: event.target.value })}
-            />
-          </Field>
-        </div>
-        <datalist id="custom-actions">
-          {[
-            'Reply to enquiry',
-            'Call back',
-            'Chase payment',
-            'Confirm payment',
-            'Request a photograph',
-          ].map((value) => (
-            <option key={value}>{value}</option>
-          ))}
-        </datalist>
+            <Field label="Automatic action">
+              <input
+                value={draft.task_title}
+                maxLength={160}
+                list="custom-actions"
+                onChange={(event) => patch({ task_title: event.target.value })}
+              />
+            </Field>
+            <Field label="Due within (hours)">
+              <input
+                type="number"
+                min={1}
+                max={8760}
+                value={draft.due_hours}
+                onChange={(event) => patch({ due_hours: event.target.value })}
+              />
+            </Field>
+          </div>
+          <datalist id="custom-actions">
+            {[
+              'Reply to enquiry',
+              'Call back',
+              'Chase payment',
+              'Confirm payment',
+              'Request a photograph',
+            ].map((value) => (
+              <option key={value}>{value}</option>
+            ))}
+          </datalist>
         </details>
         <div className="workspace-actions">
           <button onClick={() => setPreview(!preview)}>

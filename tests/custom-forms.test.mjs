@@ -148,7 +148,10 @@ test('versioned custom forms keep one inbox with isolated replies, uploads and r
         ),
         1,
       );
-      assert.equal(Number((await db.query('select count(*) n from user_notifications')).rows[0].n), 2);
+      assert.equal(
+        Number((await db.query('select count(*) n from user_notifications')).rows[0].n),
+        2,
+      );
     },
   );
   await t.test(

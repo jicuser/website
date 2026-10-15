@@ -20,6 +20,7 @@ Deno.serve(async (req) => {
     const db = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
     );
     const token = req.headers.get('Authorization')?.replace(/^Bearer\s+/i, '') || '';
     const {
@@ -37,6 +38,77 @@ Deno.serve(async (req) => {
     const raw = await req.text();
     if (raw.length > 8000) throw new Error('Request is too large.');
     const body = JSON.parse(raw);
+    if (['list_access_requests', 'approve_access_request', 'reject_access_request'].includes(body.action) && Deno.env.get('ACCOUNT_REQUESTS_ENABLED') !== 'true') throw new Error('Account requests are not enabled.');
+    if (body.action === 'list_access_requests') {
+      const { data, error } = await db
+        .from('account_access_requests')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true })
+        .limit(100);
+      if (error) throw error;
+      return Response.json({ ok: true, requests: data || [] }, { headers });
+    }
+    if (body.action === 'reject_access_request') {
+      if (typeof body.request_id !== 'string') throw new Error('Choose an access request.');
+      const { error } = await db
+        .from('account_access_requests')
+        .update({ status: 'rejected', reviewed_at: new Date().toISOString(), reviewed_by: user.id })
+        .eq('id', body.request_id)
+        .eq('status', 'pending');
+      if (error) throw error;
+      return Response.json({ ok: true }, { headers });
+    }
+    if (body.action === 'approve_access_request') {
+      if (typeof body.request_id !== 'string') throw new Error('Choose an access request.');
+      const access = validateDelegation(actor, validateAccess(body));
+      const { data: request, error: requestError } = await db
+        .from('account_access_requests')
+        .select('*')
+        .eq('id', body.request_id)
+        .eq('status', 'pending')
+        .single();
+      if (requestError || !request) throw new Error('This access request is no longer pending.');
+      const email = String(request.email).trim().toLowerCase();
+      let targetUser;
+      for (let page = 1; ; page++) {
+        const users = await db.auth.admin.listUsers({ page, perPage: 1000 });
+        if (users.error) throw users.error;
+        targetUser = users.data.users.find((item) => item.email?.toLowerCase() === email);
+        if (targetUser || users.data.users.length < 1000) break;
+      }
+      if (targetUser) throw new Error('This person already has an account. Review their existing permissions in Current staff before resolving this request.');
+      if (!targetUser) {
+        const invited = await db.auth.admin.inviteUserByEmail(email, {
+          data: { display_name: request.display_name },
+          redirectTo: accountSetupUrl(Deno.env.get('JIC_SITE_URL')),
+        });
+        if (invited.error || !invited.data.user)
+          throw new Error(invited.error?.message || 'Invitation could not be created.');
+        targetUser = invited.data.user;
+      }
+      const { error: grantError } = await db.rpc('manage_staff_access', {
+        actor: user.id,
+        target: targetUser.id,
+        new_permissions: access.permissions,
+        new_kinds: access.staff_kinds,
+        enabled: true,
+      });
+      if (grantError) throw grantError;
+      const { error: markError } = await db
+        .from('account_access_requests')
+        .update({
+          status: 'approved',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user.id,
+          auth_user_id: targetUser.id,
+          requested_permissions: access.permissions,
+        })
+        .eq('id', request.id)
+        .eq('status', 'pending');
+      if (markError) throw markError;
+      return Response.json({ ok: true }, { headers });
+    }
     if (body.action === 'invite') {
       const setup = accountSetupUrl(Deno.env.get('JIC_SITE_URL'));
       const access = validateDelegation(actor, validateAccess(body));

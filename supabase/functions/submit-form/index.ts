@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
     submission = validateSubmission(JSON.parse(new TextDecoder().decode(bytes)));
   } catch (error) {
-    return reply(400, { error: error instanceof SyntaxError ? 'Invalid form.' : error.message });
+    return reply(400, { error: error instanceof Error && !(error instanceof SyntaxError) ? error.message : 'Invalid form.' });
   }
 
   try {
