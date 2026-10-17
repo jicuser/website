@@ -25,7 +25,8 @@
 .monthly-timetable-scroll {
   /* Contain absolutely positioned screen-reader text within the scrolling table. */
   position: relative;
-  overflow-x: auto;
+  overflow: auto;
+  max-height: min(68dvh, 800px);
   overscroll-behavior-x: contain;
 }
 .monthly-timetable-grid {
@@ -45,9 +46,33 @@
   white-space: nowrap;
 }
 .monthly-timetable-grid thead {
+  position: sticky;
+  top: 0;
+  z-index: 4;
   --jic-border: #3b4658;
   background: #0c1930;
   color: #f4f6fa;
+}
+.monthly-timetable-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--jic-border);
+  font-size: 0.8rem;
+  color: var(--jic-text-secondary);
+}
+.monthly-timetable-controls button {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  min-height: 44px;
+  border: 1px solid var(--jic-border);
+  border-radius: 999px;
+  color: var(--jic-text);
+}
+.monthly-timetable-controls button:disabled {
+  opacity: 0.5;
 }
 .monthly-timetable-grid thead th {
   color: var(--jic-action);

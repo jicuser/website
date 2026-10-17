@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import WallpaperDownload from '@/components/WallpaperDownload';
 import { buildMonthlyTimetable } from '@/lib/monthlyTimetable';
 import '@/styles/monthly-timetable.css';
@@ -10,6 +10,7 @@ export default function MonthlyPrayerTable({
   jummahTimes = [],
 }) {
   const timetable = useMemo(() => buildMonthlyTimetable(monthlyPrayerTimes), [monthlyPrayerTimes]);
+  const scrollArea = useRef(null);
   const today = currentDate.toLocaleDateString('en-CA', {
     timeZone: 'Europe/London',
     year: 'numeric',
@@ -35,11 +36,32 @@ export default function MonthlyPrayerTable({
         </p>
       ) : (
         <>
+          <div className="monthly-timetable-controls">
+            <p>Scroll through the month. Prayer headings and dates stay in view.</p>
+            <button
+              type="button"
+              onClick={() => {
+                const area = scrollArea.current;
+                const row = area?.querySelector('.is-today');
+                if (row)
+                  area.scrollTo({
+                    top: row.offsetTop - area.querySelector('thead').offsetHeight,
+                    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                      ? 'instant'
+                      : 'smooth',
+                  });
+              }}
+              disabled={!timetable.rows.some((row) => row.isoDate === today)}
+            >
+              Today
+            </button>
+          </div>
           <p className="monthly-timetable-scroll-hint">Swipe across to see all prayers.</p>
           <div
+            ref={scrollArea}
             className="monthly-timetable-scroll"
             role="region"
-            aria-label="Monthly timetable, scroll across for all prayers"
+            aria-label="Monthly timetable, scroll down for dates and across for prayers"
             tabIndex={0}
           >
             <table

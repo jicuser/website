@@ -44,7 +44,6 @@ export default function StaffAccess() {
     return data;
   }, []);
   const loadRequests = useCallback(async () => {
-    if (import.meta.env.VITE_ENABLE_ACCOUNT_REQUESTS !== 'true') return;
     const result = await invoke({ action: 'list_access_requests' });
     setRequests(result.requests || []);
   }, [invoke]);
@@ -378,7 +377,7 @@ function AccessRequests({ requests, drafts, setDrafts, busy, actor, onApprove, o
                 disabled={Boolean(busy)}
                 onClick={() => onApprove(request)}
               >
-                Approve and invite
+                Approve access
               </button>
               <button
                 className="admin-button"

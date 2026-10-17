@@ -3,10 +3,18 @@ export function portalDestination(value) {
   if (typeof value !== 'string' || value.length > 500) return '';
   try {
     const url = new URL(value, 'https://jic.invalid');
-    if (url.origin !== 'https://jic.invalid' || url.pathname !== '/account/certificates') return '';
+    if (
+      url.origin !== 'https://jic.invalid' ||
+      !['/account/certificates', '/account/invoices', '/fundraise/new'].includes(url.pathname)
+    )
+      return '';
     const params = new URLSearchParams();
     const kind = url.searchParams.get('request');
-    if (['nikah', 'shahadah', 'course', 'ijazah'].includes(kind)) params.set('request', kind);
+    if (
+      url.pathname === '/account/certificates' &&
+      ['nikah', 'shahadah', 'course', 'ijazah'].includes(kind)
+    )
+      params.set('request', kind);
     return url.pathname + (params.size ? `?${params}` : '');
   } catch {
     return '';

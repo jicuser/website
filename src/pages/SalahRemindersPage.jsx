@@ -44,7 +44,7 @@ export default function SalahRemindersPage() {
       Notification: window.Notification,
       crypto,
       storage,
-      atob,
+      atob: (value) => window.atob(value),
     });
     client.current
       .inspect()
@@ -105,8 +105,8 @@ export default function SalahRemindersPage() {
   return (
     <div className="salah-reminders jic-page-shell">
       <PageHeading title="Set up Salah alerts">
-        Get a notification on this device before Salah begins or before jama’ah. Choose your
-        prayers and how many minutes before you want an alert.
+        Get a notification on this device before Salah begins or before jama’ah. Choose your prayers
+        and how many minutes before you want an alert.
       </PageHeading>
       <section className="salah-reminders__panel" aria-label="Reminder settings">
         <div className="salah-reminders__status">
@@ -143,7 +143,8 @@ export default function SalahRemindersPage() {
                 <strong>Add to Home Screen</strong>.
               </li>
               <li>
-                Open Jamatia from that icon, return here and tap <strong>Enable Salah alerts</strong>.
+                Open Jamatia from that icon, return here and tap{' '}
+                <strong>Enable Salah alerts</strong>.
               </li>
             </ol>
             <p>Your iPhone will ask for notification permission when you enable Salah alerts.</p>

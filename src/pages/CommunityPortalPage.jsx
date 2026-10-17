@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Award, BookOpen, ShieldCheck, Users } from 'lucide-react';
+import { ArrowRight, Award, BookOpen, ShieldCheck, Users, Wallet, Heart } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { portalDestination } from '@/lib/portalDestination';
 import PortalSignIn from '@/features/portal/PortalSignIn';
 import PortalWorkspace from '@/features/portal/PortalWorkspace';
 import '@/styles/workspace.css';
 import '@/styles/portal.css';
+import '@/styles/operations.css';
 
 export const WORKSPACE_ENABLED = import.meta.env.VITE_ENABLE_WORKSPACE === 'true';
 export default function CommunityPortalPage() {
@@ -16,6 +17,8 @@ export default function CommunityPortalPage() {
   const next = portalDestination(params.get('next'));
   if (!auth.loading && auth.user && auth.profile?.is_active && next)
     return <Navigate to={next} replace />;
+  if (!auth.loading && auth.isAdmin && !next && params.get('workspace') !== 'personal')
+    return <Navigate to="/admin" replace />;
   const signOut = () =>
     auth.signOut().catch(() => setError('Sign out could not be confirmed. Please try again.'));
   return (
@@ -24,16 +27,24 @@ export default function CommunityPortalPage() {
         <header className="workspace-header">
           <div>
             <p className="workspace-kicker">Jamatia Islamic Centre</p>
-            <h1>JIC Portal</h1>
+            <h1>{auth.user ? 'My JIC account' : 'JIC Portal'}</h1>
           </div>
           <div className="workspace-actions">
-            {auth.isAdmin && <Link to="/admin">Administration</Link>}
+            {auth.isAdmin && <Link to="/admin">Staff workspace</Link>}
             {auth.user && auth.profile?.is_active && (
               <Link to="/account/certificates">My certificates</Link>
             )}
             <Link to="/">Website</Link>
           </div>
         </header>
+        {auth.isAdmin && (
+          <nav className="portal-workspace-switch" aria-label="Account area">
+            <Link to="/admin">Staff workspace</Link>
+            <Link to="/portal?workspace=personal" aria-current="page">
+              My account
+            </Link>
+          </nav>
+        )}
         {error && <p role="alert">{error}</p>}
         {!auth.user ? (
           <div className="portal-entry-layout">
@@ -108,6 +119,18 @@ export default function CommunityPortalPage() {
             </section>
             <div className="portal-card-grid">
               {[
+                [
+                  Wallet,
+                  'My invoices',
+                  'View shared invoices and recorded payments.',
+                  '/account/invoices',
+                ],
+                [
+                  Heart,
+                  'My fundraising',
+                  'Create a personal campaign and follow its review.',
+                  '/fundraise/new',
+                ],
                 [
                   Award,
                   'My certificates',
