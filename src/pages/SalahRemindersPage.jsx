@@ -44,7 +44,7 @@ export default function SalahRemindersPage() {
       Notification: window.Notification,
       crypto,
       storage,
-      atob,
+      atob: (value) => window.atob(value),
     });
     client.current
       .inspect()

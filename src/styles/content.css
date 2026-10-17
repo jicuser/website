@@ -241,6 +241,8 @@ html[data-theme] .jic-image-viewer {
   gap: 10px;
   padding: 16px;
 }
+.jic-image-zoom { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.jic-image-zoom select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--jic-border); border-radius: 10px; background: var(--jic-surface); color: var(--jic-text); }
 .jic-image-viewer-actions p {
   flex-basis: 100%;
   margin: 0;

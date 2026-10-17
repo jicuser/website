@@ -112,7 +112,7 @@ export function createReminderClient(api, env) {
       if (!subscription) {
         const base64 = config.publicKey.replaceAll('-', '+').replaceAll('_', '/');
         const bytes = Uint8Array.from(
-          env.atob(base64 + '='.repeat((4 - (base64.length % 4)) % 4)),
+          env.atob.call(env.window, base64 + '='.repeat((4 - (base64.length % 4)) % 4)),
           (c) => c.charCodeAt(0),
         );
         subscription = await worker.pushManager.subscribe({
