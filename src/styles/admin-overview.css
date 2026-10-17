@@ -152,7 +152,7 @@
   left: 12px;
   color: var(--jic-text-secondary);
 }
-.admin-console .admin-tool-search input {
+.admin-console .admin-overview .admin-tool-search input[type='search'] {
   padding-left: 38px;
 }
 .admin-tool-group {
