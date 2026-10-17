@@ -500,14 +500,12 @@ export function CertificateWorkspace({ staff = false }) {
   return (
     <section className="certificate-area">
       <div className="certificate-toolbar">
-        <div>
-          <h2>{staff ? 'Certificates' : 'My certificates'}</h2>
-          <p>
-            {staff
-              ? 'Review requests and manage issued records.'
-              : 'View issued certificates and follow your requests.'}
-          </p>
-        </div>
+        {staff && (
+          <div>
+            <h2>Certificates</h2>
+            <p>Review requests and manage issued records.</p>
+          </div>
+        )}
         {!staff && !requesting && (
           <button type="button" className="certificate-primary" onClick={() => setRequesting(true)}>
             Request a certificate
