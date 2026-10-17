@@ -7,19 +7,26 @@ test('compact footer includes portal and certificate access alongside public ess
   assert.deepEqual(
     FOOTER_LINKS.map((item) => item.name),
     [
+      'Donate & fundraise',
       'Portal login',
       'Certificates',
       'Contact Us',
       'Download Salah timetable',
       'Services',
-      'Masjid Building Works',
+      'Our Masjid Project',
       'Education',
       'Youth',
     ],
   );
-  assert.equal(FOOTER_LINKS.find((item) => item.name === 'Download Salah timetable').path, '/prayer-times/monthly#phone-wallpaper');
+  assert.equal(
+    FOOTER_LINKS.find((item) => item.name === 'Download Salah timetable').path,
+    '/prayer-times/monthly#phone-wallpaper',
+  );
   assert.equal(FOOTER_LINKS.find((item) => item.name === 'Portal login').path, '/portal');
-  assert.equal(FOOTER_LINKS.find((item) => item.name === 'Certificates').path, '/services/certificates');
+  assert.equal(
+    FOOTER_LINKS.find((item) => item.name === 'Certificates').path,
+    '/services/certificates',
+  );
   assert.ok(NAV_GROUPS.some((item) => item.path === '/about'));
   assert.ok(NAV_GROUPS.some((item) => item.path === '/prayer-times'));
   assert.ok(MADRASSAH_TABS.some((item) => item.path === '/madrassah'));
@@ -36,7 +43,7 @@ test('public sections retain their own identity on overview pages', () => {
     ['/prayer-times', 'Prayer Times'],
     ['/worship', 'Worship'],
     ['/services', 'Services'],
-    ['/projects', 'Masjid Building Works'],
+    ['/projects', 'Our Masjid Project'],
     ['/education', 'Education'],
     ['/youth', 'Youth'],
   ]) {
@@ -102,26 +109,20 @@ test('Madrassah keeps its own tabs within the Education parent section', () => {
   }
 });
 
-test('extension pages and legacy aliases keep Building Works parent and extension tabs', () => {
-  for (const [path, currentPath] of [
-    ['/projects/masjid-extension', '/projects/masjid-extension'],
-    ['/projects/masjid-extension/timeline', '/projects/masjid-extension/timeline'],
-    ['/projects/main-prayer-hall', '/projects/main-prayer-hall'],
-    ['/projects/wudu-area', '/projects/wudu-area'],
-    ['/projects/community-hall', '/projects/community-hall'],
-    ['/projects/madrassah-floor', '/projects/madrassah-floor'],
-    ['/projects/timeline', '/projects/masjid-extension/timeline'],
-    ['/projects/madrassah-building', '/projects/madrassah-floor'],
+test('project legacy links retain the project parent with a simplified journey menu', () => {
+  for (const path of [
+    '/projects',
+    '/projects/masjid-extension',
+    '/projects/masjid-extension/timeline',
+    '/projects/main-prayer-hall',
+    '/projects/wudu-area',
+    '/projects/community-hall',
+    '/projects/madrassah-floor',
+    '/projects/timeline',
+    '/projects/madrassah-building',
+    '/projects/gallery',
   ]) {
-    const section = activeNavigation(path);
-    assert.equal(section.name, 'Masjid Extension', path);
-    assert.equal(section.path, '/projects/masjid-extension', path);
-    assert.equal(section.primaryPath, '/projects', path);
-    assert.equal(section.primaryName, 'Masjid Building Works', path);
-    assert.equal(section.current.path, currentPath, path);
-  }
-  for (const path of ['/projects', '/projects/gallery', '/projects/current-appeals']) {
-    assert.equal(activeNavigation(path).name, 'Masjid Building Works', path);
+    assert.equal(activeNavigation(path).primaryPath, '/projects', path);
   }
 });
 

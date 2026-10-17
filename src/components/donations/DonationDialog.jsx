@@ -2,14 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Copy, Heart, Landmark, X } from 'lucide-react';
 
-const BANK_DETAILS = {
-  bank: 'Metro Bank',
-  accountName: 'Jamatia Islamic Centre',
-  sortCode: '23-05-80',
-  accountNumber: '57434236',
-};
+import { Link } from 'react-router-dom';
+import { BANK_DETAILS } from '@/features/operations/model';
 
-export default function WonderfulDonationModal({ open, onClose }) {
+export default function DonationDialog({ open, onClose }) {
   const [copied, setCopied] = useState('');
 
   useEffect(() => {
@@ -122,6 +118,13 @@ export default function WonderfulDonationModal({ open, onClose }) {
             </div>
 
             <div className="px-5 py-5 sm:px-7 sm:py-6">
+              <Link
+                to="/donate"
+                onClick={onClose}
+                className="mb-5 block rounded-xl border border-current/20 p-4"
+              >
+                Explore giving options & personal fundraisers →
+              </Link>
               <div className="jic-popup-surface rounded-2xl p-5 sm:p-6">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">

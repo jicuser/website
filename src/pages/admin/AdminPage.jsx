@@ -24,6 +24,9 @@ import {
   Moon,
   Monitor,
   MessageSquare,
+  Wallet,
+  Heart,
+  Building2,
 } from 'lucide-react';
 import AdminOverview from '@/features/admin/AdminOverview';
 import FormsManager from '@/features/forms/FormsManager';
@@ -43,6 +46,10 @@ import TeamEditor from '@/components/admin/TeamEditor';
 import FormsInbox from '@/components/admin/FormsInbox';
 import { ADMIN_SECTIONS, ADMIN_GROUPS } from '@/content/adminNavigation';
 
+const FinanceManager = lazy(() => import('@/features/operations/Finance'));
+const FundraisingManager = lazy(() => import('@/features/operations/FundraisingManager'));
+const Safeguarding = lazy(() => import('@/features/operations/Safeguarding'));
+const ProjectEditor = lazy(() => import('@/features/projects/ProjectEditor'));
 const CertificatesManager = lazy(() => import('@/features/certificates/Certificates'));
 
 const input =
@@ -55,6 +62,10 @@ const ghost = `${btn} border border-slate-300 bg-white text-slate-700 hover:bg-s
 const danger = `${btn} bg-red-50 text-red-700 hover:bg-red-100`;
 
 const SECTION_ICONS = {
+  finance: Wallet,
+  fundraising: Heart,
+  safeguarding: ShieldCheck,
+  projects: Building2,
   app_content: FileText,
   dashboard: Activity,
   prayer: Clock3,
@@ -759,6 +770,26 @@ export default function AdminPage() {
   };
 
   const section = {
+    finance: (
+      <Suspense fallback={<p role="status">Opening finance…</p>}>
+        <FinanceManager />
+      </Suspense>
+    ),
+    fundraising: (
+      <Suspense fallback={<p role="status">Opening fundraising…</p>}>
+        <FundraisingManager />
+      </Suspense>
+    ),
+    safeguarding: (
+      <Suspense fallback={<p role="status">Opening reviews…</p>}>
+        <Safeguarding />
+      </Suspense>
+    ),
+    projects: (
+      <Suspense fallback={<p role="status">Opening timeline…</p>}>
+        <ProjectEditor />
+      </Suspense>
+    ),
     tv: <TvSection registerBack={registerBack} />,
     dashboard: <AdminOverview onChoose={chooseSection} icons={SECTION_ICONS} />,
     prayer: <PrayerEditor />,
@@ -800,13 +831,24 @@ export default function AdminPage() {
     <div className="admin-console min-h-screen bg-slate-100 text-slate-900">
       <header className="admin-account-header">
         <div className="admin-toolbar-title">
-          <strong>JIC Admin</strong>
+          <strong>JIC Staff workspace</strong>
           <small>
             {auditName}
             {profile?.is_owner ? ' · Owner' : ''}
           </small>
         </div>
         <div className="admin-toolbar-actions">
+          <button
+            className="admin-button"
+            disabled={saving}
+            onClick={() => {
+              if (!dirty || window.confirm('Discard unsaved changes?'))
+                navigate('/portal?workspace=personal');
+            }}
+          >
+            <Users size={18} />
+            <span>My account</span>
+          </button>
           <button
             className="admin-button"
             onClick={toggleTheme}

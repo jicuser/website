@@ -1,12 +1,8 @@
 /** Primary navigation grouped by visitor intent. */
 export const MASJID_EXTENSION_TABS = [
-  { name: '‹ All Building Works', path: '/projects' },
-  { name: 'Extension Overview', path: '/projects/masjid-extension' },
-  { name: 'Timeline', path: '/projects/masjid-extension/timeline' },
-  { name: 'Main Prayer Hall', path: '/projects/main-prayer-hall' },
-  { name: 'Wudu & Facilities', path: '/projects/wudu-area' },
-  { name: 'Community Hall', path: '/projects/community-hall' },
-  { name: 'Madrassah Floor', path: '/projects/madrassah-floor' },
+  { name: 'Project journey', path: '/projects' },
+  { name: 'Timeline & spaces', path: '/projects/masjid-extension' },
+  { name: 'Support JIC', path: '/donate' },
 ];
 export const MADRASSAH_TABS = [
   { name: 'Overview', path: '/madrassah' },
@@ -33,52 +29,96 @@ export const WORSHIP_TABS = [
 ];
 export const NAV_GROUPS = [
   { name: 'Home', path: '/', children: [] },
-  { name: 'About', path: '/about', children: [
-    { name: 'Overview', path: '/about' }, { name: 'Meet the Team', path: '/team' },
-    { name: 'Our History', path: '/about/history' }, { name: 'Financial History', path: '/financial-history' },
-    { name: 'Contact Us', path: '/contact' }, { name: 'Social Media', path: '/social-media' },
-  ] },
-  { name: 'Prayer Times', path: '/prayer-times', children: [
-    { name: 'Today', path: '/prayer-times' }, { name: 'Monthly Timetable', path: '/prayer-times/monthly' },
-    { name: 'Jummah', path: '/prayer-times/jummah' }, { name: 'Salah Alerts', path: '/prayer-times/reminders' },
-  ] },
+  {
+    name: 'About',
+    path: '/about',
+    children: [
+      { name: 'Overview', path: '/about' },
+      { name: 'Meet the Team', path: '/team' },
+      { name: 'Our History', path: '/about/history' },
+      { name: 'Financial History', path: '/financial-history' },
+      { name: 'Contact Us', path: '/contact' },
+      { name: 'Social Media', path: '/social-media' },
+    ],
+  },
+  {
+    name: 'Prayer Times',
+    path: '/prayer-times',
+    children: [
+      { name: 'Today', path: '/prayer-times' },
+      { name: 'Monthly Timetable', path: '/prayer-times/monthly' },
+      { name: 'Jummah', path: '/prayer-times/jummah' },
+      { name: 'Salah Alerts', path: '/prayer-times/reminders' },
+    ],
+  },
   { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
-  { name: 'Services', path: '/services', children: [
-    { name: 'Overview', path: '/services' }, { name: 'Religious Services', path: '/services/religious' },
-    { name: 'Educational Programmes', path: '/services/education' }, { name: 'Community Services', path: '/services/community' },
-    { name: 'Funeral Services', path: '/funerals' }, { name: 'Nikah', path: '/services/nikah' },
-    { name: 'Hall Booking', path: '/services/hall-booking' },
-    { name: 'Certificates', path: '/services/certificates' },
-  ] },
-  { name: 'Masjid Building Works', path: '/projects', children: [
-    { name: 'Overview', path: '/projects' }, { name: 'Masjid Extension', path: '/projects/masjid-extension' },
-    { name: 'Current Appeals', path: '/projects/current-appeals' }, { name: 'Updates & Gallery', path: '/projects/gallery' },
-    { name: 'Support the Works', path: '/projects/how-to-support' },
-  ] },
+  {
+    name: 'Services',
+    path: '/services',
+    children: [
+      { name: 'Overview', path: '/services' },
+      { name: 'Religious Services', path: '/services/religious' },
+      { name: 'Educational Programmes', path: '/services/education' },
+      { name: 'Community Services', path: '/services/community' },
+      { name: 'Funeral Services', path: '/funerals' },
+      { name: 'Nikah', path: '/services/nikah' },
+      { name: 'Hall Booking', path: '/services/hall-booking' },
+      { name: 'Certificates', path: '/services/certificates' },
+    ],
+  },
+  {
+    name: 'Our Masjid Project',
+    path: '/projects',
+    children: [
+      { name: 'Project journey', path: '/projects' },
+      { name: 'Stages & spaces', path: '/projects/masjid-extension' },
+      { name: 'Support JIC', path: '/donate' },
+    ],
+  },
   { name: 'Education', path: '/education', children: EDUCATION_TABS },
-  { name: 'Youth', path: '/youth', children: [
-    { name: 'Overview', path: '/youth' }, { name: 'Activities', path: '/youth/activities' },
-    { name: "I'tikaf Registration", path: '/youth/itikaf' }, { name: 'Trips & Events', path: '/youth/trips-events' },
-    { name: 'Volunteering', path: '/youth/volunteering' }, { name: 'Classes & Skills', path: '/youth/classes-skills' },
-  ] },
+  {
+    name: 'Youth',
+    path: '/youth',
+    children: [
+      { name: 'Overview', path: '/youth' },
+      { name: 'Activities', path: '/youth/activities' },
+      { name: "I'tikaf Registration", path: '/youth/itikaf' },
+      { name: 'Trips & Events', path: '/youth/trips-events' },
+      { name: 'Volunteering', path: '/youth/volunteering' },
+      { name: 'Classes & Skills', path: '/youth/classes-skills' },
+    ],
+  },
 ];
 export const NAV_ITEMS = [
   ...NAV_GROUPS.map(({ name, path }) => ({ name, path })),
   { name: 'Financial History', path: '/financial-history' },
-  { name: 'Meet the Team', path: '/team' }, { name: 'Contact Us', path: '/contact' },
+  { name: 'Meet the Team', path: '/team' },
+  { name: 'Contact Us', path: '/contact' },
 ];
 // A menu destination is not necessarily a public CMS page.
 export const PUBLIC_MENU_GROUPS = [
   ...NAV_GROUPS,
   { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
+  {
+    name: 'Donate & fundraise',
+    path: '/donate',
+    children: [
+      { name: 'Giving hub', path: '/donate' },
+      { name: 'Start a fundraiser', path: '/fundraise/new' },
+    ],
+    editable: false,
+  },
   { name: 'Social Media', path: '/social-media', children: [] },
   { name: 'Portal login', path: '/portal', children: [], editable: false },
 ];
 export const FOOTER_LINKS = [
+  { name: 'Donate & fundraise', path: '/donate' },
   { name: 'Portal login', path: '/portal' },
   { name: 'Certificates', path: '/services/certificates' },
   { name: 'Contact Us', path: '/contact' },
   { name: 'Download Salah timetable', path: '/prayer-times/monthly#phone-wallpaper' },
-  { name: 'Services', path: '/services' }, { name: 'Masjid Building Works', path: '/projects' },
-  { name: 'Education', path: '/education' }, { name: 'Youth', path: '/youth' },
+  { name: 'Services', path: '/services' },
+  { name: 'Our Masjid Project', path: '/projects' },
+  { name: 'Education', path: '/education' },
+  { name: 'Youth', path: '/youth' },
 ];

@@ -103,7 +103,21 @@ export function createReminderClient(api, env) {
         }
       }
       await env.navigator.serviceWorker.register('/salah-reminders-sw.js', { scope: '/' });
-      const worker = await env.navigator.serviceWorker.ready;
+      let readyTimeout;
+      const worker = await Promise.race([
+        env.navigator.serviceWorker.ready,
+        new Promise((_, reject) => {
+          readyTimeout = setTimeout(
+            () =>
+              reject(
+                new Error(
+                  'Phone setup took too long. Close and reopen the installed JIC app, then try again.',
+                ),
+              ),
+            15000,
+          );
+        }),
+      ]).finally(() => clearTimeout(readyTimeout));
       let subscription = await worker.pushManager.getSubscription();
       if (fresh && subscription) {
         await subscription.unsubscribe();

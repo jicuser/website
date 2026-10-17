@@ -35,6 +35,16 @@ const MasjidExtensionPage = lazy(() => import('@/pages/MasjidExtensionPage'));
 const PrayerTimesPage = lazy(() => import('@/pages/PrayerTimesPage'));
 const SalahRemindersPage = lazy(() => import('@/pages/SalahRemindersPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
+const DonationsPage = lazy(() => import('@/features/operations/Donations'));
+const CampaignPage = lazy(() =>
+  import('@/features/operations/Donations').then((m) => ({ default: m.CampaignPage })),
+);
+const MyFundraisingPage = lazy(() =>
+  import('@/features/operations/Donations').then((m) => ({ default: m.MyFundraisingPage })),
+);
+const MyInvoicesPage = lazy(() =>
+  import('@/features/operations/Finance').then((m) => ({ default: m.MyInvoicesPage })),
+);
 const ProjectsPage = lazy(() => import('@/pages/ProjectsPage'));
 const SectionPage = lazy(() => import('@/pages/SectionPage'));
 const GuidedServicePage = lazy(() => import('@/pages/GuidedServicePage'));
@@ -77,6 +87,7 @@ function AppRoutes() {
         <RouteScrollReset />
         <Routes>
           <Route path="/portal" element={<CommunityPortalPage />} />
+          <Route path="/account/invoices" element={<MyInvoicesPage />} />
           <Route path="/account/certificates" element={<CertificatesPage />} />
           <Route path="/verify/:token" element={<VerifyCertificatePage />} />
           <Route path="/radio" element={<RadioPlayerPage />} />
@@ -154,6 +165,10 @@ function AppRoutes() {
             <Route path="services/education" element={<ServicesPage />} />
             <Route path="services/community" element={<ServicesPage />} />
             <Route path="services/hall-booking" element={<HallBookingPage />} />
+            <Route path="donate" element={<DonationsPage />} />
+            <Route path="fundraise" element={<DonationsPage />} />
+            <Route path="fundraise/new" element={<MyFundraisingPage />} />
+            <Route path="fundraise/:slug" element={<CampaignPage />} />
             <Route path="projects" element={<ProjectsPage />} />
             <Route path="projects/masjid-extension" element={<MasjidExtensionPage />} />
             {Object.keys(PAGE_ALIASES).map((path) => (
@@ -177,12 +192,18 @@ function AppRoutes() {
                 key={path}
                 path={path}
                 element={
-                  [
-                    'services/nikah',
-                    'funerals',
-                    'funerals/what-to-do',
-                    'funerals/contact-support',
-                  ].includes(path) ? (
+                  path.startsWith('projects/') ? (
+                    ['projects/current-appeals', 'projects/how-to-support'].includes(path) ? (
+                      <DonationsPage />
+                    ) : (
+                      <ProjectsPage />
+                    )
+                  ) : [
+                      'services/nikah',
+                      'funerals',
+                      'funerals/what-to-do',
+                      'funerals/contact-support',
+                    ].includes(path) ? (
                     <GuidedServicePage />
                   ) : (
                     <SectionPage

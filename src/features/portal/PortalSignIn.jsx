@@ -35,9 +35,11 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
         const result = await supabase.auth.signInWithOtp(options);
         if (result.error) throw new Error('Unable to send a sign-in link. Please try again later.');
         lastSent.current = Date.now();
-        setNotice(mode === 'create'
-          ? 'Check your email to verify your address and open your account. Staff and family access are reviewed separately.'
-          : 'If this email has an eligible account, a sign-in link will arrive shortly.');
+        setNotice(
+          mode === 'create'
+            ? 'Check your email to verify your address and open your account. Staff and family access are reviewed separately.'
+            : 'If this email has an eligible account, a sign-in link will arrive shortly.',
+        );
       }
     } catch (failure) {
       setError(
@@ -53,7 +55,9 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
   return (
     <section className="portal-signin workspace-card" aria-labelledby="portal-signin-title">
       <p className="workspace-kicker">Your connection to JIC</p>
-      <h2 id="portal-signin-title">{mode === 'create' ? 'Create your JIC account' : 'Sign in to your Portal'}</h2>
+      <h2 id="portal-signin-title">
+        {mode === 'create' ? 'Create your JIC account' : 'Sign in to your Portal'}
+      </h2>
       <p>Sign in to see the JIC services and records available to your account.</p>
       <div className="portal-signin-modes" aria-label="Sign-in method">
         {[
@@ -78,7 +82,20 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
       </div>
       <form className="workspace-form" onSubmit={submit} aria-label="Portal sign in">
         <fieldset disabled={busy || auth.loading}>
-          {mode === 'create' && <label className="workspace-field"><span>Your name</span><input name="display_name" autoComplete="name" minLength={2} maxLength={120} required value={name} onChange={(event) => setName(event.target.value)} /></label>}
+          {mode === 'create' && (
+            <label className="workspace-field">
+              <span>Your name</span>
+              <input
+                name="display_name"
+                autoComplete="name"
+                minLength={2}
+                maxLength={120}
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+            </label>
+          )}
           <label className="workspace-field">
             <span>Email address</span>
             <input
@@ -98,7 +115,13 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
             </label>
           )}
           <button type="submit" disabled={busy}>
-            {busy ? 'Please wait…' : mode === 'password' ? 'Sign in' : mode === 'create' ? 'Email my account link' : 'Email me a sign-in link'}
+            {busy
+              ? 'Please wait…'
+              : mode === 'password'
+                ? 'Sign in'
+                : mode === 'create'
+                  ? 'Email my account link'
+                  : 'Email me a sign-in link'}
           </button>
         </fieldset>
       </form>
@@ -107,9 +130,17 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
       <GoogleSignInButton returnTo={returnTo} disabled={busy || auth.loading} />
       <div className="workspace-actions">
         <Link to="/account/recovery">Forgot your password?</Link>
-        <Link to="/account/request" state={{ email }}>Request access from the office</Link>
+        <Link to="/account/request" state={{ email }}>
+          Request access from the office
+        </Link>
       </div>
-      {mode === 'create' && <p className="workspace-meta">No password to remember. Verify your own email first. Creating an account does not grant staff access or link you to a child. Read our <Link to="/privacy">privacy information</Link>.</p>}
+      {mode === 'create' && (
+        <p className="workspace-meta">
+          No password to remember. Verify your own email first. Creating an account does not grant
+          staff access or link you to a child. Read our{' '}
+          <Link to="/privacy">privacy information</Link>.
+        </p>
+      )}
       {returnTo && (
         <p className="workspace-meta">After signing in, you will return to your certificates.</p>
       )}

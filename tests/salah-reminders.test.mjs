@@ -187,3 +187,15 @@ test('simultaneous start and Jama’ah are one notification but retain both rece
   assert.match(note.body, /10 minutes/);
   assert.match(note.body, /6:18/);
 });
+
+test('iPhone Window.atob receives the Window receiver when creating a push subscription', async () => {
+  const { env, client } = fixture();
+  env.navigator.userAgent = 'iPhone';
+  env.navigator.standalone = true;
+  env.atob = function (value) {
+    assert.equal(this, env.window, 'Safari requires the real Window receiver');
+    return globalThis.atob(value);
+  };
+  const result = await client.enable(DEFAULT_SALAH_REMINDERS, config, null);
+  assert.equal(result.active, true);
+});

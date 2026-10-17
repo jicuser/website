@@ -416,4 +416,30 @@ begin
 end;$$;
 revoke all on function public.finance_member_by_email(text) from public,anon;
 grant execute on function public.finance_member_by_email(text) to authenticated;
+create function public.community_finance_overview() returns jsonb
+language plpgsql stable security definer set search_path='' as $$
+begin
+  if not private.has_permission('finance') then raise exception 'Finance permission required.';end if;
+  return jsonb_build_object(
+    'invoices',coalesce((select jsonb_agg(to_jsonb(i)||jsonb_build_object('paid_pence',coalesce((select sum(amount_pence) from public.community_payments where invoice_id=i.id),0)) order by i.created_at desc) from (select * from public.community_invoices order by created_at desc limit 100) i),'[]'::jsonb),
+    'payments',coalesce((select jsonb_agg(to_jsonb(p)||jsonb_build_object('reversed',exists(select 1 from public.community_payments r where r.reversal_of=p.id)) order by p.created_at desc) from (select * from public.community_payments order by created_at desc limit 100) p),'[]'::jsonb),
+    'settings',(select to_jsonb(s) from public.community_finance_settings s where singleton),
+    'campaigns',coalesce((select jsonb_agg(jsonb_build_object('id',id,'title',title,'reference',reference,'status',status) order by created_at desc) from public.community_campaigns where status in ('published','closed')),'[]'::jsonb),
+    'outstanding',coalesce((select sum(greatest(0,i.total_pence-coalesce((select sum(amount_pence) from public.community_payments where invoice_id=i.id),0))) from public.community_invoices i where status='issued'),0),
+    'overdue',coalesce((select sum(greatest(0,i.total_pence-coalesce((select sum(amount_pence) from public.community_payments where invoice_id=i.id),0))) from public.community_invoices i where status='issued' and due_date<(now() at time zone 'Europe/London')::date),0),
+    'received',coalesce((select sum(amount_pence) from public.community_payments where invoice_id is not null),0),
+    'donations',coalesce((select sum(amount_pence) from public.community_payments where campaign_id is not null),0),
+    'months',(select jsonb_agg(jsonb_build_object('key',to_char(m,'YYYY-MM'),'label',to_char(m,'Mon YY'),'total',coalesce((select sum(amount_pence) from public.community_payments where happened_on>=m::date and happened_on<(m+interval '1 month')::date),0)) order by m) from generate_series(date_trunc('month',now() at time zone 'Europe/London')-interval '5 months',date_trunc('month',now() at time zone 'Europe/London'),interval '1 month') m)
+  );
+end;$$;
+revoke all on function public.community_finance_overview() from public,anon;
+grant execute on function public.community_finance_overview() to authenticated;
+
+create function public.my_community_invoices() returns jsonb
+language sql stable security definer set search_path='' as $$
+ select coalesce(jsonb_agg(to_jsonb(i)||jsonb_build_object('paid_pence',coalesce((select sum(amount_pence) from public.community_payments where invoice_id=i.id),0)) order by i.created_at desc),'[]'::jsonb)
+ from public.community_invoices i where member_id=auth.uid() and status<>'draft' and exists(select 1 from public.profiles where id=auth.uid() and is_active)
+$$;
+revoke all on function public.my_community_invoices() from public,anon;
+grant execute on function public.my_community_invoices() to authenticated;
 commit;

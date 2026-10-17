@@ -7,7 +7,7 @@ const matchesPath = (pathname, path) =>
 const nestedSections = [
   { name: 'Madrassah', path: '/madrassah', primaryPath: '/education', children: MADRASSAH_TABS },
   {
-    name: 'Masjid Extension',
+    name: 'Our Masjid Project',
     path: '/projects/masjid-extension',
     primaryPath: '/projects',
     children: MASJID_EXTENSION_TABS,

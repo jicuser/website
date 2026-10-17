@@ -13,12 +13,20 @@ export default function GoogleSignInButton({ returnTo = '', disabled = false }) 
       .then((value) => {
         if (!controller.signal.aborted) setAvailable(value);
       })
-      .catch(() => { if (!controller.signal.aborted) setAvailable(false); });
+      .catch(() => {
+        if (!controller.signal.aborted) setAvailable(false);
+      });
     return () => controller.abort();
   }, []);
 
   if (available === null) return null;
-  if (!available) return <p className="workspace-meta">Google sign-in is not connected yet. You can create an account with your email or request access from the office.</p>;
+  if (!available)
+    return (
+      <p className="workspace-meta">
+        Google sign-in is not connected yet. You can create an account with your email or request
+        access from the office.
+      </p>
+    );
   return (
     <div className="workspace-google-signin">
       <button

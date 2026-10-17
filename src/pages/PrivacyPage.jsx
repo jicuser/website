@@ -17,7 +17,7 @@ const PrivacyPage = () => {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
               Privacy Policy
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-8">Last Updated: October 15, 2026</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-8">Last Updated: October 17, 2026</p>
 
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
@@ -61,6 +61,39 @@ const PrivacyPage = () => {
                 <li>Complying with legal obligations</li>
               </ul>
 
+              <h2 className="text-2xl font-bold mt-8 mb-4">
+                Portal, fundraising and centre records
+              </h2>
+              <p>
+                We use your account email and access request details to provide the portal and
+                review the access you need. Public fundraising pages show the organiser name, story,
+                target and confirmed total that you submit for publication. Do not include private
+                information about other people in your page.
+              </p>
+              <p>
+                Invoices and payment references are restricted to authorised finance staff and,
+                where explicitly linked, the verified account receiving the invoice. We do not
+                collect card details through the donation pages. Bank transfers take place in your
+                own banking service.
+              </p>
+              <p>
+                Minimal DBS review records are restricted to authorised safeguarding staff and the
+                account owner. Staff must establish an appropriate lawful basis and policy before
+                recording information. The tracker does not store certificate scans or
+                criminal-record details. Internal review and retention dates help the team reassess
+                what needs to be kept.
+              </p>
+              <p>
+                Access requests use a short-lived, hashed network identifier to limit abuse. Loading
+                an optional social preview or Polycam walkthrough connects to that provider and is
+                subject to its privacy and cookie policies. These external previews load when you
+                choose to open them.
+              </p>
+              <p>
+                For access, correction, deletion or retention questions, contact the centre using
+                the details below. Accounting records may need to be retained to meet legal
+                obligations; the team will explain any applicable limits.
+              </p>
               <h2 className="text-2xl font-bold mt-8 mb-4">Information Sharing and Disclosure</h2>
               <p>
                 We do not sell, trade, or otherwise transfer your personal information to outside
@@ -150,7 +183,7 @@ const PrivacyPage = () => {
                 <br />
                 Sparkhill, Birmingham, B11 4ER
                 <br />
-                Email: info@jicmasjid.org
+                Email: info@jicwoodlands.org.uk
                 <br />
                 Phone: +44 121 778 6612
               </p>

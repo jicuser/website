@@ -71,7 +71,9 @@
   border-radius: 999px;
   color: var(--jic-text);
 }
-.monthly-timetable-controls button:disabled { opacity: 0.5; }
+.monthly-timetable-controls button:disabled {
+  opacity: 0.5;
+}
 .monthly-timetable-grid thead th {
   color: var(--jic-action);
   font-size: 0.875rem;

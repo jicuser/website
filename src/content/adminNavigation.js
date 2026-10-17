@@ -1,12 +1,16 @@
 /** Shared labels, permissions and purposes for the staff dashboard and navigation. */
 export const ADMIN_SECTIONS = [
-  ...(import.meta.env?.VITE_ENABLE_CERTIFICATES === 'true' ? [{
-    id: 'certificates',
-    name: 'Certificates',
-    permission: 'certificates',
-    group: 'Enquiries & forms',
-    description: 'Review requests, issue certificates and manage verification.',
-  }] : []),
+  ...(import.meta.env?.VITE_ENABLE_CERTIFICATES === 'true'
+    ? [
+        {
+          id: 'certificates',
+          name: 'Certificates',
+          permission: 'certificates',
+          group: 'Enquiries & forms',
+          description: 'Review requests, issue certificates and manage verification.',
+        },
+      ]
+    : []),
   ...(import.meta.env?.VITE_ENABLE_WORKSPACE === 'true'
     ? [
         {
@@ -18,6 +22,34 @@ export const ADMIN_SECTIONS = [
         },
       ]
     : []),
+  {
+    id: 'finance',
+    name: 'Finance',
+    permission: 'finance',
+    group: 'Centre operations',
+    description: 'Create invoices, record payments and see balances.',
+  },
+  {
+    id: 'fundraising',
+    name: 'Fundraising',
+    permission: 'fundraising',
+    group: 'Centre operations',
+    description: 'Review and publish personal campaign pages.',
+  },
+  {
+    id: 'safeguarding',
+    name: 'Safeguarding',
+    permission: 'safeguarding',
+    group: 'Staff & system',
+    description: 'Restricted DBS and retention review dates.',
+  },
+  {
+    id: 'projects',
+    name: 'Project timeline',
+    permission: 'content',
+    group: 'Website content',
+    description: 'Arrange stages, photos and Polycam walkthroughs.',
+  },
   { id: 'dashboard', name: 'Overview', permission: 'dashboard', group: 'Admin' },
   {
     id: 'content',

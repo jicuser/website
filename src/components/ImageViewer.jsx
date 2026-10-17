@@ -40,10 +40,34 @@ export default function ImageViewer({ image, onClose, children }) {
         </button>
       </div>
       <div className="jic-image-viewer-scroll" data-zoom={zoom}>
-        <img src={image.url} alt={image.alt || image.title} style={zoom === 'page' ? undefined : { width: zoom === 'width' ? '100%' : zoom + '%', maxWidth: 'none', maxHeight: 'none' }} />
+        <img
+          src={image.url}
+          alt={image.alt || image.title}
+          style={
+            zoom === 'page'
+              ? undefined
+              : {
+                  width: zoom === 'width' ? '100%' : zoom + '%',
+                  maxWidth: 'none',
+                  maxHeight: 'none',
+                }
+          }
+        />
       </div>
       <div className="jic-image-viewer-actions">
-        <label className="jic-image-zoom">View <select aria-label="Image zoom" value={zoom} onChange={(event) => setZoom(event.target.value)}><option value="width">Fit width</option><option value="page">Whole image</option><option value="150">150%</option><option value="200">200%</option></select></label>
+        <label className="jic-image-zoom">
+          View{' '}
+          <select
+            aria-label="Image zoom"
+            value={zoom}
+            onChange={(event) => setZoom(event.target.value)}
+          >
+            <option value="width">Fit width</option>
+            <option value="page">Whole image</option>
+            <option value="150">150%</option>
+            <option value="200">200%</option>
+          </select>
+        </label>
         {children}
       </div>
     </dialog>,

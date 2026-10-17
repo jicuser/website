@@ -48,7 +48,7 @@ import { nextCongregation } from '@/lib/nextCongregation';
 import { displayTime } from '@/lib/timetable';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
-const WonderfulDonationModal = lazy(() => import('@/components/donations/WonderfulDonationModal'));
+const DonationDialog = lazy(() => import('@/components/donations/DonationDialog'));
 
 // One compact time per obligatory congregation. Full start and jama'ah times
 // remain available when visitors expand the dock.
@@ -774,7 +774,7 @@ export default function UnifiedHeader() {
             </div>
           }
         >
-          <WonderfulDonationModal open onClose={() => setDonationOpen(false)} />
+          <DonationDialog open onClose={() => setDonationOpen(false)} />
         </Suspense>
       )}
     </>

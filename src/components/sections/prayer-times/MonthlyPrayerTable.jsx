@@ -38,11 +38,23 @@ export default function MonthlyPrayerTable({
         <>
           <div className="monthly-timetable-controls">
             <p>Scroll through the month. Prayer headings and dates stay in view.</p>
-            <button type="button" onClick={() => {
-              const area = scrollArea.current;
-              const row = area?.querySelector('.is-today');
-              if (row) area.scrollTo({ top: row.offsetTop - area.querySelector('thead').offsetHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-            }} disabled={!timetable.rows.some((row) => row.isoDate === today)}>Today</button>
+            <button
+              type="button"
+              onClick={() => {
+                const area = scrollArea.current;
+                const row = area?.querySelector('.is-today');
+                if (row)
+                  area.scrollTo({
+                    top: row.offsetTop - area.querySelector('thead').offsetHeight,
+                    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                      ? 'instant'
+                      : 'smooth',
+                  });
+              }}
+              disabled={!timetable.rows.some((row) => row.isoDate === today)}
+            >
+              Today
+            </button>
           </div>
           <p className="monthly-timetable-scroll-hint">Swipe across to see all prayers.</p>
           <div
