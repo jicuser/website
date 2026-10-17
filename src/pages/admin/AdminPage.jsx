@@ -25,6 +25,7 @@ import {
   Monitor,
   MessageSquare,
 } from 'lucide-react';
+import AdminOverview from '@/features/admin/AdminOverview';
 import FormsManager from '@/features/forms/FormsManager';
 import StaffAccess from '@/components/admin/StaffAccess';
 import StreamSetup from '@/components/admin/StreamSetup';
@@ -123,39 +124,6 @@ function formatDateTime(value) {
 async function uploadImage(file, folder = 'admin') {
   if (!file) return null;
   return createImageUploader(supabase)(file, folder);
-}
-
-function DashboardSection({ onChoose }) {
-  const { can } = useAuth();
-  const tasks = ADMIN_SECTIONS.filter(
-    (section) => section.id !== 'dashboard' && can(section.permission),
-  );
-  return (
-    <div>
-      <div className="admin-heading">
-        <h2>What would you like to do?</h2>
-      </div>
-      {ADMIN_GROUPS.filter((group) => tasks.some((task) => task.group === group)).map((group) => (
-        <section className="admin-task-group" key={group} aria-label={group}>
-          <h3>{group}</h3>
-          <div className="admin-task-grid">
-            {tasks
-              .filter((task) => task.group === group)
-              .map(({ id, name, description }) => {
-                const Icon = SECTION_ICONS[id];
-                return (
-                  <button key={id} type="button" aria-label={name} onClick={() => onChoose(id)}>
-                    <Icon aria-hidden="true" />
-                    <strong>{name}</strong>
-                    <span>{description}</span>
-                  </button>
-                );
-              })}
-          </div>
-        </section>
-      ))}
-    </div>
-  );
 }
 
 function TvSection({ registerBack }) {
@@ -770,9 +738,11 @@ export default function AdminPage() {
   const registerBack = useCallback((handler) => {
     setSectionBack(() => (typeof handler === 'function' ? handler : null));
   }, []);
+  const defaultSection =
+    allowed.find(([key]) => key === 'dashboard')?.[0] || allowed[0]?.[0] || 'dashboard';
   const active = allowed.some((item) => item[0] === params.get('section'))
     ? params.get('section')
-    : allowed[0]?.[0] || 'dashboard';
+    : defaultSection;
   const setActive = (key) => setParams({ section: key });
 
   const chooseSection = (key) => {
@@ -785,12 +755,12 @@ export default function AdminPage() {
   const safeSignOut = async () => {
     if (saving) return;
     if (dirty && !window.confirm('Sign out and discard unsaved changes?')) return;
-    await signOut();
+    await signOut().catch(() => window.alert('Sign out could not be confirmed. Please try again.'));
   };
 
   const section = {
     tv: <TvSection registerBack={registerBack} />,
-    dashboard: <DashboardSection onChoose={chooseSection} />,
+    dashboard: <AdminOverview onChoose={chooseSection} icons={SECTION_ICONS} />,
     prayer: <PrayerEditor />,
     events: <EventsSection />,
     posters: <PostersEditor key={user?.id} registerBack={registerBack} />,
@@ -813,7 +783,11 @@ export default function AdminPage() {
       />
     ),
     forms: <FormsManager key={user?.id} registerBack={registerBack} />,
-    certificates: <Suspense fallback={<p role="status">Loading certificates…</p>}><CertificatesManager /></Suspense>,
+    certificates: (
+      <Suspense fallback={<p role="status">Loading certificates…</p>}>
+        <CertificatesManager />
+      </Suspense>
+    ),
     users: <StaffAccess />,
     audit: <AuditSection />,
   }[active];
@@ -870,19 +844,33 @@ export default function AdminPage() {
               className="admin-mobile-back"
               disabled={saving}
               aria-label="Back"
-              onClick={() => (sectionBack ? sectionBack() : chooseSection('dashboard'))}
+              onClick={() => (sectionBack ? sectionBack() : chooseSection(defaultSection))}
             >
               <ArrowLeft size={18} aria-hidden="true" />
               <span>Back</span>
             </button>
           )}
-          <strong className="admin-mobile-current">{sectionName}</strong>
+          <label className="admin-mobile-switcher">
+            <span className="sr-only">Go to admin area</span>
+            <select
+              aria-label="Go to admin area"
+              value={active}
+              disabled={saving}
+              onChange={(event) => chooseSection(event.target.value)}
+            >
+              {allowed.map(([key, name]) => (
+                <option key={key} value={key}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
           {active !== 'dashboard' && (
             <button
               className="admin-mobile-overview"
               disabled={saving}
               aria-label="Overview"
-              onClick={() => chooseSection('dashboard')}
+              onClick={() => chooseSection(defaultSection)}
             >
               <Home size={18} aria-hidden="true" />
               <span>Overview</span>

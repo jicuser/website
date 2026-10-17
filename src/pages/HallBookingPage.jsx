@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { hallDateStatus, hallMonthRange } from '@/lib/serviceEnquiries';
+import CentreVisit from '@/components/services/CentreVisit';
+import '@/styles/services.css';
 
 const STATUS_META = {
   available: { label: 'Enquire', className: 'is-available' },
@@ -86,7 +88,7 @@ export default function HallBookingPage() {
     setMonth((current) => new Date(current.getFullYear(), current.getMonth() + amount, 1));
 
   return (
-    <div className="jic-hall-page mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+    <div className="jic-hall-page service-page">
       <h1>Hall booking</h1>
       <p>
         Choose a date and send an enquiry. The team will check your event details and confirm
@@ -198,6 +200,43 @@ export default function HallBookingPage() {
           </div>
         </div>
       </section>
+      <section className="service-detail-grid">
+        <div className="service-checklist">
+          <h2>Plan your enquiry</h2>
+          <ul>
+            <li>Preferred date, start and finish time</li>
+            <li>Type of event and approximate guest numbers</li>
+            <li>Time needed for setting up and clearing away</li>
+            <li>Questions about access, facilities and charges</li>
+          </ul>
+          <p>The office will confirm suitability, availability and the booking details with you.</p>
+        </div>
+        <div className="service-faq">
+          <h2>Before you book</h2>
+          <details>
+            <summary>What does “Check availability” mean?</summary>
+            <p>
+              No confirmed availability has been published for that date. You can enquire, but the
+              calendar does not reserve a space.
+            </p>
+          </details>
+          <details>
+            <summary>What if a date shows “Check times”?</summary>
+            <p>
+              There is a timed entry on that day. Tell the team the hours you need so they can check
+              whether your event fits.
+            </p>
+          </details>
+          <details>
+            <summary>When is my booking confirmed?</summary>
+            <p>
+              Only after the office confirms the arrangements with you. Sending an enquiry alone
+              does not confirm a booking.
+            </p>
+          </details>
+        </div>
+      </section>
+      <CentreVisit />
     </div>
   );
 }

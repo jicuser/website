@@ -89,8 +89,8 @@ test('home shortcuts fit small phones and prayer details expand only on request'
     .toHaveCount(0);
   await expect(page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }))
     .toHaveAttribute('href', '/prayer-times/reminders');
-  await expect(page.getByRole('navigation', { name: 'Quick navigation' })
-    .getByRole('link', { name: 'Sign in', exact: true })).toHaveAttribute('href', '/portal');
+  await expect(page.locator('.jic-header-portal')).toHaveAttribute('href', '/portal');
+  await expect(page.locator('.jic-header-portal')).toBeVisible();
 
   for (const width of [320, 390, 767]) {
     await page.setViewportSize({ width, height: 844 });
@@ -142,7 +142,7 @@ test('desktop timetable stays compact and links to the next congregation', async
     const dock = page.locator('#jic-prayer-dock');
     await expect(page.locator('#jic-prayer-details')).toBeVisible();
     await expect(dock.locator('.jic-today-prayer')).toHaveCount(6);
-    await expect(dock.locator('.is-next')).toContainText('Dhuhr');
+    await expect(dock.locator('.jic-today-prayer.is-next')).toContainText('Dhuhr');
     await expect(dock.locator('.jic-next-prayer-summary')).toContainText('Next jama’ah · Dhuhr');
     const sizes = await dock.evaluate((node) => ({
       height: node.getBoundingClientRect().height,

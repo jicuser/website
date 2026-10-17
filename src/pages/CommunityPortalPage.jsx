@@ -1,404 +1,160 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  ArrowRight,
-  Bell,
-  BookOpen,
-  CalendarDays,
-  Award,
-  Heart,
-  Mail,
-  Wallet,
-  CheckCircle2,
-  ClipboardList,
-  Users,
-} from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { ArrowRight, Award, BookOpen, ShieldCheck, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { CERTIFICATES_ENABLED } from '@/lib/certificates';
-import { AdminSaveProvider } from '@/context/AdminSaveContext';
-import { supabase } from '@/lib/supabaseClient';
-import Tasks, { Notifications } from '@/components/workspace/Tasks';
-import Learning from '@/components/workspace/Learning';
-import Manage from '@/components/workspace/Manage';
-import CustomFormsWorkspace from '@/components/workspace/CustomFormsWorkspace';
-import { SermonManager } from '@/components/workspace/Sermons';
-import FeeLedger from '@/components/workspace/FeeLedger';
-import GoogleSignInButton from '@/components/account/GoogleSignInButton';
-import { ActionForm, TextField, checked } from '@/components/workspace/shared';
+import { portalDestination } from '@/lib/portalDestination';
+import PortalSignIn from '@/features/portal/PortalSignIn';
+import PortalWorkspace from '@/features/portal/PortalWorkspace';
 import '@/styles/workspace.css';
+import '@/styles/portal.css';
 
 export const WORKSPACE_ENABLED = import.meta.env.VITE_ENABLE_WORKSPACE === 'true';
-const tables = [
-  'learning_courses',
-  'learning_staff',
-  'learning_students',
-  'learning_guardians',
-  'learning_department_heads',
-  'learning_enrolments',
-  'learning_sessions',
-  'learning_attendance',
-  'learning_records',
-  'learning_meetings',
-  'student_contributions',
-  'work_tasks',
-  'user_notifications',
-  'form_workflows',
-];
-const empty = () => Object.fromEntries(tables.map((name) => [name, []]));
 export default function CommunityPortalPage() {
   const auth = useAuth();
-  const [magicEmail, setMagicEmail] = useState('');
-  const [magicBusy, setMagicBusy] = useState(false);
-  const [magicNotice, setMagicNotice] = useState('');
-  const [magicError, setMagicError] = useState('');
-  const requestMagicLink = async (event) => {
-    event.preventDefault();
-    setMagicBusy(true);
-    setMagicError('');
-    setMagicNotice('');
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: magicEmail.trim(),
-        options: { emailRedirectTo: `${window.location.origin}/portal`, shouldCreateUser: false },
-      });
-      if (error) throw error;
-      setMagicNotice('If this email has an eligible account, a sign-in link will arrive shortly.');
-    } catch {
-      setMagicError('Unable to send a sign-in link right now. Please try again later.');
-    } finally {
-      setMagicBusy(false);
-    }
-  };
-
+  const [params] = useSearchParams();
+  const [error, setError] = useState('');
+  const next = portalDestination(params.get('next'));
+  if (!auth.loading && auth.user && auth.profile?.is_active && next)
+    return <Navigate to={next} replace />;
+  const signOut = () =>
+    auth.signOut().catch(() => setError('Sign out could not be confirmed. Please try again.'));
   return (
-    <div className="community-workspace">
+    <div className="community-workspace jic-member-portal">
       <div className="workspace-wrap">
         <header className="workspace-header">
-          <h1>JIC Portal</h1>
+          <div>
+            <p className="workspace-kicker">Jamatia Islamic Centre</p>
+            <h1>JIC Portal</h1>
+          </div>
           <div className="workspace-actions">
-            {CERTIFICATES_ENABLED && auth.user && auth.profile?.is_active && <Link to="/account/certificates">My certificates</Link>}
+            {auth.isAdmin && <Link to="/admin">Administration</Link>}
+            {auth.user && auth.profile?.is_active && (
+              <Link to="/account/certificates">My certificates</Link>
+            )}
             <Link to="/">Website</Link>
           </div>
         </header>
-        {auth.loading ? (
-          <p role="status">Checking your account…</p>
-        ) : !auth.user ? (
-          <ActionForm
-            title="Sign in"
-            button="Sign in"
-            onSubmit={async (form) => {
-              await auth.signInMember(form.get('email'), form.get('password'));
-            }}
-          >
-            <TextField name="email" label="Email" type="email" autoComplete="username" />
-            <TextField
-              name="password"
-              label="Password"
-              type="password"
-              autoComplete="current-password"
-            />
-            <Link to="/account/recovery">Forgot your password?</Link>
-            <GoogleSignInButton />
-            <div className="workspace-card">
-              <h3>Sign in without a password</h3>
-              <p className="workspace-meta">Already have an approved JIC account? Request a secure email sign-in link.</p>
-              <form className="workspace-form" onSubmit={requestMagicLink}>
-                <label className="workspace-field">
-                  <span>Email address</span>
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    required
-                    maxLength={254}
-                    value={magicEmail}
-                    onChange={(event) => setMagicEmail(event.target.value)}
-                  />
-                </label>
-                <button type="submit" disabled={magicBusy}>
-                  {magicBusy ? 'Sending…' : 'Email me a sign-in link'}
-                </button>
-              </form>
-              {magicNotice && <p role="status">{magicNotice}</p>}
-              {magicError && <p role="alert">{magicError}</p>}
+        {error && <p role="alert">{error}</p>}
+        {!auth.user ? (
+          <div className="portal-entry-layout">
+            <section className="portal-entry-intro">
+              <p className="workspace-kicker">Welcome to your centre</p>
+              <h2>
+                A closer connection.
+                <br />
+                One simple account.
+              </h2>
+              <p>Keep your available JIC records together and pick up where you left off.</p>
+              <ul>
+                <li>
+                  <Users aria-hidden="true" />
+                  <span>
+                    <strong>Family & learning</strong>
+                    <small>
+                      {WORKSPACE_ENABLED
+                        ? 'Linked children, classes and published progress.'
+                        : 'Family and learning access is being prepared.'}
+                    </small>
+                  </span>
+                </li>
+                <li>
+                  <Award aria-hidden="true" />
+                  <span>
+                    <strong>Your certificates</strong>
+                    <small>Understand requests, office review and verification.</small>
+                  </span>
+                </li>
+                <li>
+                  <ShieldCheck aria-hidden="true" />
+                  <span>
+                    <strong>Your own records</strong>
+                    <small>Access is checked for your account and role.</small>
+                  </span>
+                </li>
+              </ul>
+              <Link to="/services/certificates">
+                Explore certificates <ArrowRight size={17} aria-hidden="true" />
+              </Link>
+            </section>
+            <div>
+              {auth.loading && <p role="status">Checking your account…</p>}
+              <PortalSignIn auth={auth} returnTo={next} />
             </div>
-            <p className="workspace-meta">
-              Need access? <Link to="/account/request">Request a JIC account</Link>
-            </p>
-          </ActionForm>
+          </div>
+        ) : auth.loading ? (
+          <p role="status">Checking your account…</p>
         ) : !auth.profile?.is_active ? (
-          <div>
+          <section className="workspace-card">
+            <h2>Account access</h2>
             <p role="alert">
               {auth.profileError || 'This account does not have active portal access.'}
             </p>
-            <button onClick={auth.refreshProfile}>Check again</button>
-            <button onClick={auth.signOut}>Sign out</button>
-          </div>
-        ) : !WORKSPACE_ENABLED ? (
-          <section className="workspace-card">
-            <h2>My account</h2>
-            <p>Signed in as {auth.profile.display_name || auth.user.email}.</p>
-            <p>
-              Learning and family tools are not available yet. You can use the website and any
-              approved staff areas.
-            </p>
             <div className="workspace-actions">
-              {auth.isAdmin && <Link to="/admin">Open administration</Link>}
+              <button type="button" onClick={() => auth.refreshProfile().catch(() => {})}>
+                Check again
+              </button>
               <Link to="/account/request">Request access</Link>
-              <Link to="/education">Browse courses</Link>
-              <button onClick={auth.signOut}>Sign out</button>
+              <button type="button" onClick={signOut}>
+                Sign out
+              </button>
             </div>
           </section>
+        ) : !WORKSPACE_ENABLED ? (
+          <>
+            <section className="portal-welcome">
+              <p className="workspace-kicker">My account</p>
+              <h2>Welcome{auth.profile.display_name ? `, ${auth.profile.display_name}` : ''}</h2>
+              <p>Choose what you need help with today.</p>
+            </section>
+            <div className="portal-card-grid">
+              {[
+                [
+                  Award,
+                  'My certificates',
+                  'View the certificate journey and your available records.',
+                  '/account/certificates',
+                ],
+                [
+                  BookOpen,
+                  'Courses & classes',
+                  'Find current learning opportunities at JIC.',
+                  '/education',
+                ],
+                [
+                  Users,
+                  'Services & bookings',
+                  'Plan a visit, ceremony or hall enquiry.',
+                  '/services',
+                ],
+              ].map(([Icon, title, text, to]) => (
+                <Link className="portal-area-card" key={to} to={to}>
+                  <Icon size={22} aria-hidden="true" />
+                  <span>
+                    <strong>{title}</strong>
+                    <small>{text}</small>
+                  </span>
+                  <ArrowRight size={17} aria-hidden="true" />
+                </Link>
+              ))}
+            </div>
+            <section className="workspace-card">
+              <h3>Family and learning records</h3>
+              <p>
+                These records are not available on this website yet. The office can help with your
+                enrolment or linked family access.
+              </p>
+              <div className="workspace-actions">
+                <Link to="/account/request">Account help</Link>
+                <button type="button" onClick={signOut}>
+                  Sign out
+                </button>
+              </div>
+            </section>
+          </>
         ) : (
-          <Workspace key={auth.user.id} auth={auth} />
+          <PortalWorkspace key={auth.user.id} auth={auth} />
         )}
       </div>
     </div>
-  );
-}
-function WorkspaceSummary({ data }) {
-  const unread = data.user_notifications.filter((row) => !row.read_at).length;
-  const openTasks = data.work_tasks.filter(
-    (row) => !['done', 'completed', 'closed'].includes(String(row.status || '').toLowerCase()),
-  ).length;
-  const upcoming = data.learning_sessions.filter((row) => {
-    const value = row.starts_at;
-    return value ? new Date(value).getTime() >= Date.now() : false;
-  }).length;
-  const items = [
-    [BookOpen, data.learning_courses.length, 'Courses'],
-    [CalendarDays, upcoming, 'Upcoming sessions'],
-    [ClipboardList, openTasks, 'Open actions'],
-    [Bell, unread, 'Unread updates'],
-  ];
-  return (
-    <section className="workspace-summary" aria-label="Workspace summary">
-      {items.map(([Icon, value, label]) => (
-        <div className="workspace-summary-card" key={label}>
-          <span className="workspace-summary-icon">
-            <Icon size={17} />
-          </span>
-          <span>
-            <strong>{value}</strong>
-            <small>{label}</small>
-          </span>
-        </div>
-      ))}
-    </section>
-  );
-}
-
-function WorkspaceOverview({ data, auth, onTabChange }) {
-  const userId = auth.user?.id;
-  const teaching =
-    auth.isOwner ||
-    data.learning_staff.some((row) => row.user_id === userId) ||
-    (data.learning_department_heads || []).some((row) => row.user_id === userId);
-  const family =
-    data.learning_students.some((row) => row.user_id === userId || row.guardian_id === userId) ||
-    (data.learning_guardians || []).some((row) => row.user_id === userId);
-
-  const cards = [
-    [Mail, 'Enquiries and services', 'Contact JIC and follow up through the available service channels.', 'enquiries'],
-    [CalendarDays, 'Request a booking', 'Explore hall availability and submit a booking enquiry.', 'bookings'],
-    [Heart, 'Support JIC', 'Visit the donation page; personal donation history is not linked yet.', 'donations'],
-    ...(CERTIFICATES_ENABLED ? [[Award, 'My certificates', 'View and verify issued JIC records.', 'certificates']] : []),
-    ...(family
-      ? [[Users, 'My family', 'Open children, attendance, progress and fees.', 'learning']]
-      : []),
-    ...(teaching
-      ? [
-          [
-            BookOpen,
-            'Teaching workspace',
-            'Take registers, add progress and manage classes.',
-            'learning',
-          ],
-        ]
-      : []),
-    ...(family || auth.isOwner ? [[Wallet, 'Fees and receipts', 'Review charges and confirmed payments.', 'fees']] : []),
-    ...(auth.isAdmin
-      ? [[CheckCircle2, 'Administration', 'Review tasks, forms, content and staff work.', 'admin']]
-      : []),
-  ];
-  return (
-    <section className="workspace-overview" aria-label="Workspace overview">
-      <div className="workspace-overview-heading">
-        <div>
-          <p className="workspace-kicker">Your JIC workspace</p>
-          <h2>Choose where to start</h2>
-        </div>
-        <span className="workspace-status">
-          <span /> Secure account
-        </span>
-      </div>
-      <div className="workspace-overview-grid">
-        {cards.map(([Icon, title, text, tab]) => (
-          <button
-            type="button"
-            className="workspace-overview-card workspace-overview-action"
-            key={title}
-            aria-label={title}
-            onClick={() => {
-              const destinations = {
-                admin: '/admin',
-                enquiries: '/services',
-                bookings: '/services/hall-booking',
-                donations: '/donate',
-                certificates: '/account/certificates',
-              };
-              if (destinations[tab]) window.location.assign(destinations[tab]);
-              else onTabChange(tab);
-            }}
-          >
-            <span className="workspace-overview-icon">
-              <Icon size={19} />
-            </span>
-            <span>
-              <strong>{title}</strong>
-              <small>{text}</small>
-            </span>
-            <ArrowRight size={16} />
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-function Workspace({ auth }) {
-  const [params] = useSearchParams();
-  const formId = params.get('form');
-  const [tab, setTab] = useState(
-    formId
-      ? 'tasks'
-      : ['forms', 'fees'].includes(params.get('tab'))
-        ? params.get('tab')
-        : 'learning',
-  );
-  useEffect(() => {
-    if (formId) setTab('tasks');
-  }, [formId]);
-  const [data, setData] = useState(empty);
-  const [busy, setBusy] = useState(true);
-  const [error, setError] = useState('');
-  const report = useCallback((message) => setError(message), []);
-  const reload = useCallback(async () => {
-    setBusy(true);
-    setError('');
-    try {
-      const results = await Promise.all(
-        tables.map(async (name) => {
-          let query = supabase.from(name).select('*').limit(500);
-          const order =
-            name === 'learning_meetings'
-              ? 'requested_at'
-              : [
-                    'learning_staff',
-                    'learning_guardians',
-                    'learning_department_heads',
-                    'learning_enrolments',
-                    'learning_attendance',
-                    'form_workflows',
-                  ].includes(name)
-                ? null
-                : 'created_at';
-          if (order) query = query.order(order, { ascending: false });
-          return [name, await checked(query)];
-        }),
-      );
-      setData(Object.fromEntries(results));
-    } catch (e) {
-      setData(empty());
-      setError('The workspace could not be loaded. ' + e.message);
-    } finally {
-      setBusy(false);
-    }
-  }, []);
-  useEffect(() => {
-    reload();
-  }, [reload]);
-  useEffect(() => {
-    const refresh = () => auth.refreshProfile();
-    window.addEventListener('focus', refresh);
-    return () => window.removeEventListener('focus', refresh);
-  }, [auth.refreshProfile]);
-  const userId = auth.user?.id;
-  const isTeacher =
-    auth.isOwner ||
-    data.learning_staff.some((row) => row.user_id === userId) ||
-    (data.learning_department_heads || []).some((row) => row.user_id === userId);
-  const hasFamily =
-    data.learning_students.some((row) => row.user_id === userId || row.guardian_id === userId) ||
-    (data.learning_guardians || []).some((row) => row.user_id === userId);
-  const options = [
-    ['learning', isTeacher ? 'Learning & teaching' : 'My learning'],
-    ['tasks', 'My actions'],
-    ['notifications', 'Updates'],
-    ['forms', 'Forms & replies'],
-    ...(hasFamily || auth.isOwner ? [['fees', 'Fees']] : []),
-    ...(auth.isOwner ? [['manage', 'Manage learning']] : []),
-    ...(auth.isOwner ? [['talks', 'Talks']] : []),
-  ];
-  return (
-    <>
-      <div className="workspace-actions">
-        <span>{auth.profile.display_name}</span>
-        <button disabled={busy} onClick={reload}>
-          Refresh
-        </button>
-        <button onClick={auth.signOut}>Sign out</button>
-        {auth.isAdmin && <Link to="/admin">Website admin</Link>}
-      </div>
-      <WorkspaceSummary data={data} />
-      <WorkspaceOverview data={data} auth={auth} onTabChange={setTab} />
-      <p className="workspace-nav-label">Your areas</p>
-      <nav className="workspace-tabs" aria-label="Workspace areas">
-        {options.map(([id, title]) => (
-          <button
-            key={id}
-            aria-current={id === tab ? 'page' : undefined}
-            onClick={() => setTab(id)}
-          >
-            {title}
-          </button>
-        ))}
-      </nav>
-      {error && <p role="alert">{error}</p>}
-      {busy && <p role="status">Loading workspace…</p>}
-      <>
-        {tab === 'learning' && (
-          <Learning data={data} auth={auth} reload={reload} onError={report} />
-        )}
-        {tab === 'tasks' && (
-          <Tasks
-            rows={data.work_tasks}
-            notifications={data.user_notifications}
-            reload={reload}
-            formId={formId}
-            onError={report}
-          />
-        )}
-        {tab === 'notifications' && (
-          <Notifications
-            rows={data.user_notifications}
-            reload={reload}
-            onError={report}
-            onOpen={setTab}
-          />
-        )}
-        {tab === 'forms' && (
-          <AdminSaveProvider>
-            <CustomFormsWorkspace auth={auth} initialMine={params.get('mine') === 'true'} />
-          </AdminSaveProvider>
-        )}
-        {tab === 'talks' && auth.isOwner && <SermonManager />}
-        {tab === 'fees' && <FeeLedger canManage={auth.isOwner} />}
-        {tab === 'manage' && auth.isOwner && (
-          <Manage data={data} reload={reload} onError={report} />
-        )}
-        <p className="workspace-meta">
-          Showing up to 500 records in each area. All records are restricted to your current access.
-        </p>
-      </>
-    </>
   );
 }

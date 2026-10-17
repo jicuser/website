@@ -30,14 +30,14 @@ const religiousServices = [
     icon: <Heart className="h-10 w-10 text-primary" />,
     title: 'Nikah enquiries',
     description: 'Ask about the Nikah process or request a preferred date for the team to review.',
-    to: '/forms/nikah-enquiry',
+    to: '/services/nikah',
   },
   {
     icon: <Heart className="h-10 w-10 text-primary" />,
     title: 'Funeral support',
     description:
       'Send the essential details privately so a member of the centre team can contact you.',
-    to: '/forms/funeral-enquiry',
+    to: '/funerals',
   },
   {
     icon: <Clock className="h-10 w-10 text-primary" />,
@@ -85,7 +85,7 @@ const ReligiousServicesTab = () => {
                 <h3 className="text-xl font-bold mb-2">{service.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300">{service.description}</p>
                 {service.to && (
-                  <span className="mt-4 font-semibold text-primary">Open enquiry form →</span>
+                  <span className="mt-4 font-semibold text-primary">View the service guide →</span>
                 )}
               </CardContent>
             </Card>
@@ -102,7 +102,7 @@ const ReligiousServicesTab = () => {
                 <Link
                   to={service.to}
                   className="block h-full"
-                  aria-label={`Open ${service.title} form`}
+                  aria-label={`Open ${service.title} guide`}
                 >
                   {card}
                 </Link>

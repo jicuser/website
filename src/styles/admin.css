@@ -265,8 +265,8 @@ html:not(.dark) .admin-eyebrow {
 }
 
 .admin-console {
-  background: radial-gradient(ellipse at 85% 5%, #e7dfca 0, transparent 45%), #f4f3ef;
-  color: #172333;
+  background: var(--jic-bg);
+  color: var(--jic-text);
   font-family: Inter, system-ui, sans-serif;
   min-height: 100vh;
 }
@@ -274,7 +274,7 @@ html:not(.dark) .admin-eyebrow {
 .admin-console h2,
 .admin-console h3,
 .admin-console h4 {
-  color: #172333;
+  color: var(--jic-text);
 }
 .admin-console h2 {
   font-size: clamp(24px, 3vw, 32px);
@@ -287,10 +287,11 @@ html:not(.dark) .admin-eyebrow {
   letter-spacing: -0.02em;
 }
 .admin-console p {
-  color: #5d6672;
+  color: var(--jic-text-secondary);
   line-height: 1.6;
 }
-.admin-console header {
+.admin-console .admin-account-header {
+  color: #fff;
   background: rgba(16, 28, 43, 0.96);
   backdrop-filter: blur(24px);
 }
@@ -299,7 +300,7 @@ html:not(.dark) .admin-eyebrow {
   color: #fff;
 }
 .admin-console aside {
-  background: rgba(255, 255, 255, 0.48);
+  background: var(--jic-surface);
 }
 .admin-console .bg-white {
   background: rgba(255, 255, 255, 0.7);
@@ -307,8 +308,8 @@ html:not(.dark) .admin-eyebrow {
 .admin-console input:not([type='checkbox']),
 .admin-console textarea,
 .admin-console select {
-  color: #172333;
-  background: rgba(255, 255, 255, 0.86);
+  color: var(--jic-text);
+  background: var(--jic-surface);
 }
 .admin-workspace {
   max-width: 1180px;
@@ -1337,7 +1338,7 @@ html:not(.dark) .managed-page-section-copy {
     gap: 6px;
     min-width: 0;
   }
-  .admin-mobile-current {
+  .admin-mobile-switcher {
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -1346,6 +1347,7 @@ html:not(.dark) .managed-page-section-copy {
     text-align: center;
     font-size: 13px;
   }
+  .admin-console .admin-mobile-switcher select { padding: 8px; font-size: 13px; min-width: 0; }
   .admin-mobile-back,
   .admin-mobile-overview {
     display: inline-flex;

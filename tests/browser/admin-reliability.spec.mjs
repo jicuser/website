@@ -10,6 +10,20 @@ const member = {
   is_owner: false, is_active: false, permissions: [], staff_kinds: [],
 };
 
+test('admin overview searches available tasks and mobile switching opens the chosen area', async ({ page }, testInfo) => {
+  const evidence = await openAdmin(page, { section: 'dashboard' });
+  await expect(page.getByRole('heading', { name: 'Needs attention' })).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Find an admin task' }).fill('prayer');
+  await expect(page.locator('.admin-tool-list').getByRole('button', { name: 'Prayer times', exact: true })).toBeVisible();
+  await expect(page.locator('.admin-tool-list').getByRole('button', { name: 'Staff & access', exact: true })).toHaveCount(0);
+  await page.getByRole('searchbox', { name: 'Find an admin task' }).fill('');
+  await page.screenshot({ path: testInfo.outputPath('admin-overview-mobile.png'), fullPage: true });
+  await page.getByRole('combobox', { name: 'Go to admin area' }).selectOption('messages');
+  await expect(page.getByRole('heading', { name: 'Contact messages', exact: true })).toBeVisible();
+  expect(evidence.writes).toEqual([]);
+  expect(evidence.errors).toEqual([]);
+});
+
 // Intercept external data only. The application router, Auth provider and editors run unchanged.
 async function openAdmin(page, { actor = owner, section = 'posters', deletionFails = false, tvState = null } = {}) {
   const errors = [], writes = [], tvReads = [];
@@ -184,7 +198,7 @@ for (const width of [320, 390, 1280]) {
     await expect(page.locator('.admin-mobile-section')).toHaveCount(1);
     if (width < 801) {
       await expect(page.getByRole('button', { name: 'Back', exact: true })).toBeVisible();
-      await expect(page.locator('.admin-mobile-current')).toHaveText('Posters');
+      await expect(page.getByRole('combobox', { name: 'Go to admin area' })).toHaveValue('posters');
       await expect(page.getByRole('button', { name: 'Overview', exact: true })).toBeVisible();
       await page.evaluate(() => scrollTo(0, 800));
       const box = await page.locator('.admin-mobile-section').boundingBox();
