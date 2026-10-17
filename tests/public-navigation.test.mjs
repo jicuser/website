@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import { activeNavigation } from '../src/lib/publicNavigation.js';
 import { FOOTER_LINKS, NAV_GROUPS, MADRASSAH_TABS, WORSHIP_TABS } from '../src/content/nav.js';
 
-test('compact footer removes duplicate shortcuts without removing their pages', () => {
+test('compact footer includes portal and certificate access alongside public essentials', () => {
   assert.deepEqual(
     FOOTER_LINKS.map((item) => item.name),
     [
+      'Portal login',
+      'Certificates',
       'Contact Us',
       'Download Salah timetable',
       'Services',
@@ -15,7 +17,9 @@ test('compact footer removes duplicate shortcuts without removing their pages', 
       'Youth',
     ],
   );
-  assert.equal(FOOTER_LINKS[1].path, '/prayer-times/monthly#phone-wallpaper');
+  assert.equal(FOOTER_LINKS.find((item) => item.name === 'Download Salah timetable').path, '/prayer-times/monthly#phone-wallpaper');
+  assert.equal(FOOTER_LINKS.find((item) => item.name === 'Portal login').path, '/portal');
+  assert.equal(FOOTER_LINKS.find((item) => item.name === 'Certificates').path, '/services/certificates');
   assert.ok(NAV_GROUPS.some((item) => item.path === '/about'));
   assert.ok(NAV_GROUPS.some((item) => item.path === '/prayer-times'));
   assert.ok(MADRASSAH_TABS.some((item) => item.path === '/madrassah'));

@@ -98,9 +98,9 @@ test('signed-in members do not request undeployed learning tables', async ({ pag
     onRequest: (request) => requests.push(request.url()),
   });
   await page.goto('/portal');
-  await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Welcome/ })).toBeVisible();
   expect(requests.some((url) => url.includes('/learning_'))).toBe(false);
-  await expect(page.getByRole('link', { name: 'Open administration' })).toHaveCount(0);
+  await expect(page.locator('a[href="/admin"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
