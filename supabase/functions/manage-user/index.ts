@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
+import { readJson } from '../_shared/read-json.mjs';
 import { accountSetupUrl } from './site-url.mjs';
 import { AccountDeletionError, deleteStaffAccount } from './delete-account.mjs';
 import {
@@ -35,10 +36,7 @@ Deno.serve(async (req) => {
         { error: 'Staff management permission required.' },
         { status: 403, headers },
       );
-    const raw = await req.text();
-    if (raw.length > 8000) throw new Error('Request is too large.');
-    const body = JSON.parse(raw);
-    if (['list_access_requests', 'approve_access_request', 'reject_access_request'].includes(body.action) && Deno.env.get('ACCOUNT_REQUESTS_ENABLED') !== 'true') throw new Error('Account requests are not enabled.');
+    const body = await readJson(req, 8000);
     if (body.action === 'list_access_requests') {
       const { data, error } = await db
         .from('account_access_requests')
@@ -51,11 +49,7 @@ Deno.serve(async (req) => {
     }
     if (body.action === 'reject_access_request') {
       if (typeof body.request_id !== 'string') throw new Error('Choose an access request.');
-      const { error } = await db
-        .from('account_access_requests')
-        .update({ status: 'rejected', reviewed_at: new Date().toISOString(), reviewed_by: user.id })
-        .eq('id', body.request_id)
-        .eq('status', 'pending');
+      const { error } = await db.rpc('resolve_account_request', { p_actor: user.id, p_request: body.request_id, p_target: null, p_permissions: [], p_kinds: [], p_approve: false });
       if (error) throw error;
       return Response.json({ ok: true }, { headers });
     }
@@ -70,14 +64,9 @@ Deno.serve(async (req) => {
         .single();
       if (requestError || !request) throw new Error('This access request is no longer pending.');
       const email = String(request.email).trim().toLowerCase();
-      let targetUser;
-      for (let page = 1; ; page++) {
-        const users = await db.auth.admin.listUsers({ page, perPage: 1000 });
-        if (users.error) throw users.error;
-        targetUser = users.data.users.find((item) => item.email?.toLowerCase() === email);
-        if (targetUser || users.data.users.length < 1000) break;
-      }
-      if (targetUser) throw new Error('This person already has an account. Review their existing permissions in Current staff before resolving this request.');
+      const { data: existingId, error: lookupError } = await db.rpc('account_request_user', { p_request_id: request.id });
+      if (lookupError) throw lookupError;
+      let targetUser = existingId ? { id: existingId } : null;
       if (!targetUser) {
         const invited = await db.auth.admin.inviteUserByEmail(email, {
           data: { display_name: request.display_name },
@@ -87,26 +76,11 @@ Deno.serve(async (req) => {
           throw new Error(invited.error?.message || 'Invitation could not be created.');
         targetUser = invited.data.user;
       }
-      const { error: grantError } = await db.rpc('manage_staff_access', {
-        actor: user.id,
-        target: targetUser.id,
-        new_permissions: access.permissions,
-        new_kinds: access.staff_kinds,
-        enabled: true,
+      const { error: resolveError } = await db.rpc('resolve_account_request', {
+        p_actor: user.id, p_request: request.id, p_target: targetUser.id,
+        p_permissions: access.permissions, p_kinds: access.staff_kinds, p_approve: true,
       });
-      if (grantError) throw grantError;
-      const { error: markError } = await db
-        .from('account_access_requests')
-        .update({
-          status: 'approved',
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user.id,
-          auth_user_id: targetUser.id,
-          requested_permissions: access.permissions,
-        })
-        .eq('id', request.id)
-        .eq('status', 'pending');
-      if (markError) throw markError;
+      if (resolveError) throw resolveError;
       return Response.json({ ok: true }, { headers });
     }
     if (body.action === 'invite') {
