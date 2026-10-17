@@ -69,7 +69,7 @@ test('member submits a certificate request and retry reuses the same request key
   await page.getByRole('button', { name: 'Send request', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('could not be sent');
   await page.getByRole('button', { name: 'Send request', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('Request sent');
+  await expect(page.getByRole('status').filter({ hasText: 'Request sent' })).toBeVisible();
   await expect(page.locator('.certificate-list')).toContainText('Awaiting review');
   expect(attempts).toHaveLength(2);
   expect(attempts[0].p_client_key).toBe(attempts[1].p_client_key);
