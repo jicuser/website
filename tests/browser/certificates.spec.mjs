@@ -63,6 +63,9 @@ test('member submits a certificate request and retry reuses the same request key
   await page.getByLabel('Names to appear on the certificate').fill('Example private recipient');
   await page.getByLabel('Event or completion date (if known)').fill('2026-01-01');
   await page.getByLabel('Details for the office').fill('Private office details');
+  await page.getByRole('button', { name: 'Review details', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Check your request' })).toBeVisible();
+  await page.getByRole('checkbox', { name: 'I have checked the names and details.' }).check();
   await page.getByRole('button', { name: 'Send request', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('could not be sent');
   await page.getByRole('button', { name: 'Send request', exact: true }).click();

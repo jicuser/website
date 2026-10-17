@@ -37,6 +37,8 @@ const SalahRemindersPage = lazy(() => import('@/pages/SalahRemindersPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const ProjectsPage = lazy(() => import('@/pages/ProjectsPage'));
 const SectionPage = lazy(() => import('@/pages/SectionPage'));
+const GuidedServicePage = lazy(() => import('@/pages/GuidedServicePage'));
+const CertificatesGuidePage = lazy(() => import('@/pages/CertificatesGuidePage'));
 const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
 const TeamPage = lazy(() => import('@/pages/TeamPage'));
 const WorshipPage = lazy(() => import('@/pages/WorshipPage'));
@@ -147,6 +149,7 @@ function AppRoutes() {
             <Route path="worship/daily-salah" element={<WorshipPage />} />
 
             <Route path="services" element={<ServicesPage />} />
+            <Route path="services/certificates" element={<CertificatesGuidePage />} />
             <Route path="services/religious" element={<ServicesPage />} />
             <Route path="services/education" element={<ServicesPage />} />
             <Route path="services/community" element={<ServicesPage />} />
@@ -174,12 +177,21 @@ function AppRoutes() {
                 key={path}
                 path={path}
                 element={
-                  <SectionPage
-                    eyebrow={eyebrow}
-                    title={title}
-                    backTo={backTo}
-                    backLabel={`Back to ${eyebrow}`}
-                  />
+                  [
+                    'services/nikah',
+                    'funerals',
+                    'funerals/what-to-do',
+                    'funerals/contact-support',
+                  ].includes(path) ? (
+                    <GuidedServicePage />
+                  ) : (
+                    <SectionPage
+                      eyebrow={eyebrow}
+                      title={title}
+                      backTo={backTo}
+                      backLabel={`Back to ${eyebrow}`}
+                    />
+                  )
                 }
               />
             ))}

@@ -1,5 +1,22 @@
 import { test, expect } from '@playwright/test';
 
+test('signing in from certificates returns to the selected certificate request', async ({ page }) => {
+  const account = '00000000-0000-4000-8000-000000000071';
+  await page.route('**/preview-api/**', async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    const data = path.endsWith('/auth/v1/token') ? {
+      access_token: 'test-token', refresh_token: 'test-refresh', token_type: 'bearer', expires_in: 3600,
+      user: { id: account, email: 'member@example.test' },
+    } : path.endsWith('/get_my_profile') ? { id: account, is_active: true, is_owner: false, display_name: 'Example member', permissions: [] } : [];
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
+  });
+  await page.goto('/portal?next=%2Faccount%2Fcertificates%3Frequest%3Dnikah');
+  await page.getByLabel('Email address', { exact: true }).fill('member@example.test');
+  await page.getByLabel('Password', { exact: true }).fill('Example password');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page).toHaveURL(/\/account\/certificates\?request=nikah$/);
+});
+
 test('portal password and email-link modes use one form and never create an account', async ({ page }) => {
   const otp = [];
   const password = [];

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { getGoogleSignInAvailability } from '@/config/supabase';
 
-export default function GoogleSignInButton() {
+export default function GoogleSignInButton({ returnTo = '', disabled = false }) {
   const { signInWithGoogle } = useAuth();
   const [available, setAvailable] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -22,12 +22,12 @@ export default function GoogleSignInButton() {
     <div className="workspace-google-signin">
       <button
         type="button"
-        disabled={busy}
+        disabled={busy || disabled}
         onClick={async () => {
           setBusy(true);
           setError('');
           try {
-            await signInWithGoogle();
+            await signInWithGoogle(returnTo);
           } catch (failure) {
             setError(failure.message);
           } finally {

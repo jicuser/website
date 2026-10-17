@@ -24,7 +24,7 @@ test('page navigator keeps each canonical page once within the public website hi
 });
 
 test('Portal stays visible in the menu without making private records CMS-editable', () => {
-  assert.equal(PUBLIC_MENU_GROUPS.find((group) => group.path === '/portal')?.name, 'Portal');
+  assert.equal(PUBLIC_MENU_GROUPS.find((group) => group.path === '/portal')?.name, 'Portal login');
   assert.equal(PUBLIC_MENU_GROUPS.find((group) => group.path === '/portal')?.editable, false);
   assert.equal(sections.some((section) => section.path === '/portal'), false);
   assert.equal(EDITABLE_PAGES.some((page) => page.path === '/portal'), false);

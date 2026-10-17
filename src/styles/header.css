@@ -223,6 +223,34 @@
   margin-top: 6px;
   padding: 5px 8px;
 }
+.jic-header-portal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 650;
+}
+.jic-menu-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  background: var(--jic-action);
+  color: #102533;
+}
+.jic-menu-account span { flex: 1; }
+.jic-menu-account strong, .jic-menu-account small { display: block; }
+.jic-menu-account small { margin-top: 4px; font-size: 12px; }
 .jic-free-brand {
   display: flex;
   align-items: center;

@@ -1,5 +1,38 @@
 import { test, expect } from '@playwright/test';
 
+test('service guides explain the journey and accept an enquiry without an account', async ({ page }, testInfo) => {
+  const writes = [], errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
+  await page.route('**/preview-api/**', async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path.endsWith('/functions/v1/submit-form')) {
+      writes.push(route.request().postDataJSON());
+      return route.fulfill({ contentType: 'application/json', body: '{"ok":true}' });
+    }
+    return route.fulfill({ contentType: 'application/json', body: '[]' });
+  });
+  for (const [path, title] of [['/funerals', 'Janazah & funeral support'], ['/services/nikah', 'Nikah at JIC'], ['/services/community', 'Community support at JIC']]) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+    await expect(page.getByRole('list', { name: 'How it works' }).locator('li')).toHaveCount(3);
+    await expect(page.locator('.service-centre-photo img')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Show location map' })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  }
+  await page.goto('/funerals');
+  await page.locator('#name').fill('Example family');
+  await page.locator('#email').fill('family@example.test');
+  await page.locator('#question').fill('Please contact us about Janazah arrangements.');
+  await page.getByRole('button', { name: 'Send Message', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Enquiry received' })).toBeVisible();
+  expect(writes).toHaveLength(1);
+  expect(writes[0].kind).toBe('contact');
+  expect(writes[0].payload.question).toContain('Janazah / funeral support');
+  await page.screenshot({ path: testInfo.outputPath('janazah-journey-mobile.png'), fullPage: true });
+  expect(errors).toEqual([]);
+});
+
 test('hall enquiry keeps the selected date, hides prayer controls while typing, and shows a receipt', async ({
   page,
 }, testInfo) => {

@@ -48,6 +48,7 @@ export const NAV_GROUPS = [
     { name: 'Educational Programmes', path: '/services/education' }, { name: 'Community Services', path: '/services/community' },
     { name: 'Funeral Services', path: '/funerals' }, { name: 'Nikah', path: '/services/nikah' },
     { name: 'Hall Booking', path: '/services/hall-booking' },
+    { name: 'Certificates', path: '/services/certificates' },
   ] },
   { name: 'Masjid Building Works', path: '/projects', children: [
     { name: 'Overview', path: '/projects' }, { name: 'Masjid Extension', path: '/projects/masjid-extension' },
@@ -71,9 +72,11 @@ export const PUBLIC_MENU_GROUPS = [
   ...NAV_GROUPS,
   { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
   { name: 'Social Media', path: '/social-media', children: [] },
-  { name: 'Portal', path: '/portal', children: [], editable: false },
+  { name: 'Portal login', path: '/portal', children: [], editable: false },
 ];
 export const FOOTER_LINKS = [
+  { name: 'Portal login', path: '/portal' },
+  { name: 'Certificates', path: '/services/certificates' },
   { name: 'Contact Us', path: '/contact' },
   { name: 'Download Salah timetable', path: '/prayer-times/monthly#phone-wallpaper' },
   { name: 'Services', path: '/services' }, { name: 'Masjid Building Works', path: '/projects' },
