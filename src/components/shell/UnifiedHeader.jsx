@@ -348,10 +348,12 @@ export default function UnifiedHeader() {
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
               <JamatiaLogo variant="wordmark" />
             </Link>
-            <Link to="/portal" className="jic-header-portal">
-              <User size={16} aria-hidden="true" />
-              <span>{accountLabel}</span>
-            </Link>
+            {pathname !== '/' && (
+              <Link to="/portal" className="jic-header-portal">
+                <User size={16} aria-hidden="true" />
+                <span>{accountLabel}</span>
+              </Link>
+            )}
             <div className="jic-mobile-quick-nav" ref={quickMenuRef}>
               <button
                 ref={quickMenuButtonRef}
@@ -404,14 +406,16 @@ export default function UnifiedHeader() {
                   {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
                   <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
                 </button>
-                <Link
-                  to="/portal"
-                  aria-label={accountLabel}
-                  title={accountLabel}
-                  className="jic-desktop-action"
-                >
-                  <User size={20} aria-hidden="true" />
-                </Link>
+                {pathname !== '/' && (
+                  <Link
+                    to="/portal"
+                    aria-label={accountLabel}
+                    title={accountLabel}
+                    className="jic-desktop-action"
+                  >
+                    <User size={20} aria-hidden="true" />
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}

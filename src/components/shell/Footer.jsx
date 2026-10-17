@@ -17,7 +17,6 @@ export default function Footer() {
   const year = new Date().getFullYear();
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${SITE.name}, ${SITE.address.full}`)}`;
   const phoneUrl = `tel:${SITE.phone.replace(/[^\d+]/g, '').replace(/^0/, '+44')}`;
-  const openDonation = () => window.dispatchEvent(new CustomEvent('jic-open-donation'));
   return (
     <footer className="jic-site-footer">
       <div className="jic-footer-inner">
@@ -76,9 +75,6 @@ export default function Footer() {
               <Mail size={20} aria-hidden="true" />
             </a>
           </nav>
-          <button type="button" onClick={openDonation} className="jic-footer-donate">
-            Donate
-          </button>
         </div>
         <div className="jic-footer-bottom">
           <Link to="/" className="jic-footer-signature" aria-label="Jamatia Islamic Centre home">
