@@ -525,8 +525,7 @@ html[data-prayer-dock-hidden='true'] {
   html {
     --jic-prayer-sticky-offset: var(--jic-mobile-strip-height, 44px);
     --jic-mobile-visible-dock-height: calc(
-      var(--jic-mobile-controls-height, 44px) + var(--jic-prayer-dock-height, 80px) + 8px +
-        env(safe-area-inset-bottom)
+      var(--jic-prayer-dock-height, 80px) + 8px + env(safe-area-inset-bottom)
     );
     scroll-padding-bottom: calc(var(--jic-mobile-visible-dock-height) + 12px);
   }
@@ -547,9 +546,7 @@ html[data-prayer-dock-hidden='true'] {
     border-radius: 28px;
     background: var(--jic-bg-secondary);
     box-shadow: 0 4px 20px #0003;
-    max-height: calc(
-      100dvh - var(--jic-mobile-controls-height, 90px) - var(--jic-mobile-strip-height, 44px) - 24px
-    );
+    max-height: calc(100dvh - var(--jic-mobile-strip-height, 44px) - 24px);
     overflow: hidden;
     transition:
       opacity 160ms ease,
@@ -680,7 +677,9 @@ html[data-prayer-dock-hidden='true'] {
     margin-right: auto;
   }
   .jic-mobile-quick-nav {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 2px;
     position: relative;
     flex: 0 0 auto;
     z-index: 40;
@@ -770,7 +769,7 @@ html[data-prayer-dock-hidden='true'] {
     font-weight: 600;
   }
   .jic-public-route {
-    /* Reserve Home, the prayer pill and the home-indicator inset once. */
+    /* Reserve the prayer pill and home-indicator inset once. */
     padding-bottom: calc(var(--jic-mobile-visible-dock-height) + 12px);
   }
   .jic-mobile-dock {
@@ -1144,7 +1143,7 @@ html[data-prayer-dock-hidden='true'] {
   }
   html {
     --jic-prayer-sticky-offset: 0px;
-    --jic-mobile-visible-dock-height: var(--jic-mobile-controls-height, 60px);
+    --jic-mobile-visible-dock-height: 0px;
     scroll-padding-top: 12px;
   }
 }

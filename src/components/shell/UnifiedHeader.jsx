@@ -64,7 +64,6 @@ export default function UnifiedHeader() {
   const { todaysTimes, jummahTimes, currentDate, isLoadingPrayerTimes } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
     mobileBannerRef = useRef(null),
-    mobileControlsRef = useRef(null),
     audioRef = useRef(null),
     menuRef = useRef(null),
     menuCloseRef = useRef(null),
@@ -156,7 +155,6 @@ export default function UnifiedHeader() {
   // Shared measurements keep content, floating actions and phone safe areas clear.
   useLayoutEffect(() => {
     const prayer = prayerDockRef.current;
-    const controls = mobileControlsRef.current;
     const banner = mobileBannerRef.current;
     const update = () => {
       const style = document.documentElement.style;
@@ -168,15 +166,10 @@ export default function UnifiedHeader() {
         '--jic-mobile-strip-height',
         `${Math.ceil(banner.getBoundingClientRect().height)}px`,
       );
-      style.setProperty(
-        '--jic-mobile-controls-height',
-        `${Math.ceil(controls.getBoundingClientRect().height)}px`,
-      );
     };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(prayer);
-    observer.observe(controls);
     observer.observe(banner);
     return () => observer.disconnect();
   }, []);
@@ -308,6 +301,18 @@ export default function UnifiedHeader() {
               >
                 Menu <ChevronDown size={16} aria-hidden="true" />
               </button>
+              <nav className="jic-mobile-controls" aria-label="Quick navigation">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (pathname === '/') window.scrollTo({ top: 0, behavior: 'smooth' });
+                    else navigate('/');
+                  }}
+                >
+                  <Home size={21} aria-hidden="true" />
+                  <span className="sr-only">Home</span>
+                </button>
+              </nav>
             </div>
             <DesktopNavigation navigation={navigation} groups={directoryGroups} />
             <div className="jic-free-actions-slot">
@@ -385,7 +390,7 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
-      <div ref={mobileControlsRef} className="jic-mobile-dock">
+      <div className="jic-mobile-dock">
         <div
           id="jic-prayer-dock"
           ref={prayerDockRef}
@@ -459,18 +464,6 @@ export default function UnifiedHeader() {
             />
           </div>
         </div>
-        <nav className="jic-mobile-controls" aria-label="Quick navigation">
-          <button
-            type="button"
-            onClick={() => {
-              if (pathname === '/') window.scrollTo({ top: 0, behavior: 'smooth' });
-              else navigate('/');
-            }}
-          >
-            <Home size={21} aria-hidden="true" />
-            <span className="sr-only">Home</span>
-          </button>
-        </nav>
       </div>
       {radioError && (
         <span className="sr-only" role="status">

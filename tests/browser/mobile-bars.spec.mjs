@@ -25,7 +25,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
     const size = await page.evaluate(() => {
       const strip = document.querySelector('.jic-mobile-info-banner').getBoundingClientRect();
       const pill = document.querySelector('#jic-prayer-dock').getBoundingClientRect();
-      const dock = document.querySelector('.jic-mobile-dock').getBoundingClientRect();
+      const menu = document.querySelector('.jic-menu-word').getBoundingClientRect();
       const nav = document.querySelector('.jic-mobile-controls').getBoundingClientRect();
       const actions = document.querySelector('.jic-floating-tools');
       return {
@@ -41,7 +41,9 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
         bottomGap:
           (visualViewport ? visualViewport.offsetTop + visualViewport.height : innerHeight) -
           pill.bottom,
-        navInsideDock: nav.bottom <= dock.bottom,
+        homeBesideMenu:
+          nav.left >= menu.right &&
+          Math.abs(nav.top + nav.height / 2 - menu.top - menu.height / 2) < 1,
         pillBelowNav: pill.top >= nav.bottom + 7,
         pillHeight: pill.height,
         floating: getComputedStyle(actions).position,
@@ -58,7 +60,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
     expect(size.top).toBe(0);
     expect(size.stripHeight).toBeLessThanOrEqual(46);
     expect(Math.abs(size.bottomGap), JSON.stringify(size)).toBeLessThanOrEqual(1);
-    expect(size.navInsideDock).toBe(true);
+    expect(size.homeBesideMenu).toBe(true);
     expect(size.pillBelowNav, JSON.stringify(size)).toBe(true);
     expect(size.pillHeight).toBeLessThanOrEqual(72);
     expect(size.controlsHidden).toBe(true);
