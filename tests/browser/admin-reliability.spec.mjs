@@ -92,6 +92,31 @@ test('account menu keeps the unsaved-change guard when opening a personal accoun
   expect(evidence.errors).toEqual([]);
 });
 
+test('safeguarding opens with a useful empty state and optional recording guidance', async ({
+  page,
+}) => {
+  const evidence = await openAdmin(page, { section: 'safeguarding' });
+  await expect(
+    page.getByRole('heading', { name: 'Safeguarding reviews', exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('.ops-stats')).toHaveCount(0);
+  const guidance = page.locator('.ops-recording-guidance');
+  await expect(guidance).not.toHaveAttribute('open');
+  await guidance.locator('summary').click();
+  await expect(guidance).toContainText('no official expiry date');
+  expect(
+    await page
+      .locator('.ops-admin')
+      .evaluate(
+        (node) =>
+          getComputedStyle(node).getPropertyValue('--ops-ink').trim() ===
+          getComputedStyle(node).getPropertyValue('--jic-text').trim(),
+      ),
+  ).toBe(true);
+  expect(evidence.writes).toEqual([]);
+  expect(evidence.errors).toEqual([]);
+});
+
 // Intercept external data only. The application router, Auth provider and editors run unchanged.
 async function openAdmin(
   page,

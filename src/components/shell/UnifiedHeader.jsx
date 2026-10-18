@@ -507,39 +507,52 @@ export default function UnifiedHeader() {
               type="button"
               onClick={toggleTimetable}
               className="jic-mobile-prayer-toggle"
-              aria-label={`${prayerExpanded ? 'Hide' : 'Show'} full prayer timetable. Today's jama'ah times: ${accessibleJamaahTimes}`}
+              aria-label={
+                prayerExpanded
+                  ? 'Close full prayer timetable'
+                  : `Show full prayer timetable. Today's jama'ah times: ${accessibleJamaahTimes}`
+              }
               aria-expanded={prayerExpanded}
               aria-controls="jic-prayer-details"
             >
               <Clock3 size={18} aria-hidden="true" />
               <span className="jic-mobile-prayer-toggle-content">
                 <span className="jic-mobile-prayer-heading">
-                  Today’s salah times <small>Jama’ah</small>
+                  {prayerExpanded ? (
+                    'Close timetable'
+                  ) : (
+                    <>
+                      Today’s salah times <small>Jama’ah</small>
+                    </>
+                  )}
                 </span>
-                {todaysTimes ? (
-                  <span className="jic-mobile-prayer-times">
-                    {todayCongregations.map(({ name, time }) => (
-                      <span
-                        key={name}
-                        className={cn(
-                          'jic-mini-prayer',
-                          (next?.name === name ||
-                            (name === 'Jummah' && next?.name === 'Jummah 1')) &&
-                            'is-next',
-                        )}
-                      >
-                        <span className="jic-mini-prayer-name">{name}</span>
-                        <strong className="jic-mini-prayer-time">{compactJamaahTime(time)}</strong>
-                      </span>
-                    ))}
-                  </span>
-                ) : (
-                  <span className="jic-mobile-prayer-empty" role="status">
-                    {isLoadingPrayerTimes
-                      ? 'Loading today’s times…'
-                      : 'Today’s timetable is unavailable'}
-                  </span>
-                )}
+                {!prayerExpanded &&
+                  (todaysTimes ? (
+                    <span className="jic-mobile-prayer-times">
+                      {todayCongregations.map(({ name, time }) => (
+                        <span
+                          key={name}
+                          className={cn(
+                            'jic-mini-prayer',
+                            (next?.name === name ||
+                              (name === 'Jummah' && next?.name === 'Jummah 1')) &&
+                              'is-next',
+                          )}
+                        >
+                          <span className="jic-mini-prayer-name">{name}</span>
+                          <strong className="jic-mini-prayer-time">
+                            {compactJamaahTime(time)}
+                          </strong>
+                        </span>
+                      ))}
+                    </span>
+                  ) : (
+                    <span className="jic-mobile-prayer-empty" role="status">
+                      {isLoadingPrayerTimes
+                        ? 'Loading today’s times…'
+                        : 'Today’s timetable is unavailable'}
+                    </span>
+                  ))}
               </span>
               <ChevronDown size={18} aria-hidden="true" />
             </button>

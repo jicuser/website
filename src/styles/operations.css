@@ -1019,3 +1019,48 @@
     transform: none;
   }
 }
+
+/* Staff tools share the website palette; status colours are reserved for states. */
+html[data-theme] .admin-console .ops-admin {
+  --ops-ink: var(--jic-text);
+  --ops-muted: var(--jic-text-secondary);
+  --ops-paper: var(--jic-surface);
+  --ops-soft: var(--jic-bg-secondary);
+  --ops-border: var(--jic-border);
+  --ops-accent: var(--jic-gold);
+}
+html[data-theme] .admin-console .ops-admin .ops-button {
+  color: #0c1930;
+  background: var(--jic-action);
+  border-color: var(--jic-action);
+}
+html[data-theme] .admin-console .ops-admin .ops-badge {
+  color: var(--jic-gold);
+}
+.ops-recording-guidance {
+  margin-block: 16px;
+  border-bottom: 1px solid var(--ops-border);
+}
+.ops-recording-guidance summary {
+  cursor: pointer;
+  padding-block: 12px;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+.ops-recording-guidance p {
+  max-width: 65ch;
+  padding-bottom: 12px;
+  font-size: 0.875rem;
+  color: var(--ops-muted);
+}
+.ops-admin .ops-stat {
+  padding: 16px;
+  gap: 6px;
+  border-radius: 12px;
+}
+.ops-admin .ops-stat > strong {
+  font-size: 1.65rem;
+}
+.ops-admin .ops-empty {
+  padding: 20px;
+}

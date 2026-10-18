@@ -6,7 +6,6 @@ import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import { supplementalContentPaths } from '@/content/editablePages';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
-import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import RelatedContent from '@/components/RelatedContent';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import PublishedPageLinks from '@/features/content/PublishedPageLinks';
@@ -40,6 +39,8 @@ function PublicLayout() {
   const visible = isPageVisible(getContent, pathname) || isAdmin;
   const preview = new URLSearchParams(search).get('preview') === '1';
   const isHome = pathname === '/';
+  const showReminder =
+    isHome || pathname.startsWith('/worship') || pathname.startsWith('/prayer-times');
   const isDiscovery = ['/search', '/social-media'].includes(pathname);
   const isTask =
     pathname.startsWith('/forms/') ||
@@ -50,10 +51,9 @@ function PublicLayout() {
       className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
     >
       <PageTitle />
-      <PublicBackdrop />
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
-        <DailyReminder />
+        {showReminder && <DailyReminder />}
         {visible ? (
           <div>
             <Suspense

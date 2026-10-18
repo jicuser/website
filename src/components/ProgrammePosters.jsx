@@ -65,7 +65,7 @@ export default function ProgrammePosters() {
               <p className="jic-programme-meta">{item.subtitle}</p>
               <h3>{item.title}</h3>
               <p>{item.schedule}</p>
-              <p>{item.detail}</p>
+              <p className="jic-programme-detail">{item.detail}</p>
               <Link to={item.to === pathname ? '/contact' : item.to}>
                 {item.registration && item.registration !== 'none'
                   ? 'Details & registration'

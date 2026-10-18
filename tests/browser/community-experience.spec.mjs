@@ -13,44 +13,47 @@ async function publicSite(page) {
   await page.goto('/');
 }
 
-test('learning choices explain the next step and use real enrolment destinations', async ({
+test('homepage leads with masjid activity and compact practical links', async ({ page }) => {
+  await publicSite(page);
+  const services = page.locator('.service-explorer--compact');
+  await expect(services).toBeVisible();
+  await expect(services.locator('.service-explorer-card')).toHaveCount(3);
+  await expect(page.getByRole('searchbox', { name: 'Search services' })).toHaveCount(0);
+  await expect(page.getByRole('group', { name: 'Filter services' })).toHaveCount(0);
+  await expect(
+    page.locator('.jic-learning, .jic-account-connection, .jic-visitor-questions'),
+  ).toHaveCount(0);
+  expect(
+    await page
+      .locator('.jic-programmes')
+      .evaluate(
+        (node) =>
+          node.getBoundingClientRect().top <
+          document.querySelector('.service-explorer--compact').getBoundingClientRect().top,
+      ),
+  ).toBe(true);
+  expect(
+    await page.locator('.jic-premium-home').evaluate((node) => node.getBoundingClientRect().height),
+  ).toBeLessThan(3000);
+});
+
+test('the services page keeps the complete searchable directory in short rows', async ({
   page,
 }) => {
   await publicSite(page);
-  const learning = page.getByRole('region', { name: 'Learning for every stage of life.' });
-  await expect(learning.getByRole('tab', { name: 'For children' })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  );
-  await learning.getByRole('tab', { name: 'For adults' }).click();
-  await expect(learning.getByRole('tabpanel')).toContainText('Make time for your learning');
-  await expect(learning.getByRole('link', { name: 'Explore adult classes' })).toHaveAttribute(
-    'href',
-    '/education/courses',
-  );
-  await page.keyboard.press('ArrowLeft');
-  await expect(learning.getByRole('tab', { name: 'For children' })).toBeFocused();
-  await expect(learning.getByRole('tabpanel')).toContainText(
-    'A thoughtful start for young learners',
-  );
+  await page.goto('/services');
+  await expect(page.getByRole('heading', { name: 'Services at JIC' })).toBeVisible();
+  await expect(page.locator('.jic-daily-reminder')).toHaveCount(0);
+  await page.getByRole('searchbox', { name: 'Search services' }).fill('nikah');
+  await expect(page.locator('.service-explorer-card')).toHaveCount(1);
+  const result = page
+    .locator('.service-explorer-grid')
+    .getByRole('link', { name: 'Nikah', exact: true });
+  await expect(result).toHaveAttribute('href', '/services/nikah');
+  expect((await result.boundingBox()).height).toBeLessThan(160);
 });
 
-test('visitor questions disclose clear next steps without leaving the page', async ({ page }) => {
-  await publicSite(page);
-  const question = page.getByText('Do I need an account to contact JIC?', { exact: true });
-  await question.click();
-  await expect(
-    page.getByText('You can make a service enquiry without signing in.', { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.locator('details[open]').getByRole('link', { name: 'Contact the office' }),
-  ).toHaveAttribute('href', '/contact');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
-    false,
-  );
-});
-
-test('hidden services are absent from homepage questions and discovery', async ({ page }) => {
+test('hidden services are absent from compact homepage links', async ({ page }) => {
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
   await page.route('**/preview-api/**', (route) =>
     route.fulfill({

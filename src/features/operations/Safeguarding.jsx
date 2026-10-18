@@ -87,18 +87,17 @@ export default function Safeguarding() {
     <section className="ops-admin">
       <p className="ops-eyebrow">Restricted staff records</p>
       <h1>Safeguarding reviews</h1>
-      <p>
-        Track DBS checks and internal review dates. Access requires the separate safeguarding
-        permission.
-      </p>
-      <div className="ops-notice">
-        DBS checks have no official expiry date. A review date is JIC’s reminder to reassess. Record
-        minimal information here; do not add certificate scans, convictions or safeguarding incident
-        details.
-      </div>
+      <p>Track DBS checks and review dates for staff and volunteers.</p>
+      <details className="ops-recording-guidance">
+        <summary>Recording guidance</summary>
+        <p>
+          DBS certificates have no official expiry date; review dates follow JIC’s policy. Record
+          check details only. Do not add certificate scans, convictions or incident notes.
+        </p>
+      </details>
       <LoadState state={state} />
       <Notice error={error} message={message} />
-      {state.data && (
+      {state.data && records.length > 0 && (
         <Stats
           items={[
             ['Records', records.length],

@@ -85,10 +85,12 @@ test('home shortcuts fit small phones and prayer details expand only on request'
   await expect(details).toBeHidden();
   await expect(prayerButton).toBeFocused();
 
-  await expect(page.locator('.jic-hero').getByRole('link', { name: /My account|Sign in|portal/i }))
-    .toHaveCount(0);
-  await expect(page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }))
-    .toHaveAttribute('href', '/prayer-times/reminders');
+  await expect(
+    page.locator('.jic-hero').getByRole('link', { name: /My account|Sign in|portal/i }),
+  ).toHaveCount(0);
+  await expect(
+    page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }),
+  ).toHaveAttribute('href', '/prayer-times/reminders');
   await expect(page.locator('.jic-header-portal')).toHaveAttribute('href', '/portal');
   await expect(page.locator('.jic-header-portal')).toBeVisible();
 
@@ -110,7 +112,9 @@ test('home shortcuts fit small phones and prayer details expand only on request'
       };
     });
     expect(servicePositions.firstLinks).toEqual(['/funerals', '/services/nikah']);
-    expect(servicePositions.servicesVisible, 'Janazah and Nikah visible without scrolling').toBe(true);
+    expect(servicePositions.servicesVisible, 'Janazah and Nikah visible without scrolling').toBe(
+      true,
+    );
     expect(servicePositions.servicesBeforePrayer).toBe(true);
     const overflow = await page
       .locator('.jic-home-shortcuts')
@@ -121,7 +125,7 @@ test('home shortcuts fit small phones and prayer details expand only on request'
       );
     expect(overflow, `Home overflow at ${width}px`).toBe(false);
     await page.locator('.jic-home-shortcuts').scrollIntoViewIfNeeded();
-    await expect(page.locator('.jic-free-actions')).toHaveCSS('position', 'fixed');
+    await expect(page.locator('.jic-free-actions-slot')).toBeHidden();
     await expect(page.getByRole('button', { name: 'Scroll to top', exact: true })).toBeHidden();
     if (width === 390)
       await page.screenshot({ path: testInfo.outputPath('homepage-grouped-mobile.png') });
@@ -133,7 +137,9 @@ test('home shortcuts fit small phones and prayer details expand only on request'
   await expect(page).toHaveURL('/funerals');
 });
 
-test('desktop timetable stays compact and links to the next congregation', async ({ page }, testInfo) => {
+test('desktop timetable stays compact and links to the next congregation', async ({
+  page,
+}, testInfo) => {
   await page.clock.setFixedTime(new Date('2026-10-15T09:00:00Z'));
   await setup(page);
   for (const width of [1024, 1440]) {
@@ -166,8 +172,12 @@ test('Nikah and Salah alert setup open the intended public pages', async ({ page
   await page.goto('/');
   await page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }).click();
   await expect(page).toHaveURL('/prayer-times/reminders');
-  await expect(page.getByRole('heading', { name: 'Set up Salah alerts', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Enable Salah alerts', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Set up Salah alerts', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Enable Salah alerts', exact: true }),
+  ).toBeVisible();
 });
 
 for (const target of ['card', 'background']) {

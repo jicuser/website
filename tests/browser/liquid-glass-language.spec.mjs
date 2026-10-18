@@ -33,9 +33,7 @@ for (const theme of ['light', 'dark']) {
     expect(await action.evaluate(material)).toEqual(navigation);
     expect(navigation.sheen).toContain('linear-gradient');
     await page.goto('/services');
-    await expect(
-      page.getByRole('heading', { name: 'Faith, learning & life together.' }),
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Services at JIC' })).toBeVisible();
     const choice = page
       .getByRole('group', { name: 'Filter services' })
       .getByRole('button', { name: 'Learning' });

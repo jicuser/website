@@ -363,7 +363,11 @@ html[data-theme] .jic-radio-player-page {
 .jic-home-route .jic-rail-heading h2 {
   color: var(--jic-text);
 }
-/* Keep programme descriptions and actions available on wide screens too. */
+/* Homepage cards retain the schedule and action; full programme detail stays on its page. */
+.jic-home-route .jic-programme-detail {
+  display: none;
+}
+
 @media (min-width: 1024px) {
   .jic-home-route .jic-programmes {
     margin: 0 auto 24px;

@@ -275,19 +275,15 @@
   object-fit: contain;
 }
 .jic-free-actions-slot {
-  flex: 0 0 222px;
-  min-height: 58px;
+  flex: 0 0 auto;
+  min-height: 48px;
 }
 .jic-free-actions {
-  position: fixed;
-  top: calc(var(--jic-prayer-sticky-offset) + 16px);
-  transition: top 160ms ease;
-  right: var(--jic-actions-inset);
-  z-index: 45;
+  position: static;
   display: flex;
   align-items: center;
   gap: 4px;
-  width: 222px;
+  width: auto;
   padding: 6px;
   border: 1px solid var(--jic-glass-border);
   border-radius: 18px;
@@ -653,6 +649,9 @@ html[data-prayer-dock-hidden='true'] {
   .jic-prayer-dock.is-expanded .jic-prayer-details {
     display: block;
   }
+  .jic-prayer-dock.is-expanded .jic-mobile-prayer-toggle {
+    min-height: 44px;
+  }
   .jic-mobile-prayer-summary {
     display: flex;
     align-items: center;
@@ -767,53 +766,15 @@ html[data-prayer-dock-hidden='true'] {
     padding-block: 2px;
   }
   .jic-free-actions-slot {
-    display: contents;
+    display: none;
   }
   .jic-free-nav-row {
     flex-wrap: nowrap;
-    margin-bottom: 36px;
+    margin-bottom: 0;
   }
   .jic-free-brand {
     flex-basis: 154px;
     margin-right: auto;
-  }
-  .jic-free-actions {
-    position: fixed;
-    top: calc(var(--jic-mobile-strip-height, 44px) + 68px);
-    right: max(12px, env(safe-area-inset-right));
-    width: auto;
-    gap: 2px;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    opacity: 0.68;
-    transition: opacity 160ms ease;
-  }
-  .jic-free-actions:is(:hover, :focus-within) {
-    opacity: 1;
-  }
-  .jic-free-actions svg {
-    filter: drop-shadow(0 1px 2px var(--jic-bg));
-  }
-  .jic-public-route:has(:is(input, textarea, select, [contenteditable='true']):focus)
-    .jic-free-actions {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-  .jic-free-actions .jic-theme-action {
-    width: 44px;
-    min-width: 44px;
-  }
-  .jic-free-actions .jic-theme-action span {
-    display: none;
-  }
-  .jic-free-actions .jic-desktop-action {
-    display: none;
   }
   .jic-mobile-quick-nav {
     display: block;
@@ -972,8 +933,10 @@ html[data-prayer-dock-hidden='true'] {
     align-items: center;
     padding: env(safe-area-inset-top) max(8px, env(safe-area-inset-right)) 0
       max(4px, env(safe-area-inset-left));
-    background: transparent;
-    border-bottom: 1px solid color-mix(in srgb, var(--jic-border) 65%, transparent);
+    background: var(--jic-glass-panel-strong);
+    -webkit-backdrop-filter: var(--jic-glass-control-filter);
+    backdrop-filter: var(--jic-glass-control-filter);
+    border-bottom: 1px solid var(--jic-border);
     color: var(--jic-text);
   }
   .jic-ticker-motion {

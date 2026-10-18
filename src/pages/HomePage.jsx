@@ -17,9 +17,6 @@ import MosqueIcon from '@/components/icons/MosqueIcon';
 import useCommunityLink from '@/hooks/useCommunityLink';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import HomePrayerCard from '@/components/home/HomePrayerCard';
-import LearningJourney from '@/features/home/LearningJourney';
-import AccountConnection from '@/features/home/AccountConnection';
-import VisitorQuestions from '@/features/home/VisitorQuestions';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useContent } from '@/context/ContentContext';
@@ -213,23 +210,18 @@ export default function HomePage() {
           </a>
         )}
 
-        <Suspense
-          fallback={
-            <p className="jic-home-section" role="status">
-              Loading services…
-            </p>
-          }
-        >
-          <ServiceExplorer compact />
-        </Suspense>
-
         <ProgrammePosters />
 
         {events.length > 0 && (
           <section className="jic-upcoming-events" aria-labelledby="upcoming-events-title">
             <h2 id="upcoming-events-title">Upcoming events</h2>
+            {events.length > 3 && (
+              <Link className="jic-text-link" to="/events">
+                All events <ArrowRight size={16} />
+              </Link>
+            )}
             <div className="jic-event-cards">
-              {events.map((event) => (
+              {events.slice(0, 3).map((event) => (
                 <article key={event.id} className="jic-event-card">
                   {safeWebUrl(event.poster_url) && (
                     <img src={event.poster_url} alt={`${event.title} poster`} loading="lazy" />
@@ -258,17 +250,19 @@ export default function HomePage() {
           </section>
         )}
 
-        <LearningJourney />
+        <Suspense
+          fallback={
+            <p className="jic-home-section" role="status">
+              Loading services…
+            </p>
+          }
+        >
+          <ServiceExplorer compact />
+        </Suspense>
 
         {communityCards.length > 0 && (
           <section className="jic-home-section" aria-labelledby="home-community-title">
-            <div className="jic-experience-heading">
-              <span className="jic-section-label">Together at JIC</span>
-              <h2 id="home-community-title">
-                A community to <em>be part of.</em>
-              </h2>
-              <p>Support the centre, join in and help shape what comes next.</p>
-            </div>
+            <h2 id="home-community-title">Community at JIC</h2>
             <nav className="jic-home-community-grid" aria-label="Community and services">
               {communityCards.map(({ key, ...card }) => (
                 <HomeDestination key={key} {...card} />
@@ -341,10 +335,6 @@ export default function HomePage() {
             )}
           </section>
         )}
-
-        <AccountConnection />
-
-        <VisitorQuestions />
 
         <section className="jic-home-footer-strip">
           <div>
