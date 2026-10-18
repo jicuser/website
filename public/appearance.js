@@ -1,9 +1,9 @@
 // Apply saved appearance before styles or React paint the page.
 (() => {
-  let theme = 'dark';
+  let theme = 'light';
   let surface = 'glass';
   try {
-    theme = localStorage.getItem('jic-theme') === 'light' ? 'light' : 'dark';
+    theme = localStorage.getItem('jic-theme') === 'dark' ? 'dark' : 'light';
     surface = localStorage.getItem('jic_glass_enabled') === 'false' ? 'solid' : 'glass';
   } catch {
     // Private or restricted browsers can still use the default appearance.
@@ -13,5 +13,5 @@
   root.dataset.theme = theme;
   root.dataset.surface = surface;
   root.style.colorScheme = theme;
-  root.style.backgroundColor = theme === 'dark' ? '#080f1d' : '#fafbfd';
+  root.style.backgroundColor = theme === 'dark' ? '#080f1d' : '#f9f7f1';
 })();

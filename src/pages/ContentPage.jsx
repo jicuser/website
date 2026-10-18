@@ -60,7 +60,7 @@ function Page({ slug }) {
     return (
       <section className="mx-auto max-w-5xl p-6">
         <h1 className="text-2xl font-semibold">This page is not available.</h1>
-        <p>It may be hidden or the address may have changed.</p>
+        <p>It may have been withdrawn or the address may have changed.</p>
         <Link to="/">Return to the website</Link>
       </section>
     );

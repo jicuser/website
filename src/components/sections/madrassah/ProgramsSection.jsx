@@ -15,7 +15,7 @@ const ProgramTab = ({ title, description, curriculum, schedule, imageSrc, imageA
       <div className="p-6">
         <h3 className="text-2xl font-bold mb-4">{title}</h3>
         <p className="text-gray-600 dark:text-gray-300 mb-4">{description}</p>
-        <h4 className="font-bold text-lg mb-2">Curriculum Includes:</h4>
+        <h4 className="font-bold text-lg mb-2">Learning topics to ask about</h4>
         <ul className="space-y-2 text-gray-600 dark:text-gray-300 mb-4">
           {curriculum.map((item, index) => (
             <li key={index} className="flex items-start">
@@ -46,61 +46,62 @@ const ProgramsSection = () => (
   <section className="py-16 bg-gray-50 dark:bg-gray-800">
     <div className="container mx-auto px-4">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Our Programs</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Classes & learning</h2>
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          We offer various programs tailored to different age groups and learning needs.
+          Use these topics to discuss a suitable class. The team can confirm the current
+          curriculum, age groups and timetable.
         </p>
       </div>
 
       <Tabs defaultValue="children" className="w-full max-w-4xl mx-auto">
         <div className="flex justify-center mb-8">
           <TabsList className="grid grid-cols-1 md:grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="children">Children (5-10)</TabsTrigger>
-            <TabsTrigger value="youth">Youth (11-16)</TabsTrigger>
-            <TabsTrigger value="adults">Adults (17+)</TabsTrigger>
+            <TabsTrigger value="children">Children</TabsTrigger>
+            <TabsTrigger value="youth">Young people</TabsTrigger>
+            <TabsTrigger value="adults">Adults</TabsTrigger>
           </TabsList>
         </div>
 
         <TabsContent value="children" className="space-y-8">
           <ProgramTab
-            title="Children's Program"
-            description="Our children's program introduces young learners to the basics of Islam in a fun and engaging way."
+            title="Children’s learning"
+            description="Ask about introductory Islamic learning and Qur’an reading for your child."
             curriculum={[
               'Basic Quran recitation (Qaida)',
-              'Memorization of short surahs',
+              'Memorisation of short surahs',
               'Islamic manners and etiquette',
               'Basic Islamic beliefs',
               'Stories of the Prophets',
               'Introduction to Arabic alphabet',
             ]}
-            schedule={{ time: '4:00 PM - 6:00 PM', days: 'Mon-Fri' }}
+            schedule={{ time: 'Confirm class times', days: 'Ask about current groups' }}
             imageSrc="https://images.unsplash.com/photo-1624863037771-b6e5dde7f4aa"
-            imageAlt="Children learning in Madrassah"
+            imageAlt="Illustrative study image"
           />
         </TabsContent>
 
         <TabsContent value="youth" className="space-y-8">
           <ProgramTab
-            title="Youth Program"
-            description="Our youth program builds on the fundamentals and addresses the challenges faced by Muslim teenagers in today's world."
+            title="Learning for young people"
+            description="Ask about classes that build on earlier Islamic learning and Qur’an study."
             curriculum={[
               'Advanced Quran recitation with tajweed',
-              'Memorization of selected surahs',
+              'Memorisation of selected surahs',
               'Fundamentals of Islamic jurisprudence',
-              'Islamic history and civilization',
+              'Islamic history and civilisation',
               'Contemporary Islamic issues',
               'Basic Arabic language',
             ]}
-            schedule={{ time: '5:00 PM - 7:00 PM', days: 'Mon-Fri' }}
+            schedule={{ time: 'Confirm class times', days: 'Ask about current groups' }}
             imageSrc="https://images.unsplash.com/photo-1604245155712-52ae0ae6fe2e"
-            imageAlt="Youth in Madrassah"
+            imageAlt="Illustrative study image"
           />
         </TabsContent>
 
         <TabsContent value="adults" className="space-y-8">
           <ProgramTab
-            title="Adult Program"
-            description="Our adult program offers in-depth Islamic education for those seeking to deepen their understanding of the faith."
+            title="Adult learning"
+            description="Ask the centre about adult courses, entry requirements and the topics you would like to study."
             curriculum={[
               'Advanced Quran study with tafsir (interpretation)',
               'Hadith studies',
@@ -109,9 +110,9 @@ const ProgramsSection = () => (
               'Comparative religion',
               'Intermediate Arabic language',
             ]}
-            schedule={{ time: '7:00 PM - 9:00 PM', days: 'Tue & Thu' }}
+            schedule={{ time: 'Confirm course times', days: 'Ask about current courses' }}
             imageSrc="https://images.unsplash.com/photo-1654860687488-119a90eafa86"
-            imageAlt="Adults in Madrassah"
+            imageAlt="Illustrative study image"
           />
         </TabsContent>
       </Tabs>

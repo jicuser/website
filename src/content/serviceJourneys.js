@@ -144,7 +144,7 @@ export const SERVICE_JOURNEYS = {
     related: [
       {
         title: 'Certificates',
-        description: 'Request, follow and view your record.',
+        description: 'Request, track and view your record.',
         to: '/services/certificates',
       },
       {
@@ -166,7 +166,7 @@ export const SERVICE_CARDS = [
   },
   {
     title: 'Nikah',
-    description: 'Plan your ceremony, check requirements and understand the certificate journey.',
+    description: 'Ask about dates, ceremony requirements and your Nikah record.',
     to: '/services/nikah',
     icon: 'rings',
     label: 'Marriage services',

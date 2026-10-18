@@ -1,7 +1,7 @@
 import { posterImage } from '../../lib/posters.js';
 export const PROJECT_KEY = 'masjid_project_stages';
 export const STAGE_STATUS = [
-  ['update_pending', 'Details coming soon'],
+  ['update_pending', 'Details not published'],
   ['planned', 'Planned'],
   ['in_progress', 'In progress'],
   ['completed', 'Completed'],

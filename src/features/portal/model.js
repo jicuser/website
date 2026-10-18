@@ -1,4 +1,5 @@
 import { portalDestination } from '../../lib/portalDestination.js';
+import { accountReturnUrl } from '../account/config.js';
 /** Presentation selectors only. Supabase RLS remains the security boundary. */
 export const PORTAL_TABLES = [
   'learning_courses',
@@ -126,7 +127,7 @@ export function magicLinkOptions(email, origin, destination = '') {
   const value = String(email || '').trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || value.length > 254)
     throw new Error('Enter a valid email address.');
-  const url = new URL('/portal', origin);
+  const url = new URL(accountReturnUrl('/portal', origin));
   const next = portalDestination(destination);
   if (next) url.searchParams.set('next', next);
   if (!['https:', 'http:'].includes(url.protocol)) throw new Error('Invalid sign-in destination.');

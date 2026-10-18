@@ -64,16 +64,19 @@ html[data-theme] .jic-premium-home .jic-hero {
   overflow: hidden;
   border-radius: 0;
   color: #fff;
+  background:
+    linear-gradient(115deg, rgba(12, 46, 38, 0.98), rgba(12, 46, 38, 0.78)),
+    url('/optimized/jic-aerial-sunset.webp') center 52% / cover;
 }
 html[data-theme] .jic-premium-home .jic-hero-inner {
   position: relative;
   width: min(1200px, calc(100% - 32px));
   margin: auto;
-  padding: 24px 0;
+  padding: clamp(28px, 5vw, 64px) 0;
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.9fr);
   align-items: center;
-  gap: 24px;
+  gap: clamp(24px, 5vw, 72px);
   min-height: 0;
 }
 html[data-theme] .jic-premium-home .jic-kicker {
@@ -87,16 +90,20 @@ html[data-theme] .jic-premium-home .jic-hero h1 {
   max-width: 920px;
   margin: 0;
   font-family: Georgia, 'Times New Roman', serif;
-  font-style: italic;
+  font-style: normal;
   font-weight: 500;
-  font-size: clamp(36px, 4.5vw, 58px);
-  line-height: 1.06;
+  font-size: clamp(38px, 4.6vw, 66px);
+  line-height: 1.1;
   letter-spacing: -0.035em;
   color: #fff;
-  text-shadow: 0 3px 18px #0006;
+  text-wrap: balance;
+}
+html[data-theme] .jic-premium-home .jic-hero h1 em {
+  color: #b9e3cf;
+  font-weight: 400;
 }
 html[data-theme] .jic-premium-home .jic-hero-sub {
-  max-width: 580px;
+  max-width: 480px;
   margin: 18px 0 0;
   font-size: 18px;
   line-height: 1.5;
@@ -240,8 +247,9 @@ html[data-theme] .jic-home-footer-strip {
   flex-shrink: 0;
 }
 .jic-upcoming-events h2 {
-  color: #fff;
-  font-size: 24px;
+  color: var(--jic-text);
+  font-family: var(--jic-heading-font);
+  font-size: 32px;
   margin-bottom: 14px;
 }
 .jic-event-cards {
@@ -328,13 +336,12 @@ html[data-theme] .jic-home-footer-strip {
     width: 100%;
   }
 }
-html[data-theme='light'] .jic-premium-home .jic-hero :is(h1, .jic-hero-sub),
 html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming-events h2) {
   color: #0c1930;
   text-shadow: none;
 }
 html[data-theme='light'] .jic-premium-home .jic-kicker {
-  color: #784217;
+  color: #f0d598;
 }
 
 .jic-live-play {
@@ -360,7 +367,7 @@ html[data-theme='light'] .jic-premium-home .jic-kicker {
 /* Essential services and learning precede prayer details on phones. Opaque surfaces
    keep dense text readable without adding a blur layer to every shortcut. */
 .jic-home-content {
-  padding: 20px 0 8px;
+  padding: 36px 0 24px;
   background: var(--jic-bg);
   border-top: 1px solid var(--jic-border);
 }
@@ -373,7 +380,7 @@ html[data-theme='light'] .jic-premium-home .jic-kicker {
   gap: 8px;
   min-height: 44px;
   margin-top: 4px;
-  color: var(--jic-gold);
+  color: #f0d598;
   font-size: 14px;
   font-weight: 600;
 }
@@ -382,14 +389,14 @@ html[data-theme='light'] .jic-premium-home .jic-kicker {
 }
 .jic-home-prayer {
   min-width: 0;
-  border: 1px solid #39516a;
-  border-radius: 18px;
-  background: #102638;
+  border: 1px solid #52746a;
+  border-radius: 22px;
+  background: #103a30;
   color: #f8fafc;
   overflow: hidden;
 }
 .jic-home-prayer-main {
-  padding: 12px 16px 4px;
+  padding: 20px 22px 8px;
 }
 .jic-home-eyebrow {
   margin: 0 0 4px;
@@ -449,8 +456,8 @@ html[data-theme='light'] .jic-premium-home .jic-kicker {
   gap: 10px;
   min-height: 52px;
   padding: 8px 16px;
-  border-top: 1px solid #39516a;
-  background: #183448;
+  border-top: 1px solid #52746a;
+  background: #19483d;
   color: inherit;
 }
 .jic-home-radio strong,
@@ -475,7 +482,7 @@ html[data-theme='light'] .jic-premium-home .jic-kicker {
 }
 .jic-home-section {
   width: min(1200px, calc(100% - 32px));
-  margin: 0 auto 28px;
+  margin: 64px auto;
 }
 .jic-home-section > h2 {
   margin: 0 0 12px;
@@ -495,6 +502,8 @@ html[data-theme='light'] .jic-premium-home .jic-kicker {
   margin-top: 16px;
 }
 .jic-home-shortcuts .jic-home-destination {
+  background: #fffdf7;
+  color: #183c32;
   min-height: 68px;
   padding: 10px 12px;
   gap: 10px;
@@ -513,9 +522,10 @@ html[data-theme='light'] .jic-premium-home .jic-kicker {
 }
 .jic-home-shortcuts .jic-home-destination-copy small {
   font-size: 12px;
+  color: #5c6962;
 }
 .jic-home-community-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .jic-home-destination {
   display: flex;

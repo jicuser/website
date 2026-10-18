@@ -38,7 +38,7 @@ export const PROGRAMMES = [
     detail: 'Foundations of Islamic scholarship · £100/term (three terms/year).',
     image: '/posters/seekers-gateway.jpg',
     alt: 'The Seeker’s Gateway: Arabic, Fiqh, Aqida, Tajwid, Sirah, Tafsir, Hadith, Usul, Logic and Apologetics. Starts September 2026, supervised by Shaykh Qamar Ilyas. Open to males and females, £100 per term. Contact 07484127444 between 11am and 12.15pm.',
-    to: '/education/classes-courses',
+    to: '/education/courses',
     groups: ['home', 'education'],
   },
   {

@@ -6,21 +6,21 @@ import { BookOpen, GraduationCap, Users } from 'lucide-react';
 const features = [
   {
     icon: <BookOpen className="h-10 w-10 text-primary" />,
-    title: 'Comprehensive Curriculum',
+    title: 'Qur’an & Islamic studies',
     description:
-      'Our curriculum covers Quran recitation and memorization, Islamic studies, Arabic language, and character development.',
+      'Ask about Qur’an recitation, memorisation, Islamic studies and Arabic learning for your child.',
   },
   {
     icon: <GraduationCap className="h-10 w-10 text-primary" />,
-    title: 'Qualified Teachers',
+    title: 'Find a suitable class',
     description:
-      'Our teachers are well-qualified in Islamic sciences and experienced in teaching children of all ages.',
+      'Tell the Madrassah your child’s age and previous learning so the team can advise on the next step.',
   },
   {
     icon: <Users className="h-10 w-10 text-primary" />,
-    title: 'Supportive Environment',
+    title: 'Support for families',
     description:
-      'We provide a nurturing and inclusive environment where students can learn and grow in their faith.',
+      'Discuss any learning, access or communication needs with the team before enrolment.',
   },
 ];
 
@@ -32,8 +32,8 @@ const AboutSection = () => (
           About Our Madrassah
         </h2>
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Our Madrassah provides comprehensive Islamic education for children and youth, focusing on
-          Quranic studies, Islamic knowledge, and character development.
+          Islamic learning for children and young people, with a focus on Qur’anic studies,
+          Islamic knowledge and character. Contact the Madrassah to discuss current classes.
         </p>
       </div>
 

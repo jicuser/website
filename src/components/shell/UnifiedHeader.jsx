@@ -348,12 +348,10 @@ export default function UnifiedHeader() {
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
               <JamatiaLogo variant="wordmark" />
             </Link>
-            {pathname !== '/' && (
-              <Link to="/portal" className="jic-header-portal">
-                <User size={16} aria-hidden="true" />
-                <span>{accountLabel}</span>
-              </Link>
-            )}
+            <Link to="/portal" className="jic-header-portal">
+              <User size={16} aria-hidden="true" />
+              <span>{accountLabel}</span>
+            </Link>
             <div className="jic-mobile-quick-nav" ref={quickMenuRef}>
               <button
                 ref={quickMenuButtonRef}

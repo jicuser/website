@@ -56,7 +56,7 @@ const AboutPage = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Our History</h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              The journey of Jamatia Islamic Centre from its humble beginnings to what it is today.
+              How our founder members began the centre and laid the foundations for its work today.
             </p>
           </div>
 
@@ -137,7 +137,7 @@ const AboutPage = () => {
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
-                      Foster community engagement and service
+                      Bring people together to learn and serve
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
@@ -161,18 +161,17 @@ const AboutPage = () => {
                     <h3 className="text-2xl font-bold">Our Vision</h3>
                   </div>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    To be a leading Islamic centre that inspires spiritual growth, promotes
-                    educational excellence, and serves as a model of community engagement and
-                    interfaith harmony.
+                    To help our community deepen its faith, learn together and support one
+                    another, with understanding and respect for our neighbours.
                   </p>
                   <ul className="space-y-2 text-gray-600 dark:text-gray-300">
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
-                      Become a centre of excellence for Islamic education
+                      Support lifelong Islamic learning
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
-                      Develop programmes that address contemporary challenges
+                      Respond to changing community needs
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
@@ -180,7 +179,7 @@ const AboutPage = () => {
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">•</span>
-                      Lead initiatives for positive social change
+                      Encourage service and understanding
                     </li>
                   </ul>
                 </CardContent>

@@ -72,12 +72,11 @@ export default function ProjectTimeline() {
             The next chapter.
           </h1>
           <p>
-            Follow the spaces taking shape, explore each stage and see what your support makes
-            possible.
+            View the project areas, published updates and ways to support JIC.
           </p>
           <div className="ops-actions">
             <a className="ops-button" href="#project-stages">
-              Explore the journey <ArrowDown size={17} />
+              View project stages <ArrowDown size={17} />
             </a>
             <Link className="ops-secondary" to="/donate">
               Support JIC <ArrowRight size={17} />
@@ -100,12 +99,12 @@ export default function ProjectTimeline() {
       <section className="project-explorer" aria-labelledby="project-explore-title">
         <div>
           <p className="ops-eyebrow">Explore our spaces</p>
-          <h2 id="project-explore-title">A connected community.</h2>
-          <p>Choose a space to jump to its story.</p>
+          <h2 id="project-explore-title">Project areas</h2>
+          <p>Choose a space to see its published details.</p>
           <p className="project-summary">
             <strong>{completed}</strong> of {stages.length} stages marked complete
           </p>
-          <small>A visual guide to the project areas, not a floor plan.</small>
+          <small>This diagram shows project areas and their published status.</small>
         </div>
         <div className="project-map">
           {stages.map((s, i) => (
@@ -127,7 +126,7 @@ export default function ProjectTimeline() {
       </section>
       <div id="project-stages" className="project-stages-layout">
         <nav className="project-stage-nav" aria-label="Project stages">
-          <p className="ops-eyebrow">The journey</p>
+          <p className="ops-eyebrow">Project stages</p>
           {stages.map((s, i) => (
             <button
               key={s.id}
@@ -189,7 +188,7 @@ export default function ProjectTimeline() {
               ) : (
                 <div className="project-photo-placeholder">
                   <Camera size={26} />
-                  <span>Photos and milestones will be added to this stage.</span>
+                  <span>No photos are published for this stage.</span>
                 </div>
               )}
               {s.status === 'completed' && polycamEmbed(s.polycam) && (
@@ -239,8 +238,8 @@ export default function ProjectTimeline() {
       </div>
       {!stages.length && (
         <div className="ops-empty">
-          <h2>The project story is being prepared.</h2>
-          <p>Stages will appear here as the team adds them.</p>
+          <h2>No project stages are currently published.</h2>
+          <p>Contact the centre for the latest information about the works.</p>
         </div>
       )}
       {image && <ImageViewer image={image} onClose={() => setImage(null)} />}

@@ -140,8 +140,8 @@ export default function ItikaafRegistrationForm() {
       await submitWebsiteForm('itikaaf', payload);
       setForm(initialState);
       toast({
-        title: 'Registration successful',
-        description: 'Your details were saved. Thank you.',
+        title: 'Registration received',
+        description: 'Your details have been sent. Please confirm attendance arrangements with the centre.',
       });
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');

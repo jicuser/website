@@ -1,2 +1,19 @@
-## Pages
-- [Untitled Page](/youth): No description available
+# Jamatia Islamic Centre
+
+A place for prayer, Islamic learning and community life at 179–183 Woodlands Road,
+Sparkhill, Birmingham B11 4ER.
+
+## Public pages
+
+- [Prayer times](/prayer-times): Today’s prayer start and congregation times.
+- [Monthly timetable](/prayer-times/monthly): Prayer times and timetable downloads.
+- [Services](/services): Find guidance for centre services and enquiries.
+- [Education](/education): Adult classes, Madrassah and enrolment information.
+- [Madrassah](/madrassah): Pupil learning and information for parents.
+- [Youth](/youth): Learning, activities and opportunities for young people.
+- [Masjid project](/projects): Project areas and published updates.
+- [Donate](/donate): Bank transfer details and public fundraising pages.
+- [Contact](/contact): Address, telephone, email and an enquiry form.
+- [Privacy](/privacy): How website information is used.
+
+Current availability and arrangements should be confirmed with the centre.

@@ -29,7 +29,7 @@ function Recording({ path }) {
           src={url}
           onError={() => {
             setUrl('');
-            setError('Recording link expired. Open it again.');
+            setError('The recording could not play. Open it again or try later.');
           }}
         />
       ) : (
@@ -175,7 +175,7 @@ function PublishedSermons() {
       </form>
       {busy && <p role="status">Loading talks…</p>}
       {error && <p role="alert">{error}</p>}
-      {!busy && !error && !rows.length && <p>No published talks yet.</p>}
+      {!busy && !error && !rows.length && <p>No talks are listed for this search or page.</p>}
       {rows.map((talk) => (
         <Talk key={talk.id} talk={talk} />
       ))}

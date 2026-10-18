@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { withRequestTimeout } from '@/lib/requestTimeout';
+import { accountReturnUrl } from '@/features/account/config';
 
 export default function AccountRecoveryPage() {
   const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ export default function AccountRecoveryPage() {
       const { error: failure } = await withRequestTimeout(
         () =>
           supabase.auth.resetPasswordForEmail(email.trim(), {
-            redirectTo: new URL('/admin/setup', window.location.origin).href,
+            redirectTo: accountReturnUrl('/admin/setup', window.location.origin),
           }),
         { timeoutMs: 15000 },
       );

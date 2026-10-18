@@ -1,0 +1,405 @@
+/* Original JIC feature sections. Shared palette belongs to theme.css. */
+.jic-experience {
+  width: min(1120px, calc(100% - 40px));
+  margin: clamp(56px, 8vw, 96px) auto;
+}
+.jic-experience-heading {
+  max-width: 680px;
+  margin: 0 auto 36px;
+  text-align: center;
+}
+.jic-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 99px;
+  padding: 8px 14px;
+  background: var(--jic-experience-mint);
+  color: var(--jic-teal);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.jic-experience-heading h2,
+.jic-account-connection h2 {
+  margin: 18px 0;
+  font-family: var(--jic-heading-font);
+  font-size: clamp(30px, 4vw, 48px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.jic-experience-heading h2 em {
+  color: var(--jic-teal);
+  font-weight: 400;
+}
+.jic-experience-heading > p {
+  margin: 0;
+  color: var(--jic-text-secondary);
+  font-size: 17px;
+  line-height: 1.75;
+}
+.jic-learning-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(28px, 6vw, 80px);
+  align-items: center;
+}
+.jic-choice-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--jic-border);
+  border-radius: 99px;
+  background: var(--jic-bg-secondary);
+  margin-bottom: 24px;
+}
+.jic-choice-tabs button {
+  border-radius: 99px;
+  padding: 10px 18px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--jic-text-secondary);
+}
+.jic-choice-tabs [aria-selected='true'] {
+  background: var(--jic-teal);
+  color: var(--jic-bg);
+  box-shadow: 0 3px 10px #00291a12;
+}
+.jic-learning-copy h3 {
+  font-family: var(--jic-heading-font);
+  font-size: 30px;
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  margin-bottom: 16px;
+}
+.jic-learning-copy [role='tabpanel'] > p {
+  color: var(--jic-text-secondary);
+  font-size: 16px;
+  line-height: 1.8;
+  margin-bottom: 22px;
+}
+.jic-feature-points {
+  display: grid;
+  gap: 13px;
+  padding: 0;
+  list-style: none;
+  margin-bottom: 26px;
+}
+.jic-feature-points li {
+  display: flex;
+  align-items: start;
+  gap: 11px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.jic-feature-points svg {
+  color: var(--jic-teal);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.jic-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--jic-teal);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--jic-teal) 30%, transparent);
+  text-underline-offset: 7px;
+}
+.jic-text-link:hover {
+  text-decoration-color: currentColor;
+}
+.jic-learning-visual {
+  position: relative;
+  min-height: 370px;
+  display: grid;
+  place-items: center;
+  padding: 20px 20px 44px;
+}
+.jic-visual-orbit {
+  position: absolute;
+  width: min(100%, 380px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--jic-experience-mint), transparent 75%);
+}
+.jic-learning-notebook {
+  position: relative;
+  width: min(100%, 300px);
+  padding: 24px;
+  border: 1px solid var(--jic-border);
+  border-radius: 20px;
+  background: var(--jic-surface);
+  box-shadow: 0 24px 40px #183b2720;
+  transform: rotate(-3deg);
+}
+.jic-notebook-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--jic-teal);
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--jic-border);
+}
+.jic-notebook-symbol {
+  margin: 26px 0 16px;
+  color: var(--jic-teal);
+}
+.jic-learning-notebook > strong {
+  display: block;
+  white-space: pre-line;
+  font-family: var(--jic-heading-font);
+  font-size: 29px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.jic-notebook-rule {
+  display: block;
+  width: 42px;
+  height: 3px;
+  background: var(--jic-action);
+  margin: 20px 0;
+  border-radius: 2px;
+}
+.jic-learning-notebook > p {
+  display: flex;
+  gap: 7px;
+  align-items: start;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--jic-text-secondary);
+}
+.jic-learning-notebook > p svg {
+  color: var(--jic-teal);
+  flex-shrink: 0;
+}
+.jic-visual-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: absolute;
+  bottom: 18px;
+  right: 4px;
+  padding: 15px 18px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+  box-shadow: 0 12px 25px #183b2715;
+  color: var(--jic-teal);
+}
+.jic-visual-note span {
+  color: var(--jic-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+.jic-visual-note small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--jic-text-secondary);
+  margin-top: 3px;
+}
+.jic-account-connection {
+  background: var(--jic-experience-green);
+  color: #f8faf3;
+  padding: clamp(40px, 6vw, 72px) 20px;
+  margin-block: 72px;
+}
+.jic-account-connection-inner {
+  width: min(1080px, 100%);
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center;
+  gap: clamp(32px, 6vw, 80px);
+}
+.jic-account-connection .jic-section-label {
+  background: #ffffff12;
+  color: #bee6d2;
+}
+.jic-account-connection h2 {
+  color: #f8faf3;
+}
+.jic-account-connection h2 em {
+  color: #b6e0c9;
+}
+.jic-account-connection-inner > div > p {
+  max-width: 480px;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #d0ddd3;
+}
+.jic-solid-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 22px;
+  background: #f5eedc;
+  color: #123d32;
+  border-radius: 99px;
+  font-weight: 700;
+  margin-top: 24px;
+}
+.jic-solid-link:hover {
+  background: #fffdf7;
+}
+.jic-account-connection-inner > div > p.jic-account-help {
+  margin-top: 14px;
+  font-size: 13px;
+}
+.jic-account-help a {
+  color: #f5eedc;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.jic-account-steps {
+  display: grid;
+  gap: 12px;
+}
+.jic-account-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #739b854d;
+  border-radius: 16px;
+  background: #ffffff08;
+}
+.jic-step-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffffff10;
+  color: #b6e0c9;
+  flex-shrink: 0;
+}
+.jic-account-step strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+}
+.jic-account-step small {
+  display: block;
+  color: #c7dace;
+  font-size: 13px;
+  margin-top: 4px;
+}
+.jic-step-number {
+  margin-left: auto;
+  color: #b6d4c4;
+  font-family: var(--jic-heading-font);
+  font-size: 21px;
+}
+.jic-account-steps > p {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 6px 4px 0;
+  color: #b5ccbc;
+}
+.jic-account-steps > p svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.jic-question-list {
+  max-width: 820px;
+  margin-inline: auto;
+}
+.jic-question-list details {
+  margin-top: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 16px;
+  background: var(--jic-surface);
+}
+.jic-question-list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 600;
+  list-style: none;
+}
+.jic-question-list summary::-webkit-details-marker {
+  display: none;
+}
+.jic-question-list summary svg {
+  color: var(--jic-teal);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.jic-question-list [open] summary svg {
+  transform: rotate(45deg);
+}
+.jic-question-list [open] {
+  border-color: color-mix(in srgb, var(--jic-teal) 45%, var(--jic-border));
+  background: color-mix(in srgb, var(--jic-experience-mint) 24%, var(--jic-surface));
+}
+.jic-question-list details > div {
+  padding: 0 24px 20px;
+}
+.jic-question-list details p {
+  color: var(--jic-text-secondary);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+@media (max-width: 767px) {
+  .jic-experience {
+    width: calc(100% - 32px);
+    margin-block: 52px;
+  }
+  .jic-experience-heading {
+    margin-bottom: 28px;
+  }
+  .jic-experience-heading > p {
+    font-size: 15px;
+  }
+  .jic-learning-layout,
+  .jic-account-connection-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .jic-learning-copy h3 {
+    font-size: 27px;
+  }
+  .jic-learning-visual {
+    min-height: 340px;
+  }
+  .jic-account-connection {
+    margin-block: 52px;
+  }
+  .jic-question-list summary {
+    padding: 18px;
+    font-size: 15px;
+  }
+  .jic-question-list details > div {
+    padding: 0 18px 18px;
+  }
+  .jic-home-prayer-main {
+    padding: 12px 16px 4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jic-question-list summary svg {
+    transition: none;
+  }
+}

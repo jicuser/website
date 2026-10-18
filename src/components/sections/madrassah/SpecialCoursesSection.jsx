@@ -7,21 +7,21 @@ const courses = [
   {
     icon: <Book className="h-10 w-10 text-primary" />,
     title: 'Tajweed Course',
-    description: 'Learn the proper rules of Quranic recitation with our certified Qari.',
-    duration: '10 weeks',
+    description: 'Ask about learning the rules of Qur’an recitation and finding a suitable class.',
+    duration: 'Confirm with the Madrassah',
   },
   {
     icon: <Award className="h-10 w-10 text-primary" />,
-    title: 'Hifz Program',
-    description: 'Memorization of the Holy Quran under the guidance of experienced Huffaz.',
-    duration: 'Ongoing',
+    title: 'Hifz',
+    description: 'Ask about Qur’an memorisation, prior learning and the commitment involved.',
+    duration: 'Confirm with the Madrassah',
   },
   {
     icon: <GraduationCap className="h-10 w-10 text-primary" />,
     title: 'Arabic for Beginners',
     description:
-      'Learn the basics of Arabic language to better understand the Quran and Islamic texts.',
-    duration: '12 weeks',
+      'Ask about introductory Arabic for reading and understanding Islamic texts.',
+    duration: 'Confirm with the Madrassah',
   },
 ];
 
@@ -29,9 +29,10 @@ const SpecialCoursesSection = () => (
   <section className="py-16">
     <div className="container mx-auto px-4">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Special Courses</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Further learning</h2>
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          In addition to our regular programs, we offer specialized courses throughout the year.
+          Contact the Madrassah about these areas of study. Course availability, duration and
+          entry requirements need confirmation.
         </p>
       </div>
 
@@ -51,7 +52,7 @@ const SpecialCoursesSection = () => (
                   <div>
                     <h3 className="text-xl font-bold">{course.title}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Duration: {course.duration}
+                      Availability: {course.duration}
                     </p>
                   </div>
                 </div>

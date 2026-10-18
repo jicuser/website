@@ -134,9 +134,9 @@ export default function DonationsPage() {
         <div>
           <p className="ops-eyebrow">A little from each of us. More for everyone.</p>
           <h1>
-            Keep goodness
+            Support your
             <br />
-            growing.
+            centre.
           </h1>
           <p>Support the place where our community prays, learns and comes together.</p>
           <div className="ops-actions">
@@ -157,7 +157,7 @@ export default function DonationsPage() {
         <div className="ops-heading">
           <div>
             <p className="ops-eyebrow">Giving, in every season</p>
-            <h2>Find your reason to give.</h2>
+            <h2>Choose a cause</h2>
           </div>
           <Link to="/financial-history">
             View financial history <ArrowRight size={16} />
@@ -178,10 +178,10 @@ export default function DonationsPage() {
                 <span>
                   {
                     {
-                      community: 'Bring people together.',
-                      ramadan: 'Make generosity a habit.',
-                      education: 'Support a place to learn.',
-                      masjid: 'Care for our shared home.',
+                      community: 'View community campaigns.',
+                      ramadan: 'View Ramadan campaigns.',
+                      education: 'View learning campaigns.',
+                      masjid: 'View masjid campaigns.',
                     }[id]
                   }
                 </span>
@@ -194,7 +194,7 @@ export default function DonationsPage() {
         <div className="ops-heading">
           <div>
             <p className="ops-eyebrow">Community fundraisers</p>
-            <h2>Good intentions. Shared effort.</h2>
+            <h2>Fundraising for JIC</h2>
           </div>
           <Link to="/fundraise/new">
             Create your page <ArrowRight size={16} />
@@ -206,8 +206,8 @@ export default function DonationsPage() {
             <Heart size={32} />
             <h3>
               {category === 'all'
-                ? 'Be part of the first campaign.'
-                : 'No approved campaigns in this category yet.'}
+                ? 'No public campaigns are currently listed.'
+                : 'No public campaigns are currently listed in this category.'}
             </h3>
             <p>
               Create a personal page, choose a target and invite friends to support JIC. The team
@@ -470,11 +470,11 @@ function MyFundraising() {
       <header className="ops-intro">
         <p className="ops-eyebrow">Make it personal</p>
         <h1>
-          Your story can
+          Start a fundraiser
           <br />
-          start something good.
+          for JIC.
         </h1>
-        <p>Create a page for JIC, invite your friends and follow your progress.</p>
+        <p>Create a page for review, then share the approved page with friends and family.</p>
       </header>
       <ol className="ops-steps">
         <li>

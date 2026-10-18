@@ -7,7 +7,8 @@ export default function ClassesCoursesPage() {
   return (
     <div className="page-transition">
       <PageHeading title="Madrassah Classes">
-        Explore the programme information below or contact the Madrassah about a place.
+        Explore the learning topics below. The Madrassah can confirm current classes, times and
+        places.
       </PageHeading>
       <ProgramsSection />
       <SpecialCoursesSection />

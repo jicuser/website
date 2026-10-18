@@ -32,7 +32,7 @@ export default function MonthlyPrayerTable({
       </header>
       {timetable.rows.length === 0 ? (
         <p className="monthly-timetable-empty">
-          This month’s timetable has not been uploaded yet. Please contact the centre.
+          This month’s timetable is unavailable. Please contact the centre.
         </p>
       ) : (
         <>

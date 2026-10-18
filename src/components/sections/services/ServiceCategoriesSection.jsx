@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { NAV_GROUPS } from '@/content/nav';
 import PageHeading from '@/components/PageHeading';
-import ServicesOverview from '@/components/services/ServicesOverview';
+import ServicesLanding from '@/features/services/ServicesLanding';
 import ReligiousServicesTab from './ReligiousServicesTab';
 import EducationalProgramsTab from './EducationalProgramsTab';
 import ServiceJourney from '@/components/services/ServiceJourney';
@@ -27,7 +27,7 @@ export default function ServiceCategoriesSection() {
     return <ServiceJourney journey={SERVICE_JOURNEYS.community} />;
   const Category = categories[path];
   const title = services.children.find((page) => page.path === path)?.name;
-  if (!Category) return <ServicesOverview />;
+  if (!Category) return <ServicesLanding />;
   return (
     <>
       <PageHeading title={title} />

@@ -17,14 +17,13 @@ const PrivacyPage = () => {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
               Privacy Policy
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-8">Last Updated: October 17, 2026</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-8">Last updated: 18 October 2026</p>
 
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
-                At Jamatia Islamic Centre, we are committed to protecting your privacy and ensuring
-                the security of your personal information. This Privacy Policy explains how we
-                collect, use, disclose, and safeguard your information when you visit our website,
-                use our services, or interact with us in any way.
+                This policy explains how Jamatia Islamic Centre uses personal information provided
+                through this website and its services. Contact the centre if you need to ask about
+                a particular form, record or use of your information.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">Information We Collect</h2>
@@ -33,20 +32,20 @@ const PrivacyPage = () => {
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Register for our services or events</li>
-                <li>Sign up for our newsletter</li>
+                <li>Request portal access or use your JIC account</li>
                 <li>Fill out a contact form</li>
-                <li>Enroll in our Madrassah or other educational programs</li>
-                <li>Make a donation</li>
-                <li>Participate in surveys or feedback forms</li>
+                <li>Enrol in our Madrassah or other educational programmes</li>
+                <li>Make a donation or submit a fundraising page</li>
+                <li>Request a booking, certificate or other centre service</li>
               </ul>
 
               <p>The personal information we collect may include:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Name, email address, phone number, and mailing address</li>
-                <li>Date of birth (for age-specific programs)</li>
-                <li>Payment information (for donations or service fees)</li>
-                <li>Emergency contact information</li>
-                <li>Photographs or videos (with your consent)</li>
+                <li>Age or date of birth, where needed for an activity or enrolment</li>
+                <li>Invoice, donation and recorded payment details</li>
+                <li>Emergency contacts and relevant health information for activities</li>
+                <li>Files you upload with a form, where requested</li>
               </ul>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">How We Use Your Information</h2>
@@ -54,10 +53,10 @@ const PrivacyPage = () => {
               <ul className="list-disc pl-6 space-y-2">
                 <li>Providing and maintaining our services</li>
                 <li>Processing donations and payments</li>
-                <li>Sending newsletters and communications about our activities and events</li>
-                <li>Responding to your inquiries and requests</li>
+                <li>Communicating with you about your account, activity or request</li>
+                <li>Responding to your enquiries and requests</li>
                 <li>Improving our website and services</li>
-                <li>Administering educational programs</li>
+                <li>Administering educational programmes</li>
                 <li>Complying with legal obligations</li>
               </ul>
 
@@ -77,17 +76,17 @@ const PrivacyPage = () => {
                 own banking service.
               </p>
               <p>
-                Minimal DBS review records are restricted to authorised safeguarding staff and the
-                account owner. Staff must establish an appropriate lawful basis and policy before
-                recording information. The tracker does not store certificate scans or
-                criminal-record details. Internal review and retention dates help the team reassess
-                what needs to be kept.
+                Safeguarding review records have restricted access. Contact the centre directly
+                about safeguarding information and how long it is kept. Do not send DBS
+                certificates or criminal record details through general enquiry forms.
               </p>
               <p>
-                Access requests use a short-lived, hashed network identifier to limit abuse. Loading
-                an optional social preview or Polycam walkthrough connects to that provider and is
-                subject to its privacy and cookie policies. These external previews load when you
-                choose to open them.
+                Access requests include a temporary identifier derived from your network address
+                to limit repeated abuse. The contact map loads from Google Maps, and the Qur’an
+                reader requests text from AlQuran Cloud. Social previews and Polycam walkthroughs
+                connect to their providers when you choose to open them. These services receive
+                connection information when their content loads and apply their own privacy and
+                cookie policies.
               </p>
               <p>
                 For access, correction, deletion or retention questions, contact the centre using
@@ -102,11 +101,11 @@ const PrivacyPage = () => {
               <ul className="list-disc pl-6 space-y-2">
                 <li>With your consent</li>
                 <li>
-                  To trusted third parties who assist us in operating our website, conducting our
-                  business, or servicing you
+                  With service providers needed to operate the website, manage records or respond
+                  to your request
                 </li>
                 <li>
-                  To comply with legal requirements, such as responding to a subpoena or court order
+                  To meet legal requirements, including a valid court order
                 </li>
                 <li>
                   To protect our rights, property, or safety, or the rights, property, or safety of
@@ -131,44 +130,45 @@ const PrivacyPage = () => {
               </p>
               <h2 className="text-2xl font-bold mt-8 mb-4">Data Security</h2>
               <p>
-                We implement appropriate security measures to protect your personal information from
-                unauthorized access, alteration, disclosure, or destruction. However, no method of
+                We use access controls to protect personal information from unauthorised access,
+                alteration, disclosure or destruction. However, no method of
                 transmission over the Internet or electronic storage is 100% secure, and we cannot
                 guarantee absolute security.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">Your Rights</h2>
               <p>
-                Depending on your location, you may have certain rights regarding your personal
-                information, including:
+                You can contact the centre about your data protection rights, including:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>The right to access the personal information we hold about you</li>
                 <li>The right to request correction of inaccurate information</li>
                 <li>The right to request deletion of your information</li>
                 <li>The right to withdraw consent</li>
-                <li>The right to lodge a complaint with a supervisory authority</li>
+                <li>The right to raise a concern with the UK Information Commissioner’s Office</li>
               </ul>
 
-              <h2 className="text-2xl font-bold mt-8 mb-4">Cookies and Tracking Technologies</h2>
+              <h2 className="text-2xl font-bold mt-8 mb-4">Cookies and Browser Storage</h2>
               <p>
-                Our website may use cookies and similar tracking technologies to enhance your
-                experience, analyze usage patterns, and deliver personalized content. You can
-                control cookies through your browser settings.
+                The website uses browser storage for appearance preferences, sign-in within your
+                current tab, reminder settings and display connections. You can manage or clear
+                website data in your browser settings. Clearing it may sign you out or reset your
+                preferences. External services may use their own cookies when their content loads.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">Children's Privacy</h2>
               <p>
-                We do not knowingly collect personal information from children under 13 without
-                parental consent. If you believe we have collected information from a child under
-                13, please contact us immediately.
+                Parents and guardians may provide information about children when enquiring about
+                classes, registering for activities or requesting family access. Share only the
+                details requested. Contact the centre if you are concerned about a child’s
+                information or need to correct a record.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">Changes to This Privacy Policy</h2>
               <p>
                 We may update our Privacy Policy from time to time. We will notify you of any
                 changes by posting the new Privacy Policy on this page and updating the "Last
-                Updated" date.
+                updated" date.
               </p>
 
               <h2 className="text-2xl font-bold mt-8 mb-4">Contact Us</h2>

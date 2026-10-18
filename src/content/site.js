@@ -1,7 +1,7 @@
 export const SITE = {
   name: 'Jamatia Islamic Centre',
   tagline:
-    'A place of worship, learning, and community service dedicated to spreading the message of peace and harmony.',
+    'A place for prayer, Islamic learning and community life in Sparkhill, Birmingham.',
 
   address: {
     line1: '179–183 Woodlands Road',
@@ -12,7 +12,7 @@ export const SITE = {
 
   phone: '0121 778 6612',
   email: 'info@jicwoodlands.org.uk',
-  hours: 'Open 24 hours',
+  hours: 'Contact the centre to confirm opening times.',
 
   radio: {
     streamUrl: 'https://jicmosque.radioca.st/stream',

@@ -28,7 +28,7 @@ function writeStorage(key, value) {
 
 export function AppearanceProvider({ children }) {
   const [theme, setTheme] = useState(() =>
-    readStorage('jic-theme', 'dark') === 'light' ? 'light' : 'dark',
+    readStorage('jic-theme', 'light') === 'dark' ? 'dark' : 'light',
   );
   const [glassEnabled, setGlassEnabled] = useState(
     () => readStorage('jic_glass_enabled', 'true') !== 'false',
@@ -40,7 +40,7 @@ export function AppearanceProvider({ children }) {
     root.dataset.theme = theme;
     root.dataset.surface = glassEnabled ? 'glass' : 'solid';
     root.style.colorScheme = theme;
-    root.style.backgroundColor = theme === 'dark' ? '#080f1d' : '#fafbfd';
+    root.style.backgroundColor = theme === 'dark' ? '#080f1d' : '#f9f7f1';
   }, [theme, glassEnabled]);
 
   useEffect(() => {

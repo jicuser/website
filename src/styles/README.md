@@ -55,3 +55,5 @@ Glass uses CSS tint, borders and backdrop blur. Mobile blur sizes are smaller, c
 Secondary routes, including admin, TV and financial charts, use [React lazy loading](https://react.dev/reference/react/lazy). The public header remains visible while a secondary route downloads. `PageLoadBoundary` provides a reload action if a chunk fails. In the production build, the main App chunk fell from 798 KB (231 KB gzip) to 194 KB (63 KB gzip); this measures that chunk, not total page weight or device load time. HLS remains a separate optional player download.
 
 Run `npm run validate`. The colour test checks clear, frosted and dense backgrounds in both themes against black and white backgrounds. Check a real phone before claiming a visual or frame-rate result.
+
+`community-experience.css` owns the learning choices, account introduction and visitor question sections. Service discovery is owned by `services.css`.

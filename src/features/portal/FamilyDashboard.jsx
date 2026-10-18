@@ -62,7 +62,7 @@ export default function FamilyDashboard({ data, auth, reload, failures = [] }) {
     if (key === 'student') next.delete('course');
     setParams(next);
   }
-  if (!student) return <p className="workspace-card">No family records are linked to this account.</p>;
+  if (!student) return <p className="workspace-card">No family records are linked to this account. Contact the centre if you need family access.</p>;
   const records = familyRecords(data, student.id, course?.id);
   const attendance = studentAttendance(data, student.id, course?.id);
   const meetings = data.learning_meetings.filter((row) => row.student_id === student.id &&

@@ -35,7 +35,7 @@ test('saved theme and glass preference are applied before React starts', () => {
       assert.equal(classes.has('dark'), theme === 'dark');
       assert.equal(root.dataset.surface, glass === 'true' ? 'glass' : 'solid');
       assert.equal(root.style.colorScheme, theme);
-      assert.equal(root.style.backgroundColor, theme === 'dark' ? '#080f1d' : '#fafbfd');
+      assert.equal(root.style.backgroundColor, theme === 'dark' ? '#080f1d' : '#f9f7f1');
     }
   }
 });
@@ -47,8 +47,8 @@ test('missing, malformed or blocked storage leaves a usable default appearance',
     [{}, true],
   ]) {
     const { root, classes } = startAppearance(saved, blocked);
-    assert.equal(root.dataset.theme, 'dark');
+    assert.equal(root.dataset.theme, 'light');
     assert.equal(root.dataset.surface, 'glass');
-    assert.equal(classes.has('dark'), true);
+    assert.equal(classes.has('dark'), false);
   }
 });

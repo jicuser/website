@@ -94,7 +94,7 @@ export default function PortalHome({ data, auth, params, areas, busy, failures }
         ) : failures.includes('learning_sessions') ? (
           <p>Class information is unavailable. Please refresh.</p>
         ) : !nextSessions.length ? (
-          <p>No upcoming sessions are in the loaded schedule.</p>
+          <p>No upcoming classes are listed for your account.</p>
         ) : (
           <ul className="portal-record-list">
             {nextSessions.map((session) => (

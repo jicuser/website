@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadAdminOverview, summariseForms } from '../src/features/admin/overview.js';
+import { findAdminTasks, getAdminEntrySections } from '../src/features/admin/taskNavigation.js';
+import { ADMIN_SECTIONS, ADMIN_GROUPS } from '../src/content/adminNavigation.js';
+import { hasPermission } from '../supabase/functions/_shared/access.js';
+import {
+  activityActionLabel,
+  activityAreaLabel,
+  loadAdminActivity,
+} from '../src/features/admin/activity.js';
 
 test('overview skips unauthorised and disabled areas entirely', async () => {
   const client = new Proxy(
@@ -58,4 +66,204 @@ test('a failed queue is unavailable while other queues keep their real counts', 
   });
   assert.deepEqual(seen, ['form_submissions', 'admin_forms_overview']);
   assert.deepEqual(summariseForms([]), { waiting: 0, complete: 0, actions: 0, forms: 0 });
+});
+
+test('a permitted queue can report a real zero without querying any other area', async () => {
+  const signal = new AbortController().signal;
+  for (const [permission, table, filters, key] of [
+    [
+      'forms_contact',
+      'form_submissions',
+      [
+        ['kind', 'contact'],
+        ['status', 'new'],
+      ],
+      'messages',
+    ],
+    ['certificates', 'certificate_requests', [['status', 'pending']], 'certificates'],
+  ]) {
+    const seen = [];
+    const client = {
+      from(name) {
+        seen.push(name);
+        const applied = [];
+        return {
+          select() {
+            return this;
+          },
+          eq(column, value) {
+            applied.push([column, value]);
+            return this;
+          },
+          abortSignal(requestSignal) {
+            assert.equal(requestSignal, signal);
+            assert.deepEqual(applied, filters);
+            return Promise.resolve({ count: 0 });
+          },
+        };
+      },
+      rpc() {
+        throw new Error('No forms request permitted');
+      },
+    };
+    const result = await loadAdminOverview(client, {
+      can: (requested) => requested === permission,
+      certificatesEnabled: true,
+      signal,
+    });
+    assert.deepEqual(seen, [table]);
+    assert.deepEqual(result, { [key]: { value: 0, error: false } });
+  }
+});
+
+test('task search matches everyday words across fields and keeps unauthorised tasks hidden', () => {
+  const sections = [
+    { id: 'dashboard', name: 'Overview', permission: 'dashboard' },
+    {
+      id: 'prayer',
+      name: 'Prayer times',
+      permission: 'prayer_times',
+      group: 'Prayer & displays',
+      description: 'Update the timetable and Jummah times.',
+      keywords: ['edit', 'salah'],
+    },
+    {
+      id: 'users',
+      name: 'Staff & access',
+      permission: 'users',
+      group: 'Staff & system',
+      description: 'Invite staff and manage permissions.',
+      keywords: ['accounts', 'users'],
+    },
+  ];
+  const can = (permission) => ['dashboard', 'prayer_times'].includes(permission);
+  assert.deepEqual(
+    findAdminTasks(sections, can).map(({ id }) => id),
+    ['prayer'],
+  );
+  for (const query of ['  EDIT   salah ', 'timetable prayer', 'prayer & displays']) {
+    assert.deepEqual(
+      findAdminTasks(sections, can, query).map(({ id }) => id),
+      ['prayer'],
+    );
+  }
+  assert.deepEqual(findAdminTasks(sections, can, 'users'), []);
+  assert.deepEqual(findAdminTasks(sections, can, 'prayer accounts'), []);
+  assert.deepEqual(
+    findAdminTasks(sections, () => false),
+    [],
+  );
+});
+
+test('malformed response totals stay unavailable instead of becoming an empty inbox', async () => {
+  for (const value of [null, '', -1, 1.5, 'unknown', Number.MAX_SAFE_INTEGER + 1]) {
+    const client = {
+      rpc() {
+        return {
+          abortSignal: async () => ({
+            data: [{ new_count: value, done_count: 0, open_actions: 0 }],
+          }),
+        };
+      },
+    };
+    const result = await loadAdminOverview(client, {
+      can: (permission) => permission === 'forms',
+      certificatesEnabled: false,
+    });
+    assert.deepEqual(result.forms, { value: null, error: true });
+  }
+  assert.deepEqual(summariseForms([{ new_count: '3', done_count: 4, open_actions: '2' }]), {
+    waiting: 3,
+    complete: 4,
+    actions: 2,
+    forms: 1,
+  });
+});
+
+test('narrow staff roles keep real entry destinations and do not gain an overview link', () => {
+  for (const [profile, ids] of [
+    [{ permissions: ['tv'] }, ['tv']],
+    [{ permissions: [], has_assigned_forms: true }, ['forms']],
+    [{ permissions: ['media'] }, []],
+  ]) {
+    const can = (permission) => hasPermission({ ...profile, is_active: true }, permission);
+    const tasks = findAdminTasks(ADMIN_SECTIONS, can);
+    assert.deepEqual(
+      tasks.map(({ id }) => id),
+      ids,
+    );
+    const available = ADMIN_SECTIONS.filter(({ permission }) => can(permission));
+    const navigation = getAdminEntrySections(available.map(({ id }) => id));
+    assert.equal(navigation.overviewSection, can('dashboard') ? 'dashboard' : null);
+    assert.equal(navigation.defaultSection, can('dashboard') ? 'dashboard' : ids[0]);
+  }
+  assert.deepEqual(getAdminEntrySections(['finance', 'dashboard']), {
+    defaultSection: 'dashboard',
+    overviewSection: 'dashboard',
+  });
+});
+
+test('staff task groups retain a clear order and real tasks have useful search aliases', () => {
+  assert.equal(ADMIN_GROUPS[0], 'Workspace');
+  assert.equal(ADMIN_SECTIONS[0].id, 'dashboard');
+  assert.equal(new Set(ADMIN_GROUPS).size, ADMIN_GROUPS.length);
+  assert.ok(ADMIN_SECTIONS.every(({ group }) => ADMIN_GROUPS.includes(group)));
+  for (const [query, id] of [
+    ['announcements', 'announcements'],
+    ['audit', 'audit'],
+    ['users', 'users'],
+    ['YouTube', 'livestream'],
+    ['edit salah', 'prayer'],
+    ['invoices', 'finance'],
+  ]) {
+    assert.ok(findAdminTasks(ADMIN_SECTIONS, () => true, query).some((task) => task.id === id));
+  }
+});
+
+test('activity loading distinguishes a real empty log from failed and malformed reads', async () => {
+  const client = (response) => ({
+    from() {
+      return {
+        select() {
+          return this;
+        },
+        order() {
+          return this;
+        },
+        limit(size) {
+          assert.equal(size, 100);
+          return response;
+        },
+      };
+    },
+  });
+  assert.deepEqual(await loadAdminActivity(client({ data: [] })), []);
+  const rows = [{ id: 'record', action: 'UPDATE', table_name: 'page_content' }];
+  assert.deepEqual(await loadAdminActivity(client({ data: rows })), rows);
+  for (const response of [
+    { data: null },
+    { data: [null] },
+    { data: [], error: { message: 'Connection failed' } },
+  ]) {
+    await assert.rejects(loadAdminActivity(client(response)), /could not be loaded/);
+  }
+  await assert.rejects(
+    loadAdminActivity({
+      from() {
+        throw new Error('Network failure');
+      },
+    }),
+    /could not be loaded/,
+  );
+});
+
+test('activity labels explain known areas and retain readable unfamiliar names', () => {
+  assert.equal(activityAreaLabel('form_submissions'), 'Form responses');
+  assert.equal(activityAreaLabel('community_invoices'), 'Invoices');
+  assert.equal(activityActionLabel('REASSIGN'), 'Reassigned');
+  assert.equal(activityAreaLabel('new_record_area'), 'New record area');
+  assert.equal(activityActionLabel('CUSTOM_REVIEW'), 'Custom review');
+  assert.equal(activityAreaLabel('__proto__'), 'Proto');
+  assert.equal(activityAreaLabel(null), 'Centre records');
+  assert.equal(activityActionLabel(null), 'Change recorded');
 });

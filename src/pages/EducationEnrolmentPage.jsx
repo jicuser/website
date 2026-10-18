@@ -6,7 +6,7 @@ import PageChoices from '@/components/PageChoices';
 const choices = [
   {
     path: '/madrassah/enrolment',
-    description: 'Apply for a child to join the Madrassah.',
+    description: 'Enquire about a place for a child at the Madrassah.',
     icon: GraduationCap,
   },
   {

@@ -209,7 +209,7 @@ export default function WorshipPage() {
           <Link to="/worship/dalail-al-khayrat">
             <HeartHandshake />
             <h2>Dala’il al-Khayrat</h2>
-            <p>Salawat and daily reading.</p>
+            <p>Ask about salawat and the reading programme.</p>
           </Link>
           <Link to="/worship/daily-duas">
             <MoonStar />
@@ -279,8 +279,8 @@ export default function WorshipPage() {
         <section className="worship-reading-card">
           <h2>Dala’il al-Khayrat</h2>
           <p>
-            A dedicated place for JIC’s Dala’il al-Khayrat reading programme, salawat and related
-            resources.
+            Contact the centre for details of JIC’s Dala’il al-Khayrat reading programme, salawat
+            and related resources.
           </p>
         </section>
       )}

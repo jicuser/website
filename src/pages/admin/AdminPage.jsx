@@ -45,6 +45,12 @@ import { fromDateTimeLocal, toDateTimeLocal } from '@/lib/dateTime';
 import TeamEditor from '@/components/admin/TeamEditor';
 import FormsInbox from '@/components/admin/FormsInbox';
 import { ADMIN_SECTIONS, ADMIN_GROUPS } from '@/content/adminNavigation';
+import { getAdminEntrySections } from '@/features/admin/taskNavigation';
+import {
+  activityActionLabel,
+  activityAreaLabel,
+  loadAdminActivity,
+} from '@/features/admin/activity';
 
 const FinanceManager = lazy(() => import('@/features/operations/Finance'));
 const FundraisingManager = lazy(() => import('@/features/operations/FundraisingManager'));
@@ -678,17 +684,14 @@ function LivestreamSection() {
 function AuditSection() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const load = useCallback(() => {
     setLoading(true);
-    supabase
-      .from('audit_log')
-      .select('id,actor_id,actor_name,table_name,record_id,action,created_at')
-      .order('created_at', { ascending: false })
-      .limit(100)
-      .then(({ data }) => {
-        setRows(data || []);
-        setLoading(false);
-      });
+    setError('');
+    loadAdminActivity(supabase)
+      .then(setRows)
+      .catch((failure) => setError(failure.message))
+      .finally(() => setLoading(false));
   }, []);
   useEffect(() => {
     load();
@@ -697,15 +700,19 @@ function AuditSection() {
     <div>
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Audit log</h2>
+          <h2 className="text-2xl font-bold">Activity log</h2>
         </div>
-        <button className={ghost} onClick={load}>
+        <button className={ghost} onClick={load} disabled={loading}>
           <RefreshCw size={14} />
-          Refresh
+          {loading ? 'Loading…' : error ? 'Try again' : 'Refresh'}
         </button>
       </div>
       {loading ? (
         <Empty>Loading…</Empty>
+      ) : error ? (
+        <p className="admin-error" role="alert">
+          {error}
+        </p>
       ) : rows.length === 0 ? (
         <Empty>No changes recorded yet.</Empty>
       ) : (
@@ -723,8 +730,8 @@ function AuditSection() {
               {rows.map((row) => (
                 <tr key={row.id} className="border-t">
                   <td className="p-3">{formatDateTime(row.created_at)}</td>
-                  <td className="p-3 font-semibold">{row.action}</td>
-                  <td className="p-3">{row.table_name}</td>
+                  <td className="p-3 font-semibold">{activityActionLabel(row.action)}</td>
+                  <td className="p-3">{activityAreaLabel(row.table_name)}</td>
                   <td className="p-3">
                     <strong>{row.actor_name || 'Staff'}</strong>
                   </td>
@@ -749,8 +756,7 @@ export default function AdminPage() {
   const registerBack = useCallback((handler) => {
     setSectionBack(() => (typeof handler === 'function' ? handler : null));
   }, []);
-  const defaultSection =
-    allowed.find(([key]) => key === 'dashboard')?.[0] || allowed[0]?.[0] || 'dashboard';
+  const { defaultSection, overviewSection } = getAdminEntrySections(allowed.map(([key]) => key));
   const active = allowed.some((item) => item[0] === params.get('section'))
     ? params.get('section')
     : defaultSection;
@@ -825,6 +831,7 @@ export default function AdminPage() {
 
   const auditName = user?.user_metadata?.audit_name || profile?.display_name || 'User';
   const sectionName = allowed.find(([key]) => key === active)?.[1] || 'Admin';
+  const sectionDescription = ADMIN_SECTIONS.find(({ id }) => id === active)?.description;
   const shortSaveLabel = saveLabel.split(' ')[0];
 
   return (
@@ -879,14 +886,17 @@ export default function AdminPage() {
         </div>
       </header>
       <div className="admin-toolbar">
-        <strong className="admin-desktop-current">{sectionName}</strong>
+        <div className="admin-desktop-current">
+          <strong>{sectionName}</strong>
+          {sectionDescription && <small>{sectionDescription}</small>}
+        </div>
         <nav className="admin-mobile-section" aria-label="Current admin section">
-          {active !== 'dashboard' && (
+          {(sectionBack || (overviewSection && active !== overviewSection)) && (
             <button
               className="admin-mobile-back"
               disabled={saving}
               aria-label="Back"
-              onClick={() => (sectionBack ? sectionBack() : chooseSection(defaultSection))}
+              onClick={() => (sectionBack ? sectionBack() : chooseSection(overviewSection))}
             >
               <ArrowLeft size={18} aria-hidden="true" />
               <span>Back</span>
@@ -900,19 +910,27 @@ export default function AdminPage() {
               disabled={saving}
               onChange={(event) => chooseSection(event.target.value)}
             >
-              {allowed.map(([key, name]) => (
-                <option key={key} value={key}>
-                  {name}
-                </option>
-              ))}
+              {SECTION_GROUPS.filter(([, keys]) => allowed.some(([key]) => keys.includes(key))).map(
+                ([group, keys]) => (
+                  <optgroup key={group} label={group}>
+                    {allowed
+                      .filter(([key]) => keys.includes(key))
+                      .map(([key, name]) => (
+                        <option key={key} value={key}>
+                          {name}
+                        </option>
+                      ))}
+                  </optgroup>
+                ),
+              )}
             </select>
           </label>
-          {active !== 'dashboard' && (
+          {overviewSection && active !== overviewSection && (
             <button
               className="admin-mobile-overview"
               disabled={saving}
               aria-label="Overview"
-              onClick={() => chooseSection(defaultSection)}
+              onClick={() => chooseSection(overviewSection)}
             >
               <Home size={18} aria-hidden="true" />
               <span>Overview</span>

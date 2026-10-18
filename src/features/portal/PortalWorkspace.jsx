@@ -46,7 +46,7 @@ export default function PortalWorkspace({ auth }) {
           Sign out
         </button>
       </div>
-      <nav className="workspace-tabs portal-navigation" aria-label="Workspace areas">
+      <nav className="workspace-tabs portal-navigation" aria-label="Account areas">
         {areas.map(([id, title]) => (
           <Link
             key={id}
@@ -59,8 +59,8 @@ export default function PortalWorkspace({ auth }) {
       </nav>
       {failures.length > 0 && (
         <p role="alert" className="workspace-card">
-          Some records could not be loaded. Available areas remain usable; refresh to try the
-          missing records again.
+          Some records could not be loaded. You can still use the information shown. Select
+          Refresh to try again.
         </p>
       )}
       {actionError && <p role="alert">{actionError}</p>}
@@ -114,8 +114,8 @@ export default function PortalWorkspace({ auth }) {
         {area === 'talks' && auth.isOwner && <SermonManager />}
       </Suspense>
       <p className="workspace-meta">
-        Learning summaries use up to 500 authorised records per area. Fees and forms use their own
-        paginated lists.
+        Your learning summary may not show every record. Contact the centre if you need an older
+        record or think something is missing.
       </p>
     </>
   );

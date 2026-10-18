@@ -42,7 +42,7 @@ export default function CustomFormsWorkspace({ auth, initialMine = false }) {
       setDefinitions([]);
       setAssignments([]);
       setPublicForms([]);
-      setError('Forms are not available right now. Please try again or contact an administrator.');
+      setError('Forms are not available right now. Please try again or contact the centre.');
     } finally {
       setLoading(false);
     }

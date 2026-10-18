@@ -7,7 +7,7 @@ import CallToActionSection from '@/components/sections/madrassah/CallToActionSec
 
 const overviewTiles = [
   {
-    description: 'Admissions, registration and information for new pupils.',
+    description: 'Ask about admissions and a place for a new pupil.',
     path: '/madrassah/enrolment',
     icon: UserPlus,
   },

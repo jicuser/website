@@ -16,6 +16,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   webServer: {
+    reuseExistingServer: !process.env.CI,
     command: 'npm run dev -- --host 127.0.0.1 --port 4319',
     url: 'http://127.0.0.1:4319',
     env: {

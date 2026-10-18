@@ -60,7 +60,7 @@ export default function CustomFormsInbox({
       .catch(() => {
         if (active) {
           setResult({ rows: [], total: 0, new_count: 0, done_count: 0 });
-          setError('Responses could not be loaded. Please refresh or contact an administrator.');
+          setError('Responses could not be loaded. Please refresh or contact the centre.');
         }
       })
       .finally(() => {

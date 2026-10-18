@@ -18,7 +18,7 @@ export default function CertificatesGuidePage() {
       <section className="service-hero">
         <div className="service-hero-copy">
           <p className="service-eyebrow">Your milestones, recorded</p>
-          <h1>Certificates, made clear.</h1>
+          <h1>JIC certificates</h1>
           <p>
             Find the record you need, understand what the office checks and know where to find it
             once issued.
@@ -99,7 +99,7 @@ export default function CertificatesGuidePage() {
       </section>
       <section className="service-detail-grid">
         <div className="service-checklist">
-          <h2>Your details stay private</h2>
+          <h2>What a verification link shows</h2>
           <p>
             The full online certificate is available through your account. The verification link
             shows the reference, type, issuer, issue date and whether the record is valid. It does

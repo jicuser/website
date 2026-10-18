@@ -10,6 +10,7 @@ import {
 } from '../src/lib/timetableWallpaper.js';
 import { buildMonthlyTimetable } from '../src/lib/monthlyTimetable.js';
 import { PROGRAMMES } from '../src/content/programmes.js';
+import { standaloneSections } from '../src/content/sectionRoutes.js';
 
 const invite = 'https://chat.whatsapp.com/EQFjZwFapIxEBWHPk6tfXB';
 
@@ -77,10 +78,16 @@ test('approved logo variations have paired, self-contained vector exports', () =
 
 test('each programme uses a real local poster and an existing content destination', () => {
   assert.equal(new Set(PROGRAMMES.map((programme) => programme.id)).size, PROGRAMMES.length);
-  const destinations = ['/youth/classes-skills', '/education/classes-courses', '/worship'];
+  const routes = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  const destinations = new Set([
+    ...[...routes.matchAll(/<Route\b[^>]*\bpath="([^"]+)"/g)].map(([, path]) =>
+      path.startsWith('/') ? path : `/${path}`,
+    ),
+    ...standaloneSections.map(([path]) => `/${path}`),
+  ]);
   for (const programme of PROGRAMMES) {
     assert.ok(existsSync(new URL(`../public${programme.image}`, import.meta.url)));
-    assert.ok(destinations.includes(programme.to));
+    assert.ok(destinations.has(programme.to), `${programme.title} must link to an existing route`);
     assert.ok(programme.alt.length > 80);
     assert.ok(Array.isArray(programme.groups));
     assert.ok(

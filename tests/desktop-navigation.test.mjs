@@ -325,8 +325,15 @@ test('current and nested destinations select the correct section and dropdown ch
     ['/prayer-times/monthly', '/prayer-times', '/prayer-times/monthly', 'page'],
     ['/funerals/what-to-do', '/services', '/funerals', 'location'],
     ['/madrassah/policies', '/education', '/madrassah', 'location'],
+    ['/projects/masjid-extension/timeline', '/projects', '/projects/masjid-extension', 'location'],
     ['/projects/main-prayer-hall', '/projects', '/projects/masjid-extension', 'location'],
+    ['/projects/main-prayer-hall/', '/projects', '/projects/masjid-extension', 'location'],
+    ['/projects/wudu-area', '/projects', '/projects/masjid-extension', 'location'],
+    ['/projects/community-hall', '/projects', '/projects/masjid-extension', 'location'],
+    ['/projects/madrassah-floor', '/projects', '/projects/masjid-extension', 'location'],
     ['/projects/timeline', '/projects', '/projects/masjid-extension', 'location'],
+    ['/projects/madrassah-building', '/projects', '/projects/masjid-extension', 'location'],
+    ['/donate', '/projects', '/donate', 'page'],
   ]) {
     const fixture = navigationFixture(path);
     fixture.render();
@@ -337,6 +344,25 @@ test('current and nested destinations select the correct section and dropdown ch
     );
     assert.equal(selectedLinks.length, 1, path);
   }
+});
+
+test('project stage ancestry also selects the matching shared subsection tab', () => {
+  for (const path of [
+    '/projects/masjid-extension/timeline',
+    '/projects/main-prayer-hall',
+    '/projects/wudu-area',
+    '/projects/community-hall',
+    '/projects/madrassah-floor',
+    '/projects/timeline',
+    '/projects/madrassah-building',
+  ]) {
+    const navigation = activeNavigation(path);
+    assert.equal(navigation.path, '/projects/masjid-extension', path);
+    assert.equal(navigation.current?.path, '/projects/masjid-extension', path);
+  }
+  const donation = activeNavigation('/donate');
+  assert.equal(donation.path, '/projects');
+  assert.equal(donation.current?.path, '/donate');
 });
 
 test('clicking the current child closes without depending on a pathname change', () => {

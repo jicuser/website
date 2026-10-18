@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BookOpen,
@@ -17,6 +17,9 @@ import MosqueIcon from '@/components/icons/MosqueIcon';
 import useCommunityLink from '@/hooks/useCommunityLink';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import HomePrayerCard from '@/components/home/HomePrayerCard';
+import LearningJourney from '@/features/home/LearningJourney';
+import AccountConnection from '@/features/home/AccountConnection';
+import VisitorQuestions from '@/features/home/VisitorQuestions';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useContent } from '@/context/ContentContext';
@@ -25,6 +28,8 @@ import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
 import { displayTime } from '@/lib/timetable';
 import { isPageVisible } from '@/lib/pageVisibility';
 import { cn } from '@/lib/utils';
+
+const ServiceExplorer = lazy(() => import('@/features/services/ServiceExplorer'));
 
 const DEFAULT_CARDS = [
   {
@@ -38,8 +43,8 @@ const DEFAULT_CARDS = [
   },
   {
     key: 'projects',
-    title: 'Masjid Building Works',
-    text: 'Follow the latest building works, appeals and progress at JIC.',
+    title: 'Our masjid, our future',
+    text: 'Explore the building project and ways to support the centre.',
     to: '/projects',
     cta: 'View & Support the Works',
     icon: Building2,
@@ -47,8 +52,8 @@ const DEFAULT_CARDS = [
   },
   {
     key: 'youth',
-    title: 'Youth',
-    text: 'Activities, programs and opportunities.',
+    title: 'Room for the next generation',
+    text: 'Discover youth activities, learning and ways to get involved.',
     to: '/youth',
     cta: 'Explore Youth',
     icon: Users,
@@ -152,7 +157,7 @@ export default function HomePage() {
     },
   ].filter((card) => !card.to || isPageVisible(getContent, card.to));
   const communityCards = cards.filter(
-    (card) => card.key !== 'madrassah' && isPageVisible(getContent, card.to),
+    (card) => !['madrassah', 'services'].includes(card.key) && isPageVisible(getContent, card.to),
   );
 
   return (
@@ -162,11 +167,17 @@ export default function HomePage() {
           <div className="jic-hero-copy">
             <p className="jic-kicker">JAMATIA ISLAMIC CENTRE · BIRMINGHAM</p>
             <h1 style={{ whiteSpace: 'pre-line' }}>
-              {hero.title || 'A place for faith.\nA home for community.'}
+              {hero.title || (
+                <>
+                  A place for faith.
+                  <br />
+                  <em>A home for community.</em>
+                </>
+              )}
             </h1>
             <p className="jic-hero-sub" style={{ whiteSpace: 'pre-line' }}>
               {hero.body ||
-                'Worship. Learn. Grow. Together.\nA stronger community for a brighter tomorrow.'}
+                'Come to pray. Find a class. Be part of something closer to home. Welcome to Jamatia Islamic Centre.'}
             </p>
             <nav className="jic-home-shortcuts" aria-label="Services and learning">
               {shortcuts.map(({ key, ...card }) => (
@@ -174,7 +185,7 @@ export default function HomePage() {
               ))}
             </nav>
             <Link to="/contact#map" className="jic-home-visit">
-              Visit the Centre <ArrowRight size={16} aria-hidden="true" />
+              Plan your visit <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
           <HomePrayerCard />
@@ -201,6 +212,16 @@ export default function HomePage() {
             </span>
           </a>
         )}
+
+        <Suspense
+          fallback={
+            <p className="jic-home-section" role="status">
+              Loading services…
+            </p>
+          }
+        >
+          <ServiceExplorer compact />
+        </Suspense>
 
         <ProgrammePosters />
 
@@ -237,9 +258,17 @@ export default function HomePage() {
           </section>
         )}
 
+        <LearningJourney />
+
         {communityCards.length > 0 && (
           <section className="jic-home-section" aria-labelledby="home-community-title">
-            <h2 id="home-community-title">Community & services</h2>
+            <div className="jic-experience-heading">
+              <span className="jic-section-label">Together at JIC</span>
+              <h2 id="home-community-title">
+                A community to <em>be part of.</em>
+              </h2>
+              <p>Support the centre, join in and help shape what comes next.</p>
+            </div>
             <nav className="jic-home-community-grid" aria-label="Community and services">
               {communityCards.map(({ key, ...card }) => (
                 <HomeDestination key={key} {...card} />
@@ -312,6 +341,10 @@ export default function HomePage() {
             )}
           </section>
         )}
+
+        <AccountConnection />
+
+        <VisitorQuestions />
 
         <section className="jic-home-footer-strip">
           <div>

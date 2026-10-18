@@ -62,28 +62,31 @@ const PrayerGuidelinesSection = () => (
           transition={{ duration: 0.5 }}
           className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6"
         >
-          <h3 className="text-xl font-bold mb-4">Facilities</h3>
+          <h3 className="text-xl font-bold mb-4">Before your visit</h3>
           <ul className="space-y-3 text-gray-600 dark:text-gray-300">
             <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>Separate prayer areas for men and women
+              <span className="text-primary mr-2">•</span>Ask the centre about prayer areas and
+              arrangements for your visit
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>Clean and spacious wudu (ablution)
-              facilities
+              <span className="text-primary mr-2">•</span>Allow time for wudu (ablution) before
+              joining the prayer
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>Prayer mats provided, but you may bring
-              your own
+              <span className="text-primary mr-2">•</span>Ask the team if you need help finding
+              your way around
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>Copies of the Quran available for use
+              <span className="text-primary mr-2">•</span>Check the published timetable for prayer
+              start and congregation times
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>Wheelchair accessible entrances and prayer
-              areas
+              <span className="text-primary mr-2">•</span>Contact the centre before visiting to
+              discuss step-free access or other access needs
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>Parking available for worshippers
+              <span className="text-primary mr-2">•</span>Park considerately and keep neighbouring
+              driveways and entrances clear
             </li>
           </ul>
         </motion.div>

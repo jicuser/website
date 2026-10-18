@@ -25,7 +25,7 @@ const EnrollmentForm = () => {
 
     try {
       await submitWebsiteForm('madrassah', formData);
-      toast({ title: 'Inquiry received', description: 'Thank you for your interest. We will get back to you soon.' });
+      toast({ title: 'Enquiry received', description: 'Your details have been sent to the Madrassah. A place still needs confirmation.' });
       setFormData({ name: '', email: '', phone: '', query: '' });
     } catch (error) {
       toast({ title: 'Submission failed', description: error.message, variant: 'destructive' });
@@ -43,7 +43,7 @@ const EnrollmentForm = () => {
       className="madrassah-enrolment-form w-full max-w-2xl mx-auto"
     >
       <h1 className="madrassah-enrolment-title">Pupil enrolment</h1>
-      <p className="madrassah-enrolment-intro">Enquire about a place at the Madrassah.</p>
+      <p className="madrassah-enrolment-intro">Enquire about a place at the Madrassah. The team must confirm a place before enrolment is complete.</p>
       <form onSubmit={handleSubmit} className="madrassah-enrolment-fields">
         <div>
           <label
@@ -117,11 +117,11 @@ const EnrollmentForm = () => {
             required
             rows={4}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800"
-            placeholder="Pupil name, age and any details we should know."
+            placeholder="Pupil’s name, age and previous learning. Share only what is needed for this enquiry."
           ></textarea>
         </div>
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? 'Submitting...' : 'Send enquiry'}
+          {isSubmitting ? 'Sending…' : 'Send enquiry'}
         </Button>
       </form>
     </motion.div>

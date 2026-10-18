@@ -231,7 +231,7 @@ function PublicForm({ slug }) {
             <p className="workspace-meta">
               {service
                 ? 'Your message goes to the centre’s team. Any requested date or booking needs separate confirmation.'
-                : 'Submitting this form does not confirm a place. The centre will review your details.'}
+                : 'The centre will review your response. Any requested place or booking needs separate confirmation.'}
             </p>
             <fieldset disabled={busy}>
               <CustomFormsFields

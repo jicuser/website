@@ -928,8 +928,8 @@ html:not(.dark) .managed-page-section-copy {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: max(12px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
-    12px max(20px, env(safe-area-inset-left));
+  padding: max(12px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 12px
+    max(20px, env(safe-area-inset-left));
   border-bottom: 1px solid var(--jic-border);
 }
 .admin-toolbar {
@@ -967,6 +967,16 @@ html:not(.dark) .managed-page-section-copy {
 }
 .admin-desktop-current {
   flex: 1 1 auto;
+}
+.admin-desktop-current strong {
+  display: block;
+  font-size: 0.9rem;
+}
+.admin-desktop-current small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--jic-text-secondary);
 }
 .admin-save-short {
   display: none;
@@ -1010,6 +1020,12 @@ html:not(.dark) .managed-page-section-copy {
   border-radius: 8px;
   text-align: left;
   font-size: 14px;
+}
+.admin-navigation nav button:hover:not([aria-current]) {
+  background: var(--jic-bg-secondary);
+}
+.admin-navigation nav button > svg {
+  flex-shrink: 0;
 }
 .admin-navigation nav button[aria-current] {
   background: var(--jic-action);
@@ -1347,7 +1363,11 @@ html:not(.dark) .managed-page-section-copy {
     text-align: center;
     font-size: 13px;
   }
-  .admin-console .admin-mobile-switcher select { padding: 8px; font-size: 13px; min-width: 0; }
+  .admin-console .admin-mobile-switcher select {
+    padding: 8px;
+    font-size: 16px;
+    min-width: 0;
+  }
   .admin-mobile-back,
   .admin-mobile-overview {
     display: inline-flex;

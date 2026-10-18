@@ -11,17 +11,17 @@ const META_DESCRIPTION = 'Youth programmes and activities at Jamatia Islamic Cen
 const activities = [
   {
     title: 'Faith & Learning',
-    text: 'Youth circles, reminders and practical Islamic learning.',
+    text: 'Ask about youth circles, Islamic studies and learning at the centre.',
     icon: BookOpen,
   },
   {
     title: 'Community Service',
-    text: 'Volunteer projects that build responsibility and connection.',
+    text: 'Ask about volunteering and how young people can help at JIC.',
     icon: Heart,
   },
   {
     title: 'Social & Sports',
-    text: 'Positive activities that help young people build friendships and confidence.',
+    text: 'Check which activities are currently available and how to take part.',
     icon: Trophy,
   },
 ];

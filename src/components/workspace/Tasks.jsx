@@ -149,11 +149,11 @@ export default function Tasks({ rows, notifications, reload, formId, onError }) 
         </select>
       </Field>
       <p className="workspace-meta">
-        Showing {shown.length} matching actions from the {rows.length} most recently loaded records.
+        Showing {shown.length} matching actions from the {rows.length} most recent actions listed.
         Totals include all records you can access
         {formId ? ' for the selected form; unread alerts include your whole account' : ''}.
       </p>
-      {shown.length === 0 && <p>No matching actions in the loaded records.</p>}
+      {shown.length === 0 && <p>No matching actions in this list.</p>}
       {shown.map((row) => (
         <article className="workspace-card" key={row.id}>
           <h3>{row.title}</h3>

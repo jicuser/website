@@ -7,7 +7,7 @@ import { submitWebsiteForm } from '@/lib/submitWebsiteForm';
 import { SITE } from '@/content/site';
 import useCommunityLink from '@/hooks/useCommunityLink';
 
-const ContactForm = ({ subject = '', title = 'Contact Us' }) => {
+const ContactForm = ({ subject = '', title = 'Contact the centre' }) => {
   const whatsapp = useCommunityLink();
   const { toast } = useToast();
   const [formData, setFormData] = useState({ name: '', email: '', question: '' });
@@ -34,7 +34,7 @@ const ContactForm = ({ subject = '', title = 'Contact Us' }) => {
       });
       toast({
         title: 'Message received',
-        description: 'Thank you for contacting us. We will get back to you soon.',
+        description: 'Thank you. Your message has been sent to the centre’s team.',
       });
       setFormData({ name: '', email: '', question: '' });
       setSent(true);
@@ -62,7 +62,7 @@ const ContactForm = ({ subject = '', title = 'Contact Us' }) => {
         <div role="status" className="service-message-sent">
           <h3>Enquiry received</h3>
           <p>
-            The office will reply using the email address you provided. Any date or arrangement
+            The office can reply using the email address you provided. Any date or arrangement
             still needs confirmation.
           </p>
           <Button type="button" onClick={() => setSent(false)}>
@@ -87,7 +87,7 @@ const ContactForm = ({ subject = '', title = 'Contact Us' }) => {
               onChange={handleChange}
               required
               className="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-              placeholder="Your Name"
+              placeholder="Your name"
             />
           </div>
           <div>
@@ -95,7 +95,7 @@ const ContactForm = ({ subject = '', title = 'Contact Us' }) => {
               htmlFor="email"
               className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Email Address *
+              Email address *
             </label>
             <input
               type="email"
@@ -114,7 +114,7 @@ const ContactForm = ({ subject = '', title = 'Contact Us' }) => {
               htmlFor="question"
               className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Your Message *
+              Your message *
             </label>
             <textarea
               id="question"
@@ -129,7 +129,7 @@ const ContactForm = ({ subject = '', title = 'Contact Us' }) => {
             />
           </div>
           <Button type="submit" disabled={isSubmitting} className="w-full py-3 text-lg">
-            {isSubmitting ? 'Sending...' : 'Send Message'}
+            {isSubmitting ? 'Sending…' : 'Send message'}
           </Button>
           {sendFailed && (
             <p role="alert" className="text-sm">

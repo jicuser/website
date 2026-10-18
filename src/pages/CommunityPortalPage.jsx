@@ -51,11 +51,11 @@ export default function CommunityPortalPage() {
             <section className="portal-entry-intro">
               <p className="workspace-kicker">Welcome to your centre</p>
               <h2>
-                A closer connection.
+                Your JIC records.
                 <br />
-                One simple account.
+                One place to begin.
               </h2>
-              <p>Keep your available JIC records together and pick up where you left off.</p>
+              <p>Sign in for your available records, invoices and requests.</p>
               <ul>
                 <li>
                   <Users aria-hidden="true" />
@@ -64,7 +64,7 @@ export default function CommunityPortalPage() {
                     <small>
                       {WORKSPACE_ENABLED
                         ? 'Linked children, classes and published progress.'
-                        : 'Family and learning access is being prepared.'}
+                        : 'Family and learning records are not currently available here.'}
                     </small>
                   </span>
                 </li>
@@ -72,14 +72,14 @@ export default function CommunityPortalPage() {
                   <Award aria-hidden="true" />
                   <span>
                     <strong>Your certificates</strong>
-                    <small>Understand requests, office review and verification.</small>
+                    <small>Find guidance, request a record and view available certificates.</small>
                   </span>
                 </li>
                 <li>
                   <ShieldCheck aria-hidden="true" />
                   <span>
                     <strong>Your own records</strong>
-                    <small>Access is checked for your account and role.</small>
+                    <small>View the records shared with your account.</small>
                   </span>
                 </li>
               </ul>
@@ -134,7 +134,7 @@ export default function CommunityPortalPage() {
                 [
                   Award,
                   'My certificates',
-                  'View the certificate journey and your available records.',
+                  'Find certificate guidance and your available records.',
                   '/account/certificates',
                 ],
                 [

@@ -164,7 +164,7 @@ export default function SalahRemindersPage() {
         )}
         {state && !state.config.ready && (
           <p className="salah-reminders__error">
-            The reminder sender is temporarily unavailable. New settings cannot be enabled yet.
+            Salah alerts are currently unavailable. Please check the prayer timetable.
           </p>
         )}
         <fieldset disabled={busy || loading} className="salah-reminders__choices">

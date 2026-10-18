@@ -76,7 +76,7 @@ function PublicLayout() {
         ) : (
           <section className="jic-page-loading">
             <h1>Page unavailable</h1>
-            <p>This page is currently hidden.</p>
+            <p>Contact the centre if you need information from this page.</p>
             <a href="/">Return home</a>
           </section>
         )}

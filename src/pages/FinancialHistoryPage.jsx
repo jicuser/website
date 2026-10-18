@@ -46,7 +46,7 @@ export default function FinancialHistoryPage() {
           Financial History
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          An overview of Jamatia Islamic Centre's income and expenditure over the past years.
+          Jamatia Islamic Centre’s annual income and expenditure for the years shown below.
         </p>
       </header>
 
@@ -105,7 +105,7 @@ export default function FinancialHistoryPage() {
                       <div className="flex items-center">
                         <DollarSign className="h-5 w-5 text-blue-600 mr-2" />
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Net Balance:
+                          Surplus / deficit:
                         </span>
                       </div>
                       <span

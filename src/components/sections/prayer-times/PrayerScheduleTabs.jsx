@@ -49,7 +49,7 @@ export const RamadanTimesTable = ({ ramadanTimes }) => (
     <div className="p-6">
       <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-600 rounded-lg text-center">
         <p className="text-gray-600 dark:text-gray-300">
-          Ramadan prayer times will be updated closer to the holy month.
+          Contact the centre for the current Ramadan timetable.
         </p>
       </div>
       {ramadanTimes && ramadanTimes.length > 0 ? (
@@ -82,7 +82,7 @@ export const RamadanTimesTable = ({ ramadanTimes }) => (
         </>
       ) : (
         <p className="text-center text-gray-600 dark:text-gray-300 py-8">
-          No specific Ramadan schedule active for the current view.
+          No Ramadan timetable is currently available here.
         </p>
       )}
     </div>

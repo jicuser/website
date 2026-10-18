@@ -9,11 +9,24 @@ import { PUBLIC_MENU_GROUPS } from '../src/content/nav.js';
 import { buildPageNavigator, findNavigatorPages } from '../src/lib/pageNavigator.js';
 
 const sections = buildPageNavigator(EDITABLE_PAGES);
+const expectedSections = [
+  'Home',
+  'About',
+  'Prayer Times',
+  'Worship',
+  'Services',
+  'Our Masjid Project',
+  'Education',
+  'Youth',
+  'Madrassah',
+  'Donate & fundraise',
+  'Social Media',
+];
 
 test('page navigator keeps each canonical page once within the public website hierarchy', () => {
   assert.deepEqual(
     sections.map((section) => section.name),
-    PUBLIC_MENU_GROUPS.filter((section) => section.editable !== false).map((section) => section.name),
+    expectedSections,
   );
   const pages = sections.flatMap((section) => section.pages);
   assert.equal(pages.length, EDITABLE_PAGES.length);
@@ -30,12 +43,35 @@ test('Portal stays visible in the menu without making private records CMS-editab
   assert.equal(EDITABLE_PAGES.some((page) => page.path === '/portal'), false);
 });
 
-test('nested pages retain clear names inside Education, Services and Building Works', () => {
+test('the public donation page remains editable without adding private menu destinations', () => {
+  const pages = sections.flatMap((section) => section.pages);
+  assert.deepEqual(
+    sections.find((section) => section.path === '/donate').pages.map((page) => page.path),
+    ['/donate'],
+  );
+  for (const path of [
+    '/portal',
+    '/account/invoices',
+    '/account/certificates',
+    '/account/request',
+    '/account/recovery',
+    '/fundraise/new',
+    '/admin',
+    '/admin/setup',
+  ]) {
+    assert.equal(EDITABLE_PAGES.some((page) => page.path === path), false, path);
+    assert.equal(pages.some((page) => page.path === path), false, path);
+  }
+});
+
+test('nested pages retain clear names inside Education, Services and Our Masjid Project', () => {
   const find = (path) => sections.flatMap((section) => section.pages).find((page) => page.path === path);
   assert.equal(find('/madrassah').section, 'Madrassah');
   assert.equal(find('/madrassah/policies').section, 'Madrassah');
   assert.equal(find('/madrassah/policies').label, 'Policies');
-  assert.equal(find('/projects/masjid-extension/timeline').label, 'Masjid Extension · Timeline');
+  assert.equal(find('/projects/masjid-extension/timeline').section, 'Our Masjid Project');
+  assert.equal(find('/projects/masjid-extension/timeline').label, 'Extension Timeline');
+  assert.equal(find('/projects/main-prayer-hall').label, 'Main Prayer Hall');
   assert.equal(find('/funerals/contact-support').section, 'Services');
   assert.equal(find('/contact').section, 'About');
   assert.equal(find('/social-media').section, 'Social Media');
@@ -123,12 +159,12 @@ test('saving disables navigation and guards against a programmatic page selectio
   assert.deepEqual(calls, []);
 });
 
-test('admin sections use the screenshot menu order and Home is a direct destination', () => {
+test('page editor sections follow the public menu order and Home is a direct destination', () => {
   const calls = [];
   const render = harness({ selected: '/education', onSelectPage: (path) => calls.push(path) });
   const tree = render();
   assert.deepEqual(nodes(tree, (node) => Boolean(node.props?.['data-section'])).map((node) => node.props['data-section']),
-    ['Home', 'About', 'Prayer Times', 'Worship', 'Services', 'Masjid Building Works', 'Education', 'Youth', 'Madrassah', 'Social Media']);
+    expectedSections);
   assert.equal(section(tree, 'Home').props['aria-expanded'], undefined);
   section(tree, 'Home').props.onClick(); assert.deepEqual(calls, ['/']);
 });

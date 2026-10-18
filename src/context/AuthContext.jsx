@@ -10,6 +10,7 @@ import React, {
 import { supabase, getGoogleSignInAvailability } from '@/config/supabase';
 import { startGoogleSignIn } from '@/lib/googleSignIn';
 import { portalLoginHref } from '@/lib/portalDestination';
+import { accountReturnOrigin } from '@/features/account/config';
 import { createAuthRecovery, INITIAL_AUTH_STATE } from '@/lib/authRecovery';
 import { hasPermission, hasAdminAccess } from '../../supabase/functions/_shared/access.js';
 
@@ -39,7 +40,11 @@ export function AuthProvider({ children }) {
   );
   const signInWithGoogle = useCallback(
     (returnTo = '') =>
-      startGoogleSignIn(supabase, getGoogleSignInAvailability, `${window.location.origin}${portalLoginHref(returnTo)}`),
+      startGoogleSignIn(
+        supabase,
+        getGoogleSignInAvailability,
+        `${accountReturnOrigin(window.location.origin)}${portalLoginHref(returnTo)}`,
+      ),
     [],
   );
   const signOut = useCallback(() => recovery.current.signOut(), []);

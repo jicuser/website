@@ -102,11 +102,11 @@ export default function SocialMediaPage() {
       <header className="jic-social-intro">
         <p className="jic-social-eyebrow">A closer community</p>
         <h1 id="social-title">
-          A little JIC.
+          Stay connected
           <br />
-          Wherever you are.
+          to JIC.
         </h1>
-        <p>Talks to listen to. Moments to share. Reminders to carry with you.</p>
+        <p>Find the centre’s social channels for talks, programme notices and community news.</p>
       </header>
       <nav className="jic-social-jump" aria-label="Social channels">
         {SOCIAL_CHANNELS.map((c) => (
@@ -186,7 +186,7 @@ export default function SocialMediaPage() {
             <WhatsAppIcon size={44} />
             <strong>JIC Community</strong>
             <p>Announcements · Programmes · Community news</p>
-            <span>Group messages stay inside WhatsApp.</span>
+            <span>Opens in WhatsApp.</span>
           </div>
           <p>Join the official community to receive JIC updates on your phone.</p>
           <a

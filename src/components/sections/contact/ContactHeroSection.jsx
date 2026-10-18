@@ -12,8 +12,8 @@ const ContactHeroSection = () => (
         >
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Contact Us</h1>
           <p className="text-lg text-gray-700 dark:text-gray-300">
-            We'd love to hear from you! Whether you have a question about our services, want to join
-            our community, or need any assistance, our team is here to help.
+            Ask about prayer, classes, bookings or support. Send a message below, or contact the
+            centre by phone or email.
           </p>
         </motion.div>
       </div>

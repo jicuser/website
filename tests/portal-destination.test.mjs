@@ -20,12 +20,12 @@ test('certificate sign-in restores only an allowlisted local destination', () =>
   assert.equal(portalDestination('/account/certificates?request=unknown'), '/account/certificates');
   const login = new URL(
     portalLoginHref('/account/certificates?request=course'),
-    'https://jic.test',
+    'https://jicmasjid.org',
   );
   assert.equal(login.searchParams.get('next'), '/account/certificates?request=course');
   const options = magicLinkOptions(
     'parent@example.test',
-    'https://jic.test',
+    'https://jicmasjid.org',
     '/account/certificates?request=nikah',
   );
   assert.equal(
@@ -33,4 +33,16 @@ test('certificate sign-in restores only an allowlisted local destination', () =>
     '/account/certificates?request=nikah',
   );
   assert.equal(options.options.shouldCreateUser, false);
+});
+
+test('email links reject external return origins even when the local destination is allowlisted', () => {
+  for (const origin of [
+    'https://unapproved.example',
+    'https://jicmasjid.org.evil.test',
+    'http://jicmasjid.org',
+    'https://user:secret@jicmasjid.org',
+  ])
+    assert.throws(() =>
+      magicLinkOptions('parent@example.test', origin, '/account/certificates?request=nikah'),
+    );
 });

@@ -101,7 +101,8 @@ function RequestForm({ onSaved, onCancel, initialKind = 'nikah' }) {
     >
       <h2>Request a certificate</h2>
       <p>
-        Staff will check the record before issuing. Your certificate will appear in this account.
+        Staff will check the record before issuing. If approved, your certificate will appear in
+        this account.
       </p>
       <ol className="certificate-journey" aria-label="Request progress">
         <li aria-current={!review ? 'step' : undefined}>1. Your details</li>
