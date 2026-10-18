@@ -60,12 +60,21 @@
   display: none;
 }
 @media (max-width: 767px) {
-  .jic-floating-tools {
-    top: calc(52px + env(safe-area-inset-top));
+  .jic-floating-tools:not(.jic-menu-tools) {
+    display: none;
   }
 }
 @media (max-height: 500px) and (orientation: landscape) {
   .jic-floating-tools {
     top: max(8px, env(safe-area-inset-top));
   }
+}
+
+.jic-floating-tools.jic-menu-tools {
+  position: relative;
+  inset: auto;
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  margin-bottom: 12px;
 }

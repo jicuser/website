@@ -240,7 +240,7 @@
 }
 .jic-menu-actions {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   margin-block: 8px 12px;
 }
@@ -532,7 +532,7 @@ html[data-prayer-dock-hidden='true'] {
     padding-top: var(--jic-mobile-strip-height, calc(44px + env(safe-area-inset-top)));
   }
   .jic-unified-inner {
-    padding-top: 54px;
+    padding-top: 12px;
   }
   .jic-prayer-dock {
     position: absolute;
@@ -587,9 +587,9 @@ html[data-prayer-dock-hidden='true'] {
     border-top: 1px solid var(--jic-border);
   }
   .jic-mobile-prayer-toggle {
+    position: relative;
     display: grid;
-    grid-template-columns: 18px minmax(0, 1fr) 18px;
-    column-gap: 8px;
+    grid-template-columns: minmax(0, 1fr);
     align-items: center;
     flex: 1;
     min-width: 0;
@@ -601,7 +601,7 @@ html[data-prayer-dock-hidden='true'] {
     border: 0;
   }
   .jic-mobile-prayer-toggle-content {
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 1;
     display: flex;
     flex-direction: column;
@@ -609,6 +609,7 @@ html[data-prayer-dock-hidden='true'] {
     min-width: 0;
   }
   .jic-mobile-prayer-heading {
+    padding-right: 24px;
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -619,7 +620,7 @@ html[data-prayer-dock-hidden='true'] {
   }
   .jic-mobile-prayer-times {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: 42px repeat(5, minmax(0, 1fr));
     gap: 3px;
     min-width: 0;
   }
@@ -640,16 +641,25 @@ html[data-prayer-dock-hidden='true'] {
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--jic-text-secondary);
-    font-size: 0.55rem;
+    font-size: clamp(0.625rem, 2.6vw, 0.75rem);
     font-weight: 550;
   }
   .jic-mini-prayer-time {
     white-space: nowrap;
-    font-size: 0.65rem;
+    font-size: clamp(0.625rem, 2.8vw, 0.75rem);
     font-weight: 700;
     color: var(--jic-text);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
+  }
+  .jic-mini-prayer-start {
+    color: var(--jic-text-secondary);
+    font-size: clamp(0.625rem, 2.8vw, 0.75rem);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .jic-mini-prayer-labels {
+    align-items: flex-start;
   }
   .jic-mini-prayer.is-next {
     background: color-mix(in srgb, var(--jic-gold) 13%, transparent);
@@ -667,11 +677,12 @@ html[data-prayer-dock-hidden='true'] {
     outline-offset: -2px;
   }
   .jic-mobile-prayer-toggle > svg {
-    grid-row: 1;
+    position: absolute;
+    top: 6px;
+    right: 0;
     color: var(--jic-gold);
   }
   .jic-mobile-prayer-toggle > svg:last-child {
-    grid-column: 3;
     transform: rotate(180deg);
   }
   .jic-mobile-prayer-toggle[aria-expanded='true'] > svg:last-child {
@@ -796,13 +807,16 @@ html[data-prayer-dock-hidden='true'] {
     display: block;
     padding: 0 max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom)
       max(8px, env(safe-area-inset-left));
-    background: var(--jic-bg-secondary);
+    background: transparent;
     color: var(--jic-text);
-    border-top: 1px solid var(--jic-border);
+    pointer-events: none;
+  }
+  .jic-mobile-dock .jic-prayer-dock {
+    pointer-events: auto;
   }
   .jic-mobile-controls {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    display: flex;
+    justify-content: space-between;
     padding-block: 4px;
   }
   .jic-mobile-controls :is(button, a) {
@@ -812,9 +826,14 @@ html[data-prayer-dock-hidden='true'] {
     justify-content: center;
     gap: 3px;
     min-height: 48px;
-    background: transparent;
-    border: 0;
-    border-radius: 10px;
+    min-width: 52px;
+    padding: 6px;
+    pointer-events: auto;
+    background: var(--jic-glass-panel-strong);
+    backdrop-filter: var(--jic-glass-control-filter);
+    -webkit-backdrop-filter: var(--jic-glass-control-filter);
+    border: 1px solid var(--jic-glass-border);
+    border-radius: 16px;
     color: inherit;
     font-size: clamp(0.6875rem, 3vw, 0.75rem);
   }

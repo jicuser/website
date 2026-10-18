@@ -90,10 +90,9 @@ for (const width of [390, 1280]) {
     await page.evaluate(() => window.scrollTo(0, 460));
     await expect(prayer).toHaveAttribute('aria-hidden', 'true');
     if (width < 768) {
-      await page
-        .getByRole('navigation', { name: 'Quick navigation' })
-        .getByRole('button', { name: 'Prayer times', exact: true })
-        .click();
+      await page.evaluate(() => window.scrollTo(0, 410));
+      await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
+      await page.locator('.jic-mobile-prayer-toggle').click();
       await expect(page.locator('#jic-prayer-details')).toBeVisible();
     }
     await page.goto('/services');

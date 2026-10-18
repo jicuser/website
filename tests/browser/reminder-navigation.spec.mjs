@@ -72,9 +72,7 @@ test('home shortcuts fit small phones and prayer details expand only on request'
   await setup(page);
   const dock = page.locator('#jic-prayer-dock');
   const details = page.locator('#jic-prayer-details');
-  const prayerButton = page
-    .getByRole('navigation', { name: 'Quick navigation' })
-    .getByRole('button', { name: 'Prayer times', exact: true });
+  const prayerButton = page.locator('.jic-mobile-prayer-toggle');
   await expect(details).toBeHidden();
   await expect(prayerButton).toHaveAttribute('aria-expanded', 'false');
   expect(await dock.evaluate((node) => node.getBoundingClientRect().height)).toBeLessThan(84);
@@ -213,13 +211,13 @@ test('a scroll gesture dismisses salawat without trapping the page', async ({ pa
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
 });
 
-test('mobile footer stays uncovered and Prayer times can be opened explicitly', async ({
+test('mobile footer stays uncovered and Home returns to the prayer pill', async ({
   page,
 }, testInfo) => {
   await setup(page);
   await expect(
     page.getByRole('navigation', { name: 'Quick navigation' }).getByRole('button'),
-  ).toHaveCount(4);
+  ).toHaveCount(2);
   await page.locator('.jic-site-footer').scrollIntoViewIfNeeded();
   const dock = page.locator('#jic-prayer-dock');
   await expect(dock).toHaveAttribute('aria-hidden', 'true');
@@ -232,9 +230,12 @@ test('mobile footer stays uncovered and Prayer times can be opened explicitly', 
   expect(iconPositions).toHaveLength(9);
   expect(new Set(iconPositions).size).toBe(1);
   await page.screenshot({ path: testInfo.outputPath('compact-mobile-footer.png') });
-  const toggle = page
+  await page
     .getByRole('navigation', { name: 'Quick navigation' })
-    .getByRole('button', { name: 'Prayer times', exact: true });
+    .getByRole('button', { name: 'Home', exact: true })
+    .click();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  const toggle = page.locator('.jic-mobile-prayer-toggle');
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   await expect(dock).not.toHaveAttribute('aria-hidden', 'true');

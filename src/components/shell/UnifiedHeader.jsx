@@ -11,7 +11,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  ArrowLeft,
   ChevronDown,
   ChevronRight,
   Heart,
@@ -23,17 +22,15 @@ import {
   Play,
   X,
   ExternalLink,
-  Search,
-  Clock3,
 } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
-import { useNavigationHistory } from '@/context/NavigationContext';
 import { useProgrammeJourney } from '@/context/ProgrammeJourneyContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
+import FloatingPageTools from '@/components/shell/FloatingPageTools';
 import DesktopNavigation from '@/components/shell/DesktopNavigation';
 import MobileInfoBanner from '@/components/shell/MobileInfoBanner';
 import { cn } from '@/lib/utils';
@@ -50,9 +47,7 @@ import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMedi
 
 const DonationDialog = lazy(() => import('@/components/donations/DonationDialog'));
 
-// One compact time per obligatory congregation. Full start and jama'ah times
-// remain available when visitors expand the dock.
-const compactJamaahTime = (value) => {
+const compactPrayerTime = (value) => {
   const formatted = displayTime(value);
   return formatted === '—' ? '—' : formatted.replace(/\s+/g, '').toLowerCase();
 };
@@ -66,8 +61,6 @@ export default function UnifiedHeader() {
   const { pathname, key: routeKey } = useLocation();
   const alertSetup = pathname === '/prayer-times/reminders';
   const navigate = useNavigate();
-  const { canGoBack, previousPath } = useNavigationHistory();
-  const showHome = pathname === '/' || !canGoBack || previousPath === '/';
   const { todaysTimes, jummahTimes, currentDate, isLoadingPrayerTimes } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
     mobileBannerRef = useRef(null),
@@ -128,17 +121,23 @@ export default function UnifiedHeader() {
     currentDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London', weekday: 'short' }) ===
     'Fri';
   const todayCongregations = [
-    { name: 'Fajr', time: todaysTimes?.jamaah_fajr },
+    { name: 'Fajr', start: todaysTimes?.fajr, time: todaysTimes?.jamaah_fajr },
     {
       name: isFriday ? 'Jummah' : 'Dhuhr',
+      start: todaysTimes?.dhuhr,
       time: isFriday ? jummahTimes?.[0]?.prayer : todaysTimes?.jamaah_dhuhr,
     },
-    { name: 'Asr', time: todaysTimes?.jamaah_asr },
-    { name: 'Maghrib', time: todaysTimes?.jamaah_maghrib },
-    { name: 'Isha', time: todaysTimes?.jamaah_isha },
+    { name: 'Asr', start: todaysTimes?.asr, time: todaysTimes?.jamaah_asr },
+    { name: 'Maghrib', start: todaysTimes?.maghrib, time: todaysTimes?.jamaah_maghrib },
+    { name: 'Isha', start: todaysTimes?.isha, time: todaysTimes?.jamaah_isha },
   ];
-  const accessibleJamaahTimes = todaysTimes
-    ? todayCongregations.map(({ name, time }) => `${name} ${displayTime(time)}`).join(', ')
+  const accessiblePrayerTimes = todaysTimes
+    ? todayCongregations
+        .map(
+          ({ name, start, time }) =>
+            `${name}: start ${displayTime(start)}, jama’ah ${displayTime(time)}`,
+        )
+        .join(', ')
     : isLoadingPrayerTimes
       ? 'Loading times'
       : 'Times unavailable';
@@ -164,8 +163,10 @@ export default function UnifiedHeader() {
     return () => document.removeEventListener('keydown', close);
   }, [prayerExpanded]);
 
-  // Close when navigation commits, so a slow page cannot expose the old screen.
+  // Close the modal before the destination focuses its controls.
+  // Keep it open until navigation commits so slow routes retain the current menu.
   useLayoutEffect(() => {
+    menuRef.current?.close();
     setMenuOpen(false);
     setQuickMenuOpen(false);
     setPrayerExpanded(false);
@@ -479,23 +480,28 @@ export default function UnifiedHeader() {
               type="button"
               onClick={toggleTimetable}
               className="jic-mobile-prayer-toggle"
+              ref={prayerToggleRef}
               aria-label={
                 prayerExpanded
                   ? 'Close full prayer timetable'
-                  : `Show full prayer timetable. Today's jama'ah times: ${accessibleJamaahTimes}`
+                  : `Show full prayer timetable. Today's prayer times: ${accessiblePrayerTimes}`
               }
               aria-expanded={prayerExpanded}
               aria-controls="jic-prayer-details"
             >
-              <Clock3 size={18} aria-hidden="true" />
               <span className="jic-mobile-prayer-toggle-content">
                 <span className="jic-mobile-prayer-heading">
-                  {prayerExpanded ? 'Close timetable' : <>Today’s jama’ah times</>}
+                  {prayerExpanded ? 'Close timetable' : <>Today’s prayer times</>}
                 </span>
                 {!prayerExpanded &&
                   (todaysTimes ? (
-                    <span className="jic-mobile-prayer-times">
-                      {todayCongregations.map(({ name, time }) => (
+                    <span className="jic-mobile-prayer-times" aria-hidden="true">
+                      <span className="jic-mini-prayer jic-mini-prayer-labels">
+                        <span className="jic-mini-prayer-name">&nbsp;</span>
+                        <span className="jic-mini-prayer-start">Start</span>
+                        <strong className="jic-mini-prayer-time">Jama’ah</strong>
+                      </span>
+                      {todayCongregations.map(({ name, start, time }) => (
                         <span
                           key={name}
                           className={cn(
@@ -506,8 +512,9 @@ export default function UnifiedHeader() {
                           )}
                         >
                           <span className="jic-mini-prayer-name">{name}</span>
+                          <span className="jic-mini-prayer-start">{compactPrayerTime(start)}</span>
                           <strong className="jic-mini-prayer-time">
-                            {compactJamaahTime(time)}
+                            {compactPrayerTime(time)}
                           </strong>
                         </span>
                       ))}
@@ -553,30 +560,11 @@ export default function UnifiedHeader() {
             type="button"
             onClick={() => {
               if (pathname === '/') window.scrollTo({ top: 0, behavior: 'smooth' });
-              else if (canGoBack) navigate(-1);
               else navigate('/');
             }}
           >
-            {showHome ? (
-              <Home size={21} aria-hidden="true" />
-            ) : (
-              <ArrowLeft size={21} aria-hidden="true" />
-            )}
-            <span>{showHome ? 'Home' : 'Back'}</span>
-          </button>
-          <button type="button" onClick={() => setDonationOpen(true)}>
-            <Heart className="jic-donate-heart" size={21} aria-hidden="true" />
-            <span>Donate</span>
-          </button>
-          <button
-            ref={prayerToggleRef}
-            type="button"
-            onClick={toggleTimetable}
-            aria-expanded={prayerExpanded && !prayerDockHidden}
-            aria-controls="jic-prayer-details"
-          >
-            <Clock3 size={21} aria-hidden="true" />
-            <span>Prayer times</span>
+            <Home size={21} aria-hidden="true" />
+            <span>Home</span>
           </button>
           <button
             type="button"
@@ -646,11 +634,8 @@ export default function UnifiedHeader() {
                 <Heart className="jic-donate-heart" size={20} aria-hidden="true" />
                 <span>Donate</span>
               </button>
-              <Link to="/search" aria-label="Search the website">
-                <Search size={20} aria-hidden="true" />
-                <span>Search</span>
-              </Link>
             </nav>
+            <FloatingPageTools placement="menu" />
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
                 {directoryGroups.map(({ name, path, children }) => {

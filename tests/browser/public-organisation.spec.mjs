@@ -94,7 +94,7 @@ test('portal access is in the menu, Faith & practice keeps reading links, and vo
   const writes = await prepare(page);
   await page.goto('/');
   await expect(page.locator('.jic-unified-header a[href="/portal"]')).toHaveCount(0);
-  await expect(page.locator('.jic-mobile-prayer-heading')).toHaveText('Today’s jama’ah times');
+  await expect(page.locator('.jic-mobile-prayer-heading')).toHaveText('Today’s prayer times');
   await expect(page.locator('.jic-mobile-prayer-heading small')).toHaveCount(0);
   await page.locator('.jic-bottom-menu-trigger').click();
   await expect(page.locator('.jic-menu-account')).toHaveAttribute('href', '/portal');

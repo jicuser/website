@@ -4,7 +4,7 @@ import { Moon, Search, Sparkles, Sun } from 'lucide-react';
 import { useAppearance } from '@/context/AppearanceContext';
 import '@/styles/floating-tools.css';
 
-export default function FloatingPageTools() {
+export default function FloatingPageTools({ placement = 'floating' }) {
   const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const [hint, setHint] = useState(null);
   const timeout = useRef(null);
@@ -25,7 +25,10 @@ export default function FloatingPageTools() {
   );
 
   return (
-    <nav className="jic-floating-tools" aria-label="Page controls">
+    <nav
+      className={`jic-floating-tools${placement === 'menu' ? ' jic-menu-tools' : ''}`}
+      aria-label={placement === 'menu' ? 'Menu controls' : 'Page controls'}
+    >
       <span className="jic-floating-tool">
         <Link
           to="/search"
