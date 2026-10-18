@@ -478,7 +478,7 @@
 .tv-layout-help {
   margin: 0;
   color: var(--jic-muted);
-  font-size: 0.82rem;
+  font-size: 1rem;
   line-height: 1.5;
 }
 .tv-layout-position {
@@ -561,9 +561,7 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
 }
 .tv-save-actions {
-  position: sticky;
-  bottom: 10px;
-  z-index: 5;
+  position: static;
   gap: 12px;
   margin: 0;
   padding: 16px;
@@ -827,4 +825,143 @@
   .tv-section-choices {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* One task at a time. The preview is the main editing surface. */
+.tv-settings-fields > .tv-display-description {
+  margin: -8px 0 0;
+  color: var(--jic-text-secondary);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.tv-task-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.tv-task-tabs > button {
+  min-width: 0;
+  min-height: 52px;
+  padding: 10px 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--jic-text-secondary);
+  font-size: 1rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.tv-task-tabs > button[aria-selected='true'] {
+  color: var(--jic-text);
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 -3px var(--jic-gold);
+}
+.tv-task-tabs > button:focus-visible,
+.tv-task-disclosure > summary:focus-visible,
+.tv-editor-items > summary:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+.tv-task-panel {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.tv-task-panel[hidden] {
+  display: none;
+}
+.tv-task-panel > .admin-panel {
+  margin: 0;
+}
+.tv-task-disclosure,
+.tv-editor-items {
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.tv-task-disclosure > summary,
+.tv-editor-items > summary {
+  min-height: 48px;
+  padding-block: 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 650;
+  cursor: pointer;
+}
+.tv-task-disclosure[open] > summary,
+.tv-editor-items[open] > summary {
+  margin-bottom: 16px;
+}
+.tv-task-disclosure > :is(.tv-design-picker, .tv-theme-picker) {
+  padding: 0;
+  border: 0;
+}
+.stream-background-settings :is(label, button, select, input, textarea, .tv-editor-save-status),
+.stream-background-settings .tv-item-choices > button,
+.stream-background-settings .tv-design-choice-copy > :is(strong, span, small),
+.stream-background-settings .tv-theme-choices > button > :is(strong, span:last-child) {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.stream-background-settings :is(select, input:not([type='checkbox']), button.admin-button) {
+  min-height: 48px;
+}
+.tv-reload-settings {
+  justify-self: start;
+}
+.tv-task-panel > .tv-layout-editor {
+  padding: 16px;
+}
+.tv-screen-more {
+  align-self: center;
+  min-width: 0;
+  font-size: 1rem;
+}
+.tv-screen-more > summary {
+  min-height: 48px;
+  padding: 12px;
+  cursor: pointer;
+}
+.tv-screen-more[open] > button {
+  margin-top: 8px;
+}
+@media (max-width: 700px) {
+  .tv-task-panel > .tv-layout-editor {
+    padding: 12px;
+  }
+  .tv-task-tabs > button {
+    padding-inline: 4px;
+  }
+  .tv-task-disclosure,
+  .tv-editor-items {
+    padding: 8px 12px;
+  }
+  .tv-layout-history {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+  .stream-background-settings .tv-layout-history .admin-button {
+    width: 100%;
+    padding-inline: 6px;
+  }
+  .tv-design-picker .tv-design-choices > button {
+    grid-template-columns: minmax(64px, 28%) minmax(0, 1fr);
+  }
+}
+
+.tv-editor-context.tv-display-choice {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tv-layout-history > button[hidden] {
+  display: none;
+}
+.tv-editor-items > :is(.tv-layout-add-content, .tv-editor-advanced) {
+  margin-top: 16px;
 }

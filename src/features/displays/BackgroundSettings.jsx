@@ -33,8 +33,7 @@ export default function BackgroundSettings({
   const inFlight = useRef(false);
   const [message, setMessage] = useState('');
   const [preset, setPreset] = useState('standby');
-  const [renaming, setRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState('');
+  const [task, setTask] = useState('design');
   const update = (key, value) => {
     if (inFlight.current) return;
     setMessage('');
@@ -46,7 +45,6 @@ export default function BackgroundSettings({
 
   useEffect(() => {
     if (screenId === 'shoe-area') setPreset('standby');
-    setRenaming(false);
   }, [screenId]);
 
   useEffect(() => {
@@ -77,7 +75,7 @@ export default function BackgroundSettings({
         { staff: true },
       );
       dispatch({ type: 'saved', screenId, data: saved });
-      setMessage('Display settings saved. Layouts follow their automatic timings.');
+      setMessage('Display settings saved.');
       // The save response is authoritative; a failed status refresh is not a failed save.
       try {
         await onRefresh();
@@ -107,7 +105,6 @@ export default function BackgroundSettings({
     try {
       const next = await onRefresh();
       dispatch({ type: 'reload', screenId, data: next });
-      setRenaming(false);
       setMessage('Saved display settings reloaded.');
     } catch (error) {
       setMessage(error.message);
@@ -125,8 +122,8 @@ export default function BackgroundSettings({
             ? 'Reloading saved settings…'
             : 'Saving…'
           : dirty
-            ? 'Unsaved changes — save to apply them to this screen.'
-            : 'You are viewing saved display settings.'}
+            ? 'Unsaved changes'
+            : 'All changes saved'}
       </p>
       {data.presentation && (
         <p>A presentation is active. These automatic layouts are used when it ends.</p>
@@ -139,133 +136,166 @@ export default function BackgroundSettings({
       )}
       <fieldset className="tv-settings-fields" disabled={busy}>
         <legend className="sr-only">Automatic display settings</legend>
-        <div className="tv-workflow-heading">
-          <span aria-hidden="true">1</span>
-          <div>
-            <h3>Choose your screen</h3>
-            <p>Each screen keeps its own design and settings.</p>
-          </div>
-        </div>
-        <div className="tv-editor-context">
+        <div className="tv-editor-context tv-display-choice">
           <label>
-            Screen to edit
-            <select
-              value={screenId}
-              onChange={(event) => {
-                if (!dirty || window.confirm('Discard unsaved changes and switch screens?'))
-                  onSwitchScreen?.(event.target.value);
-              }}
-            >
-              {TV_SCREENS.map((screen) => (
-                <option key={screen.id} value={screen.id}>
-                  {screen.label}
+            Display to edit
+            <select value={preset} onChange={(event) => setPreset(event.target.value)}>
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.name}
                 </option>
               ))}
             </select>
           </label>
-          <label>
-            Screen shape
-            <select
-              value={form.display_orientation}
-              onChange={(event) => update('display_orientation', event.target.value)}
+        </div>
+        <p className="tv-display-description">{TV_PRESET_DESCRIPTIONS[preset]}</p>
+
+        <div
+          className="tv-task-tabs"
+          role="tablist"
+          aria-label="Display editing tasks"
+          onKeyDown={(event) => {
+            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+            const tabs = [...event.currentTarget.querySelectorAll('[role="tab"]')];
+            const index = tabs.indexOf(document.activeElement);
+            const next =
+              event.key === 'Home'
+                ? 0
+                : event.key === 'End'
+                  ? tabs.length - 1
+                  : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+            event.preventDefault();
+            tabs[next].focus();
+            tabs[next].click();
+          }}
+        >
+          {[
+            ['design', 'Design'],
+            ['content', 'Content & timing'],
+            ['advanced', 'Advanced'],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              id={`tv-task-${screenId}-${id}`}
+              aria-controls={`tv-panel-${screenId}-${id}`}
+              aria-selected={task === id}
+              tabIndex={task === id ? 0 : -1}
+              onClick={() => setTask(id)}
             >
-              <option value="landscape">Landscape · 16:9</option>
-              <option value="portrait">Portrait · 9:16</option>
-            </select>
-          </label>
+              {label}
+            </button>
+          ))}
         </div>
 
-        <div className="tv-scene-tabs-wrap">
-          <div className="tv-scene-tabs-head">
-            <div className="tv-workflow-heading">
-              <span aria-hidden="true">2</span>
-              <div>
-                <h3>Choose when it appears</h3>
-                <p>Edit the everyday screen or one of its automatic prayer displays.</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              className="admin-text-button"
-              aria-expanded={renaming}
-              onClick={() => {
-                setRenameValue(presetName);
-                setRenaming((value) => !value);
-              }}
-            >
-              {renaming ? 'Done renaming' : 'Rename section'}
-            </button>
-          </div>
-          <div className="tv-section-choices" role="group" aria-label="Display sections">
-            {sections.map((section) => (
-              <button
-                type="button"
-                key={section.id}
-                aria-pressed={preset === section.id}
-                onClick={() => {
-                  setPreset(section.id);
-                  setRenaming(false);
+        <div
+          className="tv-task-panel"
+          id={`tv-panel-${screenId}-design`}
+          role="tabpanel"
+          aria-labelledby={`tv-task-${screenId}-design`}
+          hidden={task !== 'design'}
+        >
+          <TvDisplayLayoutEditor
+            screenId={screenId}
+            disabled={busy}
+            settings={form}
+            preset={preset}
+            onChange={update}
+            allowBlocks={preset === 'standby'}
+          />
+          {preset === 'standby' && (
+            <details className="tv-task-disclosure">
+              <summary>Change layout</summary>
+              <TvBoardPicker
+                key={`${screenId}:${form.display_orientation}:${revision}`}
+                screenId={screenId}
+                settings={form}
+                onChange={update}
+                disabled={busy}
+              />
+            </details>
+          )}
+          <details className="tv-task-disclosure">
+            <summary>Change colours</summary>
+            <TvThemePicker settings={form} onChange={update} disabled={busy} />
+          </details>
+        </div>
+
+        <div
+          className="tv-task-panel"
+          id={`tv-panel-${screenId}-content`}
+          role="tabpanel"
+          aria-labelledby={`tv-task-${screenId}-content`}
+          hidden={task !== 'content'}
+        >
+          <NormalSettings
+            form={form}
+            update={update}
+            currentEvents={currentEvents}
+            hall={screenId !== 'shoe-area'}
+            preset={preset}
+          />
+        </div>
+
+        <div
+          className="tv-task-panel"
+          id={`tv-panel-${screenId}-advanced`}
+          role="tabpanel"
+          aria-labelledby={`tv-task-${screenId}-advanced`}
+          hidden={task !== 'advanced'}
+        >
+          <div className="tv-editor-context">
+            <label>
+              Screen
+              <select
+                value={screenId}
+                onChange={(event) => {
+                  if (!dirty || window.confirm('Discard unsaved changes and switch screens?'))
+                    onSwitchScreen?.(event.target.value);
                 }}
               >
-                <span className={`tv-section-icon is-${section.id}`} aria-hidden="true" />
-                {section.name}
-              </button>
-            ))}
-          </div>
-          <p className="tv-layout-help">
-            {TV_PRESET_DESCRIPTIONS[preset]} Selecting a section changes this editor’s preview.
-          </p>
-          {renaming && (
-            <label className="tv-scene-rename">
-              Section name
+                {TV_SCREENS.map((screen) => (
+                  <option key={screen.id} value={screen.id}>
+                    {screen.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Screen shape
+              <select
+                value={form.display_orientation}
+                onChange={(event) => update('display_orientation', event.target.value)}
+              >
+                <option value="landscape">Landscape · 16:9</option>
+                <option value="portrait">Portrait · 9:16</option>
+              </select>
+            </label>
+            <label>
+              Display name
               <input
                 maxLength={40}
-                value={renameValue}
-                onChange={(event) => {
-                  setRenameValue(event.target.value);
-                  update('preset_names', { ...form.preset_names, [preset]: event.target.value });
-                }}
+                value={presetName}
+                onChange={(event) =>
+                  update('preset_names', {
+                    ...form.preset_names,
+                    [preset]: event.target.value,
+                  })
+                }
               />
             </label>
-          )}
-        </div>
-
-        <div className="tv-workflow-heading">
-          <span aria-hidden="true">3</span>
-          <div>
-            <h3>Design your display</h3>
-            <p>Choose a starting design, then adjust its colours and individual items.</p>
           </div>
-        </div>
-
-        {preset === 'standby' && (
-          <TvBoardPicker
-            key={`${screenId}:${form.display_orientation}:${revision}`}
-            screenId={screenId}
-            settings={form}
-            onChange={update}
+          <ScheduledScenes form={form} update={update} screenId={screenId} disabled={busy} />
+          <button
+            type="button"
+            className="admin-button tv-reload-settings"
             disabled={busy}
-          />
-        )}
-
-        <TvThemePicker settings={form} onChange={update} disabled={busy} />
-
-        <TvDisplayLayoutEditor
-          screenId={screenId}
-          disabled={busy}
-          settings={form}
-          preset={preset}
-          onChange={update}
-          allowBlocks={preset === 'standby'}
-        />
-        <NormalSettings
-          form={form}
-          update={update}
-          currentEvents={currentEvents}
-          hall={screenId !== 'shoe-area'}
-          preset={preset}
-        />
-        <ScheduledScenes form={form} update={update} screenId={screenId} disabled={busy} />
+            onClick={reload}
+          >
+            {busy && operation === 'reload' ? 'Reloading…' : 'Reload saved settings'}
+          </button>
+        </div>
       </fieldset>
 
       {dirty && (
@@ -285,9 +315,6 @@ export default function BackgroundSettings({
           onClick={() => saveCurrent().catch(() => {})}
         >
           {busy && operation === 'save' ? 'Saving…' : 'Save display settings'}
-        </button>
-        <button className="admin-button" disabled={busy} onClick={reload}>
-          {busy && operation === 'reload' ? 'Reloading…' : 'Reload saved settings'}
         </button>
       </div>
       {message && <p role="status">{message}</p>}

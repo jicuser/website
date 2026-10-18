@@ -210,6 +210,7 @@ for (const width of [390, 1280]) {
       },
     });
     await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
+    await page.getByText('Change layout', { exact: true }).click();
     const picker = page.getByRole('region', { name: 'Choose a starting layout' });
     await picker.getByRole('button', { name: /^Countdown A large/ }).click();
     const cardContrast = await picker.evaluate((element) => {
@@ -331,11 +332,9 @@ for (const existingDraft of [false, true]) {
       },
     });
     await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
-    const layout = page
-      .getByRole('group', { name: 'Display sections', exact: true })
-      .getByRole('button', { name: 'Everyday display', exact: true });
+    const layout = page.getByRole('combobox', { name: 'Display to edit', exact: true });
     await expect(layout).toBeVisible();
-    await expect(layout).toHaveAttribute('aria-pressed', 'true');
+    await expect(layout).toHaveValue('standby');
     const readCount = evidence.tvReads.filter((screen) => screen === 'mens-main').length;
     // Automatic settings still poll the server after their initial load.
     await expect

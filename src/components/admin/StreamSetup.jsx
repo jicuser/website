@@ -24,17 +24,6 @@ function CaptureDock({ slot, onTarget }) {
   return <div className="scene-capture-dock" ref={attach} />;
 }
 
-function standbySummary(settings = {}) {
-  const parts = [];
-  if (settings.show_times) parts.push('timetable');
-  if (settings.show_next) parts.push('next prayer');
-  if (settings.show_clock) parts.push('clock');
-  const posters = Array.isArray(settings.poster_ids) ? settings.poster_ids.length : 0;
-  if (posters) parts.push(`${posters} poster${posters === 1 ? '' : 's'}`);
-  if (settings.include_events) parts.push('event posters');
-  return parts.length ? parts.join(' · ') : 'No everyday content selected';
-}
-
 function ScreenOverview({ onOpen }) {
   const [states, setStates] = useState({});
   const [loading, setLoading] = useState(true);
@@ -70,7 +59,7 @@ function ScreenOverview({ onOpen }) {
         <div>
           <span className="admin-eyebrow">TV & SCREENS</span>
           <h2>Current screens</h2>
-          <p>Choose a screen, then edit its automatic display or start a presentation.</p>
+          <p>Choose the screen you want to update.</p>
         </div>
         <button className="admin-button" disabled={loading} onClick={() => load()}>
           {loading ? 'Checking…' : 'Refresh status'}
@@ -103,20 +92,12 @@ function ScreenOverview({ onOpen }) {
                 </div>
                 {state?.error && <small>Could not read live status</small>}
               </div>
-              <p>
-                {data
-                  ? presenting
-                    ? 'A presentation is active. Automatic layouts return when it ends.'
-                    : `Everyday display: ${standbySummary(data.settings)}`
-                  : loading
-                    ? 'Checking current display…'
-                    : 'Open the screen to edit its automatic display.'}
-              </p>
-              {data && data.settings?.prayer_enabled !== false && screen.id !== 'shoe-area' && (
-                <small>Prayer sequence is automatic.</small>
-              )}
+              {presenting && <p>Automatic displays return when the presentation ends.</p>}
               <div className="admin-actions">
-                <button className="admin-button" onClick={() => onOpen(screen.id, false, true)}>
+                <button
+                  className="admin-button primary"
+                  onClick={() => onOpen(screen.id, false, true)}
+                >
                   Edit automatic display
                 </button>
                 {screen.id !== 'shoe-area' &&
@@ -128,17 +109,20 @@ function ScreenOverview({ onOpen }) {
                       Manage live presentation
                     </button>
                   ) : (
-                    <button
-                      className="admin-button primary"
-                      onClick={() => onOpen(screen.id, true, false)}
-                    >
+                    <button className="admin-button" onClick={() => onOpen(screen.id, true, false)}>
                       Quick present
                     </button>
                   ))}
                 {screen.id !== 'shoe-area' && !presenting && (
-                  <button className="admin-button" onClick={() => onOpen(screen.id, false, false)}>
-                    Presentation setup
-                  </button>
+                  <details className="tv-screen-more">
+                    <summary>More options</summary>
+                    <button
+                      className="admin-button"
+                      onClick={() => onOpen(screen.id, false, false)}
+                    >
+                      Presentation setup
+                    </button>
+                  </details>
                 )}
               </div>
             </article>
@@ -266,17 +250,17 @@ function HallWorkspace({
     <div className="stream-setup admin-tv-editor">
       <div className="stream-setup-heading">
         <div>
-          <span className="admin-eyebrow stream-step-indicator jic-prompt">
-            {backgroundOnly
-              ? 'AUTOMATIC DISPLAY'
-              : hall
+          {!backgroundOnly && (
+            <span className="admin-eyebrow stream-step-indicator jic-prompt">
+              {hall
                 ? setup.started
                   ? 'PRESENTATION LIVE'
                   : quickStart
                     ? 'QUICK PRESENT'
                     : 'PRESENTATION SETUP'
                 : 'AUTOMATIC DISPLAY'}
-          </span>
+            </span>
+          )}
           <h2>{screen.label}</h2>
         </div>
         <button

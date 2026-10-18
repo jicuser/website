@@ -287,63 +287,6 @@ export default function TvDisplayLayoutEditor({
       <div className="tv-layout-toolbar">
         <div>
           <strong>{presetLabel}</strong>
-          <span>{orientation === 'portrait' ? '9:16 portrait' : '16:9 landscape'}</span>
-        </div>
-        <div className="tv-layout-history">
-          <button
-            type="button"
-            className="admin-button"
-            disabled={disabled || !history.canUndo}
-            onClick={() => history.undo(scene, setScene)}
-          >
-            Undo
-          </button>
-          <button
-            type="button"
-            className="admin-button"
-            disabled={disabled || !history.canRedo}
-            onClick={() => history.redo(scene, setScene)}
-          >
-            Redo
-          </button>
-          {!expanded && (
-            <button
-              ref={expandButton}
-              type="button"
-              className="admin-button"
-              onClick={() => setExpanded(true)}
-            >
-              Larger editor
-            </button>
-          )}
-          <button type="button" className="admin-button" onClick={() => setPreviewOnly(true)}>
-            Preview
-          </button>
-        </div>
-      </div>
-
-      <div className="tv-item-selection">
-        <div className="tv-item-selection-heading">
-          <strong>Items on this screen</strong>
-          <span>Select an item here or tap it in the preview.</span>
-        </div>
-        <div className="tv-item-choices" role="group" aria-label="Items on this screen">
-          {scene.layers.map((item, index) => (
-            <button
-              type="button"
-              key={item.id}
-              data-layer-id={item.id}
-              disabled={disabled}
-              aria-pressed={selected === item.id}
-              onClick={() => chooseLayer(item.id)}
-            >
-              {contentLabel(item, index)}
-              {item.hidden ? ' · hidden' : ''}
-            </button>
-          ))}
-          {scene.layers.length === 0 && (
-            <p>No items yet. Add a timetable, poster or message below.</p>
-          )}
         </div>
       </div>
 
@@ -375,6 +318,112 @@ export default function TvDisplayLayoutEditor({
           presetContent={presetContent}
         />
       </LayoutCanvas>
+      <div className="tv-layout-history">
+        <button
+          type="button"
+          className="admin-button"
+          hidden={!history.canUndo && !history.canRedo}
+          disabled={disabled || !history.canUndo}
+          onClick={() => history.undo(scene, setScene)}
+        >
+          Undo
+        </button>
+        <button
+          type="button"
+          className="admin-button"
+          hidden={!history.canUndo && !history.canRedo}
+          disabled={disabled || !history.canRedo}
+          onClick={() => history.redo(scene, setScene)}
+        >
+          Redo
+        </button>
+        {!expanded && (
+          <button
+            ref={expandButton}
+            type="button"
+            className="admin-button"
+            onClick={() => setExpanded(true)}
+          >
+            Larger editor
+          </button>
+        )}
+        <button type="button" className="admin-button" onClick={() => setPreviewOnly(true)}>
+          Preview
+        </button>
+      </div>
+
+      <details className="tv-editor-items">
+        <summary>Edit an item</summary>
+        <div className="tv-item-choices" role="group" aria-label="Items on this screen">
+          {scene.layers.map((item, index) => (
+            <button
+              type="button"
+              key={item.id}
+              data-layer-id={item.id}
+              disabled={disabled}
+              aria-pressed={selected === item.id}
+              onClick={() => chooseLayer(item.id)}
+            >
+              {contentLabel(item, index)}
+              {item.hidden ? ' · hidden' : ''}
+            </button>
+          ))}
+          {scene.layers.length === 0 && (
+            <p>No items yet. Add a timetable, poster or message below.</p>
+          )}
+        </div>
+        <label className="tv-layout-add-content">
+          Add an item
+          <select
+            value=""
+            disabled={disabled || scene.layers.length >= 12}
+            onChange={(event) => addBlock(event.target.value)}
+          >
+            <option value="">Choose an item to add…</option>
+            {allowBlocks ? (
+              <option value="poster">Poster</option>
+            ) : (
+              <option value="state">Automatic prayer message</option>
+            )}
+            <option value="times">Prayer timetable</option>
+            <option value="next">Next prayer</option>
+            <option value="clock">Clock</option>
+            <option value="brand">JIC logo</option>
+            <option value="text">Text notice</option>
+          </select>
+          {scene.layers.length >= 12 && (
+            <small>This layout has the maximum of 12 content items.</small>
+          )}
+        </label>
+
+        <details className="tv-editor-advanced">
+          <summary>Advanced layout tools</summary>
+          <label className="admin-check">
+            <input
+              type="checkbox"
+              checked={snap}
+              onChange={(event) => setSnap(event.target.checked)}
+            />
+            Align items to the grid
+          </label>
+          <p className="tv-layout-help">
+            Restore this section’s original arrangement. You can use Undo to recover your last edit.
+          </p>
+          <button
+            type="button"
+            className="admin-button tv-reset-layout"
+            disabled={disabled}
+            onClick={() => {
+              if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
+              const reset = resetScene ? cloneScene(resetScene) : defaultScene(orientation, preset);
+              commitScene(reset);
+              setSelected('');
+            }}
+          >
+            Restore default layout
+          </button>
+        </details>
+      </details>
 
       {layer ? (
         <div className="tv-selection-actions" aria-label="Selected content actions">
@@ -450,9 +499,7 @@ export default function TvDisplayLayoutEditor({
           </div>
         </div>
       ) : (
-        <p className="tv-layout-help">
-          Tap an item to edit it. Then drag it to move, or drag a corner to resize.
-        </p>
+        <p className="tv-layout-help">Tap the preview to edit an item, or choose Edit an item.</p>
       )}
       {cropping && (
         <p className="tv-layout-help">
@@ -612,58 +659,6 @@ export default function TvDisplayLayoutEditor({
           </fieldset>
         </>
       )}
-
-      <label className="tv-layout-add-content">
-        Add an item
-        <select
-          value=""
-          disabled={disabled || scene.layers.length >= 12}
-          onChange={(event) => addBlock(event.target.value)}
-        >
-          <option value="">Choose an item to add…</option>
-          {allowBlocks ? (
-            <option value="poster">Poster</option>
-          ) : (
-            <option value="state">Automatic prayer message</option>
-          )}
-          <option value="times">Prayer timetable</option>
-          <option value="next">Next prayer</option>
-          <option value="clock">Clock</option>
-          <option value="brand">JIC logo</option>
-          <option value="text">Text notice</option>
-        </select>
-        {scene.layers.length >= 12 && (
-          <small>This layout has the maximum of 12 content items.</small>
-        )}
-      </label>
-
-      <details className="tv-editor-advanced">
-        <summary>Advanced layout tools</summary>
-        <label className="admin-check">
-          <input
-            type="checkbox"
-            checked={snap}
-            onChange={(event) => setSnap(event.target.checked)}
-          />
-          Align items to the grid
-        </label>
-        <p className="tv-layout-help">
-          Restore this section’s original arrangement. You can use Undo to recover your last edit.
-        </p>
-        <button
-          type="button"
-          className="admin-button tv-reset-layout"
-          disabled={disabled}
-          onClick={() => {
-            if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
-            const reset = resetScene ? cloneScene(resetScene) : defaultScene(orientation, preset);
-            commitScene(reset);
-            setSelected('');
-          }}
-        >
-          Restore default layout
-        </button>
-      </details>
 
       <TvFinalPreview
         open={previewOnly}

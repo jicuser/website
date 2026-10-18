@@ -176,5 +176,5 @@ test('the colour picker identifies the draft selection and respects disabled sav
   assert.equal((markup.match(/aria-pressed="true"/g) || []).length, 1);
   assert.equal((markup.match(/disabled=""/g) || []).length, 3);
   for (const name of ['Midnight', 'Pearl', 'Forest']) assert.ok(markup.includes(name));
-  assert.match(markup, /Poster artwork keeps its own colours/);
+  assert.match(markup, /Posters keep their own colours/);
 });

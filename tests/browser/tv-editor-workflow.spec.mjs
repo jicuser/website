@@ -7,7 +7,7 @@ for (const [width, theme] of [
 ]) {
   test(`TV sections, colours and saved comparison stay in the draft at ${width}px`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     const errors = [],
       writes = [];
@@ -73,6 +73,26 @@ for (const [width, theme] of [
     await expect(page.locator('.admin-toolbar')).toBeVisible();
     await page.goto('/admin?section=tv');
     await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
+    const designTab = page.getByRole('tab', { name: 'Design', exact: true });
+    const contentTab = page.getByRole('tab', { name: 'Content & timing', exact: true });
+    const advancedTab = page.getByRole('tab', { name: 'Advanced', exact: true });
+    await expect(designTab).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('combobox', { name: 'Screen shape', exact: true })).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'Scheduled scenes' })).toBeHidden();
+    await expect(page.getByRole('group', { name: 'TV colour schemes' })).toBeHidden();
+    await expect(page.getByRole('region', { name: 'Choose a starting layout' })).toBeHidden();
+    await expect(
+      page.getByRole('group', { name: 'Items on this screen', exact: true }),
+    ).toBeHidden();
+    await expect(page.locator('.tv-layout-editor .scene-player')).toBeVisible();
+    const readingSizes = await page
+      .locator('.tv-task-tabs button, .tv-editor-context label, .tv-editor-context select')
+      .evaluateAll((elements) =>
+        elements.map((element) => parseFloat(getComputedStyle(element).fontSize)),
+      );
+    expect(Math.min(...readingSizes)).toBeGreaterThanOrEqual(16);
+    await page.screenshot({ path: testInfo.outputPath(`tv-design-${width}.png`), fullPage: true });
+    await page.getByText('Change layout', { exact: true }).click();
     const designs = page.locator('.tv-board-picker');
     await designs.getByRole('button', { name: /^Countdown A large/ }).click();
     if (width > 700) {
@@ -87,17 +107,37 @@ for (const [width, theme] of [
     }
     expect(writes).toEqual([]);
     await designs.getByRole('button', { name: 'Close preview', exact: true }).click();
-    const sections = page.getByRole('group', { name: 'Display sections', exact: true });
-    await expect(sections.getByRole('button')).toHaveCount(6);
-    await sections.getByRole('button', { name: 'Before prayer', exact: true }).click();
+    await page.getByText('Change layout', { exact: true }).click();
+    const sections = page.getByRole('combobox', { name: 'Display to edit', exact: true });
+    await expect(sections.locator('option')).toHaveCount(6);
+    await sections.selectOption('before');
     await expect(page.getByRole('region', { name: 'Before prayer layout editor' })).toBeVisible();
+    await page.getByText('Edit an item', { exact: true }).click();
     const items = page.getByRole('group', { name: 'Items on this screen', exact: true });
     await items.getByRole('button', { name: 'Before prayer message', exact: true }).click();
     await expect(page.getByRole('group', { name: 'Before prayer message settings' })).toBeVisible();
+    await page.getByText('Change colours', { exact: true }).click();
     await page
       .getByRole('group', { name: 'TV colour schemes' })
       .getByRole('button', { name: /^Pearl/ })
       .click();
+    await expect(page.locator('.tv-layout-editor .scene-player')).toHaveAttribute(
+      'data-tv-theme',
+      'pearl',
+    );
+    await contentTab.click();
+    await expect(page.getByLabel('Show the reminder before Jama‘ah')).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Before prayer layout editor' })).toBeHidden();
+    await advancedTab.click();
+    await expect(page.getByRole('combobox', { name: 'Screen shape', exact: true })).toBeVisible();
+    await expect(page.getByLabel('Display name', { exact: true })).toHaveValue('Before prayer');
+    await expect(page.getByRole('heading', { name: 'Scheduled scenes' })).toBeVisible();
+    await designTab.focus();
+    await designTab.press('ArrowRight');
+    await expect(contentTab).toBeFocused();
+    await expect(contentTab).toHaveAttribute('aria-selected', 'true');
+    await designTab.click();
+    await expect(page.getByRole('group', { name: 'Before prayer message settings' })).toBeVisible();
     await expect(page.locator('.tv-layout-editor .scene-player')).toHaveAttribute(
       'data-tv-theme',
       'pearl',

@@ -10,12 +10,9 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
   if (preset === 'standby') {
     return (
       <>
-        <details className="admin-panel">
-          <summary>Posters & rotation</summary>
-          <p>
-            Choose which posters are available to this display. Their position and size are
-            controlled in the visual layout above.
-          </p>
+        <section className="admin-panel">
+          <h3>Posters & rotation</h3>
+          <p>Choose the posters shown on this screen.</p>
           <Link
             to="/admin?section=posters"
             onClick={(event) => {
@@ -92,7 +89,7 @@ export default function NormalSettings({ form, update, currentEvents, hall, pres
                 ))}
             </select>
           </label>
-        </details>
+        </section>
       </>
     );
   }

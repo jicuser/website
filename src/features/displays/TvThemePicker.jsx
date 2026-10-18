@@ -12,10 +12,7 @@ export default function TvThemePicker({ settings, onChange, disabled = false }) 
   return (
     <section className="tv-theme-picker" aria-labelledby={headingId}>
       <h3 id={headingId}>TV colour scheme</h3>
-      <p>
-        Choose colours for this screen’s timetable and messages. Poster artwork keeps its own
-        colours.
-      </p>
+      <p>Applies to this screen. Posters keep their own colours.</p>
       <div className="tv-theme-choices" role="group" aria-label="TV colour schemes">
         {TV_THEMES.map((theme) => (
           <button
@@ -39,9 +36,6 @@ export default function TvThemePicker({ settings, onChange, disabled = false }) 
           </button>
         ))}
       </div>
-      <p className="tv-layout-help">
-        The preview updates your draft. Save display settings to apply this scheme to the TV.
-      </p>
     </section>
   );
 }
