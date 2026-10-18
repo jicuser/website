@@ -20,7 +20,7 @@ test('the catalogue connects each JIC service to its existing destination', () =
     hall: '/services/hall-booking',
     certificates: '/services/certificates',
     youth: '/youth',
-    community: '/services/community',
+    community: '/get-involved',
     giving: '/donate',
     portal: '/portal',
   });

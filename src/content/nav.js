@@ -5,8 +5,16 @@ export const MASJID_EXTENSION_TABS = [
 export const GIVING_NAVIGATION = {
   name: 'Giving',
   path: '/donate',
+  children: [],
+  editable: false,
+};
+export const GET_INVOLVED_NAVIGATION = {
+  name: 'Get involved',
+  path: '/get-involved',
   children: [
-    { name: 'Donate', path: '/donate' },
+    { name: 'Overview', path: '/get-involved' },
+    { name: 'Volunteer', path: '/get-involved/volunteer' },
+    { name: 'Campaigns', path: '/fundraise' },
     { name: 'Start a fundraiser', path: '/fundraise/new' },
   ],
   editable: false,
@@ -58,7 +66,7 @@ export const NAV_GROUPS = [
       { name: 'Salah Alerts', path: '/prayer-times/reminders' },
     ],
   },
-  { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
+  { name: 'Faith & practice', path: '/worship', children: WORSHIP_TABS },
   {
     name: 'Services',
     path: '/services',
@@ -106,11 +114,13 @@ export const PUBLIC_MENU_GROUPS = [
   ...NAV_GROUPS,
   { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
   GIVING_NAVIGATION,
+  GET_INVOLVED_NAVIGATION,
   { name: 'Social Media', path: '/social-media', children: [] },
   { name: 'Portal login', path: '/portal', children: [], editable: false },
 ];
 export const FOOTER_LINKS = [
-  { name: 'Donate & fundraise', path: '/donate' },
+  { name: 'Donate', path: '/donate' },
+  { name: 'Get involved', path: '/get-involved' },
   { name: 'Portal login', path: '/portal' },
   { name: 'Certificates', path: '/services/certificates' },
   { name: 'Contact Us', path: '/contact' },

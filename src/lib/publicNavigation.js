@@ -1,4 +1,9 @@
-import { GIVING_NAVIGATION, MADRASSAH_TABS, NAV_GROUPS } from '../content/nav.js';
+import {
+  GIVING_NAVIGATION,
+  GET_INVOLVED_NAVIGATION,
+  MADRASSAH_TABS,
+  NAV_GROUPS,
+} from '../content/nav.js';
 import { canonicalPagePath } from '../content/pageAliases.js';
 import { standaloneSections } from '../content/sectionRoutes.js';
 
@@ -13,12 +18,24 @@ const nestedSections = [
 // Use the same section identity for desktop highlights, mobile breadcrumbs and menus.
 export function activeNavigation(pathname) {
   pathname = canonicalPagePath(pathname);
-  if (matchesPath(pathname, '/donate') || matchesPath(pathname, '/fundraise')) {
-    const current = GIVING_NAVIGATION.children.find(
-      (page) =>
-        page.path === (matchesPath(pathname, '/fundraise/new') ? '/fundraise/new' : '/donate'),
-    );
-    return { ...GIVING_NAVIGATION, primaryPath: '/donate', primaryName: 'Giving', current };
+  if (matchesPath(pathname, '/donate')) {
+    return {
+      ...GIVING_NAVIGATION,
+      primaryPath: '/donate',
+      primaryName: 'Giving',
+      current: { name: 'Donate', path: '/donate' },
+    };
+  }
+  if (matchesPath(pathname, '/get-involved') || matchesPath(pathname, '/fundraise')) {
+    const current = GET_INVOLVED_NAVIGATION.children
+      .filter((page) => matchesPath(pathname, page.path))
+      .sort((a, b) => b.path.length - a.path.length)[0];
+    return {
+      ...GET_INVOLVED_NAVIGATION,
+      primaryPath: '/get-involved',
+      primaryName: 'Get involved',
+      current,
+    };
   }
   // Retained stage URLs can be siblings of their section after menus are simplified.
   const parentPath = standaloneSections

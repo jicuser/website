@@ -63,6 +63,7 @@ export default function UnifiedHeader() {
   const accountLabel = user ? 'My portal' : 'Portal login';
   const menuGroups = visibleNavigation(PUBLIC_MENU_GROUPS, getContent);
   const { pathname, key: routeKey } = useLocation();
+  const alertSetup = pathname === '/prayer-times/reminders';
   const navigate = useNavigate();
   const { canGoBack, previousPath } = useNavigationHistory();
   const showHome = pathname === '/' || !canGoBack || previousPath === '/';
@@ -89,6 +90,7 @@ export default function UnifiedHeader() {
     prayerDockRef,
     routeKey,
     menuOpen || donationOpen || quickMenuOpen,
+    alertSetup,
   );
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
   const programme = useProgrammeJourney();
@@ -336,7 +338,7 @@ export default function UnifiedHeader() {
         }}
         aria-hidden="true"
       />
-      <header className="jic-unified-header">
+      <header className={cn('jic-unified-header', alertSetup && 'is-task-mode')}>
         <MobileInfoBanner
           ref={mobileBannerRef}
           collapsed={prayerDockHidden}
@@ -349,10 +351,6 @@ export default function UnifiedHeader() {
           <div className="jic-free-nav-row">
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
               <JamatiaLogo variant="wordmark" />
-            </Link>
-            <Link to="/portal" className="jic-header-portal">
-              <User size={16} aria-hidden="true" />
-              <span>{accountLabel}</span>
             </Link>
             <div className="jic-mobile-quick-nav" ref={quickMenuRef}>
               <button
@@ -406,16 +404,6 @@ export default function UnifiedHeader() {
                   {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
                   <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
                 </button>
-                {pathname !== '/' && (
-                  <Link
-                    to="/portal"
-                    aria-label={accountLabel}
-                    title={accountLabel}
-                    className="jic-desktop-action"
-                  >
-                    <User size={20} aria-hidden="true" />
-                  </Link>
-                )}
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
@@ -465,7 +453,7 @@ export default function UnifiedHeader() {
               )}
             </nav>
           )}
-          {subtabs.length > 0 && (
+          {subtabs.length > 0 && !alertSetup && pathname !== '/get-involved' && (
             <nav
               ref={subnavRef}
               className="jic-unified-subnav"
@@ -519,13 +507,7 @@ export default function UnifiedHeader() {
               <Clock3 size={18} aria-hidden="true" />
               <span className="jic-mobile-prayer-toggle-content">
                 <span className="jic-mobile-prayer-heading">
-                  {prayerExpanded ? (
-                    'Close timetable'
-                  ) : (
-                    <>
-                      Today’s salah times <small>Jama’ah</small>
-                    </>
-                  )}
+                  {prayerExpanded ? 'Close timetable' : <>Today’s jama’ah times</>}
                 </span>
                 {!prayerExpanded &&
                   (todaysTimes ? (

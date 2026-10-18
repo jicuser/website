@@ -1,18 +1,22 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { observePrayerDockScroll } from '@/lib/prayerDockScroll';
 
-export function usePrayerDockVisibility(panelRef, routeKey, paused) {
+export function usePrayerDockVisibility(panelRef, routeKey, paused, quiet = false) {
   const [hidden, setHidden] = useState(false);
   const controller = useRef(null);
   useLayoutEffect(() => {
-    setHidden(false);
+    setHidden(quiet);
     if (paused || !panelRef.current) return undefined;
-    controller.current = observePrayerDockScroll({ panel: panelRef.current, onChange: setHidden });
+    controller.current = observePrayerDockScroll({
+      panel: panelRef.current,
+      onChange: setHidden,
+      quiet,
+    });
     return () => {
       controller.current?.();
       controller.current = null;
     };
-  }, [panelRef, routeKey, paused]);
+  }, [panelRef, routeKey, paused, quiet]);
 
   useLayoutEffect(() => {
     const root = document.documentElement;

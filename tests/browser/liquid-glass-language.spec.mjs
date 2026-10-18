@@ -29,8 +29,7 @@ for (const theme of ['light', 'dark']) {
     };
     const action = page.getByRole('link', { name: 'Make a donation', exact: true });
     await expect(action).toBeVisible();
-    const navigation = await page.locator('.jic-unified-subnav-link').first().evaluate(material);
-    expect(await action.evaluate(material)).toEqual(navigation);
+    const navigation = await action.evaluate(material);
     expect(navigation.sheen).toContain('linear-gradient');
     await page.goto('/services');
     await expect(page.getByRole('heading', { name: 'Services at JIC' })).toBeVisible();
@@ -40,6 +39,7 @@ for (const theme of ['light', 'dark']) {
     await choice.click();
     expect((await choice.evaluate(material)).sheen).toContain('linear-gradient');
     expect((await choice.evaluate(material)).colour).toBe(navigation.colour);
+    expect((await choice.evaluate(material)).background).toBe(navigation.background);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
       false,
     );

@@ -217,8 +217,8 @@
 }
 .ops-giving-hero {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 48px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
   align-items: center;
 }
 .ops-giving-hero > div > p:not(.ops-eyebrow) {
@@ -1063,4 +1063,79 @@ html[data-theme] .admin-console .ops-admin .ops-badge {
 }
 .ops-admin .ops-empty {
   padding: 20px;
+}
+
+/* Giving is a payment task; participation has its own compact directory. */
+.ops-giving .ops-section {
+  margin-top: 32px;
+}
+.ops-giving-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 24px 0;
+}
+.ops-giving-links > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--ops-accent);
+  font-weight: 600;
+}
+.ops-campaign-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.ops-campaign-filter select {
+  min-height: 44px;
+  min-width: 0;
+  padding: 8px 36px 8px 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.ops-campaign-empty {
+  padding-block: 16px;
+}
+.ops-involvement-list {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+.ops-involvement-list > a {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 20px;
+  gap: 16px;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid var(--jic-border);
+  border-radius: 16px;
+  text-decoration: none;
+}
+.ops-involvement-list > a > svg {
+  color: var(--jic-gold);
+}
+.ops-involvement-list :is(strong, small) {
+  display: block;
+}
+.ops-involvement-list strong {
+  font-size: 1.125rem;
+}
+.ops-involvement-list small {
+  margin-top: 4px;
+  font-size: 1rem;
+  color: var(--jic-text-secondary);
+}
+
+.ops-involvement > .jic-page-heading {
+  padding: 0 0 16px;
+}
+
+.ops-involvement > .jic-page-heading h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 4vw, 3rem);
 }

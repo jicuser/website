@@ -16,7 +16,8 @@ test('compact footer includes portal and certificate access alongside public ess
   assert.deepEqual(
     FOOTER_LINKS.map((item) => item.name),
     [
-      'Donate & fundraise',
+      'Donate',
+      'Get involved',
       'Portal login',
       'Certificates',
       'Contact Us',
@@ -50,7 +51,7 @@ test('public sections retain their own identity on overview pages', () => {
     ['/', 'Home'],
     ['/about', 'About'],
     ['/prayer-times', 'Prayer Times'],
-    ['/worship', 'Worship'],
+    ['/worship', 'Faith & practice'],
     ['/services', 'Services'],
     ['/projects', 'Our Masjid Project'],
     ['/education', 'Education'],
@@ -173,23 +174,28 @@ test('project aliases share one overview action while stage URLs and CMS pages r
   }
 });
 
-test('donations and fundraising use Giving without selecting the project section', () => {
-  for (const path of ['/donate', '/fundraise', '/fundraise/new', '/fundraise/community-appeal']) {
+test('donating is separate from volunteering and fundraising navigation', () => {
+  const donation = activeNavigation('/donate');
+  assert.equal(donation.name, 'Giving');
+  assert.equal(donation.primaryPath, '/donate');
+  assert.equal(donation.current.path, '/donate');
+  assert.deepEqual(donation.children, [], 'no redundant category tabs above the payment task');
+  for (const [path, current] of [
+    ['/get-involved', '/get-involved'],
+    ['/get-involved/volunteer', '/get-involved/volunteer'],
+    ['/fundraise', '/fundraise'],
+    ['/fundraise/new', '/fundraise/new'],
+    ['/fundraise/community-appeal', '/fundraise'],
+  ]) {
     const section = activeNavigation(path);
-    assert.equal(section.name, 'Giving', path);
-    assert.equal(section.primaryPath, '/donate', path);
-    assert.equal(section.path, '/donate', path);
-    assert.equal(
-      section.current?.path,
-      path === '/fundraise/new' ? '/fundraise/new' : '/donate',
-      path,
-    );
-    assert.deepEqual(
-      section.children.map((page) => page.path),
-      ['/donate', '/fundraise/new'],
-    );
+    assert.equal(section.name, 'Get involved', path);
+    assert.equal(section.primaryPath, '/get-involved', path);
+    assert.equal(section.current.path, current, path);
   }
-  assert.equal(PUBLIC_MENU_GROUPS.find((group) => group.path === '/donate').name, 'Giving');
+  assert.equal(
+    PUBLIC_MENU_GROUPS.find((group) => group.path === '/get-involved').name,
+    'Get involved',
+  );
   assert.equal(
     EDITABLE_PAGES.some((page) => page.path === '/fundraise/new'),
     false,

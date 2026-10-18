@@ -693,11 +693,6 @@ html[data-prayer-dock-hidden='true'] {
     line-height: 1.2;
     font-weight: 650;
   }
-  .jic-mobile-prayer-heading small {
-    color: var(--jic-text-secondary);
-    font-size: 0.625rem;
-    font-weight: 500;
-  }
   .jic-mobile-prayer-times {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1261,4 +1256,8 @@ html[data-prayer-dock-hidden='true'] .jic-public-route .jic-admin-bar:not(:focus
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+}
+
+.jic-unified-header.is-task-mode {
+  padding-top: env(safe-area-inset-top, 0px);
 }

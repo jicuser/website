@@ -306,3 +306,7 @@ html[data-theme] .worship-salah-grid > article.is-current {
     min-height: 108px;
   }
 }
+
+.worship-page > .jic-page-heading {
+  padding: 0 0 24px;
+}

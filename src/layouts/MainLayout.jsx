@@ -41,10 +41,15 @@ function PublicLayout() {
   const preview = new URLSearchParams(search).get('preview') === '1';
   const isHome = pathname === '/';
   const showReminder =
-    isHome || pathname.startsWith('/worship') || pathname.startsWith('/prayer-times');
+    isHome ||
+    pathname.startsWith('/worship') ||
+    (pathname.startsWith('/prayer-times') && pathname !== '/prayer-times/reminders');
   const isDiscovery = ['/search', '/social-media'].includes(pathname);
   const isTask =
     pathname.startsWith('/forms/') ||
+    pathname === '/donate' ||
+    pathname.startsWith('/fundraise') ||
+    pathname.startsWith('/get-involved') ||
     ['/contact', '/prayer-times/reminders', '/services/hall-booking'].includes(pathname);
 
   return (

@@ -11,6 +11,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import GuideResource from '@/components/GuideResource';
+import PageHeading from '@/components/PageHeading';
 
 const QURAN_API = 'https://api.alquran.cloud/v1';
 const QURAN_FALLBACK = 'https://quran.com';
@@ -200,38 +201,43 @@ export default function WorshipPage() {
   return (
     <div className="worship-page">
       {pathname === '/worship' && (
-        <div className="worship-hub-grid">
-          <Link to="/worship/quran">
-            <BookOpen />
-            <h2>Read Qur’an</h2>
-            <p>Read Arabic with English meaning.</p>
-          </Link>
-          <Link to="/worship/dalail-al-khayrat">
-            <HeartHandshake />
-            <h2>Dala’il al-Khayrat</h2>
-            <p>Ask about salawat and the reading programme.</p>
-          </Link>
-          <Link to="/worship/daily-duas">
-            <MoonStar />
-            <h2>Daily Du‘as</h2>
-            <p>Morning, evening and everyday adhkar.</p>
-          </Link>
-          <Link to="/worship/prayer-guide">
-            <MoonStar />
-            <h2>Prayer Guide</h2>
-            <p>A compact Salah refresher.</p>
-          </Link>
-          <Link to="/worship/janazah-guide">
-            <HeartHandshake />
-            <h2>Janazah Guide</h2>
-            <p>Know the basic funeral prayer steps.</p>
-          </Link>
-          <Link to="/worship/daily-salah">
-            <MoonStar />
-            <h2>Daily Salah</h2>
-            <p>Today’s JIC prayer times.</p>
-          </Link>
-        </div>
+        <>
+          <PageHeading title="Faith & practice">
+            Qur’an, du‘as and practical prayer guides.
+          </PageHeading>
+          <div className="worship-hub-grid">
+            <Link to="/worship/quran">
+              <BookOpen />
+              <h2>Read Qur’an</h2>
+              <p>Read Arabic with English meaning.</p>
+            </Link>
+            <Link to="/worship/dalail-al-khayrat">
+              <HeartHandshake />
+              <h2>Dala’il al-Khayrat</h2>
+              <p>Ask about salawat and the reading programme.</p>
+            </Link>
+            <Link to="/worship/daily-duas">
+              <MoonStar />
+              <h2>Daily Du‘as</h2>
+              <p>Morning, evening and everyday adhkar.</p>
+            </Link>
+            <Link to="/worship/prayer-guide">
+              <MoonStar />
+              <h2>Prayer Guide</h2>
+              <p>A compact Salah refresher.</p>
+            </Link>
+            <Link to="/worship/janazah-guide">
+              <HeartHandshake />
+              <h2>Janazah Guide</h2>
+              <p>Know the basic funeral prayer steps.</p>
+            </Link>
+            <Link to="/worship/daily-salah">
+              <MoonStar />
+              <h2>Daily Salah</h2>
+              <p>Today’s JIC prayer times.</p>
+            </Link>
+          </div>
+        </>
       )}
       {isQuran && <QuranReader />}
       {isPrayer && (

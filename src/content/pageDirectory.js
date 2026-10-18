@@ -1,4 +1,9 @@
-import { NAV_GROUPS, MADRASSAH_TABS, MASJID_EXTENSION_TABS } from './nav.js';
+import {
+  NAV_GROUPS,
+  MADRASSAH_TABS,
+  MASJID_EXTENSION_TABS,
+  GET_INVOLVED_NAVIGATION,
+} from './nav.js';
 import { standaloneSections } from './sectionRoutes.js';
 
 // Menus can say Overview within a named section. Search and editors need the
@@ -10,6 +15,10 @@ function add(page) {
 for (const group of NAV_GROUPS) {
   add({ name: group.name, path: group.path, group: group.name });
   for (const child of group.children) add({ ...child, group: group.name });
+}
+add({ name: 'Get involved', path: '/get-involved', group: 'Get involved' });
+for (const page of GET_INVOLVED_NAVIGATION.children) {
+  if (page.path !== '/fundraise/new') add({ ...page, group: 'Get involved' });
 }
 for (const [group, tabs] of [
   ['Madrassah', MADRASSAH_TABS],

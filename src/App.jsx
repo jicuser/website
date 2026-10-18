@@ -36,6 +36,13 @@ const PrayerTimesPage = lazy(() => import('@/pages/PrayerTimesPage'));
 const SalahRemindersPage = lazy(() => import('@/pages/SalahRemindersPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const DonationsPage = lazy(() => import('@/features/operations/Donations'));
+const GetInvolvedPage = lazy(() => import('@/pages/GetInvolvedPage'));
+const VolunteerPage = lazy(() =>
+  import('@/pages/GetInvolvedPage').then((m) => ({ default: m.VolunteerPage })),
+);
+const CampaignsPage = lazy(() =>
+  import('@/features/operations/Donations').then((m) => ({ default: m.CampaignsPage })),
+);
 const CampaignPage = lazy(() =>
   import('@/features/operations/Donations').then((m) => ({ default: m.CampaignPage })),
 );
@@ -166,7 +173,9 @@ function AppRoutes() {
             <Route path="services/community" element={<ServicesPage />} />
             <Route path="services/hall-booking" element={<HallBookingPage />} />
             <Route path="donate" element={<DonationsPage />} />
-            <Route path="fundraise" element={<DonationsPage />} />
+            <Route path="get-involved" element={<GetInvolvedPage />} />
+            <Route path="get-involved/volunteer" element={<VolunteerPage />} />
+            <Route path="fundraise" element={<CampaignsPage />} />
             <Route path="fundraise/new" element={<MyFundraisingPage />} />
             <Route path="fundraise/:slug" element={<CampaignPage />} />
             <Route path="projects" element={<ProjectsPage />} />

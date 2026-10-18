@@ -70,7 +70,7 @@ export default function SalahRemindersPage() {
         const saved = await client.current.enable(settings, state.config, state.saved?.updated_at);
         if (mounted.current) {
           setState((current) => ({ ...current, active: true, saved }));
-          setMessage('Reminders enabled for this device. Send a test to check delivery.');
+          setMessage('Salah alerts are on.');
         }
       } else if (action === 'off') {
         await client.current.disable();
@@ -104,9 +104,8 @@ export default function SalahRemindersPage() {
     JSON.stringify(settings) !== JSON.stringify(state.saved.preferences);
   return (
     <div className="salah-reminders jic-page-shell">
-      <PageHeading title="Set up Salah alerts">
-        Get a notification on this device before Salah begins or before jama’ah. Choose your prayers
-        and how many minutes before you want an alert.
+      <PageHeading title="Salah alerts">
+        A reminder on this device before prayer. No account needed.
       </PageHeading>
       <section className="salah-reminders__panel" aria-label="Reminder settings">
         <div className="salah-reminders__status">
@@ -135,19 +134,16 @@ export default function SalahRemindersPage() {
         )}
         {state?.support === 'install' && (
           <div className="salah-reminders__setup">
-            <h2>One-time iPhone setup</h2>
+            <h2>On iPhone</h2>
             <ol>
-              <li>Open this website in Safari.</li>
               <li>
-                Tap <Share2 size={16} aria-hidden="true" /> Share, then{' '}
+                In Safari, tap <Share2 size={16} aria-hidden="true" /> Share →{' '}
                 <strong>Add to Home Screen</strong>.
               </li>
               <li>
-                Open Jamatia from that icon, return here and tap{' '}
-                <strong>Enable Salah alerts</strong>.
+                Open the JIC icon, go to Salah alerts and tap <strong>Enable Salah alerts</strong>.
               </li>
             </ol>
-            <p>Your iPhone will ask for notification permission when you enable Salah alerts.</p>
           </div>
         )}
         {state?.support === 'blocked' && (
@@ -167,71 +163,24 @@ export default function SalahRemindersPage() {
             Salah alerts are currently unavailable. Please check the prayer timetable.
           </p>
         )}
-        <fieldset disabled={busy || loading} className="salah-reminders__choices">
-          {[
-            ['start', 'Salah start time', 'startMinutes'],
-            ['jamaah', 'Jama’ah time', 'jamaahMinutes'],
-          ].map(([key, label, minutes]) => (
-            <div className="salah-reminders__choice" key={key}>
-              <label className="salah-reminders__switch">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={settings[key]}
-                  onChange={(event) =>
-                    setSettings((current) => ({ ...current, [key]: event.target.checked }))
-                  }
-                />
-                <strong>{label}</strong>
-              </label>
-              {settings[key] && (
-                <label className="salah-reminders__minutes">
-                  Remind me
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min="0"
-                    max="60"
-                    step="1"
-                    aria-label={`Minutes before ${label}`}
-                    value={settings[minutes]}
-                    onChange={(event) =>
-                      setSettings((current) => ({
-                        ...current,
-                        [minutes]: event.target.value === '' ? '' : Number(event.target.value),
-                      }))
-                    }
-                  />
-                  <span>minutes before</span>
-                </label>
-              )}
-            </div>
-          ))}
-          <details className="salah-reminders__prayers">
-            <summary>Choose prayers · {settings.prayers.length} selected</summary>
-            <div>
-              {REMINDER_PRAYERS.map((prayer) => (
-                <label key={prayer}>
-                  <input
-                    type="checkbox"
-                    checked={settings.prayers.includes(prayer)}
-                    onChange={(event) =>
-                      setSettings((current) => ({
-                        ...current,
-                        prayers: event.target.checked
-                          ? [...current.prayers, prayer]
-                          : current.prayers.filter((item) => item !== prayer),
-                      }))
-                    }
-                  />
-                  {prayer === 'dhuhr' ? 'Dhuhr' : prayer[0].toUpperCase() + prayer.slice(1)}
-                </label>
-              ))}
-            </div>
-          </details>
-        </fieldset>
+
         {problem && <p className="salah-reminders__hint">{problem}</p>}
         {changed && <p className="salah-reminders__hint">Your changes are not saved yet.</p>}
+        <p className="salah-reminders__summary">
+          <strong>
+            {settings.prayers.length === 5
+              ? 'All five prayers'
+              : `${settings.prayers.length} prayers`}
+          </strong>
+          <span>
+            {[
+              settings.jamaah && `${settings.jamaahMinutes} minutes before Jama’ah`,
+              settings.start && `${settings.startMinutes} minutes before Salah begins`,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </span>
+        </p>
         <div className="salah-reminders__actions">
           <button
             type="button"
@@ -267,24 +216,95 @@ export default function SalahRemindersPage() {
               Turn off Salah alerts
             </button>
           )}
-          <button
-            type="button"
-            className="jic-secondary-cta"
-            disabled={busy || loading}
-            onClick={() => act('reload')}
-          >
-            Check this device again
-          </button>
+          {(state?.support !== 'supported' || error) && (
+            <button
+              type="button"
+              className="jic-secondary-cta"
+              disabled={busy || loading}
+              onClick={() => act('reload')}
+            >
+              Check this device again
+            </button>
+          )}
         </div>
-        <p className="salah-reminders__hint">
-          0 minutes means at the prayer time. Times follow the published JIC timetable in UK time.
-          Phone settings, Focus and network conditions can silence or delay alerts; check the
-          timetable when needed.
-        </p>
-        <p className="salah-reminders__hint">
-          No sign-in needed. This device’s subscription and choices are stored privately for
-          reminders. Turning reminders off removes them. <Link to="/privacy">Privacy</Link>
-        </p>
+        <details className="salah-reminders__customise">
+          <summary>Customise alerts</summary>
+          <fieldset disabled={busy || loading} className="salah-reminders__choices">
+            {[
+              ['start', 'Salah start time', 'startMinutes'],
+              ['jamaah', 'Jama’ah time', 'jamaahMinutes'],
+            ].map(([key, label, minutes]) => (
+              <div className="salah-reminders__choice" key={key}>
+                <label className="salah-reminders__switch">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={settings[key]}
+                    onChange={(event) =>
+                      setSettings((current) => ({ ...current, [key]: event.target.checked }))
+                    }
+                  />
+                  <strong>{label}</strong>
+                </label>
+                {settings[key] && (
+                  <label className="salah-reminders__minutes">
+                    Remind me
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min="0"
+                      max="60"
+                      step="1"
+                      aria-label={`Minutes before ${label}`}
+                      value={settings[minutes]}
+                      onChange={(event) =>
+                        setSettings((current) => ({
+                          ...current,
+                          [minutes]: event.target.value === '' ? '' : Number(event.target.value),
+                        }))
+                      }
+                    />
+                    <span>minutes before</span>
+                  </label>
+                )}
+              </div>
+            ))}
+            <details className="salah-reminders__prayers">
+              <summary>Choose prayers · {settings.prayers.length} selected</summary>
+              <div>
+                {REMINDER_PRAYERS.map((prayer) => (
+                  <label key={prayer}>
+                    <input
+                      type="checkbox"
+                      checked={settings.prayers.includes(prayer)}
+                      onChange={(event) =>
+                        setSettings((current) => ({
+                          ...current,
+                          prayers: event.target.checked
+                            ? [...current.prayers, prayer]
+                            : current.prayers.filter((item) => item !== prayer),
+                        }))
+                      }
+                    />
+                    {prayer === 'dhuhr' ? 'Dhuhr' : prayer[0].toUpperCase() + prayer.slice(1)}
+                  </label>
+                ))}
+              </div>
+            </details>
+          </fieldset>
+        </details>
+        <details className="salah-reminders__about">
+          <summary>About these alerts</summary>
+          <p className="salah-reminders__hint">
+            0 minutes means at the prayer time. Times follow the published JIC timetable in UK time.
+            Phone settings, Focus and network conditions can silence or delay alerts; check the
+            timetable when needed.
+          </p>
+          <p className="salah-reminders__hint">
+            No sign-in needed. This device’s subscription and choices are stored privately for
+            reminders. Turning reminders off removes them. <Link to="/privacy">Privacy</Link>
+          </p>
+        </details>
       </section>
       <Link className="salah-reminders__timetable" to="/prayer-times">
         View today’s prayer times →

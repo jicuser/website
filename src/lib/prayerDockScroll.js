@@ -2,7 +2,7 @@ export const PRAYER_DOCK_SCROLL_DISTANCE = 12;
 
 // Watch the page, not nested timetable, menu or image-preview scroll areas.
 // Visibility never changes the panel's measured size or the page's scroll range.
-export function observePrayerDockScroll({ panel, onChange, browser = window }) {
+export function observePrayerDockScroll({ panel, onChange, browser = window, quiet = false }) {
   const { document } = browser;
   const inFlow = browser.matchMedia('(max-height: 500px) and (orientation: landscape)');
   let previousY = Math.max(0, browser.scrollY);
@@ -37,7 +37,9 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
       setHidden(!manualOpen);
     } else {
       setHidden(
-        scrollHidden || (browser.innerWidth < 768 && (footerVisible || Boolean(editing()))),
+        quiet ||
+          scrollHidden ||
+          (browser.innerWidth < 768 && (footerVisible || Boolean(editing()))),
       );
     }
   };

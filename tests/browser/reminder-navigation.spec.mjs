@@ -91,8 +91,10 @@ test('home shortcuts fit small phones and prayer details expand only on request'
   await expect(
     page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }),
   ).toHaveAttribute('href', '/prayer-times/reminders');
-  await expect(page.locator('.jic-header-portal')).toHaveAttribute('href', '/portal');
-  await expect(page.locator('.jic-header-portal')).toBeVisible();
+  await expect(page.locator('.jic-header-portal')).toHaveCount(0);
+  await page.locator('.jic-bottom-menu-trigger').click();
+  await expect(page.locator('.jic-menu-account')).toHaveAttribute('href', '/portal');
+  await page.keyboard.press('Escape');
 
   for (const width of [320, 390, 767]) {
     await page.setViewportSize({ width, height: 844 });
@@ -172,9 +174,7 @@ test('Nikah and Salah alert setup open the intended public pages', async ({ page
   await page.goto('/');
   await page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }).click();
   await expect(page).toHaveURL('/prayer-times/reminders');
-  await expect(
-    page.getByRole('heading', { name: 'Set up Salah alerts', exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Salah alerts', exact: true })).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Enable Salah alerts', exact: true }),
   ).toBeVisible();

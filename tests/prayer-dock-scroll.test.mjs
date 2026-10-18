@@ -21,7 +21,7 @@ function eventTarget() {
   };
 }
 
-function fixture() {
+function fixture(options = {}) {
   let now = 0;
   let timerId = 0;
   const timers = new Map();
@@ -62,6 +62,7 @@ function fixture() {
     panel,
     browser,
     onChange: (value) => changes.push(value),
+    ...options,
   });
   return {
     browser,
@@ -270,4 +271,17 @@ test('desktop bars also stay hidden until a deliberate upward scroll', () => {
   assert.deepEqual(f.changes, [true]);
   f.scroll(180);
   assert.deepEqual(f.changes, [true, false]);
+});
+
+test('alert setup keeps floating bars tucked away until explicitly requested', () => {
+  const f = fixture({ quiet: true });
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(0);
+  f.scroll(200);
+  f.scroll(180);
+  assert.deepEqual(f.changes, [true]);
+  f.toggle();
+  assert.deepEqual(f.changes, [true, false]);
+  f.scroll(200);
+  assert.deepEqual(f.changes, [true, false, true]);
 });

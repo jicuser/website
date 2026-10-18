@@ -10,7 +10,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   );
   await page.goto('/');
   await expect(page.locator('.jic-mobile-prayer-summary')).toBeVisible();
-  await expect(page.locator('.jic-mobile-prayer-summary')).toContainText('Today’s salah times');
+  await expect(page.locator('.jic-mobile-prayer-summary')).toContainText('Today’s jama’ah times');
   await expect(page.locator('.jic-mobile-info-banner')).toBeVisible();
   await expect(page.locator('.jic-mobile-jummah')).toHaveCount(0);
   await expect(page.locator('.jic-mobile-controls > *')).toHaveCount(4);

@@ -120,24 +120,17 @@ const publicLoader = async (signal) => {
   return data || [];
 };
 export default function DonationsPage() {
-  const state = useRecords(publicLoader);
-  const [category, setCategory] = useState('all');
   const [amount, setAmount] = useState('20');
   const [frequency, setFrequency] = useState('once');
-  const campaigns = (state.data || []).filter((c) => category === 'all' || c.category === category);
   return (
     <div className="ops-page ops-giving">
       <Helmet>
-        <title>Donate & Fundraise | Jamatia Islamic Centre</title>
+        <title>Donate | Jamatia Islamic Centre</title>
       </Helmet>
       <header className="ops-giving-hero">
         <div>
           <p className="ops-eyebrow">A little from each of us. More for everyone.</p>
-          <h1>
-            Support your
-            <br />
-            centre.
-          </h1>
+          <h1>Donate to JIC</h1>
           <p>Support the place where our community prays, learns and comes together.</p>
           <div className="ops-actions">
             <a className="ops-button" href="#give">
@@ -145,94 +138,10 @@ export default function DonationsPage() {
             </a>
           </div>
         </div>
-        <figure>
-          <img src="/optimized/jic-aerial-sunset.webp" alt="Jamatia Islamic Centre at sunset" />
-          <figcaption>Your centre. Your community. Your impact.</figcaption>
-        </figure>
       </header>
-      <section className="ops-section">
-        <div className="ops-heading">
-          <div>
-            <p className="ops-eyebrow">Giving, in every season</p>
-            <h2>Choose a cause</h2>
-          </div>
-          <Link to="/financial-history">
-            View financial history <ArrowRight size={16} />
-          </Link>
-        </div>
-        <div className="ops-reasons">
-          {CAMPAIGN_CATEGORIES.map(([id, label]) => {
-            const Icon = icons[id];
-            return (
-              <button
-                type="button"
-                key={id}
-                aria-pressed={category === id}
-                onClick={() => setCategory(category === id ? 'all' : id)}
-              >
-                <Icon size={28} />
-                <strong>{label}</strong>
-                <span>
-                  {
-                    {
-                      community: 'View community campaigns.',
-                      ramadan: 'View Ramadan campaigns.',
-                      education: 'View learning campaigns.',
-                      masjid: 'View masjid campaigns.',
-                    }[id]
-                  }
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-      <section className="ops-section" id="campaigns">
-        <div className="ops-heading">
-          <div>
-            <p className="ops-eyebrow">Community fundraisers</p>
-            <h2>Fundraising for JIC</h2>
-          </div>
-          <Link to="/fundraise/new">
-            Create your page <ArrowRight size={16} />
-          </Link>
-        </div>
-        <LoadState state={state} />
-        {!state.loading && !state.error && !campaigns.length && (
-          <div className="ops-empty">
-            <Heart size={32} />
-            <h3>
-              {category === 'all'
-                ? 'No public campaigns are currently listed.'
-                : 'No public campaigns are currently listed in this category.'}
-            </h3>
-            <p>
-              Create a personal page, choose a target and invite friends to support JIC. The team
-              reviews every page before it appears here.
-            </p>
-            <Link className="ops-secondary" to="/fundraise/new">
-              Start a fundraiser
-            </Link>
-            {category !== 'all' && (
-              <button className="ops-secondary" onClick={() => setCategory('all')}>
-                Show all campaigns
-              </button>
-            )}
-          </div>
-        )}
-        <div className="ops-campaign-grid">
-          {campaigns.map((c) => (
-            <CampaignCard key={c.id} campaign={c} />
-          ))}
-        </div>
-      </section>
       <section className="ops-give-layout ops-section" id="give">
         <div>
-          <p className="ops-eyebrow">Choose your rhythm</p>
-          <h2>
-            A gift today.
-            <br />A habit for tomorrow.
-          </h2>
+          <h2>Choose your donation</h2>
           <p>Choose an amount to plan your donation, then make the transfer through your bank.</p>
           <div className="ops-toggle" aria-label="Donation frequency">
             {[
@@ -274,12 +183,20 @@ export default function DonationsPage() {
             Nothing is charged on this page.
           </div>
           <p className="ops-help">
-            {CAMPAIGN_PURPOSE} For Zakat or a restricted gift, confirm the purpose with JIC before
-            transferring.
+            Your donation supports JIC’s charitable work. For Zakat or a restricted gift, confirm
+            the purpose with the office before transferring.
           </p>
         </div>
         <BankDetails reference={frequency === 'ramadan' ? 'JIC-RAMADAN' : 'JIC-DONATION'} />
       </section>
+      <nav className="ops-giving-links" aria-label="More ways to support JIC">
+        <Link to="/get-involved">
+          Volunteer or fundraise <ArrowRight size={16} />
+        </Link>
+        <Link to="/financial-history">
+          View financial history <ArrowRight size={16} />
+        </Link>
+      </nav>
       <section className="ops-panel ops-faq">
         <h2>Before you give</h2>
         <details>
@@ -290,24 +207,73 @@ export default function DonationsPage() {
             kept separate from donations.
           </p>
         </details>
-        <details>
-          <summary>When will my campaign total change?</summary>
-          <p>
-            The treasurer records donations after checking receipt. A bank transfer may not appear
-            immediately. Only confirmed entries count towards the total.
-          </p>
-        </details>
-        <details>
-          <summary>What will be public on my fundraising page?</summary>
-          <p>
-            Your chosen organiser name, title, story, target and confirmed total. Use a name you are
-            happy to share and leave out private information about others.
-          </p>
-        </details>
       </section>
     </div>
   );
 }
+export function CampaignsPage() {
+  const state = useRecords(publicLoader);
+  const [category, setCategory] = useState('all');
+  const available = CAMPAIGN_CATEGORIES.filter(([id]) =>
+    state.data?.some((item) => item.category === id),
+  );
+  const campaigns = (state.data || []).filter(
+    (item) => category === 'all' || item.category === category,
+  );
+  return (
+    <div className="ops-page ops-campaigns">
+      <Helmet>
+        <title>Community campaigns | Jamatia Islamic Centre</title>
+      </Helmet>
+      <header className="ops-heading">
+        <div>
+          <h1>Community campaigns</h1>
+          <p>Support a community fundraiser or start one for JIC.</p>
+        </div>
+        <Link className="ops-secondary" to="/fundraise/new">
+          Start a fundraiser <ArrowRight size={16} />
+        </Link>
+      </header>
+      {available.length > 1 && (
+        <label className="ops-campaign-filter">
+          Cause
+          <select value={category} onChange={(event) => setCategory(event.target.value)}>
+            <option value="all">All causes</option>
+            {available.map(([id, name]) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      <LoadState state={state} />
+      {!state.loading && !state.error && !campaigns.length && (
+        <p className="ops-campaign-empty">
+          No campaigns are listed right now. You can still{' '}
+          <Link to="/get-involved/volunteer">offer your time</Link> or{' '}
+          <Link to="/donate">donate directly to JIC</Link>.
+        </p>
+      )}
+      <div className="ops-campaign-grid">
+        {campaigns.map((campaign) => (
+          <CampaignCard key={campaign.id} campaign={campaign} />
+        ))}
+      </div>
+      <details className="ops-panel ops-faq">
+        <summary>About campaign totals and privacy</summary>
+        <p>
+          The treasurer updates totals after confirming receipt. Only confirmed donations count.
+        </p>
+        <p>
+          Fundraising pages show your organiser name, story, target and confirmed total. Choose a
+          name you are happy to share.
+        </p>
+      </details>
+    </div>
+  );
+}
+
 export function CampaignPage() {
   const { slug } = useParams();
   const loader = useCallback(
@@ -338,7 +304,7 @@ export function CampaignPage() {
   const c = state.data;
   return (
     <div className="ops-page">
-      <Link className="ops-text-link" to="/donate">
+      <Link className="ops-text-link" to="/fundraise">
         ← All fundraising
       </Link>
       <LoadState state={state} />
@@ -462,7 +428,7 @@ function MyFundraising() {
       </Helmet>
       <div className="ops-heading">
         <Link to="/portal">← My portal</Link>
-        <Link to="/donate">Donation hub</Link>
+        <Link to="/get-involved">Get involved</Link>
       </div>
       <header className="ops-intro">
         <p className="ops-eyebrow">Make it personal</p>
