@@ -3,7 +3,7 @@ import { Pause, Play } from 'lucide-react';
 import { headerTickerItems } from '@/lib/headerTicker';
 
 const MobileInfoBanner = forwardRef(function MobileInfoBanner(
-  { next, jummahTimes, notices, radio },
+  { next, jummahTimes, notices, radio, collapsed = false },
   ref,
 ) {
   const [paused, setPaused] = useState(false);
@@ -29,7 +29,13 @@ const MobileInfoBanner = forwardRef(function MobileInfoBanner(
   ));
 
   return (
-    <aside ref={ref} className="jic-mobile-info-banner" aria-label="Community updates">
+    <aside
+      ref={ref}
+      className={`jic-mobile-info-banner${collapsed ? ' is-scroll-hidden' : ''}`}
+      aria-label="Community updates"
+      aria-hidden={collapsed || undefined}
+      inert={collapsed ? '' : undefined}
+    >
       <button
         type="button"
         className="jic-ticker-motion"

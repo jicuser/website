@@ -12,6 +12,7 @@ import PublishedPageLinks from '@/features/content/PublishedPageLinks';
 import { PublishedPagesProvider } from '@/context/PublishedPagesContext';
 import { ProgrammeJourneyProvider } from '@/context/ProgrammeJourneyContext';
 import DailyReminder from '@/components/shell/DailyReminder';
+import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import SpiritualOverlays from '@/components/shell/SpiritualOverlays';
 import Footer from '@/components/shell/Footer';
 import PageTitle from '@/components/shell/PageTitle';
@@ -51,6 +52,7 @@ function PublicLayout() {
       className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
     >
       <PageTitle />
+      {isHome && <PublicBackdrop />}
       <UnifiedHeader />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
         {showReminder && <DailyReminder />}

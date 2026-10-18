@@ -1,5 +1,4 @@
 export const PRAYER_DOCK_SCROLL_DISTANCE = 12;
-export const PRAYER_DOCK_IDLE_MS = 700;
 
 // Watch the page, not nested timetable, menu or image-preview scroll areas.
 // Visibility never changes the panel's measured size or the page's scroll range.
@@ -11,10 +10,11 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
   let distance = 0;
   let upwardDistance = 0;
   let hidden = false;
+  let scrollHidden = false;
+  let keyboardFocus = false;
   let pointerInside = false;
   let footerVisible = false;
   let manualOpen = null;
-  let idleTimer;
   let focusTimer;
 
   const editing = () =>
@@ -27,18 +27,23 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
     onChange(value);
   };
   const settle = () => {
-    if (inFlow.matches || pointerInside || panel.contains(document.activeElement)) {
+    if (
+      inFlow.matches ||
+      pointerInside ||
+      (keyboardFocus && panel.contains(document.activeElement))
+    ) {
       setHidden(false);
     } else if (manualOpen !== null) {
       setHidden(!manualOpen);
     } else {
-      setHidden(browser.innerWidth < 768 && (footerVisible || Boolean(editing())));
+      setHidden(
+        scrollHidden || (browser.innerWidth < 768 && (footerVisible || Boolean(editing()))),
+      );
     }
   };
 
   const show = () => {
-    browser.clearTimeout(idleTimer);
-    idleTimer = undefined;
+    scrollHidden = false;
     distance = 0;
     upwardDistance = 0;
     previousY = Math.max(0, browser.scrollY);
@@ -47,7 +52,12 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
   const onScroll = (event) => {
     if (event.target !== document) return;
     const y = Math.max(0, browser.scrollY);
-    if (inFlow.matches || pointerInside || panel.contains(document.activeElement) || y === 0) {
+    if (
+      inFlow.matches ||
+      pointerInside ||
+      (keyboardFocus && panel.contains(document.activeElement)) ||
+      y === 0
+    ) {
       show();
       return;
     }
@@ -56,20 +66,19 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
     previousY = y;
     if (!movement) return;
     manualOpen = null;
-    if (browser.innerWidth < 768 && delta < 0) {
+    if (delta < 0) {
       upwardDistance += movement;
       distance = 0;
       if (upwardDistance >= PRAYER_DOCK_SCROLL_DISTANCE) {
         show();
         return;
       }
-    } else upwardDistance = 0;
-    distance += movement;
-    if (!hidden && distance >= PRAYER_DOCK_SCROLL_DISTANCE) {
-      setHidden(true);
+    } else {
+      upwardDistance = 0;
+      distance += movement;
+      if (distance >= PRAYER_DOCK_SCROLL_DISTANCE) scrollHidden = true;
     }
-    browser.clearTimeout(idleTimer);
-    idleTimer = browser.setTimeout(show, PRAYER_DOCK_IDLE_MS);
+    settle();
   };
   const onPointerDown = () => {
     pointerInside = true;
@@ -77,6 +86,12 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
   };
   const onPointerEnd = () => {
     pointerInside = false;
+  };
+  const onPagePointer = () => {
+    keyboardFocus = false;
+  };
+  const onKeyDown = () => {
+    keyboardFocus = true;
   };
   const onResize = () => {
     // Mobile browser bars can change viewport height during a scroll. That
@@ -89,15 +104,14 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
     browser.clearTimeout(focusTimer);
     manualOpen = null;
     // Wait until focus has moved from the old field to its destination.
-    focusTimer = browser.setTimeout(show, 0);
+    focusTimer = browser.setTimeout(settle, 0);
   };
   const footer = document.querySelector?.('.jic-site-footer');
   const observer =
     footer && browser.IntersectionObserver
       ? new browser.IntersectionObserver(([entry]) => {
           footerVisible = entry.isIntersecting;
-          if (footerVisible) settle();
-          else if (!idleTimer) settle();
+          settle();
         })
       : null;
   observer?.observe(footer);
@@ -108,13 +122,14 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
   browser.addEventListener('pointercancel', onPointerEnd, passive);
   panel.addEventListener('pointerdown', onPointerDown, passive);
   panel.addEventListener('focusin', show);
+  document.addEventListener('pointerdown', onPagePointer, true);
+  document.addEventListener('keydown', onKeyDown, true);
   document.addEventListener('visibilitychange', show);
   document.addEventListener('focusin', onFocus);
   document.addEventListener('focusout', onFocus);
   inFlow.addEventListener('change', show);
   settle();
   const cleanup = () => {
-    browser.clearTimeout(idleTimer);
     browser.clearTimeout(focusTimer);
     observer?.disconnect();
     browser.removeEventListener('scroll', onScroll);
@@ -123,6 +138,8 @@ export function observePrayerDockScroll({ panel, onChange, browser = window }) {
     browser.removeEventListener('pointercancel', onPointerEnd);
     panel.removeEventListener('pointerdown', onPointerDown);
     panel.removeEventListener('focusin', show);
+    document.removeEventListener('pointerdown', onPagePointer, true);
+    document.removeEventListener('keydown', onKeyDown, true);
     document.removeEventListener('visibilitychange', show);
     document.removeEventListener('focusin', onFocus);
     document.removeEventListener('focusout', onFocus);

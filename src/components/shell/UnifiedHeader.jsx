@@ -339,6 +339,7 @@ export default function UnifiedHeader() {
       <header className="jic-unified-header">
         <MobileInfoBanner
           ref={mobileBannerRef}
+          collapsed={prayerDockHidden}
           next={next}
           jummahTimes={jummahTimes}
           notices={getContent('header_ticker_items', '[]')}

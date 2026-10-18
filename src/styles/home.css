@@ -11,7 +11,7 @@ html[data-theme='light'] .jic-inner-route {
 html[data-theme='dark'] .jic-inner-route {
   --jic-photo-veil: rgba(3, 9, 15, 0.86);
 }
-/* Optional backdrop styling. Default reading surfaces use the page palette. */
+/* The homepage shares one photo behind its header and content. */
 .jic-public-route {
   position: relative;
   isolation: isolate;
@@ -59,51 +59,12 @@ html[data-theme] .jic-premium-home {
   color: var(--jic-text);
 }
 html[data-theme] .jic-premium-home .jic-hero {
-  --jic-text: #f4f6fa;
-  --jic-text-secondary: #dce5ef;
-  --jic-gold: #f3ce86;
-  --jic-gold-strong: var(--jic-gold);
-  --jic-glass-ink: var(--jic-text);
-  --jic-glass-muted: var(--jic-text-secondary);
-  --jic-glass-accent: var(--jic-gold);
-  --jic-glass-control: rgba(9, 29, 51, 0.72);
-  --jic-glass-tile: rgba(11, 33, 56, 0.78);
-  --jic-glass-panel: rgba(10, 29, 50, 0.84);
-  --jic-glass-panel-strong: rgba(9, 27, 47, 0.94);
-  --jic-glass-border: rgba(143, 178, 207, 0.24);
-  --jic-glass-highlight: rgba(172, 204, 229, 0.1);
   min-height: 0;
   position: relative;
   overflow: hidden;
   border-radius: 0;
   color: var(--jic-text);
-  background:
-    linear-gradient(115deg, rgba(5, 16, 31, 0.96), rgba(8, 27, 48, 0.78)),
-    url('/optimized/jic-aerial-sunset.webp') center 52% / cover;
-}
-/* Keep on-photo controls opaque when shared material fallbacks disable transparency.
-   Blur preferences continue to come from the canonical glass tokens. */
-html[data-theme][data-surface='solid'] .jic-premium-home .jic-hero {
-  --jic-glass-control: #091d33;
-  --jic-glass-tile: #0b2138;
-  --jic-glass-panel: #0a1d32;
-  --jic-glass-panel-strong: #091b2f;
-}
-@media (prefers-reduced-transparency: reduce) {
-  html[data-theme] .jic-premium-home .jic-hero {
-    --jic-glass-control: #091d33;
-    --jic-glass-tile: #0b2138;
-    --jic-glass-panel: #0a1d32;
-    --jic-glass-panel-strong: #091b2f;
-  }
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  html[data-theme] .jic-premium-home .jic-hero {
-    --jic-glass-control: #091d33;
-    --jic-glass-tile: #0b2138;
-    --jic-glass-panel: #0a1d32;
-    --jic-glass-panel-strong: #091b2f;
-  }
+  background: transparent;
 }
 html[data-theme] .jic-premium-home .jic-hero-inner {
   position: relative;
@@ -148,7 +109,7 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
   font-size: 18px;
   line-height: 1.5;
   color: var(--jic-text-secondary);
-  text-shadow: 0 2px 12px #0009;
+  text-shadow: none;
 }
 .jic-hero-buttons {
   display: flex;

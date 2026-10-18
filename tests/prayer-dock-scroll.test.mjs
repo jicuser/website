@@ -101,14 +101,14 @@ test('small movements do not hide the panel; sustained scrolling hides it once',
   assert.deepEqual(f.changes, [true]);
 });
 
-test('momentum in either direction postpones return until 700ms after the last movement', () => {
+test('a pause and small momentum corrections keep the bars hidden until scrolling up', () => {
   const f = fixture();
   f.scroll(130);
   f.advance(650);
   f.scroll(120);
-  f.advance(699);
+  f.advance(2000);
   assert.deepEqual(f.changes, [true]);
-  f.advance(1);
+  f.scroll(115);
   assert.deepEqual(f.changes, [true, false]);
 });
 
@@ -131,12 +131,15 @@ test('nested rails and horizontal-only scroll events do not hide or delay the pa
   f.scroll(150);
   f.scroll(150, {});
   f.advance(200);
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(130);
   assert.deepEqual(f.changes, [true, false]);
 });
 
 test('focused and pressed prayer controls stay available during page movements', () => {
   const f = fixture();
   f.document.activeElement = f.panelControl;
+  f.document.emit('keydown', { key: 'Tab' });
   f.scroll(200);
   assert.deepEqual(f.changes, []);
   f.document.activeElement = null;
@@ -185,6 +188,8 @@ test('height-only browser-bar resizing cannot make the panel flicker during a ge
   f.advance(699);
   assert.deepEqual(f.changes, [true]);
   f.advance(1);
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(230);
   assert.deepEqual(f.changes, [true, false]);
 });
 
@@ -212,10 +217,12 @@ test('the mobile footer remains clear at rest, with an explicit tap to reveal ti
   f.advance(700);
   assert.deepEqual(f.changes, [true, false, true]);
   f.footer(false);
+  assert.deepEqual(f.changes, [true, false, true]);
+  f.scroll(180);
   assert.deepEqual(f.changes, [true, false, true, false]);
 });
 
-test('typing hides the prayer panel until focus leaves the field', () => {
+test('typing hides the prayer panel and scrolling down keeps it hidden after focus leaves', () => {
   const f = fixture();
   f.document.activeElement = { matches: () => true };
   f.document.emit('focusin');
@@ -226,6 +233,8 @@ test('typing hides the prayer panel until focus leaves the field', () => {
   f.document.activeElement = null;
   f.document.emit('focusout');
   f.advance(0);
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(180);
   assert.deepEqual(f.changes, [true, false]);
 });
 
@@ -237,5 +246,28 @@ test('a tap can collapse the panel, while desktop footer visibility does not hid
   f.toggle();
   f.browser.innerWidth = 1280;
   f.footer(true);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('a previous touch focus does not pin the bars while reading the page', () => {
+  const f = fixture();
+  f.document.activeElement = f.panelControl;
+  f.document.emit('pointerdown');
+  f.scroll(200);
+  f.advance(3000);
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(180);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('desktop bars also stay hidden until a deliberate upward scroll', () => {
+  const f = fixture();
+  f.browser.innerWidth = 1280;
+  f.scroll(200);
+  f.advance(3000);
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(195);
+  assert.deepEqual(f.changes, [true]);
+  f.scroll(180);
   assert.deepEqual(f.changes, [true, false]);
 });
