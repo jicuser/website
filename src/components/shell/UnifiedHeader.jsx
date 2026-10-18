@@ -19,11 +19,8 @@ import {
   LogIn,
   User,
   Menu,
-  Moon,
   Pause,
   Play,
-  Sparkles,
-  Sun,
   X,
   ExternalLink,
   Search,
@@ -31,17 +28,20 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
-import { PUBLIC_MENU_GROUPS, NAV_GROUPS } from '@/content/nav';
+import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
-import { useAppearance } from '@/context/AppearanceContext';
 import { useNavigationHistory } from '@/context/NavigationContext';
 import { useProgrammeJourney } from '@/context/ProgrammeJourneyContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import DesktopNavigation from '@/components/shell/DesktopNavigation';
 import MobileInfoBanner from '@/components/shell/MobileInfoBanner';
 import { cn } from '@/lib/utils';
-import { activeNavigation, navigationBreadcrumbs } from '@/lib/publicNavigation';
+import {
+  activeNavigation,
+  navigationBreadcrumbs,
+  compactMenuNavigation,
+} from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
 import { nextCongregation } from '@/lib/nextCongregation';
@@ -62,12 +62,12 @@ export default function UnifiedHeader() {
   const { user } = useAuth();
   const accountLabel = user ? 'My portal' : 'Portal login';
   const menuGroups = visibleNavigation(PUBLIC_MENU_GROUPS, getContent);
+  const directoryGroups = compactMenuNavigation(menuGroups);
   const { pathname, key: routeKey } = useLocation();
   const alertSetup = pathname === '/prayer-times/reminders';
   const navigate = useNavigate();
   const { canGoBack, previousPath } = useNavigationHistory();
   const showHome = pathname === '/' || !canGoBack || previousPath === '/';
-  const { theme, toggleTheme, glassEnabled, toggleGlass } = useAppearance();
   const { todaysTimes, jummahTimes, currentDate, isLoadingPrayerTimes } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
     mobileBannerRef = useRef(null),
@@ -260,7 +260,7 @@ export default function UnifiedHeader() {
     const node = menuRef.current,
       previousOverflow = document.body.style.overflow;
     node.showModal();
-    if (menuSection) setExpandedMenuGroups((groups) => ({ ...groups, [menuSection]: true }));
+    setExpandedMenuGroups({});
     document.body.style.overflow = 'hidden';
     // React autofocus can run before showModal; explicitly focus the visible close control.
     menuCloseRef.current?.focus({ preventScroll: true });
@@ -268,7 +268,7 @@ export default function UnifiedHeader() {
       node.close();
       document.body.style.overflow = previousOverflow;
     };
-  }, [menuOpen, menuSection]);
+  }, [menuOpen]);
   useEffect(() => {
     const audio = audioRef.current;
     return () => {
@@ -365,7 +365,11 @@ export default function UnifiedHeader() {
               </button>
               {quickMenuOpen && (
                 <nav id="jic-quick-menu" className="jic-quick-menu" aria-label="Main pages">
-                  {menuGroups.map(({ name, path }) => (
+                  {[
+                    ...directoryGroups,
+                    { name: 'Donate', path: '/donate' },
+                    { name: accountLabel, path: '/portal' },
+                  ].map(({ name, path }) => (
                     <Link
                       key={path}
                       to={path}
@@ -382,10 +386,7 @@ export default function UnifiedHeader() {
                 </nav>
               )}
             </div>
-            <DesktopNavigation
-              navigation={navigation}
-              groups={visibleNavigation(NAV_GROUPS, getContent)}
-            />
+            <DesktopNavigation navigation={navigation} groups={directoryGroups} />
             <div className="jic-free-actions-slot">
               <button
                 type="button"
@@ -630,7 +631,6 @@ export default function UnifiedHeader() {
               <User size={22} aria-hidden="true" />
               <span>
                 <strong>{accountLabel}</strong>
-                <small>Your account, learning and certificates</small>
               </span>
               <ChevronRight size={18} aria-hidden="true" />
             </Link>
@@ -639,83 +639,72 @@ export default function UnifiedHeader() {
             </Link>
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
-                {menuGroups
-                  .filter((group) => group.path !== '/portal')
-                  .map(({ name, path, children }) => {
-                    const subpages = children.filter((child) => child.path !== path);
-                    const expanded = Boolean(expandedMenuGroups[path]);
-                    const childrenId = `jic-menu-${path.slice(1) || 'home'}-children`;
-                    return (
-                      <li className="jic-unified-menu-group" key={path}>
-                        <div className="jic-unified-menu-row">
-                          <Link
-                            to={path}
-                            aria-current={
-                              path === menuSection
-                                ? pathname === path
-                                  ? 'page'
-                                  : 'location'
-                                : undefined
-                            }
-                            onClick={() => {
-                              if (pathname === path) setMenuOpen(false);
-                            }}
-                          >
-                            {name}
-                          </Link>
-                          {subpages.length > 0 && (
-                            <button
-                              type="button"
-                              className="jic-menu-expand"
-                              aria-label={`${expanded ? 'Collapse' : 'Expand'} ${name} subpages`}
-                              aria-expanded={expanded}
-                              aria-controls={childrenId}
-                              onClick={() =>
-                                setExpandedMenuGroups((previous) => ({
-                                  ...previous,
-                                  [path]: !previous[path],
-                                }))
-                              }
-                            >
-                              <ChevronDown size={20} aria-hidden="true" />
-                            </button>
-                          )}
-                        </div>
+                {directoryGroups.map(({ name, path, children }) => {
+                  const subpages = children.filter((child) => child.path !== path);
+                  const expanded = Boolean(expandedMenuGroups[path]);
+                  const childrenId = `jic-menu-${path.slice(1) || 'home'}-children`;
+                  return (
+                    <li className="jic-unified-menu-group" key={path}>
+                      <div className="jic-unified-menu-row">
+                        <Link
+                          to={path}
+                          aria-current={
+                            path === menuSection ||
+                            children.some((child) => child.path === menuSection)
+                              ? pathname === path
+                                ? 'page'
+                                : 'location'
+                              : undefined
+                          }
+                          onClick={() => {
+                            if (pathname === path) setMenuOpen(false);
+                          }}
+                        >
+                          {name}
+                        </Link>
                         {subpages.length > 0 && (
-                          <ul
-                            id={childrenId}
-                            className="jic-unified-menu-children"
-                            hidden={!expanded}
+                          <button
+                            type="button"
+                            className="jic-menu-expand"
+                            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${name} subpages`}
+                            aria-expanded={expanded}
+                            aria-controls={childrenId}
+                            onClick={() =>
+                              setExpandedMenuGroups((previous) => ({
+                                [path]: !previous[path],
+                              }))
+                            }
                           >
-                            {subpages.map((child) => (
-                              <li key={`${child.path}-${child.name}`}>
-                                <NavLink
-                                  end
-                                  to={child.path}
-                                  onClick={() => {
-                                    if (pathname === child.path) setMenuOpen(false);
-                                  }}
-                                >
-                                  {child.name}
-                                </NavLink>
-                              </li>
-                            ))}
-                          </ul>
+                            <ChevronDown size={20} aria-hidden="true" />
+                          </button>
                         )}
-                      </li>
-                    );
-                  })}
+                      </div>
+                      {subpages.length > 0 && (
+                        <ul
+                          id={childrenId}
+                          className="jic-unified-menu-children"
+                          hidden={!expanded}
+                        >
+                          {subpages.map((child) => (
+                            <li key={`${child.path}-${child.name}`}>
+                              <NavLink
+                                end
+                                to={child.path}
+                                onClick={() => {
+                                  if (pathname === child.path) setMenuOpen(false);
+                                }}
+                              >
+                                {child.name}
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
-            <div className="jic-menu-appearance">
-              <button type="button" onClick={toggleTheme}>
-                {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}{' '}
-                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-              </button>
-              <button type="button" onClick={toggleGlass} aria-pressed={glassEnabled}>
-                <Sparkles size={17} /> Glass {glassEnabled ? 'on' : 'off'}
-              </button>
-            </div>
             <div className="jic-menu-bottom-actions">
               <Link to="/admin/login" className="jic-unified-admin-link">
                 <LogIn size={17} />

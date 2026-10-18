@@ -1,16 +1,19 @@
-/* A compact sticky row keeps utilities available without covering the header. */
+/* Fixed viewport coordinates keep the utilities steady across routes and scroll. */
 .jic-floating-tools {
-  position: sticky;
-  top: calc(var(--jic-prayer-visible-height, 0px) + 8px);
+  position: fixed;
+  top: calc(var(--jic-prayer-dock-height, 112px) + 8px);
+  right: max(16px, env(safe-area-inset-right));
   z-index: 35;
-  align-self: flex-end;
   display: flex;
   gap: 2px;
   width: fit-content;
-  margin: 4px max(16px, env(safe-area-inset-right)) 8px 16px;
-  padding: 3px;
-  border: 1px solid var(--jic-glass-border);
-  border-radius: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--jic-text);
 }
 .jic-floating-tool {
   position: relative;
@@ -56,10 +59,7 @@
 }
 @media (max-width: 767px) {
   .jic-floating-tools {
-    top: calc(var(--jic-mobile-strip-height, 44px) + 8px);
-  }
-  html[data-prayer-dock-hidden='true'] .jic-floating-tools {
-    top: max(8px, env(safe-area-inset-top));
+    top: calc(52px + env(safe-area-inset-top));
   }
 }
 @media (max-height: 500px) and (orientation: landscape) {

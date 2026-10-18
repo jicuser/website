@@ -67,7 +67,9 @@ export default function DesktopNavigation({ navigation, groups = NAV_GROUPS }) {
     <nav ref={navRef} className="jic-desktop-primary-nav" aria-label="Primary navigation">
       {groups.map(({ name, path, children }) => {
         const open = openPath === path;
-        const current = navigation?.primaryPath === path;
+        const current =
+          navigation?.primaryPath === path ||
+          children.some((child) => child.path === navigation?.primaryPath);
         const id = `jic-desktop-${path.slice(1) || 'home'}`;
         const currentChild =
           navigation?.path !== navigation?.primaryPath

@@ -62,7 +62,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
     expect(size.pillAboveNav, JSON.stringify(size)).toBe(true);
     expect(size.pillHeight).toBeLessThanOrEqual(72);
     expect(size.controlsHidden).toBe(false);
-    expect(size.floating).toBe('sticky');
+    expect(size.floating).toBe('fixed');
     expect(size.overflow).toBe(false);
     expect(size.targets).toBe(true);
   }
@@ -96,12 +96,9 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   await page.getByRole('button', { name: 'Resume rolling updates' }).click();
   await expect(page.locator('.jic-ticker-track')).toHaveCSS('animation-name', 'jic-info-roll');
   await page.locator('.jic-bottom-menu-trigger').click();
-  await page
-    .locator('.jic-menu-appearance')
-    .getByRole('button', { name: /^(Light|Dark) mode$/ })
-    .click();
   await expect(page.locator('#jic-site-menu a[href="/search"]')).toHaveCount(1);
   await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /^Switch to (light|dark) mode$/ }).click();
   await page.screenshot({ path: testInfo.outputPath('mobile-ticker-alternate-theme.png') });
   await page.locator('.jic-bottom-menu-trigger').click();
   await expect(page.locator('#jic-site-menu a[href="/portal"]')).toBeVisible();

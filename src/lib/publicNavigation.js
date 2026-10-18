@@ -89,3 +89,29 @@ export function navigationBreadcrumbs(navigation) {
     return true;
   });
 }
+
+// Keep the directory concise while retaining the full section model for page tabs and CMS.
+export function compactMenuNavigation(groups) {
+  const parents = new Map([
+    ['/projects', '/about'],
+    ['/social-media', '/about'],
+    ['/madrassah', '/education'],
+    ['/youth', '/education'],
+  ]);
+  const roots = new Set(groups.map((group) => group.path));
+  return groups
+    .filter((group) => !['/portal', '/donate'].includes(group.path))
+    .filter((group) => !roots.has(parents.get(group.path)))
+    .map((group) => {
+      const children = [...group.children];
+      for (const destination of groups) {
+        if (
+          parents.get(destination.path) === group.path &&
+          !children.some((child) => child.path === destination.path)
+        ) {
+          children.push({ name: destination.name, path: destination.path });
+        }
+      }
+      return { ...group, name: group.path === '/education' ? 'Learning' : group.name, children };
+    });
+}

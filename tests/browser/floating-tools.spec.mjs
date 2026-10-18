@@ -37,19 +37,27 @@ for (const width of [320, 390, 1280]) {
     await page.evaluate(() => scrollTo(0, 650));
     await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
     await expect(tools).toBeVisible();
-    await expect.poll(async () => (await tools.boundingBox()).y).toBeLessThan(100);
+    await expect.poll(async () => (await tools.boundingBox()).y).toBe(initial.y);
     let box = await tools.boundingBox();
-    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y).toBe(initial.y);
     expect(box.x + box.width).toBeLessThanOrEqual(width);
     await page.evaluate(() => scrollTo(0, 600));
     await expect(page.locator('#jic-prayer-dock')).not.toHaveAttribute('aria-hidden', 'true');
     await expect(tools).toBeVisible();
     box = await tools.boundingBox();
-    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y).toBe(initial.y);
     expect(box.y + box.height).toBeLessThan(844);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
       false,
     );
+    for (const route of ['/team', '/donate', '/prayer-times/reminders']) {
+      await page.goto(route);
+      await expect(tools).toBeVisible();
+      await expect.poll(async () => (await tools.boundingBox()).y).toBe(initial.y);
+      expect((await tools.boundingBox()).x).toBe(initial.x);
+      const brand = await page.locator('.jic-free-nav-row').boundingBox();
+      expect(brand.y).toBeGreaterThanOrEqual(initial.y + initial.height);
+    }
     if (width === 390)
       await page.screenshot({ path: testInfo.outputPath('floating-icons-mobile.png') });
   });
@@ -86,8 +94,10 @@ test('appearance changes show brief labels, retain preferences, and search is re
     background: getComputedStyle(node).backgroundColor,
     blur: getComputedStyle(node).backdropFilter,
   }));
-  expect(material.blur).toContain('blur');
-  expect(material.background).toMatch(/rgba\(|\/ 0\./);
+  expect(material.blur).toBe('none');
+  expect(material.background).toBe('rgba(0, 0, 0, 0)');
+  await expect(tools).toHaveCSS('box-shadow', 'none');
+  await expect(tools).toHaveCSS('border-top-width', '0px');
   await page.screenshot({ path: testInfo.outputPath('transparency-hint-mobile.png') });
   await tools.getByRole('link', { name: 'Search site' }).click();
   await expect(page).toHaveURL('/search');
@@ -97,3 +107,34 @@ test('appearance changes show brief labels, retain preferences, and search is re
   await expect(page.locator('.jic-search-results a[href="/get-involved/volunteer"]')).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+for (const theme of ['light', 'dark']) {
+  test(`compact menu groups related destinations in ${theme} mode`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openHome(page, theme);
+    await page.locator('.jic-bottom-menu-trigger').click();
+    const menu = page.getByRole('dialog', { name: 'Navigation menu' });
+    await expect(menu.locator('.jic-unified-menu-row > a')).toHaveText([
+      'Home',
+      'About',
+      'Prayer Times',
+      'Faith & practice',
+      'Services',
+      'Learning',
+      'Get involved',
+    ]);
+    await expect(menu.locator('.jic-menu-account')).toBeVisible();
+    const donate = menu.getByRole('button', { name: 'Donate', exact: true });
+    await expect(donate).toBeInViewport();
+    await page.screenshot({ path: testInfo.outputPath(`compact-menu-${theme}.png`) });
+    await menu.getByRole('button', { name: 'Expand Learning subpages' }).click();
+    await expect(menu.getByRole('link', { name: 'Madrassah', exact: true })).toBeVisible();
+    await expect(menu.getByRole('link', { name: 'Youth', exact: true })).toBeVisible();
+    await menu.getByRole('button', { name: 'Expand About subpages' }).click();
+    await expect(menu.getByRole('link', { name: 'Youth', exact: true })).toBeHidden();
+    await expect(menu.getByRole('link', { name: 'Social Media', exact: true })).toBeVisible();
+    await menu.getByRole('link', { name: 'Our Masjid Project', exact: true }).click();
+    await expect(page).toHaveURL('/projects');
+    await expect(menu).toBeHidden();
+  });
+}
