@@ -182,7 +182,7 @@
   font-weight: 700;
 }
 .certificate-badge.is-revoked {
-  color: var(--jic-error);
+  color: var(--jic-error-text);
 }
 .certificate-document {
   max-width: 720px;

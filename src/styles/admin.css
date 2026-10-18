@@ -222,7 +222,7 @@ html:not(.dark) .admin-workspace h3 {
 }
 
 html:not(.dark) .admin-eyebrow {
-  color: #a87313;
+  color: var(--jic-gold-strong);
 }
 html:not(.dark) .admin-login-back,
 html:not(.dark) .admin-login-secure {
@@ -683,7 +683,7 @@ html:not(.dark) .admin-login-secure {
   color: var(--jic-text);
 }
 .admin-editor-danger > svg {
-  color: var(--jic-error);
+  color: var(--jic-error-text);
 }
 .admin-editor-input {
   border-color: var(--jic-border);
@@ -2186,7 +2186,9 @@ html.dark .admin-console .admin-field-error {
   color: var(--jic-gold);
   font-size: 13px;
 }
-.admin-permission-group .admin-access-grid { margin-top: 12px; }
+.admin-permission-group .admin-access-grid {
+  margin-top: 12px;
+}
 .admin-access-preview {
   padding: 12px;
   border-left: 3px solid var(--jic-gold);

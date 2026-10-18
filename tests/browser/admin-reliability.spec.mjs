@@ -38,12 +38,15 @@ test('admin overview searches available tasks and mobile switching opens the cho
   expect(evidence.errors).toEqual([]);
 });
 
-for (const width of [390, 1280]) {
+for (const width of [320, 390, 1280]) {
   test(`staff task groups and account controls stay clear in both themes at ${width}px`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     const evidence = await openAdmin(page, { section: 'dashboard' });
+    await page.getByRole('link', { name: 'Skip to staff tools' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#staff-content')).toBeFocused();
     await expect(page.locator('.admin-tool-group[open]')).toHaveCount(0);
     await page.locator('.admin-tools summary').filter({ hasText: 'Website content' }).click();
     await page

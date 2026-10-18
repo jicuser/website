@@ -645,3 +645,19 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
     min-height: 80px;
   }
 }
+
+/* Keep full service names readable on narrow phones. */
+@media (max-width: 359px) {
+  .jic-home-shortcuts .jic-home-destination {
+    gap: 6px;
+    padding: 10px 8px;
+  }
+  .jic-home-shortcuts .jic-home-destination-icon {
+    flex-basis: 24px;
+    width: 24px;
+    height: 28px;
+  }
+  .jic-home-shortcuts .jic-home-destination-copy strong {
+    overflow-wrap: normal;
+  }
+}

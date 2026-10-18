@@ -847,6 +847,9 @@ export default function AdminPage() {
 
   return (
     <div className="admin-console min-h-screen">
+      <a className="jic-skip-link" href="#staff-content">
+        Skip to staff tools
+      </a>
       <header className="admin-account-header">
         <div className="admin-toolbar-title">
           <strong>JIC Staff workspace</strong>
@@ -1046,7 +1049,9 @@ export default function AdminPage() {
             )}
           </nav>
         </aside>
-        <main className="admin-main">{section}</main>
+        <main id="staff-content" tabIndex={-1} className="admin-main">
+          {section}
+        </main>
       </div>
     </div>
   );

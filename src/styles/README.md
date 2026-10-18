@@ -27,6 +27,7 @@
 ## Rules
 
 - Keep component geometry and its media queries together.
+- Use `--jic-error-text` for error messages; `--jic-error` remains the indicator/fill colour. Keyboard skip links in the public and staff shells target their focusable main content.
 - Use theme tokens for shared colours. Glass changes the background, not the opacity of text or images.
 - Use `jic-prompt` for the current question or next-step label. It follows the readable gold accent in both themes and glass modes; keep explanatory text in the normal text colour. Primary actions use existing button variants, with green for starting a stream and red for ending it.
 - Do not use `!important` as a cascade patch. Put a rule in the stylesheet that owns the component and use a scoped selector. The only retained exception is the global reduced-motion accessibility fallback in `index.css`.

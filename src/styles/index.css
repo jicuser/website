@@ -126,3 +126,28 @@ body.edit-mode-active {
   border: 1px solid currentColor;
   border-radius: 8px;
 }
+
+/* Keyboard users can bypass the shared navigation on each page. */
+.jic-skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 2px solid var(--jic-gold);
+  border-radius: 10px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  font-weight: 650;
+  transform: translateY(calc(-100% - 24px));
+}
+.jic-skip-link:focus {
+  transform: none;
+}
+#main-content,
+#staff-content {
+  scroll-margin-top: 72px;
+}

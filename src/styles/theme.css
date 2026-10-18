@@ -42,6 +42,7 @@
   --jic-success: #248a3d;
   --jic-warning: #b77900;
   --jic-error: #d70015;
+  --jic-error-text: #d70015;
 }
 .dark {
   --jic-logo-metal: #d6af62;
@@ -77,6 +78,7 @@
   --jic-success: #30d158;
   --jic-warning: #ffd60a;
   --jic-error: #ff453a;
+  --jic-error-text: #ff8a80;
   --jic-experience-green: #0b2036;
   --jic-experience-mint: #112a43;
 }

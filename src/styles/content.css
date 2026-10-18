@@ -296,7 +296,7 @@ html[data-theme] .jic-image-viewer {
 }
 .jic-wallpaper-control [role='alert'],
 .jic-image-viewer-actions [role='alert'] {
-  color: var(--jic-error);
+  color: var(--jic-error-text);
 }
 html[data-theme] .bg-primary.text-white {
   color: #0c1930;

@@ -228,7 +228,7 @@
   opacity: 0.65;
 }
 .timetable-downloads [role='alert'] {
-  color: var(--jic-error);
+  color: var(--jic-error-text);
   font-size: 0.875rem;
 }
 @media (min-width: 860px) {

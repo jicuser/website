@@ -374,14 +374,16 @@
     width: 100%;
   }
   .admin-tool-list > button {
-    min-height: 88px;
-    padding: 20px;
+    min-height: 72px;
+    gap: 10px;
+    padding: 12px;
   }
   .admin-tool-group-heading {
-    padding: 20px;
+    padding: 16px;
   }
   .admin-tool-list {
-    padding: 0 20px 20px;
+    gap: 8px;
+    padding: 0 12px 12px;
   }
   .admin-progress {
     max-width: none;

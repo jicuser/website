@@ -17,7 +17,24 @@ for (const theme of ['dark', 'light']) {
   test(`one homepage photo continues behind the header and hero in ${theme} mode`, async ({
     page,
   }, testInfo) => {
-    await openHome(page, theme);
+    await openHome(page, theme, 320);
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#main-content')).toBeFocused();
+    // Finish the keyboard journey before checking the initial header geometry.
+    await page.goto('/');
+    await expect(page.locator('.jic-home-shortcuts a')).toHaveCount(4);
+    const titleHeights = await page
+      .locator('.jic-home-shortcuts strong')
+      .evaluateAll((nodes) =>
+        nodes.map(
+          (node) =>
+            node.getBoundingClientRect().height <=
+            parseFloat(getComputedStyle(node).lineHeight) + 1,
+        ),
+      );
+    expect(titleHeights.every(Boolean)).toBe(true);
     const backdrop = page.locator('.jic-page-backdrop img');
     await expect.poll(() => backdrop.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
     const surfaces = await page.evaluate(() => {

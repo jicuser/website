@@ -107,7 +107,7 @@
   line-height: 1.6;
 }
 .salah-reminders__error {
-  color: var(--jic-error);
+  color: var(--jic-error-text);
 }
 .salah-reminders__timetable {
   display: inline-block;

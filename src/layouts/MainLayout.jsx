@@ -57,11 +57,18 @@ function PublicLayout() {
     <div
       className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
     >
+      <a className="jic-skip-link" href="#main-content">
+        Skip to content
+      </a>
       <PageTitle />
       {isHome && <PublicBackdrop />}
       <UnifiedHeader />
       <FloatingPageTools />
-      <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}
+      >
         {showReminder && <DailyReminder />}
         {visible ? (
           <div>
