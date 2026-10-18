@@ -11,9 +11,13 @@
   line-height: 1.6;
 }
 .ops-page {
-  max-width: 1240px;
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
+  max-width: var(--jic-content-width);
   margin: auto;
-  padding: clamp(24px, 5vw, 64px) 24px 88px;
+  padding: clamp(24px, 4vw, 48px) 0 var(--jic-space-section);
 }
 .ops-admin {
   width: 100%;
@@ -86,7 +90,7 @@
   background: var(--ops-paper);
   border: 1px solid var(--ops-border);
   border-radius: 22px;
-  padding: clamp(20px, 3vw, 32px);
+  padding: var(--jic-space-card);
   margin-bottom: 22px;
   min-width: 0;
 }
@@ -111,7 +115,7 @@
   color: var(--ops-accent);
 }
 .ops-section {
-  margin-top: 64px;
+  margin-top: var(--jic-space-section);
   scroll-margin-top: calc(var(--jic-prayer-sticky-offset, 100px) + 24px);
 }
 .ops-button,
@@ -276,9 +280,11 @@
 .ops-campaign-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: 22px;
+  gap: var(--jic-gap);
 }
 .ops-campaign-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--ops-border);
   border-radius: 22px;
   overflow: hidden;
@@ -324,7 +330,14 @@
     var(--ops-soft);
 }
 .ops-campaign-copy {
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--jic-space-card);
+}
+.ops-campaign-copy > .ops-text-link {
+  margin-top: auto;
+  padding-top: 16px;
 }
 .ops-campaign-copy .ops-badge {
   margin-bottom: 16px;
@@ -421,7 +434,7 @@
   color: white;
 }
 .ops-faq {
-  margin-top: 64px;
+  margin-top: var(--jic-space-section);
 }
 .ops-faq details {
   padding: 20px 0;
@@ -924,7 +937,7 @@
 }
 @media (max-width: 650px) {
   .ops-page {
-    padding: 28px 18px 60px;
+    padding: 24px 0 var(--jic-space-section);
   }
   .ops-giving-hero,
   .ops-give-layout {
@@ -937,7 +950,7 @@
     height: 250px;
   }
   .ops-section {
-    margin-top: 42px;
+    margin-top: var(--jic-space-section);
   }
   .ops-reasons button {
     padding: 18px;

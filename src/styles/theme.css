@@ -1,5 +1,10 @@
 /* Canonical JIC colour system. Layout belongs to component styles; translucency belongs to liquid-glass.css. */
 :root {
+  --jic-content-width: 1120px;
+  --jic-page-gutter: clamp(16px, 3vw, 32px);
+  --jic-space-section: clamp(40px, 6vw, 72px);
+  --jic-space-card: clamp(20px, 2.5vw, 28px);
+  --jic-gap: clamp(16px, 2.5vw, 24px);
   --jic-action: #e2b45d;
   --jic-teal: #6b3a0c;
   --jic-logo-metal: #89501b;

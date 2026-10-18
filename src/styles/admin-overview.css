@@ -9,8 +9,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 24px;
-  padding-block: 8px 28px;
-  margin-bottom: 28px;
+  padding-block: 8px 24px;
+  margin-bottom: 24px;
   border-bottom: 1px solid var(--jic-border);
 }
 .admin-welcome > div {
@@ -76,7 +76,7 @@
   align-items: flex-start;
   gap: 12px;
   min-width: 0;
-  padding: 24px;
+  padding: var(--jic-space-card);
   border: 1px solid var(--jic-border);
   border-top: 3px solid var(--jic-gold-strong);
   border-radius: 16px;
@@ -209,7 +209,7 @@
   color: var(--jic-text-secondary);
 }
 .admin-tools {
-  margin-top: 40px;
+  margin-top: 32px;
 }
 .admin-tools .admin-heading {
   align-items: flex-end;
@@ -239,7 +239,7 @@
   font-size: 0.8rem;
 }
 .admin-tool-group {
-  margin-block: 12px;
+  margin-block: 16px;
   border: 1px solid var(--jic-border);
   border-radius: 14px;
   background: var(--jic-surface);
@@ -285,7 +285,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
-  gap: 12px;
+  gap: 16px;
   padding: 0 16px 16px;
 }
 .admin-tool-list > button {
@@ -295,7 +295,7 @@
   gap: 12px;
   min-width: 0;
   min-height: 92px;
-  padding: 18px 16px;
+  padding: 20px;
   background: var(--jic-bg);
   border: 1px solid var(--jic-border);
   border-radius: 12px;

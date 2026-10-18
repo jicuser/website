@@ -1,8 +1,12 @@
 /* Service information, journeys and enquiry forms. Uses the shared appearance tokens. */
 .service-page {
-  max-width: 1180px;
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
+  max-width: var(--jic-content-width);
   margin: auto;
-  padding: clamp(20px, 4vw, 48px) max(18px, env(safe-area-inset-left));
+  padding-block: clamp(24px, 4vw, 48px);
   color: var(--jic-text);
 }
 .service-page h1 {
@@ -130,12 +134,12 @@
   font-size: 0.875rem;
 }
 .service-section {
-  margin-block: 48px;
+  margin-block: var(--jic-space-section);
 }
 .service-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px;
+  gap: var(--jic-gap);
   padding: 0;
   margin: 28px 0 0;
   list-style: none;
@@ -166,14 +170,14 @@
 .service-detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: var(--jic-gap);
   margin-block: 40px;
 }
 .service-checklist {
   border: 1px solid var(--jic-border);
   background: var(--jic-surface);
   border-radius: 20px;
-  padding: 28px;
+  padding: var(--jic-space-card);
 }
 .service-checklist ul {
   list-style: none;
@@ -237,7 +241,7 @@
   border: 1px solid var(--jic-border);
   background: var(--jic-surface);
   border-radius: 20px;
-  padding: 24px;
+  padding: var(--jic-space-card);
   min-width: 0;
 }
 .service-enquiry-form :is(input, textarea) {
@@ -256,7 +260,7 @@
 .service-visit {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: var(--jic-gap);
   padding-block: 32px;
   margin-top: 20px;
   border-top: 1px solid var(--jic-border);
@@ -459,18 +463,24 @@
   --finder-paper: color-mix(in srgb, var(--jic-surface) 96%, var(--jic-action));
   --finder-action: var(--jic-gold);
   --finder-action-ink: var(--jic-text);
-  width: 100%;
-  max-width: 1180px;
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
+  max-width: var(--jic-content-width);
   box-sizing: border-box;
   margin-inline: auto;
-  padding: clamp(28px, 4vw, 56px) max(18px, env(safe-area-inset-left));
+  padding-block: clamp(24px, 4vw, 48px);
   color: var(--jic-text);
 }
 .dark .service-explorer {
   --finder-action-ink: var(--jic-text);
 }
 .service-explorer--compact {
-  width: min(1120px, calc(100% - 32px));
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
   margin-inline: auto;
   padding: 0;
 }
@@ -482,8 +492,8 @@
   display: grid;
   grid-template-columns: 1.12fr 0.88fr;
   align-items: center;
-  gap: clamp(28px, 5vw, 64px);
-  margin-bottom: clamp(48px, 6vw, 80px);
+  gap: clamp(24px, 5vw, 56px);
+  margin-bottom: var(--jic-space-section);
 }
 .service-explorer-intro {
   min-width: 0;
@@ -731,15 +741,15 @@
 .service-explorer-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--jic-gap);
 }
 .service-explorer-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   min-width: 0;
-  min-height: 310px;
-  padding: 26px;
+  min-height: 300px;
+  padding: var(--jic-space-card);
   border: 1px solid var(--jic-border);
   border-radius: 16px;
   background: var(--finder-paper);
@@ -759,7 +769,7 @@
   align-items: flex-start;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 .service-explorer-card-icon {
   display: grid;
@@ -801,7 +811,7 @@
   letter-spacing: -0.025em;
 }
 .service-explorer-card-description {
-  margin: 14px 0 26px;
+  margin: 16px 0 24px;
   color: var(--jic-text-secondary);
   font-size: 0.85rem;
   line-height: 1.75;
@@ -913,7 +923,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .service-explorer-header {
-    gap: 28px;
+    gap: var(--jic-gap);
   }
   .service-explorer-photo > img {
     height: 300px;
@@ -976,10 +986,10 @@
     padding: 24px;
   }
   .service-explorer-card-top {
-    margin-bottom: 22px;
+    margin-bottom: 20px;
   }
   .service-explorer-card-description {
-    margin-bottom: 22px;
+    margin-bottom: 20px;
   }
   .service-explorer-view-all {
     width: 100%;

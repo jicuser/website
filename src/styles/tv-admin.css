@@ -1,10 +1,19 @@
 /* Admin-only TV workspace styles. Public display rendering stays in tv.css. */
 
+.stream-background-settings {
+  display: grid;
+  gap: var(--jic-gap, 24px);
+  min-width: 0;
+}
+.stream-background-settings > :is(.tv-editor-save-status, .stream-feedback, [role='status']) {
+  margin: 0;
+}
+
 .tv-workflow-heading {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-block: 8px;
+  margin: 0;
 }
 .tv-workflow-heading > span {
   display: grid;
@@ -22,7 +31,7 @@
 }
 .tv-workflow-heading p,
 .tv-item-selection-heading > span {
-  margin: 4px 0 0;
+  margin: 8px 0 0;
   font-size: 0.85rem;
   line-height: 1.6;
   color: var(--jic-text-secondary);
@@ -36,11 +45,13 @@
 .tv-item-choices > button {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  min-width: 0;
   min-height: 48px;
   border: 1px solid var(--jic-border);
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 12px 16px;
+  overflow-wrap: anywhere;
   background: var(--jic-surface);
   color: var(--jic-text);
   text-align: left;
@@ -68,8 +79,8 @@
 }
 .tv-item-selection {
   display: grid;
-  gap: 10px;
-  margin-block: 6px;
+  gap: 12px;
+  margin: 0;
 }
 .tv-item-selection-heading {
   display: flex;
@@ -95,24 +106,29 @@
   border-radius: 12px;
   background: var(--jic-surface);
   color: var(--jic-text);
-  padding: 12px 16px;
+  padding: 16px;
 }
 .tv-editor-advanced > summary,
 .tv-item-actions-more > summary,
 .tv-draft-review > summary {
   cursor: pointer;
   font-weight: 650;
-  min-height: 24px;
+  min-height: 44px;
+  padding-block: 10px;
+  box-sizing: border-box;
 }
 .tv-editor-advanced[open] > summary,
 .tv-draft-review[open] > summary {
   margin-bottom: 16px;
 }
 .tv-editor-advanced > .admin-check {
-  margin-block: 16px;
+  margin: 0 0 16px;
+}
+.tv-editor-advanced > .tv-layout-help {
+  margin-bottom: 16px;
 }
 .tv-item-actions-more {
-  padding: 8px 12px;
+  padding: 0 12px;
   min-height: 44px;
 }
 .tv-item-actions-more > div {
@@ -122,9 +138,11 @@
   padding-top: 12px;
 }
 .tv-draft-review {
-  margin-block: 20px;
+  margin: 0;
+  padding: var(--jic-space-card, clamp(20px, 2.5vw, 28px));
 }
 .tv-draft-review > p {
+  margin: 0 0 16px;
   color: var(--jic-text-secondary);
   font-size: 0.875rem;
   line-height: 1.7;
@@ -135,7 +153,7 @@
   gap: 8px;
   list-style: none;
   padding: 0;
-  margin-block: 16px;
+  margin: 0 0 16px;
 }
 .tv-draft-review > ul > li {
   border: 1px solid var(--jic-border);
@@ -144,7 +162,13 @@
   font-size: 0.8rem;
 }
 .tv-review-views {
-  margin-block: 16px;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+.tv-review-views > button {
+  flex: 1 1 200px;
+  min-width: 0;
+  min-height: 44px;
 }
 .tv-section-choices > button:focus-visible,
 .tv-item-choices > button:focus-visible,
@@ -328,7 +352,7 @@
 
 .tv-settings-fields {
   display: grid;
-  gap: 1rem;
+  gap: var(--jic-gap, 24px);
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -342,18 +366,16 @@
 }
 
 .tv-editor-context {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: end;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin: 0;
 }
 .tv-editor-context label {
-  min-width: min(100%, 220px);
-  flex: 1 1 220px;
+  min-width: 0;
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 .tv-editor-context select,
 .tv-preset-selector select {
@@ -374,8 +396,10 @@
 
 .tv-scene-tabs-wrap {
   display: grid;
-  gap: 6px;
-  margin: 10px 0 12px;
+  gap: 16px;
+  margin: 0;
+  padding-top: var(--jic-space-card, clamp(20px, 2.5vw, 28px));
+  border-top: 1px solid var(--jic-border);
 }
 .tv-scene-tabs-wrap > span {
   color: var(--jic-muted);
@@ -384,9 +408,9 @@
 }
 .tv-layout-editor {
   display: grid;
-  gap: 10px;
-  margin-top: 12px;
-  padding: 12px;
+  gap: 16px;
+  margin: 0;
+  padding: var(--jic-space-card, clamp(20px, 2.5vw, 28px));
   border: 1px solid var(--jic-border);
   border-radius: 14px;
   background: var(--jic-surface);
@@ -396,11 +420,11 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 16px;
 }
 .tv-layout-toolbar > div:first-child {
   display: grid;
-  gap: 2px;
+  gap: 8px;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -411,7 +435,7 @@
 .tv-layout-history {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   justify-content: flex-start;
 }
 .tv-layout-history .admin-button,
@@ -443,7 +467,7 @@
 .tv-layout-controls label,
 .tv-layout-position label {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 .tv-layout-selection select,
 .tv-layout-add-content select {
@@ -460,9 +484,9 @@
 .tv-layout-position {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 12px;
   margin: 0;
-  padding: 10px;
+  padding: 16px;
   border: 1px solid var(--jic-border);
   border-radius: 10px;
 }
@@ -475,10 +499,10 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: end;
-  gap: 8px;
+  gap: 16px;
   min-width: 0;
   margin: 0;
-  padding: 12px;
+  padding: 16px;
   border: 1px solid var(--jic-border);
   border-radius: 12px;
 }
@@ -499,8 +523,8 @@
 .tv-layer-content-picker,
 .tv-state-asset-picker {
   display: grid;
-  gap: 7px;
-  padding: 11px;
+  gap: 12px;
+  padding: 16px;
   border: 1px solid var(--jic-border);
   border-radius: 12px;
   background: color-mix(in srgb, var(--jic-surface) 94%, var(--jic-gold) 2%);
@@ -526,16 +550,23 @@
 }
 
 .tv-preset-settings {
-  margin-top: 12px;
+  display: grid;
+  gap: 16px;
+  margin: 0;
+}
+.stream-background-settings .tv-preset-settings > :is(h3, p, label, .admin-field-grid) {
+  margin: 0;
 }
 .tv-prayer-delay-grid {
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
 }
 .tv-save-actions {
   position: sticky;
   bottom: 10px;
   z-index: 5;
-  padding: 10px;
+  gap: 12px;
+  margin: 0;
+  padding: 16px;
   border: 1px solid var(--jic-border);
   border-radius: 14px;
   background: var(--jic-surface);
@@ -585,13 +616,12 @@
 
 @media (max-width: 700px) {
   .tv-editor-context {
-    display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
   .tv-editor-context label {
     min-width: 0;
   }
   .tv-layout-editor {
-    padding: 8px;
     border-radius: 12px;
   }
   .tv-layout-toolbar {
@@ -618,7 +648,7 @@
   }
   .tv-save-actions {
     position: static;
-    margin-top: 14px;
+    margin: 0;
   }
   .tv-save-actions .admin-button {
     width: 100%;
@@ -627,7 +657,7 @@
     align-items: flex-start;
   }
   .tv-final-preview-bar .admin-button {
-    min-height: 42px;
+    min-height: 44px;
     padding-inline: 12px;
   }
 }
@@ -646,15 +676,17 @@
 }
 .tv-scene-rename {
   display: grid;
-  gap: 5px;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
   max-width: 360px;
 }
 
 .tv-scheduled-scenes {
   display: grid;
-  gap: 12px;
-  margin-top: 18px;
-  padding-top: 16px;
+  gap: 16px;
+  margin: 0;
+  padding-top: var(--jic-space-card, clamp(20px, 2.5vw, 28px));
   border-top: 1px solid var(--jic-border);
 }
 .tv-scheduled-scenes .admin-heading {
@@ -675,8 +707,8 @@
 }
 .tv-scene-rule-card {
   display: grid;
-  gap: 12px;
-  padding: 12px;
+  gap: 16px;
+  padding: 16px;
   border: 1px solid var(--jic-border);
   border-radius: 12px;
   background: var(--jic-surface);
@@ -700,17 +732,17 @@
   margin: 0;
 }
 .tv-day-rules legend {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-weight: 700;
 }
 .tv-day-rules > div {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 5px;
+  gap: 8px;
 }
 .tv-day-rules button {
   min-width: 0;
-  min-height: 40px;
+  min-height: 44px;
   border: 1px solid var(--jic-border);
   border-radius: 9px;
   background: var(--jic-surface);
@@ -722,7 +754,7 @@
   background: color-mix(in srgb, var(--jic-gold) 15%, var(--jic-surface));
 }
 .tv-time-rules label:not(.admin-check) {
-  min-width: 140px;
+  min-width: min(100%, 140px);
 }
 .tv-scene-order-actions {
   margin: 0;
@@ -737,6 +769,62 @@
   }
   .tv-time-rules {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Group boundaries use the parent grid's gap; nested controls add no outer margins. */
+.tv-workflow-heading > div {
+  min-width: 0;
+}
+.tv-settings-fields > .tv-workflow-heading:not(:first-of-type) {
+  padding-top: var(--jic-space-card, clamp(20px, 2.5vw, 28px));
+  border-top: 1px solid var(--jic-border);
+}
+.stream-background-settings .tv-settings-fields > .admin-panel {
+  margin: 0;
+}
+.tv-item-selection-heading > span {
+  margin: 0;
+}
+.tv-item-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 144px), 1fr));
+}
+.tv-layout-editor .tv-item-choices > button {
+  height: 100%;
+}
+.tv-layout-editor .tv-selection-actions {
+  gap: 12px;
+}
+.tv-layout-editor .tv-selection-buttons {
+  gap: 8px;
+}
+:is(.stream-background-settings, .layout-editor-dialog-content) .tv-layout-editor > .layout-canvas {
+  margin-block: 0;
+}
+.tv-layout-controls :is(input:not([type='checkbox']):not([type='file']), select),
+.tv-editor-context select,
+.tv-scene-rename input {
+  min-height: 44px;
+  max-width: 100%;
+}
+.tv-scene-tabs-head > .admin-text-button {
+  min-height: 44px;
+}
+.tv-precise-position[open] > summary {
+  margin-bottom: 12px;
+}
+.tv-layout-add-content,
+.tv-time-rules label,
+.tv-scene-rule-title label {
+  min-width: 0;
+}
+.tv-save-actions .admin-button {
+  min-height: 44px;
+}
+@media (max-width: 400px) {
+  .tv-section-choices {
     grid-template-columns: minmax(0, 1fr);
   }
 }

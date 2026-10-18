@@ -1,7 +1,10 @@
 /* Public search and social pages. Materials belong to liquid-glass.css. */
 .jic-search-page,
 .jic-social-page {
-  width: min(100% - 32px, 1000px);
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
   margin: 24px auto 40px;
 }
 .jic-search-page > p,

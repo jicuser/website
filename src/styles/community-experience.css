@@ -1,7 +1,10 @@
 /* Feature layout and typography. Shared materials belong to liquid-glass.css. */
 .jic-experience {
-  width: min(1120px, calc(100% - 40px));
-  margin: clamp(56px, 8vw, 96px) auto;
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
+  margin: var(--jic-space-section) auto;
 }
 .jic-experience-heading {
   max-width: 680px;
@@ -43,7 +46,7 @@
 .jic-learning-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(28px, 6vw, 80px);
+  gap: clamp(24px, 5vw, 56px);
   align-items: center;
 }
 .jic-choice-tabs {
@@ -212,16 +215,19 @@
 .jic-account-connection {
   border-block: 1px solid var(--jic-glass-border);
   color: var(--jic-text);
-  padding: clamp(40px, 6vw, 72px) 20px;
-  margin-block: 72px;
+  padding-block: clamp(24px, 4vw, 40px);
+  margin-block: var(--jic-space-section);
 }
 .jic-account-connection-inner {
-  width: min(1080px, 100%);
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
   margin: auto;
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   align-items: center;
-  gap: clamp(32px, 6vw, 80px);
+  gap: clamp(24px, 5vw, 56px);
 }
 .jic-account-connection h2 {
   color: var(--jic-text);
@@ -357,8 +363,11 @@
 }
 @media (max-width: 767px) {
   .jic-experience {
-    width: calc(100% - 32px);
-    margin-block: 52px;
+    width: min(
+      var(--jic-content-width),
+      calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+    );
+    margin-block: var(--jic-space-section);
   }
   .jic-experience-heading {
     margin-bottom: 28px;
@@ -377,7 +386,7 @@
     min-height: 340px;
   }
   .jic-account-connection {
-    margin-block: 52px;
+    margin-block: var(--jic-space-section);
   }
   .jic-question-list summary {
     padding: 18px;

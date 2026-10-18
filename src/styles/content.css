@@ -1,7 +1,10 @@
 /* Reusable content rails, poster cards and image/download dialogs. */
 .jic-rail-section {
-  width: min(1200px, calc(100% - 32px));
-  margin: 30px auto;
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
+  margin: var(--jic-space-section) auto;
 }
 .jic-rail-heading {
   display: flex;
@@ -360,24 +363,20 @@ html[data-theme] .jic-radio-player-page {
 .jic-home-route .jic-rail-heading h2 {
   color: var(--jic-text);
 }
-/* The home page uses a compact poster row on laptops; each image still opens the viewer. */
+/* Keep programme descriptions and actions available on wide screens too. */
 @media (min-width: 1024px) {
   .jic-home-route .jic-programmes {
     margin: 0 auto 24px;
   }
   .jic-home-route .jic-programmes .jic-swipe-rail {
-    grid-auto-columns: 160px;
-    gap: 12px;
-  }
-  .jic-home-route .jic-programmes :is(.jic-programme-copy, .jic-rail-controls),
-  .jic-home-route .jic-programmes .jic-poster-button > span {
-    display: none;
+    grid-auto-columns: calc((100% - 48px) / 3);
+    gap: 24px;
   }
   .jic-home-route .jic-programmes .jic-poster-button {
     padding: 6px;
   }
   .jic-home-route .jic-programmes .jic-poster-button img {
-    height: 200px;
+    height: 220px;
   }
 }
 @media (max-width: 767px) {

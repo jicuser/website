@@ -2,8 +2,8 @@
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   align-items: center;
-  gap: 42px;
-  margin-bottom: 60px;
+  gap: clamp(24px, 4vw, 48px);
+  margin-bottom: var(--jic-space-section);
 }
 .project-hero figure {
   position: relative;
@@ -37,8 +37,8 @@
   background: var(--ops-soft);
   border: 1px solid var(--ops-border);
   border-radius: 24px;
-  padding: clamp(24px, 4vw, 44px);
-  margin-bottom: 65px;
+  padding: var(--jic-space-card);
+  margin-bottom: var(--jic-space-section);
   overflow: hidden;
 }
 .project-explorer small {

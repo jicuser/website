@@ -344,8 +344,8 @@ html:not(.dark) .admin-login-secure {
   box-shadow: 0 8px 35px #25314405;
   backdrop-filter: blur(24px);
   border-radius: 22px;
-  padding: 24px;
-  margin: 0 0 22px;
+  padding: var(--jic-space-card);
+  margin: 0 0 24px;
   min-width: 0;
 }
 .admin-panel p {
@@ -553,7 +553,7 @@ html:not(.dark) .admin-login-secure {
   font-size: 14px;
   font-weight: 650;
   color: var(--jic-text-secondary);
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 .admin-panel input:not([type='checkbox']):not([type='file']),
 .admin-panel textarea {
@@ -565,7 +565,7 @@ html:not(.dark) .admin-login-secure {
   width: 100%;
   padding: 11px 12px;
   font: 400 16px/1.5 system-ui;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 .admin-panel input:focus,
 .admin-panel textarea:focus {
@@ -583,7 +583,7 @@ html:not(.dark) .admin-login-secure {
 .admin-field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 18px;
+  gap: 0 24px;
 }
 .admin-upload {
   border: 1.5px dashed #c9b779;
@@ -1191,7 +1191,7 @@ html:not(.dark) .managed-page-section-copy {
   display: none;
 }
 .admin-main {
-  padding: clamp(16px, 3vw, 36px);
+  padding: var(--jic-space-card);
   min-width: 0;
 }
 .admin-task-group {

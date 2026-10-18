@@ -36,6 +36,8 @@ Use real destination links and content. Empty records remain empty; an enquiry i
 
 ## Responsive and interaction rules
 
+Public sections align to a shared 1120px content width with fluid 16–32px gutters. A single homepage flow owns the 40–72px section gaps; cards use shared padding and keep actions aligned without forcing fixed heights on phones. Related fields stay close together, while separate tasks have larger group gaps. Programme descriptions and actions remain available on desktop.
+
 Sections use centred reading widths; cards collapse into a single column on small phones. Essential Janazah/Nikah links remain above prayer details on mobile. Controls have at least 44px targets; mobile text inputs use 16px to avoid browser focus zoom. Learning choices support arrow keys, Home and End. Questions use native details controls. Respect reduced motion and preserve saved appearance choices; new visitors start in the light theme.
 
 ## Assets
