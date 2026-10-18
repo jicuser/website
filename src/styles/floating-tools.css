@@ -73,8 +73,10 @@
 .jic-floating-tools.jic-menu-tools {
   position: relative;
   inset: auto;
-  display: flex;
-  justify-content: space-evenly;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-items: center;
+  gap: 6px;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 40px;
 }

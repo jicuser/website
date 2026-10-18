@@ -508,27 +508,6 @@ export default function UnifiedHeader() {
             </button>
           </div>
           <div className="jic-unified-menu-scroll">
-            <nav className="jic-menu-actions" aria-label="Quick actions">
-              <Link to="/portal" className="jic-menu-account" aria-label={accountLabel}>
-                <User size={20} aria-hidden="true" />
-                <span>My portal</span>
-              </Link>
-              <Link to="/admin/login" aria-label="Staff login">
-                <LogIn size={20} aria-hidden="true" />
-                <span>Staff login</span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setDonationOpen(true);
-                }}
-              >
-                <Heart className="jic-donate-heart" size={20} aria-hidden="true" />
-                <span>Donate</span>
-              </button>
-            </nav>
-            <FloatingPageTools placement="menu" />
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
                 {directoryGroups.map(({ name, path, children }) => {
@@ -597,6 +576,27 @@ export default function UnifiedHeader() {
                 })}
               </ul>
             </nav>
+            <nav className="jic-menu-actions" aria-label="Quick actions">
+              <Link to="/portal" className="jic-menu-account" aria-label={accountLabel}>
+                <User size={20} aria-hidden="true" />
+                <span>My portal</span>
+              </Link>
+              <Link to="/admin/login" aria-label="Staff login">
+                <LogIn size={20} aria-hidden="true" />
+                <span>Staff login</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setDonationOpen(true);
+                }}
+              >
+                <Heart className="jic-donate-heart" size={20} aria-hidden="true" />
+                <span>Donate</span>
+              </button>
+            </nav>
+            <FloatingPageTools placement="menu" />
           </div>
         </dialog>
       )}

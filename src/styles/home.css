@@ -207,30 +207,27 @@ html[data-theme] .jic-premium-home .jic-hero-sub {
 html[data-theme] .jic-home-footer-strip {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 20px;
-  border-radius: 14px;
-}
-.jic-home-footer-strip > div {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  min-width: 0;
+  min-height: 60px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  text-decoration: none;
 }
-.jic-home-footer-strip > div > svg {
+.jic-home-footer-strip > svg {
   flex-shrink: 0;
+}
+.jic-home-footer-strip > svg:last-child {
+  margin-left: auto;
 }
 .jic-home-footer-strip strong,
 .jic-home-footer-strip small {
   display: block;
 }
 .jic-home-footer-strip strong {
-  font-size: 18px;
+  font-size: 15px;
 }
 .jic-home-footer-strip small {
-  font-size: 14px;
-  margin-top: 4px;
+  font-size: 12px;
   color: var(--jic-text-secondary);
 }
 .jic-community-join {
@@ -332,11 +329,6 @@ html[data-theme] .jic-home-footer-strip {
   .jic-event-strip {
     gap: 8px;
     padding: 12px;
-  }
-  html[data-theme] .jic-home-footer-strip {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 18px;
   }
   .jic-community-join {
     width: 100%;

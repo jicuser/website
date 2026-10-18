@@ -2,7 +2,6 @@ import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BookOpen,
-  CalendarDays,
   Play,
   Radio,
   Users,
@@ -18,7 +17,6 @@ import useCommunityLink from '@/hooks/useCommunityLink';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import HomePrayerCard from '@/components/home/HomePrayerCard';
 import { SITE } from '@/content/site';
-import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useContent } from '@/context/ContentContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
@@ -117,7 +115,6 @@ export default function HomePage() {
   const whatsapp = useCommunityLink();
   const cards = useHomeTiles();
   const [playingUrl, setPlayingUrl] = useState(null);
-  const { jummahTimes } = usePublicPrayerTimes();
   const { getContent } = useContent();
   let hero = {};
   try {
@@ -271,30 +268,6 @@ export default function HomePage() {
           </section>
         )}
 
-        {jummahTimes.length > 0 && (
-          <section className="jic-event-strip">
-            <div className="jic-event-label">
-              <CalendarDays size={17} />
-              <span>Friday Sermon</span>
-            </div>
-            <div className="jic-event-main">
-              <strong>
-                {jummahTimes
-                  .map((t, i) => `${i === 0 ? '1st' : '2nd'} Jamaat ${t.prayer}`)
-                  .join(' · ')}
-              </strong>
-              <span>Every Friday</span>
-            </div>
-            <Link
-              to="/prayer-times/jummah"
-              className="jic-event-arrow"
-              aria-label="View Jummah times"
-            >
-              ›
-            </Link>
-          </section>
-        )}
-
         {hasLiveStream && (
           <section id="live" className="jic-live-section">
             <div className="jic-live-heading">
@@ -336,23 +309,19 @@ export default function HomePage() {
           </section>
         )}
 
-        <section className="jic-home-footer-strip">
-          <div>
-            <WhatsAppIcon size={24} />
-            <div>
-              <strong>Join our WhatsApp Community</strong>
-              <small>Official JIC updates and announcements</small>
-            </div>
-          </div>
-          <a
-            className="jic-community-join"
-            href={whatsapp}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Join WhatsApp <ArrowRight size={17} />
-          </a>
-        </section>
+        <a
+          className="jic-home-footer-strip"
+          href={whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <WhatsAppIcon size={22} aria-hidden="true" />
+          <span>
+            <strong>Join WhatsApp</strong>
+            <small>Community updates from JIC</small>
+          </span>
+          <ArrowRight size={18} aria-hidden="true" />
+        </a>
       </div>
     </div>
   );
