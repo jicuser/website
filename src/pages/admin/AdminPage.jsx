@@ -12,6 +12,8 @@ import {
   ShieldCheck,
   LogOut,
   Home,
+  ExternalLink,
+  KeyRound,
   RefreshCw,
   Plus,
   Trash2,
@@ -859,13 +861,13 @@ export default function AdminPage() {
               if (!dirty || window.confirm('Discard unsaved changes?')) navigate('/');
             }}
           >
-            <Home size={18} />
+            <ExternalLink size={18} />
             <span className="admin-website-label">View website</span>
           </button>
           <details
             className="admin-account-menu"
             onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget))
+              if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget))
                 event.currentTarget.open = false;
             }}
             onKeyDown={(event) => {
@@ -896,6 +898,17 @@ export default function AdminPage() {
               >
                 <Users size={17} aria-hidden="true" />
                 My account
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => {
+                  if (!dirty || window.confirm('Discard unsaved changes?'))
+                    navigate('/admin/setup?mode=change');
+                }}
+              >
+                <KeyRound size={17} aria-hidden="true" />
+                Change password
               </button>
               <button
                 type="button"

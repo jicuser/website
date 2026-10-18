@@ -133,8 +133,8 @@ export default function StaffAccess() {
   };
   return (
     <div className="admin-staff-access">
-      <h2>Staff & access</h2>
-      <p>Invite staff, then give only the access they need.</p>
+      <h2>People & access</h2>
+      <p>Add members, volunteers or staff, then choose what they can manage.</p>
       {notice && (
         <p
           className={notice.error ? 'admin-error' : 'admin-success'}
@@ -145,7 +145,7 @@ export default function StaffAccess() {
       )}
       <div className="admin-heading admin-staff-list-heading">
         <div>
-          <h3>Current staff</h3>
+          <h3>People</h3>
           <p>Open a person to change their access.</p>
         </div>
         <button
@@ -155,7 +155,7 @@ export default function StaffAccess() {
           onClick={() => setInviteOpen((value) => !value)}
         >
           <UserPlus size={18} />
-          {inviteOpen ? 'Close' : 'Add staff'}
+          {inviteOpen ? 'Close' : 'Add person'}
         </button>
       </div>
       {inviteOpen && (
@@ -183,8 +183,8 @@ export default function StaffAccess() {
                 />
               </label>
             </div>
-            <details className="admin-staff-invite-access">
-              <summary>Access & staff labels</summary>
+            <details className="admin-staff-invite-access" open>
+              <summary>Role & access</summary>
               <AccessChecklist actor={profile} value={access} onChange={setAccess} />
             </details>
             <div className="admin-actions">
@@ -233,8 +233,12 @@ export default function StaffAccess() {
               <summary>
                 {row.display_name || 'Person'}
                 {own ? ' (you)' : ''} ·{' '}
-                {row.is_owner ? 'Owner' : `${row.permissions.length} permissions`} ·{' '}
-                {row.is_active ? 'Enabled' : 'Disabled'}
+                {row.is_owner
+                  ? 'Owner'
+                  : row.permissions.length
+                    ? `${row.permissions.length} staff permissions`
+                    : 'Portal only'}{' '}
+                · {row.is_active ? 'Enabled' : 'Disabled'}
               </summary>
               {row.is_owner ? (
                 <p>Owner access is protected and cannot be changed here.</p>
@@ -285,11 +289,11 @@ export default function StaffAccess() {
                   onClick={() =>
                     run(`setup-${row.id}`, async () => {
                       await invoke({ action: 'send_setup', user_id: row.id });
-                      setNotice({ text: 'A new setup email has been sent.' });
+                      setNotice({ text: 'A password reset email has been sent.' });
                     })
                   }
                 >
-                  Send setup email
+                  Send password reset
                 </button>
               </div>
               <DeleteAccount
@@ -312,7 +316,7 @@ export default function StaffAccess() {
                         delete remaining[row.id];
                         return remaining;
                       });
-                      setNotice({ text: result.warning || 'Staff account deleted.' });
+                      setNotice({ text: result.warning || 'Account deleted.' });
                     },
                     true,
                   )
@@ -327,7 +331,9 @@ export default function StaffAccess() {
                   Save permissions
                 </button>
               )}
-              {!row.permissions.length && !row.is_owner && <p>No admin access assigned.</p>}
+              {!row.permissions.length && !row.is_owner && (
+                <p>Portal account only. No staff areas assigned.</p>
+              )}
             </details>
           );
         })

@@ -138,7 +138,7 @@ export default function BackgroundSettings({
         <legend className="sr-only">Automatic display settings</legend>
         <div className="tv-editor-context tv-display-choice">
           <label>
-            Display to edit
+            When this layout appears
             <select value={preset} onChange={(event) => setPreset(event.target.value)}>
               {sections.map((section) => (
                 <option key={section.id} value={section.id}>

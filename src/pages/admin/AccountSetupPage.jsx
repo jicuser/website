@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { supabase } from '@/lib/supabaseClient';
@@ -8,6 +8,8 @@ import { passwordError } from '@/lib/accountSetup';
 
 export default function AccountSetupPage() {
   const { refreshProfile, isAdmin } = useAuth();
+  const [params] = useSearchParams();
+  const changing = params.get('mode') === 'change';
   const [account, setAccount] = useState(null);
   const [checking, setChecking] = useState(true);
   const [password, setPassword] = useState('');
@@ -36,7 +38,11 @@ export default function AccountSetupPage() {
         if (active) setError(err.message || 'Your setup link could not be checked.');
       } finally {
         if (active) {
-          window.history.replaceState(window.history.state, '', '/admin/setup');
+          window.history.replaceState(
+            window.history.state,
+            '',
+            changing ? '/admin/setup?mode=change' : '/admin/setup',
+          );
           setChecking(false);
         }
       }
@@ -45,7 +51,7 @@ export default function AccountSetupPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [changing]);
 
   async function submit(event) {
     event.preventDefault();
@@ -85,7 +91,7 @@ export default function AccountSetupPage() {
           </Link>
           <span className="admin-login-secure">
             <ShieldCheck size={15} />
-            Account setup
+            {changing ? 'Account security' : 'Account setup'}
           </span>
         </div>
         <div className="admin-login-brand">
@@ -94,16 +100,16 @@ export default function AccountSetupPage() {
           </Link>
           <div>
             <p>JAMATIA ISLAMIC CENTRE</p>
-            <h1 id="account-setup-title">Set your password</h1>
+            <h1 id="account-setup-title">{changing ? 'Change password' : 'Set your password'}</h1>
           </div>
         </div>
         {checking ? (
-          <p role="status">Checking your setup link…</p>
+          <p role="status">Checking your account…</p>
         ) : saved ? (
           <div role="status">
             <p>Your password is saved.</p>
             <Link className="admin-button" to={isAdmin ? '/admin' : '/portal'}>
-              {isAdmin ? 'Continue to Admin' : 'Continue to your portal'}
+              {isAdmin ? 'Return to staff workspace' : 'Continue to your portal'}
             </Link>
           </div>
         ) : (

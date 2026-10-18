@@ -2170,3 +2170,26 @@ html.dark .admin-console .admin-field-error {
     min-width: 0;
   }
 }
+
+.admin-permission-group {
+  margin-block: 8px;
+  padding: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+}
+.admin-permission-group > summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.admin-permission-group > summary > span {
+  margin-left: 10px;
+  color: var(--jic-gold);
+  font-size: 13px;
+}
+.admin-permission-group .admin-access-grid { margin-top: 12px; }
+.admin-access-preview {
+  padding: 12px;
+  border-left: 3px solid var(--jic-gold);
+  background: var(--jic-bg-secondary);
+  border-radius: 0 8px 8px 0;
+}

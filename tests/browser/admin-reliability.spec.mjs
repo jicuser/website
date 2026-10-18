@@ -28,7 +28,7 @@ test('admin overview searches available tasks and mobile switching opens the cho
     page.locator('.admin-tool-list').getByRole('button', { name: 'Prayer times', exact: true }),
   ).toBeVisible();
   await expect(
-    page.locator('.admin-tool-list').getByRole('button', { name: 'Staff & access', exact: true }),
+    page.locator('.admin-tool-list').getByRole('button', { name: 'People & access', exact: true }),
   ).toHaveCount(0);
   await page.getByRole('searchbox', { name: 'Find an admin task' }).fill('');
   await page.screenshot({ path: testInfo.outputPath('admin-overview-mobile.png'), fullPage: true });
@@ -120,7 +120,14 @@ test('safeguarding opens with a useful empty state and optional recording guidan
 // Intercept external data only. The application router, Auth provider and editors run unchanged.
 async function openAdmin(
   page,
-  { actor = owner, section = 'posters', deletionFails = false, tvState = null } = {},
+  {
+    actor = owner,
+    section = 'posters',
+    deletionFails = false,
+    tvState = null,
+    formRows = [],
+    formTasks = [],
+  } = {},
 ) {
   const errors = [],
     writes = [],
@@ -156,7 +163,34 @@ async function openAdmin(
         expires_at: expires,
       };
     } else if (url.pathname.endsWith('/rpc/get_my_profile')) data = actor;
-    else if (url.pathname.endsWith('/profiles')) data = [actor, member];
+    else if (url.pathname.endsWith('/rpc/search_form_submissions')) {
+      const query = route.request().postDataJSON();
+      const matching = formRows.filter(
+        (row) =>
+          (!query.p_kind || row.kind === query.p_kind) &&
+          (!query.p_search ||
+            JSON.stringify(row.payload).toLowerCase().includes(query.p_search.toLowerCase())),
+      );
+      const selected = matching.filter((row) => !query.p_status || row.status === query.p_status);
+      data = {
+        rows: selected.slice(query.p_offset, query.p_offset + query.p_limit),
+        total: selected.length,
+        new_count: matching.filter((row) => row.status === 'new').length,
+        done_count: matching.filter((row) => row.status === 'done').length,
+      };
+    } else if (url.pathname.endsWith('/rpc/admin_form_tasks')) {
+      data = {
+        rows: formTasks,
+        total: formTasks.length,
+        open_count: formTasks.filter((task) => task.status !== 'done').length,
+      };
+    } else if (url.pathname.endsWith('/work_tasks') && method === 'PATCH') {
+      const body = route.request().postDataJSON();
+      writes.push({ table: 'work_tasks', ...body });
+      const task = formTasks.find((item) => `eq.${item.id}` === url.searchParams.get('id'));
+      if (task) Object.assign(task, body);
+      data = { id: task?.id };
+    } else if (url.pathname.endsWith('/profiles')) data = [actor, member];
     else if (url.pathname.endsWith('/functions/v1/tv-control') && tvState) {
       const body = route.request().postDataJSON();
       if (['admin', 'status'].includes(body.action)) tvReads.push(body.screenId);
@@ -166,7 +200,7 @@ async function openAdmin(
       data = { ...tvState, id: body.screenId };
     } else if (url.pathname.endsWith('/functions/v1/manage-user')) {
       const body = route.request().postDataJSON();
-      writes.push(body);
+      if (body.action !== 'list_access_requests') writes.push(body);
       if (deletionFails && body.action === 'delete')
         return route.fulfill({
           status: 409,
@@ -332,7 +366,7 @@ for (const existingDraft of [false, true]) {
       },
     });
     await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
-    const layout = page.getByRole('combobox', { name: 'Display to edit', exact: true });
+    const layout = page.getByRole('combobox', { name: 'When this layout appears', exact: true });
     await expect(layout).toBeVisible();
     await expect(layout).toHaveValue('standby');
     const readCount = evidence.tvReads.filter((screen) => screen === 'mens-main').length;
@@ -422,7 +456,7 @@ test('only owners can see deletion controls and confirmation cannot be skipped',
 }) => {
   const evidence = await openAdmin(page, { section: 'users' });
   const account = page.locator('.admin-staff-access details').filter({ hasText: 'Test staff' });
-  await account.locator('summary').click();
+  await account.locator(':scope > summary').click();
   await account.getByRole('button', { name: 'Delete account', exact: true }).click();
   await expect(
     account.getByRole('button', { name: 'Delete permanently', exact: true }),
@@ -445,7 +479,7 @@ test('failed deletion keeps the staff account and displays the server explanatio
 }) => {
   const evidence = await openAdmin(page, { section: 'users', deletionFails: true });
   const account = page.locator('.admin-staff-access details').filter({ hasText: 'Test staff' });
-  await account.locator('summary').click();
+  await account.locator(':scope > summary').click();
   await account.getByRole('button', { name: 'Delete account', exact: true }).click();
   await account.getByLabel('Type DELETE to confirm').fill('DELETE');
   await account.getByRole('button', { name: 'Delete permanently', exact: true }).click();
@@ -457,8 +491,165 @@ test('failed deletion keeps the staff account and displays the server explanatio
 test('delegated staff managers do not receive the owner deletion control', async ({ page }) => {
   const actor = { ...owner, is_owner: false, permissions: ['users'] };
   const evidence = await openAdmin(page, { actor, section: 'users' });
-  await expect(page.locator('.admin-staff-access details')).toHaveCount(2);
+  await expect(page.locator('.admin-staff-access > details.admin-panel')).toHaveCount(2);
   await expect(page.getByRole('button', { name: 'Delete account', exact: true })).toHaveCount(0);
   expect(evidence.writes).toEqual([]);
+  expect(evidence.errors).toEqual([]);
+});
+
+for (const theme of ['dark', 'light']) {
+  test(`forms inbox includes existing registrations and uses accurate totals in ${theme} mode`, async ({
+    page,
+  }, testInfo) => {
+    const formRows = Array.from({ length: 4 }, (_, index) => ({
+      id: `10000000-0000-4000-8000-00000000001${index}`,
+      kind: 'madrassah',
+      status: index === 3 ? 'done' : 'new',
+      payload: { name: `Family ${index + 1}` },
+      created_at: '2026-10-18T10:00:00Z',
+    }));
+    const evidence = await openAdmin(page, { section: 'forms', formRows });
+    await page.locator('.admin-account-menu > summary').click();
+    if ((await page.locator('html').getAttribute('data-theme')) !== theme) {
+      await page.getByRole('button', { name: `Use ${theme} mode`, exact: true }).click();
+    }
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: /Madrassah enquiry/ })).toContainText(
+      '3 waiting',
+    );
+    await page
+      .getByRole('navigation', { name: 'Forms workspace' })
+      .getByRole('button', { name: 'Responses', exact: true })
+      .click();
+    await expect(page.getByRole('combobox', { name: 'Form', exact: true })).toHaveValue('');
+    await expect(page.locator('.custom-response')).toHaveCount(3);
+    await expect(page.getByRole('button', { name: 'All 4', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Refresh', exact: true })).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'Previous', exact: true })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Completed 1', exact: true }).click();
+    await expect(page.locator('.custom-response')).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'All 4', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'All 4', exact: true }).click();
+    await expect(page.locator('.custom-response')).toHaveCount(4);
+    await page.getByRole('searchbox', { name: 'Search', exact: true }).fill('missing');
+    await expect(page.getByRole('heading', { name: 'No matching responses' })).toBeVisible();
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await expect(page.locator('.custom-response')).toHaveCount(3);
+    await expect(page.locator('.custom-inbox-tools')).not.toHaveAttribute('open');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({
+      path: testInfo.outputPath(`forms-responses-${theme}.png`),
+      fullPage: true,
+    });
+    await page
+      .getByRole('navigation', { name: 'Forms workspace' })
+      .getByRole('button', { name: 'Follow-ups', exact: true })
+      .click();
+    await expect(page.getByRole('heading', { name: 'No follow-ups yet' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Refresh', exact: true })).toHaveCount(1);
+    await page.getByRole('button', { name: 'View responses' }).click();
+    await expect(page.locator('.custom-response')).toHaveCount(3);
+    expect(evidence.writes).toEqual([]);
+    expect(evidence.errors).toEqual([]);
+  });
+}
+
+test('completing a follow-up only updates that task, leaving its response unchanged', async ({
+  page,
+}) => {
+  const evidence = await openAdmin(page, {
+    section: 'forms',
+    formTasks: [
+      {
+        id: '10000000-0000-4000-8000-000000000050',
+        title: 'Call the family',
+        status: 'open',
+        assignee_name: 'Centre owner',
+        updated_at: '2026-10-18T10:00:00Z',
+        due_at: null,
+      },
+    ],
+  });
+  await page
+    .getByRole('navigation', { name: 'Forms workspace' })
+    .getByRole('button', { name: 'Follow-ups', exact: true })
+    .click();
+  await page.getByRole('combobox', { name: 'Status for Call the family' }).selectOption('done');
+  await expect(page.getByRole('heading', { name: 'Follow-ups · 0 waiting' })).toBeVisible();
+  expect(evidence.writes).toEqual([{ table: 'work_tasks', status: 'done' }]);
+  expect(evidence.errors).toEqual([]);
+});
+
+test('phone account menu survives a null-focus blur and light mode persists', async ({ page }) => {
+  await openAdmin(page, { section: 'forms' });
+  const menu = page.locator('.admin-account-menu');
+  await menu.locator('summary').click();
+  await page.getByRole('button', { name: 'Use dark mode', exact: true }).click();
+  await menu.locator('summary').dispatchEvent('focusout', { relatedTarget: null });
+  await expect(menu).toHaveAttribute('open');
+  await page.getByRole('button', { name: 'Use light mode', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page.locator('.admin-console')).toHaveCSS('background-color', 'rgb(240, 237, 228)');
+  await page.reload();
+  await expect(page.locator('.admin-console')).toHaveCSS('background-color', 'rgb(240, 237, 228)');
+});
+
+test('adding a volunteer previews exact access and sends only selected permissions', async ({
+  page,
+}, testInfo) => {
+  const evidence = await openAdmin(page, { section: 'users' });
+  await page.getByRole('button', { name: 'Add person', exact: true }).click();
+  const form = page.locator('.admin-staff-invite-inline');
+  await form.getByLabel('Name', { exact: true }).fill('Example volunteer');
+  await form.getByLabel('Email', { exact: true }).fill('volunteer@example.invalid');
+  await expect(form.locator('.admin-access-preview')).toContainText('Portal only');
+  await form.getByRole('checkbox', { name: 'Volunteer', exact: true }).check();
+  await expect(form.locator('.admin-access-preview')).toContainText('Portal only');
+  await form
+    .locator('.admin-permission-group > summary')
+    .filter({ hasText: 'Prayer & screens' })
+    .click();
+  await form.getByRole('checkbox', { name: 'TV scenes and device inputs', exact: true }).check();
+  await expect(form.locator('.admin-access-preview')).toHaveText('Staff areas: TV & screens.');
+  await page.screenshot({
+    path: testInfo.outputPath('invite-volunteer-access.png'),
+    fullPage: true,
+  });
+  await form.getByRole('button', { name: 'Send invitation', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('Invitation sent');
+  expect(evidence.writes).toEqual([
+    {
+      action: 'invite',
+      email: 'volunteer@example.invalid',
+      display_name: 'Example volunteer',
+      permissions: ['tv'],
+      staff_kinds: ['volunteer'],
+    },
+  ]);
+  expect(evidence.errors).toEqual([]);
+});
+
+test('staff can reach password change from Account and save their own new password', async ({
+  page,
+}) => {
+  const evidence = await openAdmin(page, { section: 'dashboard' });
+  const updates = [];
+  await page.route('**/preview-api/auth/v1/user', async (route) => {
+    if (route.request().method() === 'PUT') updates.push(route.request().postDataJSON());
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ id: owner.id, email: 'staff@example.invalid' }),
+    });
+  });
+  await page.locator('.admin-account-menu > summary').click();
+  await page.getByRole('button', { name: 'Change password', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Change password', exact: true })).toBeVisible();
+  await page.getByLabel('New password', { exact: true }).fill('Local-test-passphrase-2030');
+  await page.getByLabel('Confirm password', { exact: true }).fill('Local-test-passphrase-2030');
+  await page.getByRole('button', { name: 'Save password', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('Your password is saved.');
+  expect(updates).toEqual([{ password: 'Local-test-passphrase-2030' }]);
   expect(evidence.errors).toEqual([]);
 });

@@ -11,7 +11,7 @@ import CustomFormsInbox from '@/components/workspace/CustomFormsInbox';
 import FormActions from './FormActions';
 import ScheduleManager from './ScheduleManager';
 import { formStatus, workflowChanged, pageUrl } from '@/lib/pageContent';
-import { SERVICE_ENQUIRIES, serviceEnquiry } from '@/lib/serviceEnquiries';
+import { serviceEnquiry } from '@/lib/serviceEnquiries';
 import '@/styles/workspace.css';
 import '@/styles/custom-forms.css';
 import '@/styles/content-workflow.css';
@@ -153,7 +153,7 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
           aria-pressed={tab === 'overview'}
           onClick={() => chooseTab('overview')}
         >
-          Information & people
+          Form details
         </button>
         <button
           className="admin-button"
@@ -167,7 +167,7 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
           aria-pressed={tab === 'actions'}
           onClick={() => chooseTab('actions')}
         >
-          Actions ({form.open_actions})
+          Follow-ups ({form.open_actions})
         </button>
       </nav>
       {message && <p role="status">{message}</p>}
@@ -185,7 +185,7 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
             </div>
             <div>
               <strong>{form.open_actions}</strong>
-              <span>Outstanding actions you can access</span>
+              <span>Follow-ups waiting</span>
             </div>
           </div>
           <h4>Responsible people & access</h4>
@@ -236,8 +236,8 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
             <p>Standalone form. Link it from a poster or content page when needed.</p>
           ) : null}
           <p>
-            Assignments apply to future responses. Reassign existing unfinished actions in Actions
-            when responsibility changes.
+            Assignments apply to future responses. Reassign unfinished follow-ups in Follow-ups when
+            responsibility changes.
           </p>
           <div className="admin-actions">
             {form.can_manage && (
@@ -325,7 +325,13 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
           formId={form.id}
         />
       )}
-      {tab === 'actions' && <FormActions key={form.id} formId={form.id} />}
+      {tab === 'actions' && (
+        <FormActions
+          key={form.id}
+          formId={form.id}
+          onViewResponses={() => chooseTab('responses')}
+        />
+      )}
     </section>
   );
 }
@@ -347,7 +353,7 @@ function EntryTiles({ auth, loading, onChoose, onCreate }) {
       )}
       <button onClick={() => onChoose({ view: 'responses' })}>
         <ClipboardList />
-        <strong>Responses & actions</strong>
+        <strong>Responses & follow-ups</strong>
         <span>Submitted information and outstanding work.</span>
       </button>
       {(auth.isOwner || auth.can('events')) && (
@@ -364,11 +370,11 @@ function EntryTiles({ auth, loading, onChoose, onCreate }) {
 
 function LegacyFormCards({ auth, onChoose, counts, loading, error }) {
   const legacy = [
-    ['madrassah', 'Madrassah enquiry', 'Existing Madrassah enquiries.', 'forms_madrassah'],
-    ['itikaaf', 'I’tikaf registration', 'Existing I’tikaf registrations.', 'forms_itikaaf'],
-  ].filter(([, , , permission]) => auth.isOwner || auth.can(permission));
+    ['madrassah', 'Madrassah enquiry', 'forms_madrassah'],
+    ['itikaaf', 'I’tikaf registration', 'forms_itikaaf'],
+  ].filter(([, , permission]) => auth.isOwner || auth.can(permission));
   if (!legacy.length) return null;
-  return legacy.map(([kind, title, description]) => {
+  return legacy.map(([kind, title]) => {
     const summary = counts?.[kind];
     return (
       <button
@@ -378,11 +384,9 @@ function LegacyFormCards({ auth, onChoose, counts, loading, error }) {
       >
         <span className="content-status">Live</span>
         <strong>{title}</strong>
-        <span>{description}</span>
         <span className="form-card-metrics">
           <b>{loading && !summary ? '…' : summary?.new_count || 0}</b> waiting
           <b>{loading && !summary ? '…' : summary?.done_count || 0}</b> completed
-          <b>{loading && !summary ? '…' : summary?.total || 0}</b> total
         </span>
         {error && (
           <span className="workspace-meta">Counts unavailable · tap to open responses</span>
@@ -407,10 +411,6 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
     loading: legacyLoading,
     error: legacyError,
   } = useLegacyFormCounts(legacyKinds.join('|'));
-  const waitingCount =
-    forms.reduce((total, form) => total + Number(form.new_count || 0), 0) +
-    legacyKinds.reduce((total, kind) => total + Number(legacyCounts?.[kind]?.new_count || 0), 0);
-  const actionCount = forms.reduce((total, form) => total + Number(form.open_actions || 0), 0);
   const [status, setStatus] = useState('all');
   const [category, setCategory] = useState('all');
   const listed = forms.filter(
@@ -423,29 +423,54 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
 
   return (
     <section className="community-workspace custom-forms-admin">
-      <div className="admin-heading">
-        <div>
-          <h2>{view === 'schedule' ? 'Schedule' : 'Forms'}</h2>
-          <p>
-            {view === 'schedule'
-              ? 'Manage hall availability and recurring course/class times.'
-              : 'Forms, pages and response responsibility.'}
-          </p>
+      {['forms', 'schedule', 'home'].includes(view) && (
+        <div className="admin-heading">
+          <div>
+            <h2>{view === 'schedule' ? 'Schedule' : 'Forms'}</h2>
+            <p>
+              {view === 'schedule'
+                ? 'Hall availability and class times.'
+                : 'Open a form to review responses or edit its questions.'}
+            </p>
+          </div>
+          {view === 'forms' && (auth.isOwner || auth.can('forms_manage')) && (
+            <button className="admin-button primary" onClick={onCreate}>
+              <Plus size={16} /> New form
+            </button>
+          )}
         </div>
-        {view === 'forms' && (auth.isOwner || auth.can('forms_manage')) ? (
-          <button className="admin-button primary" onClick={onCreate}>
-            <Plus size={16} /> New form
-          </button>
-        ) : view !== 'home' && view !== 'schedule' ? (
-          <button className="admin-button" disabled={loading} onClick={reload}>
-            Refresh
-          </button>
-        ) : null}
-      </div>
+      )}
+      {view !== 'home' && (
+        <nav className="forms-workspace-tabs" aria-label="Forms workspace">
+          {[
+            ['forms', 'Forms'],
+            ['responses', 'Responses'],
+            ['actions', 'Follow-ups'],
+            ...(auth.isOwner || auth.can('events') ? [['schedule', 'Schedule']] : []),
+          ].map(([id, title]) => (
+            <button
+              type="button"
+              key={id}
+              className="admin-button"
+              aria-pressed={view === id}
+              onClick={() => onChoose({ view: id })}
+            >
+              {title}
+            </button>
+          ))}
+        </nav>
+      )}
       {view === 'home' && (
         <EntryTiles auth={auth} loading={loading} onChoose={onChoose} onCreate={onCreate} />
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}{' '}
+          <button type="button" className="admin-button" disabled={loading} onClick={reload}>
+            Retry forms
+          </button>
+        </p>
+      )}
 
       {view === 'home' ? (
         <p className="mt-4">Choose an area above.</p>
@@ -453,44 +478,30 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
         <ScheduleManager />
       ) : view === 'forms' ? (
         <>
-          <button
-            type="button"
-            className="content-inbox-strip"
-            onClick={() => onChoose({ view: 'responses' })}
-          >
-            <span>
-              <strong>Inbox</strong>
-              <small>
-                {loading || legacyLoading
-                  ? 'Loading…'
-                  : `${waitingCount} waiting · ${actionCount} actions`}
-              </small>
-            </span>
-            <b>Open</b>
-          </button>
-          <label>
-            Form type
-            <select value={category} onChange={(event) => setCategory(event.target.value)}>
-              <option value="all">All forms</option>
-              <option value="services">Service enquiries & bookings</option>
-              <option value="other">Registrations & other forms</option>
-            </select>
-          </label>
-          {category === 'services' && (
-            <p className="workspace-meta">
-              {SERVICE_ENQUIRIES.map((item) => item.pageName).join(' · ')}. Open a form to edit its
-              questions, assign staff or see responses.
-            </p>
-          )}
-          <label>
-            Show forms
-            <select value={status} onChange={(event) => setStatus(event.target.value)}>
-              <option value="all">All current forms</option>
-              <option>Live</option>
-              <option>Draft</option>
-              <option>Closed</option>
-            </select>
-          </label>
+          <details className="forms-catalogue-filters">
+            <summary>
+              Filter forms{category !== 'all' || status !== 'all' ? ' · Filtered' : ''}
+            </summary>
+            <div className="content-field-grid">
+              <label>
+                Form type
+                <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                  <option value="all">All forms</option>
+                  <option value="services">Service enquiries & bookings</option>
+                  <option value="other">Registrations & other forms</option>
+                </select>
+              </label>
+              <label>
+                Show forms
+                <select value={status} onChange={(event) => setStatus(event.target.value)}>
+                  <option value="all">All current forms</option>
+                  <option>Live</option>
+                  <option>Draft</option>
+                  <option>Closed</option>
+                </select>
+              </label>
+            </div>
+          </details>
           {loading && !data && <p role="status">Loading forms…</p>}
           <div className="content-form-grid">
             {showLegacy && (
@@ -513,23 +524,11 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
                 <span className="form-card-metrics">
                   <b>{form.new_count}</b> waiting
                   <b>{form.done_count}</b> completed
-                  <b>{form.open_actions}</b> actions
-                </span>
-                <span className="form-card-line">
-                  <b>Handled by</b>{' '}
-                  {form.people
-                    .filter((person) => person.role === 'responsible')
-                    .map((person) => person.display_name || 'Staff member')
-                    .join(', ') || 'Not assigned'}
-                </span>
-                <span className="form-card-line">
-                  <b>Shown on</b>{' '}
-                  {serviceEnquiry(form.slug)?.pageName ||
-                    (form.pages?.length
-                      ? form.pages
-                          .map((page) => `${page.title}${page.published ? '' : ' (hidden)'}`)
-                          .join(' · ')
-                      : 'Standalone form only')}
+                  {form.open_actions > 0 && (
+                    <>
+                      <b>{form.open_actions}</b> follow-ups
+                    </>
+                  )}
                 </span>
               </button>
             ))}
@@ -540,26 +539,11 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
         </>
       ) : (
         <>
-          <div className="admin-actions">
-            <button
-              className="admin-button"
-              aria-pressed={view === 'responses'}
-              onClick={() => onChoose({ view: 'responses' })}
-            >
-              Responses
-            </button>
-            <button
-              className="admin-button"
-              aria-pressed={view === 'actions'}
-              onClick={() => onChoose({ view: 'actions' })}
-            >
-              Actions
-            </button>
-          </div>
           {view === 'actions' ? (
-            <FormActions />
+            <FormActions onViewResponses={() => onChoose({ view: 'responses' })} />
           ) : (
             <CustomFormsInbox
+              key={responseKind}
               auth={auth}
               initialKind={responseKind}
               definitions={forms}

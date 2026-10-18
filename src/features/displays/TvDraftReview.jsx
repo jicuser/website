@@ -3,10 +3,14 @@ import TvPreview from '@/components/admin/TvPreview';
 import { tvSettingsChanges } from '@/lib/tvSettingsReview';
 
 export default function TvDraftReview({ saved, draft, screenId, preset }) {
+  const [expanded, setExpanded] = useState(false);
   const [view, setView] = useState('draft');
   const changes = tvSettingsChanges(saved, draft);
   return (
-    <details className="tv-draft-review">
+    <details
+      className="tv-draft-review"
+      onToggle={(event) => setExpanded(event.currentTarget.open)}
+    >
       <summary>Review your changes before saving</summary>
       <p>Compare this screen’s saved settings with your changes. The TV updates when you save.</p>
       {changes.length > 0 && (
@@ -34,12 +38,14 @@ export default function TvDraftReview({ saved, draft, screenId, preset }) {
           After · your changes
         </button>
       </div>
-      <TvPreview
-        screenId={screenId}
-        label={view === 'saved' ? 'Before · saved display' : 'After · your changes'}
-        settings={view === 'saved' ? saved : draft}
-        previewState={preset}
-      />
+      {expanded && (
+        <TvPreview
+          screenId={screenId}
+          label={view === 'saved' ? 'Before · saved display' : 'After · your changes'}
+          settings={view === 'saved' ? saved : draft}
+          previewState={preset}
+        />
+      )}
     </details>
   );
 }

@@ -12,7 +12,7 @@ export default function TvThemePicker({ settings, onChange, disabled = false }) 
   return (
     <section className="tv-theme-picker" aria-labelledby={headingId}>
       <h3 id={headingId}>TV colour scheme</h3>
-      <p>Applies to this screen. Posters keep their own colours.</p>
+      <p>Used across this TV’s prayer layouts. Posters keep their own colours.</p>
       <div className="tv-theme-choices" role="group" aria-label="TV colour schemes">
         {TV_THEMES.map((theme) => (
           <button

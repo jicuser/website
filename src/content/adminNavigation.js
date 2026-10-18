@@ -147,11 +147,11 @@ export const ADMIN_SECTIONS = [
   },
   {
     id: 'users',
-    name: 'Staff & access',
+    name: 'People & access',
     permission: 'users',
     group: 'Staff & records',
-    description: 'Invite staff and choose the areas they can manage.',
-    keywords: ['users', 'accounts', 'permissions'],
+    description: 'Add members, volunteers and staff; choose their access.',
+    keywords: ['users', 'accounts', 'permissions', 'members', 'volunteers', 'staff', 'password'],
   },
   {
     id: 'safeguarding',

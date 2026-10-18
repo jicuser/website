@@ -195,7 +195,8 @@
   box-shadow: inset 0 -2px var(--jic-gold);
 }
 .custom-inbox-status-tabs b {
-  display: block;
+  display: inline;
+  margin-left: 4px;
   font-size: 15px;
 }
 .custom-inbox-tools {

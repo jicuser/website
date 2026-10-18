@@ -223,7 +223,7 @@ test('response inbox searches server-side, saves an internal note and assigns ac
       }
     },
   });
-  await page.goto('/portal?tab=forms&mine=true');
+  await page.goto('/admin?section=forms&view=responses');
   await page.getByLabel('Search', { exact: true }).fill('Example');
   await expect.poll(() => queries.some((query) => query.p_search === 'Example')).toBe(true);
   await page.locator('.custom-response summary').click();
@@ -231,9 +231,9 @@ test('response inbox searches server-side, saves an internal note and assigns ac
   await page.getByRole('button', { name: 'Save staff note', exact: true }).click();
   await expect.poll(() => replies.length).toBe(1);
   expect(replies[0].p_internal).toBe(true);
-  await page.getByRole('button', { name: 'Assign action', exact: true }).click();
+  await page.getByRole('button', { name: 'Assign follow-up', exact: true }).click();
   await page.getByRole('combobox', { name: 'Responsible person', exact: true }).selectOption(owner);
-  await page.getByRole('button', { name: 'Assign action', exact: true }).last().click();
+  await page.getByRole('button', { name: 'Assign follow-up', exact: true }).last().click();
   await expect.poll(() => tasks.length).toBe(1);
   expect(tasks[0].p_submission_id).toBe(responseId);
   await page.screenshot({ path: testInfo.outputPath('responses.png'), fullPage: true });
@@ -397,7 +397,7 @@ test('response email offers an external draft without sending from the portal', 
       }
     },
   });
-  await page.goto('/portal?tab=forms&mine=true');
+  await page.goto('/admin?section=forms&view=responses');
   await page.locator('.custom-response summary').click();
   const draft = page.getByRole('link', { name: 'Open email draft', exact: true });
   const destination = new URL(await draft.getAttribute('href'));
@@ -520,7 +520,7 @@ test('action totals use server counts beyond loaded rows and preserve the select
       }
     },
   });
-  await page.goto(`/portal?form=${responseId}`);
+  await page.goto(`/portal?workspace=personal&form=${responseId}`);
   await expect(
     page.getByRole('heading', { name: '1203 open actions for this form' }),
   ).toBeVisible();

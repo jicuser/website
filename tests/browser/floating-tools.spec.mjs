@@ -149,6 +149,10 @@ for (const theme of ['light', 'dark']) {
     await expect(menu.locator('.jic-menu-account')).toBeVisible();
     const actions = menu.getByRole('navigation', { name: 'Quick actions' });
     await expect(actions.locator('a, button')).toHaveCount(4);
+    await expect(actions.getByRole('link', { name: 'Staff login', exact: true })).toHaveAttribute(
+      'href',
+      '/admin/login',
+    );
     const tops = await actions
       .locator('a, button')
       .evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().top));

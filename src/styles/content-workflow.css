@@ -233,3 +233,56 @@
   font-size: inherit;
   font-weight: 700;
 }
+
+/* Keep the forms workspace compact, with the same destinations in every view. */
+.forms-workspace-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 20px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--jic-border);
+}
+.admin-console .forms-workspace-tabs .admin-button {
+  flex: 1 0 auto;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--jic-muted);
+  box-shadow: none;
+}
+.admin-console .forms-workspace-tabs .admin-button[aria-pressed='true'] {
+  color: var(--jic-text);
+  background: var(--jic-surface);
+  box-shadow: inset 0 -2px var(--jic-gold);
+}
+.forms-catalogue-filters {
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.forms-catalogue-filters > summary { cursor: pointer; font-weight: 600; }
+.content-form-grid .content-form-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 16px;
+  margin: 0;
+  align-content: start;
+}
+.content-form-grid .content-form-card > strong { grid-row: 1; grid-column: 1; align-self: center; }
+.content-form-grid .content-status { grid-row: 1; grid-column: 2; font-size: 12px; padding: 3px 8px; }
+.content-form-grid .form-card-metrics,
+.content-form-grid .workspace-meta { grid-column: 1 / -1; }
+.custom-forms-admin .admin-empty-state {
+  margin-block: 8px;
+  padding: 20px;
+  border: 1px dashed var(--jic-border);
+  border-radius: 14px;
+}
+.custom-forms-admin .admin-empty-state h3 { margin: 0 0 8px; font-size: 18px; }
+.custom-forms-admin .admin-empty-state p { margin: 0 0 12px; color: var(--jic-muted); }
+.custom-forms-admin .admin-empty-state button + button { margin-left: 8px; }

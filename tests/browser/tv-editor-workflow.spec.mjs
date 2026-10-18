@@ -108,7 +108,7 @@ for (const [width, theme] of [
     expect(writes).toEqual([]);
     await designs.getByRole('button', { name: 'Close preview', exact: true }).click();
     await page.getByText('Change layout', { exact: true }).click();
-    const sections = page.getByRole('combobox', { name: 'Display to edit', exact: true });
+    const sections = page.getByRole('combobox', { name: 'When this layout appears', exact: true });
     await expect(sections.locator('option')).toHaveCount(6);
     await sections.selectOption('before');
     await expect(page.getByRole('region', { name: 'Before prayer layout editor' })).toBeVisible();

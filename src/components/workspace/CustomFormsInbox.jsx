@@ -16,7 +16,7 @@ export default function CustomFormsInbox({
 }) {
   const [filters, setFilters] = useState({
     search: '',
-    kind: formId ? 'custom' : initialKind || 'custom',
+    kind: formId ? 'custom' : initialKind,
     form: formId ? `form:${formId}` : '',
     status: 'new',
     from: '',
@@ -31,7 +31,6 @@ export default function CustomFormsInbox({
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
   const [selected, setSelected] = useState([]);
-  const [compact, setCompact] = useState(true);
   const [exportStatus, setExportStatus] = useState('');
   const exportController = useRef(null);
   const patch = (value) => {
@@ -76,6 +75,14 @@ export default function CustomFormsInbox({
     window.addEventListener('content-workflow-updated', refresh);
     return () => window.removeEventListener('content-workflow-updated', refresh);
   }, []);
+
+  const hasFilters = Boolean(
+    filters.search ||
+    (!formId && (filters.kind || filters.form)) ||
+    filters.from ||
+    filters.to ||
+    filters.mine,
+  );
 
   async function exportCsv() {
     const controller = new AbortController();
@@ -141,18 +148,12 @@ export default function CustomFormsInbox({
     }
   }
   return (
-    <section className={`custom-inbox ${compact ? 'is-compact' : ''}`}>
+    <section className="custom-inbox is-compact" aria-label="Form responses">
       <div className="workspace-header custom-inbox-header">
         <div>
-          <h2>Form responses</h2>
-          <span className="workspace-meta">
-            {result.new_count} waiting · {result.done_count} completed
-          </span>
+          <h2>Responses</h2>
         </div>
         <div className="workspace-actions">
-          <button type="button" onClick={() => setCompact((value) => !value)}>
-            {compact ? 'Roomy view' : 'Compact view'}
-          </button>
           <button disabled={loading} onClick={() => setRevision((value) => value + 1)}>
             Refresh
           </button>
@@ -166,21 +167,21 @@ export default function CustomFormsInbox({
             aria-pressed={filters.status === 'new'}
             onClick={() => patch({ status: 'new' })}
           >
-            Waiting <b>{result.new_count}</b>
+            Waiting <b>{loading ? '…' : result.new_count}</b>
           </button>
           <button
             type="button"
             aria-pressed={filters.status === 'done'}
             onClick={() => patch({ status: 'done' })}
           >
-            Completed <b>{result.done_count}</b>
+            Completed <b>{loading ? '…' : result.done_count}</b>
           </button>
           <button
             type="button"
             aria-pressed={filters.status === ''}
             onClick={() => patch({ status: '' })}
           >
-            All <b>{result.total}</b>
+            All <b>{loading ? '…' : result.new_count + result.done_count}</b>
           </button>
         </div>
 
@@ -194,28 +195,38 @@ export default function CustomFormsInbox({
           />
         </Field>
 
-        <Field label="Form">
-          <select
-            disabled={Boolean(formId)}
-            value={filters.form || filters.kind}
-            onChange={(event) =>
-              patch(
-                event.target.value.startsWith('form:')
-                  ? { form: event.target.value, kind: 'custom' }
-                  : { kind: event.target.value, form: '' },
-              )
-            }
-          >
-            <option value="custom">All custom forms</option>
-            <option value="madrassah">Madrassah</option>
-            <option value="itikaaf">I’tikaf</option>
-            {definitions.map((form) => (
-              <option key={form.id} value={`form:${form.id}`}>
-                {form.title}
-              </option>
-            ))}
-          </select>
-        </Field>
+        {!formId && (
+          <Field label="Form">
+            <select
+              disabled={Boolean(formId)}
+              value={filters.form || filters.kind}
+              onChange={(event) =>
+                patch(
+                  event.target.value.startsWith('form:')
+                    ? { form: event.target.value, kind: 'custom' }
+                    : { kind: event.target.value, form: '' },
+                )
+              }
+            >
+              <option value="">All forms</option>
+              <option value="custom">Website forms</option>
+              {(auth.isOwner || auth.can('forms_contact')) && (
+                <option value="contact">Contact messages</option>
+              )}
+              {(auth.isOwner || auth.can('forms_madrassah')) && (
+                <option value="madrassah">Madrassah</option>
+              )}
+              {(auth.isOwner || auth.can('forms_itikaaf')) && (
+                <option value="itikaaf">I’tikaf</option>
+              )}
+              {definitions.map((form) => (
+                <option key={form.id} value={`form:${form.id}`}>
+                  {form.title}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
       </div>
 
       <details className="custom-inbox-tools">
@@ -268,13 +279,59 @@ export default function CustomFormsInbox({
             <button onClick={() => exportController.current?.abort()}>Cancel export</button>
           )}
         </div>
+        <p className="workspace-meta">
+          Downloads use your current filters. For attachments, select responses from the same form.
+        </p>
       </details>
       {exportStatus && <p role="status">{exportStatus}</p>}
       {error && <p role="alert">{error}</p>}
       {loading && !result.rows.length ? (
         <p role="status">Loading responses…</p>
       ) : !result.rows.length ? (
-        <p>No responses match these filters.</p>
+        !error && (
+          <div className="admin-empty-state">
+            <h3>
+              {hasFilters
+                ? 'No matching responses'
+                : filters.status === 'new'
+                  ? 'Nothing waiting'
+                  : filters.status === 'done'
+                    ? 'No completed responses yet'
+                    : 'No responses yet'}
+            </h3>
+            <p>
+              {hasFilters
+                ? 'Try another form or clear your filters.'
+                : filters.status === 'new' && result.done_count > 0
+                  ? 'Your completed responses are still available.'
+                  : 'Responses appear here when someone submits a form you can access.'}
+            </p>
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('');
+                  patch({
+                    search: '',
+                    kind: formId ? 'custom' : '',
+                    form: formId ? `form:${formId}` : '',
+                    status: 'new',
+                    from: '',
+                    to: '',
+                    mine: false,
+                  });
+                }}
+              >
+                Clear filters
+              </button>
+            )}
+            {filters.status === 'new' && result.done_count > 0 && (
+              <button type="button" onClick={() => patch({ status: 'done' })}>
+                View completed
+              </button>
+            )}
+          </div>
+        )
       ) : (
         result.rows.map((row) => {
           const canWork =
@@ -304,31 +361,29 @@ export default function CustomFormsInbox({
           );
         })
       )}
-      <div className="workspace-actions">
-        <button
-          disabled={loading || page === 0}
-          onClick={() => {
-            setPage((value) => value - 1);
-            setSelected([]);
-          }}
-        >
-          Previous
-        </button>
-        <span>Page {page + 1}</span>
-        <button
-          disabled={loading || (page + 1) * 25 >= result.total}
-          onClick={() => {
-            setPage((value) => value + 1);
-            setSelected([]);
-          }}
-        >
-          Next
-        </button>
-      </div>
-      <p className="workspace-meta custom-inbox-footnote">
-        Downloads use the filters above. Attachment download works with selected responses from one
-        form.
-      </p>
+      {(page > 0 || result.total > 25) && (
+        <div className="workspace-actions">
+          <button
+            disabled={loading || page === 0}
+            onClick={() => {
+              setPage((value) => value - 1);
+              setSelected([]);
+            }}
+          >
+            Previous
+          </button>
+          <span>Page {page + 1}</span>
+          <button
+            disabled={loading || (page + 1) * 25 >= result.total}
+            onClick={() => {
+              setPage((value) => value + 1);
+              setSelected([]);
+            }}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </section>
   );
 }
@@ -513,7 +568,7 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
             </button>
             {
               <button disabled={busy} onClick={() => setShowTask(!showTask)}>
-                Assign action
+                Assign follow-up
               </button>
             }
             {email && (
@@ -548,12 +603,12 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
                 );
                 setShowTask(false);
                 workflowChanged();
-                setMessage('Action assigned.');
+                setMessage('Follow-up assigned.');
               });
             }}
           >
             <fieldset disabled={busy || loading}>
-              <Field label="Action">
+              <Field label="Follow-up">
                 <input
                   name="title"
                   required
@@ -586,7 +641,7 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
               <Field label="Due (your local time)">
                 <input name="due" type="datetime-local" />
               </Field>
-              <button>Assign action</button>
+              <button>Assign follow-up</button>
             </fieldset>
           </form>
         )}

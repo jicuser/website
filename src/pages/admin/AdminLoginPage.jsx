@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
           </Link>
           <div>
             <p>JAMATIA ISLAMIC CENTRE</p>
-            <h1 id="admin-login-title">Administration</h1>
+            <h1 id="admin-login-title">Staff login</h1>
           </div>
         </div>
         {error && (
@@ -88,7 +88,7 @@ export default function AdminLoginPage() {
         </Link>
         {user && !isAdmin && !loading && !profileError && (
           <p className="admin-login-error" role="alert">
-            This account does not have JIC administration access.
+            This account does not have JIC staff workspace access.
           </p>
         )}
         {user ? (
