@@ -48,8 +48,8 @@ html[data-theme='dark'] {
   --jic-glass-panel: rgba(10, 29, 50, 0.84);
   --jic-glass-panel-strong: rgba(9, 27, 47, 0.94);
   --jic-glass-border: rgba(143, 178, 207, 0.24);
-  --jic-glass-highlight: rgba(172, 204, 229, 0.10);
-  --jic-glass-shadow: 0 12px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(172, 204, 229, 0.10);
+  --jic-glass-highlight: rgba(172, 204, 229, 0.1);
+  --jic-glass-shadow: 0 12px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(172, 204, 229, 0.1);
   --jic-glass-control-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.08), transparent 65%);
   --jic-glass-tile-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.06), transparent 65%);
   --jic-glass-panel-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.04), transparent 65%);
@@ -58,7 +58,8 @@ html[data-theme='dark'] {
   --jic-glass-accent: #f3ce86;
 }
 
-html[data-theme][data-surface='glass'] :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer) {
+html[data-theme][data-surface='glass']
+  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer) {
   --jic-text: var(--jic-glass-ink);
   --jic-text-secondary: var(--jic-glass-muted);
   --jic-muted: var(--jic-glass-muted);
@@ -68,9 +69,35 @@ html[data-theme][data-surface='glass'] :is(.jic-public-route, .jic-popup-panel, 
 /* Named controls and data-glass opt in. Plain buttons, image triggers and staff
  * actions retain their own appearance. Both modes use this same material owner. */
 html[data-theme]
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
+  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
   :is(
     [data-glass='clear'],
+    .jic-hall-contact a,
+    button.bg-primary,
+    a.bg-primary,
+    .ops-button,
+    .ops-secondary,
+    .ops-toggle button,
+    .ops-amounts button,
+    .ops-tabs button,
+    .ops-reasons button,
+    .service-button,
+    .service-explorer-primary,
+    .service-explorer-view-all,
+    .service-explorer-categories button,
+    .jic-choice-tabs button,
+    .jic-solid-link,
+    .jic-home-destination:not(.has-image),
+    .jic-header-portal,
+    .portal-signin-modes button,
+    .portal-family-picker button,
+    .portal-signin button[type='submit'],
+    .workspace-button,
+    .workspace-tabs button,
+    .workspace-actions button,
+    .workspace-card button,
+    .portal-navigation a,
+    .portal-workspace-switch a,
     .jic-primary-cta,
     .jic-secondary-cta,
     .jic-unified-subnav-link,
@@ -92,6 +119,7 @@ html[data-theme]
     .jic-image-viewer-actions :is(a, button)
   ) {
   background: var(--jic-glass-control-sheen), var(--jic-glass-control);
+  color: var(--jic-text-secondary);
   border-color: var(--jic-glass-border);
   box-shadow: var(--jic-glass-shadow);
   -webkit-backdrop-filter: var(--jic-glass-control-filter);
@@ -100,9 +128,32 @@ html[data-theme]
 
 /* Medium surfaces: tiles, cards and utility strips. */
 html[data-theme]
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
+  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
   :is(
     [data-glass='frosted'],
+    .ops-panel,
+    .ops-bank,
+    .ops-empty,
+    .ops-campaign-card,
+    .service-explorer-card,
+    .service-explorer-search,
+    .service-explorer-empty,
+    .service-checklist,
+    .service-enquiry-form,
+    .service-map,
+    .service-directory > a,
+    .service-related > a,
+    .jic-learning-notebook,
+    .jic-visual-note,
+    .jic-account-connection,
+    .jic-account-step,
+    .jic-question-list details,
+    .jic-home-prayer,
+    .jic-home-radio,
+    .jic-home-live-banner,
+    .portal-signin,
+    .workspace-card,
+    .portal-area-card,
     .jic-feature-card.is-glass-only,
     .extension-hub-tile,
     .jic-event-strip,
@@ -135,7 +186,7 @@ html[data-theme]
 
 /* Large or readability-sensitive surfaces: menus, schedules, dialogs and bars. */
 html[data-theme]
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
+  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
   :is(
     [data-glass='dense'],
     .jic-unified-info,
@@ -156,7 +207,7 @@ html[data-theme] :is(.jic-popup-panel, .jic-image-viewer) {
 
 /* Form controls use a stronger tint for legibility, but avoid nested blur passes. */
 html[data-theme]
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
+  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
   :is(input:not([type='checkbox']):not([type='radio']), textarea, select) {
   background: var(--jic-glass-panel-strong);
   color: var(--jic-text);
@@ -168,9 +219,19 @@ html[data-theme]
 
 /* The enclosing panel already supplies blur. Nested controls only need a tint. */
 html[data-theme]
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
+  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
   :is(
     [data-glass='frosted'],
+    .ops-panel,
+    .ops-bank,
+    .ops-campaign-card,
+    .service-explorer-card,
+    .service-explorer-search,
+    .service-enquiry-form,
+    .jic-account-connection,
+    .jic-home-prayer,
+    .jic-home-radio,
+    .portal-signin,
     [data-glass='dense'],
     .jic-unified-menu,
     .jic-unified-info,
@@ -189,10 +250,21 @@ html[data-theme]
 
 /* Active state remains obvious across themes. */
 html[data-theme]
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
+  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
   :is(
     .jic-unified-subnav-link:is(.is-current, [aria-current='page']),
-    [role='tab'][data-state='active']
+    [role='tab'][data-state='active'],
+    .ops-toggle button[aria-pressed='true'],
+    .ops-amounts button[aria-pressed='true'],
+    .ops-tabs button[aria-pressed='true'],
+    .ops-reasons button[aria-pressed='true'],
+    .service-explorer-categories button[aria-pressed='true'],
+    .jic-choice-tabs button[aria-selected='true'],
+    .portal-signin-modes button[aria-pressed='true'],
+    .portal-family-picker button[aria-pressed='true'],
+    .workspace-tabs button[aria-current='page'],
+    .portal-navigation a[aria-current='page'],
+    .portal-workspace-switch a[aria-current='page']
   ) {
   border-color: var(--jic-gold);
   box-shadow:
@@ -217,16 +289,6 @@ html[data-theme] .jic-watch-live svg {
   color: inherit;
 }
 
-html[data-theme] .jic-menu-trigger {
-  --jic-button-tint: #115e59;
-  --jic-button-ink: #fff;
-}
-
-html[data-theme] :is(.jic-hall-contact a, .jic-public-route .bg-primary) {
-  --jic-button-tint: var(--jic-action);
-  --jic-button-ink: #0c1930;
-}
-
 html[data-theme] .jic-public-route .bg-destructive {
   --jic-button-tint: #b91c1c;
   --jic-button-ink: #ffffff;
@@ -234,23 +296,60 @@ html[data-theme] .jic-public-route .bg-destructive {
 
 /* Coloured actions retain their identity in glass and solid modes. */
 html[data-theme]
-  :is(.jic-public-route, .jic-popup-panel, .jic-image-viewer)
-  :is(
-    .jic-community-join,
-    .jic-watch-live,
-    .jic-menu-trigger,
-    .jic-footer-donate,
-    .jic-hall-contact a,
-    button.bg-primary,
-    a.bg-primary,
-    button.bg-destructive,
-    a.bg-destructive
-  ) {
+  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
+  :is(.jic-community-join, .jic-watch-live, button.bg-destructive, a.bg-destructive) {
   background:
     var(--jic-glass-action-sheen),
     color-mix(in srgb, var(--jic-button-tint) var(--jic-button-tint-strength), transparent);
   color: var(--jic-button-ink);
   border-color: color-mix(in srgb, var(--jic-button-tint) 68%, var(--jic-glass-border));
+}
+
+/* Public giving inherits the same palette as its surrounding navigation. Staff
+ * finance screens keep their separate, scoped operations palette. */
+html[data-theme] .jic-public-route .ops-page {
+  --ops-ink: var(--jic-text);
+  --ops-muted: var(--jic-text-secondary);
+  --ops-paper: var(--jic-glass-tile);
+  --ops-soft: var(--jic-glass-control);
+  --ops-border: var(--jic-glass-border);
+  --ops-accent: var(--jic-gold);
+}
+
+html[data-theme]
+  :is(.jic-public-route, .jic-member-portal)
+  :is(
+    .ops-button,
+    .ops-secondary,
+    .service-button,
+    .service-explorer-primary,
+    .service-explorer-view-all,
+    .service-explorer-categories button,
+    .jic-choice-tabs button,
+    .jic-solid-link,
+    .portal-signin button[type='submit']
+  ) {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 12px;
+}
+
+/* Primary actions retain a gold edge without introducing another button fill. */
+html[data-theme]
+  :is(.jic-public-route, .jic-member-portal)
+  :is(
+    .ops-button,
+    .service-button.is-primary,
+    .service-explorer-primary,
+    .jic-solid-link,
+    .portal-signin button[type='submit']
+  ) {
+  border-color: var(--jic-gold);
+}
+
+html[data-theme] .jic-public-route .service-explorer-search input {
+  background: transparent;
+  box-shadow: none;
 }
 
 /* Donate feedback belongs to the donation actions, not the navigation triggers. */
@@ -264,10 +363,6 @@ html[data-theme]
   .jic-public-route
   :is(.jic-footer-donate, .jic-unified-menu-donate):is(:hover, :focus-visible) {
   border-color: var(--jic-gold-strong);
-}
-
-html[data-theme] .jic-public-route .jic-footer-donate:is(:hover, :focus-visible) {
-  background-color: color-mix(in srgb, var(--jic-button-tint) 90%, var(--jic-action));
 }
 
 html[data-theme] .jic-public-route .jic-unified-menu-donate:is(:hover, :focus-visible) {

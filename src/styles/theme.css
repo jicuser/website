@@ -1,7 +1,7 @@
 /* Canonical JIC colour system. Layout belongs to component styles; translucency belongs to liquid-glass.css. */
 :root {
   --jic-action: #e2b45d;
-  --jic-teal: #087b70;
+  --jic-teal: #6b3a0c;
   --jic-logo-metal: #89501b;
   --jic-logo-ink: #0c1930;
   --background: 45 33% 97%;
@@ -24,13 +24,13 @@
   --jic-bg: #f9f7f1;
   --jic-bg-secondary: #f0ede4;
   --jic-surface: #fffefa;
-  --jic-text: #142c29;
-  --jic-text-secondary: #59645f;
-  --jic-muted: #64726b;
+  --jic-text: #081222;
+  --jic-text-secondary: #26364a;
+  --jic-muted: #526071;
   --jic-border: #dedfd5;
   --jic-heading-font: Georgia, 'Times New Roman', serif;
-  --jic-experience-green: #103e35;
-  --jic-experience-mint: #e0f0e8;
+  --jic-experience-green: #0b2036;
+  --jic-experience-mint: #e7edf4;
   --jic-gold: #89501b;
   --jic-gold-strong: #784217;
   --jic-live: #ff375f;
@@ -61,7 +61,7 @@
   --jic-bg: #080f1d;
   --jic-bg-secondary: #0b2036;
   --jic-surface: #112a43;
-  --jic-teal: #5cddc4;
+  --jic-teal: #f3ce86;
   --jic-text: #f4f6fa;
   --jic-text-secondary: #b7c3d5;
   --jic-muted: #9baac0;
@@ -72,8 +72,8 @@
   --jic-success: #30d158;
   --jic-warning: #ffd60a;
   --jic-error: #ff453a;
-  --jic-experience-green: #0d302a;
-  --jic-experience-mint: #153a34;
+  --jic-experience-green: #0b2036;
+  --jic-experience-mint: #112a43;
 }
 
 html,

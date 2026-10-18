@@ -2,6 +2,7 @@
 /** @typedef {import('./contracts.js').AccountOriginSettings} AccountOriginSettings */
 
 export const ACCOUNT_PRODUCTION_ORIGIN = 'https://jicmasjid.org';
+const ACCOUNT_PRODUCTION_ALIAS = 'https://www.jicmasjid.org';
 
 /** @param {unknown} value */
 function parseOrigin(value) {
@@ -31,7 +32,7 @@ function parseOrigin(value) {
 const loopback = (url) => ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
 
 /**
- * Only the JIC origin, loopback development or one explicitly approved preview
+ * Only the exact JIC origins, loopback development or one explicitly approved preview
  * may receive an account return. Values are never included in errors.
  * @param {string | undefined} [currentOrigin]
  * @param {AccountOriginSettings} [settings]
@@ -45,6 +46,7 @@ export function accountReturnOrigin(currentOrigin, settings = import.meta.env ??
   /** @param {URL} url */
   const trusted = (url) =>
     url.origin === ACCOUNT_PRODUCTION_ORIGIN ||
+    url.origin === ACCOUNT_PRODUCTION_ALIAS ||
     (settings.DEV === true && loopback(url)) ||
     url.origin === preview?.origin;
   const configured = settings.VITE_ACCOUNT_RETURN_ORIGIN
@@ -54,7 +56,8 @@ export function accountReturnOrigin(currentOrigin, settings = import.meta.env ??
     throw new Error('Unapproved account return configuration.');
   const current = currentOrigin === undefined ? null : parseOrigin(currentOrigin);
   if (current && !trusted(current)) throw new Error('Unapproved account return origin.');
-  return configured?.origin ?? current?.origin ?? ACCOUNT_PRODUCTION_ORIGIN;
+  const origin = configured?.origin ?? current?.origin ?? ACCOUNT_PRODUCTION_ORIGIN;
+  return origin === ACCOUNT_PRODUCTION_ALIAS ? ACCOUNT_PRODUCTION_ORIGIN : origin;
 }
 
 /**

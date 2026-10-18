@@ -17,6 +17,27 @@ test('account returns use the intended production origin and fixed account route
   assert.throws(() => accountReturnUrl('/admin', production));
 });
 
+test('the exact www production alias returns to the canonical apex origin', () => {
+  const alias = 'https://www.jicmasjid.org';
+  assert.equal(accountReturnOrigin(alias), production);
+  assert.equal(accountReturnOrigin(`${alias}/`), production);
+  assert.equal(accountReturnUrl('/portal', alias), `${production}/portal`);
+  assert.equal(accountReturnUrl('/admin/setup', alias), `${production}/admin/setup`);
+  assert.equal(accountReturnOrigin(production, { VITE_ACCOUNT_RETURN_ORIGIN: alias }), production);
+  assert.equal(accountReturnOrigin(alias, { VITE_ACCOUNT_RETURN_ORIGIN: alias }), production);
+  assert.equal(accountReturnOrigin(undefined, { VITE_ACCOUNT_RETURN_ORIGIN: `${alias}/` }), production);
+  for (const origin of [
+    'https://other.jicmasjid.org',
+    'https://evilwww.jicmasjid.org',
+    'https://www.jicmasjid.org.evil.test',
+    'https://www.jicmasjid.org:444',
+    'http://www.jicmasjid.org',
+  ]) {
+    assert.throws(() => accountReturnOrigin(origin));
+    assert.throws(() => accountReturnOrigin(production, { VITE_ACCOUNT_RETURN_ORIGIN: origin }));
+  }
+});
+
 test('only loopback development may use local HTTP origins', () => {
   for (const origin of ['http://localhost:3000', 'http://127.0.0.1:4319', 'http://[::1]:3000']) {
     assert.equal(accountReturnOrigin(origin, development), origin);

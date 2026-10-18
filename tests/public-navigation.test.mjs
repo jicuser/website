@@ -1,7 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { activeNavigation } from '../src/lib/publicNavigation.js';
-import { FOOTER_LINKS, NAV_GROUPS, MADRASSAH_TABS, WORSHIP_TABS } from '../src/content/nav.js';
+import * as navigation from '../src/lib/publicNavigation.js';
+import {
+  FOOTER_LINKS,
+  NAV_GROUPS,
+  MADRASSAH_TABS,
+  WORSHIP_TABS,
+  PUBLIC_MENU_GROUPS,
+} from '../src/content/nav.js';
+import { EDITABLE_PAGES } from '../src/content/editablePages.js';
+
+const { activeNavigation } = navigation;
 
 test('compact footer includes portal and certificate access alongside public essentials', () => {
   assert.deepEqual(
@@ -124,6 +133,86 @@ test('project legacy links retain the project parent with a simplified journey m
   ]) {
     assert.equal(activeNavigation(path).primaryPath, '/projects', path);
   }
+});
+
+test('project aliases share one overview action while stage URLs and CMS pages remain available', () => {
+  const projects = NAV_GROUPS.find((group) => group.path === '/projects');
+  assert.equal(projects.children.filter((page) => page.path.startsWith('/projects')).length, 1);
+  assert.equal(
+    projects.children.find((page) => page.path.startsWith('/projects')).path,
+    '/projects',
+  );
+  for (const path of [
+    '/projects/masjid-extension',
+    '/projects/masjid-extension/timeline',
+    '/projects/main-prayer-hall',
+    '/projects/wudu-area',
+    '/projects/community-hall',
+    '/projects/madrassah-floor',
+    '/projects/timeline',
+    '/projects/madrassah-building',
+  ]) {
+    const section = activeNavigation(path);
+    assert.equal(section.path, '/projects', path);
+    assert.equal(section.current?.path, '/projects', path);
+    assert.equal(
+      section.children.filter((page) => page.path.startsWith('/projects')).length,
+      1,
+      path,
+    );
+  }
+  for (const path of [
+    '/projects/masjid-extension',
+    '/projects/main-prayer-hall',
+    '/projects/wudu-area',
+  ]) {
+    assert.ok(
+      EDITABLE_PAGES.some((page) => page.path === path),
+      path,
+    );
+  }
+});
+
+test('donations and fundraising use Giving without selecting the project section', () => {
+  for (const path of ['/donate', '/fundraise', '/fundraise/new', '/fundraise/community-appeal']) {
+    const section = activeNavigation(path);
+    assert.equal(section.name, 'Giving', path);
+    assert.equal(section.primaryPath, '/donate', path);
+    assert.equal(section.path, '/donate', path);
+    assert.equal(
+      section.current?.path,
+      path === '/fundraise/new' ? '/fundraise/new' : '/donate',
+      path,
+    );
+    assert.deepEqual(
+      section.children.map((page) => page.path),
+      ['/donate', '/fundraise/new'],
+    );
+  }
+  assert.equal(PUBLIC_MENU_GROUPS.find((group) => group.path === '/donate').name, 'Giving');
+  assert.equal(
+    EDITABLE_PAGES.some((page) => page.path === '/fundraise/new'),
+    false,
+  );
+});
+
+test('section breadcrumbs keep one entry per section name and destination', () => {
+  assert.deepEqual(
+    navigation.navigationBreadcrumbs(activeNavigation('/donate')).map((item) => item.name),
+    ['Giving'],
+  );
+  const breadcrumbs = navigation.navigationBreadcrumbs({
+    primaryPath: '/projects',
+    primaryName: 'Our Masjid Project',
+    path: '/projects/masjid-extension',
+    name: 'Our Masjid Project',
+    current: { path: '/projects/main-prayer-hall', name: 'Main Prayer Hall' },
+  });
+  assert.deepEqual(
+    breadcrumbs.map((item) => item.name),
+    ['Our Masjid Project', 'Main Prayer Hall'],
+  );
+  assert.equal(breadcrumbs[0].path, '/projects');
 });
 
 test('unrelated pages and lookalike prefixes do not claim an incorrect section', () => {

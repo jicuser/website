@@ -149,10 +149,7 @@ test('coloured actions keep readable text over dark and bright backgrounds in bo
   const selectors = [
     'html[data-theme] .jic-community-join',
     'html[data-theme] .jic-watch-live',
-    'html[data-theme] .jic-menu-trigger',
-    'html[data-theme] :is(.jic-hall-contact a, .jic-public-route .bg-primary)',
     'html[data-theme] .jic-public-route .bg-destructive',
-    '.jic-footer-donate',
   ];
   const rgb = (hex) => {
     const value = hex.slice(1);

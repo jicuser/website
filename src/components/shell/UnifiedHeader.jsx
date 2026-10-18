@@ -41,7 +41,7 @@ import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import DesktopNavigation from '@/components/shell/DesktopNavigation';
 import MobileInfoBanner from '@/components/shell/MobileInfoBanner';
 import { cn } from '@/lib/utils';
-import { activeNavigation } from '@/lib/publicNavigation';
+import { activeNavigation, navigationBreadcrumbs } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
 import { nextCongregation } from '@/lib/nextCongregation';
@@ -111,6 +111,7 @@ export default function UnifiedHeader() {
     isPageVisible(getContent, page.path),
   );
   const selected = navigation?.current?.path;
+  const breadcrumbs = navigationBreadcrumbs(navigation);
   const menuSection =
     pathname === '/social-media'
       ? pathname
@@ -428,30 +429,22 @@ export default function UnifiedHeader() {
               </nav>
             </div>
           </div>
-          {navigation && navigation.path !== '/' && (
+          {breadcrumbs.length > 0 && (
             <nav className="jic-section-location" aria-label="Current section">
-              {navigation.primaryPath !== navigation.path && (
-                <>
-                  <Link to={navigation.primaryPath}>{navigation.primaryName}</Link>
-                  <ChevronRight size={14} aria-hidden="true" />
-                </>
-              )}
-              <Link
-                to={navigation.path}
-                aria-current={pathname === navigation.path ? 'page' : undefined}
-              >
-                {navigation.name}
-              </Link>
-              {navigation.current && navigation.current.path !== navigation.path && (
-                <>
-                  <ChevronRight size={14} aria-hidden="true" />
-                  {programme ? (
-                    <Link to={navigation.current.path}>{navigation.current.name}</Link>
+              {breadcrumbs.map((item, index) => (
+                <React.Fragment key={item.path}>
+                  {index > 0 && <ChevronRight size={14} aria-hidden="true" />}
+                  {!programme &&
+                  item.path === navigation.current?.path &&
+                  item.path !== navigation.path ? (
+                    <span aria-current="page">{item.name}</span>
                   ) : (
-                    <span aria-current="page">{navigation.current.name}</span>
+                    <Link to={item.path} aria-current={pathname === item.path ? 'page' : undefined}>
+                      {item.name}
+                    </Link>
                   )}
-                </>
-              )}
+                </React.Fragment>
+              ))}
               {programme && (
                 <>
                   <ChevronRight size={14} aria-hidden="true" />

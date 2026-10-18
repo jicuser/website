@@ -457,8 +457,8 @@
 /* The reusable service finder owns only .service-explorer and its descendants. */
 .service-explorer {
   --finder-paper: color-mix(in srgb, var(--jic-surface) 96%, var(--jic-action));
-  --finder-action: var(--jic-teal);
-  --finder-action-ink: #ffffff;
+  --finder-action: var(--jic-gold);
+  --finder-action-ink: var(--jic-text);
   width: 100%;
   max-width: 1180px;
   box-sizing: border-box;
@@ -467,7 +467,7 @@
   color: var(--jic-text);
 }
 .dark .service-explorer {
-  --finder-action-ink: #102e29;
+  --finder-action-ink: var(--jic-text);
 }
 .service-explorer--compact {
   width: min(1120px, calc(100% - 32px));
@@ -554,7 +554,7 @@
   overflow: hidden;
   border: 1px solid var(--jic-border);
   border-radius: 24px 110px 24px 24px;
-  background: #103e38;
+  background: #0b2036;
 }
 .service-explorer-photo > img {
   display: block;
@@ -587,7 +587,7 @@
 .service-explorer-photo small {
   display: block;
   margin-top: 5px;
-  color: #c2d9cc;
+  color: #b7c3d5;
   font-size: 0.72rem;
   font-weight: 400;
 }
@@ -819,27 +819,8 @@
 .service-explorer-card-action svg {
   flex-shrink: 0;
 }
+/* Prayer information uses the same card material as the rest of the finder. */
 .service-explorer-card--prayer {
-  border-color: #10493f;
-  background: #10493f;
-  color: #f9f7ed;
-}
-.service-explorer-card--prayer .service-explorer-card-icon {
-  background: #ffffff12;
-  color: #d9e9d9;
-}
-.service-explorer-card--prayer
-  :is(
-    .service-explorer-card-eyebrow,
-    .service-explorer-card-description,
-    .service-explorer-card-arrow
-  ) {
-  color: #c8ddcf;
-}
-.service-explorer-card--prayer .service-explorer-card-action {
-  color: #e5c47d;
-}
-.service-explorer-card--prayer:hover {
   border-color: var(--jic-gold);
 }
 .service-explorer-empty {

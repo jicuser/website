@@ -143,9 +143,6 @@ export default function DonationsPage() {
             <a className="ops-button" href="#give">
               Make a donation <Heart size={17} />
             </a>
-            <Link className="ops-secondary" to="/fundraise/new">
-              Start a fundraiser <ArrowRight size={17} />
-            </Link>
           </div>
         </div>
         <figure>

@@ -1,9 +1,16 @@
-/** Primary navigation grouped by visitor intent. */
+/** Legacy extension address retained for existing CMS content and shared links. */
 export const MASJID_EXTENSION_TABS = [
-  { name: 'Project journey', path: '/projects' },
-  { name: 'Timeline & spaces', path: '/projects/masjid-extension' },
-  { name: 'Support JIC', path: '/donate' },
+  { name: 'Masjid Extension', path: '/projects/masjid-extension' },
 ];
+export const GIVING_NAVIGATION = {
+  name: 'Giving',
+  path: '/donate',
+  children: [
+    { name: 'Donate', path: '/donate' },
+    { name: 'Start a fundraiser', path: '/fundraise/new' },
+  ],
+  editable: false,
+};
 export const MADRASSAH_TABS = [
   { name: 'Overview', path: '/madrassah' },
   { name: 'Pupil Enrolment', path: '/madrassah/enrolment' },
@@ -70,8 +77,7 @@ export const NAV_GROUPS = [
     name: 'Our Masjid Project',
     path: '/projects',
     children: [
-      { name: 'Project journey', path: '/projects' },
-      { name: 'Stages & spaces', path: '/projects/masjid-extension' },
+      { name: 'Project overview', path: '/projects' },
       { name: 'Support JIC', path: '/donate' },
     ],
   },
@@ -99,15 +105,7 @@ export const NAV_ITEMS = [
 export const PUBLIC_MENU_GROUPS = [
   ...NAV_GROUPS,
   { name: 'Madrassah', path: '/madrassah', children: MADRASSAH_TABS },
-  {
-    name: 'Donate & fundraise',
-    path: '/donate',
-    children: [
-      { name: 'Giving hub', path: '/donate' },
-      { name: 'Start a fundraiser', path: '/fundraise/new' },
-    ],
-    editable: false,
-  },
+  GIVING_NAVIGATION,
   { name: 'Social Media', path: '/social-media', children: [] },
   { name: 'Portal login', path: '/portal', children: [], editable: false },
 ];

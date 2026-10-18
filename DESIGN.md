@@ -2,9 +2,9 @@
 
 ## Direction
 
-A welcoming public website for a real community centre: worship, learning, practical support and personal account access. Warm surfaces, clear editorial headings and focused service sections make those journeys easy to understand on a phone.
+A welcoming public website for a real community centre: worship, learning, practical support and personal account access. Liquid Glass surfaces, clear editorial headings and focused service sections make those journeys easy to understand on a phone. Navy, neutral glass and brand gold form one visual language across navigation, page actions, service cards and the member portal.
 
-Reference: https://uselabbaik.com, inspected on 18 October 2026 alongside the supplied mobile captures. The reference uses cream surfaces, teal accents, serif headings, focused feature stories and interactive choices. Its software pricing, product illustrations, logos and automation claims are not part of JIC's design.
+Reference: https://uselabbaik.com, inspected on 18 October 2026 alongside the supplied mobile captures. The reference informs the focused feature stories, editorial headings and interactive choices. JIC retains its own navy-and-gold Liquid Glass identity. Its software pricing, product illustrations, logos and automation claims are not part of JIC's design.
 
 ## JIC tokens
 
@@ -12,9 +12,8 @@ Reference: https://uselabbaik.com, inspected on 18 October 2026 alongside the su
 | -------------- | ----------- | ---------- |
 | Page           | `#f9f7f1`   | `#080f1d`  |
 | Surface        | `#fffefa`   | `#112a43`  |
-| Primary text   | `#142c29`   | `#f4f6fa`  |
-| Secondary text | `#59645f`   | `#b7c3d5`  |
-| Teal           | `#087b70`   | `#5cddc4`  |
+| Primary text   | `#081222`   | `#f4f6fa`  |
+| Secondary text | `#26364a`   | `#b7c3d5`  |
 | Brand gold     | `#89501b`   | `#e9bc67`  |
 
 These are JIC implementation choices. The reference branding extraction reported `#FAF8F3`, `#00A892`, DM Sans and Amiri; JIC retains its existing body font stack and uses Georgia for editorial headings to avoid another font dependency.
@@ -27,6 +26,7 @@ These are JIC implementation choices. The reference branding extraction reported
 - `portal.css` owns member sign-in/workspace geometry.
 - `features/admin` owns permission-aware task discovery and staff overview states.
 - `theme.css` owns semantic colours; individual component styles own geometry.
+- `liquid-glass.css` owns shared controls and surfaces. Gold edges/underlines identify primary actions and selected choices without changing their glass fill. Solid mode and reduced transparency remain supported.
 
 Use real destination links and content. Empty records remain empty; an enquiry is not a booking confirmation. Public guidance stays available before account creation where the existing service supports it.
 

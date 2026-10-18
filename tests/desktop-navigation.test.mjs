@@ -325,15 +325,15 @@ test('current and nested destinations select the correct section and dropdown ch
     ['/prayer-times/monthly', '/prayer-times', '/prayer-times/monthly', 'page'],
     ['/funerals/what-to-do', '/services', '/funerals', 'location'],
     ['/madrassah/policies', '/education', '/madrassah', 'location'],
-    ['/projects/masjid-extension/timeline', '/projects', '/projects/masjid-extension', 'location'],
-    ['/projects/main-prayer-hall', '/projects', '/projects/masjid-extension', 'location'],
-    ['/projects/main-prayer-hall/', '/projects', '/projects/masjid-extension', 'location'],
-    ['/projects/wudu-area', '/projects', '/projects/masjid-extension', 'location'],
-    ['/projects/community-hall', '/projects', '/projects/masjid-extension', 'location'],
-    ['/projects/madrassah-floor', '/projects', '/projects/masjid-extension', 'location'],
-    ['/projects/timeline', '/projects', '/projects/masjid-extension', 'location'],
-    ['/projects/madrassah-building', '/projects', '/projects/masjid-extension', 'location'],
-    ['/donate', '/projects', '/donate', 'page'],
+    ['/projects/masjid-extension', '/projects', '/projects', 'location'],
+    ['/projects/masjid-extension/timeline', '/projects', '/projects', 'location'],
+    ['/projects/main-prayer-hall', '/projects', '/projects', 'location'],
+    ['/projects/main-prayer-hall/', '/projects', '/projects', 'location'],
+    ['/projects/wudu-area', '/projects', '/projects', 'location'],
+    ['/projects/community-hall', '/projects', '/projects', 'location'],
+    ['/projects/madrassah-floor', '/projects', '/projects', 'location'],
+    ['/projects/timeline', '/projects', '/projects', 'location'],
+    ['/projects/madrassah-building', '/projects', '/projects', 'location'],
   ]) {
     const fixture = navigationFixture(path);
     fixture.render();
@@ -346,7 +346,7 @@ test('current and nested destinations select the correct section and dropdown ch
   }
 });
 
-test('project stage ancestry also selects the matching shared subsection tab', () => {
+test('project stage aliases select the single project overview instead of duplicate tabs', () => {
   for (const path of [
     '/projects/masjid-extension/timeline',
     '/projects/main-prayer-hall',
@@ -357,12 +357,16 @@ test('project stage ancestry also selects the matching shared subsection tab', (
     '/projects/madrassah-building',
   ]) {
     const navigation = activeNavigation(path);
-    assert.equal(navigation.path, '/projects/masjid-extension', path);
-    assert.equal(navigation.current?.path, '/projects/masjid-extension', path);
+    assert.equal(navigation.path, '/projects', path);
+    assert.equal(navigation.current?.path, '/projects', path);
   }
   const donation = activeNavigation('/donate');
-  assert.equal(donation.path, '/projects');
+  assert.equal(donation.path, '/donate');
   assert.equal(donation.current?.path, '/donate');
+  const fixture = navigationFixture('/donate');
+  fixture.render();
+  assert.equal(fixture.trigger('/projects').props['aria-current'], undefined);
+  assert.equal(fixture.link('/projects', '/donate').props['aria-current'], undefined);
 });
 
 test('clicking the current child closes without depending on a pathname change', () => {

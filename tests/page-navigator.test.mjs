@@ -19,7 +19,7 @@ const expectedSections = [
   'Education',
   'Youth',
   'Madrassah',
-  'Donate & fundraise',
+  'Giving',
   'Social Media',
 ];
 
