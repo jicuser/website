@@ -322,6 +322,31 @@ export default function TvDisplayLayoutEditor({
         </div>
       </div>
 
+      <div className="tv-item-selection">
+        <div className="tv-item-selection-heading">
+          <strong>Items on this screen</strong>
+          <span>Select an item here or tap it in the preview.</span>
+        </div>
+        <div className="tv-item-choices" role="group" aria-label="Items on this screen">
+          {scene.layers.map((item, index) => (
+            <button
+              type="button"
+              key={item.id}
+              data-layer-id={item.id}
+              disabled={disabled}
+              aria-pressed={selected === item.id}
+              onClick={() => chooseLayer(item.id)}
+            >
+              {contentLabel(item, index)}
+              {item.hidden ? ' · hidden' : ''}
+            </button>
+          ))}
+          {scene.layers.length === 0 && (
+            <p>No items yet. Add a timetable, poster or message below.</p>
+          )}
+        </div>
+      </div>
+
       <LayoutCanvas
         key={editorKey}
         layers={scene.layers}
@@ -364,7 +389,7 @@ export default function TvDisplayLayoutEditor({
               aria-expanded={inspectorOpen}
               onClick={() => setInspectorOpen((open) => !open)}
             >
-              Edit
+              {inspectorOpen ? 'Close item settings' : 'Edit item'}
             </button>
             <button
               type="button"
@@ -374,30 +399,35 @@ export default function TvDisplayLayoutEditor({
             >
               {layer.hidden ? 'Show' : 'Hide'}
             </button>
-            <button
-              type="button"
-              className="admin-button"
-              disabled={disabled}
-              onClick={removeSelectedBlock}
-            >
-              Remove
-            </button>
-            <button
-              type="button"
-              className="admin-button"
-              disabled={disabled || scene.layers.at(-1)?.id === layer.id}
-              onClick={() => reorder(true)}
-            >
-              To front
-            </button>
-            <button
-              type="button"
-              className="admin-button"
-              disabled={disabled || scene.layers[0]?.id === layer.id}
-              onClick={() => reorder(false)}
-            >
-              To back
-            </button>
+            <details className="tv-item-actions-more">
+              <summary>More item actions</summary>
+              <div>
+                <button
+                  type="button"
+                  className="admin-button"
+                  disabled={disabled}
+                  onClick={removeSelectedBlock}
+                >
+                  Remove
+                </button>
+                <button
+                  type="button"
+                  className="admin-button"
+                  disabled={disabled || scene.layers.at(-1)?.id === layer.id}
+                  onClick={() => reorder(true)}
+                >
+                  Bring to front
+                </button>
+                <button
+                  type="button"
+                  className="admin-button"
+                  disabled={disabled || scene.layers[0]?.id === layer.id}
+                  onClick={() => reorder(false)}
+                >
+                  Send to back
+                </button>
+              </div>
+            </details>
             {canCrop && (
               <button
                 type="button"
@@ -430,33 +460,6 @@ export default function TvDisplayLayoutEditor({
         </p>
       )}
 
-      <div className="tv-layout-selection">
-        <label>
-          Layers
-          <select
-            value={selected}
-            disabled={disabled || !scene.layers.length}
-            onChange={(event) => chooseLayer(event.target.value)}
-          >
-            <option value="">Select an item…</option>
-            {scene.layers.map((item, index) => (
-              <option key={item.id} value={item.id}>
-                {contentLabel(item, index)}
-                {item.hidden ? ' · hidden' : ''}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="admin-check">
-          <input
-            type="checkbox"
-            checked={snap}
-            onChange={(event) => setSnap(event.target.checked)}
-          />
-          Snap to grid
-        </label>
-      </div>
-
       {layer && inspectorOpen && (
         <>
           <fieldset className="tv-layout-controls" disabled={disabled}>
@@ -464,7 +467,7 @@ export default function TvDisplayLayoutEditor({
 
             {layer && (
               <label>
-                Content type
+                Item type
                 <select
                   value={layer.type}
                   onChange={(event) => changeBlockType(event.target.value)}
@@ -611,13 +614,13 @@ export default function TvDisplayLayoutEditor({
       )}
 
       <label className="tv-layout-add-content">
-        Add content
+        Add an item
         <select
           value=""
           disabled={disabled || scene.layers.length >= 12}
           onChange={(event) => addBlock(event.target.value)}
         >
-          <option value="">Choose content to add…</option>
+          <option value="">Choose an item to add…</option>
           {allowBlocks ? (
             <option value="poster">Poster</option>
           ) : (
@@ -634,19 +637,33 @@ export default function TvDisplayLayoutEditor({
         )}
       </label>
 
-      <button
-        type="button"
-        className="admin-button tv-reset-layout"
-        disabled={disabled}
-        onClick={() => {
-          if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
-          const reset = resetScene ? cloneScene(resetScene) : defaultScene(orientation, preset);
-          commitScene(reset);
-          setSelected('');
-        }}
-      >
-        Restore default layout
-      </button>
+      <details className="tv-editor-advanced">
+        <summary>Advanced layout tools</summary>
+        <label className="admin-check">
+          <input
+            type="checkbox"
+            checked={snap}
+            onChange={(event) => setSnap(event.target.checked)}
+          />
+          Align items to the grid
+        </label>
+        <p className="tv-layout-help">
+          Restore this section’s original arrangement. You can use Undo to recover your last edit.
+        </p>
+        <button
+          type="button"
+          className="admin-button tv-reset-layout"
+          disabled={disabled}
+          onClick={() => {
+            if (!window.confirm(`Reset the ${orientation} ${presetLabel} layout?`)) return;
+            const reset = resetScene ? cloneScene(resetScene) : defaultScene(orientation, preset);
+            commitScene(reset);
+            setSelected('');
+          }}
+        >
+          Restore default layout
+        </button>
+      </details>
 
       <TvFinalPreview
         open={previewOnly}

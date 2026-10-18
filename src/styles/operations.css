@@ -227,7 +227,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 48% 48% 18px 18px;
-  background: #e4ede5;
+  background: var(--ops-soft);
 }
 .ops-giving-hero img {
   width: 100%;
@@ -238,7 +238,7 @@
   position: absolute;
   bottom: 0;
   inset-inline: 0;
-  background: linear-gradient(transparent, #102726);
+  background: linear-gradient(transparent, #0b2036);
   padding: 40px 24px 22px;
   color: #fff;
   font-size: 0.85rem;
@@ -291,8 +291,14 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
-  background: radial-gradient(ellipse at 20% 100%, #c2ddce, transparent 60%), #edf2e8;
-  color: #276253;
+  background:
+    radial-gradient(
+      ellipse at 20% 100%,
+      color-mix(in srgb, var(--ops-accent) 18%, transparent),
+      transparent 60%
+    ),
+    var(--ops-soft);
+  color: var(--ops-accent);
 }
 .ops-campaign-art span {
   font-size: 1.3rem;
@@ -300,12 +306,22 @@
   letter-spacing: -0.03em;
 }
 .ops-art-ramadan {
-  background: radial-gradient(ellipse at 20% 100%, #d8c28a, transparent 70%), #f3ebd8;
-  color: #795e24;
+  background:
+    radial-gradient(
+      ellipse at 20% 100%,
+      color-mix(in srgb, var(--ops-accent) 26%, transparent),
+      transparent 70%
+    ),
+    var(--ops-soft);
 }
 .ops-art-education {
-  background: radial-gradient(ellipse at 20% 100%, #b5cadb, transparent 70%), #e6eef2;
-  color: #365c78;
+  background:
+    radial-gradient(
+      ellipse at 20% 100%,
+      color-mix(in srgb, var(--ops-accent) 10%, transparent),
+      transparent 70%
+    ),
+    var(--ops-soft);
 }
 .ops-campaign-copy {
   padding: 24px;
@@ -531,8 +547,8 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #e7eee9;
-  color: #176c5c;
+  background: var(--ops-soft);
+  color: var(--ops-accent);
 }
 .ops-steps span {
   font-size: 0.85rem;
@@ -706,9 +722,9 @@
 .ops-social-card-preview {
   overflow: hidden;
   border-radius: 16px;
-  background: #eaf1ed;
+  background: var(--jic-glass-tile);
   margin: 22px 0;
-  color: #183a39;
+  color: var(--jic-text);
 }
 .ops-social-card-preview > img {
   width: 100%;
@@ -722,7 +738,7 @@
   font-size: 0.7rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #56716a;
+  color: var(--jic-text-secondary);
 }
 .ops-social-card-preview strong {
   display: block;
@@ -763,12 +779,12 @@
   margin-top: 5px;
 }
 .ops-whatsapp-preview {
-  background: #e8f2e9;
+  background: var(--jic-glass-tile);
   border-radius: 18px;
   text-align: center;
   padding: 32px 20px;
   margin: 24px 0;
-  color: #205c43;
+  color: var(--jic-text);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -784,15 +800,15 @@
   width: min(850px, calc(100vw - 24px));
   max-height: calc(100dvh - 32px);
   padding: 24px;
-  border: 0;
+  border: 1px solid var(--jic-glass-border);
   border-radius: 20px;
-  background: #fff;
-  color: #183a39;
+  background: var(--jic-glass-panel-strong);
+  color: var(--jic-text);
   overflow: auto;
 }
 .ops-social-dialog::backdrop {
-  background: #081d28c9;
-  backdrop-filter: blur(8px);
+  background: #081222c9;
+  backdrop-filter: var(--jic-glass-overlay-filter);
 }
 .ops-social-dialog header {
   display: flex;
@@ -801,7 +817,7 @@
   gap: 15px;
   position: sticky;
   top: -24px;
-  background: #fff;
+  background: var(--jic-glass-panel-strong);
   padding: 16px 0;
   z-index: 1;
 }
@@ -815,17 +831,19 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #edf3ef;
+  border: 1px solid var(--jic-glass-border);
+  background: var(--jic-glass-control);
+  color: var(--jic-text);
 }
 .ops-social-dialog > p,
 .ops-social-dialog footer p {
   font-size: 0.8rem;
-  color: #596b69;
+  color: var(--jic-text-secondary);
   margin: 12px 0;
 }
 .ops-social-live {
-  background: #f6f7f5;
-  border: 1px solid #e2e8e3;
+  background: var(--jic-glass-panel-strong);
+  border: 1px solid var(--jic-glass-border);
   border-radius: 12px;
   overflow: hidden;
   margin: 16px 0;
@@ -836,7 +854,7 @@
   min-height: 620px;
   height: 70dvh;
   border: 0;
-  background: white;
+  background: var(--jic-surface);
 }
 .ops-social-channel-cover img {
   width: 100%;
@@ -859,13 +877,14 @@
 }
 .portal-workspace-switch a {
   padding: 11px 18px;
-  border: 1px solid var(--jic-border, #d9e3de);
+  border: 1px solid var(--jic-glass-border);
   border-radius: 12px;
   min-height: 46px;
 }
 .portal-workspace-switch a[aria-current='page'] {
-  background: #176c5c;
-  color: #fff;
+  background: var(--jic-glass-control);
+  color: var(--jic-text);
+  border-color: var(--jic-gold);
 }
 .dark .ops-page,
 .dark .ops-admin {
@@ -883,7 +902,7 @@
   background: #412820;
   color: #ffd6c7;
 }
-.dark .ops-badge {
+.dark .ops-admin .ops-badge {
   color: #a0e4c1;
 }
 @media (max-width: 900px) {

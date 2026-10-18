@@ -245,12 +245,20 @@
   padding: 16px;
   margin-bottom: 12px;
   border-radius: 16px;
-  background: var(--jic-action);
-  color: #102533;
+  border: 1px solid var(--jic-glass-border);
+  color: var(--jic-text);
 }
-.jic-menu-account span { flex: 1; }
-.jic-menu-account strong, .jic-menu-account small { display: block; }
-.jic-menu-account small { margin-top: 4px; font-size: 12px; }
+.jic-menu-account span {
+  flex: 1;
+}
+.jic-menu-account strong,
+.jic-menu-account small {
+  display: block;
+}
+.jic-menu-account small {
+  margin-top: 4px;
+  font-size: 12px;
+}
 .jic-free-brand {
   display: flex;
   align-items: center;
@@ -584,9 +592,8 @@ html[data-prayer-dock-hidden='true'] {
   display: none;
 }
 .jic-free-actions .jic-menu-trigger {
-  background: #0f766e;
-  color: #fff;
-  border: 1px solid #0f766e;
+  color: var(--jic-text);
+  border: 1px solid var(--jic-glass-border);
   border-radius: 12px;
 }
 .jic-donate-heart {
@@ -1020,7 +1027,7 @@ html[data-prayer-dock-hidden='true'] {
     flex-shrink: 0;
     padding-inline: 10px 4px;
     margin-left: 8px;
-    color: var(--jic-teal);
+    color: var(--jic-gold);
     border-inline-start: 0;
     background: transparent;
     box-shadow: none;

@@ -62,7 +62,7 @@
   min-width: 0;
   height: 44px;
   border: 1px solid var(--jic-border);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--jic-glass-control);
   color: var(--jic-text);
 }
@@ -81,12 +81,10 @@
   flex: 0 0 auto;
   min-height: 44px;
   padding: 8px 20px;
-  --jic-button-tint: #d1d5db;
-  --jic-button-ink: #111827;
-  border: 1px solid var(--jic-button-tint);
-  border-radius: 8px;
-  background: var(--jic-button-tint);
-  color: var(--jic-button-ink);
+  border: 1px solid var(--jic-gold);
+  border-radius: 12px;
+  background: var(--jic-glass-control);
+  color: var(--jic-text);
   font-size: 0.8125rem;
   font-weight: 800;
   line-height: 1.5;

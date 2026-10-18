@@ -1,0 +1,175 @@
+/* TV-only semantic colours. Geometry stays in tv.css and prayer-board.css.
+   No filters or colour overrides are applied to poster or uploaded artwork. */
+:is(.jic-tv-shell, .scene-player)[data-tv-theme] {
+  background: var(--tv-background);
+  color: var(--tv-text);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  :is(.scene-canvas, .jic-tv-display, .scene-state-block, .scene-brand-block) {
+  background: var(--tv-background);
+  color: var(--tv-text);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  :is(
+    .scene-clock,
+    .scene-text,
+    .scene-next,
+    .scene-timetable,
+    .scene-prayer-table,
+    .scene-salah-board,
+    .jic-tv-prayer-scene,
+    .tv-dhikr-card,
+    .jic-tv-empty,
+    .jic-tv-display .jic-unified-info,
+    .jic-tv-next
+  ) {
+  background: var(--tv-surface);
+  color: var(--tv-text);
+  border-color: var(--tv-border);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  :is(
+    .scene-clock-date,
+    .scene-next-label,
+    .scene-next-detail,
+    .scene-prayer-table-head,
+    .scene-prayer-name small,
+    .scene-countdown small,
+    .jic-tv-scene-label,
+    .jic-tv-notice,
+    .jic-tv-status,
+    .display-connection-note,
+    .scene-prayer-table.has-tomorrow .scene-prayer-table-head > :last-child,
+    .scene-prayer-table.has-tomorrow .scene-prayer-table-row > :last-child
+  ) {
+  color: var(--tv-muted);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  :is(
+    .scene-timetable-prayers strong,
+    .scene-prayer-table-row > strong:last-child,
+    .scene-clock time,
+    .scene-next-heading span,
+    .scene-countdown b,
+    .scene-state-block .has-countdown .tv-iqamah-countdown,
+    .tv-dhikr h1,
+    .tv-dhikr h2,
+    .tv-dhikr-count,
+    .scene-salah-clock > span,
+    .jic-tv-fasting strong
+  ) {
+  color: var(--tv-accent);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  :is(
+    .scene-jummah-row,
+    .scene-timetable-prayers > div,
+    .scene-prayer-table-head,
+    .scene-prayer-table-row,
+    .scene-salah-board > .scene-prayer-table,
+    .tv-dhikr-tasbih
+  ) {
+  border-color: var(--tv-border);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  :is(
+    .scene-prayer-table-row.is-current,
+    .scene-timetable-prayers > .is-current,
+    .scene-jummah-row > .is-current
+  ) {
+  background: var(--tv-highlight);
+  color: var(--tv-highlightText);
+  box-shadow: inset 0 -3px var(--tv-accent);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme] .scene-salah-clock {
+  background: var(--tv-raised);
+  color: var(--tv-text);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme] .scene-salah-clock-face {
+  border-color: var(--tv-muted);
+  box-shadow: inset 0 0 0 min(1cqw, 0.75cqh) var(--tv-surface);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  :is(.scene-salah-clock-face > i, .scene-clock-hand.is-hour) {
+  background: var(--tv-text);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  :is(.scene-clock-hand.is-minute, .scene-clock-pin) {
+  background: var(--tv-accent);
+}
+:is(.jic-tv-shell, .scene-player)[data-tv-theme] .jic-tv-poster {
+  background: var(--tv-surface);
+  color: var(--tv-text);
+}
+
+/* Picker controls follow the staff interface; only their miniature TV is themed. */
+.tv-theme-picker {
+  margin-block: 24px;
+}
+.tv-theme-picker > p {
+  margin-block: 8px 16px;
+  color: var(--jic-text-secondary);
+}
+.tv-theme-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.tv-theme-choices > button {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+  padding: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.tv-theme-choices > button[aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 -3px var(--jic-gold);
+}
+.tv-theme-choices > button:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+.tv-theme-choices > button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.tv-theme-choices > button > span:last-child {
+  color: var(--jic-text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.tv-theme-swatch {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--tv-border);
+  border-radius: 8px;
+  background: var(--tv-background);
+  color: var(--tv-text);
+}
+.tv-theme-swatch > span {
+  grid-column: span 1;
+  font-size: 12px;
+  font-weight: 700;
+}
+.tv-theme-swatch > span:nth-child(2) {
+  grid-column: span 2;
+  text-align: right;
+  color: var(--tv-accent);
+}
+.tv-theme-swatch > i {
+  height: 22px;
+  border-radius: 3px;
+  background: var(--tv-raised);
+  border-bottom: 2px solid var(--tv-accent);
+}
+@media (max-width: 600px) {
+  .tv-theme-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

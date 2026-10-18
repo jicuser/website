@@ -59,7 +59,13 @@ html[data-theme='dark'] {
 }
 
 html[data-theme][data-surface='glass']
-  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer) {
+  :is(
+    .jic-public-route,
+    .jic-member-portal,
+    .jic-popup-panel,
+    .jic-image-viewer,
+    .ops-social-dialog
+  ) {
   --jic-text: var(--jic-glass-ink);
   --jic-text-secondary: var(--jic-glass-muted);
   --jic-muted: var(--jic-glass-muted);
@@ -69,9 +75,21 @@ html[data-theme][data-surface='glass']
 /* Named controls and data-glass opt in. Plain buttons, image triggers and staff
  * actions retain their own appearance. Both modes use this same material owner. */
 html[data-theme]
-  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
+  :is(
+    .jic-public-route,
+    .jic-member-portal,
+    .jic-popup-panel,
+    .jic-image-viewer,
+    .ops-social-dialog
+  )
   :is(
     [data-glass='clear'],
+    .jic-search-suggestions button,
+    .jic-social-jump a,
+    .jic-social-actions :is(a, button),
+    .worship-external-links a,
+    .ops-social-dialog header button,
+    .service-explorer-empty button,
     .jic-hall-contact a,
     button.bg-primary,
     a.bg-primary,
@@ -128,9 +146,34 @@ html[data-theme]
 
 /* Medium surfaces: tiles, cards and utility strips. */
 html[data-theme]
-  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
+  :is(
+    .jic-public-route,
+    .jic-member-portal,
+    .jic-popup-panel,
+    .jic-image-viewer,
+    .ops-social-dialog
+  )
   :is(
     [data-glass='frosted'],
+    .jic-search-field,
+    .jic-search-results a,
+    .jic-social-card,
+    .jic-page-choice,
+    .education-enrolment-card,
+    .madrassah-enrolment-form,
+    .jic-guide-resource,
+    .worship-hub-grid > a,
+    .worship-guide-grid > article,
+    .worship-salah-grid > article,
+    .worship-reading-card,
+    .worship-reader,
+    .project-map-tile,
+    .project-walkthrough,
+    .ops-stat,
+    .ops-social-card-preview,
+    .ops-whatsapp-preview,
+    .jic-menu-account,
+    .jic-hall-contact,
     .ops-panel,
     .ops-bank,
     .ops-empty,
@@ -186,9 +229,16 @@ html[data-theme]
 
 /* Large or readability-sensitive surfaces: menus, schedules, dialogs and bars. */
 html[data-theme]
-  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
+  :is(
+    .jic-public-route,
+    .jic-member-portal,
+    .jic-popup-panel,
+    .jic-image-viewer,
+    .ops-social-dialog
+  )
   :is(
     [data-glass='dense'],
+    .ops-social-dialog,
     .jic-unified-info,
     .jic-unified-menu,
     .jic-daily-reminder > button,
@@ -207,7 +257,13 @@ html[data-theme] :is(.jic-popup-panel, .jic-image-viewer) {
 
 /* Form controls use a stronger tint for legibility, but avoid nested blur passes. */
 html[data-theme]
-  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
+  :is(
+    .jic-public-route,
+    .jic-member-portal,
+    .jic-popup-panel,
+    .jic-image-viewer,
+    .ops-social-dialog
+  )
   :is(input:not([type='checkbox']):not([type='radio']), textarea, select) {
   background: var(--jic-glass-panel-strong);
   color: var(--jic-text);
@@ -219,7 +275,13 @@ html[data-theme]
 
 /* The enclosing panel already supplies blur. Nested controls only need a tint. */
 html[data-theme]
-  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
+  :is(
+    .jic-public-route,
+    .jic-member-portal,
+    .jic-popup-panel,
+    .jic-image-viewer,
+    .ops-social-dialog
+  )
   :is(
     [data-glass='frosted'],
     .ops-panel,
@@ -250,10 +312,17 @@ html[data-theme]
 
 /* Active state remains obvious across themes. */
 html[data-theme]
-  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
+  :is(
+    .jic-public-route,
+    .jic-member-portal,
+    .jic-popup-panel,
+    .jic-image-viewer,
+    .ops-social-dialog
+  )
   :is(
     .jic-unified-subnav-link:is(.is-current, [aria-current='page']),
     [role='tab'][data-state='active'],
+    .project-map-tile[aria-pressed='true'],
     .ops-toggle button[aria-pressed='true'],
     .ops-amounts button[aria-pressed='true'],
     .ops-tabs button[aria-pressed='true'],
@@ -296,7 +365,13 @@ html[data-theme] .jic-public-route .bg-destructive {
 
 /* Coloured actions retain their identity in glass and solid modes. */
 html[data-theme]
-  :is(.jic-public-route, .jic-member-portal, .jic-popup-panel, .jic-image-viewer)
+  :is(
+    .jic-public-route,
+    .jic-member-portal,
+    .jic-popup-panel,
+    .jic-image-viewer,
+    .ops-social-dialog
+  )
   :is(.jic-community-join, .jic-watch-live, button.bg-destructive, a.bg-destructive) {
   background:
     var(--jic-glass-action-sheen),

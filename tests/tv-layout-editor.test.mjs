@@ -158,7 +158,7 @@ test('tapping content opens only its relevant settings and does not write a draf
   const fixture = editorFixture();
   let tree = fixture.render();
   assert.match(text(tree), /Before prayer/);
-  assert.ok(select(tree, 'Layers'));
+  assert.ok(nodes(tree).find((node) => node.props['aria-label'] === 'Items on this screen'));
   assert.ok(button(tree, 'Preview'));
   assert.ok(button(tree, 'Larger editor'));
   assert.equal(button(tree, 'Remove'), undefined, 'actions wait for a selection');
@@ -167,13 +167,13 @@ test('tapping content opens only its relevant settings and does not write a draf
   component(tree, 'LayoutCanvas').props.onSelect(state.id);
   tree = fixture.render();
   assert.match(text(tree), /Before prayer message settings/);
-  assert.ok(button(tree, 'Edit'));
+  assert.ok(button(tree, 'Close item settings'));
   assert.ok(button(tree, 'Remove'));
   assert.ok(button(tree, 'Hide'));
   assert.equal(select(tree, 'Timetable style'), undefined);
   assert.equal(component(tree, 'LayoutCanvas').props.selectedId, state.id);
   assert.equal(fixture.writes.length, 0);
-  button(tree, 'Edit').props.onClick();
+  button(tree, 'Close item settings').props.onClick();
   tree = fixture.render();
   assert.doesNotMatch(text(tree), /Before prayer message settings/);
   assert.equal(fixture.writes.length, 0);
@@ -300,12 +300,11 @@ test('hidden layers remain selectable and can be shown without rebuilding them',
   layer.hidden = true;
   const fixture = editorFixture({ settings });
   let tree = fixture.render();
-  const selector = select(tree, 'Layers');
-  const option = nodes(selector).find(
-    (node) => node.type === 'option' && node.props.value === layer.id,
+  const item = nodes(tree).find(
+    (node) => node.type === 'button' && node.props['data-layer-id'] === layer.id,
   );
-  assert.match(text(option), /hidden/);
-  selector.props.onChange({ target: { value: layer.id } });
+  assert.match(text(item), /hidden/);
+  item.props.onClick();
   tree = fixture.render();
   assert.equal(fixture.writes.length, 0);
   assert.ok(button(tree, 'Show'));
@@ -332,7 +331,7 @@ test('changing, hiding or restoring a cropped image exits cropping before furthe
     tree = fixture.render();
     assert.equal(component(tree, 'LayoutCanvas').props.crop, true);
     if (action === 'change type') {
-      select(tree, 'Content type').props.onChange({ target: { value: 'text' } });
+      select(tree, 'Item type').props.onChange({ target: { value: 'text' } });
     } else {
       button(tree, action === 'hide' ? 'Hide' : 'Restore prayer message').props.onClick();
     }

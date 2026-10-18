@@ -22,7 +22,7 @@
   inset-inline: 0;
   color: white;
   padding: 36px 24px 22px;
-  background: linear-gradient(transparent, #122e2e);
+  background: linear-gradient(transparent, #0b2036);
 }
 .project-hero > div > p:not(.ops-eyebrow) {
   max-width: 480px;
@@ -67,7 +67,7 @@
   background: var(--ops-paper);
   border: 1px solid var(--ops-border);
   border-radius: 16px;
-  box-shadow: 6px 8px 0 #16453617;
+  box-shadow: 6px 8px 0 color-mix(in srgb, var(--jic-gold) 9%, transparent);
   transform: rotateX(8deg) rotateY(-6deg);
   transition:
     transform 0.22s,
@@ -77,7 +77,7 @@
 .project-map-tile:hover,
 .project-map-tile[aria-pressed='true'] {
   transform: translateY(-6px) rotateX(0) rotateY(0);
-  box-shadow: 6px 14px 0 #16453624;
+  box-shadow: 6px 14px 0 color-mix(in srgb, var(--jic-gold) 14%, transparent);
   border-color: var(--ops-accent);
 }
 .project-map-number {
@@ -146,8 +146,8 @@
   color: var(--ops-accent);
 }
 .project-stage-nav button[aria-current='step'] > span {
-  background: var(--ops-accent);
-  color: var(--ops-paper);
+  background: color-mix(in srgb, var(--ops-accent) 15%, var(--ops-soft));
+  color: var(--ops-accent);
   border-color: var(--ops-accent);
 }
 .project-timeline {
@@ -175,9 +175,9 @@
   font-weight: 650;
 }
 .project-stage.completed .project-stage-marker {
-  background: var(--ops-accent);
+  background: color-mix(in srgb, var(--ops-accent) 15%, var(--ops-soft));
   border-color: var(--ops-accent);
-  color: var(--ops-paper);
+  color: var(--ops-accent);
 }
 .project-stage-heading h2 {
   margin: 15px 0;
@@ -357,7 +357,7 @@
   .project-map-tile {
     padding: 16px;
     gap: 12px;
-    box-shadow: 4px 5px 0 #16453617;
+    box-shadow: 4px 5px 0 color-mix(in srgb, var(--jic-gold) 9%, transparent);
   }
   .project-map-tile strong {
     font-size: 0.9rem;

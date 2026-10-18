@@ -25,7 +25,7 @@
   width: 44px;
   height: 44px;
   border: 1px solid var(--jic-border);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--jic-surface);
   color: var(--jic-text);
 }
@@ -113,6 +113,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
+  min-height: 44px;
   padding-top: 8px;
   margin-top: auto;
   font-size: 14px;
@@ -208,7 +209,7 @@ html[data-theme] .jic-image-viewer {
   height: 44px;
   flex: 0 0 auto;
   border: 1px solid var(--jic-border);
-  border-radius: 10px;
+  border-radius: 12px;
 }
 .jic-image-viewer-scroll {
   min-width: 0;
@@ -273,7 +274,7 @@ html[data-theme] .jic-image-viewer {
   min-height: 44px;
   padding: 10px 14px;
   border: 1px solid var(--jic-border);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--jic-surface);
   color: var(--jic-text);
   font-size: 14px;
@@ -351,14 +352,13 @@ html[data-theme] .jic-radio-player-page {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ef4444;
+  background: var(--jic-error);
 }
 .jic-player-status[data-availability='online'] i {
-  background: #22c55e;
+  background: var(--jic-success);
 }
 .jic-home-route .jic-rail-heading h2 {
-  color: #fff;
-  text-shadow: 0 2px 12px #0008;
+  color: var(--jic-text);
 }
 /* The home page uses a compact poster row on laptops; each image still opens the viewer. */
 @media (min-width: 1024px) {

@@ -33,7 +33,7 @@
   min-height: 44px;
   padding: 0 12px;
   border: 1px solid var(--jic-border);
-  border-radius: 13px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--jic-surface) 88%, transparent);
   display: inline-flex;
   align-items: center;
@@ -123,10 +123,10 @@
   background: var(--jic-error);
 }
 .jic-hall-day.is-closed::before {
-  background: #64748b;
+  background: var(--jic-text-secondary);
 }
 .jic-hall-day.is-unknown::before {
-  background: #94a3b8;
+  background: var(--jic-muted);
 }
 .jic-hall-day.is-today {
   outline: 2px solid var(--jic-gold);
@@ -183,10 +183,10 @@
   background: var(--jic-error);
 }
 .jic-hall-legend i.is-closed {
-  background: #64748b;
+  background: var(--jic-text-secondary);
 }
 .jic-hall-legend i.is-unknown {
-  background: #94a3b8;
+  background: var(--jic-muted);
 }
 .jic-hall-contact {
   display: flex;
@@ -205,7 +205,7 @@
 }
 .jic-hall-contact span {
   font-size: 0.82rem;
-  opacity: 0.72;
+  color: var(--jic-text-secondary);
 }
 .jic-hall-contact a {
   min-height: 44px;
@@ -213,9 +213,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border-radius: 13px;
-  background: var(--jic-gold);
-  color: #101820;
+  border: 1px solid var(--jic-gold);
+  border-radius: 12px;
+  background: var(--jic-glass-control);
+  color: var(--jic-text);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -267,7 +268,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #94a3b8;
+    background: var(--jic-muted);
   }
   .jic-hall-day.is-available::after {
     background: var(--jic-success);
@@ -279,6 +280,6 @@
     background: var(--jic-error);
   }
   .jic-hall-day.is-closed::after {
-    background: #64748b;
+    background: var(--jic-text-secondary);
   }
 }

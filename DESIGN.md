@@ -28,6 +28,10 @@ These are JIC implementation choices. The reference branding extraction reported
 - `theme.css` owns semantic colours; individual component styles own geometry.
 - `liquid-glass.css` owns shared controls and surfaces. Gold edges/underlines identify primary actions and selected choices without changing their glass fill. Solid mode and reduced transparency remain supported.
 
+Staff navigation groups tasks behind disclosures and search, with one account menu. Section IDs, permissions and unsaved-change checks remain stable.
+
+The TV workflow is screen → display section → design and colours → individual items → review → save. Layout proposals compare the current draft with a proposed design; the final review compares a saved snapshot with the actual draft. Midnight, Pearl and Forest are validated TV-only palettes. Colour choices do not alter poster artwork or the staff interface theme.
+
 Use real destination links and content. Empty records remain empty; an enquiry is not a booking confirmation. Public guidance stays available before account creation where the existing service supports it.
 
 ## Responsive and interaction rules

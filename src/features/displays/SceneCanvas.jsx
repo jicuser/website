@@ -3,6 +3,7 @@ import { layerStyle, layerImageStyle } from '../../../supabase/functions/_shared
 import TvMediaPanel from '@/components/tv/TvMediaPanel';
 import PrayerWidget from './PrayerWidget';
 import { tvBoardLayoutId } from '@/lib/tvBoardLayouts';
+import { tvThemeId, tvThemeStyle } from '../../../supabase/functions/_shared/tv-themes.js';
 
 function VideoContent({ url, stream, muted, title }) {
   const video = useRef(null);
@@ -80,8 +81,10 @@ export default function SceneCanvas({
   const scene =
     tv.settings.scenes.find((s) => s.id === tv.settings.active_scene_id) || tv.settings.scenes[0];
   const boardLayout = tvBoardLayoutId(scene);
+  const theme = tvThemeId(tv.settings.display_theme);
+  const logoVariant = theme === 'pearl' ? 'light' : 'dark';
   return (
-    <main className="scene-player">
+    <main className="scene-player" data-tv-theme={theme} style={tvThemeStyle(theme)}>
       <div
         className={`scene-canvas ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''} ${boardLayout ? 'is-prayer-board' : ''}`}
         data-board-layout={boardLayout || undefined}
@@ -153,7 +156,7 @@ export default function SceneCanvas({
               ) : layer.type === 'brand' ? (
                 <div className="scene-brand-block">
                   <img
-                    src={boardLayout ? '/brand/jic-wordmark-dark.svg' : '/brand/jic-pillars-dark.svg'}
+                    src={`/brand/jic-${boardLayout ? 'wordmark' : 'pillars'}-${logoVariant}.svg`}
                     alt="Jamatia Islamic Centre"
                   />
                 </div>
@@ -198,7 +201,7 @@ export default function SceneCanvas({
           ))}
         {showFallbackBrand && !scene.layers.some((layer) => layer.type === 'brand') && (
           <div className="scene-brand">
-            <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
+            <img src={`/brand/jic-pillars-${logoVariant}.svg`} alt="Jamatia Islamic Centre" />
           </div>
         )}
       </div>

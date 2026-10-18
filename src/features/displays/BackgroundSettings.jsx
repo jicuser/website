@@ -1,12 +1,13 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import NormalSettings from './NormalSettings';
 import TvDisplayLayoutEditor from './TvDisplayLayoutEditor';
 import ScheduledScenes from './ScheduledScenes';
 import TvBoardPicker from './TvBoardPicker';
+import TvThemePicker from './TvThemePicker';
+import TvDraftReview from './TvDraftReview';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
-import { TV_PRESET_KEYS } from '../../../supabase/functions/_shared/tv.js';
-import { tvPresetLabel, TV_PRESET_DESCRIPTIONS } from '@/lib/tvEditorLabels';
+import { tvPresetLabel, tvEditorSections, TV_PRESET_DESCRIPTIONS } from '@/lib/tvEditorLabels';
 import {
   createTvSettingsDraft,
   hasTvSettingsChanges,
@@ -39,8 +40,14 @@ export default function BackgroundSettings({
     setMessage('');
     dispatch({ type: 'edit', key, value });
   };
-  const presetKeys = screenId === 'shoe-area' ? ['standby'] : TV_PRESET_KEYS;
+  const sections = tvEditorSections(screenId, form.preset_names);
   const presetName = tvPresetLabel(preset, form.preset_names);
+  const savedSettings = useMemo(() => JSON.parse(draft.baseline), [draft.baseline]);
+
+  useEffect(() => {
+    if (screenId === 'shoe-area') setPreset('standby');
+    setRenaming(false);
+  }, [screenId]);
 
   useEffect(() => {
     dispatch({ type: 'sync', screenId, data });
@@ -132,6 +139,13 @@ export default function BackgroundSettings({
       )}
       <fieldset className="tv-settings-fields" disabled={busy}>
         <legend className="sr-only">Automatic display settings</legend>
+        <div className="tv-workflow-heading">
+          <span aria-hidden="true">1</span>
+          <div>
+            <h3>Choose your screen</h3>
+            <p>Each screen keeps its own design and settings.</p>
+          </div>
+        </div>
         <div className="tv-editor-context">
           <label>
             Screen to edit
@@ -163,22 +177,13 @@ export default function BackgroundSettings({
 
         <div className="tv-scene-tabs-wrap">
           <div className="tv-scene-tabs-head">
-            <label className="tv-preset-selector">
-              Layout to edit
-              <select
-                value={preset}
-                onChange={(event) => {
-                  setPreset(event.target.value);
-                  setRenaming(false);
-                }}
-              >
-                {presetKeys.map((key) => (
-                  <option key={key} value={key}>
-                    {tvPresetLabel(key, form.preset_names)}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="tv-workflow-heading">
+              <span aria-hidden="true">2</span>
+              <div>
+                <h3>Choose when it appears</h3>
+                <p>Edit the everyday screen or one of its automatic prayer displays.</p>
+              </div>
+            </div>
             <button
               type="button"
               className="admin-text-button"
@@ -188,13 +193,31 @@ export default function BackgroundSettings({
                 setRenaming((value) => !value);
               }}
             >
-              {renaming ? 'Done renaming' : 'Rename layout'}
+              {renaming ? 'Done renaming' : 'Rename section'}
             </button>
           </div>
-          <p>{TV_PRESET_DESCRIPTIONS[preset]} Selecting a layout only changes this editor.</p>
+          <div className="tv-section-choices" role="group" aria-label="Display sections">
+            {sections.map((section) => (
+              <button
+                type="button"
+                key={section.id}
+                aria-pressed={preset === section.id}
+                onClick={() => {
+                  setPreset(section.id);
+                  setRenaming(false);
+                }}
+              >
+                <span className={`tv-section-icon is-${section.id}`} aria-hidden="true" />
+                {section.name}
+              </button>
+            ))}
+          </div>
+          <p className="tv-layout-help">
+            {TV_PRESET_DESCRIPTIONS[preset]} Selecting a section changes this editor’s preview.
+          </p>
           {renaming && (
             <label className="tv-scene-rename">
-              Layout name
+              Section name
               <input
                 maxLength={40}
                 value={renameValue}
@@ -207,6 +230,14 @@ export default function BackgroundSettings({
           )}
         </div>
 
+        <div className="tv-workflow-heading">
+          <span aria-hidden="true">3</span>
+          <div>
+            <h3>Design your display</h3>
+            <p>Choose a starting design, then adjust its colours and individual items.</p>
+          </div>
+        </div>
+
         {preset === 'standby' && (
           <TvBoardPicker
             key={`${screenId}:${form.display_orientation}:${revision}`}
@@ -216,6 +247,8 @@ export default function BackgroundSettings({
             disabled={busy}
           />
         )}
+
+        <TvThemePicker settings={form} onChange={update} disabled={busy} />
 
         <TvDisplayLayoutEditor
           screenId={screenId}
@@ -234,6 +267,16 @@ export default function BackgroundSettings({
         />
         <ScheduledScenes form={form} update={update} screenId={screenId} disabled={busy} />
       </fieldset>
+
+      {dirty && (
+        <TvDraftReview
+          key={screenId}
+          saved={savedSettings}
+          draft={form}
+          screenId={screenId}
+          preset={preset}
+        />
+      )}
 
       <div className="admin-actions tv-save-actions">
         <button

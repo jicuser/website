@@ -13,7 +13,7 @@
   font-weight: 500;
 }
 .jic-member-portal .workspace-kicker {
-  color: var(--jic-teal);
+  color: var(--jic-gold);
 }
 .jic-member-portal .workspace-wrap {
   max-width: 1160px;
@@ -25,7 +25,6 @@
   border: 1px solid var(--jic-border);
   border-radius: 24px;
   padding: clamp(20px, 3vw, 32px);
-  box-shadow: 0 16px 40px #173b2210;
 }
 .jic-member-portal .portal-signin h2 {
   font-family: var(--jic-heading-font);
@@ -33,11 +32,10 @@
   font-weight: 500;
 }
 .jic-member-portal .portal-signin button[type='submit'] {
-  background: var(--jic-teal);
-  color: var(--jic-bg);
-  border-color: transparent;
+  color: var(--jic-text);
+  border-color: var(--jic-gold);
   font-weight: 650;
-  border-radius: 99px;
+  border-radius: 12px;
 }
 .portal-entry-layout {
   display: grid;
@@ -129,12 +127,11 @@
 .jic-member-portal .portal-family-picker button {
   min-height: 44px;
   padding: 10px 16px;
-  border-radius: 14px;
+  border-radius: 12px;
 }
 .jic-member-portal [aria-pressed='true'] {
-  border-color: var(--jic-teal);
-  background: var(--jic-experience-mint);
-  box-shadow: none;
+  border-color: var(--jic-gold);
+  color: var(--jic-text);
 }
 .portal-navigation {
   overflow-x: auto;

@@ -27,6 +27,8 @@ import usePosters from '@/hooks/usePosters';
 import { useContent } from '@/context/ContentContext';
 import { safeWebUrl } from '@/lib/video';
 import { londonDate } from '@/lib/timetable';
+import { tvThemeId, tvThemeStyle } from '../../supabase/functions/_shared/tv-themes.js';
+import '@/styles/tv-themes.css';
 
 function previewSequence(state, prayers, settings) {
   if (!['before', 'jamaah', 'dhikr'].includes(state)) return null;
@@ -100,6 +102,8 @@ function ScreenDisplay({ screenId }) {
         status: 'ready',
       }
     : connection;
+  const theme = tvThemeId(tv.settings.display_theme);
+  const themeAttributes = { 'data-tv-theme': theme, style: tvThemeStyle(theme) };
   const screen = useRef(null);
   const prayers = usePrayerTimes({ includeTomorrow: true });
   const { events, livestream, stale } = useHomeLiveContent({ eventLimit: 50 });
@@ -261,7 +265,7 @@ function ScreenDisplay({ screenId }) {
 
   if (!tv.displayMode || (tv.displayMode === 'teaching' && (!tv.paired || scene !== 'teaching')))
     return (
-      <div ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
+      <div {...themeAttributes} ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
         <Helmet>
           <title>JIC · {tv.label}</title>
           <meta name="robots" content="noindex, nofollow" />
@@ -307,6 +311,7 @@ function ScreenDisplay({ screenId }) {
     };
     return (
       <div
+        {...themeAttributes}
         ref={screen}
         className={`jic-tv-shell ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''}`}
         onDoubleClick={enterFullscreen}
@@ -350,6 +355,7 @@ function ScreenDisplay({ screenId }) {
       : tv;
     return (
       <div
+        {...themeAttributes}
         ref={screen}
         className={`jic-tv-shell ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''}`}
         onDoubleClick={enterFullscreen}
@@ -378,7 +384,7 @@ function ScreenDisplay({ screenId }) {
 
   if (scene === 'teaching')
     return (
-      <div ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
+      <div {...themeAttributes} ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
         <Helmet>
           <title>JIC · {tv.label}</title>
           <meta name="robots" content="noindex, nofollow" />
@@ -399,6 +405,7 @@ function ScreenDisplay({ screenId }) {
 
   return (
     <div
+      {...themeAttributes}
       ref={screen}
       className={`jic-tv-shell ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''}`}
       onDoubleClick={enterFullscreen}
@@ -459,7 +466,7 @@ function ScreenDisplay({ screenId }) {
           )}
           {(noticeVisible || posters.length > 0) && (
             <div className="jic-tv-logo">
-              <img src="/brand/jic-pillars-dark.svg" alt="Jamatia Islamic Centre" />
+              <img src={`/brand/jic-pillars-${theme === 'pearl' ? 'light' : 'dark'}.svg`} alt="Jamatia Islamic Centre" />
             </div>
           )}
           {tv.settings.show_clock !== false && (

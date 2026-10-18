@@ -1,5 +1,6 @@
 import { hasPermission } from './access.js';
 import { newScene, validateScenes, hasSceneContent } from './tv-scenes.js';
+import { TV_THEME_KEYS, tvThemeId } from './tv-themes.js';
 export const DEFAULT_STANDBY_SCENE = {
   id: 'standby',
   name: 'Standby',
@@ -186,6 +187,7 @@ export const DEFAULT_TV_SETTINGS = {
   muted: true,
   prayer_enabled: true,
   display_orientation: 'landscape',
+  display_theme: 'midnight',
   standby_scene: DEFAULT_STANDBY_SCENE,
   preset_names: DEFAULT_TV_PRESET_NAMES,
   preset_scenes: DEFAULT_TV_PRESET_SCENES,
@@ -243,6 +245,7 @@ export function normaliseTvSettings(settings = {}) {
     ...DEFAULT_TV_SETTINGS,
     ...settings,
     display_orientation: orientation,
+    display_theme: tvThemeId(settings.display_theme),
     display_layouts: displayLayouts,
     standby_scene: displayLayouts[orientation].standby,
     preset_names: { ...DEFAULT_TV_PRESET_NAMES, ...(settings.preset_names || {}) },
@@ -320,8 +323,11 @@ export function youtubeUrl(raw) {
 }
 export function validateSettings(input, screenId = '') {
   if (!input || typeof input !== 'object') throw new Error('Screen settings are required.');
+  if (input.display_theme !== undefined && !TV_THEME_KEYS.includes(input.display_theme))
+    throw new Error('Choose a valid TV colour scheme.');
   const values = normaliseTvSettings(input);
   const result = { version: 2 };
+  result.display_theme = values.display_theme;
   if (!['normal', 'teaching'].includes(values.scene_mode))
     throw new Error('Choose Normal or Class / Teach.');
   result.scene_mode = values.scene_mode;

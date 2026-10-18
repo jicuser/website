@@ -27,7 +27,7 @@
   color: var(--jic-text-secondary);
 }
 .service-page :is(a, button, summary, input, textarea):focus-visible {
-  outline: 3px solid var(--jic-teal);
+  outline: 3px solid var(--jic-gold);
   outline-offset: 4px;
 }
 .service-page section[id] {
@@ -60,7 +60,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 28px 28px 8px 28px;
-  background: #122c36;
+  background: #0b2036;
   min-width: 0;
   margin: 0;
 }
@@ -72,7 +72,7 @@
 }
 .service-centre-photo figcaption {
   padding: 14px 18px;
-  color: #f8f3e9;
+  color: #f4f6fa;
   font-size: 0.8rem;
 }
 .service-actions {
@@ -190,7 +190,7 @@
   line-height: 1.6;
 }
 .service-checklist li svg {
-  color: var(--jic-teal);
+  color: var(--jic-gold);
   flex-shrink: 0;
   margin-top: 4px;
 }
@@ -278,7 +278,7 @@
   text-align: center;
 }
 .service-map > svg {
-  color: var(--jic-teal);
+  color: var(--jic-gold);
 }
 .service-map small {
   color: var(--jic-text-secondary);
@@ -339,7 +339,7 @@
 }
 .service-directory > a > svg {
   margin-bottom: 24px;
-  color: var(--jic-teal);
+  color: var(--jic-gold);
 }
 .service-directory small {
   color: var(--jic-text-secondary);
@@ -475,7 +475,7 @@
   padding: 0;
 }
 .service-explorer :is(a, button, input):focus-visible {
-  outline: 3px solid var(--jic-teal);
+  outline: 3px solid var(--jic-gold);
   outline-offset: 4px;
 }
 .service-explorer-header {
@@ -519,7 +519,7 @@
 }
 .service-explorer-title > span {
   display: block;
-  color: var(--jic-teal);
+  color: var(--jic-gold);
   font-style: italic;
 }
 .service-explorer-description {
@@ -538,7 +538,7 @@
   margin-top: 28px;
   padding: 12px 20px;
   border: 1px solid var(--finder-action);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--finder-action);
   color: var(--finder-action-ink);
   font-size: 0.875rem;
@@ -546,7 +546,7 @@
   text-decoration: none;
 }
 .service-explorer-primary:hover {
-  box-shadow: 0 5px 18px #072e2720;
+  box-shadow: 0 5px 18px #07132420;
 }
 .service-explorer-photo {
   margin: 0;
@@ -632,14 +632,14 @@
   width: min(100%, 390px);
   min-width: 0;
   border: 1px solid var(--jic-border);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--finder-paper);
 }
 .service-explorer-search > svg {
   position: absolute;
   left: 16px;
   pointer-events: none;
-  color: var(--jic-teal);
+  color: var(--jic-gold);
 }
 .service-explorer-search input {
   display: block;
@@ -666,7 +666,7 @@
   outline: none;
 }
 .service-explorer-search:focus-within {
-  outline: 3px solid var(--jic-teal);
+  outline: 3px solid var(--jic-gold);
   outline-offset: 3px;
 }
 .service-explorer-search button {
@@ -692,7 +692,7 @@
   min-height: 44px;
   padding: 8px 14px;
   border: 1px solid var(--jic-border);
-  border-radius: 8px;
+  border-radius: 12px;
   background: transparent;
   color: var(--jic-text-secondary);
   font-size: 0.8rem;
@@ -714,7 +714,7 @@
   font-size: 0.65rem;
 }
 .service-explorer-categories button:hover {
-  border-color: var(--jic-teal);
+  border-color: var(--jic-gold);
   color: var(--jic-text);
 }
 .service-explorer-categories button[aria-pressed='true'] {
@@ -751,8 +751,8 @@
     box-shadow 0.18s;
 }
 .service-explorer-card:hover {
-  border-color: var(--jic-teal);
-  box-shadow: 0 6px 24px #102d2710;
+  border-color: var(--jic-gold);
+  box-shadow: 0 6px 24px #07132410;
 }
 .service-explorer-card-top {
   display: flex;
@@ -767,8 +767,8 @@
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: color-mix(in srgb, var(--jic-teal) 8%, transparent);
-  color: var(--jic-teal);
+  background: color-mix(in srgb, var(--jic-gold) 8%, transparent);
+  color: var(--jic-gold);
 }
 .service-explorer-card-icon > svg {
   width: 23px;
@@ -811,7 +811,7 @@
   align-items: center;
   gap: 10px;
   margin-top: auto;
-  color: var(--jic-teal);
+  color: var(--jic-gold);
   font-size: 0.76rem;
   line-height: 1.6;
   font-weight: 650;
@@ -836,7 +836,7 @@
 }
 .service-explorer-empty > svg {
   margin-bottom: 8px;
-  color: var(--jic-teal);
+  color: var(--jic-gold);
 }
 .service-explorer-empty h3 {
   margin: 0;
@@ -854,7 +854,7 @@
   margin-top: 8px;
   padding: 10px 16px;
   border: 1px solid var(--jic-border);
-  border-radius: 8px;
+  border-radius: 12px;
   color: var(--jic-text);
   font-size: 0.8rem;
   font-weight: 650;
@@ -880,7 +880,7 @@
   gap: 6px;
   min-height: 44px;
   margin-left: 3px;
-  color: var(--jic-teal);
+  color: var(--jic-gold);
   font-weight: 650;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -893,14 +893,14 @@
   min-height: 46px;
   padding: 10px 17px;
   border: 1px solid var(--jic-border);
-  border-radius: 8px;
+  border-radius: 12px;
   color: var(--jic-text);
   font-size: 0.8rem;
   font-weight: 650;
   text-decoration: none;
 }
 .service-explorer-view-all:hover {
-  border-color: var(--jic-teal);
+  border-color: var(--jic-gold);
 }
 .service-directory-visit {
   padding-top: 0;

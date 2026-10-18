@@ -1,5 +1,167 @@
 /* Admin-only TV workspace styles. Public display rendering stays in tv.css. */
 
+.tv-workflow-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-block: 8px;
+}
+.tv-workflow-heading > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  height: 32px;
+  border: 1px solid var(--jic-border);
+  border-radius: 50%;
+  color: var(--jic-gold);
+  font-weight: 700;
+}
+.tv-workflow-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.tv-workflow-heading p,
+.tv-item-selection-heading > span {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--jic-text-secondary);
+}
+.tv-section-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.tv-section-choices > button,
+.tv-item-choices > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  text-align: left;
+  font-size: 0.875rem;
+}
+.tv-section-choices > button[aria-pressed='true'],
+.tv-item-choices > button[aria-pressed='true'],
+.tv-review-views > button[aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 -3px var(--jic-gold);
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  font-weight: 700;
+}
+.tv-section-icon {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  color: var(--jic-gold);
+}
+[aria-pressed='true'] > .tv-section-icon {
+  background: currentColor;
+}
+.tv-item-selection {
+  display: grid;
+  gap: 10px;
+  margin-block: 6px;
+}
+.tv-item-selection-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.tv-item-choices,
+.tv-review-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tv-item-choices > button {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+.tv-editor-advanced,
+.tv-item-actions-more,
+.tv-draft-review {
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  padding: 12px 16px;
+}
+.tv-editor-advanced > summary,
+.tv-item-actions-more > summary,
+.tv-draft-review > summary {
+  cursor: pointer;
+  font-weight: 650;
+  min-height: 24px;
+}
+.tv-editor-advanced[open] > summary,
+.tv-draft-review[open] > summary {
+  margin-bottom: 16px;
+}
+.tv-editor-advanced > .admin-check {
+  margin-block: 16px;
+}
+.tv-item-actions-more {
+  padding: 8px 12px;
+  min-height: 44px;
+}
+.tv-item-actions-more > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+}
+.tv-draft-review {
+  margin-block: 20px;
+}
+.tv-draft-review > p {
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.tv-draft-review > ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin-block: 16px;
+}
+.tv-draft-review > ul > li {
+  border: 1px solid var(--jic-border);
+  border-radius: 99px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+}
+.tv-review-views {
+  margin-block: 16px;
+}
+.tv-section-choices > button:focus-visible,
+.tv-item-choices > button:focus-visible,
+.tv-editor-advanced > summary:focus-visible,
+.tv-draft-review > summary:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+@media (max-width: 620px) {
+  .tv-section-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tv-layout-editor .tv-layout-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
 .tv-board-picker {
   display: grid;
   gap: 14px;

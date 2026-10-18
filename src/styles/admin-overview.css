@@ -14,11 +14,11 @@
   border-bottom: 1px solid var(--jic-border);
 }
 .admin-welcome > div {
-  max-width: 650px;
+  max-width: 600px;
 }
 .admin-welcome h1 {
   font-family: var(--jic-heading-font);
-  font-size: clamp(2rem, 3.3vw, 3rem);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
   line-height: 1.2;
   letter-spacing: -0.035em;
   font-weight: 500;
@@ -41,11 +41,29 @@
   letter-spacing: -0.025em;
 }
 .admin-overview-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 16px;
 }
 .admin-overview-section-heading p {
   margin-top: 5px;
   font-size: 0.875rem;
+}
+.admin-overview-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 8px;
+  font-size: 0.8rem;
+  color: var(--jic-gold-strong);
+  border-radius: 8px;
+}
+.admin-overview-refresh:disabled {
+  color: var(--jic-text-secondary);
 }
 .admin-attention-grid {
   display: grid;
@@ -60,7 +78,7 @@
   min-width: 0;
   padding: 24px;
   border: 1px solid var(--jic-border);
-  border-top: 3px solid var(--jic-teal);
+  border-top: 3px solid var(--jic-gold-strong);
   border-radius: 16px;
   background: var(--jic-surface);
   text-align: left;
@@ -100,7 +118,7 @@
   padding-top: 8px;
   font-size: 0.8rem;
   font-weight: 650;
-  color: var(--jic-teal);
+  color: var(--jic-gold-strong);
 }
 .admin-attention-grid > button[data-state='unavailable'] {
   border-top-color: var(--jic-gold-strong);
@@ -108,27 +126,42 @@
 .admin-attention-grid > button:hover,
 .admin-tool-list > button:hover {
   border-color: var(--jic-gold-strong);
-  box-shadow: 0 3px 12px #142c2908;
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--jic-text) 5%, transparent);
 }
 .admin-overview-note {
   margin-top: 14px;
   font-size: 0.8rem;
 }
 .admin-work-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 24px;
-  padding: 20px 24px;
   margin-top: 16px;
   border: 1px solid var(--jic-border);
   background: var(--jic-bg-secondary);
-  border-radius: 16px;
+  border-radius: 12px;
 }
-.admin-console .admin-work-summary h2 {
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
+.admin-work-summary > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  min-height: 52px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--jic-text);
+}
+.admin-work-summary > summary::-webkit-details-marker,
+.admin-tool-group > summary::-webkit-details-marker {
+  display: none;
+}
+.admin-work-summary-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 0 20px 20px;
 }
 .admin-work-summary p {
   font-size: 0.85rem;
@@ -147,7 +180,7 @@
   display: block;
   width: 100%;
   height: 12px;
-  accent-color: var(--jic-teal);
+  accent-color: var(--jic-gold-strong);
 }
 .admin-progress meter::-webkit-meter-bar {
   background: var(--jic-surface);
@@ -155,11 +188,11 @@
   border-radius: 20px;
 }
 .admin-progress meter::-webkit-meter-optimum-value {
-  background: var(--jic-teal);
+  background: var(--jic-gold-strong);
   border-radius: 20px;
 }
 .admin-progress meter::-moz-meter-bar {
-  background: var(--jic-teal);
+  background: var(--jic-gold-strong);
   border-radius: 20px;
 }
 .admin-progress strong {
@@ -206,27 +239,54 @@
   font-size: 0.8rem;
 }
 .admin-tool-group {
-  display: grid;
-  grid-template-columns: minmax(150px, 0.65fr) minmax(0, 2fr);
-  gap: 24px;
-  padding-block: 24px;
-  border-top: 1px solid var(--jic-border);
+  margin-block: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
 }
-.admin-console .admin-tool-group-heading h3 {
+.admin-tool-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 76px;
+  padding: 18px 20px;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 14px;
+}
+.admin-tool-group-heading:hover {
+  background: var(--jic-bg-secondary);
+}
+.admin-tool-group-heading strong {
+  display: block;
   font-size: 0.95rem;
   line-height: 1.4;
   letter-spacing: -0.01em;
+  font-weight: 600;
+  color: var(--jic-text);
 }
-.admin-tool-group-heading p {
-  margin-top: 8px;
-  font-size: 0.8rem;
-  max-width: 230px;
+.admin-tool-group-heading > span > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--jic-text-secondary);
+}
+.admin-tool-group-heading > svg {
+  flex-shrink: 0;
+  color: var(--jic-gold-strong);
+}
+.admin-tool-group[open] > summary > svg,
+.admin-work-summary[open] > summary > svg {
+  transform: rotate(180deg);
 }
 .admin-tool-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
   gap: 12px;
+  padding: 0 16px 16px;
 }
 .admin-tool-list > button {
   display: grid;
@@ -234,9 +294,9 @@
   align-items: start;
   gap: 12px;
   min-width: 0;
-  min-height: 104px;
-  padding: 20px 16px;
-  background: var(--jic-surface);
+  min-height: 92px;
+  padding: 18px 16px;
+  background: var(--jic-bg);
   border: 1px solid var(--jic-border);
   border-radius: 12px;
   text-align: left;
@@ -246,7 +306,7 @@
     box-shadow 150ms ease;
 }
 .admin-tool-list > button > svg:first-child {
-  color: var(--jic-teal);
+  color: var(--jic-gold-strong);
   margin-top: 1px;
 }
 .admin-tool-list > button > svg:last-child {
@@ -264,7 +324,7 @@
   font-weight: 650;
 }
 .admin-tool-list small {
-  font-size: 0.78rem;
+  font-size: 0.83rem;
   color: var(--jic-text-secondary);
   margin-top: 6px;
   line-height: 1.55;
@@ -279,7 +339,7 @@
   text-align: center;
 }
 .admin-task-empty > svg {
-  color: var(--jic-teal);
+  color: var(--jic-gold-strong);
 }
 .admin-console .admin-task-empty h3 {
   font-size: 1rem;
@@ -290,44 +350,6 @@
 }
 .admin-task-empty .admin-button {
   margin-top: 8px;
-}
-.admin-account-help {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-  border: 1px solid var(--jic-border);
-  border-radius: 16px;
-  background: var(--jic-bg-secondary);
-  padding: 24px;
-  margin-top: 24px;
-}
-.admin-personal-account {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.admin-personal-account > svg {
-  flex-shrink: 0;
-  color: var(--jic-teal);
-}
-.admin-console .admin-account-help h3 {
-  font-size: 0.95rem;
-}
-.admin-account-help p {
-  font-size: 0.8rem;
-  margin-top: 6px;
-}
-@media (max-width: 1100px) {
-  .admin-tool-group {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
-  }
-  .admin-tool-group-heading p {
-    max-width: none;
-    margin-top: 4px;
-  }
 }
 @media (max-width: 600px) {
   .admin-welcome {
@@ -350,9 +372,11 @@
     min-height: 88px;
     padding: 18px;
   }
-  .admin-work-summary,
-  .admin-account-help {
-    padding: 20px;
+  .admin-tool-group-heading {
+    padding: 16px;
+  }
+  .admin-tool-list {
+    padding: 0 12px 12px;
   }
   .admin-progress {
     max-width: none;

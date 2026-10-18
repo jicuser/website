@@ -113,22 +113,6 @@
   color: var(--jic-text-secondary);
   margin-top: 7px;
 }
-html:not(.dark) .worship-hub-grid > a,
-html:not(.dark) .worship-guide-grid > article,
-html:not(.dark) .worship-salah-grid > article,
-html:not(.dark) .worship-reading-card,
-html:not(.dark) .worship-reader {
-  background: #fff;
-  color: #0b1420;
-  border-color: #d9dde3;
-  box-shadow: 0 8px 24px rgba(11, 20, 32, 0.07);
-}
-html:not(.dark) .worship-hub-grid p,
-html:not(.dark) .worship-guide-grid p,
-html:not(.dark) .worship-salah-grid span,
-html:not(.dark) .worship-reading-card p {
-  color: #5f6875;
-}
 .worship-reader {
   overflow: hidden;
 }
@@ -151,6 +135,7 @@ html:not(.dark) .worship-reading-card p {
 }
 .worship-reader-toolbar select {
   min-width: 150px;
+  min-height: 44px;
   padding: 9px 10px;
   border-radius: 12px;
   border: 1px solid var(--jic-border);
@@ -166,6 +151,7 @@ html:not(.dark) .worship-reading-card p {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 44px;
   padding: 9px 11px;
   border-radius: 12px;
   border: 1px solid var(--jic-border);

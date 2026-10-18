@@ -27,6 +27,7 @@ import {
   Wallet,
   Heart,
   Building2,
+  ChevronDown,
 } from 'lucide-react';
 import AdminOverview from '@/features/admin/AdminOverview';
 import FormsManager from '@/features/forms/FormsManager';
@@ -58,14 +59,13 @@ const Safeguarding = lazy(() => import('@/features/operations/Safeguarding'));
 const ProjectEditor = lazy(() => import('@/features/projects/ProjectEditor'));
 const CertificatesManager = lazy(() => import('@/features/certificates/Certificates'));
 
-const input =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-amber-500';
-const label = 'mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500';
+const input = 'admin-editor-input w-full rounded-lg border px-3 py-2 outline-none';
+const label = 'admin-field-label mb-1 block text-sm font-semibold';
 const btn =
   'inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition disabled:opacity-50';
-const primary = `${btn} bg-amber-400 text-slate-950 hover:bg-amber-300`;
-const ghost = `${btn} border border-slate-300 bg-white text-slate-700 hover:bg-slate-50`;
-const danger = `${btn} bg-red-50 text-red-700 hover:bg-red-100`;
+const primary = `${btn} admin-editor-primary`;
+const ghost = `${btn} admin-editor-secondary`;
+const danger = `${btn} admin-editor-danger`;
 
 const SECTION_ICONS = {
   finance: Wallet,
@@ -111,7 +111,8 @@ function Notice({ message, error }) {
   if (!message) return null;
   return (
     <div
-      className={`mb-4 rounded-lg px-4 py-3 text-sm ${error ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}
+      className={`admin-feedback ${error ? 'is-error' : 'is-success'}`}
+      role={error ? 'alert' : 'status'}
     >
       {message}
     </div>
@@ -119,7 +120,7 @@ function Notice({ message, error }) {
 }
 function Empty({ children }) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+    <div className="admin-empty rounded-xl border border-dashed p-8 text-center text-sm">
       {children}
     </div>
   );
@@ -409,7 +410,7 @@ function EventsSection() {
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-slate-500">
+                <div className="admin-muted text-sm">
                   {row.event_date} {row.start_time ? displayTime(row.start_time) : ''} ·{' '}
                   {row.location}
                 </div>
@@ -418,7 +419,11 @@ function EventsSection() {
                 <button className={ghost} onClick={() => edit(row)}>
                   Edit
                 </button>
-                <button className={danger} onClick={() => del(row.id)}>
+                <button
+                  className={danger}
+                  aria-label={`Delete ${row.title}`}
+                  onClick={() => del(row.id)}
+                >
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -543,10 +548,14 @@ function AnnouncementsSection() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="font-semibold">{row.title}</div>
-                <p className="text-sm text-slate-600">{row.body}</p>
-                <p className="mt-1 text-xs text-slate-400">{formatDateTime(row.starts_at)}</p>
+                <p className="admin-muted text-sm">{row.body}</p>
+                <p className="admin-muted mt-1 text-xs">{formatDateTime(row.starts_at)}</p>
               </div>
-              <button className={danger} onClick={() => del(row.id)}>
+              <button
+                className={danger}
+                aria-label={`Delete ${row.title}`}
+                onClick={() => del(row.id)}
+              >
                 <Trash2 size={14} />
               </button>
             </div>
@@ -718,7 +727,7 @@ function AuditSection() {
       ) : (
         <div className="overflow-x-auto rounded-2xl border bg-white">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <thead className="admin-table-heading text-xs uppercase">
               <tr>
                 <th className="p-3">Time</th>
                 <th className="p-3">Action</th>
@@ -835,34 +844,13 @@ export default function AdminPage() {
   const shortSaveLabel = saveLabel.split(' ')[0];
 
   return (
-    <div className="admin-console min-h-screen bg-slate-100 text-slate-900">
+    <div className="admin-console min-h-screen">
       <header className="admin-account-header">
         <div className="admin-toolbar-title">
           <strong>JIC Staff workspace</strong>
-          <small>
-            {auditName}
-            {profile?.is_owner ? ' · Owner' : ''}
-          </small>
+          <small>Centre management</small>
         </div>
         <div className="admin-toolbar-actions">
-          <button
-            className="admin-button"
-            disabled={saving}
-            onClick={() => {
-              if (!dirty || window.confirm('Discard unsaved changes?'))
-                navigate('/portal?workspace=personal');
-            }}
-          >
-            <Users size={18} />
-            <span>My account</span>
-          </button>
-          <button
-            className="admin-button"
-            onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
-          >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
           <button
             className="admin-button"
             aria-label="View website"
@@ -874,15 +862,59 @@ export default function AdminPage() {
             <Home size={18} />
             <span className="admin-website-label">View website</span>
           </button>
-          <button
-            className="admin-button"
-            disabled={saving}
-            onClick={safeSignOut}
-            aria-label="Sign out"
+          <details
+            className="admin-account-menu"
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget))
+                event.currentTarget.open = false;
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector('summary')?.focus();
+              }
+            }}
           >
-            <LogOut size={18} />
-            <span>Sign out</span>
-          </button>
+            <summary>
+              <Users size={17} aria-hidden="true" />
+              <span>Account</span>
+              <ChevronDown size={15} aria-hidden="true" />
+            </summary>
+            <div className="admin-account-menu-panel">
+              <div className="admin-account-identity">
+                <strong>{auditName}</strong>
+                <small>{profile?.is_owner ? 'Centre owner' : 'Staff account'}</small>
+              </div>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => {
+                  if (!dirty || window.confirm('Discard unsaved changes?'))
+                    navigate('/portal?workspace=personal');
+                }}
+              >
+                <Users size={17} aria-hidden="true" />
+                My account
+              </button>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-label={theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
+              >
+                {theme === 'dark' ? (
+                  <Sun size={17} aria-hidden="true" />
+                ) : (
+                  <Moon size={17} aria-hidden="true" />
+                )}
+                {theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
+              </button>
+              <button type="button" disabled={saving} onClick={safeSignOut}>
+                <LogOut size={17} aria-hidden="true" />
+                Sign out
+              </button>
+            </div>
+          </details>
         </div>
       </header>
       <div className="admin-toolbar">
@@ -891,12 +923,12 @@ export default function AdminPage() {
           {sectionDescription && <small>{sectionDescription}</small>}
         </div>
         <nav className="admin-mobile-section" aria-label="Current admin section">
-          {(sectionBack || (overviewSection && active !== overviewSection)) && (
+          {sectionBack && (
             <button
               className="admin-mobile-back"
               disabled={saving}
               aria-label="Back"
-              onClick={() => (sectionBack ? sectionBack() : chooseSection(overviewSection))}
+              onClick={sectionBack}
             >
               <ArrowLeft size={18} aria-hidden="true" />
               <span>Back</span>
@@ -960,25 +992,44 @@ export default function AdminPage() {
       <div className="admin-console-layout">
         <aside className="admin-navigation max-[800px]:hidden">
           <nav aria-label="Admin sections">
+            {overviewSection && (
+              <button
+                className="admin-overview-link"
+                disabled={saving}
+                onClick={() => chooseSection(overviewSection)}
+                aria-current={active === overviewSection ? 'page' : undefined}
+              >
+                <Home size={18} aria-hidden="true" />
+                Overview
+              </button>
+            )}
             {SECTION_GROUPS.filter(([, keys]) => allowed.some(([key]) => keys.includes(key))).map(
-              ([group, keys]) => (
-                <div key={group}>
-                  <p>{group}</p>
-                  {allowed
-                    .filter(([key]) => keys.includes(key))
-                    .map(([key, name, Icon]) => (
-                      <button
-                        key={key}
-                        disabled={saving}
-                        onClick={() => chooseSection(key)}
-                        aria-current={active === key ? 'page' : undefined}
-                      >
-                        <Icon size={18} />
-                        {name}
-                      </button>
-                    ))}
-                </div>
-              ),
+              ([group, keys]) =>
+                group === 'Workspace' ? null : (
+                  <details
+                    key={`${group}:${active}`}
+                    className="admin-navigation-group"
+                    open={keys.includes(active)}
+                  >
+                    <summary>
+                      <span>{group}</span>
+                      <ChevronDown size={15} aria-hidden="true" />
+                    </summary>
+                    {allowed
+                      .filter(([key]) => keys.includes(key))
+                      .map(([key, name, Icon]) => (
+                        <button
+                          key={key}
+                          disabled={saving}
+                          onClick={() => chooseSection(key)}
+                          aria-current={active === key ? 'page' : undefined}
+                        >
+                          <Icon size={18} aria-hidden="true" />
+                          {name}
+                        </button>
+                      ))}
+                  </details>
+                ),
             )}
           </nav>
         </aside>

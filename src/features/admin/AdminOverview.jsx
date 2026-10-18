@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, RefreshCw, Search, UserCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ChevronDown, RefreshCw, Search } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { CERTIFICATES_ENABLED } from '@/lib/certificates';
@@ -80,29 +79,43 @@ export default function AdminOverview({ onChoose, icons }) {
   const summary = result.data.forms?.value;
   const total = summary ? summary.waiting + summary.complete : 0;
   const unavailable = !result.busy && cards.some((card) => card.failed || card.value == null);
+  const searching = Boolean(search.trim());
   return (
     <div className="admin-overview">
       <section className="admin-welcome">
         <div>
           <p className="admin-eyebrow">Staff overview</p>
-          <h1>Welcome{auth.profile?.display_name ? `, ${auth.profile.display_name}` : ''}.</h1>
-          <p>Review new enquiries and find what you need to look after the centre.</p>
+          <h1>What would you like to do?</h1>
+          <p>Review new enquiries or find a task to look after the centre.</p>
         </div>
-        <button
-          className="admin-button"
-          type="button"
-          disabled={result.busy}
-          onClick={() => setRevision((value) => value + 1)}
-        >
-          <RefreshCw size={16} aria-hidden="true" />
-          {result.busy ? 'Refreshing…' : 'Refresh overview'}
-        </button>
+        <label className="admin-tool-search">
+          <Search size={18} aria-hidden="true" />
+          <span className="sr-only">Find an admin task</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search tasks, e.g. prayer times…"
+            aria-describedby={search.trim() ? 'admin-task-search-result' : undefined}
+          />
+        </label>
       </section>
-      {cards.length > 0 && (
+      {cards.length > 0 && !searching && (
         <section className="admin-attention" aria-labelledby="admin-attention-title">
           <div className="admin-overview-section-heading">
-            <h2 id="admin-attention-title">Needs attention</h2>
-            <p>New messages and requests in the areas you manage.</p>
+            <div>
+              <h2 id="admin-attention-title">Needs attention</h2>
+              <p>New messages and requests in the areas you manage.</p>
+            </div>
+            <button
+              className="admin-overview-refresh"
+              type="button"
+              disabled={result.busy}
+              onClick={() => setRevision((value) => value + 1)}
+            >
+              <RefreshCw size={15} aria-hidden="true" />
+              {result.busy ? 'Refreshing…' : 'Refresh totals'}
+            </button>
           </div>
           <div className="admin-attention-grid" aria-busy={result.busy}>
             {cards.map((card) => (
@@ -151,55 +164,49 @@ export default function AdminOverview({ onChoose, icons }) {
           )}
         </section>
       )}
-      {summary && (
-        <section className="admin-work-summary" aria-labelledby="admin-progress-title">
-          <div>
-            <h2 id="admin-progress-title">Form response progress</h2>
-            <p>
-              {summary.complete} completed · {summary.waiting} awaiting review · {summary.actions}{' '}
-              open actions
-            </p>
-            <small>
-              Across {summary.forms.toLocaleString('en-GB')}{' '}
-              {summary.forms === 1 ? 'form' : 'forms'} you can access
-              {summary.forms === 500 ? ' (showing up to 500 forms)' : ''}.
-            </small>
-          </div>
-          {total ? (
-            <div className="admin-progress">
-              <meter
-                min={0}
-                max={total}
-                value={summary.complete}
-                aria-label="Completed form responses"
-              />
-              <strong>{Math.round((summary.complete / total) * 100)}% completed</strong>
+      {summary && !searching && (
+        <details className="admin-work-summary">
+          <summary>
+            <span>Form response progress</span>
+            <ChevronDown size={16} aria-hidden="true" />
+          </summary>
+          <div className="admin-work-summary-content">
+            <div>
+              <p>
+                {summary.complete} completed · {summary.waiting} awaiting review · {summary.actions}{' '}
+                open actions
+              </p>
+              <small>
+                Across {summary.forms.toLocaleString('en-GB')}{' '}
+                {summary.forms === 1 ? 'form' : 'forms'} you can access
+                {summary.forms === 500 ? ' (showing up to 500 forms)' : ''}.
+              </small>
             </div>
-          ) : (
-            <span className="admin-zero-state">
-              <CheckCircle2 size={18} aria-hidden="true" />
-              No responses recorded
-            </span>
-          )}
-        </section>
+            {total ? (
+              <div className="admin-progress">
+                <meter
+                  min={0}
+                  max={total}
+                  value={summary.complete}
+                  aria-label="Completed form responses"
+                />
+                <strong>{Math.round((summary.complete / total) * 100)}% completed</strong>
+              </div>
+            ) : (
+              <span className="admin-zero-state">
+                <CheckCircle2 size={18} aria-hidden="true" />
+                No responses recorded
+              </span>
+            )}
+          </div>
+        </details>
       )}
       <section className="admin-tools" aria-labelledby="admin-tools-title">
         <div className="admin-heading">
           <div>
-            <h2 id="admin-tools-title">What would you like to do?</h2>
-            <p>Choose an area, or search for a task.</p>
+            <h2 id="admin-tools-title">Your tools</h2>
+            <p>Open an area to see its tasks.</p>
           </div>
-          <label className="admin-tool-search">
-            <Search size={18} aria-hidden="true" />
-            <span className="sr-only">Find an admin task</span>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Try prayer times, invoices or staff…"
-              aria-describedby={search.trim() ? 'admin-task-search-result' : undefined}
-            />
-          </label>
         </div>
         {search.trim() && (
           <p className="admin-search-result" id="admin-task-search-result" role="status">
@@ -208,11 +215,14 @@ export default function AdminOverview({ onChoose, icons }) {
         )}
         {ADMIN_GROUPS.filter((group) => filtered.some((task) => task.group === group)).map(
           (group) => (
-            <section className="admin-tool-group" key={group} aria-label={group}>
-              <div className="admin-tool-group-heading">
-                <h3>{group}</h3>
-                <p>{GROUP_HELP[group]}</p>
-              </div>
+            <details className="admin-tool-group" key={group} open={Boolean(search.trim())}>
+              <summary className="admin-tool-group-heading">
+                <span>
+                  <strong>{group}</strong>
+                  <span>{GROUP_HELP[group]}</span>
+                </span>
+                <ChevronDown size={18} aria-hidden="true" />
+              </summary>
               <div className="admin-tool-list">
                 {filtered
                   .filter((task) => task.group === group)
@@ -230,7 +240,7 @@ export default function AdminOverview({ onChoose, icons }) {
                     );
                   })}
               </div>
-            </section>
+            </details>
           ),
         )}
         {!filtered.length && (
@@ -252,18 +262,6 @@ export default function AdminOverview({ onChoose, icons }) {
             )}
           </div>
         )}
-      </section>
-      <section className="admin-account-help">
-        <div className="admin-personal-account">
-          <UserCircle2 size={24} aria-hidden="true" />
-          <div>
-            <h3>Your personal account</h3>
-            <p>View your own learning, family information and records.</p>
-          </div>
-        </div>
-        <Link className="admin-button" to="/portal?workspace=personal">
-          Open my account <ArrowRight size={16} aria-hidden="true" />
-        </Link>
       </section>
     </div>
   );
