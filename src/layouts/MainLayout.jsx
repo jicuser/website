@@ -6,6 +6,7 @@ import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import { supplementalContentPaths } from '@/content/editablePages';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
+import FloatingPageTools from '@/components/shell/FloatingPageTools';
 import RelatedContent from '@/components/RelatedContent';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import PublishedPageLinks from '@/features/content/PublishedPageLinks';
@@ -59,6 +60,7 @@ function PublicLayout() {
       <PageTitle />
       {isHome && <PublicBackdrop />}
       <UnifiedHeader />
+      <FloatingPageTools />
       <main className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}>
         {showReminder && <DailyReminder />}
         {visible ? (

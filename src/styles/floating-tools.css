@@ -1,0 +1,69 @@
+/* A compact sticky row keeps utilities available without covering the header. */
+.jic-floating-tools {
+  position: sticky;
+  top: calc(var(--jic-prayer-visible-height, 0px) + 8px);
+  z-index: 35;
+  align-self: flex-end;
+  display: flex;
+  gap: 2px;
+  width: fit-content;
+  margin: 4px max(16px, env(safe-area-inset-right)) 8px 16px;
+  padding: 3px;
+  border: 1px solid var(--jic-glass-border);
+  border-radius: 28px;
+}
+.jic-floating-tool {
+  position: relative;
+  display: block;
+}
+.jic-floating-tool > :is(a, button) {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+}
+.jic-floating-tool > :is(a, button):is(:hover, :focus-visible) {
+  background: var(--jic-glass-control);
+}
+.jic-floating-tool > button[aria-pressed='true'] {
+  color: var(--jic-gold);
+}
+.jic-floating-tool > :is(a, button):focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: -2px;
+}
+.jic-floating-hint {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: max-content;
+  max-width: 180px;
+  padding: 6px 10px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-weight: 600;
+  pointer-events: none;
+}
+.jic-floating-hint[hidden] {
+  display: none;
+}
+@media (max-width: 767px) {
+  .jic-floating-tools {
+    top: calc(var(--jic-mobile-strip-height, 44px) + 8px);
+  }
+  html[data-prayer-dock-hidden='true'] .jic-floating-tools {
+    top: max(8px, env(safe-area-inset-top));
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .jic-floating-tools {
+    top: max(8px, env(safe-area-inset-top));
+  }
+}

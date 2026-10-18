@@ -27,7 +27,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
       const pill = document.querySelector('#jic-prayer-dock').getBoundingClientRect();
       const dock = document.querySelector('.jic-mobile-dock').getBoundingClientRect();
       const nav = document.querySelector('.jic-mobile-controls').getBoundingClientRect();
-      const actions = document.querySelector('.jic-free-actions');
+      const actions = document.querySelector('.jic-floating-tools');
       return {
         top: strip.top,
         innerWidth,
@@ -61,7 +61,8 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
     expect(size.navInsideDock).toBe(true);
     expect(size.pillAboveNav, JSON.stringify(size)).toBe(true);
     expect(size.pillHeight).toBeLessThanOrEqual(72);
-    expect(size.controlsHidden).toBe(true);
+    expect(size.controlsHidden).toBe(false);
+    expect(size.floating).toBe('sticky');
     expect(size.overflow).toBe(false);
     expect(size.targets).toBe(true);
   }

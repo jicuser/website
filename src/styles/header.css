@@ -278,40 +278,14 @@
   flex: 0 0 auto;
   min-height: 48px;
 }
-.jic-free-actions {
-  position: static;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: auto;
-  padding: 6px;
-  border: 1px solid var(--jic-glass-border);
-  border-radius: 18px;
-  --jic-glass-panel: var(--jic-glass-panel-strong);
-  background: var(--jic-glass-panel-sheen), var(--jic-glass-panel);
-  box-shadow: var(--jic-glass-shadow);
-  -webkit-backdrop-filter: var(--jic-glass-dense-filter);
-  backdrop-filter: var(--jic-glass-dense-filter);
-}
-.jic-free-actions :is(a, button) {
+.jic-free-actions-slot > .jic-menu-trigger {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  flex-shrink: 0;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
   color: var(--jic-text);
-}
-.jic-free-actions :is(a, button):is(:hover, :focus-visible) {
-  background: var(--jic-glass-control);
-}
-.jic-free-actions .jic-theme-action {
-  width: auto;
-  min-width: 64px;
-  gap: 2px;
-  font-size: 0.6875rem;
+  border: 1px solid var(--jic-glass-border);
+  border-radius: 12px;
 }
 .jic-desktop-primary-nav {
   display: none;
@@ -586,11 +560,6 @@ html[data-prayer-dock-hidden='true'] {
 .jic-mobile-prayer-summary,
 .jic-mobile-quick-nav {
   display: none;
-}
-.jic-free-actions .jic-menu-trigger {
-  color: var(--jic-text);
-  border: 1px solid var(--jic-glass-border);
-  border-radius: 12px;
 }
 .jic-donate-heart {
   color: #dc2626;
@@ -1017,8 +986,7 @@ html[data-prayer-dock-hidden='true'] {
 @media (prefers-reduced-motion: reduce) {
   .jic-daily-reminder,
   .jic-prayer-dock,
-  .jic-mobile-info-banner,
-  .jic-free-actions {
+  .jic-mobile-info-banner {
     transition: none;
   }
   .is-rolling .jic-ticker-track {
@@ -1233,13 +1201,6 @@ html[data-prayer-dock-hidden='true'] {
   }
   .jic-mobile-info-banner {
     position: static;
-  }
-  .jic-free-actions,
-  .jic-free-actions.is-floating {
-    position: static;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
   }
   .jic-public-main {
     padding-top: 10px;

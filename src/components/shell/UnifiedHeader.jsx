@@ -387,35 +387,17 @@ export default function UnifiedHeader() {
               groups={visibleNavigation(NAV_GROUPS, getContent)}
             />
             <div className="jic-free-actions-slot">
-              <nav
-                className={cn('jic-free-actions', prayerDockHidden && 'is-scroll-hidden')}
-                aria-label="Page controls"
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                className="jic-menu-trigger jic-desktop-action"
+                aria-haspopup="dialog"
+                aria-label="Open navigation menu"
+                aria-expanded={menuOpen}
+                aria-controls="jic-site-menu"
               >
-                <Link to="/search" aria-label="Search site">
-                  <Search size={20} />
-                </Link>
-                <button
-                  type="button"
-                  className="jic-theme-action"
-                  onClick={toggleTheme}
-                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                  title={`${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-                >
-                  {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
-                  <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen(true)}
-                  className="jic-menu-trigger jic-desktop-action"
-                  aria-haspopup="dialog"
-                  aria-label="Open navigation menu"
-                  aria-expanded={menuOpen}
-                  aria-controls="jic-site-menu"
-                >
-                  <Menu size={22} />
-                </button>
-              </nav>
+                <Menu size={22} />
+              </button>
             </div>
           </div>
           {breadcrumbs.length > 0 && (

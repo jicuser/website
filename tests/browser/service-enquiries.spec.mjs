@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-test('service guides explain the journey and accept an enquiry without an account', async ({ page }, testInfo) => {
-  const writes = [], errors = [];
+test('service guides explain the journey and accept an enquiry without an account', async ({
+  page,
+}, testInfo) => {
+  const writes = [],
+    errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
   await page.route('**/preview-api/**', async (route) => {
@@ -12,24 +15,33 @@ test('service guides explain the journey and accept an enquiry without an accoun
     }
     return route.fulfill({ contentType: 'application/json', body: '[]' });
   });
-  for (const [path, title] of [['/funerals', 'Janazah & funeral support'], ['/services/nikah', 'Nikah at JIC'], ['/services/community', 'Community support at JIC']]) {
+  for (const [path, title] of [
+    ['/funerals', 'Janazah & funeral support'],
+    ['/services/nikah', 'Nikah at JIC'],
+    ['/services/community', 'Community support at JIC'],
+  ]) {
     await page.goto(path);
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
     await expect(page.getByRole('list', { name: 'How it works' }).locator('li')).toHaveCount(3);
     await expect(page.locator('.service-centre-photo img')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Show location map' })).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
+      true,
+    );
   }
   await page.goto('/funerals');
   await page.locator('#name').fill('Example family');
   await page.locator('#email').fill('family@example.test');
   await page.locator('#question').fill('Please contact us about Janazah arrangements.');
-  await page.getByRole('button', { name: 'Send Message', exact: true }).click();
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Enquiry received' })).toBeVisible();
   expect(writes).toHaveLength(1);
   expect(writes[0].kind).toBe('contact');
   expect(writes[0].payload.question).toContain('Janazah / funeral support');
-  await page.screenshot({ path: testInfo.outputPath('janazah-journey-mobile.png'), fullPage: true });
+  await page.screenshot({
+    path: testInfo.outputPath('janazah-journey-mobile.png'),
+    fullPage: true,
+  });
   expect(errors).toEqual([]);
 });
 
@@ -79,7 +91,7 @@ test('hall enquiry keeps the selected date, hides prayer controls while typing, 
   await page.getByLabel('Email for our reply').fill('visitor@example.org');
   await page.getByLabel('How can we help?').fill('Please check the hall for a community meeting.');
   const pageControls = page.getByRole('navigation', { name: 'Page controls' });
-  await expect(pageControls).toBeHidden();
+  await expect(pageControls).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('service-enquiry.png') });
   await page.getByRole('button', { name: 'Send enquiry', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();

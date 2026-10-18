@@ -540,3 +540,35 @@ html[data-theme][data-surface='solid'] {
     --jic-glass-panel-strong: rgba(250, 251, 253, 0.98);
   }
 }
+
+/* Floating utilities use one shallow blur pass and the current page palette. */
+html[data-theme] .jic-floating-tools {
+  background:
+    var(--jic-glass-control-sheen), color-mix(in srgb, var(--jic-surface) 72%, transparent);
+  color: var(--jic-text);
+  box-shadow: var(--jic-glass-shadow);
+  -webkit-backdrop-filter: var(--jic-glass-control-filter);
+  backdrop-filter: var(--jic-glass-control-filter);
+}
+html[data-theme] .jic-floating-hint {
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  box-shadow: var(--jic-shadow-soft);
+}
+html[data-surface='solid'] .jic-floating-tools {
+  background: var(--jic-surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-theme] .jic-floating-tools {
+    background: var(--jic-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-theme] .jic-floating-tools {
+    background: var(--jic-surface);
+  }
+}

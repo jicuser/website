@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, ArrowUpRight } from 'lucide-react';
 import { Helmet } from 'react-helmet';
@@ -7,6 +7,10 @@ import { useContent } from '@/context/ContentContext';
 
 export default function SearchPage() {
   const [params, setParams] = useSearchParams();
+  const searchInput = useRef(null);
+  useEffect(() => {
+    searchInput.current?.focus({ preventScroll: true });
+  }, []);
   const query = (params.get('q') || '').slice(0, 120);
   const { getContent } = useContent();
   const entries = SEARCH_PAGES.map((page) => {
@@ -38,6 +42,7 @@ export default function SearchPage() {
           <Search size={22} aria-hidden="true" />
           <input
             id="site-search"
+            ref={searchInput}
             type="search"
             value={query}
             maxLength={120}
