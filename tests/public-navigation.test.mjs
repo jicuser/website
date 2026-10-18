@@ -12,14 +12,13 @@ import { EDITABLE_PAGES } from '../src/content/editablePages.js';
 
 const { activeNavigation } = navigation;
 
-test('compact footer includes portal and certificate access alongside public essentials', () => {
+test('compact footer keeps records under the portal', () => {
   assert.deepEqual(
     FOOTER_LINKS.map((item) => item.name),
     [
       'Donate',
       'Get involved',
       'Portal login',
-      'Certificates',
       'Contact Us',
       'Download Salah timetable',
       'Services',
@@ -34,8 +33,14 @@ test('compact footer includes portal and certificate access alongside public ess
   );
   assert.equal(FOOTER_LINKS.find((item) => item.name === 'Portal login').path, '/portal');
   assert.equal(
-    FOOTER_LINKS.find((item) => item.name === 'Certificates').path,
-    '/services/certificates',
+    FOOTER_LINKS.some((item) => item.name === 'Certificates'),
+    false,
+  );
+  assert.equal(
+    NAV_GROUPS.find((item) => item.path === '/services').children.some(
+      (item) => item.name === 'Certificates',
+    ),
+    false,
   );
   assert.ok(NAV_GROUPS.some((item) => item.path === '/about'));
   assert.ok(NAV_GROUPS.some((item) => item.path === '/prayer-times'));

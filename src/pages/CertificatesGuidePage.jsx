@@ -20,8 +20,8 @@ export default function CertificatesGuidePage() {
           <p className="service-eyebrow">Your milestones, recorded</p>
           <h1>JIC certificates</h1>
           <p>
-            Find the record you need, understand what the office checks and know where to find it
-            once issued.
+            Certificates record a ceremony or completed learning confirmed by JIC. Find your issued
+            certificates in your portal, or ask the office about a missing record.
           </p>
           <div className="service-actions">
             <Link to="/account/certificates" className="service-button is-primary">

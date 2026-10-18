@@ -627,16 +627,30 @@ export default function UnifiedHeader() {
             </button>
           </div>
           <div className="jic-unified-menu-scroll">
-            <Link to="/portal" className="jic-menu-account">
-              <User size={22} aria-hidden="true" />
-              <span>
-                <strong>{accountLabel}</strong>
-              </span>
-              <ChevronRight size={18} aria-hidden="true" />
-            </Link>
-            <Link to="/search" className="jic-menu-search">
-              <Search size={18} /> Search the website
-            </Link>
+            <nav className="jic-menu-actions" aria-label="Quick actions">
+              <Link to="/portal" className="jic-menu-account" aria-label={accountLabel}>
+                <User size={20} aria-hidden="true" />
+                <span>My portal</span>
+              </Link>
+              <Link to="/admin/login" aria-label="Admin login">
+                <LogIn size={20} aria-hidden="true" />
+                <span>Admin</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setDonationOpen(true);
+                }}
+              >
+                <Heart className="jic-donate-heart" size={20} aria-hidden="true" />
+                <span>Donate</span>
+              </button>
+              <Link to="/search" aria-label="Search the website">
+                <Search size={20} aria-hidden="true" />
+                <span>Search</span>
+              </Link>
+            </nav>
             <nav className="jic-menu-directory" aria-label="All pages">
               <ul className="jic-menu-list">
                 {directoryGroups.map(({ name, path, children }) => {
@@ -705,23 +719,6 @@ export default function UnifiedHeader() {
                 })}
               </ul>
             </nav>
-            <div className="jic-menu-bottom-actions">
-              <Link to="/admin/login" className="jic-unified-admin-link">
-                <LogIn size={17} />
-                Admin login
-              </Link>
-              <button
-                type="button"
-                className="jic-unified-menu-donate"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setDonationOpen(true);
-                }}
-              >
-                <Heart className="jic-donate-heart" size={18} aria-hidden="true" />
-                Donate
-              </button>
-            </div>
           </div>
         </dialog>
       )}

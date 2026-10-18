@@ -14,6 +14,19 @@ const aliases = {
 const pages = new Map(
   PUBLIC_PAGES.map(({ name, path, group }) => [path, { title: name, path, section: group }]),
 );
+pages.delete('/services/certificates');
+pages.set('/portal', {
+  title: 'My portal',
+  path: '/portal',
+  section: 'My account',
+  description: 'Sign in for your records, certificates and requests.',
+});
+pages.set('/account/certificates', {
+  title: 'My certificates',
+  path: '/portal?next=%2Faccount%2Fcertificates',
+  section: 'My portal',
+  description: 'Certificates issued after your ceremony or completed learning.',
+});
 pages.set('/radio', { title: 'JIC Radio', path: '/radio', section: 'Listen live' });
 pages.set('/privacy', { title: 'Privacy', path: '/privacy', section: 'Website information' });
 for (const channel of SOCIAL_CHANNELS)

@@ -14,6 +14,24 @@ async function openHome(page, theme = 'dark') {
   await expect(page.locator('.jic-home-shortcuts')).toBeVisible();
 }
 
+async function expectCenteredHint(tools) {
+  const result = await tools.evaluate((node) => {
+    const hint = node.querySelector('.jic-floating-hint:not([hidden])');
+    const label = hint.getBoundingClientRect();
+    const icon = hint.parentElement.querySelector('a, button').getBoundingClientRect();
+    return {
+      offset: Math.abs(label.x + label.width / 2 - icon.x - icon.width / 2),
+      below: label.y >= icon.bottom,
+      fits: label.x >= 0 && label.right <= innerWidth,
+      background: getComputedStyle(hint).backgroundColor,
+    };
+  });
+  expect(result.offset).toBeLessThan(1);
+  expect(result.below).toBe(true);
+  expect(result.fits).toBe(true);
+  expect(result.background).not.toBe('rgba(0, 0, 0, 0)');
+}
+
 for (const width of [320, 390, 1280]) {
   test(`floating icons stay reachable while scrolling at ${width}px`, async ({
     page,
@@ -73,9 +91,11 @@ test('appearance changes show brief labels, retain preferences, and search is re
   await tools.getByRole('button', { name: 'Switch to dark mode' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(tools.getByRole('status')).toHaveText('Dark mode');
+  await expectCenteredHint(tools);
   await expect(tools.getByRole('status')).toBeHidden({ timeout: 4000 });
   await tools.getByRole('button', { name: 'Switch to light mode' }).click();
   await expect(tools.getByRole('status')).toHaveText('Light mode');
+  await expectCenteredHint(tools);
   await tools.getByRole('button', { name: 'Turn transparency off' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-surface', 'solid');
   await expect(tools.getByRole('button', { name: 'Turn transparency on' })).toHaveAttribute(
@@ -83,6 +103,7 @@ test('appearance changes show brief labels, retain preferences, and search is re
     'false',
   );
   await expect(tools.getByRole('status')).toHaveText('Transparency off');
+  await expectCenteredHint(tools);
   await expect(tools).toHaveCSS('backdrop-filter', 'none');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-surface', 'solid');
@@ -90,6 +111,7 @@ test('appearance changes show brief labels, retain preferences, and search is re
   await tools.getByRole('button', { name: 'Turn transparency on' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-surface', 'glass');
   await expect(tools.getByRole('status')).toHaveText('Transparency on');
+  await expectCenteredHint(tools);
   const material = await tools.evaluate((node) => ({
     background: getComputedStyle(node).backgroundColor,
     blur: getComputedStyle(node).backdropFilter,
@@ -103,6 +125,7 @@ test('appearance changes show brief labels, retain preferences, and search is re
   await expect(page).toHaveURL('/search');
   await expect(page.getByRole('searchbox')).toBeFocused();
   await expect(tools.getByRole('status')).toHaveText('Search');
+  await expectCenteredHint(tools);
   await page.getByRole('searchbox').fill('volunteer');
   await expect(page.locator('.jic-search-results a[href="/get-involved/volunteer"]')).toBeVisible();
   expect(errors).toEqual([]);
@@ -124,6 +147,22 @@ for (const theme of ['light', 'dark']) {
       'Get involved',
     ]);
     await expect(menu.locator('.jic-menu-account')).toBeVisible();
+    const actions = menu.getByRole('navigation', { name: 'Quick actions' });
+    await expect(actions.locator('a, button')).toHaveCount(4);
+    const tops = await actions
+      .locator('a, button')
+      .evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().top));
+    expect(new Set(tops).size).toBe(1);
+    const surfaces = await actions
+      .locator('a, button')
+      .evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).background));
+    expect(new Set(surfaces).size).toBe(1);
+    await expect(menu).toHaveCSS('backdrop-filter', /blur/);
+    const tint = await menu.evaluate((node) => getComputedStyle(node).backgroundColor);
+    expect(tint).toMatch(/rgba\(|\/ 0\./);
+    await menu.getByRole('button', { name: 'Expand Services subpages' }).click();
+    await expect(menu.getByRole('link', { name: 'Certificates', exact: true })).toHaveCount(0);
+    await menu.getByRole('button', { name: 'Collapse Services subpages' }).click();
     const donate = menu.getByRole('button', { name: 'Donate', exact: true });
     await expect(donate).toBeInViewport();
     await page.screenshot({ path: testInfo.outputPath(`compact-menu-${theme}.png`) });
@@ -136,5 +175,12 @@ for (const theme of ['light', 'dark']) {
     await menu.getByRole('link', { name: 'Our Masjid Project', exact: true }).click();
     await expect(page).toHaveURL('/projects');
     await expect(menu).toBeHidden();
+    await page.getByRole('button', { name: 'Turn transparency off' }).click();
+    await page.locator('.jic-bottom-menu-trigger').click();
+    await expect(menu).toHaveCSS('backdrop-filter', 'none');
+    await expect(menu).toHaveCSS(
+      'background-color',
+      theme === 'dark' ? 'rgb(17, 42, 67)' : 'rgb(255, 254, 250)',
+    );
   });
 }

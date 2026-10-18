@@ -189,3 +189,18 @@ test('Salah alerts enable the default in one action and preserve custom settings
   expect(writes[1].preferences.jamaahMinutes).toBe(5);
   expect(writes[1].expected).toBe('2026-10-18T14:00:00Z');
 });
+
+test('certificates are found through the portal rather than offered as a service', async ({
+  page,
+}) => {
+  await prepare(page);
+  await page.goto('/services');
+  await expect(page.locator('a[href="/services/certificates"]')).toHaveCount(0);
+  await page.goto('/search');
+  await page.getByRole('searchbox').fill('certificates');
+  const results = page.locator('.jic-search-results');
+  await expect(results.locator('a[href="/services/certificates"]')).toHaveCount(0);
+  await results.getByRole('link', { name: /My certificates/ }).click();
+  await expect(page).toHaveURL('/portal?next=%2Faccount%2Fcertificates');
+  await expect(page.getByRole('heading', { name: 'Sign in to your Portal' })).toBeVisible();
+});

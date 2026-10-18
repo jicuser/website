@@ -37,7 +37,7 @@ export default function PortalHome({ data, auth, params, areas, busy, failures }
     [
       Award,
       'My certificates',
-      'Requests, guidance and issued JIC records',
+      'Certificates from your ceremonies and completed learning',
       '/account/certificates',
     ],
     [

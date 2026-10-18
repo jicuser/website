@@ -72,7 +72,7 @@ export default function CommunityPortalPage() {
                   <Award aria-hidden="true" />
                   <span>
                     <strong>Your certificates</strong>
-                    <small>Find guidance, request a record and view available certificates.</small>
+                    <small>Certificates issued after your ceremony or completed learning.</small>
                   </span>
                 </li>
                 <li>
@@ -83,9 +83,6 @@ export default function CommunityPortalPage() {
                   </span>
                 </li>
               </ul>
-              <Link to="/services/certificates">
-                Explore certificates <ArrowRight size={17} aria-hidden="true" />
-              </Link>
             </section>
             <div>
               {auth.loading && <p role="status">Checking your account…</p>}
@@ -134,7 +131,7 @@ export default function CommunityPortalPage() {
                 [
                   Award,
                   'My certificates',
-                  'Find certificate guidance and your available records.',
+                  'View your issued certificates and ask about a missing record.',
                   '/account/certificates',
                 ],
                 [

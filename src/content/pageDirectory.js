@@ -28,5 +28,8 @@ for (const [group, tabs] of [
 }
 for (const [path, group, name] of standaloneSections) add({ path: `/${path}`, group, name });
 
+// Guidance remains reachable from the portal and existing links, not as a service.
+add({ name: 'Certificate help', path: '/services/certificates', group: 'Portal' });
+
 export const PUBLIC_PAGES = [...pages.values()];
 export const pageName = (path) => pages.get(path)?.name || '';

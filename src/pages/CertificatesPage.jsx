@@ -22,8 +22,8 @@ export default function CertificatesPage() {
           <Link to="/portal">My account</Link>
         </header>
         <p className="certificate-intro">
-          Request a record, follow the office review and keep your issued certificates together.{' '}
-          <Link to="/services/certificates">How certificates work</Link>
+          View certificates from your ceremonies and completed learning, or ask about a missing
+          record. <Link to="/services/certificates">How certificates work</Link>
         </p>
         {!CERTIFICATES_ENABLED ? (
           <section className="certificate-card">

@@ -18,7 +18,6 @@ test('the catalogue connects each JIC service to its existing destination', () =
     nikah: '/services/nikah',
     funerals: '/funerals',
     hall: '/services/hall-booking',
-    certificates: '/services/certificates',
     youth: '/youth',
     community: '/get-involved',
     giving: '/donate',
@@ -88,7 +87,7 @@ test('CMS-hidden destinations stay hidden in every discovery mode', () => {
     'Visibility filtering must be available',
   );
   const visible = catalog.getVisibleServices(getContent);
-  assert.equal(visible.length, 9);
+  assert.equal(visible.length, 8);
   assert.equal(
     visible.some(({ id }) => ['nikah', 'portal'].includes(id)),
     false,
@@ -96,14 +95,17 @@ test('CMS-hidden destinations stay hidden in every discovery mode', () => {
   assert.deepEqual(findServices({ query: 'marriage', getContent }), []);
   assert.deepEqual(
     findServices({ category: 'account', getContent }).map(({ id }) => id),
-    ['certificates'],
+    [],
   );
   assert.equal(findServices({ category: 'life-events', getContent }).length, 2);
 });
 
-test('certificate search offers the public guidance destination', () => {
+test('certificate search leads to the portal instead of a standalone service', () => {
   const results = findServices({ query: 'certificate' });
-  assert.ok(results.some(({ to }) => to === '/services/certificates'));
+  assert.deepEqual(
+    results.map(({ to }) => to),
+    ['/portal'],
+  );
 });
 
 test('hidden certificate guidance stays out of search while the portal remains available', () => {

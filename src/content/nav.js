@@ -78,7 +78,6 @@ export const NAV_GROUPS = [
       { name: 'Funeral Services', path: '/funerals' },
       { name: 'Nikah', path: '/services/nikah' },
       { name: 'Hall Booking', path: '/services/hall-booking' },
-      { name: 'Certificates', path: '/services/certificates' },
     ],
   },
   {
@@ -122,7 +121,6 @@ export const FOOTER_LINKS = [
   { name: 'Donate', path: '/donate' },
   { name: 'Get involved', path: '/get-involved' },
   { name: 'Portal login', path: '/portal' },
-  { name: 'Certificates', path: '/services/certificates' },
   { name: 'Contact Us', path: '/contact' },
   { name: 'Download Salah timetable', path: '/prayer-times/monthly#phone-wallpaper' },
   { name: 'Services', path: '/services' },

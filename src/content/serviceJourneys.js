@@ -138,14 +138,14 @@ export const SERVICE_JOURNEYS = {
       ],
       [
         'How do I get my certificate?',
-        'Ask the office about your ceremony record. The certificates guide explains requesting, viewing and sharing a JIC certificate when online requests are available.',
+        'After your ceremony, the office confirms your record. When issued online, your certificate is available in your portal.',
       ],
     ],
     related: [
       {
-        title: 'Certificates',
-        description: 'Request, track and view your record.',
-        to: '/services/certificates',
+        title: 'My certificates',
+        description: 'View your issued ceremony record in your portal.',
+        to: '/portal?next=%2Faccount%2Fcertificates',
       },
       {
         title: 'Hall booking',
@@ -177,13 +177,6 @@ export const SERVICE_CARDS = [
     to: '/services/hall-booking',
     icon: 'calendar',
     label: 'Gather at JIC',
-  },
-  {
-    title: 'Certificates',
-    description: 'Find the right certificate, prepare your details and follow your request.',
-    to: '/services/certificates',
-    icon: 'award',
-    label: 'Your JIC records',
   },
   {
     title: 'Learning',
