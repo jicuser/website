@@ -78,7 +78,7 @@ export function portalAreas(data, auth) {
     rows(data, 'learning_staff').some((row) => row.user_id === userId) ||
     rows(data, 'learning_department_heads').some((row) => row.user_id === userId);
   return [
-    ['home', 'Overview'],
+    ['home', 'Home'],
     ...(family ? [['family', 'My family']] : []),
     ['learning', teacher ? 'Learning & teaching' : 'My learning'],
     ['forms', 'Forms & replies'],

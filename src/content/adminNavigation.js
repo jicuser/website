@@ -9,7 +9,7 @@ export const ADMIN_GROUPS = [
 ];
 
 export const ADMIN_SECTIONS = [
-  { id: 'dashboard', name: 'Overview', permission: 'dashboard', group: 'Workspace' },
+  { id: 'dashboard', name: 'Staff home', permission: 'dashboard', group: 'Workspace' },
   {
     id: 'messages',
     name: 'Contact messages',

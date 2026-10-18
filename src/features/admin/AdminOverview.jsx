@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, ChevronDown, RefreshCw, Search } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -80,25 +81,51 @@ export default function AdminOverview({ onChoose, icons }) {
   const total = summary ? summary.waiting + summary.complete : 0;
   const unavailable = !result.busy && cards.some((card) => card.failed || card.value == null);
   const searching = Boolean(search.trim());
+  const focused = tasks.length <= 3;
+  const renderTool = ({ id, name, description }) => {
+    const Icon = icons[id];
+    return (
+      <button key={id} type="button" aria-label={name} onClick={() => onChoose(id)}>
+        <Icon size={22} aria-hidden="true" />
+        <span>
+          <strong>{name}</strong>
+          <small>{description}</small>
+        </span>
+        <ArrowRight size={17} aria-hidden="true" />
+      </button>
+    );
+  };
   return (
     <div className="admin-overview">
       <section className="admin-welcome">
         <div>
-          <p className="admin-eyebrow">Staff overview</p>
-          <h1>What would you like to do?</h1>
-          <p>Review new enquiries or find a task to look after the centre.</p>
+          <p className="admin-eyebrow">Staff home</p>
+          <h1>Welcome{auth.profile?.display_name ? `, ${auth.profile.display_name}` : ''}</h1>
+          <p>
+            {auth.isOwner
+              ? 'Your centre’s work, people and updates in one place.'
+              : 'Your work and the tools available to your account.'}
+          </p>
+          <div className="admin-home-account-links">
+            <Link to="/portal">
+              My portal <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+            <Link to="/admin/setup?mode=change">Change password</Link>
+          </div>
         </div>
-        <label className="admin-tool-search">
-          <Search size={18} aria-hidden="true" />
-          <span className="sr-only">Find an admin task</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search tasks, e.g. prayer times…"
-            aria-describedby={search.trim() ? 'admin-task-search-result' : undefined}
-          />
-        </label>
+        {!focused && (
+          <label className="admin-tool-search">
+            <Search size={18} aria-hidden="true" />
+            <span className="sr-only">Find an admin task</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search your tools…"
+              aria-describedby={search.trim() ? 'admin-task-search-result' : undefined}
+            />
+          </label>
+        )}
       </section>
       {cards.length > 0 && !searching && (
         <section className="admin-attention" aria-labelledby="admin-attention-title">
@@ -174,7 +201,7 @@ export default function AdminOverview({ onChoose, icons }) {
             <div>
               <p>
                 {summary.complete} completed · {summary.waiting} awaiting review · {summary.actions}{' '}
-                open actions
+                open follow-ups
               </p>
               <small>
                 Across {summary.forms.toLocaleString('en-GB')}{' '}
@@ -213,35 +240,29 @@ export default function AdminOverview({ onChoose, icons }) {
             {filtered.length} {filtered.length === 1 ? 'task matches' : 'tasks match'} your search.
           </p>
         )}
-        {ADMIN_GROUPS.filter((group) => filtered.some((task) => task.group === group)).map(
-          (group) => (
-            <details className="admin-tool-group" key={group} open={Boolean(search.trim())}>
-              <summary className="admin-tool-group-heading">
-                <span>
-                  <strong>{group}</strong>
-                  <span>{GROUP_HELP[group]}</span>
-                </span>
-                <ChevronDown size={18} aria-hidden="true" />
-              </summary>
-              <div className="admin-tool-list">
-                {filtered
-                  .filter((task) => task.group === group)
-                  .map(({ id, name, description }) => {
-                    const Icon = icons[id];
-                    return (
-                      <button key={id} type="button" aria-label={name} onClick={() => onChoose(id)}>
-                        <Icon size={22} aria-hidden="true" />
-                        <span>
-                          <strong>{name}</strong>
-                          <small>{description}</small>
-                        </span>
-                        <ArrowRight size={17} aria-hidden="true" />
-                      </button>
-                    );
-                  })}
-              </div>
-            </details>
-          ),
+        {focused ? (
+          <div className="admin-tool-list">{filtered.map(renderTool)}</div>
+        ) : (
+          ADMIN_GROUPS.filter((group) => filtered.some((task) => task.group === group)).map(
+            (group) => (
+              <details
+                className="admin-tool-group"
+                key={group}
+                open={Boolean(search.trim()) || tasks.length <= 3}
+              >
+                <summary className="admin-tool-group-heading">
+                  <span>
+                    <strong>{group}</strong>
+                    <span>{GROUP_HELP[group]}</span>
+                  </span>
+                  <ChevronDown size={18} aria-hidden="true" />
+                </summary>
+                <div className="admin-tool-list">
+                  {filtered.filter((task) => task.group === group).map(renderTool)}
+                </div>
+              </details>
+            ),
+          )
         )}
         {!filtered.length && (
           <div className="admin-task-empty">

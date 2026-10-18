@@ -974,11 +974,11 @@ export default function AdminPage() {
             <button
               className="admin-mobile-overview"
               disabled={saving}
-              aria-label="Overview"
+              aria-label="Staff home"
               onClick={() => chooseSection(overviewSection)}
             >
               <Home size={18} aria-hidden="true" />
-              <span>Overview</span>
+              <span>Home</span>
             </button>
           )}
         </nav>

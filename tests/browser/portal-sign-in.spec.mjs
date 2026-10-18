@@ -1,13 +1,28 @@
 import { test, expect } from '@playwright/test';
 
-test('signing in from certificates returns to the selected certificate request', async ({ page }) => {
+test('signing in from certificates returns to the selected certificate request', async ({
+  page,
+}) => {
   const account = '00000000-0000-4000-8000-000000000071';
   await page.route('**/preview-api/**', async (route) => {
     const path = new URL(route.request().url()).pathname;
-    const data = path.endsWith('/auth/v1/token') ? {
-      access_token: 'test-token', refresh_token: 'test-refresh', token_type: 'bearer', expires_in: 3600,
-      user: { id: account, email: 'member@example.test' },
-    } : path.endsWith('/get_my_profile') ? { id: account, is_active: true, is_owner: false, display_name: 'Example member', permissions: [] } : [];
+    const data = path.endsWith('/auth/v1/token')
+      ? {
+          access_token: 'test-token',
+          refresh_token: 'test-refresh',
+          token_type: 'bearer',
+          expires_in: 3600,
+          user: { id: account, email: 'member@example.test' },
+        }
+      : path.endsWith('/get_my_profile')
+        ? {
+            id: account,
+            is_active: true,
+            is_owner: false,
+            display_name: 'Example member',
+            permissions: [],
+          }
+        : [];
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
   });
   await page.goto('/portal?next=%2Faccount%2Fcertificates%3Frequest%3Dnikah');
@@ -17,7 +32,9 @@ test('signing in from certificates returns to the selected certificate request',
   await expect(page).toHaveURL(/\/account\/certificates\?request=nikah$/);
 });
 
-test('portal password and email-link modes use one form and never create an account', async ({ page }) => {
+test('portal password and email-link modes use one form and never create an account', async ({
+  page,
+}) => {
   const otp = [];
   const password = [];
   const errors = [];
@@ -30,9 +47,17 @@ test('portal password and email-link modes use one form and never create an acco
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     } else if (request.url().includes('/auth/v1/token')) {
       password.push(request.postDataJSON());
-      await route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ error: 'invalid_grant', error_description: 'Invalid credentials' }) });
+      await route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'invalid_grant', error_description: 'Invalid credentials' }),
+      });
     } else {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: request.url().includes('/auth/v1/settings') ? '{"external":{"google":false}}' : '[]' });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: request.url().includes('/auth/v1/settings') ? '{"external":{"google":false}}' : '[]',
+      });
     }
   });
   await page.goto('/portal');
@@ -44,7 +69,9 @@ test('portal password and email-link modes use one form and never create an acco
   await page.getByRole('button', { name: 'Email sign-in link', exact: true }).click();
   await expect(page.locator('input[name="password"]')).toHaveCount(0);
   await page.getByRole('button', { name: 'Email me a sign-in link' }).click();
-  await expect(page.getByRole('status').filter({ hasText: 'If this email has an eligible account' })).toBeVisible();
+  await expect(
+    page.getByRole('status').filter({ hasText: 'If this email has an eligible account' }),
+  ).toBeVisible();
   expect(otp).toHaveLength(1);
   expect(otp[0].create_user).toBe(false);
   expect(otp[0].email).toBe('parent@example.test');
@@ -56,5 +83,68 @@ test('portal password and email-link modes use one form and never create an acco
   expect(password).toHaveLength(1);
   expect(otp).toHaveLength(1);
   expect(errors).toEqual([]);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
+    false,
+  );
 });
+
+for (const theme of ['light', 'dark']) {
+  test(`member signs in to a personal home in ${theme} mode`, async ({ page }, testInfo) => {
+    const id = '00000000-0000-4000-8000-000000000072';
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.addInitScript((theme) => localStorage.setItem('jic-theme', theme), theme);
+    await page.route('**/preview-api/**', async (route) => {
+      const path = new URL(route.request().url()).pathname;
+      const data = path.endsWith('/auth/v1/token')
+        ? {
+            access_token: 'test-token',
+            refresh_token: 'test-refresh',
+            token_type: 'bearer',
+            expires_in: 3600,
+            user: { id, email: 'member@example.test' },
+          }
+        : path.endsWith('/get_my_profile')
+          ? {
+              id,
+              is_active: true,
+              is_owner: false,
+              display_name: 'Example member',
+              permissions: [],
+              staff_kinds: [],
+            }
+          : [];
+      await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
+    });
+    await page.goto('/portal');
+    await page.getByLabel('Email address', { exact: true }).fill('member@example.test');
+    await page.getByLabel('Password', { exact: true }).fill('Example password');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Welcome, Example member' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Portal home', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await expect(page.getByRole('link', { name: 'Staff home', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /My invoices/ })).toHaveAttribute(
+      'href',
+      '/account/invoices',
+    );
+    await expect(page.getByRole('link', { name: /My certificates/ })).toHaveAttribute(
+      'href',
+      '/account/certificates',
+    );
+    await expect(page.getByRole('link', { name: 'Change password', exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({
+      path: testInfo.outputPath(`member-home-${theme}.png`),
+      fullPage: true,
+    });
+    await page.getByRole('link', { name: /My certificates/ }).click();
+    await page.getByRole('link', { name: 'My account', exact: true }).click();
+    await expect(page.getByRole('main', { name: 'Portal home', exact: true })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+}

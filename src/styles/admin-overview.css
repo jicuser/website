@@ -406,3 +406,18 @@
     transition: none;
   }
 }
+
+.admin-home-account-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-top: 12px;
+}
+.admin-home-account-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--jic-gold);
+  font-size: 0.9rem;
+}

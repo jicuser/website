@@ -39,7 +39,7 @@ export function hasPermission(profile, permission) {
   if (profile.is_owner === true) return true;
   const permissions = Array.isArray(profile.permissions) ? profile.permissions : [];
   if (permission === 'dashboard')
-    return permissions.some((key) => key !== 'tv' && key !== 'broadcast');
+    return hasAdminAccess(profile);
   if (permission === 'forms') return profile.has_assigned_forms === true || permissions.some((key) => key.startsWith('forms_'));
   return permissions.includes(permission);
 }

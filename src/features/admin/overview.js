@@ -45,9 +45,37 @@ export async function loadAdminOverview(client, { can, certificatesEnabled, sign
     );
   if (can('forms'))
     add('forms', async () => {
-      const result = await client.rpc('admin_forms_overview').abortSignal(signal);
-      if (result.error || !Array.isArray(result.data)) throw new Error('Forms unavailable');
-      return summariseForms(result.data);
+      const legacyKinds = [
+        ['madrassah', 'forms_madrassah'],
+        ['itikaaf', 'forms_itikaaf'],
+      ].filter(([, permission]) => can(permission));
+      const [result, ...legacy] = await Promise.all([
+        client.rpc('admin_forms_overview').abortSignal(signal),
+        ...legacyKinds.map(([kind]) =>
+          client
+            .rpc('search_form_submissions', {
+              p_kind: kind,
+              p_status: null,
+              p_offset: 0,
+              p_limit: 1,
+            })
+            .abortSignal(signal),
+        ),
+      ]);
+      if (
+        result.error ||
+        !Array.isArray(result.data) ||
+        legacy.some((item) => item.error || !item.data)
+      )
+        throw new Error('Forms unavailable');
+      return summariseForms([
+        ...result.data,
+        ...legacy.map(({ data }) => ({
+          new_count: data.new_count,
+          done_count: data.done_count,
+          open_actions: 0,
+        })),
+      ]);
     });
   if (certificatesEnabled && can('certificates'))
     add('certificates', () => count('certificate_requests', [['status', 'pending']]));

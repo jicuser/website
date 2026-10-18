@@ -412,7 +412,7 @@ for (const width of [320, 390, 1280]) {
     if (width < 801) {
       await expect(page.getByRole('button', { name: 'Back', exact: true })).toHaveCount(0);
       await expect(page.getByRole('combobox', { name: 'Go to admin area' })).toHaveValue('posters');
-      await expect(page.getByRole('button', { name: 'Overview', exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Staff home', exact: true })).toBeVisible();
       await page.evaluate(() => scrollTo(0, 800));
       const box = await page.locator('.admin-mobile-section').boundingBox();
       expect(box.y).toBeGreaterThanOrEqual(0);
@@ -437,7 +437,7 @@ for (const width of [320, 390, 1280]) {
     await expect.poll(() => evidence.writes.length).toBe(1);
     await expect(page.locator('.admin-toolbar .admin-save-pending')).toHaveCount(0);
     if (width < 801) {
-      await page.getByRole('button', { name: 'Overview', exact: true }).click();
+      await page.getByRole('button', { name: 'Staff home', exact: true }).click();
       await page.locator('.admin-tools summary').filter({ hasText: 'Website content' }).click();
       await page.getByRole('button', { name: 'Notices', exact: true }).click();
     } else {
@@ -651,5 +651,70 @@ test('staff can reach password change from Account and save their own new passwo
   await page.getByRole('button', { name: 'Save password', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Your password is saved.');
   expect(updates).toEqual([{ password: 'Local-test-passphrase-2030' }]);
+  expect(evidence.errors).toEqual([]);
+});
+
+for (const [role, actor, tool] of [
+  [
+    'TV volunteer',
+    {
+      ...owner,
+      display_name: 'Example volunteer',
+      is_owner: false,
+      permissions: ['tv'],
+      staff_kinds: ['volunteer'],
+    },
+    'TV & screens',
+  ],
+  [
+    'assigned form reviewer',
+    {
+      ...owner,
+      display_name: 'Example reviewer',
+      is_owner: false,
+      permissions: [],
+      has_assigned_forms: true,
+    },
+    'Forms & responses',
+  ],
+]) {
+  test(`${role} starts at staff home with only their assigned tools`, async ({
+    page,
+  }, testInfo) => {
+    const evidence = await openAdmin(page, { actor, section: 'dashboard' });
+    await page.goto('/admin');
+    await expect(page.locator('.admin-welcome .admin-eyebrow')).toHaveText('Staff home');
+    await expect(
+      page.locator('.admin-tool-list').getByRole('button', { name: tool, exact: true }),
+    ).toBeVisible();
+    await expect(page.locator('.admin-tool-list button')).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'People & access', exact: true })).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath(`staff-home-${role.replaceAll(' ', '-')}.png`),
+      fullPage: true,
+    });
+    await page.locator('.admin-tool-list').getByRole('button', { name: tool, exact: true }).click();
+    await page.getByRole('button', { name: 'Staff home', exact: true }).click();
+    await expect(page.locator('.admin-welcome')).toBeVisible();
+    await page.goto('/admin?section=users');
+    await expect(page.locator('.admin-welcome')).toBeVisible();
+    await expect(page.locator('.admin-staff-access')).toHaveCount(0);
+    expect(evidence.writes).toEqual([]);
+    expect(evidence.errors).toEqual([]);
+  });
+}
+
+test('centre owner can move between staff home and their personal portal home', async ({
+  page,
+}, testInfo) => {
+  const evidence = await openAdmin(page, { section: 'dashboard' });
+  await expect(page.locator('.admin-welcome h1')).toHaveText('Welcome, Centre owner');
+  await page.screenshot({ path: testInfo.outputPath('owner-home.png'), fullPage: true });
+  await page.getByRole('link', { name: 'My portal', exact: true }).click();
+  await expect(page.getByRole('main', { name: 'Portal home', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/portal$/);
+  await page.getByRole('link', { name: 'Staff home', exact: true }).click();
+  await expect(page.locator('.admin-welcome')).toBeVisible();
+  expect(evidence.writes).toEqual([]);
   expect(evidence.errors).toEqual([]);
 });

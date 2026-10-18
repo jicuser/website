@@ -53,7 +53,12 @@ test('a failed queue is unavailable while other queues keep their real counts', 
       seen.push(name);
       return {
         abortSignal() {
-          return Promise.resolve({ data: [{ new_count: 3, done_count: 5, open_actions: 2 }] });
+          return Promise.resolve({
+            data:
+              name === 'search_form_submissions'
+                ? { new_count: 0, done_count: 0 }
+                : [{ new_count: 3, done_count: 5, open_actions: 2 }],
+          });
         },
       };
     },
@@ -61,10 +66,15 @@ test('a failed queue is unavailable while other queues keep their real counts', 
   const result = await loadAdminOverview(client, { can: () => true, certificatesEnabled: false });
   assert.deepEqual(result.messages, { value: null, error: true });
   assert.deepEqual(result.forms, {
-    value: { waiting: 3, complete: 5, actions: 2, forms: 1 },
+    value: { waiting: 3, complete: 5, actions: 2, forms: 3 },
     error: false,
   });
-  assert.deepEqual(seen, ['form_submissions', 'admin_forms_overview']);
+  assert.deepEqual(seen, [
+    'form_submissions',
+    'admin_forms_overview',
+    'search_form_submissions',
+    'search_form_submissions',
+  ]);
   assert.deepEqual(summariseForms([]), { waiting: 0, complete: 0, actions: 0, forms: 0 });
 });
 
@@ -180,7 +190,7 @@ test('malformed response totals stay unavailable instead of becoming an empty in
   });
 });
 
-test('narrow staff roles keep real entry destinations and do not gain an overview link', () => {
+test('every authorised staff role gets a home without gaining extra tools', () => {
   for (const [profile, ids] of [
     [{ permissions: ['tv'] }, ['tv']],
     [{ permissions: [], has_assigned_forms: true }, ['forms']],
@@ -194,8 +204,8 @@ test('narrow staff roles keep real entry destinations and do not gain an overvie
     );
     const available = ADMIN_SECTIONS.filter(({ permission }) => can(permission));
     const navigation = getAdminEntrySections(available.map(({ id }) => id));
-    assert.equal(navigation.overviewSection, can('dashboard') ? 'dashboard' : null);
-    assert.equal(navigation.defaultSection, can('dashboard') ? 'dashboard' : ids[0]);
+    assert.equal(navigation.overviewSection, 'dashboard');
+    assert.equal(navigation.defaultSection, 'dashboard');
   }
   assert.deepEqual(getAdminEntrySections(['finance', 'dashboard']), {
     defaultSection: 'dashboard',
@@ -266,4 +276,42 @@ test('activity labels explain known areas and retain readable unfamiliar names',
   assert.equal(activityAreaLabel('__proto__'), 'Proto');
   assert.equal(activityAreaLabel(null), 'Centre records');
   assert.equal(activityActionLabel(null), 'Change recorded');
+});
+
+test('staff home includes permitted registration counts without reading other forms', async () => {
+  const calls = [];
+  const client = {
+    rpc(name, args) {
+      calls.push([name, args?.p_kind]);
+      return {
+        abortSignal: async () => ({
+          data:
+            name === 'admin_forms_overview'
+              ? [{ new_count: 2, done_count: 4, open_actions: 1 }]
+              : { new_count: 3, done_count: 1 },
+        }),
+      };
+    },
+  };
+  const result = await loadAdminOverview(client, {
+    can: (permission) => ['forms', 'forms_madrassah'].includes(permission),
+    certificatesEnabled: false,
+  });
+  assert.deepEqual(result.forms, {
+    value: { waiting: 5, complete: 5, actions: 1, forms: 2 },
+    error: false,
+  });
+  assert.deepEqual(calls, [
+    ['admin_forms_overview', undefined],
+    ['search_form_submissions', 'madrassah'],
+  ]);
+});
+
+test('a personal member or disabled staff account cannot open staff home', () => {
+  for (const profile of [
+    { is_active: true, permissions: [] },
+    { is_active: true, permissions: ['unrecognised'] },
+    { is_active: false, permissions: ['tv'] },
+  ])
+    assert.equal(hasPermission(profile, 'dashboard'), false);
 });

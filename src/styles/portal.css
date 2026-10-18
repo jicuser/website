@@ -274,3 +274,29 @@
     justify-content: flex-end;
   }
 }
+
+.portal-account-home > section { margin-bottom: 24px; }
+.portal-account-home h3 { margin-bottom: 12px; font-size: 1.1rem; }
+.portal-account-home .portal-card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.portal-home-links nav { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.portal-home-links a,
+.portal-home-help a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--jic-gold);
+}
+.portal-home-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--jic-border);
+}
+@media (max-width: 800px) {
+  .portal-account-home .portal-card-grid { grid-template-columns: minmax(0, 1fr); }
+  .portal-account-home .portal-area-card { min-height: 88px; padding: 16px; }
+}
