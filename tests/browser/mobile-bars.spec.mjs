@@ -13,7 +13,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   await expect(page.locator('.jic-mobile-prayer-summary')).toContainText('Today’s prayer times');
   await expect(page.locator('.jic-mobile-info-banner')).toBeVisible();
   await expect(page.locator('.jic-mobile-jummah')).toHaveCount(0);
-  await expect(page.locator('.jic-mobile-controls > *')).toHaveCount(2);
+  await expect(page.locator('.jic-mobile-controls > *')).toHaveCount(1);
   await expect(page.locator('.jic-mobile-controls a[href="/portal"]')).toHaveCount(0);
   await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
     'content',
@@ -40,9 +40,9 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
         stripHeight: strip.height,
         bottomGap:
           (visualViewport ? visualViewport.offsetTop + visualViewport.height : innerHeight) -
-          dock.bottom,
+          pill.bottom,
         navInsideDock: nav.bottom <= dock.bottom,
-        pillAboveNav: pill.bottom <= dock.top - 8,
+        pillBelowNav: pill.top >= nav.bottom + 7,
         pillHeight: pill.height,
         floating: getComputedStyle(actions).position,
         unboxed: getComputedStyle(actions).backgroundColor,
@@ -59,7 +59,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
     expect(size.stripHeight).toBeLessThanOrEqual(46);
     expect(Math.abs(size.bottomGap), JSON.stringify(size)).toBeLessThanOrEqual(1);
     expect(size.navInsideDock).toBe(true);
-    expect(size.pillAboveNav, JSON.stringify(size)).toBe(true);
+    expect(size.pillBelowNav, JSON.stringify(size)).toBe(true);
     expect(size.pillHeight).toBeLessThanOrEqual(72);
     expect(size.controlsHidden).toBe(true);
     expect(size.floating).toBe('fixed');
@@ -70,24 +70,9 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   await expect(page.locator('.jic-ticker-track')).toHaveCSS('animation-name', 'none');
   await expect(page.getByRole('button', { name: 'Resume rolling updates' })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('mobile-ticker-timetable-pill.png') });
-  await page.locator('.jic-mobile-prayer-toggle').click();
-  await expect(page.locator('#jic-prayer-details')).toBeVisible();
-  await expect(page.locator('.jic-mobile-prayer-times')).toHaveCount(0);
-  await expect(page.locator('.jic-mobile-prayer-heading')).toHaveText('Close timetable');
-  const bounds = await page.locator('#jic-prayer-details').evaluate((node) => {
-    const pill = document.querySelector('.jic-mobile-prayer-summary').getBoundingClientRect();
-    const details = node.getBoundingClientRect();
-    return {
-      abovePill: details.bottom <= pill.top + 1,
-      startsBelowBanner:
-        details.top >
-        document.querySelector('.jic-mobile-info-banner').getBoundingClientRect().bottom,
-    };
-  });
-  expect(bounds).toEqual({ abovePill: true, startsBelowBanner: true });
-  await page.screenshot({ path: testInfo.outputPath('mobile-timetable-expanded.png') });
-  await page.keyboard.press('Escape');
+  await page.locator('.jic-mobile-prayer-content').click();
   await expect(page.locator('#jic-prayer-details')).toBeHidden();
+  await expect(page.locator('.jic-mobile-prayer-summary button')).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.locator('.jic-ticker-track')).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.jic-ticker-motion')).toBeHidden();
@@ -95,12 +80,12 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.getByRole('button', { name: 'Resume rolling updates' }).click();
   await expect(page.locator('.jic-ticker-track')).toHaveCSS('animation-name', 'jic-info-roll');
-  await page.locator('.jic-bottom-menu-trigger').click();
+  await page.locator('.jic-menu-word').click();
   await expect(page.locator('#jic-site-menu a[href="/search"]')).toHaveCount(1);
   await page.getByRole('button', { name: /^Switch to (light|dark) mode$/ }).click();
   await page.keyboard.press('Escape');
   await page.screenshot({ path: testInfo.outputPath('mobile-ticker-alternate-theme.png') });
-  await page.locator('.jic-bottom-menu-trigger').click();
+  await page.locator('.jic-menu-word').click();
   await expect(page.locator('#jic-site-menu a[href="/portal"]')).toBeVisible();
   await page.keyboard.press('Escape');
   if (browserName === 'chromium') {
@@ -108,29 +93,22 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
     await client.send('Emulation.setSafeAreaInsetsOverride', {
       insets: { top: 47, bottom: 34, left: 0, right: 0 },
     });
-    await expect
-      .poll(() =>
-        page
-          .locator('.jic-mobile-dock')
-          .evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingBottom)),
-      )
-      .toBe(34);
     const safe = await page.evaluate(() => {
       const strip = document.querySelector('.jic-mobile-info-banner');
-      const dock = document.querySelector('.jic-mobile-dock').getBoundingClientRect();
+      const dock = document.querySelector('#jic-prayer-dock').getBoundingClientRect();
       const nav = document.querySelector('.jic-mobile-controls').getBoundingClientRect();
       const button = strip.querySelector('button').getBoundingClientRect();
       return {
         topPadding: Number.parseFloat(getComputedStyle(strip).paddingTop),
         buttonBelowNotch: button.top >= 47,
-        bottomPadding: dock.bottom - nav.bottom,
+        homeAbovePill: nav.bottom < dock.top,
         bottomGap: innerHeight - dock.bottom,
       };
     });
     expect(safe.topPadding).toBe(47);
     expect(safe.buttonBelowNotch).toBe(true);
-    expect(safe.bottomPadding).toBe(34);
-    expect(Math.abs(safe.bottomGap)).toBeLessThanOrEqual(1);
+    expect(safe.homeAbovePill).toBe(true);
+    expect(Math.abs(safe.bottomGap - 34)).toBeLessThanOrEqual(1);
     await page.screenshot({ path: testInfo.outputPath('mobile-emulated-safe-areas.png') });
   }
 });

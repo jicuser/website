@@ -39,7 +39,7 @@ for (const width of [320, 390]) {
     test(`start and jama’ah rows align at ${width}px in ${theme}`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width, height: 844 });
       await setup(page, theme);
-      const pill = page.locator('.jic-mobile-prayer-toggle');
+      const pill = page.locator('.jic-mobile-prayer-content');
       await expect(pill.locator('.jic-mini-prayer-start')).toHaveText([
         'Start',
         '6:15am',
@@ -75,11 +75,21 @@ for (const width of [320, 390]) {
       expect(layout.fits).toBe(true);
       expect(layout.height).toBeLessThanOrEqual(90);
       const nav = page.getByRole('navigation', { name: 'Quick navigation' });
-      await expect(nav.getByRole('button')).toHaveText(['Home', 'Menu']);
-      const before = await nav.getByRole('button', { name: 'Menu' }).boundingBox();
+      await expect(nav.getByRole('button')).toHaveText(['Home']);
+      await expect(pill.locator('button, [aria-expanded], svg')).toHaveCount(0);
+      await pill.click();
+      await expect(page.locator('#jic-prayer-details')).toBeHidden();
+      const home = nav.getByRole('button', { name: 'Home' });
+      await expect(home).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      await expect(home).toHaveCSS('border-top-width', '0px');
+      await expect(home).toHaveCSS('box-shadow', 'none');
+      expect((await home.boundingBox()).y + (await home.boundingBox()).height).toBeLessThan(
+        (await pill.boundingBox()).y,
+      );
+      const before = await nav.getByRole('button', { name: 'Home' }).boundingBox();
       await page.evaluate(() => scrollTo(0, 500));
       await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
-      expect(await nav.getByRole('button', { name: 'Menu' }).boundingBox()).toEqual(before);
+      expect(await nav.getByRole('button', { name: 'Home' }).boundingBox()).toEqual(before);
       await page.evaluate(() => scrollTo(0, 400));
       await expect(page.locator('#jic-prayer-dock')).not.toHaveAttribute('aria-hidden', 'true');
       await nav.getByRole('button', { name: 'Home' }).click();

@@ -87,7 +87,7 @@ test('appearance changes show brief labels, retain preferences, and search is re
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openHome(page, 'light');
-  await page.locator('.jic-bottom-menu-trigger').click();
+  await page.locator('.jic-menu-word').click();
   const tools = page.getByRole('navigation', { name: 'Menu controls' });
   await tools.getByRole('button', { name: 'Switch to dark mode' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
@@ -109,7 +109,7 @@ test('appearance changes show brief labels, retain preferences, and search is re
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-surface', 'solid');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await page.locator('.jic-bottom-menu-trigger').click();
+  await page.locator('.jic-menu-word').click();
   await tools.getByRole('button', { name: 'Turn transparency on' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-surface', 'glass');
   await expect(tools.getByRole('status')).toHaveText('Transparency on');
@@ -136,7 +136,7 @@ for (const theme of ['light', 'dark']) {
   test(`compact menu groups related destinations in ${theme} mode`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openHome(page, theme);
-    await page.locator('.jic-bottom-menu-trigger').click();
+    await page.locator('.jic-menu-word').click();
     const menu = page.getByRole('dialog', { name: 'Navigation menu' });
     await expect(menu.locator('.jic-unified-menu-row > a')).toHaveText([
       'Home',
@@ -180,7 +180,7 @@ for (const theme of ['light', 'dark']) {
     await menu.getByRole('link', { name: 'Our Masjid Project', exact: true }).click();
     await expect(page).toHaveURL('/projects');
     await expect(menu).toBeHidden();
-    await page.locator('.jic-bottom-menu-trigger').click();
+    await page.locator('.jic-menu-word').click();
     await menu.getByRole('button', { name: 'Turn transparency off' }).click();
     await expect(menu).toHaveCSS('backdrop-filter', 'none');
     await expect(menu).toHaveCSS(

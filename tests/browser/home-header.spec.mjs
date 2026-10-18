@@ -61,11 +61,6 @@ for (const width of [390, 1280]) {
     const prayer = page.locator('#jic-prayer-dock');
     const updates = page.locator('.jic-mobile-info-banner');
     await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
-    if (width < 768) {
-      // A tap can leave focus on the prayer button on mobile browsers.
-      await page.locator('.jic-mobile-prayer-toggle').click();
-      await page.locator('.jic-mobile-prayer-toggle').click();
-    }
     const pageGeometry = () =>
       page.evaluate(() => ({
         headerHeight: document.querySelector('.jic-unified-header').getBoundingClientRect().height,
@@ -92,8 +87,8 @@ for (const width of [390, 1280]) {
     if (width < 768) {
       await page.evaluate(() => window.scrollTo(0, 410));
       await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
-      await page.locator('.jic-mobile-prayer-toggle').click();
-      await expect(page.locator('#jic-prayer-details')).toBeVisible();
+      await page.locator('.jic-mobile-prayer-content').click();
+      await expect(page.locator('#jic-prayer-details')).toBeHidden();
     }
     await page.goto('/services');
     await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');

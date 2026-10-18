@@ -66,22 +66,16 @@ async function setup(page, { welcome = false } = {}) {
   };
 }
 
-test('home shortcuts fit small phones and prayer details expand only on request', async ({
+test('home shortcuts fit small phones and the prayer pill stays read-only', async ({
   page,
 }, testInfo) => {
   await setup(page);
   const dock = page.locator('#jic-prayer-dock');
   const details = page.locator('#jic-prayer-details');
-  const prayerButton = page.locator('.jic-mobile-prayer-toggle');
   await expect(details).toBeHidden();
-  await expect(prayerButton).toHaveAttribute('aria-expanded', 'false');
   expect(await dock.evaluate((node) => node.getBoundingClientRect().height)).toBeLessThan(84);
-  await prayerButton.click();
-  await expect(details).toBeVisible();
-  await expect(details).toContainText('5:15');
-  await page.keyboard.press('Escape');
+  await page.locator('.jic-mobile-prayer-content').click();
   await expect(details).toBeHidden();
-  await expect(prayerButton).toBeFocused();
 
   await expect(
     page.locator('.jic-hero').getByRole('link', { name: /My account|Sign in|portal/i }),
@@ -90,7 +84,7 @@ test('home shortcuts fit small phones and prayer details expand only on request'
     page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }),
   ).toHaveAttribute('href', '/prayer-times/reminders');
   await expect(page.locator('.jic-header-portal')).toHaveCount(0);
-  await page.locator('.jic-bottom-menu-trigger').click();
+  await page.locator('.jic-menu-word').click();
   await expect(page.locator('.jic-menu-account')).toHaveAttribute('href', '/portal');
   await page.keyboard.press('Escape');
 
@@ -217,7 +211,7 @@ test('mobile footer stays uncovered and Home returns to the prayer pill', async 
   await setup(page);
   await expect(
     page.getByRole('navigation', { name: 'Quick navigation' }).getByRole('button'),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
   await page.locator('.jic-site-footer').scrollIntoViewIfNeeded();
   const dock = page.locator('#jic-prayer-dock');
   await expect(dock).toHaveAttribute('aria-hidden', 'true');
@@ -235,15 +229,10 @@ test('mobile footer stays uncovered and Home returns to the prayer pill', async 
     .getByRole('button', { name: 'Home', exact: true })
     .click();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
-  const toggle = page.locator('.jic-mobile-prayer-toggle');
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   await expect(dock).not.toHaveAttribute('aria-hidden', 'true');
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 });
 
-test('quick Menu stays open until a slow Prayer Times route is ready', async ({ page }) => {
+test('header Menu stays open until a slow Prayer Times route is ready', async ({ page }) => {
   await setup(page);
   let releaseChunk;
   const gate = new Promise((resolve) => {
@@ -254,7 +243,7 @@ test('quick Menu stays open until a slow Prayer Times route is ready', async ({ 
     await route.continue();
   });
   await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
-  const menu = page.getByRole('navigation', { name: 'Main pages' });
+  const menu = page.getByRole('dialog', { name: 'Navigation menu' });
   const loading = page.waitForRequest('**/src/pages/PrayerTimesPage.jsx*');
   await menu.getByRole('link', { name: 'Prayer Times', exact: true }).click();
   await loading;
@@ -278,7 +267,7 @@ test('Prayer Times shows already loaded times without another loading flash', as
   try {
     await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
     await page
-      .getByRole('navigation', { name: 'Main pages' })
+      .getByRole('dialog', { name: 'Navigation menu' })
       .getByRole('link', { name: 'Prayer Times', exact: true })
       .click();
     await expect(page).toHaveURL('/prayer-times');
@@ -301,10 +290,10 @@ test('Prayer Times shows already loaded times without another loading flash', as
   }
 });
 
-test('selecting the current page still closes the quick Menu', async ({ page }) => {
+test('selecting the current page still closes the header Menu', async ({ page }) => {
   await setup(page);
   await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
-  const menu = page.getByRole('navigation', { name: 'Main pages' });
+  const menu = page.getByRole('dialog', { name: 'Navigation menu' });
   await menu.getByRole('link', { name: 'Home', exact: true }).click();
   await expect(menu).toBeHidden({ timeout: 500 });
 });
@@ -318,10 +307,7 @@ test('returning to the top for Prayer Times does not fade out the daily reminder
   const reminder = page.getByRole('complementary', { name: 'Daily reminder' });
   await expect(reminder).not.toHaveClass(/is-scrolling/);
   await expect(reminder).toHaveCSS('opacity', '1');
-  await page
-    .getByRole('navigation', { name: 'Quick navigation' })
-    .getByRole('button', { name: 'Menu', exact: true })
-    .click();
+  await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
   await page
     .locator('#jic-site-menu')
     .getByRole('link', { name: 'Prayer Times', exact: true })

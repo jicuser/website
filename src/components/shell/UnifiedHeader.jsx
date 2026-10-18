@@ -67,9 +67,6 @@ export default function UnifiedHeader() {
     mobileControlsRef = useRef(null),
     audioRef = useRef(null),
     menuRef = useRef(null),
-    quickMenuRef = useRef(null),
-    quickMenuButtonRef = useRef(null),
-    prayerToggleRef = useRef(null),
     menuCloseRef = useRef(null),
     subnavRef = useRef(null);
   const [playing, setPlaying] = useState(false),
@@ -77,12 +74,10 @@ export default function UnifiedHeader() {
     [radioError, setRadioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false),
     [donationOpen, setDonationOpen] = useState(false);
-  const [quickMenuOpen, setQuickMenuOpen] = useState(false);
-  const [prayerExpanded, setPrayerExpanded] = useState(false);
-  const { hidden: prayerDockHidden, toggle: togglePrayerDock } = usePrayerDockVisibility(
+  const { hidden: prayerDockHidden } = usePrayerDockVisibility(
     prayerDockRef,
     routeKey,
-    menuOpen || donationOpen || quickMenuOpen,
+    menuOpen || donationOpen,
     alertSetup,
   );
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
@@ -142,63 +137,12 @@ export default function UnifiedHeader() {
       ? 'Loading times'
       : 'Times unavailable';
 
-  const toggleTimetable = () => {
-    if (prayerDockHidden) {
-      togglePrayerDock();
-      setPrayerExpanded(true);
-    } else setPrayerExpanded((expanded) => !expanded);
-  };
-
-  useEffect(() => {
-    if (prayerDockHidden) setPrayerExpanded(false);
-  }, [prayerDockHidden]);
-  useEffect(() => {
-    if (!prayerExpanded) return undefined;
-    const close = (event) => {
-      if (event.key !== 'Escape') return;
-      setPrayerExpanded(false);
-      prayerToggleRef.current?.focus();
-    };
-    document.addEventListener('keydown', close);
-    return () => document.removeEventListener('keydown', close);
-  }, [prayerExpanded]);
-
   // Close the modal before the destination focuses its controls.
   // Keep it open until navigation commits so slow routes retain the current menu.
   useLayoutEffect(() => {
     menuRef.current?.close();
     setMenuOpen(false);
-    setQuickMenuOpen(false);
-    setPrayerExpanded(false);
   }, [pathname]);
-  useEffect(() => {
-    if (menuOpen || donationOpen) setQuickMenuOpen(false);
-    if (menuOpen || donationOpen || quickMenuOpen) setPrayerExpanded(false);
-  }, [menuOpen, donationOpen, quickMenuOpen]);
-  useEffect(() => {
-    if (!quickMenuOpen) return undefined;
-    const closeOutside = (event) => {
-      if (!quickMenuRef.current?.contains(event.target)) setQuickMenuOpen(false);
-    };
-    const closeOnEscape = (event) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      setQuickMenuOpen(false);
-      quickMenuButtonRef.current?.focus();
-    };
-    const desktop = window.matchMedia('(min-width: 768px)');
-    const closeOnDesktop = () => {
-      if (desktop.matches) setQuickMenuOpen(false);
-    };
-    document.addEventListener('pointerdown', closeOutside);
-    document.addEventListener('keydown', closeOnEscape);
-    desktop.addEventListener('change', closeOnDesktop);
-    return () => {
-      document.removeEventListener('pointerdown', closeOutside);
-      document.removeEventListener('keydown', closeOnEscape);
-      desktop.removeEventListener('change', closeOnDesktop);
-    };
-  }, [quickMenuOpen]);
   useEffect(() => {
     const openDonation = () => {
       setMenuOpen(false);
@@ -353,39 +297,17 @@ export default function UnifiedHeader() {
             <Link to="/" className="jic-free-brand" aria-label="Jamatia Islamic Centre home">
               <JamatiaLogo variant="wordmark" />
             </Link>
-            <div className="jic-mobile-quick-nav" ref={quickMenuRef}>
+            <div className="jic-mobile-quick-nav">
               <button
-                ref={quickMenuButtonRef}
                 type="button"
                 className="jic-menu-word"
-                aria-expanded={quickMenuOpen}
-                aria-controls="jic-quick-menu"
-                onClick={() => setQuickMenuOpen((open) => !open)}
+                aria-expanded={menuOpen}
+                aria-controls="jic-site-menu"
+                aria-haspopup="dialog"
+                onClick={() => setMenuOpen(true)}
               >
                 Menu <ChevronDown size={16} aria-hidden="true" />
               </button>
-              {quickMenuOpen && (
-                <nav id="jic-quick-menu" className="jic-quick-menu" aria-label="Main pages">
-                  {[
-                    ...directoryGroups,
-                    { name: 'Donate', path: '/donate' },
-                    { name: accountLabel, path: '/portal' },
-                  ].map(({ name, path }) => (
-                    <Link
-                      key={path}
-                      to={path}
-                      aria-current={
-                        path === menuSection ? (pathname === path ? 'page' : 'location') : undefined
-                      }
-                      onClick={() => {
-                        if (pathname === path) setQuickMenuOpen(false);
-                      }}
-                    >
-                      {name}
-                    </Link>
-                  ))}
-                </nav>
-              )}
             </div>
             <DesktopNavigation navigation={navigation} groups={directoryGroups} />
             <div className="jic-free-actions-slot">
@@ -467,68 +389,50 @@ export default function UnifiedHeader() {
         <div
           id="jic-prayer-dock"
           ref={prayerDockRef}
-          className={cn(
-            'jic-prayer-dock',
-            prayerDockHidden && 'is-scroll-hidden',
-            prayerExpanded && 'is-expanded',
-          )}
+          className={cn('jic-prayer-dock', prayerDockHidden && 'is-scroll-hidden')}
           aria-hidden={prayerDockHidden || undefined}
           inert={prayerDockHidden ? '' : undefined}
         >
           <div className="jic-mobile-prayer-summary">
-            <button
-              type="button"
-              onClick={toggleTimetable}
-              className="jic-mobile-prayer-toggle"
-              ref={prayerToggleRef}
-              aria-label={
-                prayerExpanded
-                  ? 'Close full prayer timetable'
-                  : `Show full prayer timetable. Today's prayer times: ${accessiblePrayerTimes}`
-              }
-              aria-expanded={prayerExpanded}
-              aria-controls="jic-prayer-details"
+            <div
+              className="jic-mobile-prayer-content"
+              role="group"
+              aria-label={`Today's prayer times: ${accessiblePrayerTimes}`}
             >
-              <span className="jic-mobile-prayer-toggle-content">
-                <span className="jic-mobile-prayer-heading">
-                  {prayerExpanded ? 'Close timetable' : <>Today’s prayer times</>}
-                </span>
-                {!prayerExpanded &&
-                  (todaysTimes ? (
-                    <span className="jic-mobile-prayer-times" aria-hidden="true">
-                      <span className="jic-mini-prayer jic-mini-prayer-labels">
-                        <span className="jic-mini-prayer-name">&nbsp;</span>
-                        <span className="jic-mini-prayer-start">Start</span>
-                        <strong className="jic-mini-prayer-time">Jama’ah</strong>
+              <span className="jic-mobile-prayer-rows">
+                <span className="jic-mobile-prayer-heading">Today’s prayer times</span>
+                {todaysTimes ? (
+                  <span className="jic-mobile-prayer-times" aria-hidden="true">
+                    <span className="jic-mini-prayer jic-mini-prayer-labels">
+                      <span className="jic-mini-prayer-name">&nbsp;</span>
+                      <span className="jic-mini-prayer-start">Start</span>
+                      <strong className="jic-mini-prayer-time">Jama’ah</strong>
+                    </span>
+                    {todayCongregations.map(({ name, start, time }) => (
+                      <span
+                        key={name}
+                        className={cn(
+                          'jic-mini-prayer',
+                          (next?.name === name ||
+                            (name === 'Jummah' && next?.name === 'Jummah 1')) &&
+                            'is-next',
+                        )}
+                      >
+                        <span className="jic-mini-prayer-name">{name}</span>
+                        <span className="jic-mini-prayer-start">{compactPrayerTime(start)}</span>
+                        <strong className="jic-mini-prayer-time">{compactPrayerTime(time)}</strong>
                       </span>
-                      {todayCongregations.map(({ name, start, time }) => (
-                        <span
-                          key={name}
-                          className={cn(
-                            'jic-mini-prayer',
-                            (next?.name === name ||
-                              (name === 'Jummah' && next?.name === 'Jummah 1')) &&
-                              'is-next',
-                          )}
-                        >
-                          <span className="jic-mini-prayer-name">{name}</span>
-                          <span className="jic-mini-prayer-start">{compactPrayerTime(start)}</span>
-                          <strong className="jic-mini-prayer-time">
-                            {compactPrayerTime(time)}
-                          </strong>
-                        </span>
-                      ))}
-                    </span>
-                  ) : (
-                    <span className="jic-mobile-prayer-empty" role="status">
-                      {isLoadingPrayerTimes
-                        ? 'Loading today’s times…'
-                        : 'Today’s timetable is unavailable'}
-                    </span>
-                  ))}
+                    ))}
+                  </span>
+                ) : (
+                  <span className="jic-mobile-prayer-empty" role="status">
+                    {isLoadingPrayerTimes
+                      ? 'Loading today’s times…'
+                      : 'Today’s timetable is unavailable'}
+                  </span>
+                )}
               </span>
-              <ChevronDown size={18} aria-hidden="true" />
-            </button>
+            </div>
           </div>
           <div id="jic-prayer-details" className="jic-prayer-details">
             <PrayerTimeBar
@@ -564,18 +468,7 @@ export default function UnifiedHeader() {
             }}
           >
             <Home size={21} aria-hidden="true" />
-            <span>Home</span>
-          </button>
-          <button
-            type="button"
-            className="jic-bottom-menu-trigger"
-            onClick={() => setMenuOpen(true)}
-            aria-expanded={menuOpen}
-            aria-controls="jic-site-menu"
-            aria-haspopup="dialog"
-          >
-            <Menu size={22} aria-hidden="true" />
-            <span>Menu</span>
+            <span className="sr-only">Home</span>
           </button>
         </nav>
       </div>

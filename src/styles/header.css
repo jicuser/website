@@ -524,7 +524,8 @@ html[data-prayer-dock-hidden='true'] {
   html {
     --jic-prayer-sticky-offset: var(--jic-mobile-strip-height, 44px);
     --jic-mobile-visible-dock-height: calc(
-      var(--jic-mobile-controls-height, 90px) + var(--jic-prayer-visible-height) + 10px
+      var(--jic-mobile-controls-height, 44px) + var(--jic-prayer-dock-height, 80px) + 8px +
+        env(safe-area-inset-bottom)
     );
     scroll-padding-bottom: calc(var(--jic-mobile-visible-dock-height) + 12px);
   }
@@ -536,7 +537,7 @@ html[data-prayer-dock-hidden='true'] {
   }
   .jic-prayer-dock {
     position: absolute;
-    inset: auto 12px calc(100% + 10px);
+    inset: calc(100% + 8px) 12px auto;
     display: flex;
     flex-direction: column-reverse;
     width: min(420px, calc(100% - 24px));
@@ -557,9 +558,6 @@ html[data-prayer-dock-hidden='true'] {
   .jic-prayer-dock.is-scroll-hidden {
     transform: translateY(8px);
   }
-  .jic-prayer-dock.is-expanded {
-    border-radius: 18px;
-  }
   .jic-prayer-dock .jic-unified-info {
     border: 0;
     border-radius: 0;
@@ -570,12 +568,6 @@ html[data-prayer-dock-hidden='true'] {
     overflow-y: auto;
     overscroll-behavior: contain;
   }
-  .jic-prayer-dock.is-expanded .jic-prayer-details {
-    display: block;
-  }
-  .jic-prayer-dock.is-expanded .jic-mobile-prayer-toggle {
-    min-height: 44px;
-  }
   .jic-mobile-prayer-summary {
     display: flex;
     align-items: center;
@@ -583,10 +575,7 @@ html[data-prayer-dock-hidden='true'] {
     padding: 0 10px;
     color: var(--jic-text);
   }
-  .jic-prayer-dock.is-expanded .jic-mobile-prayer-summary {
-    border-top: 1px solid var(--jic-border);
-  }
-  .jic-mobile-prayer-toggle {
+  .jic-mobile-prayer-content {
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -600,7 +589,7 @@ html[data-prayer-dock-hidden='true'] {
     color: inherit;
     border: 0;
   }
-  .jic-mobile-prayer-toggle-content {
+  .jic-mobile-prayer-rows {
     grid-column: 1;
     grid-row: 1;
     display: flex;
@@ -609,7 +598,6 @@ html[data-prayer-dock-hidden='true'] {
     min-width: 0;
   }
   .jic-mobile-prayer-heading {
-    padding-right: 24px;
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -671,22 +659,6 @@ html[data-prayer-dock-hidden='true'] {
     font-size: 0.6875rem;
     line-height: 1.4;
     color: var(--jic-text-secondary);
-  }
-  .jic-mobile-prayer-toggle:focus-visible {
-    outline: 2px solid var(--jic-gold);
-    outline-offset: -2px;
-  }
-  .jic-mobile-prayer-toggle > svg {
-    position: absolute;
-    top: 6px;
-    right: 0;
-    color: var(--jic-gold);
-  }
-  .jic-mobile-prayer-toggle > svg:last-child {
-    transform: rotate(180deg);
-  }
-  .jic-mobile-prayer-toggle[aria-expanded='true'] > svg:last-child {
-    transform: none;
   }
   .jic-prayer-dock .jic-header-live-row,
   .jic-prayer-dock .jic-prayer-legend {
@@ -797,16 +769,15 @@ html[data-prayer-dock-hidden='true'] {
     font-weight: 600;
   }
   .jic-public-route {
-    /* The measured bar includes the home-indicator inset exactly once. */
-    padding-bottom: calc(var(--jic-mobile-controls-height, 90px) + 74px);
+    /* Reserve Home, the prayer pill and the home-indicator inset once. */
+    padding-bottom: calc(var(--jic-mobile-visible-dock-height) + 12px);
   }
   .jic-mobile-dock {
     position: fixed;
-    inset: auto 0 0;
+    inset: auto 0 calc(var(--jic-prayer-dock-height, 80px) + 8px + env(safe-area-inset-bottom));
     z-index: 50;
     display: block;
-    padding: 0 max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom)
-      max(8px, env(safe-area-inset-left));
+    padding: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
     background: transparent;
     color: var(--jic-text);
     pointer-events: none;
@@ -816,8 +787,7 @@ html[data-prayer-dock-hidden='true'] {
   }
   .jic-mobile-controls {
     display: flex;
-    justify-content: space-between;
-    padding-block: 4px;
+    justify-content: flex-start;
   }
   .jic-mobile-controls :is(button, a) {
     display: flex;
@@ -825,22 +795,18 @@ html[data-prayer-dock-hidden='true'] {
     align-items: center;
     justify-content: center;
     gap: 3px;
-    min-height: 48px;
-    min-width: 52px;
-    padding: 6px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px;
     pointer-events: auto;
-    background: var(--jic-glass-panel-strong);
-    backdrop-filter: var(--jic-glass-control-filter);
-    -webkit-backdrop-filter: var(--jic-glass-control-filter);
-    border: 1px solid var(--jic-glass-border);
-    border-radius: 16px;
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    border-radius: 0;
     color: inherit;
     font-size: clamp(0.6875rem, 3vw, 0.75rem);
   }
   .jic-mobile-controls [aria-current='page'] {
-    color: var(--jic-gold);
-  }
-  .jic-bottom-menu-trigger svg {
     color: var(--jic-gold);
   }
   .jic-mobile-controls :is(button, a):focus-visible {
