@@ -33,9 +33,9 @@ test('admin overview searches available tasks and mobile switching opens the cho
   ).toHaveCount(0);
   await page.getByRole('searchbox', { name: 'Find an admin task' }).fill('');
   await page.screenshot({ path: testInfo.outputPath('admin-overview-mobile.png'), fullPage: true });
-  await page.getByRole('combobox', { name: 'Go to admin area' }).selectOption('messages');
-  await expect(page.getByRole('heading', { name: 'Contact enquiries', exact: true })).toBeVisible();
-  await expect(page.locator('.admin-main')).toContainText('not live chat');
+  await page.getByRole('combobox', { name: 'Go to admin area' }).selectOption('forms');
+  await expect(page.getByRole('heading', { name: 'Forms', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Contact Us/ })).toBeVisible();
   expect(evidence.writes).toEqual([]);
   expect(evidence.errors).toEqual([]);
 });
@@ -131,6 +131,7 @@ async function openAdmin(
     deletionFails = false,
     tvState = null,
     formRows = [],
+    customForms = [],
     formTasks = [],
     sitePages = [],
     initialPosters,
@@ -173,6 +174,7 @@ async function openAdmin(
         expires_at: expires,
       };
     } else if (url.pathname.endsWith('/rpc/get_my_profile')) data = actor;
+    else if (url.pathname.endsWith('/rpc/admin_forms_overview')) data = customForms;
     else if (url.pathname.endsWith('/rpc/search_form_submissions')) {
       const query = route.request().postDataJSON();
       const matching = formRows.filter(
@@ -188,6 +190,12 @@ async function openAdmin(
         new_count: matching.filter((row) => row.status === 'new').length,
         done_count: matching.filter((row) => row.status === 'done').length,
       };
+    } else if (url.pathname.endsWith('/form_submissions') && method === 'PATCH') {
+      const body = route.request().postDataJSON();
+      const row = formRows.find((item) => `eq.${item.id}` === url.searchParams.get('id'));
+      writes.push({ table: 'form_submissions', id: row?.id, ...body });
+      if (row) Object.assign(row, body);
+      data = { id: row?.id };
     } else if (url.pathname.endsWith('/rpc/list_site_pages')) {
       data = sitePages.filter((item) => item.published);
     } else if (url.pathname.endsWith('/rpc/get_site_page')) {
@@ -587,6 +595,103 @@ test('delegated staff managers do not receive the owner deletion control', async
   expect(evidence.errors).toEqual([]);
 });
 
+test('one Forms workspace includes Contact Us with accurate totals and keeps existing records', async ({
+  page,
+}) => {
+  const formRows = Array.from({ length: 9 }, (_, index) => ({
+    id: `20000000-0000-4000-8000-${String(index).padStart(12, '0')}`,
+    kind: 'contact',
+    status: 'new',
+    payload: {
+      name: `Visitor ${index}`,
+      email: `visitor${index}@example.test`,
+      message: `Enquiry ${index}`,
+    },
+    created_at: '2026-10-18T10:00:00Z',
+  }));
+  const original = structuredClone(formRows);
+  const evidence = await openAdmin(page, {
+    section: 'dashboard',
+    formRows,
+    customForms: [
+      {
+        id: '30000000-0000-4000-8000-000000000001',
+        title: 'Course registration',
+        slug: 'course-registration',
+        new_count: 3,
+        done_count: 0,
+        open_actions: 0,
+        people: [],
+        enabled: true,
+        published_version: 1,
+      },
+    ],
+  });
+  const attention = page.locator('.admin-attention-grid > button');
+  await expect(attention).toHaveCount(1);
+  await expect(attention.locator('strong')).toHaveText('12');
+  await attention.click();
+  const contact = page.locator('.content-form-card').filter({ hasText: 'Contact Us' });
+  await expect(contact).toContainText('9 waiting');
+  await expect(
+    page.locator('.content-form-card').filter({ hasText: 'Course registration' }),
+  ).toContainText('3 waiting');
+  await contact.click();
+  await expect(page).toHaveURL(/section=forms.*view=responses.*kind=contact/);
+  await expect(
+    page.getByRole('heading', { name: 'Contact Us responses', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Form', exact: true })).toHaveValue('contact');
+  await expect(page.locator('.custom-response')).toHaveCount(9);
+  await page.locator('.custom-response summary').first().click();
+  await expect(page.getByRole('link', { name: 'Open email draft', exact: true })).toHaveAttribute(
+    'href',
+    /^mailto:visitor0%40example\.test/,
+  );
+  await page.getByRole('button', { name: 'Mark completed', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Completed 1', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Completed 1', exact: true }).click();
+  await expect(page.locator('.custom-response')).toHaveCount(1);
+  await page.locator('.custom-response summary').click();
+  await page.getByRole('button', { name: 'Reopen', exact: true }).click();
+  await page.getByRole('button', { name: 'Waiting 9', exact: true }).click();
+  await expect(page.locator('.custom-response')).toHaveCount(9);
+  await page.reload();
+  await expect(page.getByRole('combobox', { name: 'Form', exact: true })).toHaveValue('contact');
+  await expect(page.locator('.custom-response')).toHaveCount(9);
+  expect(formRows).toEqual(original);
+  expect(evidence.writes).toEqual([
+    { table: 'form_submissions', id: original[0].id, status: 'done' },
+    { table: 'form_submissions', id: original[0].id, status: 'new' },
+  ]);
+  expect(evidence.errors).toEqual([]);
+});
+
+for (const [permission, kind, title] of [
+  ['forms_contact', 'contact', 'Contact Us'],
+  ['forms_madrassah', 'madrassah', 'Madrassah enquiry'],
+]) {
+  test(`${permission} retains access only to its existing built-in form`, async ({ page }) => {
+    const actor = { ...owner, is_owner: false, permissions: [permission] };
+    const evidence = await openAdmin(page, { actor, section: 'forms' });
+    await expect(page.locator('.content-form-card')).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'New form', exact: true })).toHaveCount(0);
+    await page.locator('.content-form-card').click();
+    const selector = page.getByRole('combobox', { name: 'Form', exact: true });
+    await expect(selector).toHaveValue(kind);
+    await expect(selector.locator('option')).toHaveText(['All forms', title]);
+    if (kind === 'contact') {
+      await page.goto('/admin?section=messages');
+      await expect(page).toHaveURL(/section=forms.*view=responses.*kind=contact/);
+      await expect(
+        page.getByRole('heading', { name: 'Contact Us responses', exact: true }),
+      ).toBeVisible();
+    }
+    expect(evidence.writes).toEqual([]);
+    expect(evidence.errors).toEqual([]);
+  });
+}
+
 for (const theme of ['dark', 'light']) {
   test(`forms inbox includes existing registrations and uses accurate totals in ${theme} mode`, async ({
     page,
@@ -765,7 +870,7 @@ for (const [role, actor, tool] of [
       permissions: [],
       has_assigned_forms: true,
     },
-    'Forms & registrations',
+    'Forms',
   ],
 ]) {
   test(`${role} starts at staff home with only their assigned tools`, async ({

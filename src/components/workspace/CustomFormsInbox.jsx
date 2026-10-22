@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
-import { formAction, formTitle, safeDownloadUrl } from '@/lib/customForms';
+import { formAction, formTitle, permittedBuiltInForms, safeDownloadUrl } from '@/lib/customForms';
 import { collectPages, downloadBlob, submissionsCsv } from '@/lib/formDownloads';
 import { checked, dateLabel, Field } from './shared';
 import { workflowChanged } from '@/lib/pageContent';
@@ -151,7 +151,13 @@ export default function CustomFormsInbox({
     <section className="custom-inbox is-compact" aria-label="Form responses">
       <div className="workspace-header custom-inbox-header">
         <div>
-          <h2>Responses</h2>
+          <h2>{filters.kind === 'contact' ? 'Contact Us responses' : 'Responses'}</h2>
+          {filters.kind === 'contact' && (
+            <p className="workspace-meta">
+              Submitted through Contact Us. Use the sender’s email or phone to reply, then mark
+              completed.
+            </p>
+          )}
         </div>
         <div className="workspace-actions">
           <button disabled={loading} onClick={() => setRevision((value) => value + 1)}>
@@ -209,16 +215,12 @@ export default function CustomFormsInbox({
               }
             >
               <option value="">All forms</option>
-              <option value="custom">Website forms</option>
-              {(auth.isOwner || auth.can('forms_contact')) && (
-                <option value="contact">Contact messages</option>
-              )}
-              {(auth.isOwner || auth.can('forms_madrassah')) && (
-                <option value="madrassah">Madrassah</option>
-              )}
-              {(auth.isOwner || auth.can('forms_itikaaf')) && (
-                <option value="itikaaf">I’tikaf</option>
-              )}
+              {definitions.length > 0 && <option value="custom">Created forms</option>}
+              {permittedBuiltInForms(auth).map(({ kind, title }) => (
+                <option key={kind} value={kind}>
+                  {title}
+                </option>
+              ))}
               {definitions.map((form) => (
                 <option key={form.id} value={`form:${form.id}`}>
                   {form.title}

@@ -1,10 +1,10 @@
 # Forms and staff access
 
-Open **Admin → Contact enquiries** for submissions sent through Contact Us. This is an inbox, not live chat: expand a submission, reply using the sender’s email or phone, then choose **Mark completed**. Open **Admin → Forms & registrations** to create forms, review registration and application submissions, or follow up assigned actions. Completed submissions can be reopened.
+Open **Admin → Forms** for Contact Us, registrations and applications. Choose **Contact Us** in the catalogue to review its responses, or use **Responses** to review all forms you can access. Reply to a contact submission using the sender’s email or phone, then choose **Mark completed**. Completed submissions can be reopened. Staff home shows one combined form-response total; older Contact Us inbox links open the same responses inside Forms.
 
 | Permission checkbox   | Forms visible         |
 | --------------------- | --------------------- |
-| Contact messages      | Contact enquiries     |
+| Contact messages      | Contact Us responses  |
 | Madrassah enquiries   | Madrassah submissions |
 | I’tikaf registrations | I’tikaf submissions   |
 | Owner                 | All submissions       |
@@ -17,7 +17,8 @@ Open **Admin → Contact enquiries** for submissions sent through Contact Us. Th
 - `supabase/functions/submit-form/validation.mjs`: field allowlist, lengths, email and existing consent validation.
 - `supabase/functions/submit-form/index.ts`: bounded JSON input, daily salted network fingerprint and generic database errors.
 - `supabase/migrations/20260912010000_website_forms.sql`: private inbox permissions and atomic rate limit of ten successful submissions per ten-minute network bucket. Rate fingerprints expire after one day.
-- `src/components/admin/FormsInbox.jsx`: paginated inbox, with text rendered by React rather than inserted as HTML.
+- `src/features/forms/FormsManager.jsx`: shared form catalogue, including built-in forms.
+- `src/components/workspace/CustomFormsInbox.jsx`: shared paginated response inbox, with text rendered by React rather than inserted as HTML.
 - `src/components/admin/StaffAccess.jsx`: staff invitations, explicit permission checkboxes and access switches.
 
 Apply the migration once, then deploy `supabase functions deploy submit-form` before publishing this frontend. The public endpoint validates and rate-limits anonymous submissions; both legacy anon and publishable client keys are supported. Visitors cannot read or write the table directly. The service-role key stays in Supabase. There is no SQL constructed from form fields. Basic rate limits reduce repeated submissions; they are not a complete bot-prevention service.

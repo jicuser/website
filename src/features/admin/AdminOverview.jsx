@@ -10,7 +10,7 @@ import { findAdminTasks } from './taskNavigation';
 import '@/styles/admin-overview.css';
 
 const GROUP_HELP = {
-  'Enquiries & forms': 'Contact enquiries, submitted registrations and form management.',
+  'Forms & requests': 'Contact Us, registrations and applications in one Forms area.',
   'Website content': 'Edit pages, notices and posters shown on the website.',
   'Prayer & displays': 'Prayer timetable, screen layouts and website livestream.',
   'Centre operations': 'Look after payments and community fundraising.',
@@ -37,27 +37,14 @@ export default function AdminOverview({ onChoose, icons }) {
   const tasks = findAdminTasks(ADMIN_SECTIONS, auth.can);
   const filtered = findAdminTasks(tasks, auth.can, search);
   const cards = [
-    ...(auth.can('forms_contact')
-      ? [
-          {
-            id: 'messages',
-            title: 'Contact enquiries to review',
-            detail: 'New Contact Us submissions',
-            empty: 'No new contact messages.',
-            action: 'Open contact enquiries',
-            value: result.data.messages?.value,
-            failed: result.data.messages?.error,
-          },
-        ]
-      : []),
     ...(auth.can('forms')
       ? [
           {
             id: 'forms',
             title: 'Form responses to review',
-            detail: 'New responses to the forms you work on',
+            detail: 'Contact Us, registrations and applications you can access',
             empty: 'No new responses to review.',
-            action: 'Open forms & registrations',
+            action: 'Open forms',
             value: result.data.forms?.value?.waiting,
             failed: result.data.forms?.error,
           },
@@ -132,7 +119,7 @@ export default function AdminOverview({ onChoose, icons }) {
           <div className="admin-overview-section-heading">
             <div>
               <h2 id="admin-attention-title">Needs attention</h2>
-              <p>New messages and requests in the areas you manage.</p>
+              <p>Submitted forms and requests in the areas you manage.</p>
             </div>
             <button
               className="admin-overview-refresh"

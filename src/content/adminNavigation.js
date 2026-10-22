@@ -1,7 +1,7 @@
 /** Shared labels, permissions and purposes for the staff dashboard and navigation. */
 export const ADMIN_GROUPS = [
   'Workspace',
-  'Enquiries & forms',
+  'Forms & requests',
   'Website content',
   'Prayer & displays',
   'Centre operations',
@@ -11,20 +11,18 @@ export const ADMIN_GROUPS = [
 export const ADMIN_SECTIONS = [
   { id: 'dashboard', name: 'Staff home', permission: 'dashboard', group: 'Workspace' },
   {
-    id: 'messages',
-    name: 'Contact enquiries',
-    permission: 'forms_contact',
-    group: 'Enquiries & forms',
-    description: 'Read Contact Us submissions and use the sender’s details to reply.',
-    keywords: ['inbox', 'email', 'reply', 'messages', 'contact'],
-  },
-  {
     id: 'forms',
-    name: 'Forms & registrations',
+    name: 'Forms',
     permission: 'forms',
-    group: 'Enquiries & forms',
-    description: 'Create application forms and review submitted registrations and requests.',
+    group: 'Forms & requests',
+    description:
+      'Contact Us, registrations and applications, with all permitted responses in one place.',
     keywords: [
+      'contact',
+      'messages',
+      'inbox',
+      'email',
+      'reply',
       'registration',
       'applications',
       'enrolment',
@@ -39,7 +37,7 @@ export const ADMIN_SECTIONS = [
           id: 'certificates',
           name: 'Certificates',
           permission: 'certificates',
-          group: 'Enquiries & forms',
+          group: 'Forms & requests',
           description: 'Review requests, issue certificates and manage verification.',
           keywords: ['approve', 'applications'],
         },

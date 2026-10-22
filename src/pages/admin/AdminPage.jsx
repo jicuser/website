@@ -1,7 +1,7 @@
 import { IMAGE_ACCEPT } from '@/lib/images';
 import { createImageUploader } from '@/lib/imageUpload';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   CalendarDays,
   Clock3,
@@ -25,7 +25,6 @@ import {
   Sun,
   Moon,
   Monitor,
-  MessageSquare,
   Wallet,
   Heart,
   Building2,
@@ -46,7 +45,7 @@ import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { displayTime } from '@/lib/timetable';
 import { fromDateTimeLocal, toDateTimeLocal } from '@/lib/dateTime';
 import TeamEditor from '@/components/admin/TeamEditor';
-import FormsInbox from '@/components/admin/FormsInbox';
+import { contactInboxDestination } from '@/lib/adminRoute';
 import { ADMIN_SECTIONS, ADMIN_GROUPS } from '@/content/adminNavigation';
 import { getAdminEntrySections } from '@/features/admin/taskNavigation';
 import {
@@ -84,7 +83,6 @@ const SECTION_ICONS = {
   tv: Monitor,
   content: FileText,
   team: Users,
-  messages: MessageSquare,
   forms: FileText,
   certificates: ShieldCheck,
   users: ShieldCheck,
@@ -767,6 +765,8 @@ export default function AdminPage() {
   const registerBack = useCallback((handler) => {
     setSectionBack(() => (typeof handler === 'function' ? handler : null));
   }, []);
+  const legacyContactDestination = contactInboxDestination(params);
+  if (legacyContactDestination) return <Navigate to={legacyContactDestination} replace />;
   const { defaultSection, overviewSection } = getAdminEntrySections(allowed.map(([key]) => key));
   const active = allowed.some((item) => item[0] === params.get('section'))
     ? params.get('section')
@@ -823,13 +823,6 @@ export default function AdminPage() {
       />
     ),
     team: <TeamEditor uploadImage={uploadImage} />,
-    messages: (
-      <FormsInbox
-        kind="contact"
-        title="Contact enquiries"
-        description="Submissions from Contact Us, not live chat. Reply using the sender’s email or phone, then mark the enquiry completed. Registration and application submissions are in Forms & registrations."
-      />
-    ),
     forms: <FormsManager key={user?.id} registerBack={registerBack} />,
     certificates: (
       <Suspense fallback={<p role="status">Loading certificates…</p>}>

@@ -12,6 +12,7 @@ import FormActions from './FormActions';
 import ScheduleManager from './ScheduleManager';
 import { formStatus, workflowChanged, pageUrl } from '@/lib/pageContent';
 import { serviceEnquiry } from '@/lib/serviceEnquiries';
+import { permittedBuiltInForms } from '@/lib/customForms';
 import '@/styles/workspace.css';
 import '@/styles/custom-forms.css';
 import '@/styles/content-workflow.css';
@@ -368,13 +369,8 @@ function EntryTiles({ auth, loading, onChoose, onCreate }) {
   );
 }
 
-function LegacyFormCards({ auth, onChoose, counts, loading, error }) {
-  const legacy = [
-    ['madrassah', 'Madrassah enquiry', 'forms_madrassah'],
-    ['itikaaf', 'I’tikaf registration', 'forms_itikaaf'],
-  ].filter(([, , permission]) => auth.isOwner || auth.can(permission));
-  if (!legacy.length) return null;
-  return legacy.map(([kind, title]) => {
+function BuiltInFormCards({ forms, onChoose, counts, loading, error }) {
+  return forms.map(({ kind, title }) => {
     const summary = counts?.[kind];
     return (
       <button
@@ -385,9 +381,10 @@ function LegacyFormCards({ auth, onChoose, counts, loading, error }) {
         <span className="content-status">Live</span>
         <strong>{title}</strong>
         <span className="form-card-metrics">
-          <b>{loading && !summary ? '…' : summary?.new_count || 0}</b> waiting
-          <b>{loading && !summary ? '…' : summary?.done_count || 0}</b> completed
+          <b>{summary ? summary.new_count : loading ? '…' : '—'}</b> waiting
+          <b>{summary ? summary.done_count : loading ? '…' : '—'}</b> completed
         </span>
+        <span className="workspace-meta">Review responses</span>
         {error && (
           <span className="workspace-meta">Counts unavailable · tap to open responses</span>
         )}
@@ -400,17 +397,12 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
   const auth = useAuth();
   const { data, loading, error, reload } = useFormSummaries();
   const forms = data || [];
-  const legacyKinds = [
-    ['madrassah', 'forms_madrassah'],
-    ['itikaaf', 'forms_itikaaf'],
-  ]
-    .filter(([, permission]) => auth.isOwner || auth.can(permission))
-    .map(([kind]) => kind);
+  const builtInForms = permittedBuiltInForms(auth);
   const {
     data: legacyCounts,
     loading: legacyLoading,
     error: legacyError,
-  } = useLegacyFormCounts(legacyKinds.join('|'));
+  } = useLegacyFormCounts(builtInForms.map(({ kind }) => kind).join('|'));
   const [status, setStatus] = useState('all');
   const [category, setCategory] = useState('all');
   const listed = forms.filter(
@@ -419,7 +411,10 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
       (category === 'all' ||
         (category === 'services' ? !!serviceEnquiry(form.slug) : !serviceEnquiry(form.slug))),
   );
-  const showLegacy = category !== 'services' && (status === 'all' || status === 'Live');
+  const listedBuiltIn = builtInForms.filter(
+    (form) =>
+      (status === 'all' || status === 'Live') && (category === 'all' || category === form.category),
+  );
 
   return (
     <section className="community-workspace custom-forms-admin">
@@ -430,7 +425,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
             <p>
               {view === 'schedule'
                 ? 'Hall availability and class times.'
-                : 'Registration and service forms. Open one to review submitted answers or edit its questions. Contact Us enquiries have their own inbox.'}
+                : 'Contact Us, registration and service forms are together here. Open a form to review its responses.'}
             </p>
           </div>
           {view === 'forms' && (auth.isOwner || auth.can('forms_manage')) && (
@@ -487,7 +482,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
                 Form type
                 <select value={category} onChange={(event) => setCategory(event.target.value)}>
                   <option value="all">All forms</option>
-                  <option value="services">Service enquiries & bookings</option>
+                  <option value="services">Contact & service enquiries</option>
                   <option value="other">Registrations & other forms</option>
                 </select>
               </label>
@@ -504,15 +499,13 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
           </details>
           {loading && !data && <p role="status">Loading forms…</p>}
           <div className="content-form-grid">
-            {showLegacy && (
-              <LegacyFormCards
-                auth={auth}
-                onChoose={onChoose}
-                counts={legacyCounts}
-                loading={legacyLoading}
-                error={legacyError}
-              />
-            )}
+            <BuiltInFormCards
+              forms={listedBuiltIn}
+              onChoose={onChoose}
+              counts={legacyCounts}
+              loading={legacyLoading}
+              error={legacyError}
+            />
             {listed.map((form) => (
               <button
                 className="admin-panel content-form-card"
@@ -533,7 +526,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
               </button>
             ))}
           </div>
-          {!loading && !listed.length && !error && (!showLegacy || !legacyKinds.length) && (
+          {!loading && !listed.length && !error && !listedBuiltIn.length && (
             <p>No forms match this view.</p>
           )}
         </>
