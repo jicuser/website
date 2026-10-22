@@ -472,30 +472,6 @@ html[data-theme][data-surface='glass'] .jic-site-footer :is(a, p, small, .jic-fo
   }
 }
 
-/* Respect accessibility and battery-saving preferences without changing layout. */
-@media (prefers-reduced-transparency: reduce) {
-  html[data-theme] {
-    --jic-glass-control: rgba(15, 26, 43, 0.92);
-    --jic-glass-tile: rgba(15, 26, 43, 0.94);
-    --jic-glass-panel: rgba(15, 26, 43, 0.96);
-    --jic-glass-panel-strong: rgba(15, 26, 43, 0.98);
-    --jic-glass-overlay-filter: none;
-    --jic-glass-control-filter: none;
-    --jic-glass-panel-filter: none;
-    --jic-glass-dense-filter: none;
-    --jic-button-tint-strength: 100%;
-    --jic-community-tint-strength: 100%;
-    --jic-watch-tint-strength: 100%;
-  }
-
-  html[data-theme='light'] {
-    --jic-glass-control: rgba(250, 251, 253, 0.92);
-    --jic-glass-tile: rgba(250, 251, 253, 0.94);
-    --jic-glass-panel: rgba(250, 251, 253, 0.96);
-    --jic-glass-panel-strong: rgba(250, 251, 253, 0.98);
-  }
-}
-
 /* Solid mode intentionally disables transparency and compositing. */
 html[data-theme][data-surface='solid'] {
   --jic-glass-control: var(--jic-surface);
@@ -534,6 +510,45 @@ html[data-theme][data-surface='solid'] {
     --jic-glass-tile: rgba(250, 251, 253, 0.94);
     --jic-glass-panel: rgba(250, 251, 253, 0.96);
     --jic-glass-panel-strong: rgba(250, 251, 253, 0.98);
+  }
+}
+
+/* Accessibility preferences keep the chosen theme, with opaque reading surfaces.
+ * Place this after solid/no-blur fallbacks so neither can weaken the preference. */
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html[data-theme][data-surface] {
+    --jic-glass-control: var(--jic-surface);
+    --jic-glass-tile: var(--jic-surface);
+    --jic-glass-panel: var(--jic-surface);
+    --jic-glass-panel-strong: var(--jic-surface);
+    --jic-glass-border: var(--jic-border);
+    --jic-glass-ink: var(--jic-text);
+    --jic-glass-muted: var(--jic-text-secondary);
+    --jic-glass-accent: var(--jic-gold);
+    --jic-glass-overlay-filter: none;
+    --jic-glass-control-filter: none;
+    --jic-glass-panel-filter: none;
+    --jic-glass-dense-filter: none;
+    --jic-glass-shadow: none;
+    --jic-glass-control-sheen: none;
+    --jic-glass-tile-sheen: none;
+    --jic-glass-panel-sheen: none;
+    --jic-glass-action-sheen: none;
+    --jic-button-tint-strength: 100%;
+    --jic-community-tint-strength: 100%;
+    --jic-watch-tint-strength: 100%;
+  }
+}
+
+@media (prefers-contrast: more) {
+  html[data-theme='light'][data-surface] {
+    --jic-glass-border: #53606b;
+    --jic-glass-muted: #26364a;
+  }
+
+  html[data-theme='dark'][data-surface] {
+    --jic-glass-border: #a6b3c2;
+    --jic-glass-muted: #edf2f8;
   }
 }
 

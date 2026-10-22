@@ -12,6 +12,7 @@
   root.classList.toggle('dark', theme === 'dark');
   root.dataset.theme = theme;
   root.dataset.surface = surface;
-  root.style.colorScheme = theme;
+  // Keep browser auto-darkening from recolouring the site's own theme.
+  root.style.colorScheme = `only ${theme}`;
   root.style.backgroundColor = theme === 'dark' ? '#080f1d' : '#f9f7f1';
 })();
