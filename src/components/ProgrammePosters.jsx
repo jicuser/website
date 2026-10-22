@@ -1,14 +1,14 @@
 import { OPTIMIZED_IMAGES } from '@/content/optimizedImages';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, Expand } from 'lucide-react';
+import { ArrowRight, Expand, Megaphone } from 'lucide-react';
 import usePosters from '@/hooks/usePosters';
 import { usePublishedPages } from '@/context/PublishedPagesContext';
 import { pageUrl } from '@/lib/pageContent';
 import { posterAppearsOnPage } from '@/lib/programmePlacement';
 import ImageViewer from '@/components/ImageViewer';
 import SwipeRail from '@/components/SwipeRail';
-import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
+import AnnouncementViewer from '@/components/posters/AnnouncementViewer';
 
 export default function ProgrammePosters() {
   const { pathname } = useLocation();
@@ -38,9 +38,15 @@ export default function ProgrammePosters() {
         {posters.map((item) => (
           <article className="jic-programme-card" key={item.id}>
             {item.kind === 'announcement' ? (
-              <div className="poster-announcement-preview">
-                <AnnouncementPoster poster={item} />
-              </div>
+              <button
+                type="button"
+                className="jic-poster-button jic-announcement-button"
+                onClick={() => setSelected(item)}
+                aria-label={`Read ${item.title} announcement`}
+              >
+                <Megaphone size={30} aria-hidden="true" />
+                <span>Read notice</span>
+              </button>
             ) : (
               <button
                 type="button"
@@ -78,7 +84,9 @@ export default function ProgrammePosters() {
           </article>
         ))}
       </SwipeRail>
-      {selected && (
+      {selected?.kind === 'announcement' ? (
+        <AnnouncementViewer poster={selected} onClose={() => setSelected(null)} />
+      ) : selected ? (
         <ImageViewer
           image={{ title: selected.title, url: selected.image, alt: selected.alt }}
           onClose={() => setSelected(null)}
@@ -91,7 +99,7 @@ export default function ProgrammePosters() {
             Download poster
           </a>
         </ImageViewer>
-      )}
+      ) : null}
     </>
   );
 }

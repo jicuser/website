@@ -76,20 +76,39 @@ for (const width of [320, 390]) {
       expect(layout.height).toBeLessThanOrEqual(90);
       const nav = page.getByRole('navigation', { name: 'Quick navigation' });
       await expect(nav.getByRole('button')).toHaveText(['Home']);
-      await expect(pill.locator('button, [aria-expanded], svg')).toHaveCount(0);
+      await expect(pill.locator('button, [aria-expanded]')).toHaveCount(0);
+      await expect(pill).toContainText('Full timetable');
       await pill.click();
+      await expect(page).toHaveURL('/prayer-times');
+      await expect(
+        page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
+      ).toBeVisible();
       await expect(page.locator('#jic-prayer-details')).toBeHidden();
       const home = nav.getByRole('button', { name: 'Home' });
+      await home.click();
+      await expect(page).toHaveURL('/');
+      await expect(page.locator('.jic-hero')).toBeVisible();
       await expect(home).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
       await expect(home).toHaveCSS('border-top-width', '0px');
       await expect(home).toHaveCSS('box-shadow', 'none');
       expect((await home.boundingBox()).y + (await home.boundingBox()).height).toBeLessThan(
         (await pill.boundingBox()).y,
       );
-      const before = await nav.getByRole('button', { name: 'Home' }).boundingBox();
+      const documentPosition = () =>
+        home.evaluate((node) => {
+          const rect = node.getBoundingClientRect();
+          return {
+            x: rect.x + scrollX,
+            y: rect.y + scrollY,
+            width: rect.width,
+            height: rect.height,
+          };
+        });
+      const before = await documentPosition();
       await page.evaluate(() => scrollTo(0, 500));
       await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
-      expect(await nav.getByRole('button', { name: 'Home' }).boundingBox()).toEqual(before);
+      // Home stays in the branding row; hiding the dock must not move page content.
+      expect(await documentPosition()).toEqual(before);
       await page.evaluate(() => scrollTo(0, 400));
       await expect(page.locator('#jic-prayer-dock')).not.toHaveAttribute('aria-hidden', 'true');
       await nav.getByRole('button', { name: 'Home' }).click();

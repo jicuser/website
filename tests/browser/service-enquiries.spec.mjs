@@ -90,8 +90,8 @@ test('hall enquiry keeps the selected date, hides prayer controls while typing, 
   await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
   await page.getByLabel('Email for our reply').fill('visitor@example.org');
   await page.getByLabel('How can we help?').fill('Please check the hall for a community meeting.');
-  const pageControls = page.getByRole('navigation', { name: 'Page controls' });
-  await expect(pageControls).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Quick navigation' })).toBeVisible();
+  await expect(page.locator('.jic-menu-word')).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('service-enquiry.png') });
   await page.getByRole('button', { name: 'Send enquiry', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();

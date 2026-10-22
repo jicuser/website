@@ -30,7 +30,8 @@ export function observePrayerDockScroll({ panel, onChange, browser = window, qui
     if (
       inFlow.matches ||
       pointerInside ||
-      (keyboardFocus && panel.contains(document.activeElement))
+      (keyboardFocus && panel.contains(document.activeElement)) ||
+      (!quiet && browser.scrollY <= 1 && !editing())
     ) {
       setHidden(false);
     } else if (manualOpen !== null) {
@@ -52,13 +53,13 @@ export function observePrayerDockScroll({ panel, onChange, browser = window, qui
     settle();
   };
   const onScroll = (event) => {
-    if (event.target !== document) return;
+    if (event.target !== document && event.target !== browser) return;
     const y = Math.max(0, browser.scrollY);
     if (
       inFlow.matches ||
       pointerInside ||
       (keyboardFocus && panel.contains(document.activeElement)) ||
-      y === 0
+      y <= 1
     ) {
       show();
       return;
@@ -98,7 +99,7 @@ export function observePrayerDockScroll({ panel, onChange, browser = window, qui
   const onResize = () => {
     // Mobile browser bars can change viewport height during a scroll. That
     // must not reveal the panel before the gesture and its momentum finish.
-    if (browser.innerWidth === previousWidth) return;
+    if (browser.innerWidth === previousWidth && browser.scrollY > 1) return;
     previousWidth = browser.innerWidth;
     show();
   };

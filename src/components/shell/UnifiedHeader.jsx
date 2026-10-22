@@ -52,6 +52,16 @@ const compactPrayerTime = (value) => {
   return formatted === '—' ? '—' : formatted.replace(/\s+/g, '').toLowerCase();
 };
 
+function CompactPrayerTime({ value }) {
+  const [clock, period] = compactPrayerTime(value).split(/(?=[ap]m$)/);
+  return (
+    <>
+      {clock}
+      {period && <small>{period}</small>}
+    </>
+  );
+}
+
 export default function UnifiedHeader() {
   const { getContent } = useContent();
   const { user } = useAuth();
@@ -305,8 +315,9 @@ export default function UnifiedHeader() {
                 <button
                   type="button"
                   onClick={() => {
+                    // A lazy route can be pending while this header still renders Home.
+                    navigate('/');
                     if (pathname === '/') window.scrollTo({ top: 0, behavior: 'smooth' });
-                    else navigate('/');
                   }}
                 >
                   <Home size={21} aria-hidden="true" />
@@ -399,13 +410,18 @@ export default function UnifiedHeader() {
           inert={prayerDockHidden ? '' : undefined}
         >
           <div className="jic-mobile-prayer-summary">
-            <div
+            <Link
+              to="/prayer-times"
               className="jic-mobile-prayer-content"
-              role="group"
-              aria-label={`Today's prayer times: ${accessiblePrayerTimes}`}
+              aria-label={`Today's prayer times: ${accessiblePrayerTimes}. View full timetable`}
             >
               <span className="jic-mobile-prayer-rows">
-                <span className="jic-mobile-prayer-heading">Today’s prayer times</span>
+                <span className="jic-mobile-prayer-heading">
+                  <span>Today’s prayer times</span>
+                  <span className="jic-mobile-prayer-link">
+                    Full timetable <ChevronRight size={13} aria-hidden="true" />
+                  </span>
+                </span>
                 {todaysTimes ? (
                   <span className="jic-mobile-prayer-times" aria-hidden="true">
                     <span className="jic-mini-prayer jic-mini-prayer-labels">
@@ -424,8 +440,12 @@ export default function UnifiedHeader() {
                         )}
                       >
                         <span className="jic-mini-prayer-name">{name}</span>
-                        <span className="jic-mini-prayer-start">{compactPrayerTime(start)}</span>
-                        <strong className="jic-mini-prayer-time">{compactPrayerTime(time)}</strong>
+                        <span className="jic-mini-prayer-start">
+                          <CompactPrayerTime value={start} />
+                        </span>
+                        <strong className="jic-mini-prayer-time">
+                          <CompactPrayerTime value={time} />
+                        </strong>
                       </span>
                     ))}
                   </span>
@@ -437,7 +457,7 @@ export default function UnifiedHeader() {
                   </span>
                 )}
               </span>
-            </div>
+            </Link>
           </div>
           <div id="jic-prayer-details" className="jic-prayer-details">
             <PrayerTimeBar

@@ -17,7 +17,8 @@ test('homepage leads with masjid activity and compact practical links', async ({
   await publicSite(page);
   const services = page.locator('.service-explorer--compact');
   await expect(services).toBeVisible();
-  await expect(services.locator('.service-explorer-card')).toHaveCount(3);
+  // Certificates remain hidden until the workspace feature is enabled.
+  await expect(services.locator('.service-explorer-card')).toHaveCount(2);
   await expect(page.getByRole('searchbox', { name: 'Search services' })).toHaveCount(0);
   await expect(page.getByRole('group', { name: 'Filter services' })).toHaveCount(0);
   await expect(

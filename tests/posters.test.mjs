@@ -60,3 +60,20 @@ test('invalid picture schemes and oversized announcement content do not reach re
     1,
   );
 });
+
+test('explicit website locations round trip independently of screen poster selections', () => {
+  const poster = { ...DEFAULT_POSTERS[0], website_locations: ['/education/courses', '/services'] };
+  assert.equal(validPoster(poster), true);
+  assert.deepEqual(
+    posterCatalogue(JSON.stringify([poster]))[0].website_locations,
+    poster.website_locations,
+  );
+  assert.equal(validPoster({ ...poster, website_locations: [] }), true);
+  for (const website_locations of [
+    '/services',
+    ['https://elsewhere.test'],
+    ['/not-a-section'],
+    [null],
+  ])
+    assert.equal(validPoster({ ...poster, website_locations }), false);
+});

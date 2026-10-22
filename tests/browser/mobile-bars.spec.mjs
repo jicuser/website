@@ -73,6 +73,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   await expect(page.getByRole('button', { name: 'Resume rolling updates' })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('mobile-ticker-timetable-pill.png') });
   await page.locator('.jic-mobile-prayer-content').click();
+  await expect(page).toHaveURL('/prayer-times');
   await expect(page.locator('#jic-prayer-details')).toBeHidden();
   await expect(page.locator('.jic-mobile-prayer-summary button')).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: 'reduce' });

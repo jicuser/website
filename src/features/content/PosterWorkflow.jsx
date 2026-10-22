@@ -8,9 +8,16 @@ import { useAdminSave } from '@/context/AdminSaveContext';
 import ContentPageEditor from './ContentPageEditor';
 import { pageUrl } from '@/lib/pageContent';
 import { pageName } from '@/content/pageDirectory';
-import { posterPlacementLabel } from '@/lib/programmePlacement';
+import PosterLocations from './PosterLocations';
 
-export default function PosterWorkflow({ poster, onEditPoster }) {
+export default function PosterWorkflow({
+  poster,
+  onEditPoster,
+  onChangeLocations,
+  pages,
+  disabled,
+  posterDirty,
+}) {
   const { can } = useAuth();
   const { dirty, saving } = useAdminSave();
   const [tab, setTab] = useState('overview');
@@ -64,6 +71,10 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
     }
   };
   const choose = (next) => {
+    if (posterDirty && tab === 'overview' && next === 'page') {
+      window.alert('Publish your poster changes before opening the dedicated page editor.');
+      return;
+    }
     if (
       saving ||
       pageBusy ||
@@ -77,7 +88,7 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
     if (
       saving ||
       pageBusy ||
-      (dirty && !window.confirm('Discard unsaved page/form changes and open this form?'))
+      (dirty && !window.confirm('Leave without publishing the current changes?'))
     )
       event.preventDefault();
   };
@@ -130,6 +141,18 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
       )}
       {tab === 'overview' && (
         <>
+          <PosterLocations
+            poster={poster}
+            pages={pages}
+            onChange={onChangeLocations}
+            disabled={disabled || saving || pageBusy}
+          />
+          {page?.published && (
+            <p className="poster-linked-placement">
+              The dedicated programme page remains available when you remove a poster location. Its
+              page listing is managed separately in Page → Website section.
+            </p>
+          )}
           <div className="poster-overview-card">
             {poster.image ? (
               <img
@@ -156,15 +179,16 @@ export default function PosterWorkflow({ poster, onEditPoster }) {
 
           <div className="poster-setup-grid">
             <section className="admin-panel">
-              <strong>Poster locations</strong>
+              <strong>Centre screens</strong>
               <p>
-                {poster.groups?.length
-                  ? `Overview pages: ${poster.groups.map(posterPlacementLabel).join(', ')}`
-                  : 'Not currently shown on public website sections.'}
+                Website locations do not change screen playlists. Choose this poster for each screen
+                in Screens & layouts.
               </p>
-              <button className="admin-button" onClick={onEditPoster}>
-                Edit poster & placement
-              </button>
+              {can('tv') && (
+                <Link className="admin-button" to="/admin?section=tv" onClick={guardFormNavigation}>
+                  Open screen settings
+                </Link>
+              )}
             </section>
 
             <section className="admin-panel">

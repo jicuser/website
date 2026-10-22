@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { DEFAULT_TV_SETTINGS } from '../../supabase/functions/_shared/tv.js';
+import { DEFAULT_POSTERS } from '../../src/lib/posters.js';
 
 const owner = {
   id: '10000000-0000-4000-8000-000000000001',
@@ -33,7 +34,8 @@ test('admin overview searches available tasks and mobile switching opens the cho
   await page.getByRole('searchbox', { name: 'Find an admin task' }).fill('');
   await page.screenshot({ path: testInfo.outputPath('admin-overview-mobile.png'), fullPage: true });
   await page.getByRole('combobox', { name: 'Go to admin area' }).selectOption('messages');
-  await expect(page.getByRole('heading', { name: 'Contact messages', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Contact enquiries', exact: true })).toBeVisible();
+  await expect(page.locator('.admin-main')).toContainText('not live chat');
   expect(evidence.writes).toEqual([]);
   expect(evidence.errors).toEqual([]);
 });
@@ -130,11 +132,16 @@ async function openAdmin(
     tvState = null,
     formRows = [],
     formTasks = [],
+    sitePages = [],
+    initialPosters,
   } = {},
 ) {
   const errors = [],
     writes = [],
     tvReads = [];
+  const content = new Map(
+    initialPosters ? [['programme_posters', JSON.stringify(initialPosters)]] : [],
+  );
   page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
   await page.route('**/*', async (route) => {
@@ -181,6 +188,13 @@ async function openAdmin(
         new_count: matching.filter((row) => row.status === 'new').length,
         done_count: matching.filter((row) => row.status === 'done').length,
       };
+    } else if (url.pathname.endsWith('/rpc/list_site_pages')) {
+      data = sitePages.filter((item) => item.published);
+    } else if (url.pathname.endsWith('/rpc/get_site_page')) {
+      const query = route.request().postDataJSON();
+      data = sitePages.find((item) => item.slug === query.p_slug && item.published) || null;
+    } else if (url.pathname.endsWith('/site_pages')) {
+      data = sitePages;
     } else if (url.pathname.endsWith('/rpc/admin_form_tasks')) {
       data = {
         rows: formTasks,
@@ -211,9 +225,12 @@ async function openAdmin(
           body: JSON.stringify({ error: 'Account has retained records.' }),
         });
       data = { ok: true };
+    } else if (url.pathname.endsWith('/page_content') && method === 'GET') {
+      data = [...content].map(([content_key, content_value]) => ({ content_key, content_value }));
     } else if (url.pathname.endsWith('/page_content') && method !== 'GET') {
       const body = route.request().postDataJSON();
       writes.push(body);
+      content.set(body.content_key, body.content_value);
       data = [{ content_key: body.content_key }];
     }
     return route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
@@ -226,6 +243,76 @@ async function openAdmin(
   await page.goto(`/admin?section=${section}`);
   await expect(page.locator('.admin-toolbar')).toBeVisible();
   return { errors, writes, tvReads };
+}
+
+test('poster locations override a linked page listing and preserve screen settings', async ({
+  page,
+}) => {
+  const linkedPage = {
+    id: 'page-quran-circle',
+    slug: 'quran-circle',
+    title: 'Open Qur’an Circle details',
+    source_poster_id: DEFAULT_POSTERS[0].id,
+    placement: '/',
+    published: true,
+    registration: 'none',
+    kind: 'page',
+    body: 'Programme information stays available.',
+  };
+  const evidence = await openAdmin(page, { sitePages: [linkedPage] });
+  await page.locator('.admin-poster-picker button').first().click();
+  const locations = page.getByRole('group', { name: 'Website poster locations' });
+  await expect(locations).toBeVisible();
+  await expect(locations.getByLabel('What’s on (homepage)', { exact: true })).toBeChecked();
+  await locations.getByLabel('What’s on (homepage)', { exact: true }).uncheck();
+  await locations.getByLabel('Services', { exact: true }).check();
+  expect(evidence.writes).toHaveLength(0);
+  await page
+    .locator('.admin-toolbar')
+    .getByRole('button', { name: 'Publish posters', exact: true })
+    .click();
+  await expect.poll(() => evidence.writes.length).toBe(1);
+  const saved = evidence.writes[0];
+  expect(saved.content_key).toBe('programme_posters');
+  const posters = JSON.parse(saved.content_value);
+  expect(posters[0]).toEqual({
+    ...DEFAULT_POSTERS[0],
+    groups: ['education', 'worship', 'services'],
+    website_locations: ['/education', '/worship', '/social-media', '/services'],
+  });
+  expect(posters.slice(1)).toEqual(DEFAULT_POSTERS.slice(1));
+  expect(evidence.tvReads).toEqual([]);
+  await page.goto('/');
+  await expect(
+    page
+      .locator('.jic-programmes')
+      .getByRole('heading', { name: 'Open Qur’an Circle', exact: true }),
+  ).toHaveCount(0);
+  await page.goto('/services');
+  await expect(
+    page
+      .locator('.jic-programmes')
+      .getByRole('heading', { name: 'Open Qur’an Circle', exact: true }),
+  ).toBeVisible();
+  await page.goto('/pages/quran-circle');
+  await expect(page.getByRole('heading', { name: linkedPage.title, exact: true })).toBeVisible();
+  expect(evidence.errors).toEqual([]);
+});
+
+for (const [label, website_locations, count] of [
+  ['hidden', [], 0],
+  ['selected', ['/social-media'], 5],
+]) {
+  test(`explicit poster locations keep social previews ${label}`, async ({ page }) => {
+    const evidence = await openAdmin(page, {
+      initialPosters: [{ ...DEFAULT_POSTERS[0], website_locations }],
+    });
+    await page.goto('/social-media');
+    await expect(page.getByRole('heading', { name: 'Stay connected to JIC.' })).toBeVisible();
+    await expect(page.locator('.ops-social-poster-link')).toHaveCount(count);
+    expect(evidence.writes).toEqual([]);
+    expect(evidence.errors).toEqual([]);
+  });
 }
 
 for (const width of [390, 1280]) {
@@ -615,7 +702,7 @@ test('adding a volunteer previews exact access and sends only selected permissio
     .filter({ hasText: 'Prayer & screens' })
     .click();
   await form.getByRole('checkbox', { name: 'TV scenes and device inputs', exact: true }).check();
-  await expect(form.locator('.admin-access-preview')).toHaveText('Staff areas: TV & screens.');
+  await expect(form.locator('.admin-access-preview')).toHaveText('Staff areas: Screens & layouts.');
   await page.screenshot({
     path: testInfo.outputPath('invite-volunteer-access.png'),
     fullPage: true,
@@ -667,7 +754,7 @@ for (const [role, actor, tool] of [
       permissions: ['tv'],
       staff_kinds: ['volunteer'],
     },
-    'TV & screens',
+    'Screens & layouts',
   ],
   [
     'assigned form reviewer',
@@ -678,7 +765,7 @@ for (const [role, actor, tool] of [
       permissions: [],
       has_assigned_forms: true,
     },
-    'Forms & responses',
+    'Forms & registrations',
   ],
 ]) {
   test(`${role} starts at staff home with only their assigned tools`, async ({

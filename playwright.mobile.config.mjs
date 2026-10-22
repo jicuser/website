@@ -1,7 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/browser',
-  testMatch: 'mobile-bars.spec.mjs',
+  testMatch: [
+    'mobile-bars.spec.mjs',
+    'accessible-appearance.spec.mjs',
+    'home-compact.spec.mjs',
+    'prayer-pill.spec.mjs',
+  ],
   outputDir: 'test-results/webkit',
   workers: 1,
   timeout: 30000,

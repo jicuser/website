@@ -80,3 +80,22 @@
   width: 100%;
   margin-bottom: 40px;
 }
+.jic-menu-tools .jic-floating-tool {
+  width: 100%;
+  min-width: 0;
+}
+.jic-menu-tools .jic-floating-tool > :is(a, button) {
+  width: 100%;
+  height: auto;
+  min-height: 64px;
+  gap: 5px;
+  padding: 8px 2px;
+  border-radius: 10px;
+}
+.jic-menu-tool-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+}

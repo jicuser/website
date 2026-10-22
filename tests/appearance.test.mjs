@@ -34,7 +34,7 @@ test('saved theme and glass preference are applied before React starts', () => {
       assert.equal(root.dataset.theme, theme);
       assert.equal(classes.has('dark'), theme === 'dark');
       assert.equal(root.dataset.surface, glass === 'true' ? 'glass' : 'solid');
-      assert.equal(root.style.colorScheme, theme);
+      assert.equal(root.style.colorScheme, `only ${theme}`);
       assert.equal(root.style.backgroundColor, theme === 'dark' ? '#080f1d' : '#f9f7f1');
     }
   }
