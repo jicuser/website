@@ -543,7 +543,7 @@ html[data-prayer-dock-hidden='true'] {
     width: min(420px, calc(100% - 24px));
     padding: 0;
     border: 1px solid var(--jic-glass-border);
-    border-radius: 28px;
+    border-radius: 16px;
     background: var(--jic-bg-secondary);
     box-shadow: 0 4px 20px #0003;
     max-height: calc(100dvh - var(--jic-mobile-strip-height, 44px) - 24px);
@@ -570,7 +570,7 @@ html[data-prayer-dock-hidden='true'] {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    padding: 0 10px;
+    padding: 0 8px;
     color: var(--jic-text);
   }
   .jic-mobile-prayer-content {
@@ -604,10 +604,20 @@ html[data-prayer-dock-hidden='true'] {
     line-height: 1.2;
     font-weight: 650;
   }
+  .jic-mobile-prayer-link {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: 550;
+    color: var(--jic-gold);
+  }
   .jic-mobile-prayer-times {
     display: grid;
-    grid-template-columns: 42px repeat(5, minmax(0, 1fr));
-    gap: 3px;
+    /* Noon can have four clock digits; each column keeps its full AM/PM time. */
+    grid-template-columns: max-content repeat(5, minmax(max-content, 1fr));
+    gap: 2px;
     min-width: 0;
   }
   .jic-mini-prayer {
@@ -622,17 +632,17 @@ html[data-prayer-dock-hidden='true'] {
   }
   .jic-mini-prayer-name {
     width: 100%;
-    overflow: hidden;
     text-align: center;
-    text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--jic-text-secondary);
-    font-size: clamp(0.625rem, 2.6vw, 0.75rem);
+    font-size: 11px;
+    line-height: 14px;
     font-weight: 550;
   }
   .jic-mini-prayer-time {
     white-space: nowrap;
-    font-size: clamp(0.625rem, 2.8vw, 0.75rem);
+    font-size: 12px;
+    line-height: 15px;
     font-weight: 700;
     color: var(--jic-text);
     font-variant-numeric: tabular-nums;
@@ -640,12 +650,22 @@ html[data-prayer-dock-hidden='true'] {
   }
   .jic-mini-prayer-start {
     color: var(--jic-text-secondary);
-    font-size: clamp(0.625rem, 2.8vw, 0.75rem);
+    font-size: 12px;
+    line-height: 15px;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
   .jic-mini-prayer-labels {
     align-items: flex-start;
+  }
+  .jic-mini-prayer-labels :is(.jic-mini-prayer-start, .jic-mini-prayer-time) {
+    font-size: 10px;
+  }
+  .jic-mini-prayer :is(.jic-mini-prayer-start, .jic-mini-prayer-time) small {
+    margin-left: 1px;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 500;
   }
   .jic-mini-prayer.is-next {
     background: color-mix(in srgb, var(--jic-gold) 13%, transparent);

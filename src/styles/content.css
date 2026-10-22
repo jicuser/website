@@ -161,7 +161,7 @@
 .jic-related svg {
   flex: 0 0 auto;
 }
-html[data-theme] .jic-image-viewer {
+html[data-theme] :is(.jic-image-viewer, .jic-announcement-viewer) {
   box-sizing: border-box;
   width: min(900px, calc(100% - 24px));
   max-width: calc(100% - 24px);
@@ -178,11 +178,13 @@ html[data-theme] .jic-image-viewer {
   overscroll-behavior: contain;
   box-shadow: 0 24px 80px #0007;
 }
-.jic-image-viewer[open] {
+.jic-image-viewer[open],
+.jic-announcement-viewer[open] {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
 }
-.jic-image-viewer::backdrop {
+.jic-image-viewer::backdrop,
+.jic-announcement-viewer::backdrop {
   background: #000b;
   backdrop-filter: var(--jic-glass-overlay-filter);
 }
@@ -298,6 +300,40 @@ html[data-theme] .jic-image-viewer {
 .jic-image-viewer-actions [role='alert'] {
   color: var(--jic-error-text);
 }
+.jic-announcement-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+  color: var(--jic-gold);
+}
+.jic-announcement-button > span {
+  position: static;
+}
+.jic-announcement-viewer[open] {
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(640px, calc(100% - 24px));
+}
+.jic-announcement-reading {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 20px;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.jic-announcement-reading p {
+  margin: 0 0 1em;
+}
+.jic-announcement-reading img {
+  display: block;
+  max-width: 100%;
+  max-height: 50dvh;
+  object-fit: contain;
+  margin: 16px auto;
+}
 html[data-theme] .bg-primary.text-white {
   color: #0c1930;
 }
@@ -363,9 +399,59 @@ html[data-theme] .jic-radio-player-page {
 .jic-home-route .jic-rail-heading h2 {
   color: var(--jic-text);
 }
-/* Homepage cards retain the schedule and action; full programme detail stays on its page. */
+/* Homepage previews sit beside their copy; the full poster opens in the viewer. */
 .jic-home-route .jic-programme-detail {
   display: none;
+}
+.jic-home-route .jic-programmes .jic-swipe-rail {
+  grid-auto-columns: calc((100% - 16px) / 2);
+}
+.jic-home-route .jic-programme-card {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+}
+.jic-home-route .jic-poster-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+}
+.jic-home-route .jic-poster-button img {
+  display: block;
+  height: 150px;
+}
+.jic-home-route .jic-poster-button > span {
+  position: static;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 5px 3px;
+  font-size: 11px;
+  line-height: 1.3;
+}
+.jic-home-route .jic-programme-copy {
+  padding: 12px;
+  gap: 6px;
+}
+.jic-home-route .jic-programme-copy h3 {
+  font-size: 18px;
+}
+.jic-home-route .jic-programme-copy p {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.jic-home-route .jic-programme-copy .jic-programme-meta {
+  font-size: 11px;
+}
+.jic-home-route .jic-programme-copy a {
+  font-size: 13px;
+  line-height: 1.4;
+  padding-top: 4px;
+}
+.jic-home-route .jic-programme-copy a svg {
+  flex-shrink: 0;
 }
 
 @media (min-width: 1024px) {
@@ -373,14 +459,8 @@ html[data-theme] .jic-radio-player-page {
     margin: 0 auto 24px;
   }
   .jic-home-route .jic-programmes .jic-swipe-rail {
-    grid-auto-columns: calc((100% - 48px) / 3);
+    grid-auto-columns: calc((100% - 24px) / 2);
     gap: 24px;
-  }
-  .jic-home-route .jic-programmes .jic-poster-button {
-    padding: 6px;
-  }
-  .jic-home-route .jic-programmes .jic-poster-button img {
-    height: 220px;
   }
 }
 @media (max-width: 767px) {
@@ -396,5 +476,14 @@ html[data-theme] .jic-radio-player-page {
   }
   .jic-rail-heading h2 {
     font-size: 21px;
+  }
+  .jic-home-route .jic-programmes .jic-swipe-rail {
+    grid-auto-columns: minmax(260px, 88%);
+  }
+  .jic-home-route .jic-programme-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+  .jic-home-route .jic-programme-copy h3 {
+    font-size: 17px;
   }
 }

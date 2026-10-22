@@ -18,6 +18,7 @@ export default function FloatingPageTools({ placement = 'floating' }) {
 
   const themeLabel = theme === 'dark' ? 'Light mode' : 'Dark mode';
   const glassLabel = `Transparency ${glassEnabled ? 'off' : 'on'}`;
+  const inMenu = placement === 'menu';
   const label = (id) => (
     <span className="jic-floating-hint" role="status" hidden={hint?.id !== id}>
       {hint?.id === id ? hint.text : ''}
@@ -38,6 +39,7 @@ export default function FloatingPageTools({ placement = 'floating' }) {
           onPointerEnter={() => showHint('search', 'Search')}
         >
           <Search size={19} aria-hidden="true" />
+          {inMenu && <span className="jic-menu-tool-label">Search</span>}
         </Link>
         {label('search')}
       </span>
@@ -57,6 +59,7 @@ export default function FloatingPageTools({ placement = 'floating' }) {
           ) : (
             <Moon size={19} aria-hidden="true" />
           )}
+          {inMenu && <span className="jic-menu-tool-label">{themeLabel}</span>}
         </button>
         {label('theme')}
       </span>
@@ -73,6 +76,7 @@ export default function FloatingPageTools({ placement = 'floating' }) {
           onPointerEnter={() => showHint('glass', glassLabel)}
         >
           <Sparkles size={19} aria-hidden="true" />
+          {inMenu && <span className="jic-menu-tool-label">{glassLabel}</span>}
         </button>
         {label('glass')}
       </span>

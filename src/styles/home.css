@@ -11,6 +11,13 @@ html[data-theme='light'] .jic-inner-route {
 html[data-theme='dark'] .jic-inner-route {
   --jic-photo-veil: rgba(3, 9, 15, 0.86);
 }
+/* Accessibility preferences give unboxed copy a predictable reading surface. */
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html[data-theme],
+  html[data-theme] .jic-inner-route {
+    --jic-photo-veil: var(--jic-bg);
+  }
+}
 /* The homepage shares one photo behind its header and content. */
 .jic-public-route {
   position: relative;

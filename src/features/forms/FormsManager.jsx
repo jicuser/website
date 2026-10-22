@@ -430,7 +430,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
             <p>
               {view === 'schedule'
                 ? 'Hall availability and class times.'
-                : 'Open a form to review responses or edit its questions.'}
+                : 'Registration and service forms. Open one to review submitted answers or edit its questions. Contact Us enquiries have their own inbox.'}
             </p>
           </div>
           {view === 'forms' && (auth.isOwner || auth.can('forms_manage')) && (

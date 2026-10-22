@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import usePosters from '@/hooks/usePosters';
-import { POSTERS_KEY, POSTER_DESTINATIONS, posterImage, validPoster } from '@/lib/posters';
+import { POSTERS_KEY, posterImage, validPoster } from '@/lib/posters';
 import AnnouncementPoster from '@/components/posters/AnnouncementPoster';
 import { useContent } from '@/context/ContentContext';
 import { useAuth } from '@/context/AuthContext';
@@ -10,18 +10,30 @@ import { supabase } from '@/lib/supabaseClient';
 import { IMAGE_ACCEPT } from '@/lib/images';
 import { createImageUploader } from '@/lib/imageUpload';
 import PosterWorkflow from '@/features/content/PosterWorkflow';
-import { posterPlacementLabel } from '@/lib/programmePlacement';
+import PosterLocations from '@/features/content/PosterLocations';
+import useAdminRecords from '@/hooks/useAdminRecords';
+import { checked } from '@/components/workspace/shared';
+import { POSTER_DESTINATIONS } from '@/lib/posters';
 import '@/styles/content-workflow.css';
 
 export default function PostersEditor({ registerBack }) {
   const published = usePosters();
   const { saveContent } = useContent();
   const { can } = useAuth();
+  const readPages = useCallback(
+    (signal) => checked(supabase.rpc('list_site_pages').abortSignal(signal)),
+    [],
+  );
+  const {
+    data: publishedPages,
+    error: pagesError,
+    reload: reloadPages,
+  } = useAdminRecords(readPages);
   const [items, setItems] = useState(published);
   const [baseline, setBaseline] = useState(published);
   const [selected, setSelected] = useState('');
   const [editingPoster, setEditingPoster] = useState(false);
-  const { dirty: workspaceDirty } = useAdminSave();
+  const { dirtyCount } = useAdminSave();
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
@@ -37,6 +49,7 @@ export default function PostersEditor({ registerBack }) {
     if (selected) revealEditor();
   }, [selected, editingPoster, revealEditor]);
   const dirty = JSON.stringify(items) !== JSON.stringify(baseline);
+  const linkedEditorDirty = dirtyCount > (dirty ? 1 : 0);
   useEffect(() => {
     if (!dirty) {
       setItems(published);
@@ -60,21 +73,36 @@ export default function PostersEditor({ registerBack }) {
       setBusy(false);
     }
   }, [items, saveContent]);
-  useRegisterAdminSave(save, dirty && !busy, 'Publish posters');
+  useRegisterAdminSave(save, dirty, 'Publish posters', busy);
   const item = items.find((poster) => poster.id === selected);
   const update = (key, value) =>
     setItems((previous) =>
       previous.map((poster) => (poster.id === selected ? { ...poster, [key]: value } : poster)),
     );
+  const updateLocations = (locations) =>
+    setItems((previous) =>
+      previous.map((poster) =>
+        poster.id === selected
+          ? {
+              ...poster,
+              website_locations: locations,
+              // Keep existing catalogue consumers in step with the selected overview locations.
+              groups: locations
+                .map((path) => (path === '/' ? 'home' : path.slice(1)))
+                .filter((group) => POSTER_DESTINATIONS.includes(group)),
+            }
+          : poster,
+      ),
+    );
   const canLeaveLinkedEditor = () =>
-    editingPoster || !workspaceDirty || window.confirm('Discard unsaved page or form changes?');
+    editingPoster || !linkedEditorDirty || window.confirm('Discard unsaved page or form changes?');
   useEffect(() => {
     if (!registerBack) return undefined;
     if (selected) {
       registerBack(() => {
         if (
           !editingPoster &&
-          workspaceDirty &&
+          linkedEditorDirty &&
           !window.confirm('Discard unsaved page or form changes?')
         )
           return;
@@ -85,7 +113,7 @@ export default function PostersEditor({ registerBack }) {
       registerBack(null);
     }
     return () => registerBack(null);
-  }, [registerBack, selected, editingPoster, workspaceDirty]);
+  }, [registerBack, selected, editingPoster, linkedEditorDirty]);
   const add = (kind) => {
     if (!canLeaveLinkedEditor()) return;
     setEditingPoster(true);
@@ -135,9 +163,21 @@ export default function PostersEditor({ registerBack }) {
   }
   return (
     <section className="admin-panel">
-      <h2>Posters & announcements</h2>
-      <p>Choose a poster to preview or edit it. Registration and detail pages are optional.</p>
+      <h2>Posters</h2>
+      <p>
+        Choose a poster, select its website locations and publish. Screen layouts and per-screen
+        poster selections are managed separately in Screens & layouts.
+      </p>
       <Link to="/admin?section=events">Manage dated event posters →</Link>
+      {pagesError && (
+        <p role="alert">
+          Linked page locations could not be loaded. Retry before changing locations for an existing
+          poster.
+          <button type="button" className="admin-button" onClick={reloadPages}>
+            Retry locations
+          </button>
+        </p>
+      )}
       {!item && (
         <div className="admin-heading">
           <div>
@@ -356,29 +396,12 @@ export default function PostersEditor({ registerBack }) {
                     </div>
                   </>
                 )}
-                <h4>Poster locations</h4>
-                <p>
-                  Choose overview pages for this poster. It will not repeat on their enrolment,
-                  contact or information pages. A linked programme page can add its own listing
-                  location.
-                </p>
-                {POSTER_DESTINATIONS.map((group) => (
-                  <label className="admin-check" key={group}>
-                    <input
-                      type="checkbox"
-                      checked={item.groups.includes(group)}
-                      onChange={(event) =>
-                        update(
-                          'groups',
-                          event.target.checked
-                            ? [...item.groups, group]
-                            : item.groups.filter((value) => value !== group),
-                        )
-                      }
-                    />
-                    {posterPlacementLabel(group)}
-                  </label>
-                ))}
+                <PosterLocations
+                  poster={item}
+                  pages={publishedPages || []}
+                  onChange={updateLocations}
+                  disabled={busy || (!publishedPages && !Array.isArray(item.website_locations))}
+                />
                 <label>
                   Poster click destination
                   <input
@@ -408,6 +431,10 @@ export default function PostersEditor({ registerBack }) {
             <PosterWorkflow
               key={item.id}
               poster={item}
+              onChangeLocations={updateLocations}
+              pages={publishedPages || []}
+              disabled={busy || (!publishedPages && !Array.isArray(item.website_locations))}
+              posterDirty={dirty}
               onEditPoster={() => {
                 if (canLeaveLinkedEditor()) setEditingPoster(true);
               }}

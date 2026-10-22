@@ -89,7 +89,9 @@ The Android cleanup was checked with the production build, JavaScript checks and
 
 ## Simple Admin navigation
 
-The Admin home page groups tasks into Website, TV screens, Prayer times, Events & posters, Notices, Livestream and Staff access, according to the signed-in user’s permissions. Phones use a compact **Go to** selector; desktop uses a grouped sidebar.
+The Admin home page groups tasks by purpose and shows only the signed-in user’s tools. **Contact enquiries** holds Contact Us submissions; **Forms & registrations** manages application forms and submitted answers. **Posters** manages artwork and website locations; **Screens & layouts** manages each screen’s layout and poster selection. Phones use **Go to admin area**; desktop uses a grouped sidebar.
+
+Open a poster to select **Website poster locations**, including **What’s on (homepage)** and **Social Media**, then publish. The first location change preserves its current website locations, including linked programme page listings. After that, these selections control where the poster appears; removing a poster location keeps the dedicated programme page available. Screen playlists are separate and keep their existing selections.
 
 Choose **Website** to open the public site. On an editable page, **Edit this page** opens its text, picture and section editor in place. Save before closing. Site-wide text and community links remain under Website & pages in Admin. Homepage tile links still open the dedicated tile editor.
 

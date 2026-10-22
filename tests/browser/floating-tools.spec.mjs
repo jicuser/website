@@ -89,11 +89,17 @@ test('appearance changes show brief labels, retain preferences, and search is re
   await openHome(page, 'light');
   await page.locator('.jic-menu-word').click();
   const tools = page.getByRole('navigation', { name: 'Menu controls' });
+  await expect(tools.locator('.jic-menu-tool-label')).toHaveText([
+    'Search',
+    'Dark mode',
+    'Transparency off',
+  ]);
   await tools.getByRole('button', { name: 'Switch to dark mode' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(tools.getByRole('status')).toHaveText('Dark mode');
   await expectCenteredHint(tools);
   await expect(tools.getByRole('status')).toBeHidden({ timeout: 4000 });
+  await expect(tools.getByText('Light mode', { exact: true })).toBeVisible();
   await tools.getByRole('button', { name: 'Switch to light mode' }).click();
   await expect(tools.getByRole('status')).toHaveText('Light mode');
   await expectCenteredHint(tools);

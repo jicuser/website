@@ -826,8 +826,8 @@ export default function AdminPage() {
     messages: (
       <FormsInbox
         kind="contact"
-        title="Contact messages"
-        description="Messages sent through Contact Us. Registration and application responses stay in Forms."
+        title="Contact enquiries"
+        description="Submissions from Contact Us, not live chat. Reply using the sender’s email or phone, then mark the enquiry completed. Registration and application submissions are in Forms & registrations."
       />
     ),
     forms: <FormsManager key={user?.id} registerBack={registerBack} />,

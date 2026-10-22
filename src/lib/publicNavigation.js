@@ -112,6 +112,16 @@ export function compactMenuNavigation(groups) {
           children.push({ name: destination.name, path: destination.path });
         }
       }
-      return { ...group, name: group.path === '/education' ? 'Learning' : group.name, children };
+      return {
+        ...group,
+        name: group.path === '/education' ? 'Learning' : group.name,
+        children,
+        sectionPaths: [
+          group.path,
+          ...groups
+            .filter((destination) => parents.get(destination.path) === group.path)
+            .map((destination) => destination.path),
+        ],
+      };
     });
 }

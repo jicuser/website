@@ -1,6 +1,6 @@
 # Forms and staff access
 
-Open **Admin → Forms inbox** to read contact messages, Madrassah enquiries and I’tikaf registrations. Expand a submission to see its details. Reply using your normal contact process, then choose **Mark completed**. Completed forms can be reopened.
+Open **Admin → Contact enquiries** for submissions sent through Contact Us. This is an inbox, not live chat: expand a submission, reply using the sender’s email or phone, then choose **Mark completed**. Open **Admin → Forms & registrations** to create forms, review registration and application submissions, or follow up assigned actions. Completed submissions can be reopened.
 
 | Permission checkbox   | Forms visible         |
 | --------------------- | --------------------- |

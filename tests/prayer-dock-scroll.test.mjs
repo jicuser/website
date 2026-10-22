@@ -179,6 +179,23 @@ test('returning to the page top, resizing and reopening a tab restore the panel'
   assert.deepEqual(f.changes, [true, false, true, false, true, false]);
 });
 
+test('returning to the top restores bars even when the footer intersects on a short page', () => {
+  const f = fixture();
+  f.scroll(200);
+  f.footer(true);
+  f.scroll(0.5);
+  assert.deepEqual(f.changes, [true, false]);
+  f.browser.emit('resize');
+  assert.deepEqual(f.changes, [true, false]);
+});
+
+test('window-target page scroll events restore bars without observing nested scroll areas', () => {
+  const f = fixture();
+  f.scroll(200);
+  f.scroll(0, f.browser);
+  assert.deepEqual(f.changes, [true, false]);
+});
+
 test('height-only browser-bar resizing cannot make the panel flicker during a gesture', () => {
   const f = fixture();
   f.scroll(200);

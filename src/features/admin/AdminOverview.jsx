@@ -10,9 +10,9 @@ import { findAdminTasks } from './taskNavigation';
 import '@/styles/admin-overview.css';
 
 const GROUP_HELP = {
-  'Enquiries & forms': 'Respond to people and follow up their requests.',
-  'Website content': 'Keep the information your community sees current.',
-  'Prayer & displays': 'Manage the timetable, centre screens and live video.',
+  'Enquiries & forms': 'Contact enquiries, submitted registrations and form management.',
+  'Website content': 'Edit pages, notices and posters shown on the website.',
+  'Prayer & displays': 'Prayer timetable, screen layouts and website livestream.',
   'Centre operations': 'Look after payments and community fundraising.',
   'Staff & records': 'Manage staff access and review centre records.',
 };
@@ -41,10 +41,10 @@ export default function AdminOverview({ onChoose, icons }) {
       ? [
           {
             id: 'messages',
-            title: 'Messages to answer',
-            detail: 'New messages and service enquiries',
+            title: 'Contact enquiries to review',
+            detail: 'New Contact Us submissions',
             empty: 'No new contact messages.',
-            action: 'Open contact messages',
+            action: 'Open contact enquiries',
             value: result.data.messages?.value,
             failed: result.data.messages?.error,
           },
@@ -57,7 +57,7 @@ export default function AdminOverview({ onChoose, icons }) {
             title: 'Form responses to review',
             detail: 'New responses to the forms you work on',
             empty: 'No new responses to review.',
-            action: 'Open forms & responses',
+            action: 'Open forms & registrations',
             value: result.data.forms?.value?.waiting,
             failed: result.data.forms?.error,
           },

@@ -357,7 +357,7 @@ export default function PageSectionsEditor({ pagePath, onSaved }) {
       </div>
       <p className="page-blocks__hint">
         These controls manage additional content, not the page’s built-in features. Programme pages
-        connect to forms in Programme pages; create and edit forms in Forms & responses.
+        connect to forms in Programme pages; create and edit forms in Forms & registrations.
       </p>
       {!canEdit && <p>You can view these blocks, but your account cannot edit website content.</p>}
       {loading && <p role="status">Loading content blocks…</p>}

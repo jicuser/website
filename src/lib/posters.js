@@ -1,6 +1,7 @@
 import { PROGRAMMES } from '../content/programmes.js';
 import { AUDIENCES, validSessions } from './education.js';
 import { TV_REMINDERS } from '../content/tvReminders.js';
+import { PAGE_PLACEMENTS } from './pageContent.js';
 
 export const POSTERS_KEY = 'programme_posters';
 export const ANNOUNCEMENTS_ID = 'community-announcements';
@@ -12,6 +13,13 @@ export const POSTER_DESTINATIONS = [
   'madrassah',
   'services',
   'about',
+];
+export const POSTER_WEBSITE_LOCATIONS = [
+  ...new Set([
+    ...POSTER_DESTINATIONS.map((group) => (group === 'home' ? '/' : `/${group}`)),
+    ...PAGE_PLACEMENTS.map(([path]) => path),
+    '/social-media',
+  ]),
 ];
 export const DEFAULT_ANNOUNCEMENTS = {
   id: ANNOUNCEMENTS_ID,
@@ -47,6 +55,10 @@ export function posterImage(value) {
 export function validPoster(poster) {
   return Boolean(
     poster &&
+    (poster.website_locations === undefined ||
+      (Array.isArray(poster.website_locations) &&
+        poster.website_locations.length <= POSTER_WEBSITE_LOCATIONS.length &&
+        poster.website_locations.every((path) => POSTER_WEBSITE_LOCATIONS.includes(path)))) &&
     (poster.audience === undefined || AUDIENCES.includes(poster.audience)) &&
     validSessions(poster.sessions) &&
     typeof poster.id === 'string' &&

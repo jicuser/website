@@ -207,6 +207,16 @@ test('donating is separate from volunteering and fundraising navigation', () => 
   );
 });
 
+test('compact menu sections own merged sections without claiming cross-linked pages', () => {
+  const groups = navigation.compactMenuNavigation(PUBLIC_MENU_GROUPS);
+  const about = groups.find((group) => group.path === '/about');
+  const learning = groups.find((group) => group.path === '/education');
+  assert.ok(about.sectionPaths.includes('/projects'));
+  assert.ok(learning.sectionPaths.includes('/youth'));
+  assert.ok(learning.sectionPaths.includes('/madrassah'));
+  assert.ok(groups.every((group) => !group.sectionPaths.includes('/donate')));
+});
+
 test('section breadcrumbs keep one entry per section name and destination', () => {
   assert.deepEqual(
     navigation.navigationBreadcrumbs(activeNavigation('/donate')).map((item) => item.name),

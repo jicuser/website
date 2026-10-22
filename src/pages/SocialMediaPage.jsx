@@ -10,6 +10,7 @@ import usePosters from '@/hooks/usePosters';
 import ImageViewer from '@/components/ImageViewer';
 import { youtubeEmbedUrl } from '@/lib/video';
 import { lockPageScroll } from '@/lib/pageScrollLock';
+import { posterAppearsOnPage } from '@/lib/programmePlacement';
 import '@/styles/operations.css';
 const EMBEDS = {
   tiktok:
@@ -89,7 +90,7 @@ export default function SocialMediaPage() {
   const whatsapp = useCommunityLink();
   const { livestream } = useHomeLiveContent();
   const posters = usePosters()
-    .filter((p) => p.image)
+    .filter((p) => p.image && posterAppearsOnPage(p, '/social-media'))
     .slice(0, 3);
   const [preview, setPreview] = useState(null),
     [image, setImage] = useState(null);

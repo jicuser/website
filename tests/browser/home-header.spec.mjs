@@ -105,6 +105,7 @@ for (const width of [390, 1280]) {
       await page.evaluate(() => window.scrollTo(0, 410));
       await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
       await page.locator('.jic-mobile-prayer-content').click();
+      await expect(page).toHaveURL('/prayer-times');
       await expect(page.locator('#jic-prayer-details')).toBeHidden();
     }
     await page.goto('/services');
