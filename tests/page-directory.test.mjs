@@ -62,9 +62,10 @@ test('staff tasks retain unique destinations and permission requirements', () =>
     assert.ok(ADMIN_GROUPS.includes(section.group), section.id);
     if (section.id !== 'dashboard') assert.ok(section.description, section.id);
   }
+  assert.equal(ADMIN_SECTIONS.find((section) => section.id === 'forms').permission, 'forms');
   assert.equal(
-    ADMIN_SECTIONS.find((section) => section.id === 'messages').permission,
-    'forms_contact',
+    ADMIN_SECTIONS.some((section) => section.id === 'messages'),
+    false,
   );
   assert.equal(ADMIN_SECTIONS.find((section) => section.id === 'users').permission, 'users');
 });

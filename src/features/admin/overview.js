@@ -1,3 +1,5 @@
+import { BUILT_IN_FORMS } from '../../lib/customForms.js';
+
 export function summariseForms(forms) {
   const count = (value) => {
     const numeric = typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value));
@@ -36,22 +38,12 @@ export async function loadAdminOverview(client, { can, certificatesEnabled, sign
       throw new Error('Count unavailable');
     return result.count;
   };
-  if (can('forms_contact'))
-    add('messages', () =>
-      count('form_submissions', [
-        ['kind', 'contact'],
-        ['status', 'new'],
-      ]),
-    );
   if (can('forms'))
     add('forms', async () => {
-      const legacyKinds = [
-        ['madrassah', 'forms_madrassah'],
-        ['itikaaf', 'forms_itikaaf'],
-      ].filter(([, permission]) => can(permission));
+      const legacyKinds = BUILT_IN_FORMS.filter(({ permission }) => can(permission));
       const [result, ...legacy] = await Promise.all([
         client.rpc('admin_forms_overview').abortSignal(signal),
-        ...legacyKinds.map(([kind]) =>
+        ...legacyKinds.map(({ kind }) =>
           client
             .rpc('search_form_submissions', {
               p_kind: kind,

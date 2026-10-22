@@ -16,6 +16,25 @@ export const FIELD_TYPES = [
   ['file', 'Document or ZIP'],
 ];
 
+export const BUILT_IN_FORMS = [
+  { kind: 'contact', title: 'Contact Us', permission: 'forms_contact', category: 'services' },
+  {
+    kind: 'madrassah',
+    title: 'Madrassah enquiry',
+    permission: 'forms_madrassah',
+    category: 'other',
+  },
+  {
+    kind: 'itikaaf',
+    title: 'I’tikaf registration',
+    permission: 'forms_itikaaf',
+    category: 'other',
+  },
+];
+
+export const permittedBuiltInForms = (auth) =>
+  BUILT_IN_FORMS.filter(({ permission }) => auth.isOwner || auth.can(permission));
+
 export function visibleFields(fields, answers) {
   return fields.filter((field) => isFieldVisible(field, answers));
 }
@@ -52,13 +71,8 @@ export function validateDraft(draft) {
 export function formTitle(row) {
   return (
     row.schema_snapshot?.title ||
-    {
-      contact: 'Contact',
-      madrassah: 'Madrassah enquiry',
-      itikaaf: 'I’tikaf registration',
-      custom: 'Custom form',
-    }[row.kind] ||
-    'Form'
+    BUILT_IN_FORMS.find(({ kind }) => kind === row.kind)?.title ||
+    (row.kind === 'custom' ? 'Custom form' : 'Form')
   );
 }
 

@@ -10,6 +10,34 @@ import {
   loadAdminActivity,
 } from '../src/features/admin/activity.js';
 
+test('Contact Us and registration responses share one permitted forms total', async () => {
+  const calls = [];
+  const client = {
+    rpc(name, args) {
+      calls.push([name, args?.p_kind]);
+      return {
+        abortSignal: async () => ({
+          data:
+            name === 'admin_forms_overview'
+              ? [{ new_count: 3, done_count: 1, open_actions: 1 }]
+              : { new_count: 9, done_count: 2 },
+        }),
+      };
+    },
+  };
+  const result = await loadAdminOverview(client, {
+    can: (permission) => ['forms', 'forms_contact'].includes(permission),
+    certificatesEnabled: false,
+  });
+  assert.deepEqual(result, {
+    forms: { value: { waiting: 12, complete: 3, actions: 1, forms: 2 }, error: false },
+  });
+  assert.deepEqual(calls, [
+    ['admin_forms_overview', undefined],
+    ['search_form_submissions', 'contact'],
+  ]);
+});
+
 test('overview skips unauthorised and disabled areas entirely', async () => {
   const client = new Proxy(
     {},
@@ -45,35 +73,38 @@ test('a failed queue is unavailable while other queues keep their real counts', 
           return this;
         },
         abortSignal() {
-          return Promise.resolve({ error: { message: 'Unavailable' }, count: null });
+          return Promise.resolve({ count: 7 });
         },
       };
     },
-    rpc(name) {
+    rpc(name, args) {
       seen.push(name);
       return {
         abortSignal() {
-          return Promise.resolve({
-            data:
-              name === 'search_form_submissions'
-                ? { new_count: 0, done_count: 0 }
-                : [{ new_count: 3, done_count: 5, open_actions: 2 }],
-          });
+          return Promise.resolve(
+            args?.p_kind === 'contact'
+              ? { error: { message: 'Unavailable' } }
+              : {
+                  data:
+                    name === 'search_form_submissions'
+                      ? { new_count: 0, done_count: 0 }
+                      : [{ new_count: 3, done_count: 5, open_actions: 2 }],
+                },
+          );
         },
       };
     },
   };
-  const result = await loadAdminOverview(client, { can: () => true, certificatesEnabled: false });
-  assert.deepEqual(result.messages, { value: null, error: true });
-  assert.deepEqual(result.forms, {
-    value: { waiting: 3, complete: 5, actions: 2, forms: 3 },
-    error: false,
-  });
+  const result = await loadAdminOverview(client, { can: () => true, certificatesEnabled: true });
+  assert.equal(result.messages, undefined);
+  assert.deepEqual(result.forms, { value: null, error: true });
+  assert.deepEqual(result.certificates, { value: 7, error: false });
   assert.deepEqual(seen, [
-    'form_submissions',
     'admin_forms_overview',
     'search_form_submissions',
     'search_form_submissions',
+    'search_form_submissions',
+    'certificate_requests',
   ]);
   assert.deepEqual(summariseForms([]), { waiting: 0, complete: 0, actions: 0, forms: 0 });
 });
@@ -81,15 +112,6 @@ test('a failed queue is unavailable while other queues keep their real counts', 
 test('a permitted queue can report a real zero without querying any other area', async () => {
   const signal = new AbortController().signal;
   for (const [permission, table, filters, key] of [
-    [
-      'forms_contact',
-      'form_submissions',
-      [
-        ['kind', 'contact'],
-        ['status', 'new'],
-      ],
-      'messages',
-    ],
     ['certificates', 'certificate_requests', [['status', 'pending']], 'certificates'],
   ]) {
     const seen = [];
@@ -194,6 +216,7 @@ test('every authorised staff role gets a home without gaining extra tools', () =
   for (const [profile, ids] of [
     [{ permissions: ['tv'] }, ['tv']],
     [{ permissions: [], has_assigned_forms: true }, ['forms']],
+    [{ permissions: ['forms_contact'] }, ['forms']],
     [{ permissions: ['media'] }, []],
   ]) {
     const can = (permission) => hasPermission({ ...profile, is_active: true }, permission);
@@ -219,6 +242,8 @@ test('staff task groups retain a clear order and real tasks have useful search a
   assert.equal(new Set(ADMIN_GROUPS).size, ADMIN_GROUPS.length);
   assert.ok(ADMIN_SECTIONS.every(({ group }) => ADMIN_GROUPS.includes(group)));
   for (const [query, id] of [
+    ['contact', 'forms'],
+    ['messages', 'forms'],
     ['announcements', 'announcements'],
     ['audit', 'audit'],
     ['users', 'users'],
