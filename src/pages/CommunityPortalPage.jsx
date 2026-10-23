@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { Award, ShieldCheck, Users } from 'lucide-react';
+import { Award, ShieldCheck, Users, Wallet } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { portalDestination } from '@/lib/portalDestination';
 import PortalSignIn from '@/features/portal/PortalSignIn';
@@ -46,46 +46,46 @@ export default function CommunityPortalPage() {
         {error && <p role="alert">{error}</p>}
         {!auth.user ? (
           <div className="portal-entry-layout">
-            <section className="portal-entry-intro">
-              <p className="workspace-kicker">Welcome to your centre</p>
-              <h2>
-                Your JIC records.
-                <br />
-                One place to begin.
-              </h2>
-              <p>Sign in for your available records, invoices and requests.</p>
+            <div>
+              {auth.loading && <p role="status">Checking your account…</p>}
+              <PortalSignIn auth={auth} returnTo={next} />
+            </div>
+            <aside className="portal-entry-intro" aria-label="About your portal">
+              <h2>After you sign in</h2>
+              <p>See the records shared with your account.</p>
               <ul>
                 <li>
-                  <Users aria-hidden="true" />
+                  <Wallet aria-hidden="true" />
                   <span>
-                    <strong>Family & learning</strong>
-                    <small>
-                      {WORKSPACE_ENABLED
-                        ? 'Linked children, classes and published progress.'
-                        : 'Family and learning records are not currently available here.'}
-                    </small>
+                    <strong>Invoices & payments</strong>
+                    <small>View your invoices and payment records.</small>
                   </span>
                 </li>
+                {WORKSPACE_ENABLED && (
+                  <li>
+                    <Users aria-hidden="true" />
+                    <span>
+                      <strong>Family & learning</strong>
+                      <small>Linked children, classes and published progress.</small>
+                    </span>
+                  </li>
+                )}
                 <li>
                   <Award aria-hidden="true" />
                   <span>
                     <strong>Your certificates</strong>
-                    <small>Certificates issued after your ceremony or completed learning.</small>
+                    <small>Open certificates shared by the centre.</small>
                   </span>
                 </li>
                 <li>
                   <ShieldCheck aria-hidden="true" />
                   <span>
-                    <strong>Your own records</strong>
-                    <small>View the records shared with your account.</small>
+                    <strong>Private to you</strong>
+                    <small>Only records linked to your account appear here.</small>
                   </span>
                 </li>
               </ul>
-            </section>
-            <div>
-              {auth.loading && <p role="status">Checking your account…</p>}
-              <PortalSignIn auth={auth} returnTo={next} />
-            </div>
+            </aside>
           </div>
         ) : auth.loading ? (
           <p role="status">Checking your account…</p>

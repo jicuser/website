@@ -13,6 +13,11 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
   const [error, setError] = useState('');
   const pending = useRef(false);
   const lastSent = useRef(0);
+  const changeMode = (value) => {
+    setMode(value);
+    setError('');
+    setNotice('');
+  };
   async function submit(event) {
     event.preventDefault();
     if (pending.current) return;
@@ -54,32 +59,32 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
   }
   return (
     <section className="portal-signin workspace-card" aria-labelledby="portal-signin-title">
-      <p className="workspace-kicker">Your connection to JIC</p>
       <h2 id="portal-signin-title">
         {mode === 'create' ? 'Create your JIC account' : 'Sign in to your Portal'}
       </h2>
-      <p>Sign in to see the JIC services and records available to your account.</p>
-      <div className="portal-signin-modes" aria-label="Sign-in method">
-        {[
-          ['password', 'Password'],
-          ['email', 'Email sign-in link'],
-          ['create', 'Create account'],
-        ].map(([id, label]) => (
-          <button
-            type="button"
-            key={id}
-            disabled={busy || auth.loading}
-            aria-pressed={mode === id}
-            onClick={() => {
-              setMode(id);
-              setError('');
-              setNotice('');
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <p>
+        {mode === 'create'
+          ? 'Use your email to get started.'
+          : 'Access your records, invoices and requests.'}
+      </p>
+      {mode !== 'create' && (
+        <div className="portal-signin-modes" aria-label="Sign-in method">
+          {[
+            ['password', 'Password'],
+            ['email', 'Email sign-in link'],
+          ].map(([id, label]) => (
+            <button
+              type="button"
+              key={id}
+              disabled={busy || auth.loading}
+              aria-pressed={mode === id}
+              onClick={() => changeMode(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <form className="workspace-form" onSubmit={submit} aria-label="Portal sign in">
         <fieldset disabled={busy || auth.loading}>
           {mode === 'create' && (
@@ -128,17 +133,26 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
       {notice && <p role="status">{notice}</p>}
       {error && <p role="alert">{error}</p>}
       <GoogleSignInButton returnTo={returnTo} disabled={busy || auth.loading} />
-      <div className="workspace-actions">
-        <Link to="/account/recovery">Forgot your password?</Link>
+      <div className="portal-signin-help">
+        {mode === 'password' && <Link to="/account/recovery">Forgot password?</Link>}
         <Link to="/account/request" state={{ email }}>
-          Request access from the office
+          Need access? Contact the office
         </Link>
+      </div>
+      <div className="portal-signin-account">
+        <span>{mode === 'create' ? 'Already have an account?' : 'New to the portal?'}</span>
+        <button
+          type="button"
+          disabled={busy || auth.loading}
+          onClick={() => changeMode(mode === 'create' ? 'password' : 'create')}
+        >
+          {mode === 'create' ? 'Back to sign in' : 'Create account'}
+        </button>
       </div>
       {mode === 'create' && (
         <p className="workspace-meta">
-          No password to remember. Verify your own email first. Creating an account does not grant
-          staff access or link you to a child. Read our{' '}
-          <Link to="/privacy">privacy information</Link>.
+          We’ll email a secure link to verify your address. Family and staff access are approved
+          separately. Read our <Link to="/privacy">privacy information</Link>.
         </p>
       )}
       {returnTo && (

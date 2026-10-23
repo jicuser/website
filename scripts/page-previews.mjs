@@ -1,10 +1,11 @@
 import {
-  centreStructuredData,
   pageMetadata,
+  PRAYER_LOCATION,
   publicMetadataPaths,
   SITE_ORIGIN,
 } from '../src/lib/pageMetadata.js';
 import { loadPublicPageMetadata } from './public-page-metadata.mjs';
+import { pageStructuredData } from '../src/lib/siteStructuredData.js';
 
 export const escapeHtml = (value) =>
   String(value).replace(
@@ -45,19 +46,33 @@ export function pageHead(path, overrides = {}) {
       'twitter:description': meta.description,
       'twitter:image': meta.image,
     }).map(([key, value]) => tag('name', key, value)),
-    ...(meta.path === '/' && canonical && !meta.noindex
-      ? [
-          `<script data-react-helmet="true" type="application/ld+json">${JSON.stringify(centreStructuredData).replace(/</g, '\\u003c')}</script>`,
-        ]
+    ...(canonical && !meta.noindex
+      ? pageStructuredData(meta).map(
+          (data) =>
+            `<script data-react-helmet="true" type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`,
+        )
       : []),
   ].join('\n    ');
 }
 
 export function withPageHead(html, path, overrides = {}) {
-  return html.replace(
+  const document = html.replace(
     /<!-- jic:metadata:start -->[\s\S]*?<!-- jic:metadata:end -->/,
     () =>
       `<!-- jic:metadata:start -->\n    ${pageHead(path, overrides)}\n    <!-- jic:metadata:end -->`,
+  );
+  const heading = {
+    '/prayer-times': "Today's Prayer Times",
+    '/prayer-times/monthly': 'Monthly Timetable',
+    '/prayer-times/jummah': 'Jummah Times',
+  }[path];
+  if (!heading) return document;
+  // The same introduction appears in the React page. No stale prayer times are
+  // embedded here: the current timetable still comes from the published API.
+  return document.replace(
+    '<div id="root"></div>',
+    () =>
+      `<div id="root"><main class="mx-auto max-w-4xl px-4 py-6"><h1>${escapeHtml(heading)}</h1><p>${escapeHtml(PRAYER_LOCATION)}</p><nav aria-label="Prayer timetable"><a href="/prayer-times">Today’s times</a> · <a href="/prayer-times/monthly">Monthly timetable</a> · <a href="/prayer-times/jummah">Friday Jummah</a></nav><p>Loading the published timetable…</p><noscript>Enable JavaScript to view the current published times, or contact the centre on ${escapeHtml('+44 121 778 6612')}.</noscript></main></div>`,
   );
 }
 

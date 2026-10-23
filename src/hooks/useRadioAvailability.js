@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-// A separate, silent probe measures the stream, never the listener's controls.
+// Read broadcast metadata without loading audio or changing the listener's controls.
 export function useRadioAvailability(streamUrl) {
   const [availability, setAvailability] = useState('checking');
   useEffect(() => {
@@ -9,46 +9,46 @@ export function useRadioAvailability(streamUrl) {
       timer = null;
     setAvailability(streamUrl ? 'checking' : 'offline');
     if (!streamUrl) return undefined;
-    const probe = () => {
+    const probe = async () => {
       if (active || disposed) return;
       if (!navigator.onLine) {
         setAvailability('unknown');
         return;
       }
-      const audio = new Audio();
-      active = audio;
-      audio.muted = true;
-      audio.preload = 'auto';
-      const finish = (status) => {
+      const controller = new AbortController();
+      active = controller;
+      timer = setTimeout(() => controller.abort(), 8000);
+      try {
+        const { checkRadioBroadcast } = await import('@/lib/radioAvailability');
+        const status = await checkRadioBroadcast(streamUrl, controller.signal);
+        if (!disposed && !controller.signal.aborted) setAvailability(status);
+      } catch {
+        if (!disposed) setAvailability('unknown');
+      } finally {
         clearTimeout(timer);
-        audio.onloadeddata = null;
-        audio.onerror = null;
-        audio.removeAttribute('src');
-        audio.load();
         active = null;
-        if (!disposed) setAvailability(status);
-      };
-      audio.onloadeddata = () => finish('online');
-      audio.onerror = () => finish(navigator.onLine ? 'offline' : 'unknown');
-      // Some mobile browsers block preloading. Do not label that as offline.
-      timer = setTimeout(() => finish('unknown'), 12000);
-      audio.src = streamUrl;
-      audio.load();
+      }
+    };
+    const offline = () => {
+      active?.abort();
+      setAvailability('unknown');
+    };
+    const restore = () => {
+      if (!document.hidden) probe();
     };
     probe();
     const interval = setInterval(probe, 45000);
     window.addEventListener('online', probe);
+    window.addEventListener('offline', offline);
+    document.addEventListener('visibilitychange', restore);
     return () => {
       disposed = true;
       clearInterval(interval);
       clearTimeout(timer);
       window.removeEventListener('online', probe);
-      if (active) {
-        active.onloadeddata = null;
-        active.onerror = null;
-        active.removeAttribute('src');
-        active.load();
-      }
+      window.removeEventListener('offline', offline);
+      document.removeEventListener('visibilitychange', restore);
+      active?.abort();
     };
   }, [streamUrl]);
   return availability;

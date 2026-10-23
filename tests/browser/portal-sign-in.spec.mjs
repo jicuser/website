@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+test.use({ screenshot: 'off' });
 
 test('signing in from certificates returns to the selected certificate request', async ({
   page,
@@ -145,6 +146,65 @@ for (const theme of ['light', 'dark']) {
     await page.getByRole('link', { name: /My certificates/ }).click();
     await page.getByRole('link', { name: 'My account', exact: true }).click();
     await expect(page.getByRole('main', { name: 'Portal home', exact: true })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const width of [320, 390]) {
+  test(`portal sign-in has compact ordered help and separate account creation at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
+    await page.route('**/*', (route) =>
+      ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname)
+        ? route.continue()
+        : route.abort(),
+    );
+    await page.route('**/preview-api/**', (route) =>
+      route.fulfill({
+        contentType: 'application/json',
+        body: route.request().url().includes('/auth/v1/settings')
+          ? '{"external":{"google":false}}'
+          : '[]',
+      }),
+    );
+    await page.goto('/portal');
+    const signIn = page.locator('.portal-signin');
+    const help = page.getByRole('complementary', { name: 'About your portal' });
+    const bounds = await signIn.boundingBox();
+    expect(bounds.height).toBeLessThan(670);
+    expect((await help.boundingBox()).y).toBeGreaterThan(bounds.y + bounds.height);
+    await expect(
+      page.getByText('Family and learning records are not currently available here.'),
+    ).toHaveCount(0);
+    await expect(page.getByText(/Google sign-in is not connected/)).toHaveCount(0);
+    const password = await page
+      .getByRole('button', { name: 'Password', exact: true })
+      .boundingBox();
+    const emailLink = await page
+      .getByRole('button', { name: 'Email sign-in link', exact: true })
+      .boundingBox();
+    expect(Math.abs(password.y - emailLink.y)).toBeLessThan(1);
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate((mode) => {
+        document.documentElement.dataset.theme = mode;
+        document.documentElement.classList.toggle('dark', mode === 'dark');
+      }, theme);
+      await page.getByRole('button', { name: 'Create account', exact: true }).click();
+      await expect(
+        page.getByRole('heading', { name: 'Create your JIC account', exact: true }),
+      ).toBeVisible();
+      await expect(page.getByLabel('Your name', { exact: true })).toBeVisible();
+      await expect(page.locator('input[name="password"]')).toHaveCount(0);
+      await page.getByRole('button', { name: 'Back to sign in', exact: true }).click();
+      await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+    }
     expect(errors).toEqual([]);
   });
 }

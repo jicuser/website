@@ -47,9 +47,7 @@ async function fixture(page, { radio = false } = {}) {
     window.__playCalls = 0;
     HTMLMediaElement.prototype.load = function () {
       if (this.muted && this.hasAttribute('src'))
-        queueMicrotask(() =>
-          this.dispatchEvent(new Event(window.__radioOnline ? 'loadeddata' : 'error')),
-        );
+        queueMicrotask(() => this.dispatchEvent(new Event('loadeddata')));
     };
     HTMLMediaElement.prototype.play = function () {
       window.__playCalls++;
@@ -65,6 +63,35 @@ async function fixture(page, { radio = false } = {}) {
       ? route.continue()
       : route.abort(),
   );
+  await page.route('**/status-json.xsl', async (route) => {
+    const online = await page.evaluate(() => window.__radioOnline);
+    await route.fulfill({
+      contentType: 'application/json',
+      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({
+        icestats: {
+          source: online
+            ? {
+                listenurl: 'https://jicmosque.radioca.st/live',
+                server_type: 'audio/mpeg',
+                audio_info: 'bitrate=128',
+                listeners: 0,
+                title: 'JIC broadcast',
+              }
+            : [
+                {
+                  listenurl: 'https://jicmosque.radioca.st/autodj',
+                  server_type: 'audio/mpeg',
+                  audio_info: 'bitrate=128',
+                  title: 'NOT LIVE - NOT LIVE [13vv]',
+                },
+                { listenurl: 'https://jicmosque.radioca.st/live', listeners: 0 },
+                { listenurl: 'https://jicmosque.radioca.st/stream', listeners: 0 },
+              ],
+        },
+      }),
+    });
+  });
   await page.route('**/preview-api/**', async (route) => {
     const req = route.request(),
       path = new URL(req.url()).pathname;
@@ -365,5 +392,31 @@ test('public metadata changes with navigation and keeps one canonical without se
   await expect(page.locator('meta[name="description"]')).toHaveCount(1);
   await page.goto('/admin/login');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+  expect(state.errors).toEqual([]);
+});
+
+test('Birmingham prayer metadata identifies the mosque after rendering and stays out of the portal', async ({
+  page,
+}) => {
+  const { state } = await fixture(page);
+  await page.goto('/prayer-times');
+  await expect(page).toHaveTitle('Birmingham Prayer Times & Salah | JIC Woodlands Road Masjid');
+  await expect(page.locator('.jic-prayer-title')).toContainText(
+    'Woodlands Road Masjid, Sparkhill, Birmingham, West Midlands',
+  );
+  await expect
+    .poll(async () =>
+      page.locator('head script[type="application/ld+json"]').evaluateAll((nodes) => {
+        const records = nodes.map((node) => JSON.parse(node.textContent));
+        const mosque = records.find((item) => item['@type'] === 'Mosque');
+        const prayer = records.find((item) => item['@type'] === 'WebPage');
+        return !!mosque && prayer?.about?.['@id'] === mosque['@id'];
+      }),
+    )
+    .toBe(true);
+  await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+  await page.goto('/portal');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+  await expect(page.locator('head script[type="application/ld+json"]')).toHaveCount(0);
   expect(state.errors).toEqual([]);
 });

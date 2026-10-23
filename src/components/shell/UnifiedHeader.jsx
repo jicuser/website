@@ -140,7 +140,15 @@ export default function UnifiedHeader() {
         : navigation?.primaryPath;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
-  const status = radioError ? 'Retry' : radioLoading ? 'Loading' : playing ? 'Live' : 'Listen';
+  const status = radioError
+    ? 'Retry'
+    : radioLoading
+      ? 'Loading'
+      : playing
+        ? 'Playing'
+        : availability === 'offline'
+          ? 'Off air'
+          : 'Listen';
   const next = nextCongregation(todaysTimes, jummahTimes, currentDate);
   const isFriday =
     currentDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London', weekday: 'short' }) ===
