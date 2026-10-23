@@ -549,7 +549,10 @@ for (const width of [320, 390, 1280]) {
     await expect(page.locator('.admin-toolbar .admin-save-pending')).toHaveCount(0);
     if (width < 801) {
       await page.getByRole('button', { name: 'Staff home', exact: true }).click();
-      await page.locator('.admin-tools summary').filter({ hasText: 'Website content' }).click();
+      await page
+        .locator('.admin-area-tiles')
+        .getByRole('button', { name: 'Website content', exact: true })
+        .click();
       await page.getByRole('button', { name: 'Notices', exact: true }).click();
     } else {
       await page

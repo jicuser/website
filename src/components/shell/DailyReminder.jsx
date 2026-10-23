@@ -8,14 +8,12 @@ export default function DailyReminder() {
   const { getContent } = useContent();
   const { pathname } = useLocation();
   const [index, setIndex] = useState(() => Math.floor(Date.now() / 86400000));
-  const [scrolling, setScrolling] = useState(false);
   const interactions = useRef(0);
   const advance = useCallback(() => {
     interactions.current = 0;
     setIndex((value) => value + 1);
   }, []);
   useEffect(() => {
-    setScrolling(false);
     const mobile = window.matchMedia('(max-width: 767px)');
     let scrollTimer,
       scrollIntentUntil = 0;
@@ -57,12 +55,10 @@ export default function DailyReminder() {
       if (mobile.matches) {
         if (event.target !== document || Date.now() > scrollIntentUntil) return;
         scrollIntentUntil = Date.now() + 1000;
-        setScrolling(true);
         window.clearTimeout(scrollTimer);
         scrollTimer = window.setTimeout(() => {
           scrollIntentUntil = 0;
           advance();
-          setScrolling(false);
         }, 700);
         return;
       }
@@ -76,7 +72,6 @@ export default function DailyReminder() {
     };
     const onResize = () => {
       window.clearTimeout(scrollTimer);
-      setScrolling(false);
     };
     mobile.addEventListener('change', onResize);
     document.addEventListener('click', onClick, true);
@@ -136,10 +131,7 @@ export default function DailyReminder() {
     /* Older browsers. */
   }
   return (
-    <aside
-      className={`jic-daily-reminder${scrolling ? ' is-scrolling' : ''}`}
-      aria-label="Daily reminder"
-    >
+    <aside className="jic-daily-reminder" aria-label="Daily reminder">
       <button
         type="button"
         aria-label="Show another daily reminder"
