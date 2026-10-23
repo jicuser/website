@@ -103,20 +103,31 @@ export default function RamadanPage({ kind = null }) {
       setBusy(false);
     }
   }
-  const title = kind ? RAMADAN_KINDS[kind] : 'Ramadan meal sponsorships';
+  const title = kind ? RAMADAN_KINDS[kind] : 'Ramadan';
   return (
     <div className="booking-workspace sponsorship-page">
       <header>
-        <span className="sponsorship-eyebrow">RAMADAN · GIVE TOGETHER</span>
+        <span className="sponsorship-eyebrow">
+          {kind ? 'RAMADAN · GIVE TOGETHER' : 'RAMADAN AT THE CENTRE'}
+        </span>
         <h1>{title}</h1>
         <p>
           {kind === 'daily'
             ? 'Choose the days you would like to support.'
             : kind
               ? 'Choose a day to sponsor a meal.'
-              : 'Sponsor an Iftar or Suhoor meal for the community.'}
+              : 'Prayer times, meal sponsorships and daily giving.'}
         </p>
       </header>
+      {!kind && (
+        <section
+          className="booking-panel ramadan-timetable-notice"
+          aria-labelledby="ramadan-timetable-heading"
+        >
+          <h2 id="ramadan-timetable-heading">Ramadan timetable coming soon</h2>
+          <p>Prayer, Suhoor and Iftar times will be shared here once confirmed.</p>
+        </section>
+      )}
       {(!state.loading || season) && choices.length > 0 && (
         <nav className="sponsorship-kind-links" aria-label="Ramadan sponsorship options">
           {choices.map(([key, label]) => {
