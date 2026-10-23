@@ -149,6 +149,7 @@ for (const theme of ['light', 'dark']) {
       'About',
       'Prayer Times',
       'Faith & practice',
+      'Ramadan',
       'Services',
       'Learning',
       'Get involved',
