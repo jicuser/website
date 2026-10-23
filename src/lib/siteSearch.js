@@ -2,7 +2,8 @@ import { PUBLIC_PAGES } from '../content/pageDirectory.js';
 import { SOCIAL_CHANNELS } from '../content/socials.js';
 
 const aliases = {
-  '/prayer-times': 'salah namaz salat jamaat jamaah timetable today',
+  '/prayer-times':
+    'salah namaz salat jamaat jamaah timetable today birmingham west midlands woodlands road masjid jic',
   '/prayer-times/jummah': 'juma jumma friday khutbah sermon',
   '/madrassah': 'madrasah madrasa school children education',
   '/youth/itikaf': 'itikaf itikaaf itikaph ramadan',

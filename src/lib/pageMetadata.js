@@ -4,8 +4,17 @@ import { canonicalPagePath } from '../content/pageAliases.js';
 
 export const SITE_ORIGIN = 'https://www.jicmasjid.org';
 export const DEFAULT_DESCRIPTION =
-  'Prayer times, Islamic classes and community services at Jamatia Islamic Centre, Woodlands Road, Sparkhill, Birmingham.';
+  'Jamatia Islamic Centre (JIC), Woodlands Road Masjid in Sparkhill, Birmingham, West Midlands. Prayer and Salah times, Jummah, classes and community services.';
 export const PREVIEW_IMAGE = `${SITE_ORIGIN}/jic-aerial-sunset.jpg`;
+export const PRAYER_LOCATION =
+  'Salah (Namaz) and Jama’ah times at Jamatia Islamic Centre (JIC), Woodlands Road Masjid, Sparkhill, Birmingham, West Midlands.';
+
+const searchTitles = {
+  '/': 'Jamatia Islamic Centre | Woodlands Road Masjid, Birmingham',
+  '/prayer-times': 'Birmingham Prayer Times & Salah | JIC Woodlands Road Masjid',
+  '/prayer-times/monthly': 'Birmingham Monthly Prayer Timetable | JIC Woodlands Road',
+  '/prayer-times/jummah': 'Jummah Times in Birmingham | JIC Woodlands Road Masjid',
+};
 
 const descriptions = {
   '/': DEFAULT_DESCRIPTION,
@@ -24,9 +33,9 @@ const descriptions = {
   '/funerals':
     'Find funeral and Janazah guidance, contact details and support from Jamatia Islamic Centre in Birmingham.',
   '/prayer-times':
-    'View today’s Salah start and Jama’ah times, Jummah times and the monthly timetable for Jamatia Islamic Centre, Birmingham.',
+    'Birmingham prayer times at JIC Woodlands Road Masjid, Sparkhill, West Midlands. Today’s Salah (Namaz), Jama’ah, Jummah and monthly prayer timetable.',
   '/prayer-times/monthly':
-    'View and download the monthly Salah and Jama’ah timetable for Jamatia Islamic Centre in Sparkhill, Birmingham.',
+    'View and download the monthly Birmingham Salah and Jama’ah timetable for JIC Woodlands Road Masjid, Sparkhill, West Midlands.',
   '/prayer-times/jummah':
     'Check Friday Jummah times at Jamatia Islamic Centre on Woodlands Road, Sparkhill, Birmingham.',
   '/prayer-times/reminders':
@@ -101,7 +110,12 @@ export function pageMetadata(pathname, overrides = {}) {
   }
   return {
     path,
-    title: name && path !== '/' ? `${name} | ${SITE.name}` : SITE.name,
+    title:
+      !overrides.title && searchTitles[path]
+        ? searchTitles[path]
+        : name && path !== '/'
+          ? `${name} | ${SITE.name}`
+          : SITE.name,
     description:
       previewText(overrides.description) ||
       descriptions[path] ||
@@ -121,21 +135,3 @@ export function pageMetadata(pathname, overrides = {}) {
 export const publicMetadataPaths = [
   ...new Set([...PUBLIC_PAGES.map(({ path }) => path), '/', '/radio', '/privacy']),
 ].filter((path) => !isPrivatePage(path));
-
-export const centreStructuredData = {
-  '@context': 'https://schema.org',
-  '@type': 'Mosque',
-  name: SITE.name,
-  url: SITE_ORIGIN,
-  image: PREVIEW_IMAGE,
-  telephone: '+441217786612',
-  email: SITE.email,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: SITE.address.line1,
-    addressLocality: 'Birmingham',
-    postalCode: 'B11 4ER',
-    addressCountry: 'GB',
-  },
-  sameAs: Object.values(SITE.socials),
-};

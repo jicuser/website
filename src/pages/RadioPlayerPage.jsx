@@ -36,9 +36,9 @@ export default function RadioPlayerPage() {
         <p className="jic-player-status" data-availability={availability}>
           <i aria-hidden="true" />
           {availability === 'online'
-            ? 'Station online'
+            ? 'Live broadcast'
             : availability === 'offline'
-              ? 'Station offline'
+              ? 'Off air — no live broadcast'
               : availability === 'checking'
                 ? 'Checking station…'
                 : 'Station status unavailable'}
