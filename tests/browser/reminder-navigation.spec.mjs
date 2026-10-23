@@ -316,8 +316,9 @@ test('Prayer Times shows already loaded times without another loading flash', as
       page.getByRole('table', { name: "Today's prayer start and congregation times" }),
     ).toContainText('5:15');
     await page.screenshot({ path: testInfo.outputPath('prayer-times.png') });
+    await page.locator('.jic-section-picker > summary').click();
     await page
-      .getByRole('navigation', { name: 'Prayer Times sections' })
+      .getByRole('navigation', { name: 'Prayer Times pages' })
       .getByRole('link', { name: 'Monthly Timetable', exact: true })
       .click();
     await expect(page.getByRole('heading', { name: 'Monthly Timetable', exact: true })).toBeVisible(

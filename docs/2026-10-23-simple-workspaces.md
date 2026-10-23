@@ -15,6 +15,7 @@ Checks: schema and permission tests for changed database contracts, scene schedu
 
 ## Staff guide
 
+- **Staff home → Your tools:** compact, equal-sized tiles show two across on phones and more across on larger screens. Prayer times, TV screens and livestream open directly. Grouped tiles open their tool grid; All tools returns to the area tiles. Search finds individual tools across the permitted areas.
 - **Website pages → open a page → Edit & preview:** type in the controls and inspect the real page beside them. On a phone, switch between Edit page and Live preview. Mobile and Desktop choose the preview width. Save publishes the changes; opening a preview never submits a public form.
 - **Website menus:** edit a section or page name, use its up/down arrows, then Save menu. Published added pages join their chosen section. These changes keep the original page addresses.
 - **Forms:** choose Live, Draft or Closed. Open Edit form to change its questions; Save draft preserves the published questions, while Publish changes creates the next published version. A new form can create a named page or attach to an existing one when the editor also has website-content permission. Contact Us, Madrassah and I’tikaf use this same workflow.

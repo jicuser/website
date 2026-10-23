@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, ChevronDown, RefreshCw, Search } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, RefreshCw, Search } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { CERTIFICATES_ENABLED } from '@/lib/certificates';
@@ -20,6 +20,9 @@ const GROUP_HELP = {
 export default function AdminOverview({ onChoose, icons }) {
   const auth = useAuth();
   const [search, setSearch] = useState('');
+  const [area, setArea] = useState(null);
+  const areaHeading = useRef(null);
+  const previousArea = useRef(null);
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState({ busy: true, data: {} });
   useEffect(() => {
@@ -69,16 +72,36 @@ export default function AdminOverview({ onChoose, icons }) {
   const unavailable = !result.busy && cards.some((card) => card.failed || card.value == null);
   const searching = Boolean(search.trim());
   const focused = tasks.length <= 3;
+  const areas = ADMIN_GROUPS.map((name) => ({
+    name,
+    tasks: tasks.filter((task) => task.group === name),
+  })).filter((item) => item.tasks.length);
+  const openedArea =
+    !searching && areas.find((item) => item.name === area && item.tasks.length > 1);
+  useEffect(() => {
+    if (area) areaHeading.current?.focus({ preventScroll: true });
+    else if (previousArea.current)
+      document.getElementById(previousArea.current)?.focus({ preventScroll: true });
+  }, [area]);
   const renderTool = ({ id, name, description }) => {
     const Icon = icons[id];
     return (
-      <button key={id} type="button" aria-label={name} onClick={() => onChoose(id)}>
+      <button
+        key={id}
+        className="admin-tool-tile"
+        type="button"
+        aria-label={name}
+        aria-describedby={`admin-tool-help-${id}`}
+        title={description}
+        onClick={() => onChoose(id)}
+      >
         <Icon size={22} aria-hidden="true" />
         <span>
           <strong>{name}</strong>
-          <small>{description}</small>
+          <small id={`admin-tool-help-${id}`} className="sr-only">
+            {description}
+          </small>
         </span>
-        <ArrowRight size={17} aria-hidden="true" />
       </button>
     );
   };
@@ -107,7 +130,11 @@ export default function AdminOverview({ onChoose, icons }) {
             <input
               type="search"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setArea(null);
+                previousArea.current = null;
+              }}
               placeholder="Search your tools…"
               aria-describedby={search.trim() ? 'admin-task-search-result' : undefined}
             />
@@ -227,34 +254,49 @@ export default function AdminOverview({ onChoose, icons }) {
             {filtered.length} {filtered.length === 1 ? 'task matches' : 'tasks match'} your search.
           </p>
         )}
-        {focused ? (
+        {openedArea && (
+          <div className="admin-area-heading">
+            <button type="button" className="admin-button" onClick={() => setArea(null)}>
+              <ArrowLeft size={16} aria-hidden="true" />
+              All tools
+            </button>
+            <div>
+              <h3 ref={areaHeading} tabIndex={-1}>
+                {openedArea.name}
+              </h3>
+              <p>{GROUP_HELP[openedArea.name]}</p>
+            </div>
+          </div>
+        )}
+        {openedArea ? (
+          <div className="admin-tool-list">{openedArea.tasks.map(renderTool)}</div>
+        ) : focused || searching ? (
           <div className="admin-tool-list">{filtered.map(renderTool)}</div>
         ) : (
-          ADMIN_GROUPS.filter((group) => filtered.some((task) => task.group === group)).map(
-            (group) =>
-              filtered.filter((task) => task.group === group).length === 1 ? (
-                <div className="admin-tool-list" key={group}>
-                  {filtered.filter((task) => task.group === group).map(renderTool)}
-                </div>
-              ) : (
-                <details
-                  className="admin-tool-group"
-                  key={group}
-                  open={Boolean(search.trim()) || tasks.length <= 3}
+          <div className="admin-tool-list admin-area-tiles">
+            {areas.map((item) => {
+              if (item.tasks.length === 1) return renderTool(item.tasks[0]);
+              const Icon = icons[item.tasks[0].id];
+              const id = `admin-area-${item.tasks[0].id}`;
+              return (
+                <button
+                  key={item.name}
+                  id={id}
+                  type="button"
+                  className="admin-tool-tile"
+                  aria-label={item.name}
+                  onClick={() => {
+                    previousArea.current = id;
+                    setArea(item.name);
+                  }}
                 >
-                  <summary className="admin-tool-group-heading">
-                    <span>
-                      <strong>{group}</strong>
-                      <span>{GROUP_HELP[group]}</span>
-                    </span>
-                    <ChevronDown size={18} aria-hidden="true" />
-                  </summary>
-                  <div className="admin-tool-list">
-                    {filtered.filter((task) => task.group === group).map(renderTool)}
-                  </div>
-                </details>
-              ),
-          )
+                  <Icon size={22} aria-hidden="true" />
+                  <strong>{item.name}</strong>
+                  <small>{item.tasks.length} tools</small>
+                </button>
+              );
+            })}
+          </div>
         )}
         {!filtered.length && (
           <div className="admin-task-empty">
