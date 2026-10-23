@@ -21,6 +21,19 @@ Every page should answer three questions: where am I, what can I do here, and wh
 
 `src/content/adminNavigation.js` owns dashboard and sidebar names, groups, descriptions and existing permission requirements. Public team profiles and staff accounts are separate functions. Website livestream and TV presentation controls are separate functions.
 
+Hall bookings and Ramadan have separate direct staff-home tiles. Website menus
+uses compact rows: edit a name in place, expand one section to see its pages, and
+drag a handle to reorder within that list. Handles work with touch or a mouse,
+auto-scroll at the viewport edges, and cancel with Escape or a cancelled gesture.
+For an alternative to dragging, tap a handle for Move up/down or focus it and use
+the arrow keys. Reordering remains a draft until Save menu publishes it.
+
+Ramadan bookings default to a compact Month view with all configured Ramadan
+days aligned to UK weekdays. Each day shows its Ramadan number, UK date and
+status colour; tapping it opens the existing sponsor editor. Range and status
+filters preserve day positions. Table view and printing use the same filtered
+records. Season dates and booking details remain under staff control.
+
 Website pages has two views:
 
 | View            | Purpose                                                                    |

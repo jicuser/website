@@ -12,7 +12,6 @@ import '@/styles/admin-overview.css';
 const GROUP_HELP = {
   'Forms & requests': 'Contact Us, registrations and applications in one Forms area.',
   'Website content': 'Edit pages, notices and posters shown on the website.',
-  'Bookings & Ramadan': 'Manage hall availability and meal sponsorships.',
   'Finance & fundraising': 'Look after payments and community fundraising.',
   'Staff & records': 'Manage staff access and review centre records.',
 };

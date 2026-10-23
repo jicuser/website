@@ -496,6 +496,9 @@
 }
 
 /* Ramadan staff tasks share the booking components without the split workspace. */
+.booking-workspace.ramadan-manager {
+  padding: 0;
+}
 .ramadan-manager :is(input, select, textarea),
 .sponsorship-page .booking-field :is(input, select, textarea) {
   box-sizing: border-box;
@@ -553,7 +556,7 @@
   cursor: wait;
   opacity: 0.6;
 }
-.sponsorship-meal-choice {
+.ramadan-manager .sponsorship-meal-choice {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .sponsorship-meal-choice button {
@@ -597,6 +600,70 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
+}
+.sponsorship-month {
+  min-width: 0;
+}
+.sponsorship-month-help {
+  margin: 10px 0;
+  font-size: 0.8rem;
+}
+.sponsorship-month-week,
+.sponsorship-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.sponsorship-month-week {
+  margin-bottom: 6px;
+  font-size: 0.65rem;
+  text-align: center;
+  color: var(--jic-text-secondary);
+}
+.sponsorship-month-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 62px;
+  padding: 6px 1px;
+  border: 1px solid var(--jic-border);
+  border-bottom: 3px solid var(--day-colour);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--day-colour) 10%, var(--jic-surface));
+  color: var(--jic-text);
+  font: inherit;
+  cursor: pointer;
+}
+.sponsorship-month-day strong {
+  font-size: 1rem;
+  line-height: 1.1;
+}
+.sponsorship-month-day span {
+  font-size: clamp(9px, 2.5vw, 11px);
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--jic-text-secondary);
+}
+.sponsorship-month-day i {
+  height: 4px;
+  width: 4px;
+  border-radius: 50%;
+  background: var(--day-colour);
+}
+.sponsorship-month-day[aria-pressed='true'] {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 1px;
+  background: color-mix(in srgb, var(--jic-gold) 18%, var(--jic-surface));
+}
+.sponsorship-month-day.is-filtered {
+  opacity: 0.35;
+  cursor: default;
+}
+.sponsorship-month + .sponsorship-editor {
+  margin-top: 16px;
 }
 .sponsorship-status-cell small {
   display: block;
@@ -739,7 +806,15 @@
       border: 1px solid var(--jic-border);
       border-radius: 10px;
     }
-    .sponsorship-mobile-table :is(th, td) {
+    .sponsorship-mobile-table
+      :is(
+        th,
+        td,
+        .sponsorship-day-cell,
+        .sponsorship-date-cell,
+        .sponsorship-status-cell,
+        .sponsorship-action-cell
+      ) {
       display: block;
       width: auto;
       padding: 0;
