@@ -133,7 +133,10 @@ async function fixture(page) {
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.locator('.admin-toolbar')).toBeVisible();
   await page.goto('/admin?section=ramadan');
-  await expect(page.getByText('Private sponsor', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Month', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   return state;
 }
 
@@ -142,6 +145,10 @@ test('phone bookings show readable rows and expand private details while Setup s
 }) => {
   const state = await fixture(page);
   const workspace = page.getByRole('region', { name: 'Ramadan management' });
+  const month = workspace.getByRole('group', { name: 'Ramadan month', exact: true });
+  await expect(month.getByRole('button')).toHaveCount(30);
+  expect((await month.boundingBox()).height).toBeLessThan(480);
+  await workspace.getByRole('button', { name: 'Table', exact: true }).click();
   const table = workspace.locator('.sponsorship-admin-table');
   const first = table.locator('tbody > tr').first();
   await expect(first.getByText('1 Ramadan', { exact: true })).toBeVisible();
@@ -178,7 +185,7 @@ test('phone bookings show readable rows and expand private details while Setup s
   });
   await editor.getByRole('button', { name: 'Close', exact: true }).click();
   await expect(editor).toHaveCount(0);
-  await workspace.getByRole('button', { name: 'Days', exact: true }).click();
+  await workspace.getByRole('button', { name: 'Month', exact: true }).click();
   await workspace.getByRole('button', { name: /^Day 1,/ }).click();
   await expect(editor.getByLabel('Phone', { exact: true })).toHaveValue('07123456789');
   await editor.getByRole('button', { name: 'Close', exact: true }).click();
@@ -209,6 +216,7 @@ test('desktop keeps a real table and prints only the chosen dates and booking st
   await page.setViewportSize({ width: 1366, height: 900 });
   const state = await fixture(page);
   const workspace = page.getByRole('region', { name: 'Ramadan management' });
+  await workspace.getByRole('button', { name: 'Table', exact: true }).click();
   const table = workspace.locator('.sponsorship-admin-table');
   expect(await table.evaluate((node) => getComputedStyle(node).display)).toBe('table');
   await workspace.getByText('Date range & availability', { exact: true }).click();
@@ -250,3 +258,48 @@ test('desktop keeps a real table and prints only the chosen dates and booking st
   });
   expect(state.errors).toEqual([]);
 });
+
+for (const width of [320, 390]) {
+  test(`Ramadan month fits at ${width}px and keeps dates in place when filtered`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const state = await fixture(page);
+    const workspace = page.getByRole('region', { name: 'Ramadan management' });
+    const month = workspace.getByRole('group', { name: 'Ramadan month', exact: true });
+    const dates = month.getByRole('button');
+    await expect(dates).toHaveCount(30);
+    const initial = await dates.evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        x: node.getBoundingClientRect().x,
+        width: node.getBoundingClientRect().width,
+        height: node.getBoundingClientRect().height,
+        overflows: node.scrollWidth > node.clientWidth,
+      })),
+    );
+    expect(initial.filter((cell) => cell.width < 24 || cell.height < 44 || cell.overflows)).toEqual(
+      [],
+    );
+    expect((await month.boundingBox()).height).toBeLessThan(480);
+    await workspace.getByLabel('Booking status', { exact: true }).selectOption('pending');
+    await expect(month.locator('button:enabled')).toHaveCount(1);
+    const second = month.getByRole('button', { name: /^Day 2,/ });
+    expect((await second.boundingBox()).x).toBe(initial[1].x);
+    await second.click();
+    const editor = workspace.getByRole('region', { name: 'Edit sponsorship', exact: true });
+    await expect(editor.getByLabel('Sponsor name', { exact: true })).toHaveValue('Second sponsor');
+    await editor.getByRole('button', { name: 'Close', exact: true }).click();
+    await workspace.getByRole('button', { name: 'Suhoor', exact: true }).click();
+    await expect(month.locator('button:enabled')).toHaveCount(30);
+    await month.getByRole('button', { name: /^Day 30,/ }).click();
+    await expect(
+      workspace.getByRole('region', { name: 'Add sponsorship', exact: true }),
+    ).toBeVisible();
+    await expect(workspace.getByLabel('Amount (£)', { exact: true })).toHaveValue('100');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    expect(state.writes).toEqual([]);
+    expect(state.errors).toEqual([]);
+  });
+}

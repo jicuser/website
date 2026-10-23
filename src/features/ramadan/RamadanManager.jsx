@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
-import SponsorshipDays from './SponsorshipDays';
+import SponsorshipMonth from './SponsorshipMonth';
 import SponsorshipRange from './SponsorshipRange';
 import SponsorshipBookings from './SponsorshipBookings';
 import SponsorshipEditor from './SponsorshipEditor';
@@ -63,7 +63,7 @@ export default function RamadanManager() {
     [error, setError] = useState(''),
     [message, setMessage] = useState(''),
     [filter, setFilter] = useState('all'),
-    [dayView, setDayView] = useState('table'),
+    [dayView, setDayView] = useState('month'),
     [range, setRange] = useState({});
   const table = useRef(null),
     loadVersion = useRef(0),
@@ -468,8 +468,8 @@ export default function RamadanManager() {
                 aria-label="Sponsorship view"
               >
                 {[
+                  ['month', 'Month'],
                   ['table', 'Table'],
-                  ['days', 'Days'],
                 ].map(([value, label]) => (
                   <button
                     type="button"
@@ -578,12 +578,13 @@ export default function RamadanManager() {
                 editor={dayView === 'table' ? editor : null}
               />
             </div>
-            {dayView === 'days' && (
+            {dayView === 'month' && (
               <>
-                <SponsorshipDays
-                  days={visibleDays.filter((day) => rows.some((row) => row.date === day.date))}
+                <SponsorshipMonth
+                  days={days}
+                  visibleDates={new Set(rows.map((row) => row.date))}
                   kind={kind}
-                  selected={selected ? [selected] : []}
+                  selected={selected}
                   disabled={busy || loading}
                   onSelect={selectDay}
                   dayInfo={(date) => {

@@ -56,6 +56,12 @@ for (const width of [320, 390, 1280]) {
     expect(sizes.columns).toBe(width < 700 ? 2 : 4);
     expect(Math.max(...sizes.heights) - Math.min(...sizes.heights)).toBeLessThan(1);
     expect(Math.min(...sizes.heights)).toBeGreaterThanOrEqual(44);
+    const areas = page.locator('.admin-area-tiles');
+    await expect(areas.getByRole('button', { name: 'Hall bookings', exact: true })).toBeVisible();
+    await expect(areas.getByRole('button', { name: 'Ramadan', exact: true })).toBeVisible();
+    await expect(
+      areas.getByRole('button', { name: 'Bookings & Ramadan', exact: true }),
+    ).toHaveCount(0);
     const websiteTile = page
       .locator('.admin-area-tiles')
       .getByRole('button', { name: 'Website content', exact: true });

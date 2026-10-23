@@ -1,48 +1,115 @@
 .menu-editor {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
+.menu-editor .admin-heading {
+  margin-bottom: 4px;
+}
+.menu-editor__list {
+  display: grid;
+  gap: 6px;
+}
 .menu-editor__group {
-  margin: 0;
+  min-width: 0;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  background: var(--jic-surface);
 }
 .menu-editor__row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   min-width: 0;
-  padding-block: 8px;
+  padding: 4px;
 }
 .menu-editor__row > label,
 .menu-editor__overview {
   flex: 1;
   min-width: 0;
 }
-.menu-editor__row input {
+.admin-console .menu-editor__row input {
   width: 100%;
   min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 16px;
+}
+.admin-console .menu-editor__row input:hover {
+  border-color: var(--jic-border);
+}
+.menu-editor__handle,
+.menu-editor__expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--jic-text-secondary);
+  background: transparent;
+}
+.menu-editor__handle {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.menu-editor__expand {
+  gap: 2px;
+  cursor: pointer;
+}
+.menu-editor__expand small {
+  font-size: 11px;
+}
+.menu-editor__expand[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+.menu-editor__no-pages {
+  width: 44px;
 }
 .menu-editor__move {
   display: flex;
-  flex: 0 0 auto;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 8px 8px 52px;
 }
 .menu-editor__move button {
-  padding: 8px;
-  min-width: 44px;
+  padding: 8px 10px;
 }
-.menu-editor__group summary {
-  cursor: pointer;
-  padding: 12px 0;
-  font-size: 0.875rem;
+.menu-editor__pages {
+  margin: 0 8px 8px 24px;
+  padding-left: 8px;
+  border-left: 2px solid var(--jic-border);
 }
-.menu-editor__group details .menu-editor__row {
+.menu-editor__page {
   border-top: 1px solid var(--jic-border);
 }
 .menu-editor__overview {
   display: grid;
-  gap: 4px;
+  gap: 2px;
+  padding: 4px 8px;
+  font-size: 0.875rem;
 }
 .menu-editor__overview small {
   color: var(--jic-text-secondary);
+  font-size: 0.7rem;
+}
+.menu-editor .is-dragging > .menu-editor__row {
+  opacity: 0.55;
+}
+.menu-editor .is-dragging .menu-editor__handle {
+  cursor: grabbing;
+}
+.menu-editor .drop-before {
+  box-shadow: 0 -3px var(--jic-gold);
+}
+.menu-editor .drop-after {
+  box-shadow: 0 3px var(--jic-gold);
 }

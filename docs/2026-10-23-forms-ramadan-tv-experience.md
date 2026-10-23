@@ -72,8 +72,11 @@ confirm a playable stream before a live notice appears.
   Do not use a calculated Hijri calendar as an assertion of local moon sighting.
 - Setup shows the first and last UK dates together, plus a readable date-range
   summary. Only 29- or 30-day seasons are accepted.
-- Provide Days and Table views. Table headings explicitly distinguish Ramadan
-  day and UK date; statuses and approved sponsor names are visible.
+- Staff bookings open in Month view: all 29/30 Ramadan days in a compact weekly
+  grid, with the UK date and availability colour on each day. Tap a day for its
+  sponsor and private details. Filtering dims excluded dates without shifting
+  their positions. Table remains available for lists and printing. Public views
+  continue to distinguish Ramadan day, UK date, status and approved sponsor name.
 - A range control chooses a first and last sponsorship day using labels that
   contain both dates. Allow whole Ramadan, selected ranges and individual days.
 - Public range selection skips closed/reserved meals. Daily Giving can have
@@ -158,8 +161,9 @@ confirm a playable stream before a live notice appears.
   Save setup preserves the season's publication status; **Website & screens**
   contains Publish/Unpublish and the existing page, meal, homepage and TV switches.
   No season dates have been guessed or created for the centre.
-- **Choose sponsorship days:** Bookings → Iftar, Suhoor or Daily Giving. Use Table
-  or Days. Phone tables become readable cards with the Ramadan day, UK date,
+- **Choose sponsorship days:** Bookings → Iftar, Suhoor or Daily Giving. The Month
+  view shows the whole Ramadan; tap a day to open or add a sponsorship. Table
+  is an alternative. Phone tables become readable cards with the Ramadan day, UK date,
   status and sponsor name; Edit expands that booking's private details. Selecting
   an occupied day opens its sponsor. **Date range & availability** contains the
   From/To selectors and Open/Close range actions; each selector includes both
