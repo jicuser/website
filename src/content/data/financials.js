@@ -3,7 +3,7 @@
  *  FINANCIAL DATA  —  src/content/data/financials.js
  * ============================================================
  *  Add a new row each year. Format: DD/MM/YYYY, amounts as £k strings.
- *  The chart and summary cards on /financial-history read from here.
+ *  The chart and annual table on /financial-history read from here.
  * ============================================================
  */
 

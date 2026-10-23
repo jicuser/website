@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { ExternalLink, Maximize2, X } from 'lucide-react';
+import { ArrowUpRight, ExternalLink, Maximize2, X } from 'lucide-react';
+import AboutMasthead from '@/components/about/AboutMasthead';
 import { SOCIAL_CHANNELS } from '@/content/socials';
 import { SOCIAL_ICONS } from '@/components/icons/SocialIcons';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
@@ -53,7 +54,9 @@ function SocialDialog({ channel, video, onClose }) {
           <X size={23} />
         </button>
       </header>
-      <p>Live content is provided by {channel.name}. It may use cookies or ask you to sign in.</p>
+      <p>
+        Preview content is provided by {channel.name}. It may use cookies or ask you to sign in.
+      </p>
       <div className="ops-social-live">
         {frame ? (
           <iframe
@@ -96,110 +99,86 @@ export default function SocialMediaPage() {
     [image, setImage] = useState(null);
   const video = youtubeEmbedUrl(livestream?.stream_url);
   return (
-    <section className="jic-social-page" aria-labelledby="social-title">
+    <section className="about-page about-social" aria-labelledby="social-title">
       <Helmet>
         <title>Social Media | Jamatia Islamic Centre</title>
       </Helmet>
-      <header className="jic-social-intro">
-        <p className="jic-social-eyebrow">A closer community</p>
-        <h1 id="social-title">
-          Stay connected
-          <br />
-          to JIC.
-        </h1>
-        <p>Find the centre’s social channels for talks, programme notices and community news.</p>
-      </header>
-      <nav className="jic-social-jump" aria-label="Social channels">
-        {SOCIAL_CHANNELS.map((c) => (
-          <a key={c.id} href={`#${c.id}`} data-glass="clear">
-            {c.name}
-          </a>
-        ))}
-        <a href="#whatsapp" data-glass="clear">
-          WhatsApp
-        </a>
-      </nav>
-      <div className="jic-social-grid">
-        {SOCIAL_CHANNELS.map((channel, index) => {
+      <AboutMasthead title="Stay connected to JIC." eyebrow="A closer community" photo>
+        <p>Talks, programme notices and moments from our community. Choose a channel to follow.</p>
+      </AboutMasthead>
+      <div className="about-channel-list">
+        {SOCIAL_CHANNELS.map((channel) => {
           const Icon = SOCIAL_ICONS[channel.id];
-          const poster = posters[index % Math.max(posters.length, 1)];
           return (
-            <article
-              key={channel.id}
-              id={channel.id}
-              className="jic-social-card"
-              data-glass="frosted"
-            >
-              <div className="jic-social-identity">
-                <Icon width={30} height={30} aria-hidden="true" />
-                <div>
-                  <h2>{channel.name}</h2>
-                  <a href={channel.url} target="_blank" rel="noopener noreferrer">
-                    {channel.handle}
-                  </a>
-                </div>
+            <article key={channel.id} id={channel.id} className="about-channel">
+              <Icon width={30} height={30} aria-hidden="true" />
+              <div className="about-channel-name">
+                <h2>{channel.name}</h2>
+                <span>{channel.handle}</span>
               </div>
-              <div className={`ops-social-card-preview ops-social-${channel.id}`}>
-                <img
-                  src="/optimized/jic-aerial-sunset.webp"
-                  alt="Jamatia Islamic Centre"
-                  loading="lazy"
-                />
-                <div>
-                  <span>Channel overview</span>
-                  <strong>{channel.topics.join(' · ')}</strong>
-                  <p>{channel.description}</p>
-                </div>
-              </div>
-              <div className="jic-social-actions">
-                <button type="button" data-glass="clear" onClick={() => setPreview(channel)}>
-                  <Maximize2 size={17} />{' '}
-                  {channel.id === 'youtube' && !video ? 'Expand channel' : 'Load live preview'}
-                </button>
-                <a href={channel.url} target="_blank" rel="noopener noreferrer" data-glass="clear">
-                  Open {channel.name}
-                  <ExternalLink size={16} />
-                </a>
-              </div>
-              {poster && (
-                <button
-                  type="button"
-                  className="ops-social-poster-link"
-                  onClick={() => setImage({ url: poster.image, title: poster.title })}
-                >
-                  <img src={poster.image} alt="" loading="lazy" />
-                  <span>
-                    <small>From JIC’s noticeboard</small>
-                    <strong>{poster.title}</strong>
-                    <span>Open full-size poster ↗</span>
-                  </span>
-                </button>
-              )}
+              <button
+                type="button"
+                aria-label={`Preview ${channel.name}`}
+                title={`Preview ${channel.name}`}
+                onClick={() => setPreview(channel)}
+              >
+                <Maximize2 size={18} aria-hidden="true" />
+                <span aria-hidden="true">Preview</span>
+              </button>
+              <a
+                href={channel.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${channel.name}`}
+                title={`Open ${channel.name}`}
+              >
+                <ArrowUpRight size={21} aria-hidden="true" />
+                <span aria-hidden="true">Open</span>
+              </a>
+              <p>{channel.description}</p>
             </article>
           );
         })}
-        <article id="whatsapp" className="jic-social-card" data-glass="frosted">
-          <div className="jic-social-identity">
-            <WhatsAppIcon size={30} />
-            <h2>WhatsApp Community</h2>
+        <article id="whatsapp" className="about-channel about-channel-whatsapp">
+          <WhatsAppIcon size={30} aria-hidden="true" />
+          <div className="about-channel-name">
+            <h2>WhatsApp</h2>
+            <span>JIC Community</span>
           </div>
-          <div className="ops-whatsapp-preview">
-            <WhatsAppIcon size={44} />
-            <strong>JIC Community</strong>
-            <p>Announcements · Programmes · Community news</p>
-            <span>Opens in WhatsApp.</span>
-          </div>
-          <p>Join the official community to receive JIC updates on your phone.</p>
           <a
-            className="jic-community-join"
+            className="about-channel-join"
             href={whatsapp}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Preview and join in WhatsApp"
+            title="Join JIC on WhatsApp"
           >
-            Preview and join in WhatsApp <ExternalLink size={16} />
+            <ArrowUpRight size={21} aria-hidden="true" />
+            <span aria-hidden="true">Join</span>
           </a>
+          <p>Announcements and community updates, straight to your phone.</p>
         </article>
       </div>
+      {posters.length > 0 && (
+        <section className="about-noticeboard" aria-labelledby="social-posters-title">
+          <div className="about-section-intro">
+            <p className="about-eyebrow">From the noticeboard</p>
+            <h2 id="social-posters-title">Around the centre</h2>
+          </div>
+          <div>
+            {posters.map((poster) => (
+              <button
+                key={poster.id}
+                type="button"
+                onClick={() => setImage({ url: poster.image, title: poster.title })}
+              >
+                <img src={poster.image} alt="" loading="lazy" />
+                <span>{poster.title}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
       {preview && <SocialDialog channel={preview} video={video} onClose={() => setPreview(null)} />}
       {image && <ImageViewer image={image} onClose={() => setImage(null)} />}
     </section>
