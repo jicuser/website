@@ -3,7 +3,6 @@ import { ArrowLeft, ArrowRight, CalendarDays, GraduationCap, Mail } from 'lucide
 import { Link, useLocation } from 'react-router-dom';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import { serviceEnquiryForPath } from '@/lib/serviceEnquiries';
-import HistoryPage from './HistoryPage';
 
 const PAGE_ACTIONS = {
   '/services/daily-prayers': [
@@ -44,7 +43,6 @@ export default function SectionPage({
   backLabel = 'Back',
 }) {
   const { pathname } = useLocation();
-  if (pathname === '/about/history') return <HistoryPage />;
   const enquiry = serviceEnquiryForPath(pathname);
   const actions = (enquiry
     ? [

@@ -1,7 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { ArrowUpRight, ExternalLink, Maximize2, X } from 'lucide-react';
-import AboutMasthead from '@/components/about/AboutMasthead';
 import { SOCIAL_CHANNELS } from '@/content/socials';
 import { SOCIAL_ICONS } from '@/components/icons/SocialIcons';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
@@ -89,7 +87,7 @@ function SocialDialog({ channel, video, onClose }) {
     </dialog>
   );
 }
-export default function SocialMediaPage() {
+export default function SocialChannels() {
   const whatsapp = useCommunityLink();
   const { livestream } = useHomeLiveContent();
   const posters = usePosters()
@@ -99,21 +97,15 @@ export default function SocialMediaPage() {
     [image, setImage] = useState(null);
   const video = youtubeEmbedUrl(livestream?.stream_url);
   return (
-    <section className="about-page about-social" aria-labelledby="social-title">
-      <Helmet>
-        <title>Social Media | Jamatia Islamic Centre</title>
-      </Helmet>
-      <AboutMasthead title="Stay connected to JIC." eyebrow="A closer community" photo>
-        <p>Talks, programme notices and moments from our community. Choose a channel to follow.</p>
-      </AboutMasthead>
+    <>
       <div className="about-channel-list">
         {SOCIAL_CHANNELS.map((channel) => {
           const Icon = SOCIAL_ICONS[channel.id];
           return (
-            <article key={channel.id} id={channel.id} className="about-channel">
+            <article key={channel.id} className="about-channel">
               <Icon width={30} height={30} aria-hidden="true" />
               <div className="about-channel-name">
-                <h2>{channel.name}</h2>
+                <h3>{channel.name}</h3>
                 <span>{channel.handle}</span>
               </div>
               <button
@@ -139,10 +131,10 @@ export default function SocialMediaPage() {
             </article>
           );
         })}
-        <article id="whatsapp" className="about-channel about-channel-whatsapp">
+        <article className="about-channel about-channel-whatsapp">
           <WhatsAppIcon size={30} aria-hidden="true" />
           <div className="about-channel-name">
-            <h2>WhatsApp</h2>
+            <h3>WhatsApp</h3>
             <span>JIC Community</span>
           </div>
           <a
@@ -163,7 +155,7 @@ export default function SocialMediaPage() {
         <section className="about-noticeboard" aria-labelledby="social-posters-title">
           <div className="about-section-intro">
             <p className="about-eyebrow">From the noticeboard</p>
-            <h2 id="social-posters-title">Around the centre</h2>
+            <h3 id="social-posters-title">Around the centre</h3>
           </div>
           <div>
             {posters.map((poster) => (
@@ -181,6 +173,6 @@ export default function SocialMediaPage() {
       )}
       {preview && <SocialDialog channel={preview} video={video} onClose={() => setPreview(null)} />}
       {image && <ImageViewer image={image} onClose={() => setImage(null)} />}
-    </section>
+    </>
   );
 }

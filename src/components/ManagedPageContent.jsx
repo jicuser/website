@@ -8,12 +8,13 @@ export default function ManagedPageContent({
   optional = false,
   headingLevel = 1,
   className = '',
+  pagePath,
 }) {
   const { pathname } = useLocation();
   const { getContent } = useContent();
   let content = {};
   try {
-    const parsed = JSON.parse(getContent(pageKey(pathname), '{}'));
+    const parsed = JSON.parse(getContent(pageKey(pagePath || pathname), '{}'));
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) content = parsed;
   } catch {}
   if (optional && !content.title && !content.body && !content.image) return null;

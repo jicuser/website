@@ -127,7 +127,7 @@ export default function UnifiedHeader() {
           ),
       }
     : originalNavigation;
-  const subtabs = (navigation?.children || []).filter((page) =>
+  const subtabs = (pathname === '/about' ? [] : navigation?.children || []).filter((page) =>
     isPageVisible(getContent, page.path),
   );
   const selected = navigation?.current?.path;

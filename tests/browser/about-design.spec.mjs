@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 test.use({ screenshot: 'off' });
 
-async function fixture(page, { people = [] } = {}) {
-  const state = { errors: [], frames: [], writes: [] };
+async function fixture(page, { people = [], content = {}, sections = [] } = {}) {
+  const state = { errors: [], reads: [], writes: [] };
   page.on('pageerror', (error) => state.errors.push(error.message));
   await page.addInitScript(() => {
     try {
@@ -18,68 +18,94 @@ async function fixture(page, { people = [] } = {}) {
   );
   await page.route('**/preview-api/**', (route) => {
     const req = route.request(),
-      path = new URL(req.url()).pathname;
+      url = new URL(req.url()),
+      path = url.pathname;
+    state.reads.push(path);
     if (['POST', 'PATCH'].includes(req.method()) && !path.includes('/rpc/'))
       state.writes.push(path);
-    const data = path.endsWith('/team_members')
-      ? people
-      : path.endsWith('/rpc/get_public_form')
-        ? {
-            id: 'contact-form',
-            slug: 'contact-us',
-            title: 'Send a message',
-            description: 'Contact the centre.',
-            version: 1,
-            enabled: true,
-            schema: {
-              fields: [
-                { id: 'name', label: 'Your name', type: 'text', required: true },
-                { id: 'email', label: 'Email address', type: 'email', required: true },
-                { id: 'message', label: 'Your message', type: 'textarea', required: true },
-              ],
-            },
-          }
-        : [];
+    const data = path.endsWith('/page_content')
+      ? Object.entries(content).map(([content_key, content_value]) => ({
+          content_key,
+          content_value,
+        }))
+      : path.endsWith('/page_sections')
+        ? sections.filter(
+            (section) => `eq.${section.page_path}` === url.searchParams.get('page_path'),
+          )
+        : path.endsWith('/team_members')
+          ? people
+          : path.endsWith('/rpc/get_public_form')
+            ? {
+                id: 'contact-form',
+                slug: 'contact-us',
+                title: 'Send a message',
+                description: 'Contact the centre.',
+                version: 1,
+                enabled: true,
+                schema: {
+                  fields: [
+                    { id: 'name', label: 'Your name', type: 'text', required: true },
+                    { id: 'email', label: 'Email address', type: 'email', required: true },
+                    { id: 'message', label: 'Your message', type: 'textarea', required: true },
+                  ],
+                },
+              }
+            : [];
     return route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
   });
   return state;
 }
 
 for (const width of [320, 390, 1280]) {
-  test(`About pages use compact visual layouts and preserve navigation at ${width}px`, async ({
+  test(`one About page keeps sections compact and old links working at ${width}px`, async ({
     page,
   }) => {
     test.setTimeout(45000);
     await page.setViewportSize({ width, height: 900 });
     const state = await fixture(page);
-    for (const [path, selector] of [
-      ['/about', '.about-overview'],
-      ['/about/history', '.about-history'],
-      ['/team', '.about-team'],
-      ['/social-media', '.about-social'],
-      ['/financial-history', '.about-finances'],
-      ['/contact', '.about-contact'],
+    await page.goto('/about');
+    const combined = page.locator('.about-combined');
+    await expect(combined).toBeVisible();
+    await expect(combined.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(combined.locator('.about-photo')).toHaveCount(1);
+    await expect(
+      combined.getByRole('navigation', { name: 'On this page' }).getByRole('link'),
+    ).toHaveCount(6);
+    await expect(combined.locator(':scope > .about-section')).toHaveCount(5);
+    await expect(combined.locator('.about-timeline')).toContainText('1979');
+    await expect(combined.locator('.about-financial-totals')).toContainText('£545,030');
+    await expect(combined.locator('details[open]')).toHaveCount(0);
+    await expect(combined.locator('iframe')).toHaveCount(0);
+    expect(state.reads.filter((path) => /team_members|get_public_form/.test(path))).toEqual([]);
+    const photo = combined.locator('.about-photo img');
+    await expect
+      .poll(() => photo.evaluate((img) => img.complete && img.naturalWidth > 0))
+      .toBe(true);
+    expect((await photo.boundingBox()).height).toBeLessThan(width < 700 ? 260 : 500);
+    expect((await combined.boundingBox()).height).toBeLessThan(width < 700 ? 2400 : 1750);
+    await combined
+      .getByRole('navigation', { name: 'On this page' })
+      .getByRole('link', { name: 'Our story', exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/about#history$/);
+    await expect(page.locator('#history')).toBeFocused();
+    for (const [path, id] of [
+      ['/about/history', 'history'],
+      ['/team', 'team'],
+      ['/social-media', 'social'],
+      ['/financial-history', 'finances'],
+      ['/contact', 'contact'],
     ]) {
       await page.goto(path);
-      const content = page.locator(selector);
+      await expect(page).toHaveURL(new RegExp(`/about#${id}$`));
+      const content = page.locator(`#${id}`);
       await expect(content).toBeVisible();
-      await expect(content.getByRole('heading', { level: 1 })).toHaveCount(1);
+      await expect(page.locator('.about-combined').getByRole('heading', { level: 1 })).toHaveCount(
+        1,
+      );
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
-      if (['/about', '/about/history', '/social-media'].includes(path)) {
-        const photo = content.locator('.about-photo img');
-        await expect
-          .poll(() => photo.evaluate((img) => img.complete && img.naturalWidth > 0))
-          .toBe(true);
-        expect((await photo.boundingBox()).height).toBeLessThan(width < 700 ? 260 : 500);
-      }
-      if (path === '/about') {
-        await expect(
-          content.getByRole('navigation', { name: 'Explore About JIC' }).getByRole('link'),
-        ).toHaveCount(4);
-        expect((await content.boundingBox()).height).toBeLessThan(width < 700 ? 1700 : 1100);
-      }
       if (path === '/team') {
         await expect(
           content.getByText('Profiles are not available yet.', { exact: false }),
@@ -148,7 +174,7 @@ test('social previews load on request and return focus to the compact channel bu
   await page.goto('/social-media');
   const content = page.locator('.about-social');
   await expect(content.locator('.about-channel')).toHaveCount(6);
-  await expect(content.locator('.about-photo')).toHaveCount(1);
+  await expect(page.locator('.about-photo')).toHaveCount(1);
   await expect(page.locator('.ops-social-live iframe')).toHaveCount(0);
   const button = content.getByRole('button', { name: 'Preview Facebook', exact: true });
   await button.click();
@@ -159,5 +185,64 @@ test('social previews load on request and return focus to the compact channel bu
   await page.getByRole('button', { name: 'Close preview', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(button).toBeFocused();
+  expect(state.errors).toEqual([]);
+});
+
+test('combined sections keep their saved content, visibility, menu labels and shared anchors', async ({
+  page,
+}) => {
+  const state = await fixture(page, {
+    content: {
+      'page:/about/history': JSON.stringify({
+        title: 'Our saved story',
+        body: 'Published history from the office.',
+      }),
+      'page:/team': JSON.stringify({ title: 'People update', body: 'Published team information.' }),
+      'page-visibility:/financial-history': 'false',
+      site_navigation: JSON.stringify({
+        labels: { '/team': 'Our community team' },
+        children: { '/about': ['/about', '/team', '/about/history', '/contact', '/social-media'] },
+      }),
+    },
+    sections: [
+      {
+        id: 'story-section',
+        page_path: '/about/history',
+        published: true,
+        title: 'History photographs',
+        body: 'A published extra section.',
+      },
+    ],
+  });
+  await page.goto('/about');
+  const content = page.locator('.about-combined');
+  await expect(
+    content.getByRole('heading', { name: 'Our saved story', exact: true }),
+  ).toBeVisible();
+  await expect(
+    content.getByText('Published history from the office.', { exact: true }),
+  ).toBeVisible();
+  await expect(content.getByText('A published extra section.', { exact: true })).toBeVisible();
+  await expect(content.getByText('Published team information.', { exact: true })).toBeVisible();
+  await expect(content.locator('#finances')).toHaveCount(0);
+  const links = content.getByRole('navigation', { name: 'On this page' }).getByRole('link');
+  await expect(links).toHaveText([
+    'Overview',
+    'Our community team',
+    'Our story',
+    'Visit & contact',
+    'Stay connected',
+  ]);
+  await links.filter({ hasText: 'Our community team' }).click();
+  await expect(page).toHaveURL(/\/about#team$/);
+  await expect(page.locator('#team')).toBeFocused();
+  await expect(page.locator('#team details')).toHaveAttribute('open', '');
+  await page.goto('/social-media?from=shared#facebook');
+  await expect(page).toHaveURL(/\/about\?from=shared#facebook$/);
+  await expect(page.locator('#facebook')).toBeFocused();
+  await expect(page.locator('#facebook')).toHaveAttribute('href', 'https://facebook.com/JICMasjid');
+  await page.goto('/financial-history');
+  await expect(page.getByRole('heading', { name: 'Page unavailable', exact: true })).toBeVisible();
+  expect(state.writes).toEqual([]);
   expect(state.errors).toEqual([]);
 });

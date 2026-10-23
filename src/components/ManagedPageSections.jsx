@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 
-export default function ManagedPageSections() {
+export default function ManagedPageSections({ pagePath }) {
   const { pathname } = useLocation();
+  const contentPath = pagePath || pathname;
   const [sections, setSections] = useState([]);
   const [draft, setDraft] = useState(null);
 
@@ -15,12 +16,12 @@ export default function ManagedPageSections() {
       return;
     const refresh = () =>
       setDraft(
-        window.__jicPagePreview?.path === pathname ? window.__jicPagePreview.sections : null,
+        window.__jicPagePreview?.path === contentPath ? window.__jicPagePreview.sections : null,
       );
     refresh();
     window.addEventListener('jic-page-preview', refresh);
     return () => window.removeEventListener('jic-page-preview', refresh);
-  }, [pathname]);
+  }, [contentPath]);
 
   useEffect(() => {
     let active = true;
@@ -29,7 +30,7 @@ export default function ManagedPageSections() {
       supabase
         .from('page_sections')
         .select('id,section_key,title,body,background_image_url,image_urls,sort_order,published')
-        .eq('page_path', pathname)
+        .eq('page_path', contentPath)
         .eq('published', true)
         .order('sort_order', { ascending: true })
         .then(({ data, error }) => {
@@ -43,7 +44,7 @@ export default function ManagedPageSections() {
       window.removeEventListener('focus', load);
       window.removeEventListener('jic-content-updated', load);
     };
-  }, [pathname]);
+  }, [contentPath]);
 
   const shown = (draft || sections).filter((section) => section.published);
   if (!shown.length) return null;

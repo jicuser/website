@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AboutMasthead from '@/components/about/AboutMasthead';
 import { supabase } from '@/lib/supabaseClient';
 import { groupPublishedTeamMembers, TEAM_GROUPS } from '@/lib/teamMembers';
 
@@ -11,7 +10,7 @@ function TeamProfiles({ people }) {
     return (
       <p className="about-empty">
         Profiles are not available yet.{' '}
-        <Link to="/contact">
+        <Link to="/about#contact">
           Contact the centre <ArrowRight size={15} aria-hidden="true" />
         </Link>
       </p>
@@ -51,7 +50,7 @@ function TeamProfiles({ people }) {
   );
 }
 
-export default function TeamPage() {
+export default function TeamDirectory() {
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -87,12 +86,7 @@ export default function TeamPage() {
     TEAM_GROUPS.find((group) => groups[group.value].length)?.value ||
     TEAM_GROUPS[0].value;
   return (
-    <article className="about-page about-team">
-      <AboutMasthead title="Meet the Team" eyebrow="People of JIC" graphic>
-        <p>
-          Our founder members, trustees, committee and staff serve the centre and its community.
-        </p>
-      </AboutMasthead>
+    <>
       {(loading || error || Object.values(groups).some((people) => people.length)) && (
         <Tabs value={selected} onValueChange={setActive}>
           <TabsList className="jic-team-tabs about-team-tabs" aria-label="Team sections">
@@ -106,7 +100,7 @@ export default function TeamPage() {
           {TEAM_GROUPS.map(({ value, label, description }) => (
             <TabsContent key={value} value={value} className="about-team-group">
               <div className="about-section-intro">
-                <h2>{label}</h2>
+                <h3>{label}</h3>
                 <p>{description}</p>
               </div>
               {loading ? (
@@ -134,12 +128,12 @@ export default function TeamPage() {
       {!loading && !error && !team.length && <TeamProfiles people={[]} />}
       {!loading && !error && unassigned.length > 0 && (
         <section className="about-team-group" aria-labelledby="other-team-members">
-          <h2 id="other-team-members">
+          <h3 id="other-team-members">
             <Users size={22} aria-hidden="true" /> Our team
-          </h2>
+          </h3>
           <TeamProfiles people={unassigned} />
         </section>
       )}
-    </article>
+    </>
   );
 }

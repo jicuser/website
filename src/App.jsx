@@ -7,6 +7,7 @@ import { AdminSaveProvider } from '@/context/AdminSaveContext';
 import { NavigationProvider } from '@/context/NavigationContext';
 import { standaloneSections } from '@/content/sectionRoutes';
 import { PAGE_ALIASES } from '@/content/pageAliases';
+import { ABOUT_PATHS } from '@/content/aboutSections';
 import MainLayout from '@/layouts/MainLayout';
 import CanonicalPageRedirect from '@/components/shell/CanonicalPageRedirect';
 import RouteScrollReset from '@/components/shell/RouteScrollReset';
@@ -23,7 +24,6 @@ const SermonArchive = lazy(() =>
   import('@/components/workspace/Sermons').then((module) => ({ default: module.SermonArchive })),
 );
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
 const ContentPage = lazy(() => import('@/pages/ContentPage'));
 const AdultCoursesPage = lazy(() => import('@/pages/AdultCoursesPage'));
@@ -31,7 +31,6 @@ const EducationPage = lazy(() => import('@/pages/EducationPage'));
 const ProgrammesPage = lazy(() => import('@/pages/ProgrammesPage'));
 const EducationEnrolmentPage = lazy(() => import('@/pages/EducationEnrolmentPage'));
 const ClassesCoursesPage = lazy(() => import('@/pages/ClassesCoursesPage'));
-const FinancialHistoryPage = lazy(() => import('@/pages/FinancialHistoryPage'));
 const HallBookingPage = lazy(() => import('@/pages/HallBookingPage'));
 const MadrassahEnrolmentPage = lazy(() => import('@/pages/MadrassahEnrolmentPage'));
 const MadrassahPage = lazy(() => import('@/pages/MadrassahPage'));
@@ -61,12 +60,10 @@ const SectionPage = lazy(() => import('@/pages/SectionPage'));
 const GuidedServicePage = lazy(() => import('@/pages/GuidedServicePage'));
 const CertificatesGuidePage = lazy(() => import('@/pages/CertificatesGuidePage'));
 const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
-const TeamPage = lazy(() => import('@/pages/TeamPage'));
 const WorshipPage = lazy(() => import('@/pages/WorshipPage'));
 const RadioPlayerPage = lazy(() => import('@/pages/RadioPlayerPage'));
 const TvDisplayPage = lazy(() => import('@/pages/TvDisplayPage'));
 const YouthPage = lazy(() => import('@/pages/YouthPage'));
-const SocialMediaPage = lazy(() => import('@/pages/SocialMediaPage'));
 const SearchPage = lazy(() => import('@/pages/SearchPage'));
 
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
@@ -141,13 +138,11 @@ function AppRoutes() {
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
 
-            <Route path="about" element={<AboutPage />} />
-            <Route path="team" element={<TeamPage />} />
-            <Route path="contact" element={<ContactPage />} />
+            {ABOUT_PATHS.map((path) => (
+              <Route key={path} path={path.slice(1)} element={<AboutPage />} />
+            ))}
             <Route path="talks" element={<SermonArchive />} />
-            <Route path="financial-history" element={<FinancialHistoryPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
-            <Route path="social-media" element={<SocialMediaPage />} />
             <Route path="search" element={<SearchPage />} />
 
             <Route
@@ -207,35 +202,37 @@ function AppRoutes() {
             <Route path="youth" element={<YouthPage />} />
             <Route path="youth/itikaf" element={<YouthPage view="itikaf" />} />
 
-            {standaloneSections.map(([path, eyebrow, title, backTo]) => (
-              <Route
-                key={path}
-                path={path}
-                element={
-                  path.startsWith('projects/') ? (
-                    ['projects/current-appeals', 'projects/how-to-support'].includes(path) ? (
-                      <DonationsPage />
+            {standaloneSections
+              .filter(([path]) => path !== 'about/history')
+              .map(([path, eyebrow, title, backTo]) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                    path.startsWith('projects/') ? (
+                      ['projects/current-appeals', 'projects/how-to-support'].includes(path) ? (
+                        <DonationsPage />
+                      ) : (
+                        <ProjectsPage />
+                      )
+                    ) : [
+                        'services/nikah',
+                        'funerals',
+                        'funerals/what-to-do',
+                        'funerals/contact-support',
+                      ].includes(path) ? (
+                      <GuidedServicePage />
                     ) : (
-                      <ProjectsPage />
+                      <SectionPage
+                        eyebrow={eyebrow}
+                        title={title}
+                        backTo={backTo}
+                        backLabel={`Back to ${eyebrow}`}
+                      />
                     )
-                  ) : [
-                      'services/nikah',
-                      'funerals',
-                      'funerals/what-to-do',
-                      'funerals/contact-support',
-                    ].includes(path) ? (
-                    <GuidedServicePage />
-                  ) : (
-                    <SectionPage
-                      eyebrow={eyebrow}
-                      title={title}
-                      backTo={backTo}
-                      backLabel={`Back to ${eyebrow}`}
-                    />
-                  )
-                }
-              />
-            ))}
+                  }
+                />
+              ))}
 
             <Route path="*" element={<NotFoundPage />} />
           </Route>

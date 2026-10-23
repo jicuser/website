@@ -5,6 +5,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import { supplementalContentPaths } from '@/content/editablePages';
+import { ABOUT_PATHS } from '@/content/aboutSections';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
 import FloatingPageTools from '@/components/shell/FloatingPageTools';
 import RelatedContent from '@/components/RelatedContent';
@@ -41,6 +42,7 @@ function PublicLayout() {
   const visible = isPageVisible(getContent, pathname) || isAdmin;
   const preview = new URLSearchParams(search).get('preview') === '1';
   const isHome = pathname === '/';
+  const isAbout = ABOUT_PATHS.includes(pathname);
   const showReminder =
     isHome ||
     pathname.startsWith('/worship') ||
@@ -81,13 +83,17 @@ function PublicLayout() {
             >
               <Outlet />
             </Suspense>
-            {supplementalContentPaths.has(pathname) && pathname !== '/services/hall-booking' && (
-              <ManagedPageContent optional headingLevel={2} className="jic-page-addition" />
+            {!isAbout &&
+              supplementalContentPaths.has(pathname) &&
+              pathname !== '/services/hall-booking' && (
+                <ManagedPageContent optional headingLevel={2} className="jic-page-addition" />
+              )}
+            {!isAbout && pathname !== '/services/hall-booking' && (
+              <ManagedPageSections key={pathname} />
             )}
-            {pathname !== '/services/hall-booking' && <ManagedPageSections key={pathname} />}
             {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
             {!isDiscovery && !isTask && <PublishedPageLinks />}
-            {!isDiscovery && !isTask && <RelatedContent />}
+            {!isAbout && !isDiscovery && !isTask && <RelatedContent />}
           </div>
         ) : (
           <section className="jic-page-loading">
