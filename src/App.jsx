@@ -176,6 +176,7 @@ function AppRoutes() {
             <Route path="services/community" element={<ServicesPage />} />
             <Route path="services/hall-booking" element={<HallBookingPage />} />
             <Route path="ramadan" element={<RamadanPage />} />
+            <Route path="ramadan/suhoor" element={<RamadanPage kind="suhoor" />} />
             <Route path="ramadan/iftar" element={<RamadanPage kind="iftar" />} />
             <Route path="ramadan/daily-giving" element={<RamadanPage kind="daily" />} />
             <Route path="donate" element={<DonationsPage />} />

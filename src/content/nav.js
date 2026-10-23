@@ -73,6 +73,7 @@ export const NAV_GROUPS = [
     children: [
       { name: 'Overview', path: '/ramadan' },
       { name: 'Sponsor an Iftar', path: '/ramadan/iftar' },
+      { name: 'Sponsor a Suhoor', path: '/ramadan/suhoor' },
       { name: 'Daily Giving', path: '/ramadan/daily-giving' },
     ],
   },

@@ -25,7 +25,7 @@ const contentTypes = [
   ['next', 'Next prayer'],
   ['clock', 'Clock'],
   ['text', 'Text notice'],
-  ['ramadan', 'Ramadan calendar'],
+  ['ramadan', 'Meal sponsorships'],
 ];
 const typeOf = (layer) =>
   layer.type === 'input'
@@ -441,7 +441,7 @@ export default function ContentEditorDialog({
                   )}
                   {draft.type === 'ramadan' && (
                     <label>
-                      Calendar
+                      Sponsorship board
                       <select
                         value={draft.ramadan_kind || 'iftar'}
                         disabled={disabled}
@@ -450,6 +450,7 @@ export default function ContentEditorDialog({
                         }
                       >
                         <option value="iftar">Iftar sponsorships</option>
+                        <option value="suhoor">Suhoor sponsorships</option>
                         <option value="daily">Daily Giving</option>
                       </select>
                     </label>

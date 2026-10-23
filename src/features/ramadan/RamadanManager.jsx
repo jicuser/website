@@ -2,12 +2,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
-import MonthCalendar from '@/components/calendar/MonthCalendar';
+import SponsorshipDays from './SponsorshipDays';
+import RamadanOptions from './RamadanOptions';
 import { fullDate, seasonDays } from '@/lib/bookingCalendar';
 import { collectPages } from '@/lib/formDownloads';
 import { printTable } from '@/lib/printTable';
 import { money, toPence } from '@/features/operations/model';
-import { RAMADAN_KINDS, RAMADAN_COLOURS } from './model';
+import { RAMADAN_KINDS } from './model';
 import '@/styles/ramadan.css';
 
 const blankSeason = {
@@ -15,6 +16,7 @@ const blankSeason = {
   start_date: '',
   day_count: 30,
   iftar_amount: '',
+  suhoor_amount: '',
   daily_amount: '',
   published: false,
 };
@@ -38,7 +40,8 @@ export default function RamadanManager() {
     [setup, setSetup] = useState(blankSeason),
     [setupOpen, setSetupOpen] = useState(false),
     [kind, setKind] = useState('iftar'),
-    [month, setMonth] = useState(() => new Date()),
+    [daySettings, setDaySettings] = useState([]),
+    [manageDays, setManageDays] = useState(false),
     [selected, setSelected] = useState(''),
     [form, setForm] = useState(blankSponsor),
     [editing, setEditing] = useState(null),
@@ -67,7 +70,7 @@ export default function RamadanManager() {
   useEffect(() => {
     if (!allowed) return;
     loadSeasons().catch(() => {
-      setError('Could not load Ramadan calendars.');
+      setError('Could not load Ramadan sponsorships.');
       setLoading(false);
     });
   }, [allowed, loadSeasons]);
@@ -82,9 +85,9 @@ export default function RamadanManager() {
     setSetup({
       ...season,
       iftar_amount: season.iftar_target_pence ? String(season.iftar_target_pence / 100) : '',
+      suhoor_amount: season.suhoor_target_pence ? String(season.suhoor_target_pence / 100) : '',
       daily_amount: season.daily_target_pence ? String(season.daily_target_pence / 100) : '',
     });
-    setMonth(new Date(`${season.start_date}T12:00:00`));
     setSelected('');
     setEditing(null);
     setForm(blankSponsor);
@@ -93,6 +96,7 @@ export default function RamadanManager() {
     const version = ++loadVersion.current;
     if (!allowed || !seasonId) {
       setRecords([]);
+      setDaySettings([]);
       setLoading(false);
       return;
     }
@@ -110,7 +114,15 @@ export default function RamadanManager() {
         if (result.error) throw result.error;
         return result.data || [];
       });
-      if (version === loadVersion.current) setRecords(data);
+      const settings = await supabase
+        .from('ramadan_day_settings')
+        .select('kind,day_date,enabled')
+        .eq('season_id', seasonId);
+      if (settings.error) throw settings.error;
+      if (version === loadVersion.current) {
+        setRecords(data);
+        setDaySettings(settings.data || []);
+      }
     } catch {
       if (version === loadVersion.current) setError('Could not load sponsorships. Try refreshing.');
     } finally {
@@ -139,16 +151,35 @@ export default function RamadanManager() {
   }
   const current = records.filter((row) => row.kind === kind && row.season_id === seasonId);
   const pending = current.filter((row) => row.status === 'pending').length;
-  const validDates = new Set(days.map((day) => day.date));
+  const dayEnabled = (date) =>
+    daySettings.find((row) => row.kind === kind && row.day_date === date)?.enabled !== false;
+  async function toggleDays(dates, enabled) {
+    await act(async () => {
+      const result = await supabase.rpc('save_ramadan_days', {
+        p_season: seasonId,
+        p_kind: kind,
+        p_dates: dates,
+        p_enabled: enabled,
+      });
+      if (result.error || result.data !== dates.length)
+        throw new Error(result.error?.message || 'Days were not saved.');
+      await loadRecords();
+      setMessage(
+        `${dates.length === 1 ? 'Day' : `${dates.length} days`} ${enabled ? 'opened' : 'closed'}.`,
+      );
+    });
+  }
   function selectDay(date) {
     setSelected(date);
     setEditing(null);
-    setForm({ ...blankSponsor, amount: kind === 'iftar' ? setup.iftar_amount : '' });
+    setForm({
+      ...blankSponsor,
+      amount: kind === 'suhoor' ? setup.suhoor_amount : kind === 'iftar' ? setup.iftar_amount : '',
+    });
   }
   function edit(row) {
     setKind(row.kind);
     setSelected(row.day_date);
-    setMonth(new Date(`${row.day_date}T12:00:00`));
     setEditing(row.id);
     setForm({ ...row, amount: row.amount_pence ? String(row.amount_pence / 100) : '' });
   }
@@ -161,15 +192,16 @@ export default function RamadanManager() {
         start_date: setup.start_date,
         day_count: Number(setup.day_count),
         iftar_target_pence: setup.iftar_amount ? toPence(setup.iftar_amount) : 0,
+        suhoor_target_pence: setup.suhoor_amount ? toPence(setup.suhoor_amount) : 0,
         daily_target_pence: setup.daily_amount ? toPence(setup.daily_amount) : 0,
         published: setup.published,
       };
       const result = await supabase.rpc('save_ramadan_season', { p_body: payload });
       if (result.error || !result.data)
-        throw new Error(result.error?.message || 'Calendar was not saved.');
+        throw new Error(result.error?.message || 'Setup was not saved.');
       await loadSeasons(result.data);
       setSetupOpen(false);
-      setMessage('Calendar saved.');
+      setMessage('Sponsorship setup saved.');
     });
   }
   async function saveSponsor(event) {
@@ -213,7 +245,7 @@ export default function RamadanManager() {
         <div className="booking-actions">
           {seasons.length > 0 && (
             <label>
-              <span className="sr-only">Ramadan calendar</span>
+              <span className="sr-only">Ramadan sponsorships</span>
               <select value={seasonId} onChange={(event) => setSeasonId(event.target.value)}>
                 {seasons.map((value) => (
                   <option key={value.id} value={value.id}>
@@ -233,13 +265,16 @@ export default function RamadanManager() {
                   iftar_amount: season.iftar_target_pence
                     ? String(season.iftar_target_pence / 100)
                     : '',
+                  suhoor_amount: season.suhoor_target_pence
+                    ? String(season.suhoor_target_pence / 100)
+                    : '',
                   daily_amount: season.daily_target_pence
                     ? String(season.daily_target_pence / 100)
                     : '',
                 });
             }}
           >
-            Calendar setup
+            Sponsorship setup
           </button>
           <button
             onClick={() => {
@@ -270,9 +305,10 @@ export default function RamadanManager() {
       </header>
       {error && <p role="alert">{error}</p>}
       {message && <p role="status">{message}</p>}
+      <RamadanOptions />
       {(setupOpen || !season) && (
         <form className="booking-panel" onSubmit={saveSetup}>
-          <h3>Calendar setup</h3>
+          <h3>Sponsorship setup</h3>
           <div className="booking-fields">
             <label className="booking-field">
               Name
@@ -309,6 +345,16 @@ export default function RamadanManager() {
               </select>
             </label>
             <label className="booking-field">
+              Suhoor target per day (£, optional)
+              <input
+                inputMode="decimal"
+                value={setup.suhoor_amount}
+                onChange={(event) =>
+                  setSetup((current) => ({ ...current, suhoor_amount: event.target.value }))
+                }
+              />
+            </label>
+            <label className="booking-field">
               Iftar target per day (£, optional)
               <input
                 inputMode="decimal"
@@ -341,7 +387,7 @@ export default function RamadanManager() {
           </label>
           <div className="booking-actions">
             <button className="primary" disabled={busy}>
-              Save calendar
+              Save setup
             </button>
             {season && (
               <button type="button" onClick={() => setSetupOpen(false)}>
@@ -399,38 +445,71 @@ export default function RamadanManager() {
           </div>
           {!season.published && (
             <p>
-              This calendar is a draft. Publish it in Calendar setup to show it on the website and
-              screens.
+              These sponsorships are a draft. Publish in Sponsorship setup to show it on the website
+              and screens.
             </p>
           )}
           <div className="booking-layout">
             <div className="booking-panel">
               {loading && <p role="status">Loading sponsorships…</p>}
-              <MonthCalendar
-                month={month}
-                onMonthChange={setMonth}
+              <div className="booking-actions">
+                <button
+                  type="button"
+                  aria-pressed={manageDays}
+                  disabled={busy}
+                  onClick={() => setManageDays((value) => !value)}
+                >
+                  {manageDays ? 'Done opening / closing days' : 'Open or close days'}
+                </button>
+                {manageDays && (
+                  <>
+                    <button
+                      disabled={busy}
+                      onClick={() =>
+                        toggleDays(
+                          days.map((day) => day.date),
+                          true,
+                        )
+                      }
+                    >
+                      Open all days
+                    </button>
+                    <button
+                      disabled={busy}
+                      onClick={() =>
+                        toggleDays(
+                          days.map((day) => day.date),
+                          false,
+                        )
+                      }
+                    >
+                      Close all days
+                    </button>
+                  </>
+                )}
+              </div>
+              <SponsorshipDays
+                days={days}
+                kind={kind}
                 selected={selected ? [selected] : []}
-                onSelect={selectDay}
+                manage={manageDays}
                 disabled={busy || loading}
+                onSelect={(date) =>
+                  manageDays ? toggleDays([date], !dayEnabled(date)) : selectDay(date)
+                }
                 dayInfo={(date) => {
-                  const day = current.filter(
+                  const entries = current.filter(
                     (row) => row.day_date === date && row.status !== 'cancelled',
                   );
-                  const state = day.some((row) => row.status === 'confirmed')
-                    ? 'confirmed'
-                    : day.length
-                      ? 'pending'
-                      : 'available';
                   return {
-                    label: validDates.has(date)
-                      ? state === 'confirmed'
-                        ? 'Confirmed'
-                        : state === 'pending'
-                          ? 'Requested'
-                          : 'Available'
-                      : '—',
-                    colour: RAMADAN_COLOURS[state],
-                    disabled: !validDates.has(date),
+                    enabled: dayEnabled(date),
+                    status: !dayEnabled(date)
+                      ? 'closed'
+                      : entries.some((row) => row.status === 'confirmed')
+                        ? 'confirmed'
+                        : entries.length
+                          ? 'pending'
+                          : 'available',
                   };
                 }}
               />
@@ -442,7 +521,7 @@ export default function RamadanManager() {
                 >
                   Open screen display
                 </Link>
-                {auth.can('tv') && <Link to="/admin?section=tv">Choose on centre screens</Link>}
+                {auth.can('tv') && <Link to="/admin?section=tv">Choose TV layout</Link>}
               </div>
               {selected &&
                 current
@@ -594,7 +673,9 @@ export default function RamadanManager() {
                     <tr key={row?.id || `${date}-${index}`}>
                       <td>{number}</td>
                       <td>{fullDate(date)}</td>
-                      <td>{row ? statusLabel[row.status] : 'Available'}</td>
+                      <td>
+                        {row ? statusLabel[row.status] : dayEnabled(date) ? 'Available' : 'Closed'}
+                      </td>
                       <td>{row?.sponsor_name || '—'}</td>
                       <td>{[row?.phone, row?.email].filter(Boolean).join(' / ') || '—'}</td>
                       <td>{row ? money(row.amount_pence) : '—'}</td>

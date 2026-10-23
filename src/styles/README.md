@@ -20,6 +20,7 @@
 | `content-workflow.css`   | Posters, programme pages and structured content workflow                             |
 | `projects.css`           | Building project tiles                                                               |
 | `booking-calendars.css`  | Shared hall and Ramadan day selectors, editors and printable tables                  |
+| `site-controls.css`      | Page visibility switches shared by website and Ramadan settings.                     |
 | `ramadan.css`            | Ramadan choices, sponsorship boards and screen layouts                               |
 | `worship.css`            | Worship pages and Qur'an reader                                                      |
 | `tv.css`                 | Dedicated mosque-screen scale and layout                                             |

@@ -48,6 +48,7 @@ function PublicLayout() {
   const isDiscovery = ['/search', '/social-media'].includes(pathname);
   const isTask =
     pathname.startsWith('/forms/') ||
+    pathname.startsWith('/ramadan') ||
     pathname === '/donate' ||
     pathname.startsWith('/fundraise') ||
     pathname.startsWith('/get-involved') ||

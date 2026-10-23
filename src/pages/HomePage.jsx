@@ -24,6 +24,8 @@ import { displayTime } from '@/lib/timetable';
 import { isPageVisible } from '@/lib/pageVisibility';
 import { cn } from '@/lib/utils';
 
+const HomeRamadan = lazy(() => import('@/features/ramadan/HomeRamadan'));
+
 const ServiceExplorer = lazy(() => import('@/features/services/ServiceExplorer'));
 
 const DEFAULT_CARDS = [
@@ -219,6 +221,12 @@ export default function HomePage() {
               Watch <ArrowRight size={17} aria-hidden="true" />
             </span>
           </a>
+        )}
+
+        {getContent('ramadan:home-enabled', 'false') === 'true' && (
+          <Suspense fallback={null}>
+            <HomeRamadan />
+          </Suspense>
         )}
 
         <ProgrammePosters />

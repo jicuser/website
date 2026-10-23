@@ -1,21 +1,31 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Moon, ArrowRight } from 'lucide-react';
+import { Heart, Moon, Sun, ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import MonthCalendar from '@/components/calendar/MonthCalendar';
+import { useContent } from '@/context/ContentContext';
+import { isPageVisible } from '@/lib/pageVisibility';
 import { fullDate, seasonDays } from '@/lib/bookingCalendar';
 import { money, toPence } from '@/features/operations/model';
 import { printTable } from '@/lib/printTable';
+import SponsorshipDays from './SponsorshipDays';
 import useRamadanCalendar from './useRamadanCalendar';
-import { RAMADAN_KINDS, RAMADAN_COLOURS, ramadanDay, ramadanStatus } from './model';
-import '@/styles/ramadan.css';
+import {
+  RAMADAN_KINDS,
+  RAMADAN_PATHS,
+  RAMADAN_COLOURS,
+  canSponsorDay,
+  ramadanDay,
+  ramadanOpen,
+  ramadanStatus,
+} from './model';
 
+const icons = { iftar: Moon, suhoor: Sun, daily: Heart };
 export default function RamadanPage({ kind = null }) {
-  const state = useRamadanCalendar(),
+  const state = useRamadanCalendar(true),
     season = state.data?.season;
+  const { getContent } = useContent();
   const days = useMemo(() => seasonDays(season), [season]);
-  const [month, setMonth] = useState(() => new Date()),
-    [selected, setSelected] = useState([]),
+  const [selected, setSelected] = useState([]),
     [name, setName] = useState(''),
     [contact, setContact] = useState(''),
     [amount, setAmount] = useState(''),
@@ -25,35 +35,36 @@ export default function RamadanPage({ kind = null }) {
     [receipt, setReceipt] = useState('');
   const requestKey = useRef(crypto.randomUUID()),
     table = useRef(null);
+  const target = season?.[`${kind}_target_pence`] || 0;
   useEffect(() => {
-    if (!season?.id) return;
-    setMonth(new Date(`${season.start_date}T12:00:00`));
     setSelected([]);
     setReceipt('');
+    setError('');
     requestKey.current = crypto.randomUUID();
-    setAmount(
-      kind === 'daily'
-        ? '5'
-        : season.iftar_target_pence
-          ? String(season.iftar_target_pence / 100)
-          : '',
-    );
-  }, [season?.id, season?.start_date, season?.iftar_target_pence, kind]);
-  const validDates = new Set(days.map((day) => day.date));
-  const eligible = days.filter(
-    (day) => kind !== 'iftar' || ramadanDay(state.data, kind, day.date).status !== 'confirmed',
+    setAmount(kind === 'daily' ? '5' : target ? String(target / 100) : '');
+  }, [season?.id, season?.start_date, target, kind]);
+  useEffect(() => {
+    if (receipt || busy) return;
+    setSelected((current) => {
+      const available = current.filter((date) => canSponsorDay(state.data, kind, date));
+      return available.length === current.length ? current : available;
+    });
+  }, [state.data, kind, receipt, busy]);
+  const choices = Object.entries(RAMADAN_KINDS).filter(
+    ([key]) => ramadanOpen(state.data, key) && isPageVisible(getContent, RAMADAN_PATHS[key]),
   );
+  const eligible = days.filter((day) => canSponsorDay(state.data, kind, day.date));
+  const open = kind && ramadanOpen(state.data, kind);
   async function submit(event) {
     event.preventDefault();
-    if (busy || !selected.length) return;
+    if (busy || !selected.length || !open) return;
     setError('');
-    let pence = 0;
+    let pence;
     try {
       pence = amount ? toPence(amount) : 0;
       if (kind === 'daily' && !pence) throw new Error('Enter your amount per day.');
     } catch (failure) {
       setError(failure.message);
-      state.refresh();
       return;
     }
     setBusy(true);
@@ -87,39 +98,44 @@ export default function RamadanPage({ kind = null }) {
       state.refresh();
     } catch (failure) {
       setError(failure.message);
+      state.refresh();
     } finally {
       setBusy(false);
     }
   }
-  const title = kind ? RAMADAN_KINDS[kind] : 'Ramadan';
+  const title = kind ? RAMADAN_KINDS[kind] : 'Ramadan meal sponsorships';
   return (
-    <div className="booking-workspace">
+    <div className="booking-workspace sponsorship-page">
       <header>
+        <span className="sponsorship-eyebrow">RAMADAN · GIVE TOGETHER</span>
         <h1>{title}</h1>
         <p>
-          {kind === 'iftar'
-            ? 'Choose your Iftar day and send a sponsorship request.'
-            : kind === 'daily'
-              ? 'Choose the days you would like to support.'
-              : 'Share the blessings of Ramadan.'}
+          {kind === 'daily'
+            ? 'Choose the days you would like to support.'
+            : kind
+              ? 'Choose a day to sponsor a meal.'
+              : 'Sponsor an Iftar or Suhoor meal for the community.'}
         </p>
       </header>
-      {!kind && (
-        <div className="ramadan-options">
-          {Object.entries(RAMADAN_KINDS).map(([key, label]) => (
-            <Link
-              className="booking-panel ramadan-option"
-              key={key}
-              to={key === 'iftar' ? '/ramadan/iftar' : '/ramadan/daily-giving'}
-            >
-              {key === 'iftar' ? <Moon size={24} /> : <Heart size={24} />}
-              <strong>{label}</strong>
-              <ArrowRight size={18} />
-            </Link>
-          ))}
-        </div>
+      {(!state.loading || season) && choices.length > 0 && (
+        <nav className="sponsorship-kind-links" aria-label="Ramadan sponsorship options">
+          {choices.map(([key, label]) => {
+            const Icon = icons[key];
+            return (
+              <Link
+                key={key}
+                to={RAMADAN_PATHS[key]}
+                aria-current={kind === key ? 'page' : undefined}
+              >
+                <Icon size={19} />
+                <span>{label}</span>
+                <ArrowRight size={16} />
+              </Link>
+            );
+          })}
+        </nav>
       )}
-      {state.loading && !season && <p role="status">Loading calendar…</p>}
+      {state.loading && !season && <p role="status">Loading sponsorships…</p>}
       {state.error && (
         <p role="alert">
           {state.error}{' '}
@@ -130,21 +146,35 @@ export default function RamadanPage({ kind = null }) {
       )}
       {!state.loading && !state.error && !season && (
         <section className="booking-panel">
-          <h2>Calendar coming soon</h2>
-          <p>The centre will publish its Ramadan dates here.</p>
+          <h2>Meal bookings coming soon</h2>
+          <p>The centre will open sponsorship days here.</p>
           <Link className="booking-button" to="/contact">
             Contact the centre
           </Link>
         </section>
       )}
-      {season && kind && (
+      {season && kind && !open && (
+        <section className="booking-panel">
+          <h2>Bookings are closed</h2>
+          <p>Please choose another sponsorship option or contact the centre.</p>
+          <Link className="booking-button" to="/ramadan">
+            View sponsorships
+          </Link>
+        </section>
+      )}
+      {season && kind && open && (
         <>
           <div className="booking-layout">
-            <div className="booking-panel">
-              <h2>{season.title}</h2>
-              <MonthCalendar
-                month={month}
-                onMonthChange={setMonth}
+            <section className="booking-panel">
+              <div className="sponsorship-days-heading">
+                <h2>Choose your days</h2>
+                <span>
+                  {eligible.length} {kind === 'daily' ? 'days open' : 'days available'}
+                </span>
+              </div>
+              <SponsorshipDays
+                days={days}
+                kind={kind}
                 selected={selected}
                 onSelect={(date) => {
                   if (receipt) return;
@@ -155,18 +185,13 @@ export default function RamadanPage({ kind = null }) {
                   );
                 }}
                 disabled={busy || !!receipt}
-                dayInfo={(date) => {
-                  const day = ramadanDay(state.data, kind, date);
-                  return {
-                    label: validDates.has(date) ? ramadanStatus(kind, day.status) : '—',
-                    colour: RAMADAN_COLOURS[day.status],
-                    disabled:
-                      !validDates.has(date) || (kind === 'iftar' && day.status === 'confirmed'),
-                  };
-                }}
+                dayInfo={(date) => ({
+                  ...ramadanDay(state.data, kind, date),
+                  disabled: !canSponsorDay(state.data, kind, date),
+                })}
               />
               <div className="booking-key">
-                {['available', 'pending', 'confirmed'].map((status) => (
+                {['available', 'pending', 'confirmed', 'closed'].map((status) => (
                   <span key={status}>
                     <i
                       className="booking-dot"
@@ -178,22 +203,24 @@ export default function RamadanPage({ kind = null }) {
               </div>
               {!receipt && (
                 <div className="booking-actions">
-                  <button
-                    disabled={busy}
-                    onClick={() => setSelected(eligible.map((day) => day.date))}
-                  >
-                    {kind === 'daily' ? 'All Ramadan' : 'Select available days'}
-                  </button>
-                  <button disabled={busy} onClick={() => setSelected([])}>
+                  {kind === 'daily' && (
+                    <button
+                      disabled={busy}
+                      onClick={() => setSelected(eligible.map((day) => day.date))}
+                    >
+                      Choose all open days
+                    </button>
+                  )}
+                  <button disabled={busy || !selected.length} onClick={() => setSelected([])}>
                     Clear selection
                   </button>
                 </div>
               )}
-            </div>
+            </section>
             {receipt ? (
-              <section className="booking-panel" role="status">
-                <h2>Request received</h2>
-                <p>The team will contact you to confirm.</p>
+              <section className="booking-panel sponsorship-receipt" role="status">
+                <h2>Booking request received</h2>
+                <p>The team will contact you to confirm your sponsorship.</p>
                 <strong>{receipt}</strong>
                 <div className="booking-actions">
                   <button
@@ -203,24 +230,24 @@ export default function RamadanPage({ kind = null }) {
                       requestKey.current = crypto.randomUUID();
                     }}
                   >
-                    Make another request
+                    {kind === 'daily' ? 'Make another request' : 'Sponsor another meal'}
                   </button>
                 </div>
               </section>
             ) : (
-              <form className="booking-panel" onSubmit={submit}>
+              <form className="booking-panel sponsorship-request" onSubmit={submit}>
                 <h2>
                   {selected.length
                     ? `${selected.length} ${selected.length === 1 ? 'day' : 'days'} selected`
-                    : 'Select your days'}
+                    : 'Your sponsorship'}
                 </h2>
-                {selected.length > 0 && (
-                  <p>
-                    {selected.length === 1
-                      ? fullDate(selected[0])
-                      : `${fullDate([...selected].sort()[0])} + ${selected.length - 1} more`}
-                  </p>
-                )}
+                <p>
+                  {selected.length === 1
+                    ? fullDate(selected[0])
+                    : selected.length
+                      ? `${fullDate([...selected].sort()[0])} + ${selected.length - 1} more`
+                      : 'Tap an available day to get started.'}
+                </p>
                 <label className="booking-field">
                   Your name
                   <input
@@ -237,13 +264,12 @@ export default function RamadanPage({ kind = null }) {
                   <input
                     required
                     maxLength={254}
-                    autoComplete="off"
                     value={contact}
                     onChange={(event) => setContact(event.target.value)}
                   />
                 </label>
                 <label className="booking-field">
-                  Amount per day (£{kind === 'iftar' ? ', optional' : ''})
+                  Amount per day (£{kind === 'daily' ? '' : ', optional'})
                   <input
                     required={kind === 'daily'}
                     inputMode="decimal"
@@ -260,21 +286,21 @@ export default function RamadanPage({ kind = null }) {
                     checked={showName}
                     onChange={(event) => setShowName(event.target.checked)}
                   />{' '}
-                  Show my name on the public sponsorship board
+                  Show my name on the sponsorship board
                 </label>
-                {error && <p role="alert">{error}</p>}
                 <div className="booking-actions">
                   <button className="primary" disabled={busy || !selected.length}>
-                    {busy ? 'Sending…' : 'Send request'}
+                    {busy ? 'Sending…' : 'Request sponsorship'}
                   </button>
                 </div>
-                <p>The team will arrange sponsorship and payment with you.</p>
+                <small>The team will arrange confirmation and payment.</small>
               </form>
             )}
           </div>
-          <section className="booking-panel ramadan-public-table">
+          {error && <p role="alert">{error}</p>}
+          <details className="booking-panel ramadan-public-table">
+            <summary>Sponsorship list & print</summary>
             <div className="booking-actions">
-              <h2>{kind === 'iftar' ? 'Iftar sponsorships' : 'Daily Giving calendar'}</h2>
               <button
                 onClick={() => {
                   try {
@@ -284,7 +310,7 @@ export default function RamadanPage({ kind = null }) {
                   }
                 }}
               >
-                Print table
+                Print sponsorships
               </button>
             </div>
             <div className="booking-table-wrap">
@@ -315,7 +341,7 @@ export default function RamadanPage({ kind = null }) {
                 </tbody>
               </table>
             </div>
-          </section>
+          </details>
         </>
       )}
     </div>

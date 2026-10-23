@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
       throw new Error('Check your details.');
     if (body.website) return json({ reference: 'REQUEST-RECEIVED' });
     if (
-      !['iftar', 'daily'].includes(body.kind) ||
+      !['iftar', 'suhoor', 'daily'].includes(body.kind) ||
       !Array.isArray(body.dates) ||
       body.dates.length < 1 ||
       body.dates.length > 30 ||
@@ -91,8 +91,10 @@ Deno.serve(async (req) => {
     if (error?.message === 'invalid_request')
       return json({ error: 'Check your details and selected dates.' }, 400);
     if (
-      error?.message.startsWith('One of those Iftar days') ||
-      error?.message.startsWith('Calendar dates changed')
+      error?.message.startsWith('One of those meal days') ||
+      error?.message.startsWith('One of those sponsorship days') ||
+      error?.message === 'These sponsorship bookings are closed.' ||
+      error?.message.startsWith('Calendar dates changed') || error?.message.startsWith('Sponsorship dates changed')
     )
       return json({ error: error.message }, 409);
     if (error) return json({ error: 'Your request was not saved. Please try again.' }, 503);

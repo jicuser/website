@@ -19,19 +19,24 @@ export const TV_BOARD_LAYOUTS = [
   {
     id: 'iftar',
     name: 'Iftar sponsorships',
-    description: 'Show sponsored and available Ramadan days with prayer times.',
+    description: 'Show Iftar meal sponsors, reserved days and available days.',
+  },
+  {
+    id: 'suhoor',
+    name: 'Suhoor sponsorships',
+    description: 'Show Suhoor meal sponsors, reserved days and available days.',
   },
   {
     id: 'daily-giving',
     name: 'Daily Giving',
-    description: 'Show the Ramadan giving calendar with prayer times.',
+    description: 'Show the Ramadan Daily Giving sponsorship board.',
   },
 ];
 
 export function tvBoardLayout(id, orientation = 'landscape') {
   const preset = TV_BOARD_LAYOUTS.find((item) => item.id === id);
   if (!preset || !['landscape', 'portrait'].includes(orientation))
-    throw new Error('Choose a valid prayer board layout and screen shape.');
+    throw new Error('Choose a valid screen layout and screen shape.');
   const portrait = orientation === 'portrait';
   const layer = (type, x, y, width, height, extra = {}) => ({
     id: `board-${type}`,
@@ -60,17 +65,9 @@ export function tvBoardLayout(id, orientation = 'landscape') {
           layer('poster', 52, 15, 45, 70),
           layer('next', 3, 88, 94, 7),
         ];
-  } else if (['iftar', 'daily-giving'].includes(id)) {
-    const content = { ramadan_kind: id === 'iftar' ? 'iftar' : 'daily' };
-    body = portrait
-      ? [
-          layer('ramadan', 3, 11, 94, 63, content),
-          layer('times', 3, 77, 94, 18, { layout: 'vertical' }),
-        ]
-      : [
-          layer('ramadan', 3, 15, 94, 60, content),
-          layer('times', 3, 78, 94, 17, { layout: 'horizontal' }),
-        ];
+  } else if (['iftar', 'suhoor', 'daily-giving'].includes(id)) {
+    const content = { ramadan_kind: id === 'daily-giving' ? 'daily' : id };
+    body = [layer('ramadan', 3, portrait ? 11 : 15, 94, portrait ? 84 : 80, content)];
   } else {
     body = portrait
       ? [

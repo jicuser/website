@@ -44,6 +44,14 @@ export const ADMIN_SECTIONS = [
       ]
     : []),
   {
+    id: 'visibility',
+    name: 'Show or hide pages',
+    permission: 'content',
+    group: 'Website content',
+    description: 'Switch website pages on or off without deleting them.',
+    keywords: ['visibility', 'hide', 'show', 'on', 'off'],
+  },
+  {
     id: 'content',
     name: 'Website pages',
     permission: 'content',
@@ -140,9 +148,8 @@ export const ADMIN_SECTIONS = [
     name: 'Ramadan',
     permission: 'ramadan',
     group: 'Centre operations',
-    description:
-      'Manage Iftar sponsorships and Daily Giving, print tables and open screen displays.',
-    keywords: ['iftar', 'sponsor', 'giving', 'calendar', 'donations'],
+    description: 'Manage Iftar and Suhoor meal bookings, Daily Giving and screen displays.',
+    keywords: ['iftar', 'suhoor', 'meal', 'sponsor', 'giving', 'donations'],
   },
   {
     id: 'finance',
