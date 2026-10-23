@@ -166,7 +166,7 @@ export default function PostersEditor({ registerBack }) {
       <h2>Posters</h2>
       <p>
         Choose a poster, select its website locations and publish. Screen layouts and per-screen
-        poster selections are managed separately in Screens & layouts.
+        poster selections are managed separately in TV screens.
       </p>
       <Link to="/admin?section=events">Manage dated event posters →</Link>
       {pagesError && (

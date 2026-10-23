@@ -40,9 +40,13 @@ export async function loadAdminOverview(client, { can, certificatesEnabled, sign
   };
   if (can('forms'))
     add('forms', async () => {
-      const legacyKinds = BUILT_IN_FORMS.filter(({ permission }) => can(permission));
-      const [result, ...legacy] = await Promise.all([
-        client.rpc('admin_forms_overview').abortSignal(signal),
+      const result = await client.rpc('admin_forms_overview').abortSignal(signal);
+      if (result.error || !Array.isArray(result.data)) throw new Error('Forms unavailable');
+      const legacyKinds = BUILT_IN_FORMS.filter(
+        ({ kind, permission }) =>
+          can(permission) && !result.data.some((form) => form.built_in_kind === kind),
+      );
+      const legacy = await Promise.all([
         ...legacyKinds.map(({ kind }) =>
           client
             .rpc('search_form_submissions', {
@@ -54,12 +58,7 @@ export async function loadAdminOverview(client, { can, certificatesEnabled, sign
             .abortSignal(signal),
         ),
       ]);
-      if (
-        result.error ||
-        !Array.isArray(result.data) ||
-        legacy.some((item) => item.error || !item.data)
-      )
-        throw new Error('Forms unavailable');
+      if (legacy.some((item) => item.error || !item.data)) throw new Error('Forms unavailable');
       return summariseForms([
         ...result.data,
         ...legacy.map(({ data }) => ({

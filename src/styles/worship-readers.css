@@ -1,0 +1,355 @@
+/* Loaded with the public reading pages, outside the startup stylesheet. */
+.worship-reading {
+  --worship-arabic-size: 32px;
+  max-width: 900px;
+  margin-inline: auto;
+}
+.worship-back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 4px;
+  color: var(--jic-text-secondary);
+  text-underline-offset: 4px;
+}
+.worship-display-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  padding: 14px 18px 18px;
+  margin-block: 18px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.worship-display-controls legend {
+  padding-inline: 5px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.worship-display-controls label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--jic-text);
+  font-size: 0.85rem;
+}
+.worship-display-controls input {
+  accent-color: var(--jic-gold-strong);
+}
+.worship-display-controls input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.worship-font-control {
+  flex-wrap: wrap;
+}
+.worship-font-control input {
+  width: 120px;
+  min-height: 44px;
+}
+.worship-font-control output {
+  min-width: 4ch;
+  font-variant-numeric: tabular-nums;
+}
+.worship-collection-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.worship-collection-picker button,
+.worship-verse-toolbar button,
+.worship-continue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.worship-collection-picker button[aria-pressed='true'],
+.worship-verse-toolbar button[aria-pressed='true'] {
+  border-color: var(--jic-gold-strong);
+  background: color-mix(in srgb, var(--jic-gold) 12%, var(--jic-surface));
+}
+.worship-collection-title {
+  margin-top: 24px;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+.worship-reading-intro,
+.worship-step-instruction {
+  margin-block: 8px 20px;
+  color: var(--jic-text-secondary);
+  line-height: 1.7;
+}
+.worship-recitation-list {
+  display: grid;
+  gap: 18px;
+}
+.worship-recitation-card {
+  padding: clamp(16px, 4vw, 28px);
+  border: 1px solid var(--jic-border);
+  border-radius: 16px;
+  background: var(--jic-surface);
+  min-width: 0;
+}
+.worship-recitation-card > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.worship-recitation-card h2,
+.worship-recitation-card h3 {
+  font-size: 1.08rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+.worship-repeat {
+  border-radius: 8px;
+  padding: 5px 9px;
+  background: color-mix(in srgb, var(--jic-gold) 12%, var(--jic-surface));
+  font-size: 0.8rem;
+  color: var(--jic-text);
+}
+.worship-recitation-arabic {
+  font-family: 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+  font-size: var(--worship-arabic-size);
+  line-height: 2.15;
+  text-align: right;
+  margin-block: 20px;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+.worship-transliteration,
+.worship-meaning,
+.worship-quran-translation {
+  line-height: 1.8;
+  margin-block: 16px;
+  overflow-wrap: anywhere;
+}
+.worship-transliteration {
+  color: var(--jic-text-secondary);
+}
+.worship-text-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--jic-text-secondary);
+}
+.worship-source {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.78rem;
+  color: var(--jic-text-secondary);
+  text-underline-offset: 3px;
+}
+.worship-reading-footnote {
+  margin-block: 20px;
+  color: var(--jic-text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+.worship-reading-footnote a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.worship-quran-navigation {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+.worship-quran-navigation > label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.worship-quran-navigation input,
+.worship-quran-navigation select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+.worship-surah-search > p {
+  font-size: 0.85rem;
+  color: var(--jic-text-secondary);
+}
+.worship-surah-search ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 6px;
+}
+.worship-surah-search button {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--jic-border);
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  cursor: pointer;
+}
+.worship-surah-search button:hover {
+  background: color-mix(in srgb, var(--jic-gold) 12%, var(--jic-surface));
+}
+.worship-continue {
+  justify-self: start;
+  text-align: left;
+}
+.worship-continue span > span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+.worship-save-hint,
+.worship-save-notice {
+  font-size: 0.8rem;
+  color: var(--jic-text-secondary);
+  line-height: 1.6;
+}
+.worship-save-notice:empty {
+  display: none;
+}
+.worship-reader > .worship-display-controls {
+  margin-inline: 18px;
+}
+.worship-surah-heading {
+  padding: 20px 18px;
+  text-align: center;
+  border-bottom: 1px solid var(--jic-border);
+}
+.worship-surah-heading h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+.worship-surah-heading p[lang='ar'] {
+  font-family: 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+  font-size: 1.7rem;
+  line-height: 2;
+}
+.worship-surah-heading p:last-child {
+  color: var(--jic-text-secondary);
+  font-size: 0.85rem;
+}
+.worship-quran-ayah {
+  padding: 20px clamp(14px, 4vw, 28px);
+  border-bottom: 1px solid var(--jic-border);
+  scroll-margin-top: 150px;
+}
+.worship-quran-ayah:last-child {
+  border-bottom: 0;
+}
+.worship-quran-ayah.is-saved {
+  box-shadow: inset 3px 0 var(--jic-gold-strong);
+}
+.worship-verse-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--jic-text-secondary);
+  font-size: 0.8rem;
+}
+.worship-quran-translation {
+  color: var(--jic-text-secondary);
+}
+.worship-reader-error {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  padding: 24px 18px;
+}
+.worship-reader-error > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+}
+.worship-reader-sources {
+  margin-top: 20px;
+}
+.worship-janazah-steps {
+  list-style: none;
+  padding: 0;
+}
+.worship-janazah-resources h2 {
+  font-size: 1.15rem;
+}
+.worship-janazah-resources .worship-external-links {
+  margin-top: 14px;
+}
+.worship-janazah-resources .worship-reading-footnote {
+  margin-bottom: 0;
+  font-size: 0.78rem;
+}
+.worship-child-duas {
+  margin-top: 16px;
+  border-top: 1px solid var(--jic-border);
+  padding-top: 8px;
+}
+.worship-child-duas summary {
+  cursor: pointer;
+  padding-block: 12px;
+  min-height: 44px;
+  font-weight: 700;
+}
+.worship-child-duas section {
+  margin-block: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--jic-border);
+}
+.worship-child-duas > p {
+  font-size: 0.8rem;
+  color: var(--jic-text-secondary);
+}
+.worship-reading :is(button, input, select, a, summary):focus-visible,
+.worship-quran-ayah:focus-visible {
+  outline: 3px solid var(--jic-gold-strong);
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .worship-display-controls {
+    align-items: stretch;
+    gap: 5px;
+    padding-inline: 12px;
+  }
+  .worship-display-controls > label {
+    width: 100%;
+  }
+  .worship-font-control input {
+    flex: 1;
+    min-width: 70px;
+  }
+  .worship-quran-navigation {
+    padding: 14px;
+  }
+  .worship-reader > .worship-display-controls {
+    margin-inline: 12px;
+  }
+  .worship-collection-picker button {
+    flex: 1;
+    padding-inline: 10px;
+  }
+}

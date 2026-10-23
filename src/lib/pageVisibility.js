@@ -1,5 +1,10 @@
 import { PUBLIC_PAGES } from '../content/pageDirectory.js';
 import { canonicalPagePath } from '../content/pageAliases.js';
+import {
+  NAVIGATION_CONTENT_KEY,
+  presentNavigation,
+  readNavigationConfiguration,
+} from './navigationConfiguration.js';
 
 export const pageVisibilityKey = (path) =>
   `page-visibility:${canonicalPagePath(path.split(/[?#]/)[0].replace(/\/+$/, '') || '/')}`;
@@ -15,13 +20,13 @@ export function isPageVisible(getContent, path) {
 }
 export const pageSectionKey = (path) =>
   pageVisibilityKey(path).replace('page-visibility:', 'page-section:');
-export function configuredNavigation(groups, getContent) {
+export function configuredNavigation(groups, getContent, addedPages = []) {
   const roots = new Set(groups.map((group) => group.path));
   const target = (path) => {
     const section = getContent(pageSectionKey(path), '');
     return !roots.has(path) && roots.has(section) ? section : '';
   };
-  return groups.map((group) => {
+  const configured = groups.map((group) => {
     const children = (group.children || []).filter(
       (page) => !target(page.path) || target(page.path) === group.path,
     );
@@ -29,11 +34,26 @@ export function configuredNavigation(groups, getContent) {
       if (target(page.path) === group.path && !children.some((child) => child.path === page.path))
         children.push({ name: page.name, path: page.path });
     }
+    for (const page of addedPages) {
+      const destination = roots.has(page.placement)
+        ? page.placement
+        : groups.find((candidate) =>
+            candidate.children?.some((child) => child.path === page.placement),
+          )?.path;
+      if (destination !== group.path || !/^[a-z0-9-]+$/.test(page.slug || '') || !page.title)
+        continue;
+      const path = `/pages/${page.slug}`;
+      if (!children.some((child) => child.path === path)) children.push({ name: page.title, path });
+    }
     return { ...group, children };
   });
+  return presentNavigation(
+    configured,
+    readNavigationConfiguration(getContent(NAVIGATION_CONTENT_KEY, '{}')),
+  );
 }
-export function visibleNavigation(groups, getContent) {
-  return configuredNavigation(groups, getContent)
+export function visibleNavigation(groups, getContent, addedPages) {
+  return configuredNavigation(groups, getContent, addedPages)
     .filter((group) => isPageVisible(getContent, group.path))
     .map((group) => ({
       ...group,

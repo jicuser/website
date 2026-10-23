@@ -56,7 +56,7 @@ test('public sections retain their own identity on overview pages', () => {
     ['/', 'Home'],
     ['/about', 'About'],
     ['/prayer-times', 'Prayer Times'],
-    ['/worship', 'Faith & practice'],
+    ['/worship', 'Adhkar, Qur’an & Janazah Guide'],
     ['/services', 'Services'],
     ['/projects', 'Our Masjid Project'],
     ['/education', 'Education'],

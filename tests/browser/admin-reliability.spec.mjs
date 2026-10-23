@@ -87,6 +87,7 @@ test('account menu keeps the unsaved-change guard when opening a personal accoun
   page,
 }) => {
   const evidence = await openAdmin(page, { section: 'announcements' });
+  await page.getByRole('button', { name: 'New notice', exact: true }).click();
   await page.getByLabel('Title', { exact: true }).fill('Unsaved notice');
   await page.locator('.admin-account-menu > summary').click();
   page.once('dialog', (dialog) => dialog.dismiss());
@@ -807,7 +808,7 @@ test('adding a volunteer previews exact access and sends only selected permissio
     .filter({ hasText: 'Prayer & screens' })
     .click();
   await form.getByRole('checkbox', { name: 'TV scenes and device inputs', exact: true }).check();
-  await expect(form.locator('.admin-access-preview')).toHaveText('Staff areas: Screens & layouts.');
+  await expect(form.locator('.admin-access-preview')).toHaveText('Staff areas: TV screens.');
   await page.screenshot({
     path: testInfo.outputPath('invite-volunteer-access.png'),
     fullPage: true,
@@ -859,7 +860,7 @@ for (const [role, actor, tool] of [
       permissions: ['tv'],
       staff_kinds: ['volunteer'],
     },
-    'Screens & layouts',
+    'TV screens',
   ],
   [
     'assigned form reviewer',

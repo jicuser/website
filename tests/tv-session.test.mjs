@@ -258,6 +258,55 @@ test('session codes have eight digits and reject the biased end of the random ra
   assert.equal(values.length, 0);
 });
 
+test('background scene programmes use the existing save endpoint and preserve the active presentation', async () => {
+  const original = teaching();
+  const api = harness({ settings: original, rpcResult: { settings: original } });
+  const everyday = {
+    mode: 'rotation',
+    fixed_scene: 'daily-giving',
+    rotation: [
+      { kind: 'iftar', duration_seconds: 20 },
+      { kind: 'suhoor', duration_seconds: 30 },
+    ],
+    persistent_layer_ids: { landscape: ['standby-times'], portrait: [] },
+  };
+  const response = await api.request(
+    'save-background',
+    {
+      settings: { ...DEFAULT_TV_SETTINGS, everyday_display: everyday },
+      expectedUpdatedAt: '2026-09-12T10:00:00.000Z',
+    },
+    'staff-token',
+  );
+  assert.equal(response.status, 200);
+  const saved = JSON.parse(
+    JSON.stringify(api.calls.find((call) => call.name === 'save_tv_presentation').values),
+  );
+  assert.deepEqual(saved.config.everyday_display, everyday);
+  assert.deepEqual(saved.config.scenes, original.scenes);
+  assert.equal(saved.config.scene_mode, 'teaching');
+  assert.equal(saved.expected, '2026-09-12T10:00:00.000Z');
+});
+
+test('the screen endpoint rejects invalid scene rotation timing before writing', async () => {
+  const api = harness();
+  const response = await api.request(
+    'save-background',
+    {
+      settings: {
+        everyday_display: { mode: 'rotation', rotation: [{ kind: 'iftar', duration_seconds: 0 }] },
+      },
+      expectedUpdatedAt: '2026-09-12T10:00:00.000Z',
+    },
+    'staff-token',
+  );
+  assert.equal(response.status, 400);
+  assert.equal(
+    api.calls.some((call) => call.name === 'save_tv_presentation'),
+    false,
+  );
+});
+
 test('a presentation needs a nonempty active scene and an unexpired session and end time', () => {
   const now = Date.now();
   const presentation = { id: presentationId, expires_at: future() };

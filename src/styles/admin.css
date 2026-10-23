@@ -911,14 +911,15 @@ html:not(.dark) .admin-login-secure {
   border-radius: 20px;
 }
 
-.dark .managed-page-section-copy {
-  color: #f8fafc;
+.managed-page-section {
+  background-color: var(--jic-surface);
+  color: var(--jic-text);
 }
-html:not(.dark) .managed-page-section:not([style]) {
-  background: #f8f6ef;
+.managed-page-section.has-photo {
+  color: #fff;
 }
-html:not(.dark) .managed-page-section-copy {
-  color: #0f172a;
+.managed-page-section-copy {
+  color: inherit;
 }
 
 .admin-login-note {

@@ -5,8 +5,8 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteCond %{REQUEST_FILENAME}/index.html -f
 RewriteRule ^(.+?)/?$ $1/index.html [L]
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.html [L]
+# Unlisted, withdrawn and private routes still open the app, with noindex HTML.
+RewriteRule ^.+$ metadata-fallback/index.html [L]
 
 <IfModule mod_headers.c>
   # Revalidate the entry page after deployments; hashed CSS/JS can stay cached.

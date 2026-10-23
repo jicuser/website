@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+test.use({ screenshot: 'off' });
 
 const id = (n) => `10000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const owner = {
@@ -177,14 +178,11 @@ async function fixture(page, { actor = owner, pagePublished = true, pageExists =
       state.writes.push(body);
       state.page = { ...body.p_page, updated_at: '2026-09-14T11:00:00Z' };
       data = state.page;
-    } else if (path.endsWith('/rpc/save_custom_form')) {
+    } else if (path.endsWith('/rpc/save_form_workflow')) {
       state.writes.push(body);
       state.form = { ...state.form, ...body.p_form, updated_at: '2026-09-14T11:00:00Z' };
-      data = state.form.id;
-    } else if (path.endsWith('/rpc/publish_custom_form')) {
-      state.writes.push(body);
-      state.form.published_version = 2;
-      data = 2;
+      if (body.p_publish) state.form.published_version = 2;
+      data = { form: state.form, page: null };
     } else if (path.endsWith('/site_pages')) data = state.page ? [state.page] : [];
     else if (path.endsWith('/custom_forms'))
       data = request.headers().accept?.includes('object') ? state.form : [state.form];
@@ -209,17 +207,18 @@ async function fixture(page, { actor = owner, pagePublished = true, pageExists =
   return { state, admin };
 }
 
-test('Admin Forms keeps live forms, people, responses and actions together', async ({
-  page,
-}, testInfo) => {
+test('Admin Forms keeps live forms, people, responses and actions together', async ({ page }) => {
   const { state, admin } = await fixture(page);
   await admin();
   await expect(page.getByRole('heading', { name: 'Forms', exact: true })).toBeVisible();
   await expect(
     page.locator('.content-form-card').filter({ hasText: 'Course interest' }),
   ).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('forms-catalogue.png'), fullPage: true });
-  await page.locator('.content-form-card').filter({ hasText: 'Course interest' }).click();
+  await page
+    .locator('.content-form-card')
+    .filter({ hasText: 'Course interest' })
+    .getByRole('button', { name: 'Open form', exact: true })
+    .click();
   await expect(page.getByText('Responsible people & access')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Arabic course', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Responses (1)', exact: true }).click();
@@ -231,7 +230,6 @@ test('Admin Forms keeps live forms, people, responses and actions together', asy
   await expect(
     page.getByText(`Assigned to: ${replacement.display_name}`, { exact: false }),
   ).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('form-actions.png'), fullPage: true });
   expect(state.errors).toEqual([]);
 });
 
@@ -257,7 +255,7 @@ test('A poster opens its linked page and the same form responses without copying
 
 test('Pages can be created and hidden without erasing a linked form or changing its address', async ({
   page,
-}, testInfo) => {
+}) => {
   const { state, admin } = await fixture(page);
   await admin('content');
   await page.getByRole('button', { name: 'Manage added pages', exact: true }).click();
@@ -272,7 +270,6 @@ test('Pages can be created and hidden without erasing a linked form or changing 
   expect(state.page.form_id).toBe(id(10));
   expect(state.page.slug).toBe('arabic-course');
   expect(state.form.enabled).toBe(true);
-  await page.screenshot({ path: testInfo.outputPath('page-editor.png'), fullPage: true });
   expect(state.errors).toEqual([]);
 });
 
@@ -298,7 +295,11 @@ test('form tabs survive refresh and browser Back returns to the preceding tab', 
 }) => {
   const { state, admin } = await fixture(page);
   await admin();
-  await page.locator('.content-form-card').filter({ hasText: 'Course interest' }).click();
+  await page
+    .locator('.content-form-card')
+    .filter({ hasText: 'Course interest' })
+    .getByRole('button', { name: 'Open form', exact: true })
+    .click();
   await page.getByRole('button', { name: 'Responses (1)', exact: true }).click();
   await expect(page).toHaveURL(/tab=responses/);
   await page.getByRole('button', { name: 'Follow-ups (1)', exact: true }).click();
@@ -338,7 +339,11 @@ test('toolbar Back closes only the existing form editor after confirming unsaved
 }) => {
   const { state, admin } = await fixture(page);
   await admin();
-  await page.locator('.content-form-card').filter({ hasText: 'Course interest' }).click();
+  await page
+    .locator('.content-form-card')
+    .filter({ hasText: 'Course interest' })
+    .getByRole('button', { name: 'Open form', exact: true })
+    .click();
   await page.getByRole('button', { name: 'Edit form & assignments', exact: true }).click();
   await page.getByLabel('Form title', { exact: true }).fill('Unsaved title');
   page.once('dialog', (dialog) => dialog.dismiss());
@@ -357,20 +362,20 @@ test('Draft and Closed filters do not display live service forms', async ({ page
   await admin();
   const cards = page.locator('.content-form-card');
   await expect(cards.filter({ hasText: 'Madrassah enquiry' })).toBeVisible();
-  await page.locator('.forms-catalogue-filters > summary').click();
+  const tabs = page.getByRole('navigation', { name: 'Form status' });
   for (const status of ['Draft', 'Closed']) {
-    await page.getByRole('combobox', { name: 'Show forms' }).selectOption(status);
+    await tabs.getByRole('button', { name: `${status} 0`, exact: true }).click();
     await expect(cards).toHaveCount(0);
     await expect(page.getByText('No forms match this view.')).toBeVisible();
   }
-  await page.getByRole('combobox', { name: 'Show forms' }).selectOption('Live');
+  await tabs.getByRole('button', { name: 'Live 4', exact: true }).click();
   await expect(cards.filter({ hasText: 'Madrassah enquiry' })).toBeVisible();
   await expect(cards.filter({ hasText: 'Course interest' })).toBeVisible();
 });
 
 test('Page directory opens a focused workspace and Add page opens a new draft', async ({
   page,
-}, testInfo) => {
+}) => {
   const { state, admin } = await fixture(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await admin('content');
@@ -390,6 +395,5 @@ test('Page directory opens a focused workspace and Add page opens a new draft', 
   await page.getByRole('button', { name: '＋ Add page', exact: true }).click();
   await expect(page.getByLabel('Page title', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Page title', { exact: true })).toHaveValue('');
-  await page.screenshot({ path: testInfo.outputPath('new-page-mobile.png'), fullPage: true });
   expect(state.errors).toEqual([]);
 });

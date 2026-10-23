@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useContent } from '@/context/ContentContext';
 import SimpleToggle from '@/components/admin/SimpleToggle';
@@ -55,8 +54,8 @@ export default function RamadanOptions({ onChanged }) {
         <>
           {[
             ['website_enabled', 'Ramadan page'],
-            ['iftar_enabled', 'Iftar meal bookings'],
-            ['suhoor_enabled', 'Suhoor meal bookings'],
+            ['iftar_enabled', 'Iftar bookings'],
+            ['suhoor_enabled', 'Suhoor bookings'],
             ['daily_enabled', 'Daily Giving'],
             ['home_enabled', 'Show on homepage'],
             ['tv_enabled', 'Show on TVs'],
@@ -93,9 +92,6 @@ export default function RamadanOptions({ onChanged }) {
               </div>
             </fieldset>
           )}
-          <div className="booking-actions">
-            <Link to="/ramadan">View sponsorship page</Link>
-          </div>
         </>
       )}
     </section>

@@ -1,21 +1,13 @@
-import { currentPrayer } from '@/lib/currentPrayer';
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  BookOpen,
-  ExternalLink,
-  Headphones,
-  HeartHandshake,
-  Loader2,
-  MoonStar,
-} from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
+import React, { lazy, Suspense } from 'react';
+import { BookOpen, HeartHandshake, Loader2, MoonStar } from 'lucide-react';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import GuideResource from '@/components/GuideResource';
 import PageHeading from '@/components/PageHeading';
 
-const QURAN_API = 'https://api.alquran.cloud/v1';
-const QURAN_FALLBACK = 'https://quran.com';
-const TARTEEL = 'https://tarteel.ai';
+// Reading text and the surah directory load only when their reader is opened.
+const AdhkarReader = lazy(() => import('@/components/worship/AdhkarReader'));
+const QuranReader = lazy(() => import('@/components/worship/QuranReader'));
+const JanazahGuide = lazy(() => import('@/components/worship/JanazahGuide'));
 
 const salahSteps = [
   [
@@ -29,218 +21,55 @@ const salahSteps = [
   ['Complete', 'Finish the required rak‘ahs, tashahhud, salawat and salam.'],
 ];
 
-const janazahSteps = [
-  ['Intention', 'Stand for the Janazah prayer facing the qiblah with the congregation.'],
-  [
-    'First takbir',
-    'Begin with takbir and recite the opening praise according to the practice followed at the masjid.',
-  ],
-  ['Second takbir', 'Send salawat upon the Prophet ﷺ.'],
-  ['Third takbir', 'Make sincere du‘a for the deceased and the Muslims.'],
-  ['Fourth takbir', 'Complete the prayer with the final takbir and salam.'],
-];
-
-const duaCards = [
-  ['Morning', 'Begin the day with dhikr, gratitude and protection du‘as.'],
-  ['Evening', 'Read the evening adhkar after ‘Asr or Maghrib according to your routine.'],
-  ['Before sleep', 'End the day with wudu where possible, Ayat al-Kursi and the closing surahs.'],
-  [
-    'After Salah',
-    'Keep a short, consistent set of tasbih, istighfar and personal du‘a after prayer.',
-  ],
-];
-
-function QuranReader() {
-  const [surah, setSurah] = useState(1);
-  const [ayahs, setAyahs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError('');
-
-    fetch(`${QURAN_API}/surah/${surah}/editions/quran-uthmani,en.sahih`)
-      .then((response) => {
-        if (!response.ok) throw new Error('Qur’an reader is temporarily unavailable.');
-        return response.json();
-      })
-      .then((payload) => {
-        if (!active) return;
-        const arabic = payload?.data?.[0]?.ayahs || [];
-        const english = payload?.data?.[1]?.ayahs || [];
-        setAyahs(
-          arabic.map((ayah, index) => ({
-            number: ayah.numberInSurah,
-            arabic: ayah.text,
-            english: english[index]?.text || '',
-          })),
-        );
-      })
-      .catch((loadError) => active && setError(loadError.message))
-      .finally(() => active && setLoading(false));
-
-    return () => {
-      active = false;
-    };
-  }, [surah]);
-
-  return (
-    <section className="worship-reader">
-      <div className="worship-reader-toolbar">
-        <label>
-          Surah
-          <select value={surah} onChange={(event) => setSurah(Number(event.target.value))}>
-            {Array.from({ length: 114 }, (_, index) => index + 1).map((number) => (
-              <option key={number} value={number}>
-                Surah {number}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="worship-external-links">
-          <a href={TARTEEL} target="_blank" rel="noreferrer">
-            <Headphones size={16} />
-            Tarteel
-          </a>
-          <a href={QURAN_FALLBACK} target="_blank" rel="noreferrer">
-            <ExternalLink size={16} />
-            Quran.com
-          </a>
-        </div>
-      </div>
-
-      {loading && (
-        <div className="worship-loading">
-          <Loader2 className="animate-spin" />
-          Loading Qur’an…
-        </div>
-      )}
-      {error && (
-        <div className="worship-note">
-          {error}{' '}
-          <a href={QURAN_FALLBACK} target="_blank" rel="noreferrer">
-            Open Quran.com
-          </a>
-        </div>
-      )}
-      {!loading && !error && (
-        <div className="worship-ayah-list">
-          {ayahs.map((ayah) => (
-            <article key={ayah.number} className="worship-ayah">
-              <span>{ayah.number}</span>
-              <p className="worship-arabic" lang="ar" dir="rtl">
-                {ayah.arabic}
-              </p>
-              <p>{ayah.english}</p>
-            </article>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function DailySalah() {
-  const { todaysTimes, currentDate } = usePublicPrayerTimes();
-  const current = currentPrayer(todaysTimes, currentDate);
-  const prayers = useMemo(
-    () => [
-      ['Fajr', todaysTimes?.fajr, todaysTimes?.jamaah_fajr],
-      ['Sunrise', todaysTimes?.sunrise, null],
-      ['Dhuhr', todaysTimes?.dhuhr, todaysTimes?.jamaah_dhuhr],
-      ['Asr', todaysTimes?.asr, todaysTimes?.jamaah_asr],
-      ['Maghrib', todaysTimes?.maghrib, todaysTimes?.jamaah_maghrib],
-      ['Isha', todaysTimes?.isha, todaysTimes?.jamaah_isha],
-    ],
-    [todaysTimes],
-  );
-
-  return (
-    <div className="worship-salah-grid">
-      {prayers.map(([name, start, jamaah]) => (
-        <article
-          key={name}
-          className={current?.name === name ? 'is-current' : ''}
-          aria-current={current?.name === name ? 'time' : undefined}
-        >
-          <MoonStar />
-          <strong>{name}</strong>
-          <span>Start {start || '—'}</span>
-          {jamaah && <span>Jama‘ah {jamaah}</span>}
-        </article>
-      ))}
-    </div>
-  );
-}
-
-function Cards({ items }) {
-  return (
-    <div className="worship-guide-grid">
-      {items.map(([title, text], index) => (
-        <article key={title}>
-          <b>{String(index + 1).padStart(2, '0')}</b>
-          <h3>{title}</h3>
-          <p>{text}</p>
-        </article>
-      ))}
-    </div>
-  );
-}
-
 export default function WorshipPage() {
   const { pathname } = useLocation();
-  const isQuran = pathname === '/worship/quran';
-  const isPrayer = pathname === '/worship/prayer-guide';
-  const isJanazah = pathname === '/worship/janazah-guide';
-  const isDailySalah = pathname === '/worship/daily-salah';
-  const isDuas = pathname === '/worship/daily-duas';
-  const isDalail = pathname === '/worship/dalail-al-khayrat';
+  if (pathname === '/worship/daily-salah') return <Navigate to="/prayer-times" replace />;
 
   return (
     <div className="worship-page">
       {pathname === '/worship' && (
         <>
-          <PageHeading title="Faith & practice">
-            Qur’an, du‘as and practical prayer guides.
+          <PageHeading title="Adhkar, Qur’an & Janazah Guide">
+            Choose a reading or open the funeral prayer guide.
           </PageHeading>
           <div className="worship-hub-grid">
-            <Link to="/worship/quran">
-              <BookOpen />
-              <h2>Read Qur’an</h2>
-              <p>Read Arabic with English meaning.</p>
-            </Link>
-            <Link to="/worship/dalail-al-khayrat">
-              <HeartHandshake />
-              <h2>Dala’il al-Khayrat</h2>
-              <p>Ask about salawat and the reading programme.</p>
-            </Link>
             <Link to="/worship/daily-duas">
-              <MoonStar />
-              <h2>Daily Du‘as</h2>
-              <p>Morning, evening and everyday adhkar.</p>
+              <MoonStar aria-hidden="true" />
+              <h2>Adhkar</h2>
+              <p>Morning, evening and after Salah, with Arabic, transliteration and meaning.</p>
             </Link>
-            <Link to="/worship/prayer-guide">
-              <MoonStar />
-              <h2>Prayer Guide</h2>
-              <p>A compact Salah refresher.</p>
+            <Link to="/worship/quran">
+              <BookOpen aria-hidden="true" />
+              <h2>Read Qur’an</h2>
+              <p>Find a surah, adjust your reading and save a verse to return to.</p>
             </Link>
             <Link to="/worship/janazah-guide">
-              <HeartHandshake />
+              <HeartHandshake aria-hidden="true" />
               <h2>Janazah Guide</h2>
-              <p>Know the basic funeral prayer steps.</p>
-            </Link>
-            <Link to="/worship/daily-salah">
-              <MoonStar />
-              <h2>Daily Salah</h2>
-              <p>Today’s JIC prayer times.</p>
+              <p>Read the recitations for each takbir and open the English or Urdu guide.</p>
             </Link>
           </div>
+          <nav className="worship-secondary-links" aria-label="More worship resources">
+            <Link to="/worship/prayer-guide">Salah guide</Link>
+            <Link to="/prayer-times">Prayer times</Link>
+            <Link to="/prayer-times/reminders">Salah reminders</Link>
+            <Link to="/worship/dalail-al-khayrat">Dala’il al-Khayrat</Link>
+          </nav>
         </>
       )}
-      {isQuran && <QuranReader />}
-      {isPrayer && (
+      <Suspense
+        fallback={
+          <p className="worship-loading" role="status">
+            <Loader2 className="animate-spin" aria-hidden="true" />
+            Loading reading…
+          </p>
+        }
+      >
+        {pathname === '/worship/quran' && <QuranReader />}
+        {pathname === '/worship/daily-duas' && <AdhkarReader />}
+        {pathname === '/worship/janazah-guide' && <JanazahGuide />}
+      </Suspense>
+      {pathname === '/worship/prayer-guide' && (
         <>
           <header className="jic-guide-heading">
             <h1>Salah guide</h1>
@@ -250,8 +79,16 @@ export default function WorshipPage() {
             </p>
           </header>
           <GuideResource guide="salah" />
-          <Cards items={salahSteps} />
-          <div className="worship-reading-card">
+          <div className="worship-guide-grid">
+            {salahSteps.map(([title, text], index) => (
+              <article key={title}>
+                <b>{String(index + 1).padStart(2, '0')}</b>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+          <div className="worship-reading-card worship-secondary-links">
             <Link className="jic-button" to="/worship/janazah-guide">
               Janazah prayer guide
             </Link>
@@ -261,33 +98,16 @@ export default function WorshipPage() {
           </div>
         </>
       )}
-      {isJanazah && (
-        <>
-          <header className="jic-guide-heading">
-            <h1>Janazah prayer guide</h1>
-            <p>
-              A short refresher alongside the full Hanafi guide. Follow the Imam when joining the
-              congregation.
-            </p>
-          </header>
-          <GuideResource guide="janazah" />
-          <Cards items={janazahSteps} />
-          <div className="worship-reading-card">
-            <Link className="jic-button" to="/forms/funeral-enquiry">
-              Ask about funeral support
-            </Link>
-          </div>
-        </>
-      )}
-      {isDuas && <Cards items={duaCards} />}
-      {isDailySalah && <DailySalah />}
-      {isDalail && (
+      {pathname === '/worship/dalail-al-khayrat' && (
         <section className="worship-reading-card">
-          <h2>Dala’il al-Khayrat</h2>
+          <h1>Dala’il al-Khayrat</h1>
           <p>
             Contact the centre for details of JIC’s Dala’il al-Khayrat reading programme, salawat
             and related resources.
           </p>
+          <Link className="jic-button" to="/contact">
+            Contact the centre
+          </Link>
         </section>
       )}
     </div>

@@ -13,7 +13,7 @@ const expectedSections = [
   'Home',
   'About',
   'Prayer Times',
-  'Faith & practice',
+  'Adhkar, Qur’an & Janazah Guide',
   'Ramadan',
   'Services',
   'Our Masjid Project',
@@ -201,9 +201,11 @@ test('search finds other sections without opening anything and offers an empty r
     (node) => node.type === 'nav' && node.props['aria-label'] === 'Page search results',
   )[0];
   const buttons = nodes(results, (node) => node.type === 'button');
-  assert.equal(buttons.length, 1);
+  assert.ok(buttons.some((button) => button.props['data-page-path'] === '/worship/janazah-guide'));
   assert.deepEqual(calls, []);
-  buttons[0].props.onClick();
+  buttons
+    .find((button) => button.props['data-page-path'] === '/worship/janazah-guide')
+    .props.onClick();
   assert.deepEqual(calls, ['/worship/janazah-guide']);
   input(tree, 'search').props.onChange({ target: { value: 'no such destination' } });
   tree = render();

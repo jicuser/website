@@ -24,7 +24,7 @@
   font-weight: 600;
 }
 .sponsorship-availability-table {
-  min-width: 520px;
+  min-width: 0;
 }
 .sponsorship-availability-table th {
   text-align: left;
@@ -310,17 +310,19 @@
   flex-shrink: 0;
 }
 .sponsorship-day > span:not(:first-child) {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: var(--jic-text-secondary);
 }
 .sponsorship-day > b {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 .sponsorship-day > small {
-  font-size: 0.65rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.75rem;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .sponsorship-day.is-selected {
   outline: 2px solid var(--jic-gold);
@@ -431,8 +433,11 @@
   border-radius: 4px;
 }
 .home-sponsorship-days [data-status='confirmed'] {
+  border-color: #3c6fba;
+  background: #3c6fba20;
+}
+.home-sponsorship-days [data-status='available'] {
   border-color: #21835b;
-  background: #21835b20;
 }
 .home-sponsorship-days [data-status='pending'] {
   border-color: #b77900;
@@ -443,11 +448,11 @@
 }
 @media (max-width: 600px) {
   .sponsorship-days {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
   .sponsorship-day {
-    min-height: 84px;
+    min-height: 100px;
     padding: 9px 7px;
   }
   .sponsorship-kind-links a {
@@ -480,12 +485,296 @@
     font-size: 0.78rem;
   }
   .sponsorship-day > b {
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     overflow-wrap: anywhere;
   }
 }
 @media (max-width: 360px) {
   .sponsorship-days {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Ramadan staff tasks share the booking components without the split workspace. */
+.ramadan-manager :is(input, select, textarea),
+.sponsorship-page .booking-field :is(input, select, textarea) {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 16px;
+}
+.ramadan-manager .booking-field {
+  min-width: 0;
+}
+.sponsorship-section-heading,
+.sponsorship-editor-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sponsorship-section-heading :is(h2, h3) {
+  margin-bottom: 0;
+}
+.sponsorship-season-choice {
+  width: min(100%, 300px);
+  margin-bottom: 0;
+}
+.sponsorship-task-nav {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr 1.5fr;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 4px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+}
+.sponsorship-task-nav button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--jic-text-secondary);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.sponsorship-task-nav [aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  color: var(--jic-text);
+  background: color-mix(in srgb, var(--jic-gold) 12%, var(--jic-surface));
+  font-weight: 650;
+}
+.sponsorship-task-nav :disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+.sponsorship-meal-choice {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.sponsorship-meal-choice button {
+  justify-content: center;
+  font-size: 0.9rem;
+}
+.sponsorship-booking-summary {
+  gap: 8px 20px;
+}
+.sponsorship-booking-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.sponsorship-booking-toolbar .sponsorship-view-choice {
+  flex: 0 0 160px;
+  margin: 0;
+}
+.sponsorship-status-filter {
+  flex: 1 1 150px;
+  margin: 0;
+}
+.sponsorship-booking-toolbar .booking-actions {
+  margin: 0;
+}
+.sponsorship-availability-options {
+  margin: 12px 0;
+  border-block: 1px solid var(--jic-border);
+}
+.sponsorship-availability-options[open] {
+  padding-bottom: 14px;
+}
+.sponsorship-availability-options .sponsorship-range {
+  padding: 0;
+}
+.sponsorship-availability-options .sponsorship-range > .booking-actions {
+  margin-top: 0;
+}
+.sponsorship-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.sponsorship-status-cell small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.75rem;
+  color: var(--jic-text-secondary);
+}
+.sponsorship-table-wrap {
+  container: sponsorship-list / inline-size;
+  max-width: 100%;
+}
+.sponsorship-mobile-table {
+  table-layout: fixed;
+}
+.sponsorship-mobile-table :is(th, td) {
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.sponsorship-mobile-table .sponsorship-day-cell {
+  width: 16%;
+}
+.sponsorship-mobile-table .sponsorship-date-cell {
+  width: 23%;
+}
+.sponsorship-mobile-table .sponsorship-status-cell {
+  width: 19%;
+}
+.sponsorship-mobile-table .sponsorship-action-cell {
+  width: 108px;
+}
+.sponsorship-mobile-table .sponsorship-action-cell button {
+  padding-inline: 10px;
+}
+.sponsorship-print-detail {
+  display: none;
+}
+.sponsorship-editor-row > td {
+  padding: 0;
+}
+.sponsorship-editor {
+  padding: clamp(12px, 2vw, 20px);
+  border: 1px solid var(--jic-gold);
+  border-radius: 12px;
+  background: var(--jic-bg);
+  color: var(--jic-text);
+  scroll-margin-top: 100px;
+  text-align: left;
+}
+.sponsorship-editor-heading {
+  margin-bottom: 16px;
+}
+.sponsorship-editor-heading h3 {
+  margin: 0;
+}
+.sponsorship-editor-heading p {
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+}
+.sponsorship-editor-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.sponsorship-editor-sponsors {
+  margin: 0 0 16px;
+}
+.sponsorship-editor-sponsors [aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  background: color-mix(in srgb, var(--jic-gold) 12%, var(--jic-surface));
+}
+.sponsorship-payment {
+  align-self: end;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.sponsorship-private-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--jic-text-secondary);
+}
+.sponsorship-setup .sponsorship-section-heading {
+  margin-bottom: 18px;
+}
+.sponsorship-publication {
+  margin-bottom: 16px;
+}
+.sponsorship-publication p {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  color: var(--jic-text-secondary);
+}
+@media (min-width: 768px) {
+  .ramadan-manager .sponsorship-range .booking-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+@media (max-width: 600px) {
+  .ramadan-manager .booking-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sponsorship-booking-toolbar .sponsorship-view-choice,
+  .sponsorship-status-filter {
+    flex: 1 1 130px;
+  }
+  .sponsorship-booking-toolbar .booking-actions {
+    width: 100%;
+  }
+  .sponsorship-booking-toolbar .booking-actions button {
+    flex: 1;
+  }
+  .sponsorship-payment {
+    margin-top: 0;
+  }
+}
+@media screen {
+  @container sponsorship-list (max-width: 650px) {
+    .sponsorship-mobile-table,
+    .sponsorship-mobile-table tbody {
+      display: block;
+      width: 100%;
+    }
+    .sponsorship-mobile-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .sponsorship-mobile-table tbody {
+      display: grid;
+      gap: 10px;
+    }
+    .sponsorship-mobile-table tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px 12px;
+      padding: 12px;
+      border: 1px solid var(--jic-border);
+      border-radius: 10px;
+    }
+    .sponsorship-mobile-table :is(th, td) {
+      display: block;
+      width: auto;
+      padding: 0;
+      border: 0;
+    }
+    .sponsorship-mobile-table .sponsorship-date-cell {
+      text-align: right;
+      font-size: 0.8rem;
+      color: var(--jic-text-secondary);
+    }
+    .sponsorship-mobile-table .sponsorship-status-cell {
+      grid-column: 1 / -1;
+    }
+    .sponsorship-mobile-table .sponsorship-sponsor-cell {
+      grid-column: 1 / -1;
+    }
+    .sponsorship-mobile-table .sponsorship-action-cell {
+      grid-column: 1 / -1;
+      justify-self: end;
+    }
+    .sponsorship-mobile-table .sponsorship-print-detail {
+      display: none;
+    }
+    .sponsorship-mobile-table td[colspan] {
+      grid-column: 1 / -1;
+    }
+    .sponsorship-mobile-table .sponsorship-editor-row {
+      display: block;
+      padding: 0;
+      border: 0;
+    }
+  }
+}
+@media print {
+  .sponsorship-print-detail {
+    display: table-cell;
   }
 }

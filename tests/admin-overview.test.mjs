@@ -101,10 +101,10 @@ test('a failed queue is unavailable while other queues keep their real counts', 
   assert.deepEqual(result.certificates, { value: 7, error: false });
   assert.deepEqual(seen, [
     'admin_forms_overview',
-    'search_form_submissions',
-    'search_form_submissions',
-    'search_form_submissions',
     'certificate_requests',
+    'search_form_submissions',
+    'search_form_submissions',
+    'search_form_submissions',
   ]);
   assert.deepEqual(summariseForms([]), { waiting: 0, complete: 0, actions: 0, forms: 0 });
 });

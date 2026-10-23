@@ -33,7 +33,7 @@ const pageLabel = (path) => EDITABLE_PAGES.find((page) => page.path === path)?.n
 const cleanRows = (rows) =>
   rows.map((row) => ({ ...row, image_urls: Array.isArray(row.image_urls) ? row.image_urls : [] }));
 
-export default function PageSectionsEditor({ pagePath, onSaved }) {
+export default function PageSectionsEditor({ pagePath, onSaved, onPreview }) {
   const { can } = useAuth();
   const id = useId();
   const [model, setModel] = useState({ rows: [], baseline: [], history: [] });
@@ -58,6 +58,25 @@ export default function PageSectionsEditor({ pagePath, onSaved }) {
   const canUpload = can('media');
   const dirty = blocksChanged(model.rows, model.baseline);
   const disabled = busy || loading || !loaded || !canEdit || Boolean(dragging);
+
+  useEffect(() => {
+    if (!loaded || !onPreview) return;
+    onPreview(
+      model.rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        body: row.body,
+        published: row.published,
+        background_image_url: row.backgroundFile
+          ? previews.current.get(row.backgroundFile)
+          : row.background_image_url,
+        image_urls: [
+          ...row.image_urls,
+          ...(row.galleryFiles || []).map((file) => previews.current.get(file)),
+        ],
+      })),
+    );
+  }, [model.rows, loaded, onPreview]);
 
   const replaceModel = useCallback((next) => {
     modelRef.current = next;

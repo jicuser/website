@@ -11,9 +11,10 @@ const codespaceHost = process.env.CODESPACE_NAME
 
 // The @ alias points to src/. Production builds are static files in dist/.
 export default defineConfig(({ command, mode }) => {
-  if (command === 'build') validateBuildSettings(loadEnv(mode, process.cwd(), 'VITE_'));
+  const env = loadEnv(mode, process.cwd(), ['VITE_', 'JIC_PUBLIC_PREVIEWS']);
+  if (command === 'build') validateBuildSettings(env);
   return {
-    plugins: [react(), pagePreviews()],
+    plugins: [react(), pagePreviews({ env })],
     server: { allowedHosts: codespaceHost ? [codespaceHost] : [] },
     resolve: {
       extensions: ['.jsx', '.js', '.tsx', '.ts', '.json'],

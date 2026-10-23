@@ -6,19 +6,10 @@ import SceneCanvas from '@/features/displays/SceneCanvas';
 import TvPrayerScene from '@/components/tv/TvPrayerScene';
 import TvSpecialNotice from '@/components/tv/TvSpecialNotice';
 import DisplayConnection from '@/components/tv/DisplayConnection';
-import {
-  tvPrayerSequence,
-  tvSpecialNotice,
-  automaticTvNotice,
-  fastingTimes,
-} from '@/lib/tvPrayerSequence';
+import { fastingTimes } from '@/lib/tvPrayerSequence';
+import { tvAutomaticState } from '@/lib/tvAutomaticState';
 import { TV_SCREENS } from '@/lib/tvControl';
-import {
-  tvScene,
-  publicSettings,
-  tvDisplayScene,
-  tvScheduledScene,
-} from '../../supabase/functions/_shared/tv.js';
+import { tvScene, publicSettings, tvAutomaticScene } from '../../supabase/functions/_shared/tv.js';
 import { Helmet } from 'react-helmet';
 import PrayerTimeBar, { NextPrayerSummary } from '@/components/shell/PrayerTimeBar';
 import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
@@ -111,16 +102,10 @@ function ScreenDisplay({ screenId }) {
   const [slide, setSlide] = useState(0);
   const [failedImages, setFailedImages] = useState([]);
   const today = londonDate();
-  const computedSequence = tvPrayerSequence(
-    now,
-    prayers.todaysTimes,
-    prayers.jummahTimes,
-    tv.settings,
-    screenId,
-  );
+  const automaticState = tvAutomaticState(tv.settings, now, prayers, screenId);
   const sequence = normalPreview
     ? previewSequence(previewState, prayers, tv.settings)
-    : computedSequence;
+    : automaticState.sequence;
   const scene = tvScene(tv.settings, now.getTime());
   const posters = useMemo(() => {
     const programmePosters = programmes.filter(
@@ -156,22 +141,8 @@ function ScreenDisplay({ screenId }) {
     tv.settings.poster_ids,
     tv.settings.include_events,
   ]);
-  const automaticNotice = automaticTvNotice(
-    now,
-    prayers.todaysTimes,
-    prayers.jummahTimes,
-    tv.settings,
-    screenId,
-  );
   // Admin preview can force a display state without changing the live screen.
-  const specialNotice = normalPreview
-    ? previewNotice(previewState)
-    : scene === 'normal'
-      ? tvSpecialNotice(now, tv.settings, screenId) ||
-        (automaticNotice === 'fasting' && Math.floor(now.getTime() / 20000) % 3 !== 0
-          ? null
-          : automaticNotice)
-      : null;
+  const specialNotice = normalPreview ? previewNotice(previewState) : automaticState.notice;
   const noticeVisible = Boolean(sequence || specialNotice);
   const presetKey = sequence?.phase
     ? sequence.phase
@@ -180,7 +151,10 @@ function ScreenDisplay({ screenId }) {
       : specialNotice
         ? 'ramadan'
         : null;
-  const presetScene = presetKey ? tvDisplayScene(tv.settings, presetKey) : null;
+  const presetScene = tvAutomaticScene(tv.settings, now, {
+    preset: presetKey,
+    includeScheduled: !normalPreview,
+  }).scene;
   const presetContent = sequence ? (
     <TvPrayerScene
       sequence={sequence}
@@ -255,7 +229,9 @@ function ScreenDisplay({ screenId }) {
   const enterFullscreen = async () => {
     try {
       await screen.current?.requestFullscreen?.();
-      await window.screen.orientation?.lock?.(tv.settings.display_orientation === 'portrait' ? 'portrait' : 'landscape');
+      await window.screen.orientation?.lock?.(
+        tv.settings.display_orientation === 'portrait' ? 'portrait' : 'landscape',
+      );
     } catch {
       /* The device keeps its orientation when browser locking is unavailable. */
     }
@@ -265,7 +241,12 @@ function ScreenDisplay({ screenId }) {
 
   if (!tv.displayMode || (tv.displayMode === 'teaching' && (!tv.paired || scene !== 'teaching')))
     return (
-      <div {...themeAttributes} ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
+      <div
+        {...themeAttributes}
+        ref={screen}
+        className="jic-tv-shell jic-tv-teaching"
+        onDoubleClick={enterFullscreen}
+      >
         <Helmet>
           <title>JIC · {tv.label}</title>
           <meta name="robots" content="noindex, nofollow" />
@@ -299,7 +280,7 @@ function ScreenDisplay({ screenId }) {
       </div>
     );
 
-  if (scene === 'normal' && noticeVisible && presetScene) {
+  if (scene === 'normal' && presetScene) {
     const presetTv = {
       ...tv,
       settings: {
@@ -337,54 +318,14 @@ function ScreenDisplay({ screenId }) {
     );
   }
 
-  if (scene === 'normal' && !noticeVisible) {
-    const scheduled = normalPreview
-      ? null
-      : tvScheduledScene(tv.settings, now, tv.settings.display_orientation);
-    const standbyScene = scheduled?.scene || tvDisplayScene(tv.settings, 'standby');
-    const standbyTv = standbyScene
-      ? {
-          ...tv,
-          settings: {
-            ...tv.settings,
-            scenes: [standbyScene],
-            active_scene_id: standbyScene.id,
-            scene_mode: 'normal',
-          },
-        }
-      : tv;
+  if (scene === 'teaching')
     return (
       <div
         {...themeAttributes}
         ref={screen}
-        className={`jic-tv-shell ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''}`}
+        className="jic-tv-shell jic-tv-teaching"
         onDoubleClick={enterFullscreen}
       >
-        <Helmet>
-          <title>JIC · {tv.label}</title>
-          <meta name="robots" content="noindex, nofollow" />
-        </Helmet>
-        {standbyScene ? (
-          <SceneCanvas
-            tv={standbyTv}
-            screenId={screenId}
-            now={now}
-            prayers={prayers}
-            posters={posters}
-            slide={slide}
-            onImageError={onImageError}
-            livestream={livestream}
-            showFallbackBrand={false}
-          />
-        ) : null}
-        {connectionControl}
-      </div>
-    );
-  }
-
-  if (scene === 'teaching')
-    return (
-      <div {...themeAttributes} ref={screen} className="jic-tv-shell jic-tv-teaching" onDoubleClick={enterFullscreen}>
         <Helmet>
           <title>JIC · {tv.label}</title>
           <meta name="robots" content="noindex, nofollow" />
@@ -438,10 +379,10 @@ function ScreenDisplay({ screenId }) {
         <main className="jic-tv-stage" aria-label="Hall display content">
           {sequence && (
             <TvPrayerScene
-          sequence={sequence}
-          jummahNotice={tv.settings.jummah_notice}
-          settings={tv.settings}
-        />
+              sequence={sequence}
+              jummahNotice={tv.settings.jummah_notice}
+              settings={tv.settings}
+            />
           )}
           {!sequence && specialNotice && (
             <TvSpecialNotice
@@ -466,7 +407,10 @@ function ScreenDisplay({ screenId }) {
           )}
           {(noticeVisible || posters.length > 0) && (
             <div className="jic-tv-logo">
-              <img src={`/brand/jic-pillars-${theme === 'pearl' ? 'light' : 'dark'}.svg`} alt="Jamatia Islamic Centre" />
+              <img
+                src={`/brand/jic-pillars-${theme === 'pearl' ? 'light' : 'dark'}.svg`}
+                alt="Jamatia Islamic Centre"
+              />
             </div>
           )}
           {tv.settings.show_clock !== false && (

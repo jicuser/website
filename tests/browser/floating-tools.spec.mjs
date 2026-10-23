@@ -148,7 +148,7 @@ for (const theme of ['light', 'dark']) {
       'Home',
       'About',
       'Prayer Times',
-      'Faith & practice',
+      'Adhkar, Qur’an & Janazah Guide',
       'Ramadan',
       'Services',
       'Learning',

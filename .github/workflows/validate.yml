@@ -27,6 +27,7 @@ jobs:
           # Validation builds are never deployed and do not need production credentials.
           VITE_SUPABASE_URL: https://ci-validation.supabase.co
           VITE_SUPABASE_ANON_KEY: sb_publishable_ci_validation_only
+          JIC_PUBLIC_PREVIEWS: 'off'
       - id: browsers
         run: npx playwright install --with-deps chromium webkit
       - run: npm run test:browser

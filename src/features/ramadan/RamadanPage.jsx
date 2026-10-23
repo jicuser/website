@@ -373,13 +373,22 @@ export default function RamadanPage({ kind = null }) {
                 Print sponsorships
               </button>
             </div>
-            <div className="booking-table-wrap">
-              <table className="booking-table" ref={table}>
+            <div className="booking-table-wrap sponsorship-table-wrap">
+              <table
+                className="booking-table sponsorship-mobile-table sponsorship-summary-table"
+                ref={table}
+              >
                 <thead>
                   <tr>
-                    <th>Ramadan day</th>
-                    <th>UK date</th>
-                    <th>Status</th>
+                    <th scope="col" className="sponsorship-day-cell">
+                      Ramadan day
+                    </th>
+                    <th scope="col" className="sponsorship-date-cell">
+                      UK date
+                    </th>
+                    <th scope="col" className="sponsorship-status-cell">
+                      Status
+                    </th>
                     <th>Sponsor</th>
                   </tr>
                 </thead>
@@ -388,10 +397,14 @@ export default function RamadanPage({ kind = null }) {
                     const entry = ramadanDay(state.data, kind, day.date);
                     return (
                       <tr key={day.date}>
-                        <td>{day.number} Ramadan</td>
-                        <td>{fullDate(day.date)}</td>
-                        <td>{ramadanStatus(kind, entry.status)}</td>
-                        <td>
+                        <th scope="row" className="sponsorship-day-cell">
+                          {day.number} Ramadan
+                        </th>
+                        <td className="sponsorship-date-cell">{fullDate(day.date)}</td>
+                        <td className="sponsorship-status-cell">
+                          {ramadanStatus(kind, entry.status)}
+                        </td>
+                        <td className="sponsorship-sponsor-cell">
                           {entry.names?.join(', ') ||
                             (Number(entry.confirmed) > 0 ? 'Anonymous' : '—')}
                         </td>

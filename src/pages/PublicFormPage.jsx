@@ -8,6 +8,7 @@ import { formAction, visibleAnswers } from '@/lib/customForms';
 import { programmeForForm, programmeSlugFromSearch } from '@/lib/programmeJourney';
 import { serviceEnquiry, hallFormPrefill } from '@/lib/serviceEnquiries';
 import { checked } from '@/components/workspace/shared';
+import { SITE } from '@/content/site';
 import CustomFormsFields from '@/components/workspace/CustomFormsFields';
 import {
   validateAnswers,
@@ -28,7 +29,22 @@ export default function PublicFormPage() {
   return <PublicForm key={`${slug}:${auth.user?.id || 'anonymous'}`} slug={slug} />;
 }
 
-function PublicForm({ slug }) {
+export function EmbeddedPublicForm({ slug, subject = '', title, headingLevel = 2 }) {
+  const auth = useAuth();
+  if (auth.loading && !auth.user) return <p role="status">Loading form…</p>;
+  return (
+    <PublicForm
+      key={`${slug}:${subject}:${auth.user?.id || 'anonymous'}`}
+      slug={slug}
+      embedded
+      subject={subject}
+      titleOverride={title}
+      headingLevel={headingLevel}
+    />
+  );
+}
+
+function PublicForm({ slug, embedded = false, subject = '', titleOverride, headingLevel = 2 }) {
   const auth = useAuth();
   const { search } = useLocation();
   const requestedProgramme = programmeSlugFromSearch(search);
@@ -48,6 +64,7 @@ function PublicForm({ slug }) {
   const attempt = useRef(crypto.randomUUID());
   const mounted = useRef(true);
   const activeUploads = useRef(new Map());
+  const FormHeading = embedded && headingLevel !== 1 ? 'h2' : 'h1';
   useEffect(() => {
     setManagedForm(null);
     if (!auth.user) return undefined;
@@ -160,8 +177,8 @@ function PublicForm({ slug }) {
   }
 
   return (
-    <div className="community-workspace public-custom-form">
-      {form?.title && (
+    <div className={`community-workspace public-custom-form${embedded ? ' is-embedded' : ''}`}>
+      {!embedded && form?.title && (
         <PageMetadata title={form.title} description={form.description} noindex={false} />
       )}
       <div className="workspace-wrap">
@@ -196,7 +213,7 @@ function PublicForm({ slug }) {
           <p role="status">Loading form…</p>
         ) : receipt ? (
           <div className="workspace-card">
-            <h1>Thank you</h1>
+            {embedded ? <h2>Thank you</h2> : <h1>Thank you</h1>}
             <p>
               {service
                 ? 'Your enquiry has been received. The centre’s team can use your contact details to follow up.'
@@ -228,10 +245,13 @@ function PublicForm({ slug }) {
               setBusy(true);
               setError('');
               try {
-                const payload = validateAnswers(
-                  form.schema,
-                  visibleAnswers(form.schema.fields, answers),
+                const entered = visibleAnswers(form.schema.fields, answers);
+                const contextField = form.schema.fields.find(
+                  (field) => field.type === 'textarea' && typeof entered[field.id] === 'string',
                 );
+                if (subject && contextField)
+                  entered[contextField.id] = `${subject}\n\n${entered[contextField.id]}`;
+                const payload = validateAnswers(form.schema, entered);
                 const selectedUploads = Object.entries(uploads)
                   .filter(([key, item]) => item?.id && payload[key] === item.id)
                   .map(([, item]) => ({ id: item.id, upload_token: item.upload_token }));
@@ -255,7 +275,7 @@ function PublicForm({ slug }) {
               }
             }}
           >
-            <h1>{form.title}</h1>
+            <FormHeading>{titleOverride || form.title}</FormHeading>
             <p>{form.description}</p>
             <p className="workspace-meta">
               {service
@@ -275,7 +295,13 @@ function PublicForm({ slug }) {
               Fields marked * are required. <Link to="/privacy">How we use your information</Link>
             </p>
             <button disabled={busy || Object.values(uploads).some((item) => item?.busy)}>
-              {busy ? 'Sending…' : service ? 'Send enquiry' : 'Send response'}
+              {busy
+                ? 'Sending…'
+                : slug === 'contact-us'
+                  ? 'Send message'
+                  : service || slug === 'madrassah-enquiry'
+                    ? 'Send enquiry'
+                    : 'Send response'}
             </button>
           </form>
         ) : (
@@ -291,7 +317,29 @@ function PublicForm({ slug }) {
             </div>
           )
         )}
-        {error && <p role="alert">{error}</p>}
+        {error && (
+          <p role="alert">
+            {error}
+            {slug === 'contact-us' && (
+              <>
+                {' '}
+                <a
+                  href={`mailto:${SITE.email}?subject=${encodeURIComponent(subject || 'Website enquiry')}&body=${encodeURIComponent(
+                    Object.entries(answers)
+                      .map(
+                        ([key, value]) =>
+                          `${form?.schema.fields.find((field) => field.id === key)?.label || key}: ${value}`,
+                      )
+                      .join('\n\n'),
+                  )}`}
+                >
+                  Open your email app with this message
+                </a>
+                .
+              </>
+            )}
+          </p>
+        )}
       </div>
     </div>
   );

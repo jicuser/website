@@ -2,9 +2,26 @@
 
 Each hall has one permanent `/tv179/<hall>` webpage. The address stays the same when a stream starts, changes scenes or ends. When no stream is running, it shows public posters, prayer times and scheduled notices. An active stream shows its selected scene to approved viewers. Display webpages use their own dark theme, regardless of the website theme.
 
-## Choose a prayer board layout
+## Choose everyday scenes
 
-In **TV screens → Edit automatic display → Everyday display**, choose the screen and its shape. **Choose a starting layout** offers:
+In **TV screens**, choose **Automatic displays**, then **Edit automatic display** on the screen card. Each card shows an illustrative miniature of its saved content and whether a fixed scene, rotation, timed override, automatic prayer scene or presentation is selected. It reports the saved programme, rather than confirming playback on a physical TV.
+
+**Everyday content** starts with two choices:
+
+- **Keep one scene:** choose Timetable & notices, Iftar sponsorships, Suhoor sponsorships or Daily Giving.
+- **Rotate scenes:** add up to four different scenes, choose how long each appears, and put them in order. The timetable scene keeps the screen’s saved everyday layout. Ramadan scenes use the published sponsorship data and its TV visibility settings.
+
+**Keep items visible across scenes** selects blocks from the current orientation’s timetable layout. A timetable, logo, clock, next-prayer summary, text or poster can stay in its saved position while the sponsorship scene changes around it. Choose the logo and clock for a shared header or footer. A poster kept on screen retains its own poster timing. The resolver finds clear space for the sponsorship board; a selection that leaves no usable space is rejected. Landscape and portrait fixed-item choices are independent. Replacing a timetable layout removes references to items that no longer exist.
+
+The miniature follows the draft rotation and shows the selected scene and time until the next change. **Preview everyday content** uses the real receiver renderer. Neither preview saves settings. **Save display settings** publishes the programme and layout together through the existing revision-checked `save-background` action.
+
+Rotation uses elapsed wall-clock time so devices with the same saved programme stay in sync and refreshing does not restart the loop. Automatic prayer phases and seasonal notices take priority. The existing timed scene rules remain in **Advanced → Scheduled overrides**, in their saved order; the first matching rule overrides everyday content. After an override or prayer phase, the display returns to the scene for the current point in the loop. Persistent items apply to everyday content only.
+
+Old settings open as **Keep one scene → Timetable & notices**, retaining their complete saved everyday layout, including any older sponsorship layout. Existing schedules and presentation scenes are preserved.
+
+## Choose a timetable layout
+
+Below Everyday content, the timetable layout editor controls the **Timetable & notices** scene and the source of fixed items. **Change layout → Choose a starting layout** offers:
 
 - **Timetable & notices:** a timetable and rotating notice, with a compact next-jama’ah footer.
 - **Countdown:** a large next-jama’ah countdown with the prayer timetable below.
@@ -18,7 +35,7 @@ The new boards highlight the next congregation; Friday uses the published Jummah
 
 The before-prayer scene now counts down to jama’ah. The old generated “1 minute” title is replaced by “Jama‘ah begins shortly”; custom staff messages are preserved. Embedded draft previews do not allocate viewer credentials or poll the hall-control service.
 
-These layouts use existing scene fields, so no new database migration or Edge Function deployment is needed. Deploy the frontend, then choose and save the desired layout for each screen. Existing saved layouts are not automatically replaced.
+The timetable templates use existing scene fields. The scene programme adds the backward-compatible `everyday_display` setting to the same screen JSON, without a database migration. Deploy `tv-control` with `_shared/tv.js`, `_shared/tv-everyday.js` and `_shared/tv-board-layouts.js` (and its existing shared dependencies), then deploy the matching frontend. An older Edge Function strips the new setting, so deploy it before staff save a programme. Existing saved layouts are not automatically replaced.
 
 The Labbaik reference was reviewed at https://uselabbaik.com/prayer-board. Its public examples also show prayer-restriction warnings, colour choices, scheduled announcements and donation/event QR codes. Those are separate features: this change does not add Zawwal calculations, new religious timings, QR appeals or offline timetable caching. Existing JIC prayer and dhikr configuration remains authoritative.
 
@@ -65,6 +82,7 @@ YouTube/TikTok broadcasting uses the separate media relay (`VITE_MEDIA_RELAY_URL
 
 - `StreamSetup` and `useStreamSetup` own the three setup steps, the private tab draft and save conflicts. Polls never replace an unsaved layout. A stopped or replaced managed stream releases this browser's capture controllers.
 - `SceneEditor`, `ContentEditorDialog` and `SceneCanvas` share percentage geometry. `sceneLayouts` provides presets/snapping; `streamWorkspace` builds blank scenes and remaps template inputs without merging distinct sources.
+- `_shared/tv-everyday.js` validates the fixed/rotation programme, unique scene kinds, per-scene durations of 5–300 seconds and fixed-item references. `_shared/tv-board-layouts.js` supplies both the editor and receiver templates. `_shared/tv.js` resolves automatic prayer presets before scheduled overrides and everyday content. `tvAutomaticState` shares prayer/seasonal state selection with the staff overview.
 - `DeviceInputs` keeps per-slot controllers mounted outside the dialog. Portals render only their controls inside the selected source. `tvPublisherController` separates capture preparation, publication and stopping.
 - `tv_screens` stores saved layouts and revisions. `save_tv_presentation` checks the revision while holding the hall lock; `new-presentation` rotates the stream identity. Background saves preserve the active scene and presentation fields.
 - `tv_presentations` stores each active stream's private identity/code. `tv_devices` stores hashed viewer credentials bound to that hall and stream. Ending a stream removes its credentials and receivers. Admin previews are short lived and excluded from the viewer list.
@@ -78,6 +96,6 @@ Successful start, stop, approval and layout changes send an empty Realtime refre
 
 Apply the migrations through `20260912121025_saved_stream_settings.sql`, deploy `tv-control` with its shared modules, then publish the matching frontend. The display-code/template migration adds private tables and updates empty-scene handling; it does not reset existing streams or delete posters/accounts. Historical SQL migrations remain necessary deployment history.
 
-Run `npm run validate`. Database suites use isolated fixtures and roll back: `tests/display-connections.sql`, `tests/tv-presentation-sessions.sql`, `tests/tv-receiver.sql` and `tests/staff-tv-permissions.sql`. They cover code rotation, expiry, rate limits, permissions, template privacy, stale saves, stream isolation and receiver independence.
+Run `npm run validate`. Focused programme coverage is in `tests/tv-everyday-scenes.test.mjs`, the real Edge handler cases in `tests/tv-session.test.mjs`, and the screenshot-free `tests/browser/tv-everyday-scenes.spec.mjs`. It checks exact rotation boundaries, synchronization after reload, fixed-item geometry, priority, legacy settings, validation and saving through the existing endpoint on phone and desktop. Database suites use isolated fixtures and roll back: `tests/display-connections.sql`, `tests/tv-presentation-sessions.sql`, `tests/tv-receiver.sql` and `tests/staff-tv-permissions.sql`. They cover code rotation, expiry, rate limits, permissions, template privacy, stale saves, stream isolation and receiver independence.
 
 For acceptance, open one display webpage, build a two-input scene with a laptop screen and phone camera, then Start stream and approve the displayed six-digit code. Check picture and audio, resize and save, close/reopen the content dialog, refresh each device separately, load a saved scene, and end the stream. Confirm old watching links no longer work. Automated checks do not establish physical browser codec support or camera/network delivery.

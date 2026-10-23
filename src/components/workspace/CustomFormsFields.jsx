@@ -104,9 +104,9 @@ export default function CustomFormsFields({
           {...common}
           type={type}
           maxLength={field.type === 'phone' ? 40 : field.type === 'email' ? 254 : 500}
-          step={type === 'number' ? 'any' : undefined}
-          min={type === 'number' ? -1e12 : undefined}
-          max={type === 'number' ? 1e12 : undefined}
+          step={type === 'number' ? (field.integer ? 1 : 'any') : undefined}
+          min={type === 'number' ? (field.minimum ?? -1e12) : undefined}
+          max={type === 'number' ? (field.maximum ?? 1e12) : undefined}
           value={value ?? ''}
           placeholder={
             field.placeholder || (field.type === 'phone' ? '07700 900000 or +44…' : undefined)

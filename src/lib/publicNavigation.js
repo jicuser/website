@@ -6,6 +6,7 @@ import {
 } from '../content/nav.js';
 import { canonicalPagePath } from '../content/pageAliases.js';
 import { standaloneSections } from '../content/sectionRoutes.js';
+import { orderedNavigation } from './navigationConfiguration.js';
 
 const matchesPath = (pathname, path) =>
   pathname === path || (path !== '/' && pathname.startsWith(`${path}/`));
@@ -114,8 +115,8 @@ export function compactMenuNavigation(groups) {
       }
       return {
         ...group,
-        name: group.path === '/education' ? 'Learning' : group.name,
-        children,
+        name: group.path === '/education' && !group.customName ? 'Learning' : group.name,
+        children: orderedNavigation(children, group.childOrder),
         sectionPaths: [
           group.path,
           ...groups

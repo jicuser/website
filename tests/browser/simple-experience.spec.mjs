@@ -115,15 +115,14 @@ async function fixture(page, { radio = false } = {}) {
       data = req.headers().accept?.includes('object') ? state.draft : [state.draft];
     else if (path.endsWith('/custom_form_staff'))
       data = [{ user_id: actor.id, role: 'responsible' }];
-    else if (path.endsWith('/rpc/save_custom_form')) {
-      state.writes.push({ action: 'save-form', ...body });
+    else if (path.endsWith('/rpc/save_form_workflow')) {
+      state.writes.push({ action: body.p_publish ? 'publish-form' : 'save-form', ...body });
       state.draft = { ...state.draft, ...body.p_form, updated_at: '2026-10-23T11:00:00Z' };
-      data = state.draft.id;
-    } else if (path.endsWith('/rpc/publish_custom_form')) {
-      state.writes.push({ action: 'publish-form', ...body });
-      state.draft.published_version++;
-      state.published = structuredClone(state.draft);
-      data = state.draft.published_version;
+      if (body.p_publish) {
+        state.draft.published_version++;
+        state.published = structuredClone(state.draft);
+      }
+      data = { form: state.draft, page: null };
     } else if (path.endsWith('/rpc/ramadan_calendar_public'))
       data = {
         season: state.season,
@@ -272,6 +271,7 @@ test('Ramadan staff table opens and closes a date range and accepts a 29-day end
     'aria-pressed',
     'true',
   );
+  await page.getByText('Date range & availability', { exact: true }).click();
   await range.getByLabel('From', { exact: true }).selectOption('2027-02-27');
   await range.getByLabel('To', { exact: true }).selectOption('2027-03-02');
   await page.getByRole('button', { name: 'Close this range', exact: true }).click();
@@ -280,7 +280,7 @@ test('Ramadan staff table opens and closes a date range and accepts a 29-day end
     p_enabled: false,
     p_dates: ['2027-02-27', '2027-02-28', '2027-03-01', '2027-03-02'],
   });
-  await page.getByRole('button', { name: 'Sponsorship setup', exact: true }).click();
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
   await page.getByLabel('Last UK date', { exact: true }).fill('2027-03-09');
   await page.getByRole('button', { name: 'Save setup', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Sponsorship setup saved.');
@@ -335,7 +335,7 @@ test('TV starts with one task and one primary action per supported screen withou
   await page.getByRole('button', { name: /Live presentation Camera/ }).click();
   await expect(page.getByRole('button', { name: 'Quick present', exact: true })).toHaveCount(3);
   await expect(page.getByText('Shoe Area', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: /Screen layouts Prayer/ }).click();
+  await page.getByRole('button', { name: /Automatic displays Timetable/ }).click();
   await page.getByRole('button', { name: 'Edit automatic display', exact: true }).last().click();
   await expect(page.getByRole('tab', { name: 'Design', exact: true })).toBeVisible();
   expect(state.writes).toEqual([]);

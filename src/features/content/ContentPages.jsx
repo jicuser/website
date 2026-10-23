@@ -6,6 +6,12 @@ import { EDITABLE_PAGES } from '@/content/editablePages';
 import { buildPageNavigator } from '@/lib/pageNavigator';
 import { isPageEnabled, pageSectionKey } from '@/lib/pageVisibility';
 import { saveSiteVisibility } from '@/lib/siteVisibility';
+import {
+  navigationName,
+  NAVIGATION_CONTENT_KEY,
+  orderedNavigation,
+  readNavigationConfiguration,
+} from '@/lib/navigationConfiguration';
 import '@/styles/page-directory.css';
 import React, { useCallback, useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -224,7 +230,7 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
   const [query, setQuery] = useState('');
   const [busy, setBusy] = useState(null);
   const [message, setMessage] = useState('');
-  const [mode, setMode] = useState('view');
+  const [mode, setMode] = useState('edit');
   const tab = params.get('view');
   const opened = params.has('page');
   const selected = EDITABLE_PAGES.find((page) => page.path === initialPath);
@@ -238,7 +244,7 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
   }, [opened, tab, dirty, saving, registerBack, setParams]);
   function navigate(path, view = 'site') {
     if (saving || (dirty && !window.confirm('Discard unsaved page changes?'))) return;
-    setMode('view');
+    setMode('edit');
     setParams((current) => {
       const updated = new URLSearchParams(current);
       updated.set('view', view);
@@ -291,7 +297,7 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
           <button className="admin-button" onClick={() => navigate(null)}>
             ← All pages
           </button>
-          <h2>{selected.name}</h2>
+          <h2>{navigationName(getContent, selected.path, selected.name)}</h2>
         </div>
         <nav className="admin-actions" aria-label="Page actions">
           <button
@@ -302,14 +308,14 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
             }}
             disabled={saving}
           >
-            View
+            View saved page
           </button>
           <button
             className="admin-button"
             aria-pressed={mode === 'edit'}
             onClick={() => setMode('edit')}
           >
-            Edit content & layout
+            Edit & preview
           </button>
           <a className="admin-button" href={selected.path} target="_blank" rel="noreferrer">
             Open website ↗
@@ -345,10 +351,18 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
         )}
       </section>
     );
-  const sections = buildPageNavigator(EDITABLE_PAGES).map((section) => ({
-    ...section,
-    pages: [...section.pages],
-  }));
+  const menuSettings = readNavigationConfiguration(getContent(NAVIGATION_CONTENT_KEY, '{}'));
+  const sections = orderedNavigation(buildPageNavigator(EDITABLE_PAGES), menuSettings.order).map(
+    (section) => ({
+      ...section,
+      name: menuSettings.labels[section.path] || section.name,
+      pages: orderedNavigation(section.pages, menuSettings.children[section.path]).map((page) => ({
+        ...page,
+        name: menuSettings.labels[page.path] || page.name,
+        label: menuSettings.labels[page.path] || page.label,
+      })),
+    }),
+  );
   for (const section of sections) {
     for (const page of [...section.pages]) {
       const destination = sections.find(
@@ -376,6 +390,9 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
       <div className="admin-actions">
         <Link className="admin-button" to="/admin?section=visibility">
           Show or hide pages
+        </Link>
+        <Link className="admin-button" to="/admin?section=menus">
+          Menu names & order
         </Link>
         <button className="admin-button" onClick={() => navigate(null, 'pages')}>
           Manage added pages

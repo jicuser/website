@@ -160,9 +160,6 @@ test('applying each design changes only the current orientation’s everyday dra
       ['classic', 'Timetable & notices'],
       ['countdown', 'Countdown'],
       ['noticeboard', 'Noticeboard'],
-      ['iftar', 'Iftar sponsorships'],
-      ['suhoor', 'Suhoor sponsorships'],
-      ['daily-giving', 'Daily Giving'],
     ]) {
       const settings = {
         ...structuredClone(DEFAULT_TV_SETTINGS),
@@ -182,6 +179,22 @@ test('applying each design changes only the current orientation’s everyday dra
       updated.display_layouts[orientation].standby = original.display_layouts[orientation].standby;
       assert.deepEqual(updated, original);
     }
+});
+
+test('timetable comparisons stay visible while a sponsorship scene is selected and preserve its programme', () => {
+  const settings = structuredClone(DEFAULT_TV_SETTINGS);
+  settings.everyday_display.fixed_scene = 'iftar';
+  const original = structuredClone(settings.everyday_display);
+  const fixture = pickerFixture({ settings });
+  assert.equal(choice(fixture.render(), 'iftar'), undefined);
+  choice(fixture.render(), 'countdown').props.onClick();
+  button(fixture.render(), 'Side by side').props.onClick();
+  for (const preview of previews(fixture.render())) {
+    assert.equal(preview.props.settings.everyday_display.mode, 'fixed');
+    assert.equal(preview.props.settings.everyday_display.fixed_scene, 'classic');
+  }
+  button(fixture.render(), 'Use Countdown').props.onClick();
+  assert.deepEqual(fixture.props.settings.everyday_display, original);
 });
 
 test('side-by-side previews keep the same prayer moment and retain it across candidate changes', () => {

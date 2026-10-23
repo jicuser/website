@@ -1,6 +1,12 @@
 import { hasPermission } from './access.js';
 import { newScene, validateScenes, hasSceneContent } from './tv-scenes.js';
 import { TV_THEME_KEYS, tvThemeId } from './tv-themes.js';
+import {
+  DEFAULT_TV_EVERYDAY_DISPLAY,
+  normaliseTvEverydayDisplay,
+  validateTvEverydayDisplay,
+  resolveTvEverydayScene,
+} from './tv-everyday.js';
 export const DEFAULT_STANDBY_SCENE = {
   id: 'standby',
   name: 'Standby',
@@ -193,6 +199,7 @@ export const DEFAULT_TV_SETTINGS = {
   preset_scenes: DEFAULT_TV_PRESET_SCENES,
   display_layouts: DEFAULT_TV_DISPLAY_LAYOUTS,
   scheduled_scenes: [],
+  everyday_display: DEFAULT_TV_EVERYDAY_DISPLAY,
   jamaah_lead_minutes: 1,
   before_jamaah_message: 'Jama‘ah begins in 1 minute',
   jamaah_message: 'It is Jama‘ah time',
@@ -247,6 +254,7 @@ export function normaliseTvSettings(settings = {}) {
     display_orientation: orientation,
     display_theme: tvThemeId(settings.display_theme),
     display_layouts: displayLayouts,
+    everyday_display: normaliseTvEverydayDisplay(settings.everyday_display),
     standby_scene: displayLayouts[orientation].standby,
     preset_names: { ...DEFAULT_TV_PRESET_NAMES, ...(settings.preset_names || {}) },
     preset_scenes: Object.fromEntries(
@@ -323,6 +331,8 @@ export function youtubeUrl(raw) {
 }
 export function validateSettings(input, screenId = '') {
   if (!input || typeof input !== 'object') throw new Error('Screen settings are required.');
+  if (input.everyday_display !== undefined && (!input.everyday_display || typeof input.everyday_display !== 'object' || Array.isArray(input.everyday_display)))
+    throw new Error('Choose valid everyday display settings.');
   if (input.display_theme !== undefined && !TV_THEME_KEYS.includes(input.display_theme))
     throw new Error('Choose a valid TV colour scheme.');
   const values = normaliseTvSettings(input);
@@ -395,6 +405,7 @@ export function validateSettings(input, screenId = '') {
     }
   }
   result.standby_scene = result.display_layouts[result.display_orientation].standby;
+  result.everyday_display = validateTvEverydayDisplay(input.everyday_display === undefined ? values.everyday_display : input.everyday_display, result.display_layouts);
   result.preset_scenes = Object.fromEntries(
     TV_PRESET_KEYS.filter((key) => key !== 'standby').map((key) => [
       key,
@@ -607,6 +618,17 @@ export function tvScheduledScene(settings = {}, now = new Date(), orientation = 
     }
   }
   return null;
+}
+export function tvAutomaticScene(settings = {}, now = new Date(), {
+  orientation = settings.display_orientation || 'landscape',
+  preset = null,
+  includeScheduled = true,
+} = {}) {
+  if (preset && preset !== 'standby' && TV_PRESET_KEYS.includes(preset))
+    return { source: 'automatic', name: settings.preset_names?.[preset] || DEFAULT_TV_PRESET_NAMES[preset], scene: tvDisplayScene(settings, preset, orientation) };
+  const scheduled = includeScheduled ? tvScheduledScene(settings, now, orientation) : null;
+  if (scheduled) return { ...scheduled, source: 'scheduled' };
+  return resolveTvEverydayScene(settings, tvDisplayScene(settings, 'standby', orientation), now, orientation);
 }
 export const isTvStaff = (profile) => hasPermission(profile, 'tv');
 export function validDescription(description, type) {

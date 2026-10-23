@@ -272,6 +272,124 @@
 .booking-table th {
   font-weight: 650;
 }
+
+/* Venue details and the enquiry summary belong to the public hall journey. */
+.hall-booking-page > header p,
+.hall-step-heading p {
+  max-width: 65ch;
+  margin: 0;
+  color: var(--jic-text-secondary);
+}
+.hall-details {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid var(--jic-border);
+  border-radius: 16px;
+  background: var(--jic-surface);
+}
+.hall-details-copy > p,
+.hall-details-facts p {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  color: var(--jic-text-secondary);
+}
+.hall-details-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+.hall-details-facts h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 650;
+}
+.hall-details-facts p,
+.hall-details-facts ul {
+  margin: 0;
+}
+.hall-details-facts ul {
+  padding-left: 20px;
+  list-style: disc;
+  color: var(--jic-text-secondary);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.hall-details-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+.hall-details-gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+.hall-details-gallery img:only-child {
+  grid-column: 1 / -1;
+}
+.hall-page-content:empty {
+  display: none;
+}
+.hall-page-content {
+  margin-bottom: 32px;
+}
+.hall-page-content .managed-page-content {
+  margin-bottom: 20px;
+}
+.hall-step-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.hall-step-heading > span {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--jic-gold);
+  border-radius: 50%;
+  color: var(--jic-gold);
+  font-weight: 650;
+}
+.hall-booking-page .booking-panel + .booking-panel {
+  margin-top: 0;
+}
+.hall-enquiry.has-date {
+  border-color: var(--jic-gold);
+}
+.hall-enquiry .hall-step-label {
+  margin-bottom: 14px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-weight: 650;
+  color: var(--jic-gold);
+}
+.hall-enquiry .hall-selected-date {
+  margin-bottom: 16px;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  line-height: 1.3;
+  font-weight: 650;
+}
+.hall-enquiry p {
+  margin: 10px 0;
+  color: var(--jic-text-secondary);
+}
+.hall-calendar .date-calendar-day span {
+  font-size: 0.6875rem;
+}
+.hall-enquiry .booking-actions .primary {
+  width: 100%;
+}
 @media (max-width: 767px) {
   .booking-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -292,6 +410,10 @@
   }
   .booking-fields {
     gap: 8px;
+  }
+  .hall-details-facts,
+  .hall-details-gallery {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media print {

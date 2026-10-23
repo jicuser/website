@@ -28,6 +28,7 @@ const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
 const ContentPage = lazy(() => import('@/pages/ContentPage'));
 const AdultCoursesPage = lazy(() => import('@/pages/AdultCoursesPage'));
 const EducationPage = lazy(() => import('@/pages/EducationPage'));
+const ProgrammesPage = lazy(() => import('@/pages/ProgrammesPage'));
 const EducationEnrolmentPage = lazy(() => import('@/pages/EducationEnrolmentPage'));
 const ClassesCoursesPage = lazy(() => import('@/pages/ClassesCoursesPage'));
 const FinancialHistoryPage = lazy(() => import('@/pages/FinancialHistoryPage'));
@@ -194,6 +195,7 @@ function AppRoutes() {
             ))}
 
             <Route path="education" element={<EducationPage />} />
+            <Route path="education/programmes" element={<ProgrammesPage />} />
             <Route path="education/courses" element={<AdultCoursesPage />} />
             <Route path="education/enrolment" element={<EducationEnrolmentPage />} />
             <Route path="forms/:slug" element={<PublicFormPage />} />

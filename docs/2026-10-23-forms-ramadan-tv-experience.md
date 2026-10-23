@@ -153,13 +153,21 @@ confirm a playable stream before a live notice appears.
   add or open question cards, choose who handles responses and publish. The form
   address is generated for you. Help, examples and conditions are inside each
   question's optional settings; its stable field key is assigned automatically.
-- **Manage Ramadan:** Admin → Ramadan → Sponsorship setup. Enter the confirmed
-  first UK date and choose the last UK date. Set Iftar/Suhoor amounts if needed,
-  then publish. No season dates have been guessed or created for the centre.
-- **Choose sponsorship days:** select Iftar, Suhoor or Daily Giving. Use Table or
-  Days, and the From/To selectors to choose a period. Every selector shows the
-  Ramadan day and UK date. Open/close the range, or add/edit a sponsor on a day.
-  Print table prints the current date and status filters.
+- **Manage Ramadan:** Admin → Ramadan → Setup. Enter the confirmed first and last
+  UK dates for a 29- or 30-day season. Optional amounts are under **Amounts**.
+  Save setup preserves the season's publication status; **Website & screens**
+  contains Publish/Unpublish and the existing page, meal, homepage and TV switches.
+  No season dates have been guessed or created for the centre.
+- **Choose sponsorship days:** Bookings → Iftar, Suhoor or Daily Giving. Use Table
+  or Days. Phone tables become readable cards with the Ramadan day, UK date,
+  status and sponsor name; Edit expands that booking's private details. Selecting
+  an occupied day opens its sponsor. **Date range & availability** contains the
+  From/To selectors and Open/Close range actions; each selector includes both
+  dates. Closing a range keeps existing bookings. Green means available, amber
+  reserved, blue sponsored, and grey closed, alongside the written status.
+  Print table uses the current date and status filters, includes staff contact,
+  amount and payment columns, and omits the editor and actions. Public tables
+  continue to show only statuses and approved sponsor names.
 - **Change a TV:** Admin → Screens & layouts → Screen layouts → choose the screen.
   Edit its draft and save display settings. **Live presentation** opens the hall
   camera/video workflow; selecting the task alone does not start broadcasting.

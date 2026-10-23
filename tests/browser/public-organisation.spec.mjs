@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { CONTACT_FORM, CONTACT_RECEIPT } from './helpers/builtInForms.mjs';
 
 const campaigns = ['masjid', 'community'].map((category, index) => ({
   id: `campaign-${index}`,
@@ -26,9 +27,11 @@ async function prepare(page, theme = 'dark') {
       data = body?.p_slug
         ? campaigns.filter((campaign) => campaign.slug === body.p_slug)
         : campaigns;
-    } else if (path.endsWith('/functions/v1/submit-form')) {
+    } else if (path.endsWith('/rpc/get_public_form')) {
+      data = CONTACT_FORM;
+    } else if (path.endsWith('/functions/v1/custom-forms')) {
       writes.push(route.request().postDataJSON());
-      data = { ok: true };
+      data = { ok: true, id: CONTACT_RECEIPT };
     } else if (path.endsWith('/functions/v1/salah-reminders')) {
       if (route.request().method() === 'GET') data = { ready: true, publicKey: 'AQID' };
       else {
@@ -88,7 +91,7 @@ for (const theme of ['dark', 'light']) {
   });
 }
 
-test('portal access is in the menu, Faith & practice keeps reading links, and volunteering accepts an enquiry', async ({
+test('portal access is in the menu, Adhkar, Qur’an & Janazah Guide keeps reading links, and volunteering accepts an enquiry', async ({
   page,
 }) => {
   const writes = await prepare(page);
@@ -103,22 +106,25 @@ test('portal access is in the menu, Faith & practice keeps reading links, and vo
   await expect(page.locator('.jic-menu-account')).toHaveAttribute('href', '/portal');
   await page
     .locator('#jic-site-menu')
-    .getByRole('link', { name: 'Faith & practice', exact: true })
+    .getByRole('link', { name: 'Adhkar, Qur’an & Janazah Guide', exact: true })
     .click();
   await expect(page).toHaveURL('/worship');
-  await expect(page.getByRole('heading', { name: 'Faith & practice' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Adhkar, Qur’an & Janazah Guide' })).toBeVisible();
   await expect(page.locator('.worship-hub-grid a[href="/worship/quran"]')).toBeVisible();
   await page.goto('/get-involved/volunteer');
   await expect(
     page.getByRole('heading', { name: 'Volunteer with JIC', exact: true }),
   ).toBeVisible();
-  await page.locator('#name').fill('Example volunteer');
-  await page.locator('#email').fill('volunteer@example.test');
-  await page.locator('#question').fill('I can help at weekend community events.');
+  await page.getByLabel('Name', { exact: false }).fill('Example volunteer');
+  await page.getByLabel('Email address', { exact: false }).fill('volunteer@example.test');
+  await page
+    .getByLabel('Your message', { exact: false })
+    .fill('I can help at weekend community events.');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Enquiry received' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
   expect(writes).toHaveLength(1);
-  expect(writes[0].payload.question).toContain('Volunteering enquiry');
+  expect(writes[0].slug).toBe('contact-us');
+  expect(writes[0].answers.question).toContain('Volunteering enquiry');
 });
 
 test('Salah alerts enable the default in one action and preserve custom settings', async ({

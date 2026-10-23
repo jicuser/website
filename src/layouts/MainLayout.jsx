@@ -45,7 +45,7 @@ function PublicLayout() {
     isHome ||
     pathname.startsWith('/worship') ||
     (pathname.startsWith('/prayer-times') && pathname !== '/prayer-times/reminders');
-  const isDiscovery = ['/search', '/social-media'].includes(pathname);
+  const isDiscovery = ['/search', '/social-media', '/education/programmes'].includes(pathname);
   const isTask =
     pathname.startsWith('/forms/') ||
     pathname.startsWith('/ramadan') ||
@@ -81,10 +81,10 @@ function PublicLayout() {
             >
               <Outlet />
             </Suspense>
-            {supplementalContentPaths.has(pathname) && (
+            {supplementalContentPaths.has(pathname) && pathname !== '/services/hall-booking' && (
               <ManagedPageContent optional headingLevel={2} className="jic-page-addition" />
             )}
-            <ManagedPageSections key={pathname} />
+            {pathname !== '/services/hall-booking' && <ManagedPageSections key={pathname} />}
             {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
             {!isDiscovery && !isTask && <PublishedPageLinks />}
             {!isDiscovery && !isTask && <RelatedContent />}

@@ -1,0 +1,104 @@
+.page-editor-layout {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  align-items: start;
+}
+.page-editor-controls {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.page-editor-controls > .admin-panel,
+.page-editor-preview.admin-panel {
+  margin: 0;
+}
+.page-editor-mobile-tabs {
+  display: flex;
+  gap: 8px;
+}
+.page-editor-mobile-tabs button {
+  flex: 1;
+}
+.page-editor-preview .admin-site-preview {
+  width: 100%;
+  height: min(78dvh, 850px);
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-bg);
+}
+.page-editor-preview .admin-site-preview.mobile {
+  max-width: 390px;
+}
+.page-editor-preview .admin-site-preview iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  border: 0;
+  background: var(--jic-bg);
+}
+.page-editor-preview .admin-site-preview:not(.mobile) iframe {
+  max-width: none;
+  transform-origin: top left;
+}
+.page-editor-preview .admin-heading {
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.page-editor-preview .admin-heading p {
+  font-size: 0.8rem;
+}
+.is-page-editing .admin-console-layout {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 1800px;
+}
+.is-page-editing .admin-navigation {
+  display: none;
+}
+.is-page-editing .admin-mobile-section {
+  display: flex;
+  flex: 1;
+}
+.is-page-editing .admin-desktop-current {
+  display: none;
+}
+.hall-details-editor {
+  display: grid;
+  gap: 14px;
+}
+.hall-details-editor__photo {
+  display: grid;
+  gap: 8px;
+  padding-block: 12px;
+  border-top: 1px solid var(--jic-border);
+}
+.hall-details-editor__photo img {
+  max-height: 150px;
+  max-width: 100%;
+  object-fit: contain;
+}
+@media (min-width: 1100px) {
+  .page-editor-layout {
+    grid-template-columns: minmax(300px, 460px) minmax(0, 1fr);
+  }
+  .page-editor-mobile-tabs {
+    display: none;
+  }
+  .page-editor-preview {
+    position: sticky;
+    top: 80px;
+  }
+}
+@media (max-width: 1099px) {
+  .page-editor-preview {
+    display: none;
+  }
+  .page-editor-layout.is-preview-pane .page-editor-preview {
+    display: block;
+  }
+  .page-editor-layout.is-preview-pane .page-editor-controls {
+    display: none;
+  }
+}

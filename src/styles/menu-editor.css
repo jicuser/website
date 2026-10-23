@@ -1,0 +1,48 @@
+.menu-editor {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.menu-editor__group {
+  margin: 0;
+}
+.menu-editor__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding-block: 8px;
+}
+.menu-editor__row > label,
+.menu-editor__overview {
+  flex: 1;
+  min-width: 0;
+}
+.menu-editor__row input {
+  width: 100%;
+  min-width: 0;
+}
+.menu-editor__move {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+.menu-editor__move button {
+  padding: 8px;
+  min-width: 44px;
+}
+.menu-editor__group summary {
+  cursor: pointer;
+  padding: 12px 0;
+  font-size: 0.875rem;
+}
+.menu-editor__group details .menu-editor__row {
+  border-top: 1px solid var(--jic-border);
+}
+.menu-editor__overview {
+  display: grid;
+  gap: 4px;
+}
+.menu-editor__overview small {
+  color: var(--jic-text-secondary);
+}

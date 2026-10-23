@@ -5,6 +5,22 @@ import { supabase } from '@/lib/supabaseClient';
 export default function ManagedPageSections() {
   const { pathname } = useLocation();
   const [sections, setSections] = useState([]);
+  const [draft, setDraft] = useState(null);
+
+  useEffect(() => {
+    if (
+      window.parent === window ||
+      new URLSearchParams(window.location.search).get('preview') !== '1'
+    )
+      return;
+    const refresh = () =>
+      setDraft(
+        window.__jicPagePreview?.path === pathname ? window.__jicPagePreview.sections : null,
+      );
+    refresh();
+    window.addEventListener('jic-page-preview', refresh);
+    return () => window.removeEventListener('jic-page-preview', refresh);
+  }, [pathname]);
 
   useEffect(() => {
     let active = true;
@@ -29,10 +45,11 @@ export default function ManagedPageSections() {
     };
   }, [pathname]);
 
-  if (!sections.length) return null;
+  const shown = (draft || sections).filter((section) => section.published);
+  if (!shown.length) return null;
   return (
     <div className="managed-page-sections">
-      {sections.map((section) => {
+      {shown.map((section) => {
         const images = Array.isArray(section.image_urls) ? section.image_urls : [];
         const style = section.background_image_url
           ? {
@@ -40,7 +57,11 @@ export default function ManagedPageSections() {
             }
           : undefined;
         return (
-          <section key={section.id} className="managed-page-section" style={style}>
+          <section
+            key={section.id}
+            className={`managed-page-section ${style ? 'has-photo' : ''}`}
+            style={style}
+          >
             <div className="managed-page-section-inner">
               <div className="managed-page-section-copy">
                 {section.title && <h2>{section.title}</h2>}

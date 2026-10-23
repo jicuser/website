@@ -3,6 +3,7 @@ const groups = [
   ['Colour scheme', ['display_theme']],
   ['Layouts and items', ['display_layouts']],
   ['Section names', ['preset_names']],
+  ['Everyday scenes and fixed items', ['everyday_display']],
   ['Posters and rotation', ['poster_ids', 'include_events', 'rotation_seconds']],
   ['Scheduled notices', ['scheduled_scenes']],
   [

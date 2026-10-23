@@ -271,6 +271,24 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
             <p>Choose a responsible person before publishing.</p>
           )}
           <h4>Where this form is used</h4>
+          {form.built_in_kind && (
+            <p>
+              <Link
+                to={
+                  {
+                    contact: '/contact',
+                    madrassah: '/madrassah/enrolment',
+                    itikaaf: '/youth/itikaf',
+                  }[form.built_in_kind]
+                }
+                target="_blank"
+                rel="noreferrer"
+              >
+                Existing website form
+              </Link>{' '}
+              · Includes all earlier responses
+            </p>
+          )}
           {serviceEnquiry(form.slug) && (
             <p>
               <Link to={serviceEnquiry(form.slug).page} target="_blank" rel="noreferrer">
@@ -292,7 +310,7 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
                 · {page.placement} · {page.published ? 'Page live' : 'Page hidden'}
               </p>
             ))
-          ) : !serviceEnquiry(form.slug) ? (
+          ) : !serviceEnquiry(form.slug) && !form.built_in_kind ? (
             <p>Standalone form. Link it from a poster or content page when needed.</p>
           ) : null}
           <p>
@@ -456,20 +474,34 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
   const auth = useAuth();
   const { data, loading, error, reload } = useFormSummaries();
   const forms = data || [];
-  const builtInForms = permittedBuiltInForms(auth);
+  const builtInForms = permittedBuiltInForms(auth).filter(
+    ({ kind }) => !forms.some((form) => form.built_in_kind === kind),
+  );
   const {
     data: legacyCounts,
     loading: legacyLoading,
     error: legacyError,
   } = useLegacyFormCounts(builtInForms.map(({ kind }) => kind).join('|'));
-  const [status, setStatus] = useState('all');
+  const [status, setStatus] = useState('Live');
   const [category, setCategory] = useState('all');
-  const listed = forms.filter(
+  const categoryForms = forms.filter(
     (form) =>
-      (status === 'all' || formStatus(form) === status) &&
-      (category === 'all' ||
-        (category === 'services' ? !!serviceEnquiry(form.slug) : !serviceEnquiry(form.slug))),
+      category === 'all' ||
+      (category === 'services'
+        ? form.built_in_kind === 'contact' || !!serviceEnquiry(form.slug)
+        : form.built_in_kind !== 'contact' && !serviceEnquiry(form.slug)),
   );
+  const categoryBuiltIn = builtInForms.filter(
+    (form) => category === 'all' || category === form.category,
+  );
+  const statusCounts = Object.fromEntries(
+    ['Live', 'Draft', 'Closed'].map((value) => [
+      value,
+      categoryForms.filter((form) => formStatus(form) === value).length +
+        (value === 'Live' ? categoryBuiltIn.length : 0),
+    ]),
+  );
+  const listed = categoryForms.filter((form) => formStatus(form) === status);
   const listedBuiltIn = builtInForms.filter(
     (form) =>
       (status === 'all' || status === 'Live') && (category === 'all' || category === form.category),
@@ -484,7 +516,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
             <p>
               {view === 'schedule'
                 ? 'Hall availability and class times.'
-                : 'Contact Us, registration and service forms are together here. Open a form to review its responses.'}
+                : 'Open a form to edit its questions, see where it appears and review every response.'}
             </p>
           </div>
           {view === 'forms' && (auth.isOwner || auth.can('forms_manage')) && (
@@ -532,10 +564,21 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
         <ScheduleManager />
       ) : view === 'forms' ? (
         <>
+          <nav className="forms-workspace-tabs" aria-label="Form status">
+            {['Live', 'Draft', 'Closed'].map((value) => (
+              <button
+                type="button"
+                key={value}
+                className="admin-button"
+                aria-pressed={status === value}
+                onClick={() => setStatus(value)}
+              >
+                {value} <span>{loading ? '…' : statusCounts[value]}</span>
+              </button>
+            ))}
+          </nav>
           <details className="forms-catalogue-filters">
-            <summary>
-              Filter forms{category !== 'all' || status !== 'all' ? ' · Filtered' : ''}
-            </summary>
+            <summary>Group forms{category !== 'all' ? ' · Filtered' : ''}</summary>
             <div className="content-field-grid">
               <label>
                 Form type
@@ -543,15 +586,6 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
                   <option value="all">All forms</option>
                   <option value="services">Contact & service enquiries</option>
                   <option value="other">Registrations & other forms</option>
-                </select>
-              </label>
-              <label>
-                Show forms
-                <select value={status} onChange={(event) => setStatus(event.target.value)}>
-                  <option value="all">All current forms</option>
-                  <option>Live</option>
-                  <option>Draft</option>
-                  <option>Closed</option>
                 </select>
               </label>
             </div>
@@ -566,11 +600,7 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
               error={legacyError}
             />
             {listed.map((form) => (
-              <button
-                className="admin-panel content-form-card"
-                key={form.id}
-                onClick={() => onChoose({ form: form.id })}
-              >
+              <article className="admin-panel content-form-card" key={form.id}>
                 <span className="content-status">{formStatus(form)}</span>
                 <strong>{form.title}</strong>
                 <span className="form-card-metrics">
@@ -582,7 +612,20 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
                     </>
                   )}
                 </span>
-              </button>
+                <div className="admin-actions">
+                  <button className="admin-button" onClick={() => onChoose({ form: form.id })}>
+                    Open form
+                  </button>
+                  {form.can_manage && (
+                    <button
+                      className="admin-button primary"
+                      onClick={() => onChoose({ form: form.id, edit: '1' })}
+                    >
+                      Edit form
+                    </button>
+                  )}
+                </div>
+              </article>
             ))}
           </div>
           {!loading && !listed.length && !error && !listedBuiltIn.length && (

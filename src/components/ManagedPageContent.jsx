@@ -26,7 +26,7 @@ export default function ManagedPageContent({
         {title && <Heading>{title}</Heading>}
         {body && <p>{body}</p>}
       </div>
-      {content.image && /^https:\/\//i.test(content.image) && (
+      {content.image && /^(https:\/\/|blob:)/i.test(content.image) && (
         <img src={content.image} alt={title || 'Jamatia Islamic Centre'} />
       )}
     </section>

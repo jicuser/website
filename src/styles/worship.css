@@ -310,3 +310,22 @@ html[data-theme] .worship-salah-grid > article.is-current {
 .worship-page > .jic-page-heading {
   padding: 0 0 24px;
 }
+
+.worship-secondary-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 20px;
+}
+.worship-secondary-links > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--jic-text);
+  text-underline-offset: 4px;
+}
+@media (max-width: 767px) {
+  .worship-hub-grid {
+    grid-template-columns: 1fr;
+  }
+}
