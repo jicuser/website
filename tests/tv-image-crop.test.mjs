@@ -91,7 +91,7 @@ const bundled = await build({
     name: 'image-render-fixture',
     setup(builder) {
       builder.onResolve({ filter: /.*/ }, ({ path }) => {
-        if (['./PrayerWidget', './PrivateTvPlayer', '@/components/posters/AnnouncementPoster'].includes(path)) return { path, namespace: 'fixture' };
+        if (['./PrayerWidget', './PrivateTvPlayer', '@/components/posters/AnnouncementPoster', '@/features/ramadan/RamadanBoard'].includes(path)) return { path, namespace: 'fixture' };
         if (!path.startsWith('@/')) return undefined;
         const base = new URL(`../src/${path.slice(2)}`, import.meta.url).pathname;
         return { path: [base, `${base}.js`, `${base}.jsx`].find(existsSync) };

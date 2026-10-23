@@ -12,6 +12,8 @@ import CanonicalPageRedirect from '@/components/shell/CanonicalPageRedirect';
 import RouteScrollReset from '@/components/shell/RouteScrollReset';
 import HomePage from '@/pages/HomePage';
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const RamadanPage = lazy(() => import('@/features/ramadan/RamadanPage'));
+const RamadanDisplayPage = lazy(() => import('@/pages/RamadanDisplayPage'));
 
 const CommunityPortalPage = lazy(() => import('@/pages/CommunityPortalPage'));
 const CertificatesPage = lazy(() => import('@/pages/CertificatesPage'));
@@ -99,6 +101,7 @@ function AppRoutes() {
           <Route path="/verify/:token" element={<VerifyCertificatePage />} />
           <Route path="/radio" element={<RadioPlayerPage />} />
           <Route path="/tv179" element={<TvDisplayPage />} />
+          <Route path="/ramadan/display" element={<RamadanDisplayPage />} />
           <Route path="/tv179/:screenId" element={<TvDisplayPage />} />
           <Route path="/tv" element={<Navigate to="/tv179" replace />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -172,6 +175,9 @@ function AppRoutes() {
             <Route path="services/education" element={<ServicesPage />} />
             <Route path="services/community" element={<ServicesPage />} />
             <Route path="services/hall-booking" element={<HallBookingPage />} />
+            <Route path="ramadan" element={<RamadanPage />} />
+            <Route path="ramadan/iftar" element={<RamadanPage kind="iftar" />} />
+            <Route path="ramadan/daily-giving" element={<RamadanPage kind="daily" />} />
             <Route path="donate" element={<DonationsPage />} />
             <Route path="get-involved" element={<GetInvolvedPage />} />
             <Route path="get-involved/volunteer" element={<VolunteerPage />} />

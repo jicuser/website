@@ -31,3 +31,7 @@ verify_jwt = false
 
 [functions.request-access]
 verify_jwt = false
+
+[functions.ramadan-request]
+# Public sponsorship requests use the SDK anon JWT and a rate-limited service RPC.
+verify_jwt = true

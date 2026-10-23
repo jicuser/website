@@ -27,6 +27,7 @@ const labels = {
   brand: 'JIC logo',
   state: 'Prayer message',
   text: 'Text notice',
+  ramadan: 'Ramadan calendar',
 };
 
 const prayerStyles = [
@@ -171,6 +172,7 @@ export default function TvDisplayLayoutEditor({
     if (type === 'times') next.layout = orientation === 'portrait' ? 'vertical' : 'horizontal';
     if (type === 'poster') Object.assign(next, { rotation_seconds: 20 });
     if (type === 'text') next.text = 'New notice';
+    if (type === 'ramadan') next.ramadan_kind = 'iftar';
     commitScene({ ...scene, layers: [...scene.layers, { ...next, ...fitRect(next) }] });
     setSelected(id);
     setInspectorOpen(true);
@@ -196,6 +198,7 @@ export default function TvDisplayLayoutEditor({
     if (type === 'times') next.layout = orientation === 'portrait' ? 'vertical' : 'horizontal';
     if (type === 'poster') Object.assign(next, { rotation_seconds: 20 });
     if (type === 'text') next.text = 'New notice';
+    if (type === 'ramadan') next.ramadan_kind = 'iftar';
     updateLayer(next);
   }
 
@@ -390,6 +393,7 @@ export default function TvDisplayLayoutEditor({
             <option value="clock">Clock</option>
             <option value="brand">JIC logo</option>
             <option value="text">Text notice</option>
+            {allowBlocks && <option value="ramadan">Ramadan calendar</option>}
           </select>
           {scene.layers.length >= 12 && (
             <small>This layout has the maximum of 12 content items.</small>
@@ -529,6 +533,20 @@ export default function TvDisplayLayoutEditor({
                   <option value="clock">Clock</option>
                   <option value="brand">JIC logo</option>
                   <option value="text">Text notice</option>
+                  {allowBlocks && <option value="ramadan">Ramadan calendar</option>}
+                </select>
+              </label>
+            )}
+
+            {layer?.type === 'ramadan' && (
+              <label>
+                Calendar
+                <select
+                  value={layer.ramadan_kind || 'iftar'}
+                  onChange={(event) => updateLayer({ ...layer, ramadan_kind: event.target.value })}
+                >
+                  <option value="iftar">Iftar sponsorships</option>
+                  <option value="daily">Daily Giving</option>
                 </select>
               </label>
             )}

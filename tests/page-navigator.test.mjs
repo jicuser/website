@@ -14,6 +14,7 @@ const expectedSections = [
   'About',
   'Prayer Times',
   'Faith & practice',
+  'Ramadan',
   'Services',
   'Our Masjid Project',
   'Education',

@@ -68,6 +68,15 @@ export const NAV_GROUPS = [
   },
   { name: 'Faith & practice', path: '/worship', children: WORSHIP_TABS },
   {
+    name: 'Ramadan',
+    path: '/ramadan',
+    children: [
+      { name: 'Overview', path: '/ramadan' },
+      { name: 'Sponsor an Iftar', path: '/ramadan/iftar' },
+      { name: 'Daily Giving', path: '/ramadan/daily-giving' },
+    ],
+  },
+  {
     name: 'Services',
     path: '/services',
     children: [

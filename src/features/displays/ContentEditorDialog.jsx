@@ -25,6 +25,7 @@ const contentTypes = [
   ['next', 'Next prayer'],
   ['clock', 'Clock'],
   ['text', 'Text notice'],
+  ['ramadan', 'Ramadan calendar'],
 ];
 const typeOf = (layer) =>
   layer.type === 'input'
@@ -118,6 +119,7 @@ export default function ContentEditorDialog({
     if (next.type === 'camera') next.protocol = 'hls';
     if (next.type === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
     if (next.type === 'text') next.text = '';
+    if (next.type === 'ramadan') next.ramadan_kind = 'iftar';
     changeDraft(next);
   }
 
@@ -436,6 +438,21 @@ export default function ContentEditorDialog({
                         </label>
                       )}
                     </>
+                  )}
+                  {draft.type === 'ramadan' && (
+                    <label>
+                      Calendar
+                      <select
+                        value={draft.ramadan_kind || 'iftar'}
+                        disabled={disabled}
+                        onChange={(event) =>
+                          changeDraft({ ...draft, ramadan_kind: event.target.value })
+                        }
+                      >
+                        <option value="iftar">Iftar sponsorships</option>
+                        <option value="daily">Daily Giving</option>
+                      </select>
+                    </label>
                   )}
                   {draft.type === 'text' && (
                     <label>

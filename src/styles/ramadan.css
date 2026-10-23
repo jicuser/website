@@ -1,0 +1,182 @@
+.ramadan-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.ramadan-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 100px;
+  color: var(--jic-text);
+  text-decoration: none;
+}
+.ramadan-option > svg {
+  color: var(--jic-gold);
+  flex-shrink: 0;
+}
+.ramadan-option > svg:last-child {
+  margin-left: auto;
+}
+.ramadan-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.ramadan-check input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.ramadan-public-table {
+  margin-top: 20px;
+}
+.ramadan-screen {
+  height: 100dvh;
+  background: #0b2036;
+  color: #fff;
+  padding: 1.5vmin;
+  display: flex;
+  flex-direction: column;
+  gap: 1vmin;
+}
+.ramadan-screen-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.ramadan-screen-controls :is(button, a) {
+  padding: 8px 12px;
+  min-height: 44px;
+  border: 1px solid #66798a;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  text-decoration: none;
+}
+.ramadan-screen-controls [aria-pressed='true'] {
+  background: #e2b45d;
+  color: #081222;
+}
+.ramadan-board {
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  gap: 1.2cqh;
+  padding: 1.5cqh 1.5cqw;
+  color: var(--tv-text, #fff);
+  background: var(--tv-panel, #102a43);
+  border-radius: 1cqw;
+}
+.ramadan-board-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2cqw;
+  flex-shrink: 0;
+}
+.ramadan-board-heading h1,
+.ramadan-board-heading h2 {
+  font-family: Georgia, serif;
+  font-size: clamp(15px, 3.2cqw, 48px);
+  line-height: 1.15;
+  margin: 0;
+}
+.ramadan-board-heading p {
+  font-size: clamp(9px, 1.6cqw, 25px);
+  margin: 0;
+  opacity: 0.85;
+}
+.ramadan-board-days {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+  gap: 0.7cqw;
+  flex: 1;
+  min-height: 0;
+}
+.ramadan-board.is-portrait .ramadan-board-days {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(10, minmax(0, 1fr));
+}
+.ramadan-board-day {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4cqh;
+  min-width: 0;
+  min-height: 0;
+  padding: 0.6cqh 0.7cqw;
+  border: 1px solid #ffffff30;
+  border-top: 3px solid var(--day-colour);
+  border-radius: 0.5cqw;
+  background: #ffffff08;
+  overflow: hidden;
+}
+.ramadan-board-day > strong {
+  font-size: clamp(10px, 1.6cqw, 26px);
+  line-height: 1.15;
+}
+.ramadan-board-day > span {
+  font-size: clamp(8px, 1.15cqw, 19px);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ramadan-board-day > small {
+  font-size: clamp(8px, 1cqw, 16px);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+.ramadan-board.is-portrait .ramadan-board-day > strong {
+  font-size: clamp(10px, 2.3cqw, 28px);
+}
+.ramadan-board.is-portrait .ramadan-board-day > span {
+  font-size: clamp(8px, 1.7cqw, 22px);
+}
+.ramadan-board.is-portrait .ramadan-board-day > small {
+  font-size: clamp(8px, 1.5cqw, 19px);
+}
+.ramadan-board-status {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: clamp(12px, 2cqw, 30px);
+  text-align: center;
+}
+.scene-source-ramadan {
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .ramadan-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ramadan-option {
+    min-height: 80px;
+  }
+  .ramadan-board-heading {
+    flex-direction: column;
+    gap: 0.5cqh;
+  }
+}
+@media print {
+  [data-print-exclude] {
+    display: none !important;
+  }
+}

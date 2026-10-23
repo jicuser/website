@@ -160,6 +160,8 @@ test('applying each design changes only the current orientation’s everyday dra
       ['classic', 'Timetable & notices'],
       ['countdown', 'Countdown'],
       ['noticeboard', 'Noticeboard'],
+      ['iftar', 'Iftar sponsorships'],
+      ['daily-giving', 'Daily Giving'],
     ]) {
       const settings = {
         ...structuredClone(DEFAULT_TV_SETTINGS),

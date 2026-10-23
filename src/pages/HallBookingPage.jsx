@@ -1,242 +1,149 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { hallDateStatus, hallMonthRange } from '@/lib/serviceEnquiries';
-import CentreVisit from '@/components/services/CentreVisit';
-import '@/styles/services.css';
+import { CALENDAR_COLOURS, HALL_STATUSES, fullDate } from '@/lib/bookingCalendar';
+import { displayTime, londonDate } from '@/lib/timetable';
+import MonthCalendar from '@/components/calendar/MonthCalendar';
 
-const STATUS_META = {
-  available: { label: 'Enquire', className: 'is-available' },
-  pending: { label: 'Pending', className: 'is-pending' },
-  booked: { label: 'Booked', className: 'is-booked' },
-  closed: { label: 'Unavailable', className: 'is-closed' },
-  unknown: { label: 'Check availability', className: 'is-unknown' },
-  partial: { label: 'Check times', className: 'is-pending' },
+const labels = {
+  available: 'Available',
+  pending: 'Provisional',
+  booked: 'Booked',
+  closed: 'Closed',
+  unknown: 'Ask us',
+  partial: 'Times',
 };
-
-const pad = (value) => String(value).padStart(2, '0');
-const isoDate = (date) =>
-  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-const monthLabel = (date) =>
-  new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' }).format(date);
-
 export default function HallBookingPage() {
-  const [month, setMonth] = useState(
-    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-  );
-  const [records, setRecords] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [liveSchedule, setLiveSchedule] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
-
+  const [month, setMonth] = useState(() => new Date(`${londonDate().slice(0, 7)}-01T12:00:00`));
+  const [records, setRecords] = useState([]),
+    [colours, setColours] = useState(CALENDAR_COLOURS),
+    [loading, setLoading] = useState(true),
+    [error, setError] = useState(''),
+    [selected, setSelected] = useState(''),
+    [revision, setRevision] = useState(0);
   useEffect(() => {
     let active = true;
-    setSelectedDate('');
     const controller = new AbortController();
-    const load = async () => {
-      setLoading(true);
-      const { first, last } = hallMonthRange(month.getFullYear(), month.getMonth());
-
-      try {
-        const { data, error } = await supabase
-          .from('hall_bookings')
-          .select('booking_date,start_time,end_time,status')
-          .gte('booking_date', first)
-          .lte('booking_date', last)
-          .order('booking_date')
-          .limit(1000)
-          .abortSignal(controller.signal);
+    setLoading(true);
+    setSelected('');
+    setError('');
+    const range = hallMonthRange(month.getFullYear(), month.getMonth());
+    Promise.all([
+      supabase
+        .from('hall_bookings')
+        .select('booking_date,start_time,end_time,status')
+        .gte('booking_date', range.first)
+        .lte('booking_date', range.last)
+        .order('booking_date')
+        .limit(1000)
+        .abortSignal(controller.signal),
+      supabase
+        .from('hall_calendar_settings')
+        .select('available,pending,booked,closed')
+        .eq('id', true)
+        .maybeSingle()
+        .abortSignal(controller.signal),
+    ])
+      .then(([bookings, settings]) => {
         if (!active) return;
-
-        if (error) {
-          setRecords([]);
-          setLiveSchedule(false);
-        } else {
-          setRecords(data || []);
-          setLiveSchedule(true);
-        }
-      } catch {
+        if (bookings.error) throw bookings.error;
+        setRecords(bookings.data || []);
+        if (settings.data) setColours({ ...CALENDAR_COLOURS, ...settings.data });
+      })
+      .catch(() => {
         if (active) {
           setRecords([]);
-          setLiveSchedule(false);
+          setError('The calendar could not be loaded. Please try again or contact the centre.');
         }
-      } finally {
+      })
+      .finally(() => {
         if (active) setLoading(false);
-      }
-    };
-
-    load();
+      });
     return () => {
       active = false;
       controller.abort();
     };
-  }, [month]);
-
-  const days = useMemo(() => {
-    const first = new Date(month.getFullYear(), month.getMonth(), 1);
-    const count = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-    const mondayOffset = (first.getDay() + 6) % 7;
-    const cells = Array.from({ length: mondayOffset }, () => null);
-    for (let day = 1; day <= count; day += 1)
-      cells.push(new Date(month.getFullYear(), month.getMonth(), day));
-    while (cells.length % 7) cells.push(null);
-    return cells;
-  }, [month]);
-
-  const changeMonth = (amount) =>
-    setMonth((current) => new Date(current.getFullYear(), current.getMonth() + amount, 1));
-
+  }, [month, revision]);
+  const state = selected ? hallDateStatus(records, selected) : 'unknown';
+  const entries = records.filter((row) => row.booking_date === selected);
+  const canEnquire = selected && !['booked', 'closed'].includes(state);
   return (
-    <div className="jic-hall-page service-page">
-      <h1>Hall booking</h1>
-      <p>
-        Choose a date and send an enquiry. The team will check your event details and confirm
-        availability.
-      </p>
-      <ol className="jic-booking-steps" aria-label="How booking works">
-        <li>Send an enquiry</li>
-        <li>Staff review your request</li>
-        <li>Receive confirmation</li>
-      </ol>
-      <section
-        className="jic-hall-calendar rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-3xl sm:p-6"
-        aria-labelledby="hall-calendar-title"
-      >
-        <div className="jic-hall-calendar-head">
-          <div>
-            <p className="jic-hall-kicker">
-              <CalendarDays size={15} /> Monthly schedule
-            </p>
-            <h2 id="hall-calendar-title">{monthLabel(month)}</h2>
-          </div>
-          <div className="jic-hall-month-controls">
-            <button type="button" onClick={() => changeMonth(-1)} aria-label="Previous month">
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setMonth(new Date(new Date().getFullYear(), new Date().getMonth(), 1))}
-            >
-              Today
-            </button>
-            <button type="button" onClick={() => changeMonth(1)} aria-label="Next month">
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </div>
-
-        {!liveSchedule && !loading && (
-          <div className="jic-hall-notice">
-            Availability is currently unconfirmed. Please contact the centre about dates marked{' '}
-            <strong>Check availability</strong>.
-          </div>
-        )}
-        {loading && <p role="status">Checking published dates…</p>}
-
-        <div className="jic-hall-weekdays" aria-hidden="true">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-            <span key={day}>{day}</span>
-          ))}
-        </div>
-        <div className="jic-hall-grid">
-          {days.map((date, index) => {
-            if (!date)
-              return (
-                <div key={`blank-${index}`} className="jic-hall-day is-empty" aria-hidden="true" />
-              );
-            const key = isoDate(date);
-            const status = liveSchedule ? hallDateStatus(records, key) : 'unknown';
-            const meta = STATUS_META[status];
-            const today = key === isoDate(new Date());
-            const unavailable = key < isoDate(new Date()) || ['closed', 'booked'].includes(status);
-            return (
-              <button
-                type="button"
-                key={key}
-                className={`jic-hall-day ${meta.className} ${today ? 'is-today' : ''}`}
-                disabled={loading || unavailable}
-                aria-pressed={selectedDate === key}
-                aria-label={`${date.toLocaleDateString('en-GB')} · ${meta.label}`}
-                onClick={() => setSelectedDate(key)}
-                title={`${date.toLocaleDateString('en-GB')} · ${meta.label}`}
-              >
-                <span className="jic-hall-date">{date.getDate()}</span>
-                <span className="jic-hall-status">{meta.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="jic-hall-legend" aria-label="Availability key">
-          {Object.entries(STATUS_META)
-            .filter(([key]) => ['unknown', 'partial', 'booked', 'closed'].includes(key))
-            .map(([key, meta]) => (
+    <div className="booking-workspace">
+      <header>
+        <h1>Hall booking</h1>
+        <p>Choose a date, then send your request. The office will confirm your booking.</p>
+      </header>
+      {error && (
+        <p role="alert">
+          {error}{' '}
+          <button className="booking-button" onClick={() => setRevision((value) => value + 1)}>
+            Try again
+          </button>
+        </p>
+      )}
+      <div className="booking-layout">
+        <div className="booking-panel">
+          {loading && <p role="status">Loading dates…</p>}
+          <MonthCalendar
+            month={month}
+            onMonthChange={setMonth}
+            selected={selected ? [selected] : []}
+            onSelect={setSelected}
+            disabled={loading || !!error}
+            dayInfo={(date) => {
+              const status = hallDateStatus(records, date);
+              return {
+                label: labels[status],
+                colour: colours[status === 'partial' ? 'pending' : status],
+                disabled: date < londonDate(),
+              };
+            }}
+          />
+          <div className="booking-key" aria-label="Calendar colours">
+            {[...HALL_STATUSES, ['unknown', 'Ask us']].map(([key, label]) => (
               <span key={key}>
-                <i className={meta.className} />
-                {meta.label}
+                <i className="booking-dot" style={{ '--day-colour': colours[key] }} />
+                {label}
               </span>
             ))}
-        </div>
-
-        <div className="jic-hall-contact">
-          <div>
-            <strong>
-              {selectedDate
-                ? `Selected: ${new Date(`${selectedDate}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`
-                : 'Interested in a date?'}
-            </strong>
-            <span>
-              Check the calendar, then send a booking request. A request is not confirmed until
-              staff approve the date.
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              to={selectedDate ? `/forms/hall-booking?date=${selectedDate}` : '/forms/hall-booking'}
-            >
-              <CalendarDays size={17} /> Send booking enquiry
-            </Link>
           </div>
         </div>
-      </section>
-      <section className="service-detail-grid">
-        <div className="service-checklist">
-          <h2>Plan your enquiry</h2>
-          <ul>
-            <li>Preferred date, start and finish time</li>
-            <li>Type of event and approximate guest numbers</li>
-            <li>Time needed for setting up and clearing away</li>
-            <li>Questions about access, facilities and charges</li>
-          </ul>
-          <p>The office will confirm suitability, availability and the booking details with you.</p>
-        </div>
-        <div className="service-faq">
-          <h2>Before you book</h2>
-          <details>
-            <summary>What does “Check availability” mean?</summary>
-            <p>
-              No confirmed availability has been published for that date. You can enquire, but the
-              calendar does not reserve a space.
-            </p>
-          </details>
-          <details>
-            <summary>What if a date shows “Check times”?</summary>
-            <p>
-              There is a timed entry on that day. Tell the team the hours you need so they can check
-              whether your event fits.
-            </p>
-          </details>
-          <details>
-            <summary>When is my booking confirmed?</summary>
-            <p>
-              Only after the office confirms the arrangements with you. Sending an enquiry alone
-              does not confirm a booking.
-            </p>
-          </details>
-        </div>
-      </section>
-      <CentreVisit />
+        <section className="booking-panel" aria-live="polite">
+          <h2>{selected ? fullDate(selected) : 'Choose your date'}</h2>
+          {selected ? (
+            <>
+              <p>
+                <strong>{state === 'partial' ? 'Times on this date' : labels[state]}</strong>
+              </p>
+              {entries
+                .filter((row) => row.start_time)
+                .map((row, index) => (
+                  <p key={index}>
+                    {displayTime(row.start_time)}–{displayTime(row.end_time)} · {labels[row.status]}
+                  </p>
+                ))}
+              {state === 'unknown' && <p>The team will check availability for you.</p>}
+              {state === 'pending' && (
+                <p>A provisional booking is being checked. You can ask about other times.</p>
+              )}
+              {['booked', 'closed'].includes(state) && <p>Please choose another date.</p>}
+            </>
+          ) : (
+            <p>Tap a day on the calendar to see its availability.</p>
+          )}
+          {canEnquire && (
+            <div className="booking-actions">
+              <Link className="primary" to={`/forms/hall-booking?date=${selected}`}>
+                Request this date
+              </Link>
+            </div>
+          )}
+          <div className="booking-actions">
+            <Link to="/contact">Contact the office</Link>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

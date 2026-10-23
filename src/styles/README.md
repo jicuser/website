@@ -19,7 +19,8 @@
 | `custom-forms.css`       | Form builder, response inbox and form-admin layout                                   |
 | `content-workflow.css`   | Posters, programme pages and structured content workflow                             |
 | `projects.css`           | Building project tiles                                                               |
-| `hall-booking.css`       | Hall availability calendar                                                           |
+| `booking-calendars.css`  | Shared hall and Ramadan day selectors, editors and printable tables                  |
+| `ramadan.css`            | Ramadan choices, sponsorship boards and screen layouts                               |
 | `worship.css`            | Worship pages and Qur'an reader                                                      |
 | `tv.css`                 | Dedicated mosque-screen scale and layout                                             |
 | `spiritual-overlays.css` | Welcome salawat and occasional reflection overlays                                   |
