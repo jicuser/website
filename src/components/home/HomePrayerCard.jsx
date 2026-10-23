@@ -39,25 +39,30 @@ export default function HomePrayerCard() {
                   : 'Today’s times have not been published yet.'}
           </p>
         )}
-        <div className="jic-home-prayer-actions">
-          <Link to="/prayer-times">
-            Full timetable <ArrowRight size={15} aria-hidden="true" />
-          </Link>
-          <Link to="/prayer-times/reminders">
-            <Bell size={16} aria-hidden="true" /> Set up Salah alerts
-          </Link>
-        </div>
       </div>
-      <Link to="/radio" className="jic-home-radio">
-        <Radio size={20} aria-hidden="true" />
-        <span>
-          <strong>JIC Radio</strong>
-          <small>Listen to the masjid</small>
-        </span>
-        <span className="jic-home-radio-action">
-          Listen <ArrowRight size={15} aria-hidden="true" />
-        </span>
-      </Link>
+      <div className="jic-home-jummah" role="group" aria-label="Friday Jummah times">
+        {[0, 1].map((index) => (
+          <Link
+            key={index}
+            to="/prayer-times/jummah"
+            aria-label={`Jummah ${index + 1} jama’ah ${displayTime(jummahTimes[index]?.prayer)}. View Friday timetable`}
+          >
+            <span>Jummah {index + 1}</span>
+            <strong>{displayTime(jummahTimes[index]?.prayer)}</strong>
+          </Link>
+        ))}
+      </div>
+      <nav className="jic-home-prayer-footer" aria-label="Prayer links">
+        <Link to="/prayer-times" aria-label="Full timetable">
+          Timetable <ArrowRight size={14} aria-hidden="true" />
+        </Link>
+        <Link to="/prayer-times/reminders" aria-label="Set up Salah alerts">
+          <Bell size={14} aria-hidden="true" /> Salah alerts
+        </Link>
+        <Link to="/radio" aria-label="Listen to JIC Radio">
+          <Radio size={14} aria-hidden="true" /> JIC Radio
+        </Link>
+      </nav>
     </aside>
   );
 }

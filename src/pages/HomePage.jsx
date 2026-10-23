@@ -149,6 +149,20 @@ export default function HomePage() {
       ...cards.find((card) => card.key === 'madrassah'),
       text: 'Learn & enrol',
     },
+    {
+      key: 'hall',
+      title: 'Hall hire',
+      text: 'Enquire & book',
+      to: '/services/hall-booking',
+      icon: Building2,
+    },
+    {
+      key: 'volunteer',
+      title: 'Volunteer',
+      text: 'Help at the centre',
+      to: '/get-involved/volunteer',
+      icon: Users,
+    },
   ].filter((card) => !card.to || isPageVisible(getContent, card.to));
   const communityCards = cards.filter(
     (card) => !['madrassah', 'services'].includes(card.key) && isPageVisible(getContent, card.to),

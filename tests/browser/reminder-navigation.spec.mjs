@@ -100,7 +100,7 @@ test('home shortcuts fit small phones and the prayer pill opens the timetable', 
 
   for (const width of [320, 390, 767]) {
     await page.setViewportSize({ width, height: 844 });
-    await expect(page.locator('.jic-home-shortcuts').getByRole('link')).toHaveCount(4);
+    await expect(page.locator('.jic-home-shortcuts').getByRole('link')).toHaveCount(6);
     await page.evaluate(() => window.scrollTo(0, 0));
     const servicePositions = await page.locator('.jic-home-shortcuts').evaluate((nav) => {
       const links = [...nav.querySelectorAll('a')];
