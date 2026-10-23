@@ -14,6 +14,11 @@ test('each service has one named enquiry and canonical source page', () => {
   assert.equal(new Set(SERVICE_ENQUIRIES.map((form) => form.slug)).size, 4);
   assert.equal(serviceEnquiryForPath('/services/nikah').slug, 'nikah-enquiry');
   assert.equal(serviceEnquiryForPath('/funerals/contact-support').slug, 'funeral-enquiry');
+  for (const path of ['/funerals', '/funerals/what-to-do', '/services/funeral-services'])
+    assert.equal(serviceEnquiryForPath(path).slug, 'funeral-enquiry');
+  for (const path of ['/services/community', '/services/community-services'])
+    assert.equal(serviceEnquiryForPath(path).slug, 'community-enquiry');
+  assert.equal(serviceEnquiryForPath('/get-involved/volunteer'), null);
   assert.equal(serviceEnquiryForPath('/unknown'), null);
 });
 

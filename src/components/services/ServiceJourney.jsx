@@ -1,9 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Check, Phone } from 'lucide-react';
 import { SITE } from '@/content/site';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ContactForm from '@/components/sections/contact/ContactForm';
+import BuiltInForm from '@/components/sections/BuiltInForm';
+import { serviceEnquiryForPath } from '@/lib/serviceEnquiries';
 import CentreVisit from './CentreVisit';
 import '@/styles/services.css';
 
@@ -24,6 +26,8 @@ export function JourneySteps({ steps, label = 'How it works' }) {
 }
 
 export default function ServiceJourney({ journey }) {
+  const { pathname } = useLocation();
+  const enquiry = serviceEnquiryForPath(pathname);
   return (
     <div className="service-page">
       <section className="service-hero">
@@ -89,12 +93,11 @@ export default function ServiceJourney({ journey }) {
           <p className="service-eyebrow">Your next step</p>
           <h2>{journey.action}</h2>
           <p>
-            Send the details you have. The office will review your message and reply using the
-            contact details you provide.
-          </p>
-          <p>
-            For a time-sensitive enquiry, call{' '}
+            {enquiry?.slug === 'funeral-enquiry'
+              ? 'For urgent funeral support, call '
+              : 'For a time-sensitive enquiry, call '}
             <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}>{SITE.phone}</a>.
+            {enquiry?.slug === 'funeral-enquiry' && ' This inbox is not an emergency service.'}
           </p>
           <p className="service-small">
             No account is needed. Please avoid sending identity documents or payment details in this
@@ -102,7 +105,11 @@ export default function ServiceJourney({ journey }) {
           </p>
         </div>
         <div className="service-enquiry-form">
-          <ContactForm subject={journey.subject} title="Your enquiry" />
+          {enquiry ? (
+            <BuiltInForm slug={enquiry.slug} />
+          ) : (
+            <ContactForm subject={journey.subject} title="Your enquiry" />
+          )}
         </div>
       </section>
       <CentreVisit />

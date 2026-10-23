@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 test.use({ screenshot: 'off' });
 
-async function fixture(page, { people = [], content = {}, sections = [] } = {}) {
+async function fixture(page, { people = [], content = {}, sections = [], addedPages = [] } = {}) {
   const state = { errors: [], reads: [], writes: [] };
   page.on('pageerror', (error) => state.errors.push(error.message));
   await page.addInitScript(() => {
@@ -23,34 +23,36 @@ async function fixture(page, { people = [], content = {}, sections = [] } = {}) 
     state.reads.push(path);
     if (['POST', 'PATCH'].includes(req.method()) && !path.includes('/rpc/'))
       state.writes.push(path);
-    const data = path.endsWith('/page_content')
-      ? Object.entries(content).map(([content_key, content_value]) => ({
-          content_key,
-          content_value,
-        }))
-      : path.endsWith('/page_sections')
-        ? sections.filter(
-            (section) => `eq.${section.page_path}` === url.searchParams.get('page_path'),
-          )
-        : path.endsWith('/team_members')
-          ? people
-          : path.endsWith('/rpc/get_public_form')
-            ? {
-                id: 'contact-form',
-                slug: 'contact-us',
-                title: 'Send a message',
-                description: 'Contact the centre.',
-                version: 1,
-                enabled: true,
-                schema: {
-                  fields: [
-                    { id: 'name', label: 'Your name', type: 'text', required: true },
-                    { id: 'email', label: 'Email address', type: 'email', required: true },
-                    { id: 'message', label: 'Your message', type: 'textarea', required: true },
-                  ],
-                },
-              }
-            : [];
+    const data = path.endsWith('/rpc/list_site_pages')
+      ? addedPages
+      : path.endsWith('/page_content')
+        ? Object.entries(content).map(([content_key, content_value]) => ({
+            content_key,
+            content_value,
+          }))
+        : path.endsWith('/page_sections')
+          ? sections.filter(
+              (section) => `eq.${section.page_path}` === url.searchParams.get('page_path'),
+            )
+          : path.endsWith('/team_members')
+            ? people
+            : path.endsWith('/rpc/get_public_form')
+              ? {
+                  id: 'contact-form',
+                  slug: 'contact-us',
+                  title: 'Send a message',
+                  description: 'Contact the centre.',
+                  version: 1,
+                  enabled: true,
+                  schema: {
+                    fields: [
+                      { id: 'name', label: 'Your name', type: 'text', required: true },
+                      { id: 'email', label: 'Email address', type: 'email', required: true },
+                      { id: 'message', label: 'Your message', type: 'textarea', required: true },
+                    ],
+                  },
+                }
+              : [];
     return route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
   });
   return state;
@@ -225,6 +227,13 @@ test('combined sections keep their saved content, visibility, menu labels and sh
   await expect(content.getByText('A published extra section.', { exact: true })).toBeVisible();
   await expect(content.getByText('Published team information.', { exact: true })).toBeVisible();
   await expect(content.locator('#finances')).toHaveCount(0);
+  await expect
+    .poll(() =>
+      content
+        .locator(':scope > .about-section')
+        .evaluateAll((nodes) => nodes.map((node) => node.id)),
+    )
+    .toEqual(['team', 'history', 'contact', 'social']);
   const links = content.getByRole('navigation', { name: 'On this page' }).getByRole('link');
   await expect(links).toHaveText([
     'Overview',
@@ -245,4 +254,56 @@ test('combined sections keep their saved content, visibility, menu labels and sh
   await expect(page.getByRole('heading', { name: 'Page unavailable', exact: true })).toBeVisible();
   expect(state.writes).toEqual([]);
   expect(state.errors).toEqual([]);
+});
+
+test('About retains moved visible sections and keeps additional pages as configured links', async ({
+  page,
+}) => {
+  const state = await fixture(page, {
+    content: {
+      'page-section:/team': '/services',
+      'page-visibility:/financial-history': 'false',
+      site_navigation: JSON.stringify({
+        labels: { '/contact': 'Visit us', '/team': 'Centre people' },
+        children: {
+          '/about': [
+            '/contact',
+            '/pages/community-story',
+            '/about/history',
+            '/about',
+            '/social-media',
+          ],
+        },
+      }),
+    },
+    addedPages: [{ slug: 'community-story', title: 'Community story', placement: '/about' }],
+  });
+  await page.goto('/about');
+  const content = page.locator('.about-combined');
+  await expect
+    .poll(() =>
+      content
+        .locator(':scope > .about-section')
+        .evaluateAll((nodes) => nodes.map((node) => node.id)),
+    )
+    .toEqual(['contact', 'history', 'social', 'team']);
+  const links = content.getByRole('navigation', { name: 'On this page' }).getByRole('link');
+  await expect(links).toHaveText([
+    'Visit us',
+    'Community story',
+    'Our story',
+    'Overview',
+    'Stay connected',
+    'Centre people',
+  ]);
+  await expect(links.filter({ hasText: 'Community story' })).toHaveAttribute(
+    'href',
+    '/pages/community-story',
+  );
+  await expect(content.getByRole('link', { name: 'Meet our founder members' })).toHaveCount(0);
+  await page.goto('/team?preview=1#team');
+  await expect(page).toHaveURL('/team?preview=1#team');
+  await expect(page.locator('#team')).toBeVisible();
+  expect(state.errors).toEqual([]);
+  expect(state.writes).toEqual([]);
 });

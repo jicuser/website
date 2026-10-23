@@ -29,7 +29,8 @@ export default function ProjectTimeline() {
     [walkthrough, setWalkthrough] = useState('');
   const sections = useRef(new Map());
   const selected = stages.find((s) => s.id === active) || stages[0];
-  const completed = stages.filter((s) => s.status === 'completed').length;
+  const publishedStatuses = stages.filter((s) => s.status !== 'update_pending');
+  const completed = publishedStatuses.filter((s) => s.status === 'completed').length;
   function choose(id) {
     setActive(id);
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -100,7 +101,14 @@ export default function ProjectTimeline() {
           <h2 id="project-explore-title">Project areas</h2>
           <p>Choose a space to see its published details.</p>
           <p className="project-summary">
-            <strong>{completed}</strong> of {stages.length} stages marked complete
+            {publishedStatuses.length ? (
+              <>
+                <strong>{completed}</strong> of {publishedStatuses.length} areas with published
+                progress marked complete
+              </>
+            ) : (
+              'Project progress has not been published yet.'
+            )}
           </p>
           <small>This diagram shows project areas and their published status.</small>
         </div>

@@ -35,7 +35,7 @@ export const SERVICE_ENQUIRIES = [
 export const serviceEnquiry = (slug) =>
   SERVICE_ENQUIRIES.find((item) => item.slug === slug) || null;
 export function serviceEnquiryForPath(path) {
-  if (['/funerals', '/services/funeral-services'].includes(path))
+  if (['/funerals', '/funerals/what-to-do', '/services/funeral-services'].includes(path))
     return serviceEnquiry('funeral-enquiry');
   if (path === '/services/community-services') return serviceEnquiry('community-enquiry');
   return SERVICE_ENQUIRIES.find((item) => item.page === path) || null;

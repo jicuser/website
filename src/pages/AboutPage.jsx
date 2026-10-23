@@ -53,6 +53,17 @@ export default function AboutPage() {
   const navigation = visibleNavigation(PUBLIC_MENU_GROUPS, getContent, addedPages).find(
     ({ path }) => path === '/about',
   );
+  // The configured menu leads; moved built-in sections retain their shared anchors.
+  const aboutChildren = navigation?.children || [];
+  const sectionLinks = [
+    ...aboutChildren,
+    ...ABOUT_SECTIONS.filter(
+      ({ path }) => visible(path) && !aboutChildren.some((child) => child.path === path),
+    ),
+  ];
+  const orderedSections = sectionLinks
+    .map(({ path }) => ABOUT_SECTIONS.find((section) => section.path === path))
+    .filter((section) => section && visible(section.path));
   const sectionContent = {
     history: <HistorySection />,
     team: (
@@ -91,7 +102,7 @@ export default function AboutPage() {
         </p>
       </AboutMasthead>
       <nav className="about-jump-links" aria-label="On this page">
-        {(navigation?.children || []).map(({ path, name }) => (
+        {sectionLinks.map(({ path, name }) => (
           <Link key={path} to={path === '/about' ? '/about#overview' : aboutSectionLink(path)}>
             {navigationName(
               getContent,
@@ -117,8 +128,12 @@ export default function AboutPage() {
             </Link>
           ))}
       </nav>
-      {ABOUT_SECTIONS.filter(({ path }) => visible(path)).map((section) => (
-        <Section key={section.path} {...section}>
+      {orderedSections.map((section) => (
+        <Section
+          key={section.path}
+          {...section}
+          name={navigationName(getContent, section.path, section.name)}
+        >
           {sectionContent[section.id]}
         </Section>
       ))}
