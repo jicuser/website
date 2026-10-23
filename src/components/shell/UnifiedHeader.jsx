@@ -46,6 +46,7 @@ import { displayTime } from '@/lib/timetable';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
 const DonationDialog = lazy(() => import('@/components/donations/DonationDialog'));
+const RadioLiveNotice = lazy(() => import('./RadioLiveNotice'));
 
 const compactPrayerTime = (value) => {
   const formatted = displayTime(value);
@@ -489,6 +490,18 @@ export default function UnifiedHeader() {
         <span className="sr-only" role="status">
           Radio could not start. Press Radio to retry.
         </span>
+      )}
+      {availability === 'online' && (
+        <Suspense fallback={null}>
+          <RadioLiveNotice
+            streamUrl={streamUrl}
+            availability={availability}
+            playing={playing}
+            busy={radioLoading}
+            hidden={menuOpen || donationOpen || alertSetup}
+            onListen={toggleRadio}
+          />
+        </Suspense>
       )}
       {menuOpen && (
         <dialog

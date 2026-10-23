@@ -162,6 +162,7 @@ test('owner builds a draft and publishes with responsible people and task routin
   await page.goto('/portal?tab=forms');
   await page.getByRole('button', { name: 'Create form', exact: true }).click();
   await page.getByLabel('Form title', { exact: true }).fill('Volunteer registration');
+  await page.getByText('Form address & availability', { exact: true }).click();
   await page.getByLabel('Form address', { exact: true }).fill('volunteer-registration');
   await page.getByRole('button', { name: 'Save and publish', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Choose at least one responsible person');

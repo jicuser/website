@@ -4,6 +4,42 @@
 .ramadan-timetable-notice p {
   margin: 0;
 }
+.sponsorship-range {
+  padding: 12px 0;
+}
+.sponsorship-range .booking-fields {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+.sponsorship-range select {
+  font-size: 16px;
+}
+.sponsorship-range-options {
+  margin: 14px 0;
+}
+.sponsorship-range-options > summary {
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.sponsorship-availability-table {
+  min-width: 520px;
+}
+.sponsorship-availability-table th {
+  text-align: left;
+}
+.booking-table .is-selected {
+  background: color-mix(in srgb, var(--jic-gold) 12%, var(--jic-surface));
+}
+.sponsorship-date-summary {
+  font-size: 14px;
+  color: var(--jic-text-secondary);
+}
+.sponsorship-view-choice button {
+  min-height: 44px;
+  justify-content: center;
+}
 .ramadan-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

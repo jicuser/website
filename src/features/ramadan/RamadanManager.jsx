@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import SponsorshipDays from './SponsorshipDays';
+import SponsorshipRange from './SponsorshipRange';
 import RamadanOptions from './RamadanOptions';
-import { fullDate, seasonDays } from '@/lib/bookingCalendar';
+import { daysInRange, fullDate, seasonDays, seasonLength } from '@/lib/bookingCalendar';
 import { collectPages } from '@/lib/formDownloads';
 import { printTable } from '@/lib/printTable';
 import { money, toPence } from '@/features/operations/model';
-import { RAMADAN_KINDS } from './model';
+import { RAMADAN_COLOURS, RAMADAN_KINDS } from './model';
 import '@/styles/ramadan.css';
 
 const blankSeason = {
@@ -50,7 +51,8 @@ export default function RamadanManager() {
     [error, setError] = useState(''),
     [message, setMessage] = useState(''),
     [filter, setFilter] = useState('all'),
-    [showTable, setShowTable] = useState(false);
+    [dayView, setDayView] = useState('table'),
+    [range, setRange] = useState({});
   const table = useRef(null),
     loadVersion = useRef(0);
   const loadSeasons = useCallback(async (preferred) => {
@@ -89,6 +91,7 @@ export default function RamadanManager() {
       daily_amount: season.daily_target_pence ? String(season.daily_target_pence / 100) : '',
     });
     setSelected('');
+    setRange({});
     setEditing(null);
     setForm(blankSponsor);
   }, [season]);
@@ -231,7 +234,9 @@ export default function RamadanManager() {
     });
   }
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
-  const printRows = days.flatMap((day) => {
+  const visibleDays = daysInRange(days, range);
+  const setupDays = seasonDays(setup);
+  const printRows = visibleDays.flatMap((day) => {
     const entries = current.filter(
       (row) => row.day_date === day.date && (filter === 'all' || row.status === filter),
     );
@@ -322,7 +327,7 @@ export default function RamadanManager() {
               />
             </label>
             <label className="booking-field">
-              First day
+              First UK date · 1 Ramadan
               <input
                 required
                 type="date"
@@ -333,16 +338,24 @@ export default function RamadanManager() {
               />
             </label>
             <label className="booking-field">
-              Days
-              <select
-                value={setup.day_count}
-                onChange={(event) =>
-                  setSetup((current) => ({ ...current, day_count: Number(event.target.value) }))
-                }
-              >
-                <option value={29}>29 days</option>
-                <option value={30}>30 days</option>
-              </select>
+              Last UK date
+              <input
+                type="date"
+                required
+                disabled={!setup.start_date}
+                value={setupDays.at(-1)?.date || ''}
+                min={seasonDays({ ...setup, day_count: 29 }).at(-1)?.date || undefined}
+                max={seasonDays({ ...setup, day_count: 30 }).at(-1)?.date || undefined}
+                onChange={(event) => {
+                  try {
+                    const count = seasonLength(setup.start_date, event.target.value);
+                    setSetup((current) => ({ ...current, day_count: count }));
+                    setError('');
+                  } catch (failure) {
+                    setError(failure.message);
+                  }
+                }}
+              />
             </label>
             <label className="booking-field">
               Suhoor target per day (£, optional)
@@ -375,6 +388,12 @@ export default function RamadanManager() {
               />
             </label>
           </div>
+          {setupDays.length > 0 && (
+            <p className="sponsorship-date-summary">
+              1 Ramadan · {fullDate(setupDays[0].date)} → {setup.day_count} Ramadan ·{' '}
+              {fullDate(setupDays.at(-1).date)}
+            </p>
+          )}
           <label className="ramadan-check">
             <input
               type="checkbox"
@@ -437,7 +456,7 @@ export default function RamadanManager() {
               className="booking-button"
               onClick={() => {
                 setFilter('pending');
-                setShowTable(true);
+                setDayView('table');
               }}
             >
               Open requests
@@ -452,15 +471,68 @@ export default function RamadanManager() {
           <div className="booking-layout">
             <div className="booking-panel">
               {loading && <p role="status">Loading sponsorships…</p>}
+              <div
+                className="booking-choices sponsorship-view-choice"
+                role="group"
+                aria-label="Sponsorship view"
+              >
+                {[
+                  ['table', 'Table'],
+                  ['days', 'Days'],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={dayView === value}
+                    disabled={busy}
+                    onClick={() => setDayView(value)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <SponsorshipRange
+                days={days}
+                value={range}
+                onChange={setRange}
+                disabled={busy || loading}
+              />
               <div className="booking-actions">
                 <button
                   type="button"
                   aria-pressed={manageDays}
                   disabled={busy}
-                  onClick={() => setManageDays((value) => !value)}
+                  onClick={() => {
+                    setManageDays((value) => !value);
+                    setDayView('days');
+                  }}
                 >
                   {manageDays ? 'Done opening / closing days' : 'Open or close days'}
                 </button>
+                <>
+                  <button
+                    disabled={busy || loading || !visibleDays.length}
+                    onClick={() =>
+                      toggleDays(
+                        visibleDays.map((day) => day.date),
+                        true,
+                      )
+                    }
+                  >
+                    Open this range
+                  </button>
+                  <button
+                    disabled={busy || loading || !visibleDays.length}
+                    onClick={() =>
+                      toggleDays(
+                        visibleDays.map((day) => day.date),
+                        false,
+                      )
+                    }
+                  >
+                    Close this range
+                  </button>
+                </>
                 {manageDays && (
                   <>
                     <button
@@ -488,31 +560,117 @@ export default function RamadanManager() {
                   </>
                 )}
               </div>
-              <SponsorshipDays
-                days={days}
-                kind={kind}
-                selected={selected ? [selected] : []}
-                manage={manageDays}
-                disabled={busy || loading}
-                onSelect={(date) =>
-                  manageDays ? toggleDays([date], !dayEnabled(date)) : selectDay(date)
-                }
-                dayInfo={(date) => {
-                  const entries = current.filter(
-                    (row) => row.day_date === date && row.status !== 'cancelled',
-                  );
-                  return {
-                    enabled: dayEnabled(date),
-                    status: !dayEnabled(date)
-                      ? 'closed'
-                      : entries.some((row) => row.status === 'confirmed')
-                        ? 'confirmed'
-                        : entries.length
-                          ? 'pending'
-                          : 'available',
-                  };
-                }}
-              />
+              <div hidden={dayView !== 'table'}>
+                <div className="booking-actions">
+                  <label>
+                    Status{' '}
+                    <select value={filter} onChange={(event) => setFilter(event.target.value)}>
+                      <option value="all">All</option>
+                      {Object.entries(statusLabel).map(([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <div className="booking-table-wrap">
+                  <table className="booking-table" ref={table}>
+                    <thead>
+                      <tr>
+                        <th>Ramadan day</th>
+                        <th>UK date</th>
+                        <th>Status</th>
+                        <th>Sponsor</th>
+                        <th>Contact</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                        <th data-print-exclude="true">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {!printRows.length && (
+                        <tr>
+                          <td colSpan={8}>No sponsorships match this range and status.</td>
+                        </tr>
+                      )}
+                      {printRows.map(({ number, date, row }, index) => (
+                        <tr
+                          key={row?.id || `${date}-${index}`}
+                          className={selected === date ? 'is-selected' : undefined}
+                        >
+                          <td>{number} Ramadan</td>
+                          <td>{fullDate(date)}</td>
+                          <td>
+                            <span
+                              className="booking-dot"
+                              aria-hidden="true"
+                              style={{
+                                '--day-colour':
+                                  RAMADAN_COLOURS[
+                                    row?.status === 'confirmed'
+                                      ? 'confirmed'
+                                      : row?.status === 'pending'
+                                        ? 'pending'
+                                        : row?.status === 'cancelled' || !dayEnabled(date)
+                                          ? 'closed'
+                                          : 'available'
+                                  ],
+                              }}
+                            />{' '}
+                            {row
+                              ? statusLabel[row.status]
+                              : dayEnabled(date)
+                                ? 'Available'
+                                : 'Closed'}
+                          </td>
+                          <td>{row?.sponsor_name || '—'}</td>
+                          <td>{[row?.phone, row?.email].filter(Boolean).join(' / ') || '—'}</td>
+                          <td>{row ? money(row.amount_pence) : '—'}</td>
+                          <td>{row ? (row.paid ? 'Received' : 'Not recorded') : '—'}</td>
+                          <td data-print-exclude="true">
+                            <button
+                              type="button"
+                              className="booking-button"
+                              disabled={busy || loading}
+                              onClick={() => (row ? edit(row) : selectDay(date))}
+                            >
+                              {row ? 'Edit' : 'Add sponsor'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              {dayView === 'days' && (
+                <SponsorshipDays
+                  days={visibleDays}
+                  kind={kind}
+                  selected={selected ? [selected] : []}
+                  manage={manageDays}
+                  disabled={busy || loading}
+                  onSelect={(date) =>
+                    manageDays ? toggleDays([date], !dayEnabled(date)) : selectDay(date)
+                  }
+                  dayInfo={(date) => {
+                    const entries = current.filter(
+                      (row) => row.day_date === date && row.status !== 'cancelled',
+                    );
+                    return {
+                      enabled: dayEnabled(date),
+                      status: !dayEnabled(date)
+                        ? 'closed'
+                        : entries.some((row) => row.status === 'confirmed')
+                          ? 'confirmed'
+                          : entries.length
+                            ? 'pending'
+                            : 'available',
+                    };
+                  }}
+                />
+              )}
               <div className="booking-actions">
                 <Link
                   to={`/ramadan/display?kind=${kind}`}
@@ -541,7 +699,11 @@ export default function RamadanManager() {
                   ))}
             </div>
             <form className="booking-panel" onSubmit={saveSponsor}>
-              <h3>{selected ? fullDate(selected) : 'Select a day'}</h3>
+              <h3>
+                {selected
+                  ? `${days.find((day) => day.date === selected)?.number} Ramadan · ${fullDate(selected)}`
+                  : 'Select a day'}
+              </h3>
               <label className="booking-field">
                 Sponsor name
                 <input
@@ -635,60 +797,6 @@ export default function RamadanManager() {
               </div>
             </form>
           </div>
-          <details
-            className="booking-panel"
-            open={showTable}
-            onToggle={(event) => setShowTable(event.currentTarget.open)}
-          >
-            <summary>All days & sponsorship table</summary>
-            <div className="booking-actions">
-              <label>
-                Status{' '}
-                <select value={filter} onChange={(event) => setFilter(event.target.value)}>
-                  <option value="all">All</option>
-                  {Object.entries(statusLabel).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="booking-table-wrap">
-              <table className="booking-table" ref={table}>
-                <thead>
-                  <tr>
-                    <th>Day</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Sponsor</th>
-                    <th>Contact</th>
-                    <th>Amount</th>
-                    <th>Payment</th>
-                    <th data-print-exclude="true">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {printRows.map(({ number, date, row }, index) => (
-                    <tr key={row?.id || `${date}-${index}`}>
-                      <td>{number}</td>
-                      <td>{fullDate(date)}</td>
-                      <td>
-                        {row ? statusLabel[row.status] : dayEnabled(date) ? 'Available' : 'Closed'}
-                      </td>
-                      <td>{row?.sponsor_name || '—'}</td>
-                      <td>{[row?.phone, row?.email].filter(Boolean).join(' / ') || '—'}</td>
-                      <td>{row ? money(row.amount_pence) : '—'}</td>
-                      <td>{row ? (row.paid ? 'Received' : 'Not recorded') : '—'}</td>
-                      <td data-print-exclude="true">
-                        {row && <button onClick={() => edit(row)}>Edit</button>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </details>
         </>
       )}
     </section>

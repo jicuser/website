@@ -108,17 +108,17 @@ confirm a playable stream before a live notice appears.
 
 ### Menus, page purposes and Google/share previews
 
-| Area | Main visitor action | Staff location |
-| --- | --- | --- |
-| Home | Prayer times, services and current programmes | Website pages / Posters |
-| About, Team, Contact | Find the centre and contact the team | Website pages / Team / Forms |
-| Prayer Times and Faith & practice | Timetable, learning and prayer guidance | Prayer times / Website pages |
-| Ramadan | Timetable notice, Iftar/Suhoor sponsorship and Daily Giving | Ramadan |
-| Services, Nikah, Funerals, Halls | Understand the service and send an enquiry | Forms / Hall bookings |
-| Education, Madrassah and Youth | Find programmes and register | Website pages / Forms |
-| Get involved, Donate, Campaigns | Volunteer or choose how to support JIC | Forms / Centre operations |
-| Radio | Start listening | Existing station stream |
-| Portal / staff / TV receivers | Complete an account or staff task | Permission-controlled workspace |
+| Area                              | Main visitor action                                         | Staff location                  |
+| --------------------------------- | ----------------------------------------------------------- | ------------------------------- |
+| Home                              | Prayer times, services and current programmes               | Website pages / Posters         |
+| About, Team, Contact              | Find the centre and contact the team                        | Website pages / Team / Forms    |
+| Prayer Times and Faith & practice | Timetable, learning and prayer guidance                     | Prayer times / Website pages    |
+| Ramadan                           | Timetable notice, Iftar/Suhoor sponsorship and Daily Giving | Ramadan                         |
+| Services, Nikah, Funerals, Halls  | Understand the service and send an enquiry                  | Forms / Hall bookings           |
+| Education, Madrassah and Youth    | Find programmes and register                                | Website pages / Forms           |
+| Get involved, Donate, Campaigns   | Volunteer or choose how to support JIC                      | Forms / Centre operations       |
+| Radio                             | Start listening                                             | Existing station stream         |
+| Portal / staff / TV receivers     | Complete an account or staff task                           | Permission-controlled workspace |
 
 - Retain the current menu hierarchy and icon labels. Task pages should not gain
   unrelated posters or discovery panels.
@@ -143,3 +143,41 @@ confirm a playable stream before a live notice appears.
    route-specific descriptions, private noindex and generated route documents.
 5. Run focused functional tests, lint/type checks and a production build. Publish
    through the existing main-branch deployment and check the live pages.
+
+## Staff quick guide
+
+- **Change a published form:** sign in, open the form on the website and choose
+  **Edit this form**. Save draft keeps current questions; **Publish changes**
+  updates the live questions. **Responses** opens that form's inbox.
+- **Create a form:** Admin → Forms → New form. Choose a template, enter its title,
+  add or open question cards, choose who handles responses and publish. The form
+  address is generated for you. Help, examples and conditions are inside each
+  question's optional settings; its stable field key is assigned automatically.
+- **Manage Ramadan:** Admin → Ramadan → Sponsorship setup. Enter the confirmed
+  first UK date and choose the last UK date. Set Iftar/Suhoor amounts if needed,
+  then publish. No season dates have been guessed or created for the centre.
+- **Choose sponsorship days:** select Iftar, Suhoor or Daily Giving. Use Table or
+  Days, and the From/To selectors to choose a period. Every selector shows the
+  Ramadan day and UK date. Open/close the range, or add/edit a sponsor on a day.
+  Print table prints the current date and status filters.
+- **Change a TV:** Admin → Screens & layouts → Screen layouts → choose the screen.
+  Edit its draft and save display settings. **Live presentation** opens the hall
+  camera/video workflow; selecting the task alone does not start broadcasting.
+- **Radio:** the small live notice appears only after the station probe succeeds.
+  Listen starts the existing player; close dismisses the notice for this tab.
+
+## Validation record
+
+- All 702 Node tests passed, including published-schema preservation, permissions,
+  bounded question hints, date ranges, exact amounts and existing booking controls.
+- Ten focused browser scenarios passed across the new workflow tests, meal booking
+  tests and the existing form publication/routing test. The new tests take no
+  screenshots and intercept form, sponsorship and TV writes.
+- ESLint and TypeScript passed. Production build and the existing startup budget
+  are checked before release. Staff controls and the radio notice load on demand.
+- The question-guidance validator migration was applied and checked on the live
+  backend. It retains invoker security and its original private execution grants;
+  the before/after database security advisor findings are unchanged.
+- Generated route documents contain canonical, description and share-card tags
+  before JavaScript runs. Unknown dynamic programme/form content still needs its
+  ordinary API load; this change does not invent static copies of that content.

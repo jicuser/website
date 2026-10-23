@@ -1,15 +1,13 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import PageMetadata from './PageMetadata';
 import { useLocation } from 'react-router-dom';
-import { pageName } from '@/content/pageDirectory';
-import { SITE } from '@/content/site';
+import { useContent } from '@/context/ContentContext';
+import { isPageVisible } from '@/lib/pageVisibility';
 
 export default function PageTitle() {
-  const { pathname } = useLocation();
-  const title = pageName(pathname);
-  return (
-    <Helmet>
-      <title>{title && pathname !== '/' ? `${title} | ${SITE.name}` : SITE.name}</title>
-    </Helmet>
-  );
+  const { pathname, search } = useLocation();
+  const { getContent } = useContent();
+  const hidden =
+    !isPageVisible(getContent, pathname) || new URLSearchParams(search).get('preview') === '1';
+  return <PageMetadata noindex={hidden ? true : undefined} />;
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
-import { SITE } from '@/content/site';
+import PageMetadata from '@/components/shell/PageMetadata';
 import { supabase } from '@/lib/supabaseClient';
 import { PAGE_PLACEMENTS, pageProblem } from '@/lib/pageContent';
 import { programmeRegistrationPath } from '@/lib/programmeJourney';
@@ -70,11 +69,12 @@ function Page({ slug }) {
   const registrationPath = programmeRegistrationPath(page);
   return (
     <article className="mx-auto max-w-5xl px-4 py-8">
-      <Helmet>
-        <title>
-          {page.title} | {SITE.name}
-        </title>
-      </Helmet>
+      <PageMetadata
+        title={page.title}
+        description={`${page.schedule || ''} ${page.body || ''}`}
+        image={page.image_url}
+        noindex={false}
+      />
       <Link to={page.placement}>
         ← {PAGE_PLACEMENTS.find(([path]) => path === page.placement)?.[1] || 'Back'}
       </Link>

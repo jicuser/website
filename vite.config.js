@@ -2,6 +2,7 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 import { validateBuildSettings } from './scripts/build-settings.mjs';
+import { pagePreviews } from './scripts/page-previews.mjs';
 
 // Allow only this Codespace's preview host; keep Vite's host protection enabled.
 const codespaceHost = process.env.CODESPACE_NAME
@@ -12,7 +13,7 @@ const codespaceHost = process.env.CODESPACE_NAME
 export default defineConfig(({ command, mode }) => {
   if (command === 'build') validateBuildSettings(loadEnv(mode, process.cwd(), 'VITE_'));
   return {
-    plugins: [react()],
+    plugins: [react(), pagePreviews()],
     server: { allowedHosts: codespaceHost ? [codespaceHost] : [] },
     resolve: {
       extensions: ['.jsx', '.js', '.tsx', '.ts', '.json'],

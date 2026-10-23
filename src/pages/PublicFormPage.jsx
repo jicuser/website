@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import PageMetadata from '@/components/shell/PageMetadata';
 import { useAuth } from '@/context/AuthContext';
 import { useRegisterProgrammeJourney } from '@/context/ProgrammeJourneyContext';
-import { SITE } from '@/content/site';
 import { supabase } from '@/lib/supabaseClient';
 import { formAction, visibleAnswers } from '@/lib/customForms';
 import { programmeForForm, programmeSlugFromSearch } from '@/lib/programmeJourney';
@@ -38,6 +37,7 @@ function PublicForm({ slug }) {
   const programme = programmeState?.key === journeyKey ? programmeState.programme : null;
   useRegisterProgrammeJourney(programme);
   const [form, setForm] = useState(null);
+  const [managedForm, setManagedForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const service = serviceEnquiry(slug);
@@ -48,6 +48,20 @@ function PublicForm({ slug }) {
   const attempt = useRef(crypto.randomUUID());
   const mounted = useRef(true);
   const activeUploads = useRef(new Map());
+  useEffect(() => {
+    setManagedForm(null);
+    if (!auth.user) return undefined;
+    const controller = new AbortController();
+    supabase
+      .rpc('admin_forms_overview')
+      .abortSignal(controller.signal)
+      .then(({ data, error }) => {
+        if (!controller.signal.aborted && !error && Array.isArray(data))
+          setManagedForm(data.find((item) => item.slug === slug && item.can_manage) || null);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [auth.user?.id, slug]);
   useEffect(() => {
     if (!requestedProgramme) return undefined;
     const controller = new AbortController();
@@ -148,11 +162,26 @@ function PublicForm({ slug }) {
   return (
     <div className="community-workspace public-custom-form">
       {form?.title && (
-        <Helmet>
-          <title>{`${form.title} | ${SITE.name}`}</title>
-        </Helmet>
+        <PageMetadata title={form.title} description={form.description} noindex={false} />
       )}
       <div className="workspace-wrap">
+        {managedForm && (
+          <nav className="custom-form-staff-tools" aria-label="Staff form controls">
+            <span>Staff controls</span>
+            <Link
+              className="workspace-button"
+              to={`/admin?section=forms&form=${managedForm.id}&edit=1`}
+            >
+              Edit this form
+            </Link>
+            <Link
+              className="workspace-button"
+              to={`/admin?section=forms&form=${managedForm.id}&tab=responses`}
+            >
+              Responses
+            </Link>
+          </nav>
+        )}
         {programme && !receipt && (
           <p>
             <Link to={programme.to}>← Back to {programme.title}</Link>
