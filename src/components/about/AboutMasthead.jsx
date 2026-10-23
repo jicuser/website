@@ -1,5 +1,4 @@
 import React from 'react';
-import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import '@/styles/about.css';
 
 export default function AboutMasthead({
@@ -7,13 +6,10 @@ export default function AboutMasthead({
   title,
   children,
   photo = false,
-  graphic = false,
   actions,
 }) {
   return (
-    <header
-      className={`about-masthead ${photo ? 'has-photo' : ''} ${graphic ? 'has-graphic' : ''}`}
-    >
+    <header className={`about-masthead ${photo ? 'has-photo' : ''}`}>
       <div className="about-masthead-copy">
         <p className="about-eyebrow">{eyebrow}</p>
         {title && <h1>{title}</h1>}
@@ -40,11 +36,6 @@ export default function AboutMasthead({
           </picture>
           <figcaption>Woodlands Road · Sparkhill · Birmingham</figcaption>
         </figure>
-      )}
-      {graphic && (
-        <div className="about-brand-graphic" aria-hidden="true">
-          <JamatiaLogo variant="entrance" />
-        </div>
       )}
     </header>
   );

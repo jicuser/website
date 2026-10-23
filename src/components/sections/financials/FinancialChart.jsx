@@ -9,7 +9,7 @@ export default function FinancialChart({ data }) {
   return (
     <figure className="about-financial-chart" aria-labelledby="finance-chart-title">
       <figcaption id="finance-chart-title">
-        <h2>Income & expenditure</h2>
+        <h3>Income & expenditure</h3>
         <span>
           <i className="income" /> Income <i className="expenditure" /> Expenditure
         </span>

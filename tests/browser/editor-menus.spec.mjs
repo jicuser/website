@@ -236,12 +236,11 @@ for (const theme of ['light', 'dark']) {
     expect(reading.ratio).toBeGreaterThanOrEqual(4.5);
     expect(reading.backdrop).toBe('none');
     await page.goto('/social-media');
-    await expect(page.locator('.jic-section-picker > summary')).toHaveText('Social Media');
-    await page.locator('.jic-section-picker > summary').click();
+    await expect(page).toHaveURL(/\/about#social$/);
     await expect(
       page
-        .getByRole('navigation', { name: 'About pages' })
-        .getByRole('link', { name: 'Contact Us', exact: true }),
+        .getByRole('navigation', { name: 'On this page' })
+        .getByRole('link', { name: 'Visit & contact', exact: true }),
     ).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,

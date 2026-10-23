@@ -328,15 +328,15 @@ test('poster locations override a linked page listing and preserve screen settin
 
 for (const [label, website_locations, count] of [
   ['hidden', [], 0],
-  ['selected', ['/social-media'], 5],
+  ['selected', ['/social-media'], 1],
 ]) {
   test(`explicit poster locations keep social previews ${label}`, async ({ page }) => {
     const evidence = await openAdmin(page, {
       initialPosters: [{ ...DEFAULT_POSTERS[0], website_locations }],
     });
     await page.goto('/social-media');
-    await expect(page.getByRole('heading', { name: 'Stay connected to JIC.' })).toBeVisible();
-    await expect(page.locator('.ops-social-poster-link')).toHaveCount(count);
+    await expect(page.getByRole('heading', { name: 'Stay connected.', exact: true })).toBeVisible();
+    await expect(page.locator('.about-noticeboard button')).toHaveCount(count);
     expect(evidence.writes).toEqual([]);
     expect(evidence.errors).toEqual([]);
   });
