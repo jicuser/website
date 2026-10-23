@@ -1,6 +1,7 @@
 /** Public guidance describes the enquiry process; the office confirms arrangements. */
 export const SERVICE_JOURNEYS = {
   community: {
+    formSlug: 'community-enquiry',
     eyebrow: 'A place to belong',
     title: 'Community support at JIC',
     intro:
@@ -45,6 +46,7 @@ export const SERVICE_JOURNEYS = {
     ],
   },
   funeral: {
+    formSlug: 'funeral-enquiry',
     eyebrow: 'Here when you need us',
     title: 'Janazah & funeral support',
     intro:
@@ -100,6 +102,7 @@ export const SERVICE_JOURNEYS = {
     ],
   },
   nikah: {
+    formSlug: 'nikah-enquiry',
     eyebrow: 'Begin your next chapter',
     title: 'Nikah at JIC',
     intro:

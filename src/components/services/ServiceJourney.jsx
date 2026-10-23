@@ -1,11 +1,11 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Phone } from 'lucide-react';
 import { SITE } from '@/content/site';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ContactForm from '@/components/sections/contact/ContactForm';
 import BuiltInForm from '@/components/sections/BuiltInForm';
-import { serviceEnquiryForPath } from '@/lib/serviceEnquiries';
+import { serviceEnquiry } from '@/lib/serviceEnquiries';
 import CentreVisit from './CentreVisit';
 import '@/styles/services.css';
 
@@ -26,8 +26,7 @@ export function JourneySteps({ steps, label = 'How it works' }) {
 }
 
 export default function ServiceJourney({ journey }) {
-  const { pathname } = useLocation();
-  const enquiry = serviceEnquiryForPath(pathname);
+  const enquiry = serviceEnquiry(journey.formSlug);
   return (
     <div className="service-page">
       <section className="service-hero">

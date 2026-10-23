@@ -5,6 +5,10 @@ const services = [
   ['/funerals', 'Janazah & funeral support', 'funeral-enquiry'],
   ['/services/nikah', 'Nikah at JIC', 'nikah-enquiry'],
   ['/services/community', 'Community support at JIC', 'community-enquiry'],
+  ['/services#community', 'Community support at JIC', 'community-enquiry'],
+  ['/services/community/', 'Community support at JIC', 'community-enquiry'],
+  ['/services/nikah/', 'Nikah at JIC', 'nikah-enquiry'],
+  ['/funerals/', 'Janazah & funeral support', 'funeral-enquiry'],
 ];
 
 function publishedService(slug) {
@@ -45,7 +49,7 @@ async function serviceFixture(page, { closed = false } = {}) {
     if (path.endsWith('/rpc/get_public_form')) {
       const { p_slug } = route.request().postDataJSON();
       state.reads.push(p_slug);
-      data = closed ? null : publishedService(p_slug);
+      data = p_slug === 'contact-us' ? CONTACT_FORM : closed ? null : publishedService(p_slug);
     }
     if (path.endsWith('/functions/v1/custom-forms')) {
       state.writes.push(route.request().postDataJSON());
@@ -57,7 +61,7 @@ async function serviceFixture(page, { closed = false } = {}) {
 }
 
 for (const [path, title, slug] of services) {
-  test(`${slug} uses the same published schema and version inline and directly`, async ({
+  test(`${path}: ${slug} uses the same published schema and version inline and directly`, async ({
     page,
   }) => {
     const state = await serviceFixture(page);
@@ -66,6 +70,10 @@ for (const [path, title, slug] of services) {
       if (destination === path) {
         await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
         await expect(page.getByRole('list', { name: 'How it works' }).locator('li')).toHaveCount(3);
+        if (slug === 'funeral-enquiry')
+          await expect(
+            page.getByText('This inbox is not an emergency service.', { exact: false }),
+          ).toBeVisible();
       }
       await expect(
         page.getByRole('heading', { name: `Published ${slug}`, exact: true }),
@@ -98,7 +106,7 @@ for (const [path, title, slug] of services) {
     expect(state.errors).toEqual([]);
   });
 
-  test(`${slug} stays closed inline and directly when the managed form is unpublished`, async ({
+  test(`${path}: ${slug} stays closed inline and directly when the managed form is unpublished`, async ({
     page,
   }) => {
     const state = await serviceFixture(page, { closed: true });

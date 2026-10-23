@@ -2,8 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { formsDatabase, id } from './helpers/formsDatabase.mjs';
+import { SERVICE_JOURNEYS } from '../src/content/serviceJourneys.js';
 import {
   SERVICE_ENQUIRIES,
+  serviceEnquiry,
   serviceEnquiryForPath,
   hallDateStatus,
   hallMonthRange,
@@ -20,6 +22,23 @@ test('each service has one named enquiry and canonical source page', () => {
     assert.equal(serviceEnquiryForPath(path).slug, 'community-enquiry');
   assert.equal(serviceEnquiryForPath('/get-involved/volunteer'), null);
   assert.equal(serviceEnquiryForPath('/unknown'), null);
+});
+
+test('journeys carry a dedicated form identity and registry links normalize accepted path variants', () => {
+  for (const [kind, slug] of [
+    ['community', 'community-enquiry'],
+    ['funeral', 'funeral-enquiry'],
+    ['nikah', 'nikah-enquiry'],
+  ]) {
+    assert.equal(SERVICE_JOURNEYS[kind].formSlug, slug);
+    assert.equal(serviceEnquiry(SERVICE_JOURNEYS[kind].formSlug).slug, slug);
+  }
+  for (const { page, slug } of SERVICE_ENQUIRIES) {
+    assert.equal(serviceEnquiryForPath(`${page}/`).slug, slug);
+    assert.equal(serviceEnquiryForPath(`${page}/?from=guide#enquire`).slug, slug);
+  }
+  assert.equal(serviceEnquiryForPath('/funerals/').slug, 'funeral-enquiry');
+  assert.equal(serviceEnquiryForPath('/get-involved/volunteer/'), null);
 });
 
 test('hall dates are unknown until explicitly published; part-day slots do not claim full-day availability', () => {
