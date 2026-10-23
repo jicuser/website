@@ -1,5 +1,196 @@
 /* Admin-only TV workspace styles. Public display rendering stays in tv.css. */
 
+.tv-everyday-settings {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  padding: clamp(16px, 2.5vw, 24px);
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.tv-everyday-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tv-everyday-heading h3,
+.tv-everyday-heading p,
+.tv-everyday-controls p {
+  margin: 0;
+}
+.tv-everyday-heading p {
+  margin-top: 8px;
+  color: var(--jic-text-secondary);
+}
+.tv-everyday-shape {
+  padding: 6px 10px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+.tv-everyday-modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.tv-everyday-modes > button {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  color: var(--jic-text);
+  background: var(--jic-bg);
+  text-align: left;
+  font-size: 1rem;
+}
+.tv-everyday-modes > button span {
+  font-size: 0.875rem;
+  color: var(--jic-text-secondary);
+}
+.tv-everyday-modes > button[aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 -3px var(--jic-gold);
+}
+.tv-everyday-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+.tv-everyday-controls,
+.tv-everyday-controls label:not(.admin-check),
+.tv-everyday-miniature,
+.tv-screen-miniature {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+.tv-everyday-controls label,
+.tv-everyday-controls select {
+  font-size: 1rem;
+}
+.tv-everyday-controls select {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+}
+.tv-rotation-scenes {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tv-rotation-scenes > li {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.tv-rotation-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.tv-rotation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tv-rotation-actions button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.tv-fixed-items,
+.tv-everyday-preview {
+  border-top: 1px solid var(--jic-border);
+  padding-top: 8px;
+  min-width: 0;
+}
+.tv-fixed-items > summary,
+.tv-everyday-preview > summary {
+  min-height: 44px;
+  padding-block: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.tv-fixed-items p {
+  margin: 8px 0 12px;
+  color: var(--jic-text-secondary);
+}
+.tv-fixed-items small {
+  display: block;
+  margin-top: 12px;
+  color: var(--jic-text-secondary);
+}
+.tv-fixed-item-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.tv-fixed-item-options .admin-check {
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.tv-everyday-miniature,
+.tv-screen-miniature {
+  margin: 0;
+}
+.tv-everyday-miniature figcaption,
+.tv-screen-miniature figcaption {
+  display: grid;
+  gap: 6px;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.tv-everyday-miniature figcaption > :not(strong),
+.tv-screen-miniature figcaption > :not(strong) {
+  color: var(--jic-text-secondary);
+}
+.tv-screen-miniature {
+  grid-template-columns: minmax(110px, 0.8fr) minmax(0, 1fr);
+  align-items: center;
+  margin-block: 16px;
+}
+.tv-screen-miniature .tv-design-mini-block {
+  font-size: 5px;
+}
+.tv-everyday-settings :is(button, select, input, summary):focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+@media (max-width: 760px) {
+  .tv-everyday-content,
+  .tv-everyday-modes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tv-everyday-miniature {
+    grid-row: 1;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+  .tv-fixed-item-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tv-everyday-settings * {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}
+
 .stream-background-settings {
   display: grid;
   gap: var(--jic-gap, 24px);

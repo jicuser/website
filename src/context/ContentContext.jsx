@@ -13,6 +13,7 @@ export function ContentProvider({ children }) {
   const { isAdmin, can } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const [cache, setCache] = useState({});
+  const [previewContent, setPreviewContent] = useState({});
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
 
@@ -35,8 +36,25 @@ export function ContentProvider({ children }) {
     if (!isAdmin) setEditMode(false);
   }, [isAdmin]);
 
+  useEffect(() => {
+    if (
+      window.parent === window ||
+      new URLSearchParams(window.location.search).get('preview') !== '1'
+    )
+      return;
+    let stop,
+      active = true;
+    import('@/lib/pagePreviewBridge').then(({ installPagePreviewBridge }) => {
+      if (active) stop = installPagePreviewBridge(setPreviewContent);
+    });
+    return () => {
+      active = false;
+      stop?.();
+    };
+  }, []);
+
   function getContent(key, fallback) {
-    return cache[key] ?? fallback;
+    return previewContent[key] ?? cache[key] ?? fallback;
   }
 
   const saveContent = useCallback(

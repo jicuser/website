@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+test.use({ screenshot: 'off' });
 
 const owner = '00000000-0000-4000-8000-000000000001';
 const formId = '00000000-0000-4000-8000-000000000002';
@@ -91,9 +92,7 @@ async function setup(page, { signedIn = false, handle = () => undefined } = {}) 
   return errors;
 }
 
-test('public form hides stale conditional answers and reuses its retry key', async ({
-  page,
-}, testInfo) => {
+test('public form hides stale conditional answers and reuses its retry key', async ({ page }) => {
   const attempts = [];
   const errors = await setup(page, {
     handle: async (path, body, route) => {
@@ -119,7 +118,6 @@ test('public form hides stale conditional answers and reuses its retry key', asy
   await page.getByLabel('Contact by').selectOption('Email');
   await expect(page.getByLabel('Telephone number')).toHaveCount(0);
   await page.getByLabel('Email address').fill('volunteer@example.org');
-  await page.screenshot({ path: testInfo.outputPath('public-form.png'), fullPage: true });
   await page.getByRole('button', { name: 'Send response', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Please try again.');
   await page.getByRole('button', { name: 'Send response', exact: true }).click();
@@ -133,7 +131,7 @@ test('public form hides stale conditional answers and reuses its retry key', asy
 
 test('owner builds a draft and publishes with responsible people and task routing', async ({
   page,
-}, testInfo) => {
+}) => {
   const saved = [];
   const published = [];
   const updatedAt = '2026-10-15T10:00:00Z';
@@ -147,14 +145,22 @@ test('owner builds a draft and publishes with responsible people and task routin
         });
         return true;
       }
-      if (path.endsWith('/save_custom_form')) {
+      if (path.endsWith('/save_form_workflow')) {
         saved.push(body.p_form);
-        await route.fulfill({ contentType: 'application/json', body: JSON.stringify(formId) });
-        return true;
-      }
-      if (path.endsWith('/publish_custom_form')) {
         published.push(body);
-        await route.fulfill({ contentType: 'application/json', body: '1' });
+        await route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({
+            form: {
+              ...form,
+              ...body.p_form,
+              id: formId,
+              published_version: 1,
+              updated_at: updatedAt,
+            },
+            page: null,
+          }),
+        });
         return true;
       }
     },
@@ -172,20 +178,21 @@ test('owner builds a draft and publishes with responsible people and task routin
   await page.getByLabel('Due within (hours)').fill('24');
   await page.getByRole('button', { name: 'Preview questions', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Question preview', exact: true })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('builder.png'), fullPage: true });
   await page.getByRole('button', { name: 'Save and publish', exact: true }).click();
   await expect(page.locator('.custom-form-notice')).toContainText('Published version 1');
   expect(saved).toHaveLength(1);
   expect(saved[0].responsible_ids).toEqual([owner]);
   expect(saved[0].task_title).toBe('Call back');
   expect(saved[0].due_hours).toBe(24);
-  expect(published).toEqual([{ p_form_id: formId, p_expected_updated_at: updatedAt }]);
+  expect(published).toHaveLength(1);
+  expect(published[0].p_publish).toBe(true);
+  expect(published[0].p_page).toBeNull();
   expect(errors).toEqual([]);
 });
 
 test('response inbox searches server-side, saves an internal note and assigns action', async ({
   page,
-}, testInfo) => {
+}) => {
   const queries = [],
     replies = [],
     tasks = [];
@@ -237,7 +244,6 @@ test('response inbox searches server-side, saves an internal note and assigns ac
   await page.getByRole('button', { name: 'Assign follow-up', exact: true }).last().click();
   await expect.poll(() => tasks.length).toBe(1);
   expect(tasks[0].p_submission_id).toBe(responseId);
-  await page.screenshot({ path: testInfo.outputPath('responses.png'), fullPage: true });
   expect(errors).toEqual([]);
 });
 

@@ -1117,6 +1117,11 @@ html[data-prayer-dock-hidden='true'] {
     flex-shrink: 0;
     transition: transform 150ms ease;
   }
+  .jic-desktop-section-trigger {
+    max-width: 200px;
+    white-space: normal !important;
+    text-align: center;
+  }
   .jic-desktop-section-trigger[aria-expanded='true'] svg {
     transform: rotate(180deg);
   }

@@ -29,6 +29,7 @@ export const MADRASSAH_TABS = [
 ];
 export const EDUCATION_TABS = [
   { name: 'Overview', path: '/education' },
+  { name: 'All programmes', path: '/education/programmes' },
   { name: 'Adult Classes', path: '/education/courses' },
   { name: 'Enrolment', path: '/education/enrolment' },
   { name: 'Madrassah', path: '/madrassah' },
@@ -37,10 +38,9 @@ export const WORSHIP_TABS = [
   { name: 'Overview', path: '/worship' },
   { name: 'Read Qur’an', path: '/worship/quran' },
   { name: 'Dala’il al-Khayrat', path: '/worship/dalail-al-khayrat' },
-  { name: 'Daily Prayers & Du‘as', path: '/worship/daily-duas' },
+  { name: 'Adhkar & Du‘as', path: '/worship/daily-duas' },
   { name: 'Prayer Guide', path: '/worship/prayer-guide' },
   { name: 'Janazah Guide', path: '/worship/janazah-guide' },
-  { name: 'Daily Salah', path: '/worship/daily-salah' },
 ];
 export const NAV_GROUPS = [
   { name: 'Home', path: '/', children: [] },
@@ -66,7 +66,7 @@ export const NAV_GROUPS = [
       { name: 'Salah Alerts', path: '/prayer-times/reminders' },
     ],
   },
-  { name: 'Faith & practice', path: '/worship', children: WORSHIP_TABS },
+  { name: 'Adhkar, Qur’an & Janazah Guide', path: '/worship', children: WORSHIP_TABS },
   {
     name: 'Ramadan',
     path: '/ramadan',

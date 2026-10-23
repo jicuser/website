@@ -56,6 +56,7 @@ once, then `npm run test:browser`. These use local fixture data, including a pau
 response, and do not connect to the live database.
 
 - [Website experience and page ownership](docs/website-experience.md)
+- [Google and social previews](docs/public-page-previews.md)
 - [Editing guide](docs/editing.md)
 - [Code map](CODEBASE_MAP.md)
 - [Style ownership](src/styles/README.md)

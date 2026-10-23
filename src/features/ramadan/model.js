@@ -18,10 +18,15 @@ export const RAMADAN_DEFAULTS = {
   tv_enabled: true,
 };
 export const RAMADAN_COLOURS = {
-  available: '#68758a',
+  available: '#21835b',
   pending: '#b77900',
-  confirmed: '#21835b',
+  confirmed: '#3c6fba',
   closed: '#68758a',
+};
+export const SPONSORSHIP_STATUS = {
+  pending: 'Requested',
+  confirmed: 'Confirmed',
+  cancelled: 'Cancelled',
 };
 export const ramadanSettings = (data) => ({ ...RAMADAN_DEFAULTS, ...data?.settings });
 export const ramadanOpen = (data, kind) => {

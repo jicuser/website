@@ -11,7 +11,10 @@ import {
 import CustomFormQuestion from './CustomFormQuestion';
 import { checked, Field } from './shared';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
-import { workflowChanged } from '@/lib/pageContent';
+import { useAuth } from '@/context/AuthContext';
+import { useContent } from '@/context/ContentContext';
+import { navigationName } from '@/lib/navigationConfiguration';
+import { PAGE_PLACEMENTS, pageProblem, pageSlug, workflowChanged } from '@/lib/pageContent';
 import CustomFormsFields from './CustomFormsFields';
 
 const initial = () => ({
@@ -34,12 +37,23 @@ export default function CustomFormsBuilder({
   onSaved,
   registerBack,
 }) {
+  const auth = useAuth();
+  const { getContent } = useContent();
+  const canAddPage = auth.isOwner || auth.can('content');
   const [draft, setDraft] = useState(() =>
     definition
       ? { ...definition, manager_ids: [], responsible_ids: [], watcher_ids: [] }
       : { ...initial(), ...initialDraft },
   );
   const [people, setPeople] = useState([]);
+  const [pages, setPages] = useState([]);
+  const [pageError, setPageError] = useState('');
+  const [destination, setDestination] = useState('direct');
+  const [pageTitle, setPageTitle] = useState('');
+  const [pagePlacement, setPagePlacement] = useState('/education');
+  const [selectedPage, setSelectedPage] = useState('');
+  const [savedPage, setSavedPage] = useState(null);
+  const [publishLinkedPage, setPublishLinkedPage] = useState(false);
   const [addressTouched, setAddressTouched] = useState(Boolean(definition || initialDraft.slug));
   const [template, setTemplate] = useState('enquiry');
   const inFlight = useRef(false);
@@ -73,6 +87,24 @@ export default function CustomFormsBuilder({
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
   const setFields = (fields) => patch({ schema: { ...draft.schema, fields } });
+  useEffect(() => {
+    if (!canAddPage) return undefined;
+    const controller = new AbortController();
+    let query = supabase.from('site_pages').select('*').order('title').limit(500);
+    if (definition?.id) query = query.eq('form_id', definition.id);
+    checked(query.abortSignal(controller.signal))
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setPages(result || []);
+          if (definition?.id) setSelectedPage(result?.find((item) => !item.published)?.id || '');
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setPageError('Pages could not be loaded. A direct form link is still available.');
+      });
+    return () => controller.abort();
+  }, [definition?.id, canAddPage]);
   useEffect(() => {
     let active = true;
     Promise.all([
@@ -123,12 +155,46 @@ export default function CustomFormsBuilder({
       setMessage('Choose at least one responsible person before publishing.');
       throw new Error('Choose at least one responsible person before publishing.');
     }
+    let page = null;
+    if (destination === 'new') {
+      page = {
+        ...(savedPage || {}),
+        slug: savedPage?.slug || pageSlug(pageTitle || draft.title),
+        title: (pageTitle || draft.title).trim(),
+        body: savedPage?.body || draft.description.trim(),
+        placement: pagePlacement,
+        kind: 'page',
+        registration: 'interest',
+        published: publish || Boolean(savedPage?.published),
+        ...(savedPage ? { expected_updated_at: savedPage.updated_at } : {}),
+      };
+    } else if (destination === 'existing') {
+      const chosen = savedPage || pages.find((item) => item.id === selectedPage);
+      if (!chosen) {
+        setMessage('Choose the page that will open this form.');
+        throw new Error('Choose an existing page.');
+      }
+      page = { ...chosen, expected_updated_at: chosen.updated_at, registration: 'interest' };
+    }
+    if (definition?.id && publish && publishLinkedPage) {
+      const linked = pages.find((item) => item.id === selectedPage && item.form_id === draft.id);
+      if (!linked) {
+        setMessage('Choose the linked draft page to publish.');
+        throw new Error('Choose a linked draft page.');
+      }
+      page = { ...linked, expected_updated_at: linked.updated_at, published: true };
+    }
+    const pageInvalid = page && pageProblem(page);
+    if (pageInvalid) {
+      setMessage(pageInvalid);
+      throw new Error(pageInvalid);
+    }
     inFlight.current = true;
     setBusy(true);
     setMessage('');
     try {
-      const id = await checked(
-        supabase.rpc('save_custom_form', {
+      const result = await checked(
+        supabase.rpc('save_form_workflow', {
           p_form: {
             ...(draft.id ? { id: draft.id, expected_updated_at: draft.updated_at } : {}),
             slug: draft.slug,
@@ -142,23 +208,18 @@ export default function CustomFormsBuilder({
             responsible_ids: draft.responsible_ids,
             watcher_ids: draft.watcher_ids,
           },
+          p_publish: publish,
+          p_page: page,
         }),
       );
-      setDraft((current) => ({ ...current, id }));
-      const stored = await checked(supabase.from('custom_forms').select('*').eq('id', id).single());
-      setDraft((current) => ({ ...current, ...stored }));
-      setDirty(false);
-      if (publish) {
-        const version = await checked(
-          supabase.rpc('publish_custom_form', {
-            p_form_id: id,
-            p_expected_updated_at: stored.updated_at,
-          }),
-        );
-        patch({ published_version: version });
-        setMessage(`Published version ${version}. The public form is ready to share.`);
-      } else setMessage('Draft saved. Publish when it is ready for responses.');
-      const saved = await checked(supabase.from('custom_forms').select('*').eq('id', id).single());
+      const saved = result.form;
+      if (!saved?.id) throw new Error('The form save could not be confirmed. Please try again.');
+      if (result.page) setSavedPage(result.page);
+      setMessage(
+        publish
+          ? `Published version ${saved.published_version}.${result.page?.published ? ' The linked page is live.' : ' The form is ready to share.'}`
+          : `Draft saved.${result.page ? ' The page association was saved too.' : ''} Publish when it is ready for responses.`,
+      );
       setDraft((current) => ({ ...current, ...saved }));
       setDirty(false);
       workflowChanged();
@@ -172,7 +233,7 @@ export default function CustomFormsBuilder({
     }
   }
 
-  useRegisterAdminSave(() => save(false), dirty && !busy && !loading, 'Save form draft');
+  useRegisterAdminSave(() => save(false), dirty && !busy && !loading, 'Save form draft', busy);
   return (
     <section className="workspace-card custom-form-editor">
       <div className="workspace-header">
@@ -222,7 +283,7 @@ export default function CustomFormsBuilder({
             </div>
           </section>
         )}
-        <h3>About your form</h3>
+        <h3>1. Basics</h3>
         <Field label="Form title">
           <input
             value={draft.title}
@@ -235,6 +296,129 @@ export default function CustomFormsBuilder({
             }
           />
         </Field>
+        {!definition?.id && (
+          <section className="custom-form-routing" aria-label="Where the form appears">
+            <h4>Where should people find this form?</h4>
+            <Field label="Website location">
+              <select
+                value={destination}
+                disabled={Boolean(savedPage)}
+                onChange={(event) => {
+                  setDestination(event.target.value);
+                  setDirty(true);
+                }}
+              >
+                <option value="direct">Direct form link</option>
+                {canAddPage && <option value="new">Create a page for this form</option>}
+                {canAddPage && <option value="existing">Add to an existing page</option>}
+              </select>
+            </Field>
+            {!canAddPage && (
+              <p className="workspace-meta">
+                A website editor can add this form to a page after it is saved.
+              </p>
+            )}
+            {pageError && <p role="status">{pageError}</p>}
+            {destination === 'new' && (
+              <>
+                <Field label="Page name">
+                  <input
+                    value={pageTitle || draft.title}
+                    maxLength={160}
+                    onChange={(event) => {
+                      setPageTitle(event.target.value);
+                      setDirty(true);
+                    }}
+                  />
+                </Field>
+                <Field label="Menu section">
+                  <select
+                    value={pagePlacement}
+                    onChange={(event) => {
+                      setPagePlacement(event.target.value);
+                      setDirty(true);
+                    }}
+                  >
+                    {PAGE_PLACEMENTS.map(([path, label]) => (
+                      <option key={path} value={path}>
+                        {navigationName(getContent, path, label)}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <p className="workspace-meta">
+                  Save draft keeps the new page hidden. Save and publish opens the page and form
+                  together.
+                </p>
+              </>
+            )}
+            {destination === 'existing' && (
+              <>
+                <Field label="Existing page">
+                  <select
+                    value={selectedPage}
+                    disabled={Boolean(savedPage) || Boolean(pageError)}
+                    onChange={(event) => {
+                      setSelectedPage(event.target.value);
+                      setDirty(true);
+                    }}
+                  >
+                    <option value="">Choose a page…</option>
+                    {pages
+                      .filter((item) => !item.form_id || item.form_id === draft.id)
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.title}
+                          {item.published ? ' · Live' : ' · Draft'}
+                        </option>
+                      ))}
+                  </select>
+                </Field>
+                <p className="workspace-meta">
+                  The page keeps its current visibility. Pages that already use another form can be
+                  changed in Website pages.
+                </p>
+              </>
+            )}
+          </section>
+        )}
+        {definition?.id && canAddPage && pages.some((item) => !item.published) && (
+          <section className="custom-form-routing" aria-label="Linked draft page">
+            <h4>Linked draft page</h4>
+            <Field label="Page to publish">
+              <select
+                value={selectedPage}
+                onChange={(event) => {
+                  setSelectedPage(event.target.value);
+                  setDirty(true);
+                }}
+              >
+                {pages
+                  .filter((item) => !item.published)
+                  .map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+            <label className="custom-form-check workspace-field">
+              <span>Publish linked page with this form</span>
+              <input
+                type="checkbox"
+                checked={publishLinkedPage}
+                onChange={(event) => {
+                  setPublishLinkedPage(event.target.checked);
+                  setDirty(true);
+                }}
+              />
+            </label>
+            <p className="workspace-meta">
+              Publish changes saves the form and this page together. Save draft keeps the page
+              hidden.
+            </p>
+          </section>
+        )}
         <Field label="Introduction">
           <textarea
             rows={3}
@@ -271,7 +455,7 @@ export default function CustomFormsBuilder({
           </label>
         </details>
 
-        <h3>Questions</h3>
+        <h3>2. Questions</h3>
         {draft.schema.fields.map((field, index) => (
           <CustomFormQuestion
             key={field.id}
@@ -312,10 +496,16 @@ export default function CustomFormsBuilder({
         </div>
         <section className="custom-form-routing">
           <div>
-            <h3>Who handles responses?</h3>
+            <h3>3. Responses</h3>
             <p className="workspace-meta">
               These people receive the automatic action when somebody submits this form.
             </p>
+            {draft.built_in_kind && (
+              <p className="workspace-meta">
+                This built-in form keeps its existing response permission. Only people with that
+                permission can be assigned here.
+              </p>
+            )}
           </div>
           <div className="custom-form-members custom-form-members-primary">
             {people.length === 0 && <p>No eligible accounts available.</p>}

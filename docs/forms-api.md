@@ -6,18 +6,23 @@ Custom responses are rows in the existing `form_submissions` inbox (`kind='custo
 
 ## Definition schema
 
-`custom_forms`: `id uuid`, `slug text` (lowercase letters/digits/hyphens, 3–80), `title text`, `description text`, `schema jsonb`, `published_version integer|null`, `enabled boolean`, `task_title text`, `due_hours integer (1–8760)`, `created_by uuid`, `updated_at`.
+`custom_forms`: `id uuid`, `slug text` (lowercase letters/digits/hyphens, 3–80), `title text`, `description text`, `schema jsonb`, `published_version integer|null`, `enabled boolean`, `task_title text`, `due_hours integer (1–8760)`, `created_by uuid`, `updated_at`, `built_in_kind text|null` (unique `contact|madrassah|itikaaf`). Clients cannot change the built-in identity through the save API.
 
 `schema = {fields: [{id, type, label, required, options?, show_when?}]}`. 1–40 fields; IDs `[a-z][a-z0-9_]{0,39}`; labels max160. Types: `text`, `textarea`, `email`, `phone`, `number`, `date`, `select`, `multiselect`, `checkbox`, `image`, `file`. Options are 1–50 unique strings (max120). `show_when={field:'earlier_field_id',operator:'equals'|'not_equals',value:'string'|number|boolean}` may refer only to an earlier non-file field with no show_when. Hidden answers are rejected (omit them). No expressions or scripts. String limits: text500,textarea6000,email254,phone40,date ISO YYYY-MM-DD. Number finite +/-1e12. Checkbox boolean; required checkbox must be true. Multiselect array of unique permitted strings, max50. File/image answer is an uploaded UUID (single file per field), max5 upload fields per form. Missing optional answers can be omitted/null/empty; required visible answers must have content.
 
 `custom_form_staff`: `form_id,user_id,role` with role `manager|responsible|watcher`; roles may overlap per member. Active owners or `forms_manage` permission manage all definitions. Explicit per-form managers manage their form. Any assigned role may view and reply to that form's responses. Global `forms_custom` also reads/replies all custom responses. Any recipient must be active. At least one responsible member is required before publishing; each responsible gets a task. Watchers receive notification only. Managers can also be responsible by including the same account in `responsible_ids` when saving.
+
+Built-in definitions additionally retain their original `forms_contact`, `forms_madrassah` or `forms_itikaaf` permission. That permission grants response access and is required for assigned staff; management also requires `forms_manage` or an explicit manager assignment. Owners retain access. `forms_custom` alone never opens a built-in definition or its future versioned responses. Removing the original permission immediately removes access, including attachments, replies and tasks. A responsible person must retain that permission for the public form to remain available.
+
+Question presentation accepts `help` (up to 300 characters) and `placeholder` (up to 160). Number questions optionally accept finite `minimum`, `maximum` and boolean `integer`. A numeric visibility range uses `show_when={field:'earlier_number',operator:'between',value:11,maximum:16}` with inclusive bounds. This preserves I’tikaf’s existing ages 11–16 consent rule in the shared builder. SQL and Edge validation enforce the same constraints.
 
 ## Client RPCs
 
 - `list_public_forms()` → rows `{id,slug,title,description,version}` for enabled published forms (anon/auth).
 - `get_public_form(p_slug text)` → JSON `{id,slug,title,description,version,schema}` or null (anon/auth); no staff/routing details.
 - `save_custom_form(p_form jsonb)` → UUID. `p_form={id?:uuid,slug,title,description,schema,task_title,due_hours,enabled,manager_ids:uuid[],responsible_ids:uuid[],watcher_ids:uuid[]}`. Existing form IDs update draft; published version stays immutable until republished. New forms default enabled true; safe server validation, no arbitrary direct client writes.
-- `publish_custom_form(p_form_id uuid)` → integer new version; validates draft, recipients then snapshots atomically.
+- `publish_custom_form(p_form_id uuid,p_expected_updated_at timestamptz default null)` → integer new version; validates draft, recipients and expected revision, then snapshots atomically.
+- `save_form_workflow(p_form jsonb,p_publish boolean,p_page jsonb default null)` → `{form,page}`. The website uses this single transaction to save a draft, optionally publish, and create/associate a page. An existing form includes `expected_updated_at`; an existing page includes its own `expected_updated_at`. Any failure rolls back the entire change. Page writes require `content` permission independently of form management. A page already linked to another form cannot be replaced through this API. Existing page slugs and published form slugs remain protected.
 - `custom_form_members(p_form_id uuid default null)` → rows `{id,display_name}` of active eligible accounts for assignment; only managers/owners. Null requires global manage permission.
 - Read `custom_forms` and `custom_form_staff` through Supabase table queries under RLS. Roles can overlap (PK form_id,user_id,role).
 - Read `form_submissions` with `.eq('kind','custom')` for staff inbox; for public account history also `.eq('submitter_id', user.id)`. Staff access follows per-form membership/current permissions. Own authenticated submitters see only their own custom responses.
@@ -43,6 +48,16 @@ Feature flags: use existing workspace gate. Super admin user editor adds `forms_
 `search_form_submissions(p_search text default '',p_kind text default null,p_form_id uuid default null,p_status text default null,p_from timestamptz default null,p_to timestamptz default null,p_offset int default 0,p_limit int default 25,p_oldest bool default false,p_mine bool default false)` → JSON `{rows:[],total,new_count,done_count}`; invoker RLS protects legacy and custom responses. Search matches literal case-insensitive substring of JSON answers. `total` includes status filter; new/done counts ignore status filter. All other filters apply. From inclusive, to exclusive. Limit1–100, offset0–25000. Rows include schema_snapshot.title for custom form label.
 
 Shared JS validation module `supabase/functions/custom-forms/validation.mjs` exports `validateSchema(schema)` (returns normalized schema or throws), `validateAnswers(schema,answers)` (returns normalized visible answers or throws), `isFieldVisible(field,answers)`, `validateUpload(field,file)`, `safeFilename`, `csvCell`. SQL independently enforces the same critical bounds so direct RPC calls cannot bypass validation.
+
+For a built-in definition, `search_form_submissions(p_form_id => id)` includes both its historical legacy-kind rows and future versioned custom rows. A legacy `p_kind => 'contact'` link also includes future responses for that built-in form. RLS still filters every row. `admin_forms_overview` includes `built_in_kind` and combined counts; callers must not add a second legacy-kind count for a represented built-in form.
+
+## Unified built-in form release
+
+`20261023193349_unified_form_workflow.sql` seeds published definitions at `contact-us`, `madrassah-enquiry` and `itikaaf-registration`. It does not update or reclassify any existing submission or task. It copies an eligible existing workflow recipient, or uses an active owner when no eligible workflow exists. It aborts if an unrelated custom form already occupies a reserved slug, or no active owner exists.
+
+Deploy `custom-forms` first: its only changed dependency is `supabase/functions/custom-forms/validation.mjs`, which adds backwards-compatible numeric constraints and ranges. Then apply the migration, then publish the website. `submit-form` does not require redeployment for this change: a database trigger makes older browser tabs obey the published questions, closure and routing, while retaining legacy submission identities. Existing empty hidden consent fields are omitted before validation; only newly submitted legacy rows receive a question snapshot.
+
+Local verification: `tests/form-workflow.test.mjs` executes the migration with PGlite and covers untouched historical rows, the original permission boundaries, generic task API checks, age/consent parity, version snapshots, stale writes, stable slugs, page/form transaction rollback and duplicate-free dashboard counts. Browser fixtures intercept writes and cover mobile status tabs, live editing, page placement, conflict preservation and public/staff controls.
 
 ## Operations and verification
 

@@ -44,6 +44,11 @@ export default function CustomFormQuestion({ field, fields, index, onChange, onR
                 if (['select', 'multiselect'].includes(next.type))
                   next.options = field.options || ['Yes', 'No'];
                 else delete next.options;
+                if (next.type !== 'number') {
+                  delete next.minimum;
+                  delete next.maximum;
+                  delete next.integer;
+                }
                 onChange(next);
               }}
             >
@@ -90,6 +95,37 @@ export default function CustomFormQuestion({ field, fields, index, onChange, onR
               />
             </Field>
           )}
+          {field.type === 'number' && (
+            <>
+              <div className="workspace-grid">
+                {['minimum', 'maximum'].map((key) => (
+                  <Field
+                    key={key}
+                    label={`${key === 'minimum' ? 'Minimum' : 'Maximum'} answer (optional)`}
+                  >
+                    <input
+                      type="number"
+                      value={field[key] ?? ''}
+                      onChange={(event) => {
+                        const next = { ...field };
+                        if (event.target.value === '') delete next[key];
+                        else next[key] = Number(event.target.value);
+                        onChange(next);
+                      }}
+                    />
+                  </Field>
+                ))}
+              </div>
+              <label className="custom-form-check workspace-field">
+                <span>Whole number only</span>
+                <input
+                  type="checkbox"
+                  checked={field.integer === true}
+                  onChange={(event) => patch({ integer: event.target.checked })}
+                />
+              </label>
+            </>
+          )}
           <Field label="Show question">
             <select
               value={field.show_when?.field || ''}
@@ -129,13 +165,37 @@ export default function CustomFormQuestion({ field, fields, index, onChange, onR
                 <select
                   value={field.show_when.operator}
                   onChange={(event) =>
-                    patch({ show_when: { ...field.show_when, operator: event.target.value } })
+                    patch({
+                      show_when: {
+                        ...field.show_when,
+                        operator: event.target.value,
+                        ...(event.target.value === 'between'
+                          ? { maximum: field.show_when.maximum ?? field.show_when.value }
+                          : {}),
+                      },
+                    })
                   }
                 >
                   <option value="equals">Equals</option>
                   <option value="not_equals">Does not equal</option>
+                  {parent?.type === 'number' && (
+                    <option value="between">Between (inclusive)</option>
+                  )}
                 </select>
               </Field>
+              {field.show_when.operator === 'between' && (
+                <Field label="Highest matching answer">
+                  <input
+                    type="number"
+                    value={field.show_when.maximum}
+                    onChange={(event) =>
+                      patch({
+                        show_when: { ...field.show_when, maximum: Number(event.target.value) },
+                      })
+                    }
+                  />
+                </Field>
+              )}
               <Field label="Answer to match">
                 {parent?.type === 'checkbox' ? (
                   <select

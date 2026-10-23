@@ -12,19 +12,27 @@ export default function SponsorshipTable({
 }) {
   return (
     <div
-      className="booking-table-wrap"
+      className="booking-table-wrap sponsorship-table-wrap"
       tabIndex={0}
       role="region"
       aria-label="Ramadan sponsorship table"
     >
-      <table className="booking-table sponsorship-availability-table">
+      <table className="booking-table sponsorship-availability-table sponsorship-mobile-table">
         <thead>
           <tr>
-            <th scope="col">Ramadan day</th>
-            <th scope="col">UK date</th>
-            <th scope="col">Status</th>
+            <th scope="col" className="sponsorship-day-cell">
+              Ramadan day
+            </th>
+            <th scope="col" className="sponsorship-date-cell">
+              UK date
+            </th>
+            <th scope="col" className="sponsorship-status-cell">
+              Status
+            </th>
             <th scope="col">Sponsor</th>
-            <th scope="col">Choose</th>
+            <th scope="col" className="sponsorship-action-cell">
+              Choose
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -33,17 +41,24 @@ export default function SponsorshipTable({
               active = selected.includes(day.date);
             return (
               <tr key={day.date} className={active ? 'is-selected' : undefined}>
-                <th scope="row">{day.number} Ramadan</th>
-                <td>{fullDate(day.date)}</td>
-                <td>
-                  <span
-                    className="booking-dot"
-                    style={{ '--day-colour': RAMADAN_COLOURS[info.status] }}
-                  />{' '}
-                  {ramadanStatus(kind, info.status)}
+                <th scope="row" className="sponsorship-day-cell">
+                  {day.number} Ramadan
+                </th>
+                <td className="sponsorship-date-cell">{fullDate(day.date)}</td>
+                <td className="sponsorship-status-cell">
+                  <span className="sponsorship-status">
+                    <i
+                      className="booking-dot"
+                      aria-hidden="true"
+                      style={{ '--day-colour': RAMADAN_COLOURS[info.status] }}
+                    />
+                    {ramadanStatus(kind, info.status)}
+                  </span>
                 </td>
-                <td>{info.names?.join(', ') || '—'}</td>
-                <td>
+                <td className="sponsorship-sponsor-cell">
+                  {info.names?.join(', ') || (info.status === 'confirmed' ? 'Anonymous' : '—')}
+                </td>
+                <td className="sponsorship-action-cell">
                   <button
                     type="button"
                     className="booking-button"

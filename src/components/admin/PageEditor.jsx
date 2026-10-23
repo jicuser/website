@@ -1,14 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ExternalLink,
-  Save,
-  Upload,
-  Smartphone,
-  Monitor,
-  ArrowUpRight,
-  Image as ImageIcon,
-} from 'lucide-react';
+import { ExternalLink, Save, Upload, Smartphone, Monitor, ArrowUpRight } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { createImageUploader } from '@/lib/imageUpload';
 import { useContent } from '@/context/ContentContext';
@@ -24,6 +16,8 @@ import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
 import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 import PageNavigator from '@/components/admin/PageNavigator';
+import HallDetailsEditor from '@/features/content/HallDetailsEditor';
+import '@/styles/page-editor.css';
 
 export default function PageEditor({
   initialPath = '/',
@@ -40,6 +34,12 @@ export default function PageEditor({
   const [dirty, setDirty] = useState(false);
   const [mobile, setMobile] = useState(true);
   const [revision, setRevision] = useState(0);
+  const [previewPane, setPreviewPane] = useState(false);
+  const [sectionPreview, setSectionPreview] = useState(null);
+  const [extraContent, setExtraContent] = useState({});
+  const frame = useRef(null);
+  const previewBox = useRef(null);
+  const [previewWidth, setPreviewWidth] = useState(600);
   const [pendingImage, setPendingImage] = useState(null);
   const [pendingPreview, setPendingPreview] = useState('');
   const previewUrlRef = useRef('');
@@ -47,6 +47,50 @@ export default function PageEditor({
   const { saving: workspaceSaving } = useAdminSave();
   const page = EDITABLE_PAGES.find((item) => item.path === selected);
   const additionalContent = supplementalContentPaths.has(selected);
+  const shownImage = pendingPreview || draft.image || '';
+  const postPreview = useCallback(() => {
+    if (loading) return;
+    frame.current?.contentWindow?.postMessage(
+      {
+        type: 'jic-page-preview',
+        path: selected,
+        content: {
+          [pageKey(selected)]: JSON.stringify({ ...draft, image: shownImage }),
+          ...extraContent,
+        },
+        sections: sectionPreview,
+      },
+      window.location.origin,
+    );
+  }, [loading, selected, draft, shownImage, extraContent, sectionPreview]);
+  useEffect(() => {
+    const timer = window.setTimeout(postPreview, 120);
+    return () => window.clearTimeout(timer);
+  }, [postPreview]);
+  useEffect(() => {
+    const ready = (event) => {
+      if (
+        event.origin === window.location.origin &&
+        event.source === frame.current?.contentWindow &&
+        event.data?.type === 'jic-page-preview-ready'
+      )
+        postPreview();
+    };
+    window.addEventListener('message', ready);
+    return () => window.removeEventListener('message', ready);
+  }, [postPreview]);
+  const previewHall = useCallback(
+    (value) => setExtraContent({ hall_details: JSON.stringify(value) }),
+    [],
+  );
+  useEffect(() => {
+    if (!previewBox.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry.contentRect.width > 0) setPreviewWidth(entry.contentRect.width);
+    });
+    observer.observe(previewBox.current);
+    return () => observer.disconnect();
+  }, []);
 
   const clearPendingPreview = useCallback(() => {
     if (previewUrlRef.current) {
@@ -199,8 +243,6 @@ export default function PageEditor({
     change('image', '');
   };
 
-  const shownImage = pendingPreview || draft.image || '';
-
   return (
     <div className="admin-workspace">
       {!workspace && (
@@ -230,151 +272,166 @@ export default function PageEditor({
           />
         )}
 
-        <div className="admin-page-main">
-          <section className="admin-panel">
-            <div className="admin-heading">
-              <div>
-                <h3>{page.name}</h3>
-                <p>
-                  {additionalContent
-                    ? 'Add information below this page’s main content. Save to publish it on the website.'
-                    : 'Edit this page’s introduction. Save to publish your changes on the website.'}
-                </p>
-              </div>
-              <a href={selected} target="_blank" rel="noreferrer" className="admin-button">
-                Open page <ExternalLink size={15} />
-              </a>
-            </div>
-            {error && (
-              <div role="alert" className="admin-error">
-                {error}
-              </div>
-            )}
-            {message && (
-              <div role="status" className="admin-success">
-                {message}
-              </div>
-            )}
-            <fieldset disabled={busy || loading}>
-              <label>
-                {additionalContent ? 'Additional heading' : 'Page heading'}
-                <textarea
-                  rows="2"
-                  value={draft.title || ''}
-                  onChange={(event) => change('title', event.target.value)}
-                />
-              </label>
-              <label>
-                {additionalContent ? 'Additional information' : 'Introduction'}
-                <textarea
-                  rows="6"
-                  value={draft.body || ''}
-                  onChange={(event) => change('body', event.target.value)}
-                />
-              </label>
-              <label>
-                Picture URL
-                <input
-                  type="url"
-                  value={pendingImage ? '' : draft.image || ''}
-                  placeholder={pendingImage ? 'Picture selected' : 'https://…'}
-                  onChange={(event) => change('image', event.target.value)}
-                />
-              </label>
-              <div className="admin-actions">
-                <label className="admin-button">
-                  <Upload size={16} />
-                  Choose picture
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    hidden
-                    onChange={upload}
-                  />
-                </label>
-                {shownImage && (
-                  <button type="button" className="admin-button" onClick={removePicture}>
-                    Remove picture
-                  </button>
-                )}
-              </div>
-            </fieldset>
-            <div className="admin-actions">
-              <button
-                disabled={busy || loading || !dirty}
-                className="admin-button primary"
-                onClick={() => save().catch(() => {})}
-              >
-                <Save size={16} />
-                {busy ? 'Saving…' : 'Save page'}
-              </button>
-              <small>
-                {loading
-                  ? 'Loading…'
-                  : error
-                    ? 'Check the error above'
-                    : dirty
-                      ? 'Unsaved changes'
-                      : 'Up to date'}
-              </small>
-            </div>
-          </section>
-
-          {!inline && (
-            <section className="admin-panel">
-              <span className="admin-eyebrow">CONTENT PREVIEW · {dirty ? 'UNSAVED' : 'SAVED'}</span>
-              <article className="admin-draft-card">
-                {shownImage ? (
-                  <img src={shownImage} alt="Page picture preview" />
-                ) : (
-                  <div className="admin-picture-empty">
-                    <ImageIcon />
-                    <span>No picture</span>
-                  </div>
-                )}
-                <h2>{draft.title}</h2>
-                <p>{draft.body || ''}</p>
-              </article>
-            </section>
-          )}
-          <PageSectionsEditor
-            key={selected}
-            pagePath={selected}
-            onSaved={() => setRevision((current) => current + 1)}
-          />
-          {!inline && (
+        <div className={`page-editor-layout ${previewPane ? 'is-preview-pane' : ''}`}>
+          <nav className="page-editor-mobile-tabs" aria-label="Editor view">
+            <button
+              className="admin-button"
+              aria-pressed={!previewPane}
+              onClick={() => setPreviewPane(false)}
+            >
+              Edit page
+            </button>
+            <button
+              className="admin-button"
+              aria-pressed={previewPane}
+              onClick={() => setPreviewPane(true)}
+            >
+              Live preview
+            </button>
+          </nav>
+          <div className="page-editor-controls">
             <section className="admin-panel">
               <div className="admin-heading">
                 <div>
-                  <h3>Saved website preview</h3>
-                  {dirty && <p>Save your changes to update this preview.</p>}
+                  <h3>{page.name}</h3>
+                  <p>
+                    {additionalContent
+                      ? 'Add information below this page’s main content. Save to publish it on the website.'
+                      : 'Edit this page’s introduction. Save to publish your changes on the website.'}
+                  </p>
                 </div>
-                <div className="admin-actions">
-                  <button
-                    aria-label="Mobile preview"
-                    className={`admin-button ${mobile ? 'active' : ''}`}
-                    onClick={() => setMobile(true)}
-                  >
-                    <Smartphone size={17} />
-                  </button>
-                  <button
-                    aria-label="Desktop preview"
-                    className={`admin-button ${!mobile ? 'active' : ''}`}
-                    onClick={() => setMobile(false)}
-                  >
-                    <Monitor size={17} />
-                  </button>
-                </div>
+                <a href={selected} target="_blank" rel="noreferrer" className="admin-button">
+                  Open page <ExternalLink size={15} />
+                </a>
               </div>
-              <div className={`admin-site-preview ${mobile ? 'mobile' : ''}`}>
-                <iframe
-                  key={`${selected}-${revision}`}
-                  src={`${selected}${selected.includes('?') ? '&' : '?'}preview=1`}
-                  title={`${page.name} website preview`}
-                />
+              {error && (
+                <div role="alert" className="admin-error">
+                  {error}
+                </div>
+              )}
+              {message && (
+                <div role="status" className="admin-success">
+                  {message}
+                </div>
+              )}
+              <fieldset disabled={busy || loading}>
+                <label>
+                  {additionalContent ? 'Additional heading' : 'Page heading'}
+                  <textarea
+                    rows="2"
+                    value={draft.title || ''}
+                    onChange={(event) => change('title', event.target.value)}
+                  />
+                </label>
+                <label>
+                  {additionalContent ? 'Additional information' : 'Introduction'}
+                  <textarea
+                    rows="6"
+                    value={draft.body || ''}
+                    onChange={(event) => change('body', event.target.value)}
+                  />
+                </label>
+                <label>
+                  Picture URL
+                  <input
+                    type="url"
+                    value={pendingImage ? '' : draft.image || ''}
+                    placeholder={pendingImage ? 'Picture selected' : 'https://…'}
+                    onChange={(event) => change('image', event.target.value)}
+                  />
+                </label>
+                <div className="admin-actions">
+                  <label className="admin-button">
+                    <Upload size={16} />
+                    Choose picture
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      hidden
+                      onChange={upload}
+                    />
+                  </label>
+                  {shownImage && (
+                    <button type="button" className="admin-button" onClick={removePicture}>
+                      Remove picture
+                    </button>
+                  )}
+                </div>
+              </fieldset>
+              <div className="admin-actions">
+                <button
+                  disabled={busy || loading || !dirty}
+                  className="admin-button primary"
+                  onClick={() => save().catch(() => {})}
+                >
+                  <Save size={16} />
+                  {busy ? 'Saving…' : 'Save page'}
+                </button>
+                <small>
+                  {loading
+                    ? 'Loading…'
+                    : error
+                      ? 'Check the error above'
+                      : dirty
+                        ? 'Unsaved changes'
+                        : 'Up to date'}
+                </small>
               </div>
             </section>
-          )}
+
+            {selected === '/services/hall-booking' && <HallDetailsEditor onPreview={previewHall} />}
+            <PageSectionsEditor
+              key={selected}
+              pagePath={selected}
+              onSaved={() => setRevision((current) => current + 1)}
+              onPreview={setSectionPreview}
+            />
+          </div>
+          <aside className="page-editor-preview admin-panel" aria-label="Live website preview">
+            <div className="admin-heading">
+              <div>
+                <h3>Live preview</h3>
+                <p>Draft changes appear here. Save to publish.</p>
+              </div>
+              <div className="admin-actions">
+                <button
+                  aria-label="Mobile preview"
+                  className={`admin-button ${mobile ? 'active' : ''}`}
+                  onClick={() => setMobile(true)}
+                  aria-pressed={mobile}
+                >
+                  <Smartphone size={17} />
+                </button>
+                <button
+                  aria-label="Desktop preview"
+                  className={`admin-button ${!mobile ? 'active' : ''}`}
+                  onClick={() => setMobile(false)}
+                  aria-pressed={!mobile}
+                >
+                  <Monitor size={17} />
+                </button>
+              </div>
+            </div>
+            <div ref={previewBox} className={`admin-site-preview ${mobile ? 'mobile' : ''}`}>
+              <iframe
+                ref={frame}
+                onLoad={postPreview}
+                key={`${selected}-${revision}`}
+                src={`${selected}${selected.includes('?') ? '&' : '?'}preview=1`}
+                title={`${page.name} website preview`}
+                style={
+                  mobile
+                    ? undefined
+                    : {
+                        width: 1200,
+                        height: `${120000 / previewWidth}%`,
+                        transform: `scale(${previewWidth / 1200})`,
+                        transformOrigin: 'top left',
+                      }
+                }
+              />
+            </div>
+          </aside>
         </div>
       </div>
     </div>

@@ -23,9 +23,17 @@ export default function TvBoardPicker({ settings, screenId, onChange, disabled }
   const currentName =
     TV_BOARD_LAYOUTS.find((item) => item.id === active)?.name || current?.name || 'Default layout';
   const selected = TV_BOARD_LAYOUTS.find((item) => item.id === candidate);
+  const layoutSettings =
+    settings.everyday_display?.mode === 'fixed' &&
+    settings.everyday_display.fixed_scene === 'classic'
+      ? settings
+      : {
+          ...settings,
+          everyday_display: { ...settings.everyday_display, mode: 'fixed', fixed_scene: 'classic' },
+        };
   const previewSettings = candidate
-    ? { ...settings, display_layouts: withTvBoardLayout(settings, candidate) }
-    : settings;
+    ? { ...layoutSettings, display_layouts: withTvBoardLayout(settings, candidate) }
+    : layoutSettings;
   const showRestore = previous?.scope === scope;
   const canRestore = showRestore && canRestoreTvBoardLayout(settings, previous);
   const titleId = `tv-board-picker-title-${screenId}`;
@@ -82,7 +90,9 @@ export default function TvBoardPicker({ settings, screenId, onChange, disabled }
         role="group"
         aria-label="Prayer board layouts"
       >
-        {TV_BOARD_LAYOUTS.map((item) => (
+        {TV_BOARD_LAYOUTS.filter((item) =>
+          ['classic', 'countdown', 'noticeboard'].includes(item.id),
+        ).map((item) => (
           <button
             key={item.id}
             className="tv-design-choice"
@@ -188,7 +198,7 @@ export default function TvBoardPicker({ settings, screenId, onChange, disabled }
                 <TvPreview
                   screenId={screenId}
                   label="Current draft"
-                  settings={settings}
+                  settings={layoutSettings}
                   previewState={moment}
                 />
               </div>

@@ -12,8 +12,8 @@ import '@/styles/admin-overview.css';
 const GROUP_HELP = {
   'Forms & requests': 'Contact Us, registrations and applications in one Forms area.',
   'Website content': 'Edit pages, notices and posters shown on the website.',
-  'Prayer & displays': 'Prayer timetable, screen layouts and website livestream.',
-  'Centre operations': 'Look after payments and community fundraising.',
+  'Bookings & Ramadan': 'Manage hall availability and meal sponsorships.',
+  'Finance & fundraising': 'Look after payments and community fundraising.',
   'Staff & records': 'Manage staff access and review centre records.',
 };
 
@@ -231,24 +231,29 @@ export default function AdminOverview({ onChoose, icons }) {
           <div className="admin-tool-list">{filtered.map(renderTool)}</div>
         ) : (
           ADMIN_GROUPS.filter((group) => filtered.some((task) => task.group === group)).map(
-            (group) => (
-              <details
-                className="admin-tool-group"
-                key={group}
-                open={Boolean(search.trim()) || tasks.length <= 3}
-              >
-                <summary className="admin-tool-group-heading">
-                  <span>
-                    <strong>{group}</strong>
-                    <span>{GROUP_HELP[group]}</span>
-                  </span>
-                  <ChevronDown size={18} aria-hidden="true" />
-                </summary>
-                <div className="admin-tool-list">
+            (group) =>
+              filtered.filter((task) => task.group === group).length === 1 ? (
+                <div className="admin-tool-list" key={group}>
                   {filtered.filter((task) => task.group === group).map(renderTool)}
                 </div>
-              </details>
-            ),
+              ) : (
+                <details
+                  className="admin-tool-group"
+                  key={group}
+                  open={Boolean(search.trim()) || tasks.length <= 3}
+                >
+                  <summary className="admin-tool-group-heading">
+                    <span>
+                      <strong>{group}</strong>
+                      <span>{GROUP_HELP[group]}</span>
+                    </span>
+                    <ChevronDown size={18} aria-hidden="true" />
+                  </summary>
+                  <div className="admin-tool-list">
+                    {filtered.filter((task) => task.group === group).map(renderTool)}
+                  </div>
+                </details>
+              ),
           )
         )}
         {!filtered.length && (

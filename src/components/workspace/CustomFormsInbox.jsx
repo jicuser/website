@@ -16,7 +16,7 @@ export default function CustomFormsInbox({
 }) {
   const [filters, setFilters] = useState({
     search: '',
-    kind: formId ? 'custom' : initialKind,
+    kind: formId ? '' : initialKind,
     form: formId ? `form:${formId}` : '',
     status: 'new',
     from: '',
@@ -209,18 +209,20 @@ export default function CustomFormsInbox({
               onChange={(event) =>
                 patch(
                   event.target.value.startsWith('form:')
-                    ? { form: event.target.value, kind: 'custom' }
+                    ? { form: event.target.value, kind: '' }
                     : { kind: event.target.value, form: '' },
                 )
               }
             >
               <option value="">All forms</option>
               {definitions.length > 0 && <option value="custom">Created forms</option>}
-              {permittedBuiltInForms(auth).map(({ kind, title }) => (
-                <option key={kind} value={kind}>
-                  {title}
-                </option>
-              ))}
+              {permittedBuiltInForms(auth)
+                .filter(({ kind }) => !definitions.some((form) => form.built_in_kind === kind))
+                .map(({ kind, title }) => (
+                  <option key={kind} value={kind}>
+                    {title}
+                  </option>
+                ))}
               {definitions.map((form) => (
                 <option key={form.id} value={`form:${form.id}`}>
                   {form.title}
@@ -315,7 +317,7 @@ export default function CustomFormsInbox({
                   setSearch('');
                   patch({
                     search: '',
-                    kind: formId ? 'custom' : '',
+                    kind: '',
                     form: formId ? `form:${formId}` : '',
                     status: 'new',
                     from: '',
@@ -336,8 +338,10 @@ export default function CustomFormsInbox({
         )
       ) : (
         result.rows.map((row) => {
-          const canWork =
-            row.kind === 'custom'
+          const builtIn = definitions.find((form) => form.id === row.custom_form_id)?.built_in_kind;
+          const canWork = builtIn
+            ? auth.isOwner || auth.can(`forms_${builtIn}`)
+            : row.kind === 'custom'
               ? auth.isOwner ||
                 auth.can('forms_manage') ||
                 auth.can('forms_custom') ||

@@ -78,7 +78,7 @@ for (const [width, theme] of [
     const advancedTab = page.getByRole('tab', { name: 'Advanced', exact: true });
     await expect(designTab).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByRole('combobox', { name: 'Screen shape', exact: true })).toBeHidden();
-    await expect(page.getByRole('heading', { name: 'Scheduled scenes' })).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'Scheduled overrides' })).toBeHidden();
     await expect(page.getByRole('group', { name: 'TV colour schemes' })).toBeHidden();
     await expect(page.getByRole('region', { name: 'Choose a starting layout' })).toBeHidden();
     await expect(
@@ -131,7 +131,7 @@ for (const [width, theme] of [
     await advancedTab.click();
     await expect(page.getByRole('combobox', { name: 'Screen shape', exact: true })).toBeVisible();
     await expect(page.getByLabel('Display name', { exact: true })).toHaveValue('Before prayer');
-    await expect(page.getByRole('heading', { name: 'Scheduled scenes' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Scheduled overrides' })).toBeVisible();
     await designTab.focus();
     await designTab.press('ArrowRight');
     await expect(contentTab).toBeFocused();

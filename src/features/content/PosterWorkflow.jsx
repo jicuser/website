@@ -182,7 +182,7 @@ export default function PosterWorkflow({
               <strong>Centre screens</strong>
               <p>
                 Website locations do not change screen playlists. Choose this poster for each screen
-                in Screens & layouts.
+                in TV screens.
               </p>
               {can('tv') && (
                 <Link className="admin-button" to="/admin?section=tv" onClick={guardFormNavigation}>

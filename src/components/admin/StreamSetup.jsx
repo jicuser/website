@@ -16,6 +16,16 @@ import BackgroundSettings from '@/features/displays/BackgroundSettings';
 import DeviceInputs from '@/features/displays/DeviceInputs';
 import TvConnections from '@/features/displays/TvConnections';
 import SessionOutput from '@/features/displays/SessionOutput';
+import TvLayoutThumbnail from '@/features/displays/TvLayoutThumbnail';
+import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
+import { tvAutomaticState } from '@/lib/tvAutomaticState';
+import {
+  activeTvScene,
+  normaliseTvSettings,
+  tvAutomaticScene,
+} from '../../../supabase/functions/_shared/tv.js';
+import '@/styles/tv-admin.css';
+import '@/styles/tv-design-picker.css';
 
 // Portal targets contain controls only. Capture controllers stay mounted outside
 // the dialog, so closing a source editor does not stop a live camera or screen.
@@ -29,6 +39,13 @@ function ScreenOverview({ onOpen }) {
   const [states, setStates] = useState({});
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [now, setNow] = useState(() => new Date());
+  const prayers = usePrayerTimes({ includeTomorrow: true });
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const load = useCallback(async (signal) => {
     setLoading(true);
@@ -62,7 +79,7 @@ function ScreenOverview({ onOpen }) {
           <h2>Choose a screen</h2>
           <p>
             {task === 'layout'
-              ? 'Update a layout, prayer times or posters.'
+              ? 'Choose a screen, then keep one scene or rotate content.'
               : 'Show a camera, video or presentation on a hall screen.'}
           </p>
         </div>
@@ -74,8 +91,8 @@ function ScreenOverview({ onOpen }) {
         <button type="button" aria-pressed={task === 'layout'} onClick={() => setTask('layout')}>
           <Monitor size={22} aria-hidden="true" />
           <span>
-            <strong>Screen layouts</strong>
-            <small>Prayer times, posters & notices</small>
+            <strong>Automatic displays</strong>
+            <small>Timetable, notices & sponsorship boards</small>
           </span>
         </button>
         <button
@@ -101,6 +118,19 @@ function ScreenOverview({ onOpen }) {
             const state = states[screen.id];
             const data = state?.data;
             const presenting = Boolean(data?.presentation);
+            const settings = data ? normaliseTvSettings(data.settings) : null;
+            const automatic = settings
+              ? tvAutomaticScene(settings, now, {
+                  preset: tvAutomaticState(settings, now, prayers, screen.id).preset,
+                })
+              : null;
+            const content = presenting
+              ? {
+                  name: activeTvScene(settings)?.name || 'Presentation',
+                  scene: activeTvScene(settings),
+                  source: 'presentation',
+                }
+              : automatic;
             return (
               <article className="admin-panel tv-screen-overview-card" key={screen.id}>
                 <div className="tv-screen-overview-title">
@@ -118,6 +148,29 @@ function ScreenOverview({ onOpen }) {
                   </div>
                   {state?.error && <small>Could not read live status</small>}
                 </div>
+                {content?.scene && (
+                  <figure className="tv-screen-miniature">
+                    <TvLayoutThumbnail
+                      scene={content.scene}
+                      orientation={settings.display_orientation}
+                    />
+                    <figcaption>
+                      <strong>{content.name}</strong>
+                      <span>
+                        {content.source === 'rotation'
+                          ? `Rotation · scene ${content.rotation_index + 1} of ${settings.everyday_display.rotation.length}`
+                          : content.source === 'scheduled'
+                            ? 'Timed override'
+                            : content.source === 'automatic'
+                              ? 'Automatic prayer display'
+                              : content.source === 'presentation'
+                                ? 'Live presentation layout'
+                                : 'Fixed scene'}
+                      </span>
+                      <small>Saved content preview</small>
+                    </figcaption>
+                  </figure>
+                )}
                 {presenting && <p>Automatic displays return when the presentation ends.</p>}
                 <div className="admin-actions">
                   {task === 'layout' && (

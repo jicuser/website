@@ -13,6 +13,15 @@ export function validateSchema(schema) {
     if (!object(field) || !/^[a-z][a-z0-9_]{0,39}$/.test(field.id ?? '') || prior.has(field.id) || !types.has(field.type) || typeof field.label !== 'string' || field.label.trim().length < 1 || field.label.length > 160 || (field.required !== undefined && typeof field.required !== 'boolean')) fail('Choose unique field IDs, types and labels.');
     if (['file', 'image'].includes(field.type) && ++uploads > 5) fail('Use at most five upload fields.');
     const result = { id: field.id, type: field.type, label: field.label.trim(), required: field.required === true };
+    for (const key of ['minimum', 'maximum']) if (field[key] !== undefined) {
+      if (field.type !== 'number' || typeof field[key] !== 'number' || !Number.isFinite(field[key]) || Math.abs(field[key]) > 1e12) fail('Number limits must be valid numbers.');
+      result[key] = field[key];
+    }
+    if (field.integer !== undefined) {
+      if (field.type !== 'number' || typeof field.integer !== 'boolean') fail('Choose whether the answer is a whole number.');
+      result.integer = field.integer;
+    }
+    if (result.minimum !== undefined && result.maximum !== undefined && result.minimum > result.maximum) fail('The minimum cannot exceed the maximum.');
     for (const [key, limit] of [['help', 300], ['placeholder', 160]]) {
       if (field[key] !== undefined) {
         if (typeof field[key] !== 'string' || field[key].length > limit) fail(`Shorten the ${key === 'help' ? 'help text' : 'example answer'} for ${result.label}.`);
@@ -25,8 +34,12 @@ export function validateSchema(schema) {
     }
     if (field.show_when != null) {
       const condition = field.show_when, controlling = prior.get(condition.field);
-      if (!object(condition) || !controlling || controlling.show_when || ['file', 'image', 'multiselect'].includes(controlling.type) || !['equals', 'not_equals'].includes(condition.operator) || !['string', 'number', 'boolean'].includes(typeof condition.value) || (typeof condition.value === 'number' && !Number.isFinite(condition.value))) fail('Visibility must use an earlier field without its own condition.');
+      if (!object(condition) || !controlling || controlling.show_when || ['file', 'image', 'multiselect'].includes(controlling.type) || !['equals', 'not_equals', 'between'].includes(condition.operator) || !['string', 'number', 'boolean'].includes(typeof condition.value) || (typeof condition.value === 'number' && !Number.isFinite(condition.value))) fail('Visibility must use an earlier field without its own condition.');
       result.show_when = { field: condition.field, operator: condition.operator, value: condition.value };
+      if (condition.operator === 'between') {
+        if (controlling.type !== 'number' || typeof condition.value !== 'number' || typeof condition.maximum !== 'number' || !Number.isFinite(condition.maximum) || condition.maximum < condition.value || Math.abs(condition.value) > 1e12 || Math.abs(condition.maximum) > 1e12) fail('A range condition needs a number question and ordered number limits.');
+        result.show_when.maximum = condition.maximum;
+      }
     }
     prior.set(field.id, result);
     return result;
@@ -36,6 +49,7 @@ export function validateSchema(schema) {
 
 export function isFieldVisible(field, answers = {}) {
   if (!field.show_when) return true;
+  if (field.show_when.operator === 'between') return typeof answers[field.show_when.field] === 'number' && answers[field.show_when.field] >= field.show_when.value && answers[field.show_when.field] <= field.show_when.maximum;
   const equal = Object.hasOwn(answers, field.show_when.field) && answers[field.show_when.field] === field.show_when.value;
   return field.show_when.operator === 'equals' ? equal : !equal;
 }
@@ -58,7 +72,7 @@ export function validateAnswers(schema, answers) {
     const invalid = () => fail(`Check ${field.label}.`);
     switch (field.type) {
       case 'checkbox': if (typeof value !== 'boolean') invalid(); break;
-      case 'number': if (typeof value !== 'number' || !Number.isFinite(value) || Math.abs(value) > 1e12) invalid(); break;
+      case 'number': if (typeof value !== 'number' || !Number.isFinite(value) || Math.abs(value) > 1e12 || (field.integer && !Number.isInteger(value)) || (field.minimum !== undefined && value < field.minimum) || (field.maximum !== undefined && value > field.maximum)) invalid(); break;
       case 'multiselect':
         if (!Array.isArray(value) || value.length > 50 || new Set(value).size !== value.length || value.some((item) => !field.options.includes(item))) invalid();
         break;

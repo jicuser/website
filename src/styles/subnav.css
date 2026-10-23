@@ -12,9 +12,48 @@
 .jic-section-location a {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 36px;
   color: var(--jic-text);
   font-weight: 650;
+}
+.jic-section-picker {
+  position: relative;
+  margin: 2px 8px 8px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+}
+.jic-section-picker > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 650;
+  list-style: none;
+}
+.jic-section-picker > summary::-webkit-details-marker {
+  display: none;
+}
+.jic-section-picker[open] > summary {
+  border-bottom: 1px solid var(--jic-border);
+}
+.jic-section-picker nav {
+  display: grid;
+  padding: 4px;
+}
+.jic-section-picker nav a {
+  padding: 10px;
+  min-height: 44px;
+  border-radius: 8px;
+}
+.jic-section-picker nav a[aria-current] {
+  color: var(--jic-gold);
+  font-weight: 700;
+  background: var(--jic-bg-secondary);
 }
 .jic-section-location a:hover {
   text-decoration: underline;
@@ -67,11 +106,19 @@
   border-color: var(--jic-gold);
 }
 @media (min-width: 768px) {
+  .jic-section-picker {
+    display: none;
+  }
   /* Auto margins centre links only when the complete row fits. */
   .jic-unified-subnav > :first-child {
     margin-inline-start: auto;
   }
   .jic-unified-subnav > :last-child {
     margin-inline-end: auto;
+  }
+}
+@media (max-width: 767px) {
+  .jic-unified-subnav {
+    display: none;
   }
 }

@@ -2,9 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PageMetadata from '@/components/shell/PageMetadata';
 import { supabase } from '@/lib/supabaseClient';
-import { PAGE_PLACEMENTS, pageProblem } from '@/lib/pageContent';
+import { PAGE_PLACEMENTS } from '@/lib/pageContent';
 import { programmeRegistrationPath } from '@/lib/programmeJourney';
 import { useRegisterProgrammeJourney } from '@/context/ProgrammeJourneyContext';
+
+function pageImageUrl(value) {
+  if (
+    typeof value !== 'string' ||
+    !value ||
+    value.length > 2000 ||
+    /[\s\\]/.test(value) ||
+    value.startsWith('//')
+  )
+    return '';
+  try {
+    const url = new URL(value, 'https://site.invalid');
+    return (value.startsWith('/') || value.startsWith('https://')) &&
+      url.protocol === 'https:' &&
+      !url.username &&
+      !url.password
+      ? value
+      : '';
+  } catch {
+    return '';
+  }
+}
 
 export default function ContentPage() {
   const { slug } = useParams();
@@ -14,7 +36,22 @@ export default function ContentPage() {
 function Page({ slug }) {
   const [state, setState] = useState({ page: null, loading: true, error: '' });
   const [retry, setRetry] = useState(0);
-  useRegisterProgrammeJourney(state.page);
+  const isPreview =
+    window.parent !== window && new URLSearchParams(window.location.search).get('preview') === '1';
+  const readPreview = () =>
+    isPreview && window.__jicPagePreview?.path === window.location.pathname
+      ? window.__jicPagePreview.page || null
+      : null;
+  const [draftPreview, setDraftPreview] = useState(readPreview);
+  const [previewLink, setPreviewLink] = useState('');
+  useRegisterProgrammeJourney(isPreview ? null : state.page);
+  useEffect(() => {
+    if (!isPreview) return;
+    const refresh = () => setDraftPreview(readPreview());
+    refresh();
+    window.addEventListener('jic-page-preview', refresh);
+    return () => window.removeEventListener('jic-page-preview', refresh);
+  }, [isPreview]);
   useEffect(() => {
     const controller = new AbortController();
     setState({ page: null, loading: true, error: '' });
@@ -39,13 +76,13 @@ function Page({ slug }) {
       });
     return () => controller.abort();
   }, [slug, retry]);
-  if (state.loading)
+  if (!draftPreview && state.loading)
     return (
       <p role="status" className="mx-auto max-w-5xl p-6">
         Loading details…
       </p>
     );
-  if (state.error)
+  if (!draftPreview && state.error)
     return (
       <section className="mx-auto max-w-5xl p-6">
         <p role="alert">{state.error}</p>
@@ -54,7 +91,7 @@ function Page({ slug }) {
         </button>
       </section>
     );
-  const page = state.page;
+  const page = draftPreview || state.page;
   if (!page)
     return (
       <section className="mx-auto max-w-5xl p-6">
@@ -67,29 +104,43 @@ function Page({ slug }) {
     page.registration
   ];
   const registrationPath = programmeRegistrationPath(page);
+  const image = pageImageUrl(page.image_url);
   return (
-    <article className="mx-auto max-w-5xl px-4 py-8">
+    <article
+      className="mx-auto max-w-5xl px-4 py-8"
+      onClickCapture={
+        isPreview
+          ? (event) => {
+              const anchor = event.target.closest('a');
+              if (anchor) {
+                event.preventDefault();
+                setPreviewLink(anchor.getAttribute('href') || '');
+              }
+            }
+          : undefined
+      }
+    >
       <PageMetadata
         title={page.title}
         description={`${page.schedule || ''} ${page.body || ''}`}
-        image={page.image_url}
-        noindex={false}
+        image={image}
+        noindex={isPreview}
       />
       <Link to={page.placement}>
         ← {PAGE_PLACEMENTS.find(([path]) => path === page.placement)?.[1] || 'Back'}
       </Link>
       <h1 className="text-2xl md:text-4xl font-semibold mt-5 mb-3">{page.title}</h1>
+      {isPreview && previewLink && (
+        <p role="status" className="mb-4 rounded-xl border border-border p-3 text-sm">
+          Preview link: {previewLink}. Open the saved website page to follow links.
+        </p>
+      )}
       {page.schedule && <p className="text-primary font-medium mb-6">{page.schedule}</p>}
       <div className="grid gap-6 md:grid-cols-2">
-        {page.image_url && !pageProblem(page) && (
-          <a
-            href={page.image_url}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`Open ${page.title} poster`}
-          >
+        {image && (
+          <a href={image} target="_blank" rel="noreferrer" aria-label={`Open ${page.title} poster`}>
             <img
-              src={page.image_url}
+              src={image}
               alt={`${page.title} poster`}
               className="w-full max-h-[75vh] object-contain rounded-xl"
             />

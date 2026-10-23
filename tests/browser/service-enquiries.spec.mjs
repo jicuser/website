@@ -1,17 +1,23 @@
 import { test, expect } from '@playwright/test';
+import { CONTACT_FORM, CONTACT_RECEIPT } from './helpers/builtInForms.mjs';
 
 test('service guides explain the journey and accept an enquiry without an account', async ({
   page,
-}, testInfo) => {
+}) => {
   const writes = [],
     errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
   await page.route('**/preview-api/**', async (route) => {
     const path = new URL(route.request().url()).pathname;
-    if (path.endsWith('/functions/v1/submit-form')) {
+    if (path.endsWith('/rpc/get_public_form'))
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify(CONTACT_FORM) });
+    if (path.endsWith('/functions/v1/custom-forms')) {
       writes.push(route.request().postDataJSON());
-      return route.fulfill({ contentType: 'application/json', body: '{"ok":true}' });
+      return route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, id: CONTACT_RECEIPT }),
+      });
     }
     return route.fulfill({ contentType: 'application/json', body: '[]' });
   });
@@ -30,18 +36,16 @@ test('service guides explain the journey and accept an enquiry without an accoun
     );
   }
   await page.goto('/funerals');
-  await page.locator('#name').fill('Example family');
-  await page.locator('#email').fill('family@example.test');
-  await page.locator('#question').fill('Please contact us about Janazah arrangements.');
+  await page.getByLabel('Name', { exact: false }).fill('Example family');
+  await page.getByLabel('Email address', { exact: false }).fill('family@example.test');
+  await page
+    .getByLabel('Your message', { exact: false })
+    .fill('Please contact us about Janazah arrangements.');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Enquiry received' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
   expect(writes).toHaveLength(1);
-  expect(writes[0].kind).toBe('contact');
-  expect(writes[0].payload.question).toContain('Janazah / funeral support');
-  await page.screenshot({
-    path: testInfo.outputPath('janazah-journey-mobile.png'),
-    fullPage: true,
-  });
+  expect(writes[0].slug).toBe('contact-us');
+  expect(writes[0].answers.question).toContain('Janazah / funeral support');
   expect(errors).toEqual([]);
 });
 

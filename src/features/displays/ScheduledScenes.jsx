@@ -122,8 +122,11 @@ export default function ScheduledScenes({ form, update, screenId, disabled = fal
     <section className="tv-scheduled-scenes">
       <div className="admin-heading">
         <div>
-          <h3>Scheduled scenes</h3>
-          <p>Optional screens that replace Standby at chosen days and times. Prayer screens still take priority.</p>
+          <h3>Scheduled overrides</h3>
+          <p>
+            Optional scenes that replace everyday content at chosen days and times. Prayer screens
+            still take priority.
+          </p>
         </div>
         <button
           type="button"
@@ -131,12 +134,12 @@ export default function ScheduledScenes({ form, update, screenId, disabled = fal
           disabled={scenes.length >= 12}
           onClick={addScene}
         >
-          + New scene
+          + Add timed override
         </button>
       </div>
 
       {scenes.length > 0 && (
-        <nav className="tv-custom-scene-tabs" aria-label="Scheduled TV scenes">
+        <nav className="tv-custom-scene-tabs" aria-label="Scheduled TV overrides">
           {scenes.map((item) => (
             <button
               type="button"
@@ -153,7 +156,9 @@ export default function ScheduledScenes({ form, update, screenId, disabled = fal
       )}
 
       {!scene ? (
-        <p className="workspace-meta">No extra scheduled scenes. Standby and the automatic prayer scenes continue as normal.</p>
+        <p className="workspace-meta">
+          No timed overrides. Everyday content and the automatic prayer scenes continue as normal.
+        </p>
       ) : (
         <>
           <div className="tv-scene-rule-card">
@@ -251,7 +256,9 @@ export default function ScheduledScenes({ form, update, screenId, disabled = fal
                 Delete scene
               </button>
             </div>
-            <p className="workspace-meta">If two scheduled scenes match, the first one in this list is shown.</p>
+            <p className="workspace-meta">
+              If two scheduled scenes match, the first one in this list is shown.
+            </p>
           </div>
 
           <TvDisplayLayoutEditor

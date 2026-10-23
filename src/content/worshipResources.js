@@ -17,5 +17,7 @@ export const WORSHIP_RESOURCES = {
     pdf: 'https://data2.dawateislami.net/Data/Books/Download/en/pdf/2006/62-1.pdf?fn=method-of-funeral-salah',
     source: 'https://www.dawateislami.net/bookslibrary/en/method-of-funeral-salah',
     urdu: 'https://www.dawateislami.net/bookslibrary/ur/namaz-e-janaza-ka-tariqa',
+    urduPdf:
+      'https://data2.dawateislami.net/Data/Books/Download/ur/pdf/2014/62-1.pdf?fn=namaz-e-janaza-ka-tariqa',
   },
 };

@@ -1,14 +1,12 @@
-import React, { lazy, Suspense, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Pencil, LayoutDashboard, LogOut, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { EDITABLE_PAGES } from '@/content/editablePages';
-const WebsitePageEditor = lazy(() => import('@/components/admin/WebsitePageEditor'));
 
 export default function AdminBar() {
   const { can, signOut } = useAuth();
   const { pathname } = useLocation();
-  const [editing, setEditing] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState('');
   const editable = can('content') && EDITABLE_PAGES.some((page) => page.path === pathname);
@@ -17,7 +15,6 @@ export default function AdminBar() {
     setError('');
     try {
       await signOut();
-      setEditing(false);
     } catch (err) {
       setError(err.message || 'Could not sign out. Please try again.');
     } finally {
@@ -32,10 +29,10 @@ export default function AdminBar() {
           Admin
         </Link>
         {editable && (
-          <button type="button" onClick={() => setEditing(true)} disabled={signingOut}>
+          <Link to={`/admin?section=content&page=${encodeURIComponent(pathname)}&mode=edit`}>
             <Pencil size={17} />
             Edit page
-          </button>
+          </Link>
         )}
         {pathname === '/team' && can('team') && (
           <Link to="/admin?section=team">
@@ -53,17 +50,6 @@ export default function AdminBar() {
           </p>
         )}
       </div>
-      {editing && (
-        <Suspense
-          fallback={
-            <p className="jic-admin-bar" role="status">
-              Opening editor…
-            </p>
-          }
-        >
-          <WebsitePageEditor path={pathname} onClose={() => setEditing(false)} />
-        </Suspense>
-      )}
     </>
   );
 }

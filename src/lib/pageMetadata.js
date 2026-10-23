@@ -110,10 +110,11 @@ export function pageMetadata(pathname, overrides = {}) {
         : DEFAULT_DESCRIPTION),
     url: `${SITE_ORIGIN}${path === '/' ? '/' : path}`,
     image,
-    imageAlt: overrides.image
-      ? name || SITE.name
-      : 'Jamatia Islamic Centre, Woodlands Road, Birmingham',
-    noindex: overrides.noindex ?? (isPrivatePage(path) || !known),
+    imageAlt:
+      image !== PREVIEW_IMAGE
+        ? name || SITE.name
+        : 'Jamatia Islamic Centre, Woodlands Road, Birmingham',
+    noindex: isPrivatePage(path) || (overrides.noindex ?? !known),
   };
 }
 

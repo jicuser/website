@@ -29,9 +29,9 @@ import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { useProgrammeJourney } from '@/context/ProgrammeJourneyContext';
+import { usePublishedPages } from '@/context/PublishedPagesContext';
 import PrayerTimeBar from '@/components/shell/PrayerTimeBar';
 import FloatingPageTools from '@/components/shell/FloatingPageTools';
-import DesktopNavigation from '@/components/shell/DesktopNavigation';
 import MobileInfoBanner from '@/components/shell/MobileInfoBanner';
 import { cn } from '@/lib/utils';
 import {
@@ -47,6 +47,7 @@ import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMedi
 
 const DonationDialog = lazy(() => import('@/components/donations/DonationDialog'));
 const RadioLiveNotice = lazy(() => import('./RadioLiveNotice'));
+const DesktopNavigation = lazy(() => import('./DesktopNavigation'));
 
 const compactPrayerTime = (value) => {
   const formatted = displayTime(value);
@@ -67,7 +68,8 @@ export default function UnifiedHeader() {
   const { getContent } = useContent();
   const { user } = useAuth();
   const accountLabel = user ? 'My portal' : 'Portal login';
-  const menuGroups = visibleNavigation(PUBLIC_MENU_GROUPS, getContent);
+  const addedPages = usePublishedPages();
+  const menuGroups = visibleNavigation(PUBLIC_MENU_GROUPS, getContent, addedPages);
   const directoryGroups = compactMenuNavigation(menuGroups);
   const { pathname, key: routeKey } = useLocation();
   const alertSetup = pathname === '/prayer-times/reminders';
@@ -91,6 +93,13 @@ export default function UnifiedHeader() {
     alertSetup,
   );
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
+  const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1200px)').matches);
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 1200px)');
+    const update = () => setDesktop(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
   const programme = useProgrammeJourney();
   const originalNavigation = useMemo(
     () => activeNavigation(programme?.placement || pathname),
@@ -99,12 +108,23 @@ export default function UnifiedHeader() {
   const movedSection = menuGroups.find(
     (group) => group.path === getContent(pageSectionKey(pathname), ''),
   );
-  const navigation = movedSection
+  const configuredSection =
+    movedSection || menuGroups.find((group) => group.path === originalNavigation?.path);
+  const configuredPrimary = menuGroups.find(
+    (group) => group.path === originalNavigation?.primaryPath,
+  );
+  const navigation = configuredSection
     ? {
-        ...movedSection,
-        primaryPath: movedSection.path,
-        primaryName: movedSection.name,
-        current: movedSection.children.find((page) => page.path === pathname),
+        ...originalNavigation,
+        ...configuredSection,
+        primaryPath:
+          movedSection?.path || originalNavigation?.primaryPath || configuredSection.path,
+        primaryName: movedSection?.name || configuredPrimary?.name || configuredSection.name,
+        current:
+          configuredSection.children.find((page) => page.path === pathname) ||
+          configuredSection.children.find(
+            (page) => page.path === originalNavigation?.current?.path,
+          ),
       }
     : originalNavigation;
   const subtabs = (navigation?.children || []).filter((page) =>
@@ -326,7 +346,11 @@ export default function UnifiedHeader() {
                 </button>
               </nav>
             </div>
-            <DesktopNavigation navigation={navigation} groups={directoryGroups} />
+            {desktop && (
+              <Suspense fallback={null}>
+                <DesktopNavigation navigation={navigation} groups={directoryGroups} />
+              </Suspense>
+            )}
             <div className="jic-free-actions-slot">
               <button
                 type="button"
@@ -375,6 +399,25 @@ export default function UnifiedHeader() {
                 </>
               )}
             </nav>
+          )}
+          {subtabs.length > 0 && !alertSetup && pathname !== '/get-involved' && (
+            <details key={pathname} className="jic-section-picker">
+              <summary>
+                <span>{navigation.current?.name || `Browse ${navigation.name}`}</span>
+                <ChevronDown size={16} aria-hidden="true" />
+              </summary>
+              <nav aria-label={`${navigation.name} pages`}>
+                {subtabs.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    aria-current={item.path === selected ? 'page' : undefined}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </nav>
+            </details>
           )}
           {subtabs.length > 0 && !alertSetup && pathname !== '/get-involved' && (
             <nav

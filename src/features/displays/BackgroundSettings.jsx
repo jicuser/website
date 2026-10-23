@@ -5,6 +5,7 @@ import ScheduledScenes from './ScheduledScenes';
 import TvBoardPicker from './TvBoardPicker';
 import TvThemePicker from './TvThemePicker';
 import TvDraftReview from './TvDraftReview';
+import TvEverydaySettings from './TvEverydaySettings';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { tvPresetLabel, tvEditorSections, TV_PRESET_DESCRIPTIONS } from '@/lib/tvEditorLabels';
@@ -38,6 +39,24 @@ export default function BackgroundSettings({
     if (inFlight.current) return;
     setMessage('');
     dispatch({ type: 'edit', key, value });
+    if (key === 'display_layouts') {
+      // Replacing or deleting timetable items also removes their fixed references.
+      dispatch({
+        type: 'edit',
+        key: 'everyday_display',
+        value: {
+          ...form.everyday_display,
+          persistent_layer_ids: Object.fromEntries(
+            ['landscape', 'portrait'].map((orientation) => [
+              orientation,
+              form.everyday_display.persistent_layer_ids[orientation].filter((id) =>
+                value?.[orientation]?.standby?.layers.some((layer) => layer.id === id),
+              ),
+            ]),
+          ),
+        },
+      });
+    }
   };
   const sections = tvEditorSections(screenId, form.preset_names);
   const presetName = tvPresetLabel(preset, form.preset_names);
@@ -136,6 +155,14 @@ export default function BackgroundSettings({
       )}
       <fieldset className="tv-settings-fields" disabled={busy}>
         <legend className="sr-only">Automatic display settings</legend>
+        {preset === 'standby' && (
+          <TvEverydaySettings
+            settings={form}
+            screenId={screenId}
+            onChange={update}
+            disabled={busy}
+          />
+        )}
         <div className="tv-editor-context tv-display-choice">
           <label>
             When this layout appears
@@ -203,6 +230,7 @@ export default function BackgroundSettings({
             preset={preset}
             onChange={update}
             allowBlocks={preset === 'standby'}
+            titleOverride={preset === 'standby' ? 'Timetable & notices' : ''}
           />
           {preset === 'standby' && (
             <details className="tv-task-disclosure">

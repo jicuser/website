@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /** Native scrolling keeps vertical page swipes and browser back gestures intact. */
-export default function SwipeRail({ title, children, className }) {
+export default function SwipeRail({ title, children, className, action }) {
   const id = useId();
   const rail = useRef(null);
   const [edges, setEdges] = useState({ start: true, end: true });
@@ -34,25 +34,28 @@ export default function SwipeRail({ title, children, className }) {
     <section className={cn('jic-rail-section', className)} aria-labelledby={`${id}-heading`}>
       <div className="jic-rail-heading">
         <h2 id={`${id}-heading`}>{title}</h2>
-        <div className="jic-rail-controls">
-          <button
-            type="button"
-            aria-label={`Previous ${title.toLowerCase()}`}
-            aria-controls={id}
-            disabled={edges.start}
-            onClick={() => move(-1)}
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <button
-            type="button"
-            aria-label={`Next ${title.toLowerCase()}`}
-            aria-controls={id}
-            disabled={edges.end}
-            onClick={() => move(1)}
-          >
-            <ChevronRight size={18} />
-          </button>
+        <div className="jic-rail-actions">
+          {action}
+          <div className="jic-rail-controls">
+            <button
+              type="button"
+              aria-label={`Previous ${title.toLowerCase()}`}
+              aria-controls={id}
+              disabled={edges.start}
+              onClick={() => move(-1)}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              aria-label={`Next ${title.toLowerCase()}`}
+              aria-controls={id}
+              disabled={edges.end}
+              onClick={() => move(1)}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
       </div>
       <div

@@ -1,6 +1,6 @@
 # Forms, course materials and fee workspace
 
-The website uses the same Supabase accounts and API contracts as the app. Enable `VITE_ENABLE_WORKSPACE=true` only after staging the additive migrations and functions documented in `forms-api.md`, `fees-api.md` and `learning-extensions-api.md`. Existing public contact, Madrassah and I’tikaf forms remain available through their existing validated endpoint when the new workspace is disabled.
+The website uses the same Supabase accounts and API contracts as the app. Enable `VITE_ENABLE_WORKSPACE=true` only after staging the additive migrations and functions documented in `forms-api.md`, `fees-api.md` and `learning-extensions-api.md`. Public Contact Us, Madrassah and I’tikaf now load their published questions through the shared forms engine independently of that portal feature flag. Their existing response permissions and historical records are preserved.
 
 ## Where to use it
 
@@ -14,6 +14,8 @@ The website uses the same Supabase accounts and API contracts as the app. Enable
 ## Form workflow
 
 Owners and people with `forms_manage` create forms. Explicit per-form managers edit their assigned definitions. A form can have multiple responsible people, watchers and managers. Publishing requires a responsible person; every responsible person receives an automatic task. Watchers receive an alert. Saving a draft preserves the published question snapshot until republishing. Turning acceptance off takes effect when saved.
+
+The catalogue has visible Live, Draft and Closed tabs with counts. Built-in forms use the same editor and retain their original response permission; form editing additionally requires management access. A new form can use a direct link, create a named page in a menu section, or attach to an existing page. Page writes require the separate content permission and are committed atomically with the form. A new page stays hidden with Save draft; Save and publish opens both together. An editor returning later can explicitly publish a linked draft page with the form.
 
 The builder supports text, long text, email, telephone, number, date, single/multiple choice, confirmation, photograph and document fields. Conditional questions compare a value against an earlier unconditional field. Validation and conditional visibility reuse the Edge Function's pure validation module. Preview is interactive and never submits data.
 

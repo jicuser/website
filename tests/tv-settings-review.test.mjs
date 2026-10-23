@@ -30,3 +30,11 @@ test('nested item changes and poster selections appear in the review', () => {
   };
   assert.deepEqual(tvSettingsChanges(saved, draft), ['Layouts and items', 'Posters and rotation']);
 });
+
+test('scene selection, rotation timing and fixed items are named in the save review', () => {
+  const saved = { everyday_display: { mode: 'fixed' } };
+  const draft = {
+    everyday_display: { mode: 'rotation', rotation: [{ kind: 'iftar', duration_seconds: 30 }] },
+  };
+  assert.deepEqual(tvSettingsChanges(saved, draft), ['Everyday scenes and fixed items']);
+});

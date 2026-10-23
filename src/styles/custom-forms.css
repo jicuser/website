@@ -8,6 +8,18 @@
 .custom-forms-toolbar .workspace-field {
   flex: 1 1 160px;
 }
+.public-custom-form.is-embedded {
+  padding: 0;
+}
+.public-custom-form.is-embedded .workspace-wrap {
+  padding: 0;
+  width: 100%;
+  max-width: none;
+}
+.public-custom-form.is-embedded .workspace-form {
+  margin: 0;
+  box-shadow: none;
+}
 .custom-form-editor {
   display: grid;
   gap: 16px;

@@ -1,0 +1,40 @@
+.content-page-editor {
+  min-width: 0;
+}
+.content-page-editor .content-page-fields {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+.content-page-editor .page-editor-controls > .admin-panel {
+  display: grid;
+  gap: 14px;
+}
+.content-page-editor .page-editor-controls h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.content-page-editor .page-editor-controls p,
+.content-page-editor .page-editor-controls small {
+  color: var(--jic-text-secondary);
+  line-height: 1.6;
+}
+.content-page-editor .page-editor-controls summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 12px;
+}
+.content-page-editor .page-editor-controls details label {
+  margin-top: 14px;
+}
+.content-page-editor .page-editor-mobile-tabs button[aria-pressed='true'],
+.content-page-editor .page-editor-preview button[aria-pressed='true'] {
+  border-color: var(--jic-gold-strong);
+}
+.admin-console:has(.content-page-editor) .admin-console-layout {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 1800px;
+}
+.admin-console:has(.content-page-editor) .admin-navigation {
+  display: none;
+}
