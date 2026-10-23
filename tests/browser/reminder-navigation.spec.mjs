@@ -337,15 +337,26 @@ test('selecting the current page still closes the header Menu', async ({ page })
   await expect(menu).toBeHidden({ timeout: 500 });
 });
 
-test('returning to the top for Prayer Times does not fade out the daily reminder', async ({
+test('the slim daily reminder follows Salah bar scrolling and restores on navigation', async ({
   page,
 }) => {
   await setup(page);
+  const reminder = page.locator('.jic-daily-reminder');
+  await expect(reminder).toHaveCSS('opacity', '1');
+  const originalHeight = await reminder.evaluate((node) => node.getBoundingClientRect().height);
+  expect(originalHeight).toBeLessThan(76);
   await page.mouse.wheel(0, 750);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
-  const reminder = page.getByRole('complementary', { name: 'Daily reminder' });
-  await expect(reminder).not.toHaveClass(/is-scrolling/);
+  await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
+  await expect(reminder).toHaveCSS('visibility', 'hidden');
+  await expect(reminder).toHaveCSS('opacity', '0');
+  await page.mouse.wheel(0, -120);
+  await expect(page.locator('#jic-prayer-dock')).not.toHaveAttribute('aria-hidden', 'true');
+  await expect(reminder).toHaveCSS('visibility', 'visible');
   await expect(reminder).toHaveCSS('opacity', '1');
+  const reminderTop = await reminder.evaluate((node) => node.getBoundingClientRect().top);
+  expect(reminderTop).toBeGreaterThanOrEqual(0);
+  expect(reminderTop).toBeLessThan(100);
   await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
   await page
     .locator('#jic-site-menu')
@@ -355,6 +366,40 @@ test('returning to the top for Prayer Times does not fade out the daily reminder
     page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
   ).toBeVisible();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
-  await expect(reminder).not.toHaveClass(/is-scrolling/, { timeout: 100 });
   await expect(reminder).toHaveCSS('opacity', '1', { timeout: 100 });
 });
+
+for (const theme of ['light', 'dark']) {
+  test(`daily reminder is compact and transparent in ${theme} mode with a high-contrast fallback`, async ({
+    page,
+  }) => {
+    await page.addInitScript((mode) => {
+      localStorage.setItem('jic-theme', mode);
+      localStorage.setItem('jic_glass_enabled', 'true');
+    }, theme);
+    await setup(page);
+    const reminder = page.locator('.jic-daily-reminder > button');
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      const style = await reminder.evaluate((node) => ({
+        height: node.getBoundingClientRect().height,
+        background: getComputedStyle(node).backgroundColor,
+        fits:
+          document.documentElement.scrollWidth <= innerWidth &&
+          node.scrollWidth <= node.clientWidth,
+      }));
+      expect(style.height).toBeGreaterThanOrEqual(44);
+      expect(style.height).toBeLessThan(80);
+      expect(Number(style.background.match(/[\d.]+/g)?.[3] ?? 1)).toBeLessThan(0.5);
+      expect(style.fits).toBe(true);
+    }
+    await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
+    await expect(reminder).toHaveCSS('backdrop-filter', 'none');
+    const background = await reminder.evaluate((node) => getComputedStyle(node).backgroundColor);
+    expect(Number(background.match(/[\d.]+/g)?.[3] ?? 1)).toBe(1);
+    const duration = await page
+      .locator('.jic-daily-reminder')
+      .evaluate((node) => Number.parseFloat(getComputedStyle(node).transitionDuration));
+    expect(duration).toBeLessThanOrEqual(0.001);
+  });
+}

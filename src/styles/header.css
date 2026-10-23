@@ -449,27 +449,39 @@ html[data-prayer-dock-hidden='true'] {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-/* One reminder component; mobile movement is handled below. */
+/* Keep the reminder compact and share the Salah bar's visibility state. */
 .jic-daily-reminder {
+  position: sticky;
+  top: calc(var(--jic-prayer-sticky-offset) + 6px);
+  z-index: 30;
   width: min(1200px, calc(100% - 32px));
-  margin: 0 auto 8px;
+  margin: 0 auto 4px;
+  transition:
+    opacity 160ms ease,
+    visibility 160ms;
+}
+html[data-prayer-dock-hidden='true'] .jic-daily-reminder:not(:has(:focus-visible)) {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 .jic-daily-reminder > button {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 11px 14px;
+  min-height: 44px;
+  padding: 7px 10px;
   border: 1px solid var(--jic-glass-border);
-  border-radius: 12px;
+  border-radius: 10px;
   color: var(--jic-text);
 }
 .jic-daily-reminder > button > div {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 12px;
-  font-size: 0.75rem;
-  line-height: 1.4;
+  gap: 2px 8px;
+  font-size: 0.6875rem;
+  line-height: 1.35;
   color: var(--jic-text-secondary);
 }
 .jic-daily-reminder b {
@@ -479,13 +491,12 @@ html[data-prayer-dock-hidden='true'] {
 }
 .jic-daily-reminder small {
   margin-left: auto;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
 }
 .jic-daily-reminder p {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-size: 0.875rem;
-  line-height: 1.45;
-  min-height: 2.9em;
+  line-height: 1.35;
 }
 .jic-notices {
   display: flex;
@@ -1170,6 +1181,9 @@ html[data-prayer-dock-hidden='true'] {
     position: static;
     max-height: none;
     overflow: visible;
+  }
+  .jic-daily-reminder {
+    position: static;
   }
   .jic-mobile-info-banner {
     position: static;
