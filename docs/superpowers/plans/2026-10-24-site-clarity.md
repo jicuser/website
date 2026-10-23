@@ -45,11 +45,12 @@
 
 ### Task 2: Focused admin workspaces and readable booking days
 
-**Files:** `src/components/admin/PrayerEditor.jsx`, `src/features/content/SiteVisibility.jsx`, `src/features/admin/AdminOverview.jsx`, `src/features/operations/Safeguarding.jsx`, current TV screen chooser in `src/features/tv` or `src/components/admin`, `src/components/calendar/MonthCalendar.jsx`, owning styles `admin.css`, `admin-overview.css`, `tv-admin.css`, `booking-calendars.css`, `operations.css`, plus targeted browser tests.
+**Files:** `src/components/admin/PrayerEditor.jsx`, `src/features/content/SiteVisibility.jsx`, `src/features/content/ContentPages.jsx`, `src/components/admin/PageEditor.jsx`, `src/features/admin/AdminOverview.jsx`, `src/features/operations/Safeguarding.jsx`, current TV screen chooser in `src/features/tv` or `src/components/admin`, `src/components/calendar/MonthCalendar.jsx`, owning styles `admin.css`, `admin-overview.css`, `tv-admin.css`, `booking-calendars.css`, `operations.css`, plus targeted browser tests.
 
 **Interfaces:** Keep prayer form state/save callbacks, visibility saves, auth filtering, real TV scene previews and MonthCalendar props unchanged. Existing `useRegisterAdminSave` must continue to report pending state across views. No RPC contract changes.
 
 - [ ] Make staff home's needs-attention summary compact with an obvious count/action while retaining unavailable/error totals and permission filtering; avoid redundant account links already in Account. Preserve the separate small tool tiles and task search.
+- [ ] Simplify page editing hierarchy: keep one clear page title and one website-open action within the embedded workspace. Retain the existing mobile Edit page/Live preview tabs and real desktop preview, draft behavior and publish confirmation. Move secondary catalogue settings after the page finder rather than placing multiple long panels before the primary task.
 - [ ] Render page visibility groups as compact expandable summaries with page counts/on-off counts. Searching or selecting On/Off reveals matching rows immediately. Keep original toggles, always-on restrictions, feedback and added pages. Use native disclosures or accessible buttons.
 - [ ] Recompose PrayerEditor into accessible Daily times (default), Jummah and CSV import views. Daily start/Jama'ah are paired by prayer, sunrise separate. Show concise current weekly Jummah summary and stored date coverage. Retain all fields, overrides, CSV preview/validation, save and unsaved-change behavior. Keep loading/error fields disabled as currently appropriate.
 - [ ] Make safeguarding New/Edit deliberate actions, display the review queue first, protect dirty input when cancelling, and restore focus after close. Keep existing privacy explanation and backend workflow.
