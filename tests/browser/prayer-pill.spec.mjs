@@ -73,7 +73,7 @@ for (const width of [320, 390]) {
       });
       expect(layout.rows).toEqual([1, 1]);
       expect(layout.fits).toBe(true);
-      expect(layout.height).toBeLessThanOrEqual(90);
+      expect(layout.height).toBeLessThanOrEqual(76);
       const nav = page.getByRole('navigation', { name: 'Quick navigation' });
       await expect(nav.getByRole('button')).toHaveText(['Home']);
       await expect(pill.locator('button, [aria-expanded]')).toHaveCount(0);
