@@ -49,8 +49,24 @@ for (const width of [320, 390, 1280]) {
     await page.getByRole('link', { name: 'Skip to staff tools' }).focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('#staff-content')).toBeFocused();
-    await expect(page.locator('.admin-tool-group[open]')).toHaveCount(0);
-    await page.locator('.admin-tools summary').filter({ hasText: 'Website content' }).click();
+    const sizes = await page.locator('.admin-area-tiles').evaluate((grid) => ({
+      columns: getComputedStyle(grid).gridTemplateColumns.split(' ').length,
+      heights: [...grid.children].map((tile) => tile.getBoundingClientRect().height),
+    }));
+    expect(sizes.columns).toBe(width < 700 ? 2 : 4);
+    expect(Math.max(...sizes.heights) - Math.min(...sizes.heights)).toBeLessThan(1);
+    expect(Math.min(...sizes.heights)).toBeGreaterThanOrEqual(44);
+    const websiteTile = page
+      .locator('.admin-area-tiles')
+      .getByRole('button', { name: 'Website content', exact: true });
+    await websiteTile.click();
+    await expect(page.locator('.admin-area-heading h3')).toBeFocused();
+    await expect(
+      page.locator('.admin-tool-list').getByRole('button', { name: 'Website menus', exact: true }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'All tools', exact: true }).click();
+    await expect(websiteTile).toBeFocused();
+    await websiteTile.click();
     await page
       .locator('.admin-tool-list')
       .getByRole('button', { name: 'Notices', exact: true })
@@ -73,10 +89,6 @@ for (const width of [320, 390, 1280]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
-      await page.screenshot({
-        path: testInfo.outputPath(`staff-notices-${theme}-${width}.png`),
-        fullPage: true,
-      });
     }
     expect(evidence.writes).toEqual([]);
     expect(evidence.errors).toEqual([]);
