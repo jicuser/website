@@ -161,6 +161,7 @@ test('applying each design changes only the current orientation’s everyday dra
       ['countdown', 'Countdown'],
       ['noticeboard', 'Noticeboard'],
       ['iftar', 'Iftar sponsorships'],
+      ['suhoor', 'Suhoor sponsorships'],
       ['daily-giving', 'Daily Giving'],
     ]) {
       const settings = {

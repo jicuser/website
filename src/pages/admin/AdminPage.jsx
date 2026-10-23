@@ -4,6 +4,7 @@ import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   CalendarDays,
+  Eye,
   Clock3,
   Radio,
   Megaphone,
@@ -59,6 +60,7 @@ const FundraisingManager = lazy(() => import('@/features/operations/FundraisingM
 const Safeguarding = lazy(() => import('@/features/operations/Safeguarding'));
 const ProjectEditor = lazy(() => import('@/features/projects/ProjectEditor'));
 const HallBookings = lazy(() => import('@/features/bookings/HallBookings'));
+const SiteVisibility = lazy(() => import('@/features/content/SiteVisibility'));
 const RamadanManager = lazy(() => import('@/features/ramadan/RamadanManager'));
 const CertificatesManager = lazy(() => import('@/features/certificates/Certificates'));
 
@@ -71,6 +73,7 @@ const ghost = `${btn} admin-editor-secondary`;
 const danger = `${btn} admin-editor-danger`;
 
 const SECTION_ICONS = {
+  visibility: Eye,
   hall: CalendarDays,
   ramadan: Moon,
   finance: Wallet,
@@ -791,6 +794,11 @@ export default function AdminPage() {
   };
 
   const section = {
+    visibility: (
+      <Suspense fallback={<p role="status">Opening page switches…</p>}>
+        <SiteVisibility />
+      </Suspense>
+    ),
     hall: (
       <Suspense fallback={<p role="status">Opening hall bookings…</p>}>
         <HallBookings />

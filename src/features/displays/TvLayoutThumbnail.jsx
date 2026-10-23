@@ -27,7 +27,13 @@ export default function TvLayoutThumbnail({ layoutId, orientation }) {
             {layer.type === 'clock' && <span>Clock</span>}
             {layer.type === 'ramadan' && (
               <>
-                <b>{layer.ramadan_kind === 'daily' ? 'Daily Giving' : 'Iftar'}</b>
+                <b>
+                  {layer.ramadan_kind === 'daily'
+                    ? 'Daily Giving'
+                    : layer.ramadan_kind === 'suhoor'
+                      ? 'Suhoor'
+                      : 'Iftar'}
+                </b>
                 <span className="tv-design-mini-days">
                   {Array.from({ length: 30 }, (_, index) => (
                     <i key={index} />

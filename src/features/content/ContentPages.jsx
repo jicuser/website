@@ -4,7 +4,8 @@ import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 import { useContent } from '@/context/ContentContext';
 import { EDITABLE_PAGES } from '@/content/editablePages';
 import { buildPageNavigator } from '@/lib/pageNavigator';
-import { isPageVisible, pageVisibilityKey, pageSectionKey } from '@/lib/pageVisibility';
+import { isPageEnabled, pageSectionKey } from '@/lib/pageVisibility';
+import { saveSiteVisibility } from '@/lib/siteVisibility';
 import '@/styles/page-directory.css';
 import React, { useCallback, useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -218,7 +219,7 @@ export function ContentPageCatalogue({ initialCreate = false }) {
 
 export default function ContentPages({ initialPath = '/', registerBack }) {
   const { dirty, saving } = useAdminSave();
-  const { getContent, saveContent } = useContent();
+  const { getContent, saveContent, refreshContent } = useContent();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [busy, setBusy] = useState(null);
@@ -251,8 +252,9 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
     setBusy(page.path);
     setMessage('');
     try {
-      const visible = isPageVisible(getContent, page.path);
-      await saveContent(pageVisibilityKey(page.path), visible ? 'false' : 'true');
+      const visible = isPageEnabled(getContent, page.path);
+      await saveSiteVisibility(supabase, page, !visible);
+      await refreshContent();
       setMessage(`${page.name} is now ${visible ? 'hidden' : 'visible'}.`);
     } catch (error) {
       setMessage(error.message || 'Could not save visibility. Try again.');
@@ -372,6 +374,9 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
         </button>
       </div>
       <div className="admin-actions">
+        <Link className="admin-button" to="/admin?section=visibility">
+          Show or hide pages
+        </Link>
         <button className="admin-button" onClick={() => navigate(null, 'pages')}>
           Manage added pages
         </button>
@@ -420,12 +425,12 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
                   type="button"
                   className="page-directory__toggle"
                   role="switch"
-                  aria-checked={isPageVisible(getContent, page.path)}
+                  aria-checked={isPageEnabled(getContent, page.path)}
                   aria-label={`Show ${page.name} on website`}
-                  disabled={Boolean(busy) || page.path === '/'}
+                  disabled={Boolean(busy) || ['/', '/privacy'].includes(page.path)}
                   onClick={() => toggle(page)}
                 >
-                  {isPageVisible(getContent, page.path) ? 'On' : 'Off'}
+                  {isPageEnabled(getContent, page.path) ? 'On' : 'Off'}
                 </button>
               </div>
             ))}

@@ -27,7 +27,7 @@ const labels = {
   brand: 'JIC logo',
   state: 'Prayer message',
   text: 'Text notice',
-  ramadan: 'Ramadan calendar',
+  ramadan: 'Meal sponsorships',
 };
 
 const prayerStyles = [
@@ -393,7 +393,7 @@ export default function TvDisplayLayoutEditor({
             <option value="clock">Clock</option>
             <option value="brand">JIC logo</option>
             <option value="text">Text notice</option>
-            {allowBlocks && <option value="ramadan">Ramadan calendar</option>}
+            {allowBlocks && <option value="ramadan">Meal sponsorships</option>}
           </select>
           {scene.layers.length >= 12 && (
             <small>This layout has the maximum of 12 content items.</small>
@@ -533,19 +533,20 @@ export default function TvDisplayLayoutEditor({
                   <option value="clock">Clock</option>
                   <option value="brand">JIC logo</option>
                   <option value="text">Text notice</option>
-                  {allowBlocks && <option value="ramadan">Ramadan calendar</option>}
+                  {allowBlocks && <option value="ramadan">Meal sponsorships</option>}
                 </select>
               </label>
             )}
 
             {layer?.type === 'ramadan' && (
               <label>
-                Calendar
+                Sponsorship board
                 <select
                   value={layer.ramadan_kind || 'iftar'}
                   onChange={(event) => updateLayer({ ...layer, ramadan_kind: event.target.value })}
                 >
                   <option value="iftar">Iftar sponsorships</option>
+                  <option value="suhoor">Suhoor sponsorships</option>
                   <option value="daily">Daily Giving</option>
                 </select>
               </label>

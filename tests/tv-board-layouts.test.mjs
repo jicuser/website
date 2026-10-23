@@ -20,15 +20,18 @@ test('all board layouts survive the existing server contract without replacing o
       const roundtrip = publicSettings(validateSettings(settings)).display_layouts[orientation]
         .standby;
       assert.deepEqual(roundtrip, scene);
-      assert.equal(scene.layers.filter((layer) => layer.type === 'times').length, 1);
+      assert.equal(
+        scene.layers.filter((layer) => layer.type === 'times').length,
+        ['iftar', 'suhoor', 'daily-giving'].includes(id) ? 0 : 1,
+      );
       assert.equal(
         scene.layers.some((layer) => layer.type === 'poster'),
         ['classic', 'noticeboard'].includes(id),
       );
-      if (['iftar', 'daily-giving'].includes(id))
+      if (['iftar', 'suhoor', 'daily-giving'].includes(id))
         assert.equal(
           scene.layers.find((layer) => layer.type === 'ramadan').ramadan_kind,
-          id === 'iftar' ? 'iftar' : 'daily',
+          id === 'daily-giving' ? 'daily' : id,
         );
       for (const layer of scene.layers) {
         assert.ok(

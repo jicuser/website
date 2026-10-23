@@ -106,3 +106,11 @@ Choose **Website** to open the public site. On an editable page, **Edit this pag
 ## Forms and staff
 
 [Forms and staff access](forms-and-staff.md) explains the private Forms inbox, invitations, role descriptions and Enable/Disable switches. All three public forms now use the same validated submission endpoint.
+
+## Pages and Ramadan sponsorships
+
+Use **Admin → Show or hide pages** to switch individual website or added programme pages on and off. This keeps their content. Home and Privacy stay on.
+
+Use **Admin → Ramadan** for Iftar and Suhoor meal sponsorships and Daily Giving. Each meal has separate availability. **Open or close days** changes individual days; closing a day keeps its existing bookings. The top switches control the Ramadan page, each meal, homepage placement and TV visibility. Choose **Simple cards** or **Day cards** for the homepage. TV layouts include Iftar, Suhoor and Daily Giving sponsorship boards.
+
+Set the first Ramadan date and 29 or 30 days once under **Sponsorship setup**, then publish. Visitors send booking requests; staff confirm sponsorships, record received payments and print the sponsorship list. A pending meal request reserves that meal’s day until staff confirm or cancel it.

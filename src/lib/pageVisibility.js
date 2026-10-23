@@ -3,9 +3,15 @@ import { canonicalPagePath } from '../content/pageAliases.js';
 
 export const pageVisibilityKey = (path) =>
   `page-visibility:${canonicalPagePath(path.split(/[?#]/)[0].replace(/\/+$/, '') || '/')}`;
-export function isPageVisible(getContent, path) {
+export function isPageEnabled(getContent, path) {
   if (['/', '/privacy'].includes(path.split(/[?#]/)[0])) return true;
   return getContent(pageVisibilityKey(path), 'true') !== 'false';
+}
+export function isPageVisible(getContent, path) {
+  if (['/', '/privacy'].includes(path.split(/[?#]/)[0])) return true;
+  if (path.startsWith('/ramadan/') && getContent(pageVisibilityKey('/ramadan'), 'true') === 'false')
+    return false;
+  return isPageEnabled(getContent, path);
 }
 export const pageSectionKey = (path) =>
   pageVisibilityKey(path).replace('page-visibility:', 'page-section:');

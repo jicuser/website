@@ -22,7 +22,7 @@ export default function useRamadanCalendar(autoRefresh = false) {
           setState((current) => ({
             ...current,
             loading: false,
-            error: 'Could not load the Ramadan calendar. Please try again.',
+            error: 'Could not load sponsorships. Please try again.',
           }));
       })
       .finally(() => clearTimeout(timeout));

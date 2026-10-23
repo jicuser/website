@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import RamadanBoard from '@/features/ramadan/RamadanBoard';
 export default function RamadanDisplayPage() {
   const [params, setParams] = useSearchParams(),
-    kind = params.get('kind') === 'daily' ? 'daily' : 'iftar',
+    kind = ['iftar', 'suhoor', 'daily'].includes(params.get('kind')) ? params.get('kind') : 'iftar',
     portrait = params.get('shape') === 'portrait';
   const update = (key, value) =>
     setParams((current) => {
@@ -16,6 +16,9 @@ export default function RamadanDisplayPage() {
       <nav className="ramadan-screen-controls" aria-label="Ramadan screen controls">
         <button aria-pressed={kind === 'iftar'} onClick={() => update('kind', 'iftar')}>
           Iftar sponsorships
+        </button>
+        <button aria-pressed={kind === 'suhoor'} onClick={() => update('kind', 'suhoor')}>
+          Suhoor sponsorships
         </button>
         <button aria-pressed={kind === 'daily'} onClick={() => update('kind', 'daily')}>
           Daily Giving
