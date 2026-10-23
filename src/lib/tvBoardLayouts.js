@@ -16,6 +16,16 @@ export const TV_BOARD_LAYOUTS = [
     name: 'Noticeboard',
     description: 'Give posters more room, with prayer times always in view.',
   },
+  {
+    id: 'iftar',
+    name: 'Iftar sponsorships',
+    description: 'Show sponsored and available Ramadan days with prayer times.',
+  },
+  {
+    id: 'daily-giving',
+    name: 'Daily Giving',
+    description: 'Show the Ramadan giving calendar with prayer times.',
+  },
 ];
 
 export function tvBoardLayout(id, orientation = 'landscape') {
@@ -49,6 +59,17 @@ export function tvBoardLayout(id, orientation = 'landscape') {
           layer('times', 3, 15, 47, 70, { layout: 'vertical' }),
           layer('poster', 52, 15, 45, 70),
           layer('next', 3, 88, 94, 7),
+        ];
+  } else if (['iftar', 'daily-giving'].includes(id)) {
+    const content = { ramadan_kind: id === 'iftar' ? 'iftar' : 'daily' };
+    body = portrait
+      ? [
+          layer('ramadan', 3, 11, 94, 63, content),
+          layer('times', 3, 77, 94, 18, { layout: 'vertical' }),
+        ]
+      : [
+          layer('ramadan', 3, 15, 94, 60, content),
+          layer('times', 3, 78, 94, 17, { layout: 'horizontal' }),
         ];
   } else {
     body = portrait

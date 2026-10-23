@@ -12,6 +12,7 @@ export const SOURCE_TYPES = [
   ['brand', 'Logo'],
   ['state', 'Preset content'],
   ['text', 'Text / notice'],
+  ['ramadan', 'Ramadan calendar'],
 ];
 export const INPUT_SLOTS = ['input-1', 'input-2', 'input-3', 'input-4'];
 export const MAX_SCENES = 6;
@@ -152,6 +153,11 @@ export function validateScenes(scenes, streamUrl, youtubeUrl) {
           if (typeof layer.text !== 'string' || layer.text.length > 1200)
             throw new Error('Use up to 1200 characters per notice.');
           item.text = layer.text;
+        }
+        if (layer.type === 'ramadan') {
+          if (!['iftar', 'daily'].includes(layer.ramadan_kind))
+            throw new Error('Choose Iftar sponsorships or Daily Giving.');
+          item.ramadan_kind = layer.ramadan_kind;
         }
         if (layer.type === 'state') {
           if (layer.image_url !== undefined && layer.image_url !== '') {

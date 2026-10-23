@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { layerStyle, layerImageStyle } from '../../../supabase/functions/_shared/tv-scenes.js';
 import TvMediaPanel from '@/components/tv/TvMediaPanel';
 import PrayerWidget from './PrayerWidget';
+import RamadanBoard from '@/features/ramadan/RamadanBoard';
 import { tvBoardLayoutId } from '@/lib/tvBoardLayouts';
 import { tvThemeId, tvThemeStyle } from '../../../supabase/functions/_shared/tv-themes.js';
 
@@ -117,6 +118,11 @@ export default function SceneCanvas({
                   kind={layer.type}
                   layout={layer.layout}
                   highlightNext={Boolean(boardLayout)}
+                />
+              ) : layer.type === 'ramadan' ? (
+                <RamadanBoard
+                  kind={layer.ramadan_kind}
+                  portrait={tv.settings.display_orientation === 'portrait'}
                 />
               ) : layer.type === 'clock' ? (
                 <div className="scene-clock">

@@ -2,7 +2,7 @@
 export const PERMISSIONS = [
   ['content', 'Website pages, posters and text'],
   ['media', 'Upload pictures in permitted editors'],
-  ['events', 'Events'],
+  ['events', 'Events and hall bookings'],
   ['announcements', 'Notices'],
   ['prayer_times', 'Prayer timetable'],
   ['team', 'Team profiles'],
@@ -16,7 +16,7 @@ export const PERMISSIONS = [
   ['forms_custom', 'All custom form responses'],
   ['certificates', 'Review, issue and revoke certificates'],
   ['finance', 'Invoices, payments and finance settings'],
-  ['fundraising', 'Review and publish community campaigns'],
+  ['fundraising', 'Ramadan sponsorships and community campaigns'],
   ['safeguarding', 'Restricted DBS review records'],
   ['users', 'Staff accounts and access'],
   ['audit', 'Activity history'],
@@ -41,6 +41,7 @@ export function hasPermission(profile, permission) {
   if (permission === 'dashboard')
     return hasAdminAccess(profile);
   if (permission === 'forms') return profile.has_assigned_forms === true || permissions.some((key) => key.startsWith('forms_'));
+  if (permission === 'ramadan') return permissions.includes('fundraising') || permissions.includes('finance');
   return permissions.includes(permission);
 }
 export function hasAdminAccess(profile) {

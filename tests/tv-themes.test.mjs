@@ -104,7 +104,7 @@ const bundled = await build({
     {
       name: 'theme-display-fixture',
       setup(builder) {
-        builder.onResolve({ filter: /PrivateTvPlayer|AnnouncementPoster/ }, ({ path }) => ({
+        builder.onResolve({ filter: /PrivateTvPlayer|AnnouncementPoster|RamadanBoard/ }, ({ path }) => ({
           path,
           namespace: 'fixture',
         }));

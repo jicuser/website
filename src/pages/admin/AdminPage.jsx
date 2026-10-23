@@ -58,6 +58,8 @@ const FinanceManager = lazy(() => import('@/features/operations/Finance'));
 const FundraisingManager = lazy(() => import('@/features/operations/FundraisingManager'));
 const Safeguarding = lazy(() => import('@/features/operations/Safeguarding'));
 const ProjectEditor = lazy(() => import('@/features/projects/ProjectEditor'));
+const HallBookings = lazy(() => import('@/features/bookings/HallBookings'));
+const RamadanManager = lazy(() => import('@/features/ramadan/RamadanManager'));
 const CertificatesManager = lazy(() => import('@/features/certificates/Certificates'));
 
 const input = 'admin-editor-input w-full rounded-lg border px-3 py-2 outline-none';
@@ -69,6 +71,8 @@ const ghost = `${btn} admin-editor-secondary`;
 const danger = `${btn} admin-editor-danger`;
 
 const SECTION_ICONS = {
+  hall: CalendarDays,
+  ramadan: Moon,
   finance: Wallet,
   fundraising: Heart,
   safeguarding: ShieldCheck,
@@ -787,6 +791,16 @@ export default function AdminPage() {
   };
 
   const section = {
+    hall: (
+      <Suspense fallback={<p role="status">Opening hall bookings…</p>}>
+        <HallBookings />
+      </Suspense>
+    ),
+    ramadan: (
+      <Suspense fallback={<p role="status">Opening Ramadan…</p>}>
+        <RamadanManager />
+      </Suspense>
+    ),
     finance: (
       <Suspense fallback={<p role="status">Opening finance…</p>}>
         <FinanceManager />

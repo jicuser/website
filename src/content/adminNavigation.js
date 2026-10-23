@@ -128,6 +128,23 @@ export const ADMIN_SECTIONS = [
     keywords: ['YouTube', 'Vimeo', 'Facebook', 'broadcast', 'link'],
   },
   {
+    id: 'hall',
+    name: 'Hall bookings',
+    permission: 'events',
+    group: 'Centre operations',
+    description: 'Select dates, set availability colours and keep booking details.',
+    keywords: ['calendar', 'days', 'hall', 'booking', 'availability'],
+  },
+  {
+    id: 'ramadan',
+    name: 'Ramadan',
+    permission: 'ramadan',
+    group: 'Centre operations',
+    description:
+      'Manage Iftar sponsorships and Daily Giving, print tables and open screen displays.',
+    keywords: ['iftar', 'sponsor', 'giving', 'calendar', 'donations'],
+  },
+  {
     id: 'finance',
     name: 'Finance',
     permission: 'finance',

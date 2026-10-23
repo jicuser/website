@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarDays, Clock3, Plus, Save, Trash2, X } from 'lucide-react';
+import { CalendarDays, Plus, Save, Trash2, X } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
-import { courseInput, hallInput, saveScheduleRecord } from '@/lib/scheduleInput';
+import { Link } from 'react-router-dom';
+import { courseInput, saveScheduleRecord } from '@/lib/scheduleInput';
 
 const WEEKDAYS = [
   [1, 'Monday'],
@@ -22,13 +23,6 @@ const blankCourse = {
   location: 'Jamatia Islamic Centre',
   active: true,
   planner_visible: true,
-};
-
-const blankHall = {
-  booking_date: '',
-  start_time: '',
-  end_time: '',
-  status: 'available',
 };
 
 function normaliseTime(value) {
@@ -88,11 +82,8 @@ export default function ScheduleManager() {
   const auth = useAuth();
   const canManage = auth.isOwner || auth.can('events');
   const [courses, setCourses] = useState([]);
-  const [hallRows, setHallRows] = useState([]);
   const [course, setCourse] = useState(blankCourse);
-  const [hall, setHall] = useState(blankHall);
   const [editingCourse, setEditingCourse] = useState(null);
-  const [editingHall, setEditingHall] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -101,21 +92,13 @@ export default function ScheduleManager() {
     if (!canManage) return;
     setError('');
     try {
-      const [courseResult, hallResult] = await Promise.all([
-        supabase
-          .from('course_schedule')
-          .select('id,title,day_of_week,start_time,end_time,location,active,planner_visible')
-          .order('day_of_week')
-          .order('start_time'),
-        supabase
-          .from('hall_bookings')
-          .select('id,booking_date,start_time,end_time,status')
-          .order('booking_date', { ascending: false })
-          .order('start_time'),
-      ]);
-      if (courseResult.error || hallResult.error) throw new Error('load');
+      const courseResult = await supabase
+        .from('course_schedule')
+        .select('id,title,day_of_week,start_time,end_time,location,active,planner_visible')
+        .order('day_of_week')
+        .order('start_time');
+      if (courseResult.error) throw new Error('load');
       setCourses(courseResult.data || []);
-      setHallRows(hallResult.data || []);
     } catch {
       setError('The schedule could not be loaded. Check your access and connection, then refresh.');
     }
@@ -150,33 +133,8 @@ export default function ScheduleManager() {
     }
   }
 
-  async function saveHall(event) {
-    event.preventDefault();
-    if (!canManage || busy) return;
-    setMessage('');
-    setError('');
-    try {
-      hallInput(hall);
-    } catch (failure) {
-      setError(failure.message);
-      return;
-    }
-    setBusy(true);
-    try {
-      await saveScheduleRecord(supabase, 'hall_bookings', editingHall, hall);
-      setHall(blankHall);
-      setEditingHall(null);
-      setMessage('Hall availability saved. An enquiry is not a confirmed booking.');
-      await load();
-    } catch {
-      setError('The hall status was not saved. Check your access and connection, then try again.');
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function remove(table, id, label) {
-    if (!canManage || busy || !['course_schedule', 'hall_bookings'].includes(table)) return;
+    if (!canManage || busy || table !== 'course_schedule') return;
     if (!window.confirm(`Delete this ${label}?`)) return;
     setError('');
     setMessage('');
@@ -197,7 +155,7 @@ export default function ScheduleManager() {
     return (
       <section className="community-workspace">
         <h2>Schedule</h2>
-        <p>You need Events access to manage hall availability and course schedules.</p>
+        <p>You need Events access to manage course schedules.</p>
       </section>
     );
 
@@ -206,8 +164,8 @@ export default function ScheduleManager() {
       <div className="admin-heading">
         <div>
           <span className="admin-eyebrow">SCHEDULE</span>
-          <h2>Bookings, courses & classes</h2>
-          <p>One place for hall availability and recurring course/class times.</p>
+          <h2>Course schedule</h2>
+          <p>Set recurring course and class times.</p>
         </div>
         <button className="admin-button" disabled={busy} onClick={load}>
           Refresh
@@ -216,9 +174,14 @@ export default function ScheduleManager() {
       {message && <p role="status">{message}</p>}
       {error && <p role="alert">{error}</p>}
 
+      <div className="admin-actions">
+        <Link className="admin-button" to="/admin?section=hall">
+          Open Hall bookings
+        </Link>
+      </div>
       <CoursePlanner rows={courses} />
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid gap-5">
         <section className="admin-panel">
           <div className="admin-heading">
             <div>
@@ -350,118 +313,7 @@ export default function ScheduleManager() {
             ))}
           </div>
         </section>
-
-        <section className="admin-panel">
-          <div className="admin-heading">
-            <div>
-              <Clock3 aria-hidden="true" />
-              <h3>{editingHall ? 'Edit hall date' : 'Set hall availability'}</h3>
-            </div>
-            {editingHall && (
-              <button
-                className="admin-button"
-                type="button"
-                onClick={() => {
-                  setEditingHall(null);
-                  setHall(blankHall);
-                }}
-              >
-                <X size={16} /> Cancel
-              </button>
-            )}
-          </div>
-          <form className="grid gap-3" onSubmit={saveHall}>
-            <label>
-              Date
-              <input
-                type="date"
-                value={hall.booking_date}
-                onChange={(event) => setHall({ ...hall, booking_date: event.target.value })}
-                required
-              />
-            </label>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label>
-                Start
-                <input
-                  type="time"
-                  value={hall.start_time}
-                  onChange={(event) => setHall({ ...hall, start_time: event.target.value })}
-                />
-              </label>
-              <label>
-                End
-                <input
-                  type="time"
-                  value={hall.end_time}
-                  onChange={(event) => setHall({ ...hall, end_time: event.target.value })}
-                />
-              </label>
-            </div>
-            <label>
-              Status
-              <select
-                value={hall.status}
-                onChange={(event) => setHall({ ...hall, status: event.target.value })}
-              >
-                <option value="available">Available</option>
-                <option value="pending">Pending / provisional</option>
-                <option value="booked">Booked</option>
-                <option value="closed">Unavailable / blocked</option>
-              </select>
-            </label>
-            <button className="admin-button primary" disabled={busy}>
-              <Save size={16} /> Save hall date
-            </button>
-          </form>
-          <div className="mt-4 grid gap-2">
-            {hallRows.length ? (
-              hallRows.map((row) => (
-                <div className="admin-panel" key={row.id}>
-                  <strong>{row.booking_date}</strong>
-                  <p>
-                    {row.status}
-                    {row.start_time ? ` · ${normaliseTime(row.start_time)}` : ''}
-                    {row.end_time ? `–${normaliseTime(row.end_time)}` : ''}
-                  </p>
-                  <div className="admin-actions">
-                    <button
-                      className="admin-button"
-                      onClick={() => {
-                        setEditingHall(row.id);
-                        setHall({
-                          booking_date: row.booking_date || '',
-                          start_time: normaliseTime(row.start_time),
-                          end_time: normaliseTime(row.end_time),
-                          status: row.status || 'available',
-                        });
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="admin-button"
-                      onClick={() => remove('hall_bookings', row.id, 'hall date')}
-                    >
-                      <Trash2 size={15} /> Delete
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p>
-                No hall dates have been set yet. Unlisted dates show as available once the live
-                schedule is enabled.
-              </p>
-            )}
-          </div>
-        </section>
       </div>
-
-      <p className="mt-4 text-sm">
-        A hall booking form submission is a request only. Change the hall date to Pending, Booked or
-        Unavailable here after staff review it.
-      </p>
     </section>
   );
 }

@@ -9,7 +9,7 @@ import {
 import { overlaps } from '../supabase/functions/_shared/tv-scenes.js';
 import { tvNextCongregation, countdownParts } from '../src/lib/tvCountdown.js';
 
-test('all six board layouts survive the existing server contract without replacing other scenes', () => {
+test('all board layouts survive the existing server contract without replacing other scenes', () => {
   for (const orientation of ['landscape', 'portrait'])
     for (const { id } of TV_BOARD_LAYOUTS) {
       const settings = structuredClone(DEFAULT_TV_SETTINGS);
@@ -23,8 +23,13 @@ test('all six board layouts survive the existing server contract without replaci
       assert.equal(scene.layers.filter((layer) => layer.type === 'times').length, 1);
       assert.equal(
         scene.layers.some((layer) => layer.type === 'poster'),
-        id !== 'countdown',
+        ['classic', 'noticeboard'].includes(id),
       );
+      if (['iftar', 'daily-giving'].includes(id))
+        assert.equal(
+          scene.layers.find((layer) => layer.type === 'ramadan').ramadan_kind,
+          id === 'iftar' ? 'iftar' : 'daily',
+        );
       for (const layer of scene.layers) {
         assert.ok(
           !scene.layers.some((other) => other !== layer && overlaps(layer, other)),

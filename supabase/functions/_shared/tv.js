@@ -363,7 +363,7 @@ export function validateSettings(input, screenId = '') {
       throw new Error('Use 1–40 characters for each TV preset name.');
     result.preset_names[key] = name.trim();
   }
-  const allowedStandby = new Set(['times', 'next', 'clock', 'poster', 'poster-next', 'text', 'brand', 'empty']);
+  const allowedStandby = new Set(['times', 'next', 'clock', 'poster', 'poster-next', 'text', 'brand', 'ramadan', 'empty']);
   const allowedPreset = new Set(['times', 'next', 'clock', 'state', 'text', 'brand', 'empty']);
   const validateDisplayScene = (source, preset) => {
     const checked = validateScenes([source], secureStreamUrl, youtubeUrl)[0];
@@ -371,7 +371,7 @@ export function validateSettings(input, screenId = '') {
     if (checked.layers.some((layer) => !allowed.has(layer.type)))
       throw new Error(
         preset === 'standby'
-          ? 'Standby layouts can use timetable, next prayer, clock, posters, logo and text only.'
+          ? 'Standby layouts can use timetable, next prayer, clock, posters, Ramadan calendars, logo and text only.'
           : 'Prayer preset layouts can use timetable, preset content, next prayer, clock, logo and text only.',
       );
     for (const layer of checked.layers) {
@@ -405,7 +405,7 @@ export function validateSettings(input, screenId = '') {
   if (!Array.isArray(values.scheduled_scenes) || values.scheduled_scenes.length > 12)
     throw new Error('Keep up to twelve scheduled TV scenes.');
   const scheduledIds = new Set();
-  const scheduledAllowed = new Set(['times', 'next', 'clock', 'poster', 'poster-next', 'text', 'brand', 'empty']);
+  const scheduledAllowed = new Set(['times', 'next', 'clock', 'poster', 'poster-next', 'text', 'brand', 'ramadan', 'empty']);
   const clockPattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
   result.scheduled_scenes = values.scheduled_scenes.map((item) => {
     if (
