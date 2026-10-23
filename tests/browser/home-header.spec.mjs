@@ -10,7 +10,7 @@ async function openHome(page, theme, width = 390) {
     route.fulfill({ contentType: 'application/json', body: '[]' }),
   );
   await page.goto('/');
-  await expect(page.locator('.jic-home-shortcuts a')).toHaveCount(4);
+  await expect(page.locator('.jic-home-shortcuts a')).toHaveCount(6);
 }
 
 for (const theme of ['dark', 'light']) {
@@ -24,7 +24,7 @@ for (const theme of ['dark', 'light']) {
     await expect(page.locator('#main-content')).toBeFocused();
     // Finish the keyboard journey before checking the initial header geometry.
     await page.goto('/');
-    await expect(page.locator('.jic-home-shortcuts a')).toHaveCount(4);
+    await expect(page.locator('.jic-home-shortcuts a')).toHaveCount(6);
     const titleHeights = await page
       .locator('.jic-home-shortcuts strong')
       .evaluateAll((nodes) =>

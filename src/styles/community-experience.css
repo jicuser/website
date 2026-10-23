@@ -395,9 +395,6 @@
   .jic-question-list details > div {
     padding: 0 18px 18px;
   }
-  .jic-home-prayer-main {
-    padding: 12px 16px 4px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .jic-question-list summary svg {
