@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useLocation } from 'react-router-dom';
-import { Box, Check, ArrowDown, ArrowRight, Camera, CalendarDays } from 'lucide-react';
+import { Box, Check, ArrowDown, ArrowRight, CalendarDays } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { useAuth } from '@/context/AuthContext';
 import ImageViewer from '@/components/ImageViewer';
@@ -71,9 +71,7 @@ export default function ProjectTimeline() {
             <br />
             The next chapter.
           </h1>
-          <p>
-            View the project areas, published updates and ways to support JIC.
-          </p>
+          <p>View the project areas, published updates and ways to support JIC.</p>
           <div className="ops-actions">
             <a className="ops-button" href="#project-stages">
               View project stages <ArrowDown size={17} />
@@ -90,7 +88,7 @@ export default function ProjectTimeline() {
         </div>
         <figure>
           <img
-            src="/optimized/jic-aerial-sunset.webp"
+            src="/optimized/jic-about-760.webp"
             alt="Jamatia Islamic Centre viewed from above at sunset"
           />
           <figcaption>The centre we’re building around.</figcaption>
@@ -170,7 +168,7 @@ export default function ProjectTimeline() {
                 </div>
               </div>
               <p className="ops-preserve">{s.description}</p>
-              {s.photos.length ? (
+              {s.photos.length > 0 && (
                 <div className="project-photos">
                   {s.photos.map((photo, index) => (
                     <button
@@ -184,11 +182,6 @@ export default function ProjectTimeline() {
                       <span>{photo.caption}</span>
                     </button>
                   ))}
-                </div>
-              ) : (
-                <div className="project-photo-placeholder">
-                  <Camera size={26} />
-                  <span>No photos are published for this stage.</span>
                 </div>
               )}
               {s.status === 'completed' && polycamEmbed(s.polycam) && (

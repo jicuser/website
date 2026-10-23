@@ -1,14 +1,12 @@
-/* Public search and social pages. Materials belong to liquid-glass.css. */
-.jic-search-page,
-.jic-social-page {
+/* Public search. Materials belong to liquid-glass.css. */
+.jic-search-page {
   width: min(
     var(--jic-content-width),
     calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
   );
   margin: 24px auto 40px;
 }
-.jic-search-page > p,
-.jic-social-intro > p {
+.jic-search-page > p {
   margin: 10px 0 22px;
   color: var(--jic-text-secondary);
 }
@@ -45,8 +43,7 @@
   font-size: 16px;
   padding: 6px;
 }
-.jic-search-suggestions,
-.jic-social-jump {
+.jic-search-suggestions {
   display: flex;
   gap: 8px;
   margin-block: 20px;
@@ -57,8 +54,7 @@
   flex-wrap: wrap;
   overflow: visible;
 }
-.jic-search-suggestions button,
-.jic-social-jump a {
+.jic-search-suggestions button {
   min-height: 44px;
   flex: 0 0 auto;
   padding: 10px 16px;
@@ -103,125 +99,4 @@
   margin-top: 6px;
   font-size: 0.875rem;
   line-height: 1.5;
-}
-.jic-social-eyebrow {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-}
-.jic-social-intro {
-  max-width: 620px;
-}
-.jic-social-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  align-items: start;
-}
-.jic-social-card {
-  min-width: 0;
-  padding: 22px;
-  border: 1px solid var(--jic-border);
-  border-radius: 18px;
-  scroll-margin-top: 12px;
-}
-.jic-social-identity {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
-.jic-social-identity > div {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.jic-social-identity svg {
-  flex-shrink: 0;
-}
-.jic-social-identity h2 {
-  margin: 0 0 3px;
-}
-.jic-social-identity a {
-  font-size: 0.875rem;
-  color: var(--jic-text-secondary);
-}
-.jic-social-card > p {
-  margin-block: 18px;
-  line-height: 1.6;
-}
-.jic-social-topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  list-style: none;
-  margin: 0 0 20px;
-  padding: 0;
-  font-size: 0.75rem;
-  color: var(--jic-text-secondary);
-}
-.jic-social-topics li::before {
-  content: '· ';
-}
-.jic-social-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.jic-social-actions :is(a, button) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  min-height: 44px;
-  border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  font-size: 0.875rem;
-}
-.jic-social-actions svg {
-  flex-shrink: 0;
-}
-.jic-social-preview {
-  margin-top: 20px;
-}
-.jic-social-preview iframe {
-  width: 100%;
-  height: 480px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--jic-surface);
-}
-#youtube .jic-social-preview iframe {
-  height: auto;
-  min-height: 200px;
-  aspect-ratio: 16/9;
-}
-.jic-social-preview p {
-  margin-top: 8px;
-  font-size: 0.75rem;
-}
-.jic-social-preview p a {
-  text-decoration: underline;
-}
-@media (max-width: 767px) {
-  .jic-social-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .jic-social-card {
-    padding: 18px;
-  }
-  .jic-social-jump {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    overflow: visible;
-  }
-  .jic-social-jump a {
-    display: grid;
-    place-items: center;
-    min-width: 0;
-    padding: 8px;
-    font-size: 0.875rem;
-  }
-  .jic-social-actions > * {
-    flex: 1 1 auto;
-  }
 }
