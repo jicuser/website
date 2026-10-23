@@ -13,6 +13,12 @@ export function validateSchema(schema) {
     if (!object(field) || !/^[a-z][a-z0-9_]{0,39}$/.test(field.id ?? '') || prior.has(field.id) || !types.has(field.type) || typeof field.label !== 'string' || field.label.trim().length < 1 || field.label.length > 160 || (field.required !== undefined && typeof field.required !== 'boolean')) fail('Choose unique field IDs, types and labels.');
     if (['file', 'image'].includes(field.type) && ++uploads > 5) fail('Use at most five upload fields.');
     const result = { id: field.id, type: field.type, label: field.label.trim(), required: field.required === true };
+    for (const [key, limit] of [['help', 300], ['placeholder', 160]]) {
+      if (field[key] !== undefined) {
+        if (typeof field[key] !== 'string' || field[key].length > limit) fail(`Shorten the ${key === 'help' ? 'help text' : 'example answer'} for ${result.label}.`);
+        if (field[key].trim()) result[key] = field[key].trim();
+      }
+    }
     if (['select', 'multiselect'].includes(field.type)) {
       if (!Array.isArray(field.options) || field.options.length < 1 || field.options.length > 50 || field.options.some((value) => typeof value !== 'string' || !value.trim() || value.length > 120) || new Set(field.options).size !== field.options.length) fail('Provide 1 to 50 different options.');
       result.options = [...field.options];

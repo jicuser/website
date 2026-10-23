@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Helmet } from 'react-helmet';
+import PageMetadata from '@/components/shell/PageMetadata';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowRight,
@@ -316,9 +317,7 @@ export function CampaignPage() {
       )}
       {c && (
         <>
-          <Helmet>
-            <title>{c.title} | JIC Fundraising</title>
-          </Helmet>
+          <PageMetadata title={c.title} description={c.story} noindex={false} />
           <header className="ops-campaign-hero">
             <p className="ops-eyebrow">Community fundraising · {c.category}</p>
             <h1>{c.title}</h1>

@@ -2095,6 +2095,48 @@ html.dark .admin-console .admin-field-error {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
+.tv-start-tasks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
+}
+.tv-start-tasks button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 78px;
+  padding: 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  color: var(--jic-text);
+  background: var(--jic-surface);
+  text-align: left;
+}
+.tv-start-tasks button[aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 -3px var(--jic-gold);
+}
+.tv-start-tasks svg {
+  color: var(--jic-gold);
+  flex-shrink: 0;
+}
+.tv-start-tasks strong {
+  display: block;
+  font-size: 16px;
+}
+.tv-start-tasks small {
+  display: block;
+  color: var(--jic-muted);
+  font-size: 13px;
+  margin-top: 3px;
+}
+@media (max-width: 600px) {
+  .tv-start-tasks {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+}
 .tv-screen-overview-card {
   margin: 0;
 }

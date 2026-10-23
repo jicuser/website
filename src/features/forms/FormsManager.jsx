@@ -77,7 +77,49 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
   const [editor, setEditor] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const closeEditor = useCallback(() => setEditor(null), []);
+  const closeEditor = useCallback(() => {
+    setEditor(null);
+    setParams((current) => {
+      const updated = new URLSearchParams(current);
+      updated.delete('edit');
+      return updated;
+    });
+  }, [setParams]);
+  const requestedEdit = params.get('edit') === '1';
+  useEffect(() => {
+    if (!requestedEdit || !form?.can_manage) return undefined;
+    const controller = new AbortController();
+    setBusy(true);
+    checked(
+      supabase
+        .from('custom_forms')
+        .select('*')
+        .eq('id', formId)
+        .single()
+        .abortSignal(controller.signal),
+    )
+      .then((definition) => {
+        if (controller.signal.aborted) return;
+        setBusy(false);
+        setEditor(definition);
+        setParams(
+          (current) => {
+            const updated = new URLSearchParams(current);
+            updated.delete('edit');
+            return updated;
+          },
+          { replace: true },
+        );
+      })
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setMessage('The editor could not be opened. Please try again.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setBusy(false);
+      });
+    return () => controller.abort();
+  }, [requestedEdit, form?.can_manage, formId, setParams]);
   const chooseTab = (next) => {
     if (tab === next) return;
     setParams((current) => {
@@ -110,7 +152,7 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
         registerBack={registerBack}
         onClose={closeEditor}
         onSaved={() => {
-          setEditor(null);
+          closeEditor();
           reload();
         }}
       />
@@ -149,6 +191,23 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
         )}
       </div>
       <nav className="admin-actions" aria-label="Form management">
+        {form.can_manage && tab !== 'overview' && (
+          <button
+            className="admin-button primary"
+            disabled={busy}
+            onClick={() =>
+              act(async () =>
+                setEditor(
+                  await checked(
+                    supabase.from('custom_forms').select('*').eq('id', form.id).single(),
+                  ),
+                ),
+              )
+            }
+          >
+            Edit form
+          </button>
+        )}
         <button
           className="admin-button"
           aria-pressed={tab === 'overview'}

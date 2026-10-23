@@ -18,7 +18,13 @@ export default function CustomFormsFields({
       name: field.id,
       disabled,
       required: field.required,
-      'aria-describedby': ['file', 'image'].includes(field.type) ? `${inputId}-help` : undefined,
+      'aria-describedby':
+        [
+          field.help && `${inputId}-hint`,
+          ['file', 'image'].includes(field.type) && `${inputId}-help`,
+        ]
+          .filter(Boolean)
+          .join(' ') || undefined,
     };
     let input;
     if (field.type === 'checkbox') {
@@ -36,6 +42,7 @@ export default function CustomFormsFields({
           {...common}
           rows={4}
           maxLength={6000}
+          placeholder={field.placeholder}
           value={value || ''}
           onChange={(event) => onChange(field.id, event.target.value)}
         />
@@ -101,6 +108,12 @@ export default function CustomFormsFields({
           min={type === 'number' ? -1e12 : undefined}
           max={type === 'number' ? 1e12 : undefined}
           value={value ?? ''}
+          placeholder={
+            field.placeholder || (field.type === 'phone' ? '07700 900000 or +44…' : undefined)
+          }
+          autoComplete={
+            field.type === 'phone' ? 'tel' : field.type === 'email' ? 'email' : undefined
+          }
           onChange={(event) =>
             onChange(
               field.id,
@@ -122,6 +135,11 @@ export default function CustomFormsFields({
           {field.required && <span aria-label="required"> *</span>}
         </label>
         {input}
+        {field.help && (
+          <span id={`${inputId}-hint`} className="workspace-meta">
+            {field.help}
+          </span>
+        )}
       </div>
     );
   });

@@ -38,7 +38,7 @@ export default function SponsorshipDays({
             onClick={() => onSelect(day.date)}
           >
             <span className="sponsorship-day-top">
-              <strong>Day {day.number}</strong>
+              <strong>{day.number} Ramadan</strong>
               {active ? (
                 <Check size={16} />
               ) : kind === 'suhoor' ? (

@@ -476,7 +476,7 @@ for (const existingDraft of [false, true]) {
       .toBeGreaterThan(readCount);
     expect(await page.evaluate((key) => sessionStorage.getItem(key), key)).toBe(draft);
     await page.getByRole('button', { name: 'Back to screens', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Current screens', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Choose a screen', exact: true })).toBeVisible();
     expect(await page.evaluate((key) => sessionStorage.getItem(key), key)).toBe(draft);
     expect(evidence.writes).toEqual([]);
     expect(evidence.errors).toEqual([]);

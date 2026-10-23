@@ -1,0 +1,63 @@
+.jic-radio-live-notice {
+  position: fixed;
+  bottom: calc(var(--jic-prayer-dock-height, 0px) + env(safe-area-inset-bottom, 0px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 2px 4px 2px 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--jic-surface) 92%, transparent);
+  color: var(--jic-text);
+  box-shadow: 0 6px 24px #0003;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 13px;
+}
+.jic-radio-live-notice > svg {
+  color: var(--jic-gold);
+  flex-shrink: 0;
+}
+.jic-radio-live-notice > span {
+  white-space: nowrap;
+}
+.jic-radio-live-notice button {
+  min-height: 44px;
+  font: inherit;
+}
+.jic-radio-notice-listen {
+  color: var(--jic-action);
+  font-weight: 700;
+  padding: 0 8px;
+}
+.jic-radio-notice-close {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  border-radius: 50%;
+}
+html[data-surface='solid'] .jic-radio-live-notice {
+  background: var(--jic-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  .jic-radio-live-notice {
+    background: var(--jic-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 2px solid currentColor;
+  }
+}
+@media (max-width: 359px) {
+  .jic-radio-live-notice {
+    gap: 5px;
+    padding-left: 10px;
+    font-size: 12px;
+  }
+}

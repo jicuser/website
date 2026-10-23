@@ -12,13 +12,10 @@ export default function RadioPlayerPage() {
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   useEffect(() => {
-    const title = document.title;
-    document.title = 'JIC Radio · Jamatia Islamic Centre';
     const audio = audioRef.current;
     return () => {
       audio?.pause();
       clearRadioMediaSession();
-      document.title = title;
     };
   }, []);
   return (

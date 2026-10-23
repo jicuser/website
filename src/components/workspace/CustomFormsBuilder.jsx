@@ -1,6 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { FIELD_TYPES, validateDraft } from '@/lib/customForms';
+import { validateDraft } from '@/lib/customForms';
+import {
+  QUESTION_PRESETS,
+  formAddress,
+  newQuestion,
+  starterQuestions,
+  updateQuestion,
+} from '@/lib/formBuilder';
+import CustomFormQuestion from './CustomFormQuestion';
 import { checked, Field } from './shared';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
 import { workflowChanged } from '@/lib/pageContent';
@@ -16,13 +24,7 @@ const initial = () => ({
   manager_ids: [],
   responsible_ids: [],
   watcher_ids: [],
-  schema: {
-    fields: [
-      { id: 'name', label: 'Your name', type: 'text', required: true },
-      { id: 'email', label: 'Email address', type: 'email', required: true },
-      { id: 'message', label: 'How can we help?', type: 'textarea', required: true },
-    ],
-  },
+  schema: { fields: starterQuestions('enquiry') },
 });
 
 export default function CustomFormsBuilder({
@@ -38,6 +40,9 @@ export default function CustomFormsBuilder({
       : { ...initial(), ...initialDraft },
   );
   const [people, setPeople] = useState([]);
+  const [addressTouched, setAddressTouched] = useState(Boolean(definition || initialDraft.slug));
+  const [template, setTemplate] = useState('enquiry');
+  const inFlight = useRef(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -67,7 +72,7 @@ export default function CustomFormsBuilder({
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
-  const setFields = (fields) => patch({ schema: { fields } });
+  const setFields = (fields) => patch({ schema: { ...draft.schema, fields } });
   useEffect(() => {
     let active = true;
     Promise.all([
@@ -107,7 +112,7 @@ export default function CustomFormsBuilder({
   }, [definition]);
 
   async function save(publish) {
-    if (busy || loading || loadFailed)
+    if (inFlight.current || busy || loading || loadFailed)
       throw new Error('Wait for the form and assignments to finish loading.');
     const invalid = validateDraft(draft);
     if (invalid) {
@@ -118,6 +123,7 @@ export default function CustomFormsBuilder({
       setMessage('Choose at least one responsible person before publishing.');
       throw new Error('Choose at least one responsible person before publishing.');
     }
+    inFlight.current = true;
     setBusy(true);
     setMessage('');
     try {
@@ -161,6 +167,7 @@ export default function CustomFormsBuilder({
       setMessage(error.message || 'The form could not be saved. Please try again.');
       throw error;
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   }
@@ -169,7 +176,17 @@ export default function CustomFormsBuilder({
   return (
     <section className="workspace-card custom-form-editor">
       <div className="workspace-header">
-        <h2>{draft.id ? 'Edit form' : 'Create form'}</h2>
+        <div>
+          <span className="content-status">
+            {draft.published_version ? (draft.enabled ? 'Live form' : 'Responses closed') : 'Draft'}
+          </span>
+          <h2>{draft.id ? 'Edit form' : 'Create form'}</h2>
+          {draft.published_version && (
+            <p className="workspace-meta">
+              Your published questions stay unchanged until you publish again.
+            </p>
+          )}
+        </div>
         <button disabled={busy} onClick={close}>
           Close editor
         </button>
@@ -181,26 +198,43 @@ export default function CustomFormsBuilder({
         </p>
       )}
       <fieldset disabled={busy || loading || loadFailed}>
-        <div className="workspace-grid">
-          <Field label="Form title">
-            <input
-              value={draft.title}
-              maxLength={160}
-              onChange={(event) => patch({ title: event.target.value })}
-            />
-          </Field>
-          <Field label="Form address">
-            <input
-              value={draft.slug}
-              readOnly={Boolean(draft.published_version)}
-              maxLength={80}
-              placeholder="volunteer-registration"
-              onChange={(event) =>
-                patch({ slug: event.target.value.toLowerCase().replace(/\s+/g, '-') })
-              }
-            />
-          </Field>
-        </div>
+        {!draft.id && (
+          <section className="custom-form-starters" aria-label="Form templates">
+            <h3>Start with a template</h3>
+            <div className="custom-form-quick-add">
+              {[
+                ['enquiry', 'Enquiry'],
+                ['registration', 'Registration'],
+                ['blank', 'Start blank'],
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={template === id}
+                  onClick={() => {
+                    setTemplate(id);
+                    setFields(starterQuestions(id));
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+        <h3>About your form</h3>
+        <Field label="Form title">
+          <input
+            value={draft.title}
+            maxLength={160}
+            onChange={(event) =>
+              patch({
+                title: event.target.value,
+                ...(!addressTouched ? { slug: formAddress(event.target.value) } : {}),
+              })
+            }
+          />
+        </Field>
         <Field label="Introduction">
           <textarea
             rows={3}
@@ -209,16 +243,73 @@ export default function CustomFormsBuilder({
             onChange={(event) => patch({ description: event.target.value })}
           />
         </Field>
-        <p className="workspace-meta">Address: /forms/{draft.slug || 'your-form-address'}</p>
-        <label className="custom-form-check workspace-field">
-          <span>Accept responses when published</span>
-          <input
-            type="checkbox"
-            checked={draft.enabled}
-            onChange={(event) => patch({ enabled: event.target.checked })}
-          />
-        </label>
+        <details className="custom-form-advanced">
+          <summary>Form address & availability</summary>
+          <Field label="Form address">
+            <input
+              value={draft.slug}
+              readOnly={Boolean(draft.published_version)}
+              maxLength={80}
+              placeholder="volunteer-registration"
+              onChange={(event) => {
+                setAddressTouched(true);
+                patch({ slug: event.target.value.toLowerCase().replace(/\s+/g, '-') });
+              }}
+            />
+          </Field>
+          <p className="workspace-meta">
+            /forms/{draft.slug || 'your-form-address'}
+            {draft.published_version ? ' · Published addresses stay the same.' : ''}
+          </p>
+          <label className="custom-form-check workspace-field">
+            <span>Accept responses when published</span>
+            <input
+              type="checkbox"
+              checked={draft.enabled}
+              onChange={(event) => patch({ enabled: event.target.checked })}
+            />
+          </label>
+        </details>
 
+        <h3>Questions</h3>
+        {draft.schema.fields.map((field, index) => (
+          <CustomFormQuestion
+            key={field.id}
+            field={field}
+            index={index}
+            fields={draft.schema.fields}
+            onChange={(next) => setFields(updateQuestion(draft.schema.fields, index, next))}
+            onRemove={() =>
+              setFields(draft.schema.fields.filter((_, position) => position !== index))
+            }
+            onMove={(direction) => {
+              const next = [...draft.schema.fields];
+              [next[index], next[index + direction]] = [next[index + direction], next[index]];
+              setFields(next);
+            }}
+          />
+        ))}
+        <div className="custom-form-quick-add" role="group" aria-label="Add a question">
+          {QUESTION_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              disabled={draft.schema.fields.length >= 40}
+              onClick={() =>
+                setFields([...draft.schema.fields, newQuestion(draft.schema.fields, preset.id)])
+              }
+            >
+              + {preset.name}
+            </button>
+          ))}
+          <button
+            type="button"
+            disabled={draft.schema.fields.length >= 40}
+            onClick={() => setFields([...draft.schema.fields, newQuestion(draft.schema.fields)])}
+          >
+            Add question
+          </button>
+        </div>
         <section className="custom-form-routing">
           <div>
             <h3>Who handles responses?</h3>
@@ -247,41 +338,6 @@ export default function CustomFormsBuilder({
           </div>
         </section>
 
-        <h3>Questions</h3>
-        {draft.schema.fields.map((field, index) => (
-          <FieldEditor
-            key={`${index}-${field.type}`}
-            field={field}
-            index={index}
-            fields={draft.schema.fields}
-            onChange={(next) =>
-              setFields(
-                draft.schema.fields.map((item, position) => (position === index ? next : item)),
-              )
-            }
-            onRemove={() =>
-              setFields(draft.schema.fields.filter((_, position) => position !== index))
-            }
-            onMove={(direction) => {
-              const next = [...draft.schema.fields];
-              [next[index], next[index + direction]] = [next[index + direction], next[index]];
-              setFields(next);
-            }}
-          />
-        ))}
-        <button
-          disabled={draft.schema.fields.length >= 40}
-          onClick={() => {
-            let number = draft.schema.fields.length + 1;
-            while (draft.schema.fields.some((field) => field.id === `field_${number}`)) number++;
-            setFields([
-              ...draft.schema.fields,
-              { id: `field_${number}`, label: '', type: 'text', required: false },
-            ]);
-          }}
-        >
-          Add question
-        </button>
         <details className="custom-form-advanced">
           <summary>Access & automatic action</summary>
           <p className="workspace-meta">
@@ -352,7 +408,9 @@ export default function CustomFormsBuilder({
             {preview ? 'Close preview' : 'Preview questions'}
           </button>
           <button onClick={() => save(false).catch(() => {})}>Save draft</button>
-          <button onClick={() => save(true).catch(() => {})}>Save and publish</button>
+          <button className="custom-form-publish" onClick={() => save(true).catch(() => {})}>
+            {busy ? 'Saving…' : draft.published_version ? 'Publish changes' : 'Save and publish'}
+          </button>
         </div>
         {draft.published_version && (
           <p className="workspace-meta">
@@ -364,6 +422,7 @@ export default function CustomFormsBuilder({
       {preview && (
         <div className="workspace-card workspace-form">
           <h3>Question preview</h3>
+          <h4>{draft.title || 'Your form'}</h4>
           <p>{draft.description}</p>
           <fieldset>
             <CustomFormsFields
@@ -381,158 +440,5 @@ export default function CustomFormsBuilder({
         </div>
       )}
     </section>
-  );
-}
-
-function FieldEditor({ field, fields, index, onChange, onRemove, onMove }) {
-  const patch = (value) => onChange({ ...field, ...value });
-  const previous = fields
-    .slice(0, index)
-    .filter(
-      (candidate) =>
-        !candidate.show_when && !['image', 'file', 'multiselect'].includes(candidate.type),
-    );
-  const parent = previous.find((candidate) => candidate.id === field.show_when?.field);
-  return (
-    <fieldset className="custom-form-field">
-      <legend>Question {index + 1}</legend>
-      <div className="workspace-grid">
-        <Field label="Label">
-          <input
-            value={field.label}
-            maxLength={160}
-            onChange={(event) => patch({ label: event.target.value })}
-          />
-        </Field>
-        <Field label="Answer type">
-          <select
-            value={field.type}
-            onChange={(event) => {
-              const next = { ...field, type: event.target.value };
-              if (['select', 'multiselect'].includes(next.type))
-                next.options = field.options || ['Yes', 'No'];
-              else delete next.options;
-              onChange(next);
-            }}
-          >
-            {FIELD_TYPES.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </div>
-      <Field label="Field key">
-        <input
-          value={field.id}
-          maxLength={40}
-          onChange={(event) => patch({ id: event.target.value })}
-        />
-      </Field>
-      <label className="custom-form-check workspace-field">
-        <span>Required answer</span>
-        <input
-          type="checkbox"
-          checked={field.required}
-          onChange={(event) => patch({ required: event.target.checked })}
-        />
-      </label>
-      {['select', 'multiselect'].includes(field.type) && (
-        <Field label="Choices (one per line)">
-          <textarea
-            rows={4}
-            value={(field.options || []).join('\n')}
-            onChange={(event) => patch({ options: event.target.value.split('\n') })}
-          />
-        </Field>
-      )}
-      <Field label="Show question">
-        <select
-          value={field.show_when?.field || ''}
-          onChange={(event) => {
-            if (!event.target.value) {
-              const next = { ...field };
-              delete next.show_when;
-              onChange(next);
-            } else {
-              const chosen = previous.find((candidate) => candidate.id === event.target.value);
-              patch({
-                show_when: {
-                  field: event.target.value,
-                  operator: 'equals',
-                  value:
-                    chosen.type === 'checkbox'
-                      ? true
-                      : chosen.type === 'number'
-                        ? 0
-                        : chosen.options?.[0] || '',
-                },
-              });
-            }
-          }}
-        >
-          <option value="">Always</option>
-          {previous.map((candidate) => (
-            <option key={candidate.id} value={candidate.id}>
-              Depending on: {candidate.label || candidate.id}
-            </option>
-          ))}
-        </select>
-      </Field>
-      {field.show_when && (
-        <div className="workspace-grid">
-          <Field label="Condition">
-            <select
-              value={field.show_when.operator}
-              onChange={(event) =>
-                patch({ show_when: { ...field.show_when, operator: event.target.value } })
-              }
-            >
-              <option value="equals">Equals</option>
-              <option value="not_equals">Does not equal</option>
-            </select>
-          </Field>
-          <Field label="Answer to match">
-            {parent?.type === 'checkbox' ? (
-              <select
-                value={String(field.show_when.value)}
-                onChange={(event) =>
-                  patch({ show_when: { ...field.show_when, value: event.target.value === 'true' } })
-                }
-              >
-                <option value="true">Confirmed</option>
-                <option value="false">Not confirmed</option>
-              </select>
-            ) : (
-              <input
-                type={parent?.type === 'number' ? 'number' : 'text'}
-                value={field.show_when.value}
-                onChange={(event) =>
-                  patch({
-                    show_when: {
-                      ...field.show_when,
-                      value:
-                        parent?.type === 'number' ? Number(event.target.value) : event.target.value,
-                    },
-                  })
-                }
-              />
-            )}
-          </Field>
-        </div>
-      )}
-      <div className="workspace-actions">
-        <button onClick={() => onMove(-1)} disabled={index === 0}>
-          Move up
-        </button>
-        <button onClick={() => onMove(1)} disabled={index === fields.length - 1}>
-          Move down
-        </button>
-        <button onClick={onRemove} disabled={fields.length === 1}>
-          Remove question
-        </button>
-      </div>
-    </fieldset>
   );
 }

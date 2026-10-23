@@ -4,10 +4,12 @@ import { Heart, Moon, Sun, ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useContent } from '@/context/ContentContext';
 import { isPageVisible } from '@/lib/pageVisibility';
-import { fullDate, seasonDays } from '@/lib/bookingCalendar';
+import { daysInRange, fullDate, seasonDays } from '@/lib/bookingCalendar';
 import { money, toPence } from '@/features/operations/model';
 import { printTable } from '@/lib/printTable';
 import SponsorshipDays from './SponsorshipDays';
+import SponsorshipRange from './SponsorshipRange';
+import SponsorshipTable from './SponsorshipTable';
 import useRamadanCalendar from './useRamadanCalendar';
 import {
   RAMADAN_KINDS,
@@ -26,6 +28,8 @@ export default function RamadanPage({ kind = null }) {
   const { getContent } = useContent();
   const days = useMemo(() => seasonDays(season), [season]);
   const [selected, setSelected] = useState([]),
+    [range, setRange] = useState({}),
+    [dayView, setDayView] = useState('days'),
     [name, setName] = useState(''),
     [contact, setContact] = useState(''),
     [amount, setAmount] = useState(''),
@@ -38,6 +42,7 @@ export default function RamadanPage({ kind = null }) {
   const target = season?.[`${kind}_target_pence`] || 0;
   useEffect(() => {
     setSelected([]);
+    setRange({});
     setReceipt('');
     setError('');
     requestKey.current = crypto.randomUUID();
@@ -55,6 +60,17 @@ export default function RamadanPage({ kind = null }) {
   );
   const eligible = days.filter((day) => canSponsorDay(state.data, kind, day.date));
   const open = kind && ramadanOpen(state.data, kind);
+  const visibleDays = daysInRange(days, range);
+  const selectDay = (date) => {
+    if (busy || receipt) return;
+    setSelected((current) =>
+      current.includes(date) ? current.filter((value) => value !== date) : [...current, date],
+    );
+  };
+  const dayInfo = (date) => ({
+    ...ramadanDay(state.data, kind, date),
+    disabled: !canSponsorDay(state.data, kind, date),
+  });
   async function submit(event) {
     event.preventDefault();
     if (busy || !selected.length || !open) return;
@@ -183,24 +199,57 @@ export default function RamadanPage({ kind = null }) {
                   {eligible.length} {kind === 'daily' ? 'days open' : 'days available'}
                 </span>
               </div>
-              <SponsorshipDays
-                days={days}
-                kind={kind}
-                selected={selected}
-                onSelect={(date) => {
-                  if (receipt) return;
-                  setSelected((current) =>
-                    current.includes(date)
-                      ? current.filter((value) => value !== date)
-                      : [...current, date],
-                  );
-                }}
-                disabled={busy || !!receipt}
-                dayInfo={(date) => ({
-                  ...ramadanDay(state.data, kind, date),
-                  disabled: !canSponsorDay(state.data, kind, date),
-                })}
-              />
+              <div
+                className="booking-choices sponsorship-view-choice"
+                role="group"
+                aria-label="Sponsorship view"
+              >
+                {[
+                  ['days', 'Days'],
+                  ['table', 'Table'],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={dayView === value}
+                    onClick={() => setDayView(value)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <details className="sponsorship-range-options">
+                <summary>Choose a date range</summary>
+                <SponsorshipRange
+                  days={days}
+                  value={range}
+                  onChange={setRange}
+                  disabled={busy || !!receipt}
+                  onSelect={(dates) => {
+                    const available = dates.filter((date) => canSponsorDay(state.data, kind, date));
+                    setSelected((current) => [...new Set([...current, ...available])]);
+                  }}
+                />
+              </details>
+              {dayView === 'table' ? (
+                <SponsorshipTable
+                  days={visibleDays}
+                  kind={kind}
+                  selected={selected}
+                  onSelect={selectDay}
+                  dayInfo={dayInfo}
+                  disabled={busy || !!receipt}
+                />
+              ) : (
+                <SponsorshipDays
+                  days={visibleDays}
+                  kind={kind}
+                  selected={selected}
+                  onSelect={selectDay}
+                  disabled={busy || !!receipt}
+                  dayInfo={dayInfo}
+                />
+              )}
               <div className="booking-key">
                 {['available', 'pending', 'confirmed', 'closed'].map((status) => (
                   <span key={status}>
@@ -328,18 +377,18 @@ export default function RamadanPage({ kind = null }) {
               <table className="booking-table" ref={table}>
                 <thead>
                   <tr>
-                    <th>Day</th>
-                    <th>Date</th>
+                    <th>Ramadan day</th>
+                    <th>UK date</th>
                     <th>Status</th>
                     <th>Sponsor</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {days.map((day) => {
+                  {visibleDays.map((day) => {
                     const entry = ramadanDay(state.data, kind, day.date);
                     return (
                       <tr key={day.date}>
-                        <td>{day.number}</td>
+                        <td>{day.number} Ramadan</td>
                         <td>{fullDate(day.date)}</td>
                         <td>{ramadanStatus(kind, entry.status)}</td>
                         <td>

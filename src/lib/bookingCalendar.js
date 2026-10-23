@@ -39,3 +39,25 @@ export function seasonDays(season) {
     },
   );
 }
+
+export function seasonLength(start, end) {
+  const parse = (value) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return NaN;
+    const date = new Date(`${value}T12:00:00Z`);
+    return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value
+      ? date.getTime()
+      : NaN;
+  };
+  const length = (parse(end) - parse(start)) / 86400000 + 1;
+  if (![29, 30].includes(length))
+    throw new Error(
+      'Choose a last day 28 or 29 days after the first day, for a 29- or 30-day Ramadan.',
+    );
+  return length;
+}
+
+export function daysInRange(days, range = {}) {
+  return days.filter(
+    (day) => (!range.from || day.date >= range.from) && (!range.to || day.date <= range.to),
+  );
+}

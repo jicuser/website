@@ -11,6 +11,7 @@ import MainLayout from '@/layouts/MainLayout';
 import CanonicalPageRedirect from '@/components/shell/CanonicalPageRedirect';
 import RouteScrollReset from '@/components/shell/RouteScrollReset';
 import HomePage from '@/pages/HomePage';
+import PageTitle from '@/components/shell/PageTitle';
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const RamadanPage = lazy(() => import('@/features/ramadan/RamadanPage'));
 const RamadanDisplayPage = lazy(() => import('@/pages/RamadanDisplayPage'));
@@ -94,6 +95,7 @@ function AppRoutes() {
         }
       >
         <RouteScrollReset />
+        <PageTitle />
         <Routes>
           <Route path="/portal" element={<CommunityPortalPage />} />
           <Route path="/account/invoices" element={<MyInvoicesPage />} />
@@ -175,10 +177,10 @@ function AppRoutes() {
             <Route path="services/education" element={<ServicesPage />} />
             <Route path="services/community" element={<ServicesPage />} />
             <Route path="services/hall-booking" element={<HallBookingPage />} />
-            <Route path="ramadan" element={<RamadanPage />} />
-            <Route path="ramadan/suhoor" element={<RamadanPage kind="suhoor" />} />
-            <Route path="ramadan/iftar" element={<RamadanPage kind="iftar" />} />
-            <Route path="ramadan/daily-giving" element={<RamadanPage kind="daily" />} />
+            <Route path="ramadan" element={<RamadanPage key="overview" />} />
+            <Route path="ramadan/suhoor" element={<RamadanPage key="suhoor" kind="suhoor" />} />
+            <Route path="ramadan/iftar" element={<RamadanPage key="iftar" kind="iftar" />} />
+            <Route path="ramadan/daily-giving" element={<RamadanPage key="daily" kind="daily" />} />
             <Route path="donate" element={<DonationsPage />} />
             <Route path="get-involved" element={<GetInvolvedPage />} />
             <Route path="get-involved/volunteer" element={<VolunteerPage />} />

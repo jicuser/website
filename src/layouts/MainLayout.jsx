@@ -1,6 +1,6 @@
 import { useContent } from '@/context/ContentContext';
 import { isPageVisible } from '@/lib/pageVisibility';
-import React, { Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
@@ -16,11 +16,11 @@ import DailyReminder from '@/components/shell/DailyReminder';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import SpiritualOverlays from '@/components/shell/SpiritualOverlays';
 import Footer from '@/components/shell/Footer';
-import PageTitle from '@/components/shell/PageTitle';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
-import AdminBar from '@/components/shell/AdminBar';
 import { useAuth } from '@/context/AuthContext';
 import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
+
+const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
 
 export default function MainLayout() {
   return (
@@ -61,7 +61,6 @@ function PublicLayout() {
       <a className="jic-skip-link" href="#main-content">
         Skip to content
       </a>
-      <PageTitle />
       {isHome && <PublicBackdrop />}
       <UnifiedHeader />
       <FloatingPageTools />
@@ -101,7 +100,11 @@ function PublicLayout() {
       <Footer />
       <ScrollToTop />
       {!preview && !isTask && <SpiritualOverlays />}
-      {isAdmin && !preview && <AdminBar />}
+      {isAdmin && !preview && (
+        <Suspense fallback={null}>
+          <AdminBar />
+        </Suspense>
+      )}
     </div>
   );
 }

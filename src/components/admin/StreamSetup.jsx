@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Radio } from 'lucide-react';
+import { Monitor, Radio, Video } from 'lucide-react';
 import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
@@ -25,6 +25,7 @@ function CaptureDock({ slot, onTarget }) {
 }
 
 function ScreenOverview({ onOpen }) {
+  const [task, setTask] = useState('layout');
   const [states, setStates] = useState({});
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
@@ -58,11 +59,35 @@ function ScreenOverview({ onOpen }) {
       <div className="admin-heading">
         <div>
           <span className="admin-eyebrow">TV & SCREENS</span>
-          <h2>Current screens</h2>
-          <p>Choose the screen you want to update.</p>
+          <h2>Choose a screen</h2>
+          <p>
+            {task === 'layout'
+              ? 'Update a layout, prayer times or posters.'
+              : 'Show a camera, video or presentation on a hall screen.'}
+          </p>
         </div>
         <button className="admin-button" disabled={loading} onClick={() => load()}>
           {loading ? 'Checking…' : 'Refresh status'}
+        </button>
+      </div>
+      <div className="tv-start-tasks" role="group" aria-label="What would you like to do?">
+        <button type="button" aria-pressed={task === 'layout'} onClick={() => setTask('layout')}>
+          <Monitor size={22} aria-hidden="true" />
+          <span>
+            <strong>Screen layouts</strong>
+            <small>Prayer times, posters & notices</small>
+          </span>
+        </button>
+        <button
+          type="button"
+          aria-pressed={task === 'presentation'}
+          onClick={() => setTask('presentation')}
+        >
+          <Video size={22} aria-hidden="true" />
+          <span>
+            <strong>Live presentation</strong>
+            <small>Camera, video or screen sharing</small>
+          </span>
         </button>
       </div>
       {message && (
@@ -71,63 +96,70 @@ function ScreenOverview({ onOpen }) {
         </p>
       )}
       <div className="tv-screen-overview-grid">
-        {TV_SCREENS.map((screen) => {
-          const state = states[screen.id];
-          const data = state?.data;
-          const presenting = Boolean(data?.presentation);
-          return (
-            <article className="admin-panel tv-screen-overview-card" key={screen.id}>
-              <div className="tv-screen-overview-title">
-                <div>
-                  <strong>{screen.label}</strong>
-                  <span className="content-status">
-                    {data
-                      ? presenting
-                        ? 'Presentation active'
-                        : 'Automatic display'
-                      : loading
-                        ? 'Checking…'
-                        : 'Status unavailable'}
-                  </span>
+        {TV_SCREENS.filter((screen) => task === 'layout' || screen.id !== 'shoe-area').map(
+          (screen) => {
+            const state = states[screen.id];
+            const data = state?.data;
+            const presenting = Boolean(data?.presentation);
+            return (
+              <article className="admin-panel tv-screen-overview-card" key={screen.id}>
+                <div className="tv-screen-overview-title">
+                  <div>
+                    <strong>{screen.label}</strong>
+                    <span className="content-status">
+                      {data
+                        ? presenting
+                          ? 'Presentation active'
+                          : 'Automatic display'
+                        : loading
+                          ? 'Checking…'
+                          : 'Status unavailable'}
+                    </span>
+                  </div>
+                  {state?.error && <small>Could not read live status</small>}
                 </div>
-                {state?.error && <small>Could not read live status</small>}
-              </div>
-              {presenting && <p>Automatic displays return when the presentation ends.</p>}
-              <div className="admin-actions">
-                <button
-                  className="admin-button primary"
-                  onClick={() => onOpen(screen.id, false, true)}
-                >
-                  Edit automatic display
-                </button>
-                {screen.id !== 'shoe-area' &&
-                  (presenting ? (
+                {presenting && <p>Automatic displays return when the presentation ends.</p>}
+                <div className="admin-actions">
+                  {task === 'layout' && (
                     <button
                       className="admin-button primary"
-                      onClick={() => onOpen(screen.id, false, false)}
+                      onClick={() => onOpen(screen.id, false, true)}
                     >
-                      Manage live presentation
+                      Edit automatic display
                     </button>
-                  ) : (
-                    <button className="admin-button" onClick={() => onOpen(screen.id, true, false)}>
-                      Quick present
-                    </button>
-                  ))}
-                {screen.id !== 'shoe-area' && !presenting && (
-                  <details className="tv-screen-more">
-                    <summary>More options</summary>
-                    <button
-                      className="admin-button"
-                      onClick={() => onOpen(screen.id, false, false)}
-                    >
-                      Presentation setup
-                    </button>
-                  </details>
-                )}
-              </div>
-            </article>
-          );
-        })}
+                  )}
+                  {task === 'presentation' &&
+                    (presenting ? (
+                      <button
+                        className="admin-button primary"
+                        onClick={() => onOpen(screen.id, false, false)}
+                      >
+                        Manage live presentation
+                      </button>
+                    ) : (
+                      <button
+                        className="admin-button"
+                        onClick={() => onOpen(screen.id, true, false)}
+                      >
+                        Quick present
+                      </button>
+                    ))}
+                  {task === 'presentation' && !presenting && (
+                    <details className="tv-screen-more">
+                      <summary>More options</summary>
+                      <button
+                        className="admin-button"
+                        onClick={() => onOpen(screen.id, false, false)}
+                      >
+                        Presentation setup
+                      </button>
+                    </details>
+                  )}
+                </div>
+              </article>
+            );
+          },
+        )}
       </div>
     </>
   );
