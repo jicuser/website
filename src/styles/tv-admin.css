@@ -147,21 +147,19 @@
 .tv-screen-miniature {
   margin: 0;
 }
-.tv-everyday-miniature figcaption,
-.tv-screen-miniature figcaption {
+.tv-everyday-miniature figcaption {
   display: grid;
   gap: 6px;
   font-size: 0.875rem;
   overflow-wrap: anywhere;
 }
-.tv-everyday-miniature figcaption > :not(strong),
-.tv-screen-miniature figcaption > :not(strong) {
+.tv-everyday-miniature figcaption > :not(strong) {
   color: var(--jic-text-secondary);
 }
 .tv-screen-miniature {
-  grid-template-columns: minmax(110px, 0.8fr) minmax(0, 1fr);
+  position: relative;
   align-items: center;
-  margin-block: 16px;
+  margin: 0;
 }
 .tv-screen-miniature .tv-design-mini-block {
   font-size: 5px;

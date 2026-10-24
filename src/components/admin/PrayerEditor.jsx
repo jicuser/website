@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Upload, Download, Save, Clock3, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
@@ -16,6 +16,7 @@ const CSV_TEMPLATE =
 const comparable = (value) => JSON.stringify(value || {});
 
 export default function PrayerEditor() {
+  const [view, setView] = useState('daily');
   const [date, setDate] = useState(londonDate);
   const [form, setForm] = useState({});
   const [savedForm, setSavedForm] = useState({});
@@ -24,9 +25,11 @@ export default function PrayerEditor() {
   const [pending, setPending] = useState(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [dates, setDates] = useState([]);
+  const weeklyLoaded = useRef(false);
 
   const dirtyDay = comparable(form) !== comparable(savedForm);
   const dirtyJummah = comparable(jummah) !== comparable(savedJummah);
@@ -34,29 +37,38 @@ export default function PrayerEditor() {
 
   const load = useCallback(async (targetDate) => {
     setLoading(true);
+    setLoadFailed(false);
     setError('');
     try {
       const [dayResult, jummahResult, listResult] = await Promise.all([
         supabase.from('prayer_times').select('*').eq('d_date', targetDate).maybeSingle(),
-        supabase
-          .from('page_content')
-          .select('content_value')
-          .eq('content_key', 'jummah_settings')
-          .maybeSingle(),
+        weeklyLoaded.current
+          ? Promise.resolve({ data: null, error: null })
+          : supabase
+              .from('page_content')
+              .select('content_value')
+              .eq('content_key', 'jummah_settings')
+              .maybeSingle(),
         supabase.from('prayer_times').select('d_date').order('d_date').limit(1000),
       ]);
       const failure = dayResult.error || jummahResult.error || listResult.error;
       if (failure) throw failure;
       const day = dayResult.data || {};
-      const weekly = jummahResult.data
-        ? { ...defaultJummah, ...JSON.parse(jummahResult.data.content_value) }
-        : defaultJummah;
       setForm(day);
       setSavedForm(day);
-      setJummah(weekly);
-      setSavedJummah(weekly);
+      // Weekly settings are independent of the date editor. Date reads must not
+      // replace an unsaved weekly draft when staff switch between tasks.
+      if (!weeklyLoaded.current) {
+        const weekly = jummahResult.data
+          ? { ...defaultJummah, ...JSON.parse(jummahResult.data.content_value) }
+          : defaultJummah;
+        setJummah(weekly);
+        setSavedJummah(weekly);
+        weeklyLoaded.current = true;
+      }
       setDates(listResult.data || []);
     } catch (loadError) {
+      setLoadFailed(true);
       setError(loadError.message);
     } finally {
       setLoading(false);
@@ -119,7 +131,7 @@ export default function PrayerEditor() {
   }, [pending]);
 
   const saveAll = useCallback(async () => {
-    if (!dirty || busy || loading) return;
+    if (!dirty || busy || loading || loadFailed) return false;
     setBusy(true);
     setError('');
     setMessage('');
@@ -135,9 +147,21 @@ export default function PrayerEditor() {
     } finally {
       setBusy(false);
     }
-  }, [dirty, busy, loading, pending, publishCsv, dirtyJummah, saveJummah, dirtyDay, saveDay]);
+  }, [
+    dirty,
+    busy,
+    loading,
+    loadFailed,
+    pending,
+    publishCsv,
+    dirtyJummah,
+    saveJummah,
+    dirtyDay,
+    saveDay,
+  ]);
 
   const saveOne = async (task) => {
+    if (busy || loading || loadFailed) return false;
     setBusy(true);
     setError('');
     setMessage('');
@@ -152,7 +176,7 @@ export default function PrayerEditor() {
     }
   };
 
-  useRegisterAdminSave(saveAll, dirty && !busy && !loading, 'Save timetable changes');
+  useRegisterAdminSave(saveAll, dirty, 'Save timetable changes', busy || loading);
 
   const importCsv = async (event) => {
     const file = event.target.files?.[0];
@@ -217,7 +241,45 @@ export default function PrayerEditor() {
         </div>
       )}
 
-      <section className="admin-panel">
+      <p className="admin-time-preview">
+        Stored coverage: {loading ? 'Loading dates…' : storedRange}
+      </p>
+      <p className="admin-time-preview">
+        {weeklyLoaded.current ? (
+          <>
+            Weekly Jummah: 1st Jama’ah {displayTime(jummah.jummah_1_jamah)} · 2nd Jama’ah{' '}
+            {displayTime(jummah.jummah_2_jamah)}
+          </>
+        ) : loading ? (
+          'Loading weekly Jummah…'
+        ) : (
+          'Weekly Jummah unavailable.'
+        )}
+      </p>
+      <nav className="admin-actions prayer-task-views" aria-label="Timetable tasks">
+        {[
+          ['daily', 'Daily times'],
+          ['jummah', 'Jummah'],
+          ['csv', 'CSV import'],
+        ].map(([id, label]) => (
+          <button
+            type="button"
+            className="admin-button"
+            key={id}
+            aria-pressed={view === id}
+            aria-controls={`prayer-view-${id}`}
+            onClick={() => setView(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+      <section
+        className="admin-panel"
+        id="prayer-view-csv"
+        aria-label="CSV import"
+        hidden={view !== 'csv'}
+      >
         <div className="admin-section-title">
           <Upload />
           <div>
@@ -231,7 +293,7 @@ export default function PrayerEditor() {
               <Upload size={17} />
               Choose CSV
               <input
-                disabled={busy || loading}
+                disabled={busy || loading || loadFailed}
                 type="file"
                 accept=".csv,text/csv"
                 onChange={importCsv}
@@ -275,7 +337,7 @@ export default function PrayerEditor() {
             </div>
             <div className="admin-actions">
               <button
-                disabled={busy}
+                disabled={busy || loading || loadFailed}
                 onClick={() => saveOne(publishCsv)}
                 className="admin-button primary"
               >
@@ -289,7 +351,12 @@ export default function PrayerEditor() {
         )}
       </section>
 
-      <section className="admin-panel">
+      <section
+        className="admin-panel"
+        id="prayer-view-jummah"
+        aria-label="Jummah"
+        hidden={view !== 'jummah'}
+      >
         <div className="admin-section-title">
           <Clock3 />
           <div>
@@ -301,7 +368,7 @@ export default function PrayerEditor() {
             <label key={key}>
               {title}
               <input
-                disabled={loading || busy}
+                disabled={loading || busy || loadFailed}
                 type="time"
                 value={jummah[key] || ''}
                 onChange={(event) => setJummah({ ...jummah, [key]: event.target.value })}
@@ -314,7 +381,7 @@ export default function PrayerEditor() {
           {displayTime(jummah.jummah_2_jamah)}
         </p>
         <button
-          disabled={busy || loading || !dirtyJummah}
+          disabled={busy || loading || loadFailed || !dirtyJummah}
           onClick={() => saveOne(saveJummah)}
           className="admin-button primary"
         >
@@ -323,28 +390,56 @@ export default function PrayerEditor() {
         </button>
       </section>
 
-      <section className="admin-panel">
-        <h3>Single date</h3>
+      <section
+        className="admin-panel"
+        id="prayer-view-daily"
+        aria-label="Daily times"
+        hidden={view !== 'daily'}
+      >
+        <h3>Daily times</h3>
         <label className="admin-date">
           Date
-          <input disabled={busy} type="date" value={date} onChange={changeDate} />
+          <input disabled={busy || loading} type="date" value={date} onChange={changeDate} />
         </label>
-        <div className="admin-field-grid">
-          {prayerFields.map(([key, title]) => (
-            <label key={key}>
-              {title}
-              <input
-                disabled={loading || busy}
-                type="time"
-                value={form[key]?.slice(0, 5) || ''}
-                onChange={(event) => setForm({ ...form, [key]: event.target.value })}
-              />
-            </label>
+        <div className="prayer-daily-fields">
+          {['fajr', 'zuhr', 'asr', 'maghrib', 'isha'].map((prayer) => (
+            <fieldset
+              className="prayer-time-pair"
+              key={prayer}
+              disabled={loading || busy || loadFailed}
+            >
+              <legend>
+                {prayerFields.find(([key]) => key === `${prayer}_begins`)[1].replace(' begins', '')}
+              </legend>
+              {prayerFields
+                .filter(([key]) => key.startsWith(`${prayer}_`))
+                .map(([key, title]) => (
+                  <label key={key}>
+                    <span aria-hidden="true">{key.endsWith('_begins') ? 'Start' : 'Jama’ah'}</span>
+                    <input
+                      aria-label={title}
+                      type="time"
+                      value={form[key]?.slice(0, 5) || ''}
+                      onChange={(event) => setForm({ ...form, [key]: event.target.value })}
+                    />
+                  </label>
+                ))}
+            </fieldset>
           ))}
+          <label className="prayer-sunrise">
+            Sunrise
+            <input
+              disabled={loading || busy || loadFailed}
+              type="time"
+              value={form.sunrise?.slice(0, 5) || ''}
+              onChange={(event) => setForm({ ...form, sunrise: event.target.value })}
+            />
+          </label>
         </div>
         <label className="admin-check">
           <input
             type="checkbox"
+            disabled={loading || busy || loadFailed}
             checked={Boolean(form.is_ramadan)}
             onChange={(event) => setForm({ ...form, is_ramadan: event.target.checked })}
           />{' '}
@@ -357,7 +452,7 @@ export default function PrayerEditor() {
               <label key={key}>
                 {title}
                 <input
-                  disabled={loading || busy}
+                  disabled={loading || busy || loadFailed}
                   type="time"
                   value={form[key]?.slice(0, 5) || ''}
                   onChange={(event) => setForm({ ...form, [key]: event.target.value })}
@@ -367,7 +462,7 @@ export default function PrayerEditor() {
           </div>
         </details>
         <button
-          disabled={busy || loading || !dirtyDay}
+          disabled={busy || loading || loadFailed || !dirtyDay}
           onClick={() => saveOne(saveDay)}
           className="admin-button primary"
         >

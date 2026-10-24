@@ -388,6 +388,10 @@ test('Page directory opens a focused workspace and Add page opens a new draft', 
   ).toBeVisible();
   await page.locator('.page-directory__section[open] .page-directory__name').first().click();
   await expect(page.locator('.page-editor-controls')).toBeVisible();
+  const workspace = page.locator('.page-workspace');
+  const title = await workspace.locator(':scope > .admin-heading h2').innerText();
+  await expect(workspace.getByRole('heading', { name: title, exact: true })).toHaveCount(1);
+  await expect(workspace.getByRole('link', { name: /Open (website|page)/ })).toHaveCount(1);
   await expect(page.getByRole('button', { name: 'Edit & preview', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Live preview', exact: true }).click();
   await expect(page.locator('.page-editor-preview iframe')).toBeVisible();

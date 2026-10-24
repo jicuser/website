@@ -16,7 +16,7 @@ export default function HistorySection() {
           fallbackBody="From our founding members to the community we serve today."
         />
         <Link className="about-text-link" to="/about#team">
-          Meet our founder members <ArrowRight size={16} aria-hidden="true" />
+          About the people of JIC <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </div>
       <ol className="about-timeline">

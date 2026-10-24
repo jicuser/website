@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 async function openHome(page, theme, width = 390) {
+  await page.route('**/*', (route) =>
+    ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname)
+      ? route.continue()
+      : route.abort(),
+  );
   await page.setViewportSize({ width, height: 844 });
   await page.addInitScript((value) => {
     localStorage.setItem('jic-theme', value);
@@ -14,7 +19,7 @@ async function openHome(page, theme, width = 390) {
 }
 
 for (const theme of ['dark', 'light']) {
-  test(`one homepage photo continues behind the header and hero in ${theme} mode`, async ({
+  test(`homepage photo stays within the introduction in ${theme} mode`, async ({
     page,
   }, testInfo) => {
     await openHome(page, theme, 320);
@@ -42,8 +47,12 @@ for (const theme of ['dark', 'light']) {
       const header = document.querySelector('.jic-unified-header');
       const hero = document.querySelector('.jic-hero');
       return {
-        photoStartsAtTop: image.top === 0 && image.left === 0 && image.width >= innerWidth,
-        headerOverPhoto: header.getBoundingClientRect().top >= image.top,
+        photoMatchesHero:
+          image.top === hero.getBoundingClientRect().top &&
+          image.bottom === hero.getBoundingClientRect().bottom,
+        photoPosition: getComputedStyle(document.querySelector('.jic-page-backdrop')).position,
+        contentBackground: getComputedStyle(document.querySelector('.jic-home-content'))
+          .backgroundColor,
         headerBackground: getComputedStyle(header).backgroundColor,
         heroBackground: getComputedStyle(hero).backgroundColor,
         heroImage: getComputedStyle(hero).backgroundImage,
@@ -52,8 +61,9 @@ for (const theme of ['dark', 'light']) {
         overflow: document.documentElement.scrollWidth > innerWidth + 1,
       };
     });
-    expect(surfaces.photoStartsAtTop).toBe(true);
-    expect(surfaces.headerOverPhoto).toBe(true);
+    expect(surfaces.photoMatchesHero).toBe(true);
+    expect(surfaces.photoPosition).toBe('absolute');
+    expect(surfaces.contentBackground).not.toBe('rgba(0, 0, 0, 0)');
     expect(surfaces.headerBackground).toBe('rgba(0, 0, 0, 0)');
     expect(surfaces.heroBackground).toBe('rgba(0, 0, 0, 0)');
     expect(surfaces.heroImage).toBe('none');

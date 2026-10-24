@@ -22,7 +22,7 @@ const services = NAV_GROUPS.find((group) => group.path === '/services');
 
 export default function ServiceCategoriesSection() {
   const { pathname, hash } = useLocation();
-  const path = legacyAnchors[hash] || pathname;
+  const path = legacyAnchors[hash] || pathname.replace(/\/+$/, '');
   if (path === '/services/community')
     return <ServiceJourney journey={SERVICE_JOURNEYS.community} />;
   const Category = categories[path];

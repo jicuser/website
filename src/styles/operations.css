@@ -1059,3 +1059,12 @@ html[data-theme] .admin-console .ops-admin .ops-badge {
   margin: 0 0 12px;
   font-size: clamp(2rem, 4vw, 3rem);
 }
+
+.ops-review-workspace {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.ops-review-workspace .ops-form {
+  scroll-margin-block: 90px;
+}

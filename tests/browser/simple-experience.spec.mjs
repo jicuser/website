@@ -294,6 +294,11 @@ test('Ramadan staff table opens and closes a date range and accepts a 29-day end
   await login();
   await page.goto('/admin?section=ramadan');
   const range = page.getByRole('group', { name: 'Sponsorship date range' });
+  await expect(page.getByRole('button', { name: 'Month', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await page.getByRole('button', { name: 'Table', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Table', exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',

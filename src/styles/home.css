@@ -18,14 +18,14 @@ html[data-theme='dark'] .jic-inner-route {
     --jic-photo-veil: var(--jic-bg);
   }
 }
-/* The homepage shares one photo behind its header and content. */
+/* The homepage photograph belongs to its introduction, not the full document. */
 .jic-public-route {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
 }
 .jic-page-backdrop {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
@@ -68,6 +68,7 @@ html[data-theme] .jic-premium-home {
 html[data-theme] .jic-premium-home .jic-hero {
   min-height: 0;
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   border-radius: 0;
   color: var(--jic-text);
@@ -374,6 +375,7 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
   row-gap: 32px;
   padding-block: 32px;
   border-top: 1px solid var(--jic-border);
+  background: var(--jic-bg);
 }
 /* One spacing owner prevents adjacent section margins from compounding. */
 .jic-home-route .jic-premium-home .jic-home-content > * {

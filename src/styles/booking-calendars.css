@@ -218,7 +218,9 @@
 .date-calendar-day span {
   font-size: 10px;
   line-height: 1.2;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
 }
 .date-calendar-day strong {
   font-size: 14px;
@@ -442,4 +444,21 @@
   .booking-table-wrap {
     overflow: visible;
   }
+}
+
+.site-visibility-section > summary {
+  min-height: 44px;
+  cursor: pointer;
+  padding-block: 8px;
+  color: var(--jic-text);
+}
+.site-visibility-section > summary span {
+  display: block;
+  margin-top: 4px;
+  color: var(--jic-text-secondary);
+  font-size: 0.8125rem;
+}
+.site-visibility-section > summary:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
 }

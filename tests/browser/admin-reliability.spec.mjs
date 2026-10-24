@@ -652,6 +652,7 @@ test('one Forms workspace includes Contact Us with accurate totals and keeps exi
   const attention = page.locator('.admin-attention-grid > button');
   await expect(attention).toHaveCount(1);
   await expect(attention.locator('strong')).toHaveText('12');
+  await expect(attention).toHaveAccessibleName('Open forms: 12 form responses to review');
   await attention.click();
   const contact = page.locator('.content-form-card').filter({ hasText: 'Contact Us' });
   await expect(contact).toContainText('9 waiting');
@@ -927,9 +928,10 @@ test('centre owner can move between staff home and their personal portal home', 
   const evidence = await openAdmin(page, { section: 'dashboard' });
   await expect(page.locator('.admin-welcome h1')).toHaveText('Welcome, Centre owner');
   await page.screenshot({ path: testInfo.outputPath('owner-home.png'), fullPage: true });
-  await page.getByRole('link', { name: 'My portal', exact: true }).click();
+  await page.locator('.admin-account-menu > summary').click();
+  await page.getByRole('button', { name: 'My account', exact: true }).click();
   await expect(page.getByRole('main', { name: 'Portal home', exact: true })).toBeVisible();
-  await expect(page).toHaveURL(/\/portal$/);
+  await expect(page).toHaveURL(/\/portal\?workspace=personal$/);
   await page.getByRole('link', { name: 'Staff home', exact: true }).click();
   await expect(page.locator('.admin-welcome')).toBeVisible();
   expect(evidence.writes).toEqual([]);

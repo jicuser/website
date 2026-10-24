@@ -54,11 +54,20 @@ export default function MonthCalendar({
               style={{ '--day-colour': info.colour }}
               disabled={disabled || info.disabled}
               aria-pressed={selected.includes(key)}
+              title={info.label}
               aria-label={`${date.toLocaleDateString('en-GB')} · ${info.label}`}
               onClick={() => onSelect(key)}
             >
               <strong>{date.getDate()}</strong>
-              <span>{info.label}</span>
+              <span>
+                {{
+                  Available: 'Open',
+                  Provisional: 'Held',
+                  Booked: 'Busy',
+                  Closed: 'Shut',
+                  'Ask us': 'Ask',
+                }[info.label] || info.label}
+              </span>
             </button>
           );
         })}

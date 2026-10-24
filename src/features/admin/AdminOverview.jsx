@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, RefreshCw, Search } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -115,12 +114,6 @@ export default function AdminOverview({ onChoose, icons }) {
               ? 'Your centre’s work, people and updates in one place.'
               : 'Your work and the tools available to your account.'}
           </p>
-          <div className="admin-home-account-links">
-            <Link to="/portal">
-              My portal <ArrowRight size={15} aria-hidden="true" />
-            </Link>
-            <Link to="/admin/setup?mode=change">Change password</Link>
-          </div>
         </div>
         {!focused && (
           <label className="admin-tool-search">
@@ -145,7 +138,6 @@ export default function AdminOverview({ onChoose, icons }) {
           <div className="admin-overview-section-heading">
             <div>
               <h2 id="admin-attention-title">Needs attention</h2>
-              <p>Submitted forms and requests in the areas you manage.</p>
             </div>
             <button
               className="admin-overview-refresh"
@@ -163,7 +155,7 @@ export default function AdminOverview({ onChoose, icons }) {
                 key={card.id}
                 type="button"
                 onClick={() => onChoose(card.id)}
-                aria-label={`Open ${card.title.toLowerCase()}`}
+                aria-label={`${card.action}: ${result.busy ? 'checking total' : card.failed || card.value == null ? 'total unavailable' : `${card.value.toLocaleString('en-GB')} ${card.title.toLowerCase()}`}`}
                 data-state={
                   unavailable && (card.failed || card.value == null) ? 'unavailable' : undefined
                 }

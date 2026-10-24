@@ -280,6 +280,29 @@ for (const width of [320, 390]) {
     expect(initial.filter((cell) => cell.width < 24 || cell.height < 44 || cell.overflows)).toEqual(
       [],
     );
+    await expect(month.getByRole('button', { name: /^Day 1,/ })).toContainText('Taken');
+    await expect(month.getByRole('button', { name: /^Day 1,/ })).toHaveAttribute(
+      'aria-label',
+      /Sponsored/,
+    );
+    await expect(month.getByRole('button', { name: /^Day 2,/ })).toContainText('Held');
+    await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      expect(
+        await month
+          .locator('.sponsorship-month-status')
+          .evaluateAll((labels) =>
+            labels.every(
+              (label) =>
+                getComputedStyle(label).whiteSpace === 'nowrap' &&
+                label.scrollWidth <= label.closest('button').clientWidth,
+            ),
+          ),
+      ).toBe(true);
+    }
     expect((await month.boundingBox()).height).toBeLessThan(480);
     await workspace.getByLabel('Booking status', { exact: true }).selectOption('pending');
     await expect(month.locator('button:enabled')).toHaveCount(1);

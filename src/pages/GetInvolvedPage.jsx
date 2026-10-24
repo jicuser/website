@@ -54,6 +54,7 @@ export default function GetInvolvedPage() {
 
 const volunteerJourney = {
   ...SERVICE_JOURNEYS.community,
+  formSlug: 'contact-us',
   title: 'Volunteer with JIC',
   intro:
     'Tell us what you can offer and when you are available. The team will help you find a suitable way to take part.',

@@ -35,10 +35,11 @@ export const SERVICE_ENQUIRIES = [
 export const serviceEnquiry = (slug) =>
   SERVICE_ENQUIRIES.find((item) => item.slug === slug) || null;
 export function serviceEnquiryForPath(path) {
-  if (['/funerals', '/services/funeral-services'].includes(path))
+  const pathname = path.split(/[?#]/)[0].replace(/\/+$/, '') || '/';
+  if (['/funerals', '/funerals/what-to-do', '/services/funeral-services'].includes(pathname))
     return serviceEnquiry('funeral-enquiry');
-  if (path === '/services/community-services') return serviceEnquiry('community-enquiry');
-  return SERVICE_ENQUIRIES.find((item) => item.page === path) || null;
+  if (pathname === '/services/community-services') return serviceEnquiry('community-enquiry');
+  return SERVICE_ENQUIRIES.find((item) => item.page === pathname) || null;
 }
 
 const pad = (value) => String(value).padStart(2, '0');

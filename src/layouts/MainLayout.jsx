@@ -14,12 +14,12 @@ import PublishedPageLinks from '@/features/content/PublishedPageLinks';
 import { PublishedPagesProvider } from '@/context/PublishedPagesContext';
 import { ProgrammeJourneyProvider } from '@/context/ProgrammeJourneyContext';
 import DailyReminder from '@/components/shell/DailyReminder';
-import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import SpiritualOverlays from '@/components/shell/SpiritualOverlays';
 import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import { useAuth } from '@/context/AuthContext';
 import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
+import { isPublicTaskRoute } from '@/lib/publicTaskRoute';
 
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
 
@@ -36,7 +36,8 @@ export default function MainLayout() {
 }
 
 function PublicLayout() {
-  const { pathname, search } = useLocation();
+  const { pathname: routePath, search } = useLocation();
+  const pathname = routePath.replace(/\/+$/, '') || '/';
   const { isAdmin } = useAuth();
   const { getContent } = useContent();
   const visible = isPageVisible(getContent, pathname) || isAdmin;
@@ -48,13 +49,7 @@ function PublicLayout() {
     pathname.startsWith('/worship') ||
     (pathname.startsWith('/prayer-times') && pathname !== '/prayer-times/reminders');
   const isDiscovery = ['/search', '/social-media', '/education/programmes'].includes(pathname);
-  const isTask =
-    pathname.startsWith('/forms/') ||
-    pathname.startsWith('/ramadan') ||
-    pathname === '/donate' ||
-    pathname.startsWith('/fundraise') ||
-    pathname.startsWith('/get-involved') ||
-    ['/contact', '/prayer-times/reminders', '/services/hall-booking'].includes(pathname);
+  const isTask = isPublicTaskRoute(pathname);
 
   return (
     <div
@@ -63,7 +58,6 @@ function PublicLayout() {
       <a className="jic-skip-link" href="#main-content">
         Skip to content
       </a>
-      {isHome && <PublicBackdrop />}
       <UnifiedHeader />
       <FloatingPageTools />
       <main
@@ -103,9 +97,9 @@ function PublicLayout() {
           </section>
         )}
       </main>
+      {!preview && !isTask && <SpiritualOverlays />}
       <Footer />
       <ScrollToTop />
-      {!preview && !isTask && <SpiritualOverlays />}
       {isAdmin && !preview && (
         <Suspense fallback={null}>
           <AdminBar />

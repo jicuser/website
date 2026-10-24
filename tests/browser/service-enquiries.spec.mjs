@@ -1,53 +1,131 @@
 import { test, expect } from '@playwright/test';
 import { CONTACT_FORM, CONTACT_RECEIPT } from './helpers/builtInForms.mjs';
 
-test('service guides explain the journey and accept an enquiry without an account', async ({
-  page,
-}) => {
-  const writes = [],
-    errors = [];
-  page.on('pageerror', (error) => errors.push(error.message));
+const services = [
+  ['/funerals', 'Janazah & funeral support', 'funeral-enquiry'],
+  ['/services/nikah', 'Nikah at JIC', 'nikah-enquiry'],
+  ['/services/community', 'Community support at JIC', 'community-enquiry'],
+  ['/services#community', 'Community support at JIC', 'community-enquiry'],
+  ['/services/community/', 'Community support at JIC', 'community-enquiry'],
+  ['/services/nikah/', 'Nikah at JIC', 'nikah-enquiry'],
+  ['/funerals/', 'Janazah & funeral support', 'funeral-enquiry'],
+];
+
+function publishedService(slug) {
+  return {
+    ...CONTACT_FORM,
+    slug,
+    title: `Published ${slug}`,
+    version: 7,
+    schema: {
+      fields: [
+        { id: 'name', type: 'text', label: 'Your name', required: true },
+        { id: 'email', type: 'email', label: 'Reply email', required: true },
+        { id: 'request', type: 'textarea', label: 'Service details', required: true },
+        {
+          id: 'reply_method',
+          type: 'select',
+          label: 'Reply preference',
+          options: ['Email', 'Phone'],
+          required: true,
+        },
+      ],
+    },
+  };
+}
+
+async function serviceFixture(page, { closed = false } = {}) {
+  const state = { writes: [], reads: [], errors: [] };
+  page.on('pageerror', (error) => state.errors.push(error.message));
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
+  await page.route('**/*', (route) =>
+    ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname)
+      ? route.continue()
+      : route.abort(),
+  );
   await page.route('**/preview-api/**', async (route) => {
     const path = new URL(route.request().url()).pathname;
-    if (path.endsWith('/rpc/get_public_form'))
-      return route.fulfill({ contentType: 'application/json', body: JSON.stringify(CONTACT_FORM) });
+    let data = [];
+    if (path.endsWith('/rpc/get_public_form')) {
+      const { p_slug } = route.request().postDataJSON();
+      state.reads.push(p_slug);
+      data = p_slug === 'contact-us' ? CONTACT_FORM : closed ? null : publishedService(p_slug);
+    }
     if (path.endsWith('/functions/v1/custom-forms')) {
-      writes.push(route.request().postDataJSON());
-      return route.fulfill({
-        contentType: 'application/json',
-        body: JSON.stringify({ ok: true, id: CONTACT_RECEIPT }),
+      state.writes.push(route.request().postDataJSON());
+      data = { ok: true, id: CONTACT_RECEIPT };
+    }
+    return route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
+  });
+  return state;
+}
+
+for (const [path, title, slug] of services) {
+  test(`${path}: ${slug} uses the same published schema and version inline and directly`, async ({
+    page,
+  }) => {
+    const state = await serviceFixture(page);
+    for (const destination of [path, `/forms/${slug}`]) {
+      await page.goto(destination);
+      if (destination === path) {
+        await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+        await expect(page.getByRole('list', { name: 'How it works' }).locator('li')).toHaveCount(3);
+        if (slug === 'funeral-enquiry')
+          await expect(
+            page.getByText('This inbox is not an emergency service.', { exact: false }),
+          ).toBeVisible();
+      }
+      await expect(
+        page.getByRole('heading', { name: `Published ${slug}`, exact: true }),
+      ).toBeVisible();
+      await page.getByLabel('Your name', { exact: false }).fill('Example visitor');
+      await page.getByLabel('Reply email', { exact: false }).fill('visitor@example.test');
+      await page.getByLabel('Service details', { exact: false }).fill('Please contact me.');
+      await page.getByLabel('Reply preference', { exact: false }).selectOption('Email');
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+      ).toBe(true);
+      await page.getByRole('button', { name: 'Send enquiry', exact: true }).click();
+      await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
+      if (slug === 'nikah-enquiry')
+        await expect(page.getByText('This does not confirm a booking or date.')).toBeVisible();
+    }
+    expect(state.reads.length).toBeGreaterThanOrEqual(2);
+    expect([...new Set(state.reads)]).toEqual([slug]);
+    expect(state.writes).toHaveLength(2);
+    for (const write of state.writes) {
+      expect(write.slug).toBe(slug);
+      expect(write.version).toBe(7);
+      expect(write.answers).toEqual({
+        name: 'Example visitor',
+        email: 'visitor@example.test',
+        request: 'Please contact me.',
+        reply_method: 'Email',
       });
     }
-    return route.fulfill({ contentType: 'application/json', body: '[]' });
+    expect(state.errors).toEqual([]);
   });
-  for (const [path, title] of [
-    ['/funerals', 'Janazah & funeral support'],
-    ['/services/nikah', 'Nikah at JIC'],
-    ['/services/community', 'Community support at JIC'],
-  ]) {
-    await page.goto(path);
-    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
-    await expect(page.getByRole('list', { name: 'How it works' }).locator('li')).toHaveCount(3);
-    await expect(page.locator('.service-centre-photo img')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Show location map' })).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
-      true,
-    );
-  }
-  await page.goto('/funerals');
-  await page.getByLabel('Name', { exact: false }).fill('Example family');
-  await page.getByLabel('Email address', { exact: false }).fill('family@example.test');
-  await page
-    .getByLabel('Your message', { exact: false })
-    .fill('Please contact us about Janazah arrangements.');
-  await page.getByRole('button', { name: 'Send message', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
-  expect(writes).toHaveLength(1);
-  expect(writes[0].slug).toBe('contact-us');
-  expect(writes[0].answers.question).toContain('Janazah / funeral support');
-  expect(errors).toEqual([]);
-});
+
+  test(`${path}: ${slug} stays closed inline and directly when the managed form is unpublished`, async ({
+    page,
+  }) => {
+    const state = await serviceFixture(page, { closed: true });
+    for (const destination of [path, `/forms/${slug}`]) {
+      await page.goto(destination);
+      await expect(page.getByRole('heading', { name: /is currently closed/ })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Send enquiry', exact: true })).toHaveCount(0);
+      await expect(
+        page
+          .locator('.public-custom-form')
+          .getByRole('link', { name: 'Contact the centre', exact: true }),
+      ).toHaveAttribute('href', '/contact');
+    }
+    expect(state.reads.length).toBeGreaterThanOrEqual(2);
+    expect([...new Set(state.reads)]).toEqual([slug]);
+    expect(state.writes).toEqual([]);
+    expect(state.errors).toEqual([]);
+  });
+}
 
 test('hall enquiry keeps the selected date, hides prayer controls while typing, and shows a receipt', async ({
   page,

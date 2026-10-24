@@ -79,7 +79,7 @@ function ScreenOverview({ onOpen }) {
           <h2>Choose a screen</h2>
           <p>
             {task === 'layout'
-              ? 'Choose a screen, then keep one scene or rotate content.'
+              ? 'Choose a screen. Fixed keeps one scene; Rotation cycles saved content.'
               : 'Show a camera, video or presentation on a hall screen.'}
           </p>
         </div>
@@ -133,10 +133,25 @@ function ScreenOverview({ onOpen }) {
               : automatic;
             return (
               <article className="admin-panel tv-screen-overview-card" key={screen.id}>
-                <div className="tv-screen-overview-title">
-                  <div>
+                {content?.scene ? (
+                  <figure className="tv-screen-miniature">
+                    <TvLayoutThumbnail
+                      scene={content.scene}
+                      orientation={settings.display_orientation}
+                    />
+                    <figcaption className="sr-only">
+                      {content.name} saved content preview
+                    </figcaption>
+                  </figure>
+                ) : (
+                  <div className="tv-screen-preview-unavailable" aria-hidden="true">
+                    <Monitor size={28} />
+                  </div>
+                )}
+                <div className="tv-screen-overview-body">
+                  <div className="tv-screen-overview-title">
                     <strong>{screen.label}</strong>
-                    <span className="content-status">
+                    <span>
                       {data
                         ? presenting
                           ? 'Presentation active'
@@ -146,15 +161,8 @@ function ScreenOverview({ onOpen }) {
                           : 'Status unavailable'}
                     </span>
                   </div>
-                  {state?.error && <small>Could not read live status</small>}
-                </div>
-                {content?.scene && (
-                  <figure className="tv-screen-miniature">
-                    <TvLayoutThumbnail
-                      scene={content.scene}
-                      orientation={settings.display_orientation}
-                    />
-                    <figcaption>
+                  {content?.scene && (
+                    <p className="tv-screen-overview-mode">
                       <strong>{content.name}</strong>
                       <span>
                         {content.source === 'rotation'
@@ -167,47 +175,49 @@ function ScreenOverview({ onOpen }) {
                                 ? 'Live presentation layout'
                                 : 'Fixed scene'}
                       </span>
-                      <small>Saved content preview</small>
-                    </figcaption>
-                  </figure>
-                )}
-                {presenting && <p>Automatic displays return when the presentation ends.</p>}
-                <div className="admin-actions">
-                  {task === 'layout' && (
-                    <button
-                      className="admin-button primary"
-                      onClick={() => onOpen(screen.id, false, true)}
-                    >
-                      Edit automatic display
-                    </button>
+                    </p>
                   )}
-                  {task === 'presentation' &&
-                    (presenting ? (
+                  {state?.error && <small>Could not read live status</small>}
+                  {presenting && (
+                    <small>Automatic displays return when the presentation ends.</small>
+                  )}
+                  <div className="admin-actions">
+                    {task === 'layout' && (
                       <button
                         className="admin-button primary"
-                        onClick={() => onOpen(screen.id, false, false)}
+                        onClick={() => onOpen(screen.id, false, true)}
                       >
-                        Manage live presentation
+                        Edit automatic display
                       </button>
-                    ) : (
-                      <button
-                        className="admin-button"
-                        onClick={() => onOpen(screen.id, true, false)}
-                      >
-                        Quick present
-                      </button>
-                    ))}
-                  {task === 'presentation' && !presenting && (
-                    <details className="tv-screen-more">
-                      <summary>More options</summary>
-                      <button
-                        className="admin-button"
-                        onClick={() => onOpen(screen.id, false, false)}
-                      >
-                        Presentation setup
-                      </button>
-                    </details>
-                  )}
+                    )}
+                    {task === 'presentation' &&
+                      (presenting ? (
+                        <button
+                          className="admin-button primary"
+                          onClick={() => onOpen(screen.id, false, false)}
+                        >
+                          Manage live presentation
+                        </button>
+                      ) : (
+                        <button
+                          className="admin-button"
+                          onClick={() => onOpen(screen.id, true, false)}
+                        >
+                          Quick present
+                        </button>
+                      ))}
+                    {task === 'presentation' && !presenting && (
+                      <details className="tv-screen-more">
+                        <summary>More options</summary>
+                        <button
+                          className="admin-button"
+                          onClick={() => onOpen(screen.id, false, false)}
+                        >
+                          Presentation setup
+                        </button>
+                      </details>
+                    )}
+                  </div>
                 </div>
               </article>
             );

@@ -137,3 +137,36 @@ for (const width of [390, 1280]) {
     expect(errors).toEqual([]);
   });
 }
+
+test('phone screen choices keep saved thumbnails beside screen details and one automatic edit action', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  const { writes, errors } = await openScreens(page);
+  const cards = page.locator('.tv-screen-overview-card');
+  await expect(cards).toHaveCount(4);
+  await expect(
+    cards.getByRole('button', { name: 'Edit automatic display', exact: true }),
+  ).toHaveCount(4);
+  expect(
+    await cards.evaluateAll((nodes) =>
+      nodes.every((node) => {
+        const preview = node.querySelector('.tv-screen-miniature').getBoundingClientRect();
+        const body = node.querySelector('.tv-screen-overview-body').getBoundingClientRect();
+        return preview.right <= body.left && node.getBoundingClientRect().height < 240;
+      }),
+    ),
+  ).toBe(true);
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate((value) => {
+      document.documentElement.dataset.theme = value;
+    }, theme);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  }
+  await page.getByRole('button', { name: /Live presentation Camera/ }).click();
+  await expect(page.getByRole('button', { name: 'Quick present', exact: true })).toHaveCount(3);
+  expect(writes).toEqual([]);
+  expect(errors).toEqual([]);
+});

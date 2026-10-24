@@ -284,20 +284,26 @@
 }
 .jic-page-choices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 8px;
   width: min(100%, 1152px);
   margin-inline: auto;
   padding: 0 16px 24px;
 }
 .jic-page-choice {
+  --jic-glass-tile: var(--jic-surface);
+  --jic-glass-tile-sheen: linear-gradient(transparent, transparent);
+  --jic-glass-panel-filter: none;
+  --jic-glass-shadow: none;
+  --jic-glass-border: var(--jic-border);
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
-  padding: 16px;
+  min-height: 72px;
+  padding: 12px;
   border: 1px solid var(--jic-border);
-  border-radius: 16px;
+  border-radius: 12px;
   background: var(--jic-surface);
   color: var(--jic-text);
 }
@@ -321,6 +327,10 @@
 }
 .jic-page-choice:is(:hover, :focus-visible) {
   border-color: var(--jic-gold);
+}
+.jic-page-choice:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
 }
 
 .managed-page-content {

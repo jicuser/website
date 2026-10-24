@@ -16,7 +16,10 @@ export default function SponsorshipMonth({
   const offset = (new Date(`${days[0].date}T12:00:00`).getDay() + 6) % 7;
   return (
     <div className="sponsorship-month" role="group" aria-label="Ramadan month">
-      <p className="sponsorship-month-help">Tap a day to view or add a sponsor.</p>
+      <p className="sponsorship-month-help">
+        Tap a day to view or add a sponsor. Open: available · Held: reserved ·{' '}
+        {kind === 'daily' ? 'Given: supported' : 'Taken: sponsored'}.
+      </p>
       <div className="sponsorship-month-week" aria-hidden="true">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
           <span key={day}>{day}</span>
@@ -48,7 +51,11 @@ export default function SponsorshipMonth({
             >
               <strong>{day.number}</strong>
               <span>{ukDate}</span>
-              <i aria-hidden="true" />
+              <span className="sponsorship-month-status" aria-hidden="true">
+                {{ Available: 'Open', Sponsored: 'Taken', Supported: 'Given', Reserved: 'Held' }[
+                  status
+                ] || status}
+              </span>
             </button>
           );
         })}
