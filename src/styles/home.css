@@ -690,3 +690,85 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
   font-size: 0.85rem;
   font-weight: 600;
 }
+
+
+/* Mobile hero rhythm: keep the introductory content, services and prayer
+   panel visually connected without reducing tap targets below 44px. */
+@media (max-width: 767px) {
+  html[data-theme] .jic-premium-home .jic-hero-inner {
+    padding-block: 8px 18px;
+    gap: 16px;
+  }
+  html[data-theme] .jic-premium-home .jic-kicker {
+    margin-bottom: 8px;
+    font-size: 10px;
+    letter-spacing: .11em;
+    line-height: 1.4;
+  }
+  html[data-theme] .jic-premium-home .jic-hero h1 {
+    font-size: clamp(29px, 7.5vw, 36px);
+    line-height: 1.09;
+    letter-spacing: -.035em;
+  }
+  html[data-theme] .jic-premium-home .jic-hero-sub {
+    margin-top: 10px;
+    max-width: 36ch;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .jic-home-shortcuts {
+    margin-top: 14px;
+    gap: 8px;
+  }
+  .jic-home-shortcuts .jic-home-destination {
+    min-height: 64px;
+    padding: 7px 3px;
+    gap: 3px;
+    border-radius: 12px;
+  }
+  .jic-home-shortcuts .jic-home-destination-icon {
+    flex-basis: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  .jic-home-shortcuts .jic-home-destination-copy strong {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  .jic-home-visit {
+    min-height: 44px;
+    margin-top: 4px;
+    font-size: 13px;
+  }
+  .jic-home-prayer {
+    border-radius: 16px;
+  }
+  .jic-home-prayer-main {
+    padding: 10px 12px 8px;
+  }
+  .jic-home-prayer-meta {
+    margin-bottom: 4px;
+  }
+  .jic-home-prayer-today {
+    padding: 5px 8px;
+  }
+  .jic-home-jummah a,
+  .jic-home-prayer-footer a {
+    min-height: 44px;
+  }
+  .jic-home-jummah a {
+    padding: 5px 4px;
+  }
+  .jic-home-prayer-footer a {
+    font-size: 11px;
+    gap: 4px;
+  }
+  .jic-home-content {
+    row-gap: 24px;
+    padding-block: 24px;
+  }
+}
+/* A softer photographic veil behind text; no separate heavy panel fills. */
+html[data-theme='dark'] .jic-home-route {
+  --jic-photo-veil: rgba(3, 9, 15, .7);
+}
