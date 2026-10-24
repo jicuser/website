@@ -602,7 +602,14 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
             {listed.map((form) => (
               <article className="admin-panel content-form-card" key={form.id}>
                 <span className="content-status">{formStatus(form)}</span>
-                <strong>{form.title}</strong>
+                <button
+                  type="button"
+                  className="content-form-title"
+                  aria-label={`${form.title} details`}
+                  onClick={() => onChoose({ form: form.id })}
+                >
+                  {form.title}
+                </button>
                 <span className="form-card-metrics">
                   <b>{form.new_count}</b> waiting
                   <b>{form.done_count}</b> completed
@@ -613,12 +620,16 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
                   )}
                 </span>
                 <div className="admin-actions">
-                  <button className="admin-button" onClick={() => onChoose({ form: form.id })}>
-                    Open form
+                  <button
+                    className={`admin-button${form.new_count > 0 ? ' primary' : ''}`}
+                    aria-label={`${form.title}: review responses`}
+                    onClick={() => onChoose({ form: form.id, tab: 'responses' })}
+                  >
+                    Review responses
                   </button>
                   {form.can_manage && (
                     <button
-                      className="admin-button primary"
+                      className={`admin-button${form.new_count > 0 ? '' : ' primary'}`}
                       onClick={() => onChoose({ form: form.id, edit: '1' })}
                     >
                       Edit form

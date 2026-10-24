@@ -217,7 +217,7 @@ test('Admin Forms keeps live forms, people, responses and actions together', asy
   await page
     .locator('.content-form-card')
     .filter({ hasText: 'Course interest' })
-    .getByRole('button', { name: 'Open form', exact: true })
+    .getByRole('button', { name: 'Course interest details', exact: true })
     .click();
   await expect(page.getByText('Responsible people & access')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Arabic course', exact: true })).toBeVisible();
@@ -298,7 +298,7 @@ test('form tabs survive refresh and browser Back returns to the preceding tab', 
   await page
     .locator('.content-form-card')
     .filter({ hasText: 'Course interest' })
-    .getByRole('button', { name: 'Open form', exact: true })
+    .getByRole('button', { name: 'Course interest details', exact: true })
     .click();
   await page.getByRole('button', { name: 'Responses (1)', exact: true }).click();
   await expect(page).toHaveURL(/tab=responses/);
@@ -342,7 +342,7 @@ test('toolbar Back closes only the existing form editor after confirming unsaved
   await page
     .locator('.content-form-card')
     .filter({ hasText: 'Course interest' })
-    .getByRole('button', { name: 'Open form', exact: true })
+    .getByRole('button', { name: 'Course interest details', exact: true })
     .click();
   await page.getByRole('button', { name: 'Edit form & assignments', exact: true }).click();
   await page.getByLabel('Form title', { exact: true }).fill('Unsaved title');

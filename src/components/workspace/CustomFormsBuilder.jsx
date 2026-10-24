@@ -258,7 +258,29 @@ export default function CustomFormsBuilder({
           {message}
         </p>
       )}
-      <fieldset disabled={busy || loading || loadFailed}>
+      <nav className="custom-form-view-toggle" aria-label="Form editor view">
+        <button
+          type="button"
+          aria-pressed={!preview}
+          disabled={busy || loading || loadFailed}
+          onClick={() => setPreview(false)}
+        >
+          Edit questions
+        </button>
+        <button
+          type="button"
+          aria-pressed={preview}
+          disabled={busy || loading || loadFailed}
+          onClick={() => setPreview(true)}
+        >
+          Preview questions
+        </button>
+      </nav>
+      <fieldset
+        className="custom-form-edit-fields"
+        hidden={preview}
+        disabled={busy || loading || loadFailed}
+      >
         {!draft.id && (
           <section className="custom-form-starters" aria-label="Form templates">
             <h3>Start with a template</h3>
@@ -593,21 +615,6 @@ export default function CustomFormsBuilder({
             ))}
           </datalist>
         </details>
-        <div className="workspace-actions">
-          <button onClick={() => setPreview(!preview)}>
-            {preview ? 'Close preview' : 'Preview questions'}
-          </button>
-          <button onClick={() => save(false).catch(() => {})}>Save draft</button>
-          <button className="custom-form-publish" onClick={() => save(true).catch(() => {})}>
-            {busy ? 'Saving…' : draft.published_version ? 'Publish changes' : 'Save and publish'}
-          </button>
-        </div>
-        {draft.published_version && (
-          <p className="workspace-meta">
-            Published version {draft.published_version}. Saving a draft preserves the published
-            questions until you publish again. Turning responses off takes effect when saved.
-          </p>
-        )}
       </fieldset>
       {preview && (
         <div className="workspace-card workspace-form">
@@ -628,6 +635,27 @@ export default function CustomFormsBuilder({
             Use the choices above to check conditional questions. Preview does not send a response.
           </p>
         </div>
+      )}
+      <div className="workspace-actions custom-form-save-actions">
+        <button
+          disabled={busy || loading || loadFailed}
+          onClick={() => save(false).catch(() => {})}
+        >
+          Save draft
+        </button>
+        <button
+          className="custom-form-publish"
+          disabled={busy || loading || loadFailed}
+          onClick={() => save(true).catch(() => {})}
+        >
+          {busy ? 'Saving…' : draft.published_version ? 'Publish changes' : 'Save and publish'}
+        </button>
+      </div>
+      {draft.published_version && (
+        <p className="workspace-meta">
+          Published version {draft.published_version}. Saving a draft preserves the published
+          questions until you publish again. Turning responses off takes effect when saved.
+        </p>
       )}
     </section>
   );

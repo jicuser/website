@@ -24,6 +24,29 @@
   display: grid;
   gap: 16px;
 }
+.custom-form-view-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.custom-form-view-toggle button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.custom-form-view-toggle button[aria-pressed='true'] {
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 -2px var(--jic-gold);
+}
+.custom-form-edit-fields[hidden] {
+  display: none;
+}
+.custom-form-save-actions {
+  margin-bottom: 0;
+}
 .custom-form-editor input,
 .custom-form-editor select,
 .custom-form-editor textarea,
