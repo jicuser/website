@@ -118,9 +118,10 @@ for (const width of [320, 390, 1280]) {
         await expect(content.getByRole('tablist')).toHaveCount(0);
       }
       if (path === '/contact') {
+        await content.getByRole('button', { name: 'Show all questions', exact: true }).click();
         await expect(content.getByLabel('Your name', { exact: false })).toBeVisible();
         await expect(
-          content.getByRole('button', { name: 'Send message', exact: true }),
+          content.getByRole('button', { name: 'Review answers', exact: true }),
         ).toBeVisible();
       }
       if (path === '/financial-history') {

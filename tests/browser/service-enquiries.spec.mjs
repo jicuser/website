@@ -85,6 +85,7 @@ for (const [path, title, slug] of services) {
       await expect(
         page.getByRole('heading', { name: `Published ${slug}`, exact: true }),
       ).toBeVisible();
+      await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
       await page.getByLabel('Your name', { exact: false }).fill('Example visitor');
       await page.getByLabel('Reply email', { exact: false }).fill('visitor@example.test');
       await page.getByLabel('Service details', { exact: false }).fill('Please contact me.');
@@ -92,6 +93,7 @@ for (const [path, title, slug] of services) {
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
       ).toBe(true);
+      await page.getByRole('button', { name: 'Review answers', exact: true }).click();
       await page.getByRole('button', { name: 'Send enquiry', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
       if (slug === 'nikah-enquiry')
@@ -179,6 +181,7 @@ test('hall enquiry keeps the selected date, hides prayer controls while typing, 
   await expect(
     page.getByRole('heading', { name: 'Hall booking enquiry', exact: true }),
   ).toBeVisible();
+  await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
   await expect(page.getByLabel('Preferred date')).toHaveValue('2026-10-28');
   await page.getByLabel('Your name').fill('Test visitor');
   await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
@@ -187,6 +190,7 @@ test('hall enquiry keeps the selected date, hides prayer controls while typing, 
   await expect(page.getByRole('navigation', { name: 'Quick navigation' })).toBeVisible();
   await expect(page.locator('.jic-menu-word')).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('service-enquiry.png') });
+  await page.getByRole('button', { name: 'Review answers', exact: true }).click();
   await page.getByRole('button', { name: 'Send enquiry', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
   await expect(page.getByText('This does not confirm a booking or date.')).toBeVisible();

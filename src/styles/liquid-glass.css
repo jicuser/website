@@ -162,7 +162,7 @@ html[data-theme]
     .workspace-button,
     .workspace-tabs button,
     .workspace-actions button,
-    .workspace-card button,
+    .workspace-card:not(.smart-form) button,
     .portal-navigation a,
     .portal-workspace-switch a,
     .jic-primary-cta,

@@ -44,6 +44,28 @@ export function newQuestion(fields, presetId) {
 }
 
 export function starterQuestions(template) {
+  if (template === 'triage')
+    return [
+      {
+        id: 'request_type',
+        label: 'What would you like to do?',
+        type: 'select',
+        required: true,
+        options: ['Start a new enquiry', 'Follow up an existing request'],
+      },
+      {
+        id: 'reference',
+        label: 'Your reference, if you have one',
+        type: 'text',
+        required: false,
+        show_when: {
+          field: 'request_type',
+          operator: 'equals',
+          value: 'Follow up an existing request',
+        },
+      },
+      ...starterQuestions('enquiry'),
+    ];
   const ids =
     template === 'registration'
       ? ['name', 'email', 'phone']

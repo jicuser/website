@@ -20,6 +20,180 @@
   margin: 0;
   box-shadow: none;
 }
+.smart-form {
+  --smart-action: var(--jic-primary-bg, #183149);
+  --smart-action-ink: var(--jic-primary-ink, #ffffff);
+  color: var(--jic-text);
+  background: var(--jic-surface);
+  border-color: var(--jic-border);
+  min-width: 0;
+}
+.public-custom-form .workspace-wrap {
+  max-width: 800px;
+}
+.smart-form-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid var(--jic-border);
+  font-size: 0.8125rem;
+  color: var(--jic-text-secondary);
+}
+.smart-form .smart-form-progress button {
+  border: 0;
+  background: transparent;
+  color: var(--jic-gold-strong);
+  padding: 8px 0;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.smart-form progress {
+  width: 100%;
+  height: 4px;
+  display: block;
+  appearance: none;
+  border: 0;
+  background: var(--jic-bg-secondary);
+  accent-color: var(--jic-gold-strong);
+}
+.smart-form progress::-webkit-progress-bar {
+  background: var(--jic-bg-secondary);
+}
+.smart-form progress::-webkit-progress-value {
+  background: var(--jic-gold-strong);
+}
+.smart-form progress::-moz-progress-bar {
+  background: var(--jic-gold-strong);
+}
+.smart-form .smart-form-heading {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  font-weight: 700;
+  margin: 20px 0 12px;
+}
+.smart-form-heading:focus {
+  outline: none;
+}
+.smart-form .workspace-field :is(input, textarea, select) {
+  color: var(--jic-text);
+  background: var(--jic-bg);
+  border-color: var(--jic-border);
+  font-size: 16px;
+}
+.smart-form :is(button, input, textarea, select):focus-visible {
+  outline: 3px solid var(--jic-gold-strong);
+  outline-offset: 3px;
+}
+.smart-form-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.smart-form-choices > label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  background: var(--jic-bg-secondary);
+  min-height: 54px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.smart-form-choices > label.is-selected {
+  border-color: var(--jic-gold-strong);
+  background: var(--jic-control-active, var(--jic-bg-secondary));
+}
+.smart-form .smart-form-choices input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  flex-shrink: 0;
+  padding: 0;
+  accent-color: var(--jic-gold-strong);
+}
+.smart-field-label {
+  font-weight: 600;
+}
+.smart-form-review {
+  margin: 0;
+}
+.smart-form-review > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--jic-border);
+}
+.smart-form-review dt {
+  font-size: 0.8125rem;
+  color: var(--jic-text-secondary);
+}
+.smart-form-review dd {
+  grid-column: 1;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.9375rem;
+  margin: 4px 0 0;
+}
+.smart-form .smart-form-review button {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--jic-gold-strong);
+  font-size: 0.8125rem;
+}
+.smart-form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+.smart-form-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+}
+.smart-form .smart-form-next {
+  margin-left: auto;
+  background: var(--smart-action);
+  color: var(--smart-action-ink);
+  border-color: var(--smart-action);
+  font-weight: 650;
+}
+.smart-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.smart-form .smart-form-error {
+  color: var(--jic-error-text);
+}
+.smart-form .smart-form-note {
+  margin-top: 16px;
+}
+@media (max-width: 359px) {
+  .smart-form-choices {
+    grid-template-columns: 1fr;
+  }
+}
 .custom-form-editor {
   display: grid;
   gap: 16px;

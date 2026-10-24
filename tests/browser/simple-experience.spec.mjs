@@ -251,6 +251,7 @@ test('form creation provides templates, automatic addresses, optional titles and
   await page.getByRole('button', { name: '+ Name title', exact: true }).click();
   await page.getByRole('button', { name: 'Preview questions', exact: true }).click();
   const preview = page.locator('.workspace-card.workspace-form');
+  await preview.getByRole('button', { name: 'Show all questions', exact: true }).click();
   await expect(preview.getByLabel('Title', { exact: true })).toBeVisible();
   await expect(preview.getByLabel('Phone number', { exact: true })).toHaveAttribute(
     'placeholder',
@@ -279,8 +280,10 @@ test('Ramadan table selects a range across UK months and skips reserved or close
   await expect(
     table.getByRole('button', { name: 'Select 20 Ramadan, 28 February 2027' }),
   ).toBeDisabled();
-  await page.getByLabel('Your name', { exact: true }).fill('Meal sponsor');
-  await page.getByLabel('Phone or email', { exact: true }).fill('sponsor@example.invalid');
+  await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
+  await page.getByLabel('Your name', { exact: false }).fill('Meal sponsor');
+  await page.getByLabel('Phone or email', { exact: false }).fill('sponsor@example.invalid');
+  await page.getByRole('button', { name: 'Review answers', exact: true }).click();
   await page.getByRole('button', { name: 'Request sponsorship', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Booking request received' })).toBeVisible();
   expect(state.writes[0].dates).toEqual(['2027-02-27', '2027-03-02', '2027-03-03']);

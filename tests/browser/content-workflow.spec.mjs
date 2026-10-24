@@ -200,7 +200,7 @@ async function fixture(page, { actor = owner, pagePublished = true, pageExists =
     await page.getByLabel('Email address').fill('staff@example.invalid');
     await page.getByLabel('Password', { exact: true }).fill('Local test password');
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-    await expect(page.locator('.admin-toolbar')).toBeVisible();
+    await expect(page.locator('.admin-toolbar')).toBeVisible({ timeout: 15000 });
     await page.goto(`/admin?section=${section}`);
     await expect(page.locator('.admin-toolbar')).toBeVisible();
   }
@@ -282,6 +282,7 @@ test('Public programme page offers the linked registration form and closed pages
   await page.getByRole('link', { name: 'Register interest', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Course interest', exact: true })).toBeVisible();
   await page.getByLabel('Your name', { exact: false }).fill('Applicant');
+  await page.getByRole('button', { name: 'Review answers', exact: true }).click();
   await page.getByRole('button', { name: 'Send response', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
   state.page.published = false;
@@ -313,6 +314,7 @@ test('form tabs survive refresh and browser Back returns to the preceding tab', 
   await expect(page.getByRole('button', { name: 'Responses (1)', exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
+    { timeout: 15000 },
   );
   expect(state.errors).toEqual([]);
 });

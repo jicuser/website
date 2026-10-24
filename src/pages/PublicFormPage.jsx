@@ -4,12 +4,12 @@ import PageMetadata from '@/components/shell/PageMetadata';
 import { useAuth } from '@/context/AuthContext';
 import { useRegisterProgrammeJourney } from '@/context/ProgrammeJourneyContext';
 import { supabase } from '@/lib/supabaseClient';
-import { formAction, visibleAnswers } from '@/lib/customForms';
+import { formAction, visibleAnswers, visibleFields } from '@/lib/customForms';
 import { programmeForForm, programmeSlugFromSearch } from '@/lib/programmeJourney';
 import { serviceEnquiry, hallFormPrefill } from '@/lib/serviceEnquiries';
 import { checked } from '@/components/workspace/shared';
 import { SITE } from '@/content/site';
-import CustomFormsFields from '@/components/workspace/CustomFormsFields';
+import SmartForm from '@/components/workspace/SmartForm';
 import {
   validateAnswers,
   validateUpload,
@@ -176,6 +176,18 @@ function PublicForm({ slug, embedded = false, subject = '', titleOverride, headi
     }
   }
 
+  function updateAnswers(next) {
+    const visible = new Set(visibleFields(form.schema.fields, next).map((field) => field.id));
+    // A changed branch must also invalidate an upload that is still in flight.
+    for (const id of activeUploads.current.keys())
+      if (!visible.has(id)) activeUploads.current.delete(id);
+    setUploads((current) =>
+      Object.fromEntries(Object.entries(current).filter(([id]) => visible.has(id))),
+    );
+    setAnswers(next);
+    setError('');
+  }
+
   return (
     <div className={`community-workspace public-custom-form${embedded ? ' is-embedded' : ''}`}>
       {!embedded && form?.title && (
@@ -237,10 +249,21 @@ function PublicForm({ slug, embedded = false, subject = '', titleOverride, headi
             </p>
           </div>
         ) : form ? (
-          <form
-            className="workspace-card workspace-form"
-            onSubmit={async (event) => {
-              event.preventDefault();
+          <SmartForm
+            fields={form.schema.fields}
+            answers={answers}
+            onAnswersChange={updateAnswers}
+            onFile={upload}
+            uploads={uploads}
+            busy={busy}
+            submitLabel={
+              slug === 'contact-us'
+                ? 'Send message'
+                : service || slug === 'madrassah-enquiry'
+                  ? 'Send enquiry'
+                  : 'Send response'
+            }
+            onSubmit={async () => {
               if (busy || Object.values(uploads).some((item) => item?.busy)) return;
               setBusy(true);
               setError('');
@@ -278,32 +301,12 @@ function PublicForm({ slug, embedded = false, subject = '', titleOverride, headi
             <FormHeading>{titleOverride || form.title}</FormHeading>
             <p>{form.description}</p>
             <p className="workspace-meta">
-              {service
-                ? 'Your message goes to the centre’s team. Any requested date or booking needs separate confirmation.'
-                : 'The centre will review your response. Any requested place or booking needs separate confirmation.'}
+              Your response goes to the centre. Bookings and places need confirmation.
             </p>
-            <fieldset disabled={busy}>
-              <CustomFormsFields
-                fields={form.schema.fields}
-                answers={answers}
-                onChange={(id, value) => setAnswers((current) => ({ ...current, [id]: value }))}
-                onFile={upload}
-                uploads={uploads}
-              />
-            </fieldset>
             <p className="workspace-meta">
-              Fields marked * are required. <Link to="/privacy">How we use your information</Link>
+              <Link to="/privacy">How we use your information</Link>
             </p>
-            <button disabled={busy || Object.values(uploads).some((item) => item?.busy)}>
-              {busy
-                ? 'Sending…'
-                : slug === 'contact-us'
-                  ? 'Send message'
-                  : service || slug === 'madrassah-enquiry'
-                    ? 'Send enquiry'
-                    : 'Send response'}
-            </button>
-          </form>
+          </SmartForm>
         ) : (
           !error && (
             <div className="workspace-card">
@@ -325,7 +328,7 @@ function PublicForm({ slug, embedded = false, subject = '', titleOverride, headi
                 {' '}
                 <a
                   href={`mailto:${SITE.email}?subject=${encodeURIComponent(subject || 'Website enquiry')}&body=${encodeURIComponent(
-                    Object.entries(answers)
+                    Object.entries(visibleAnswers(form?.schema.fields || [], answers))
                       .map(
                         ([key, value]) =>
                           `${form?.schema.fields.find((field) => field.id === key)?.label || key}: ${value}`,

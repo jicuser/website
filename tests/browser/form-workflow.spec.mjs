@@ -155,6 +155,9 @@ test('mobile form catalogue exposes status counts and edits a live built-in form
     forms: [contact, draft, closed],
   });
   await page.goto('/admin?section=forms');
+  await expect(page.getByRole('heading', { name: 'Forms', exact: true })).toBeVisible({
+    timeout: 15000,
+  });
   const tabs = page.getByRole('navigation', { name: 'Form status' });
   await expect(tabs.getByRole('button', { name: 'Live 3', exact: true })).toHaveAttribute(
     'aria-pressed',
@@ -297,11 +300,13 @@ for (const width of [320, 1280]) {
     await expect(page.getByRole('button', { name: 'Save form draft', exact: true })).toBeEnabled();
     const preview = page.locator('.custom-form-editor .workspace-card.workspace-form');
     await expect(preview.getByRole('heading', { name: 'Contact our team' })).toBeVisible();
+    await preview.getByRole('button', { name: 'Show all questions', exact: true }).click();
     await preview.getByLabel('Your name', { exact: false }).fill('Preview only');
     await views.getByRole('button', { name: 'Edit questions' }).click();
     await expect(page.getByLabel('Form title', { exact: true })).toHaveValue('Contact our team');
     await expect(page.getByRole('button', { name: 'Save form draft', exact: true })).toBeEnabled();
     await views.getByRole('button', { name: 'Preview questions' }).click();
+    await preview.getByRole('button', { name: 'Show all questions', exact: true }).click();
     await expect(preview.getByLabel('Your name', { exact: false })).toHaveValue('Preview only');
     await page.getByRole('button', { name: 'Publish changes', exact: true }).click();
     await expect.poll(() => state.writes.length).toBe(1);
@@ -335,6 +340,27 @@ test('built-in contact renders published questions and only managers see edit co
     'aria-pressed',
     'true',
   );
+  expect(state.writes).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
+test('staff can start a guided enquiry and preview both branches without publishing', async ({
+  page,
+}) => {
+  const state = await fixture(page);
+  await page.goto('/admin?section=forms');
+  await page.getByRole('button', { name: 'New form', exact: true }).click();
+  await page.getByRole('button', { name: 'Guided enquiry', exact: true }).click();
+  await page.getByRole('button', { name: 'Preview questions', exact: true }).click();
+  const preview = page.locator('.custom-form-editor .smart-form');
+  await preview.getByRole('radio', { name: 'Follow up an existing request', exact: true }).check();
+  await preview.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(preview.getByLabel('Your reference, if you have one')).toBeVisible();
+  await preview.getByRole('button', { name: 'Back', exact: true }).click();
+  await preview.getByRole('radio', { name: 'Start a new enquiry', exact: true }).check();
+  await preview.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(preview.getByLabel('How can we help?')).toBeVisible();
+  await expect(preview.getByLabel('Your reference, if you have one')).toHaveCount(0);
   expect(state.writes).toEqual([]);
   expect(state.errors).toEqual([]);
 });

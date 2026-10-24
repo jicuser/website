@@ -81,8 +81,14 @@ test('a Suhoor meal request selects days independently from Iftar and blocks res
   await expect(page.getByRole('button', { name: /^Day 3,/ })).toBeDisabled();
   await first.click();
   await expect(first).toHaveAttribute('aria-pressed', 'true');
-  await page.getByLabel('Your name', { exact: true }).fill('Suhoor sponsor');
-  await page.getByLabel('Phone or email', { exact: true }).fill('sponsor@example.test');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByLabel('Your name', { exact: false }).fill('Suhoor sponsor');
+  await page.getByLabel('Phone or email', { exact: false }).fill('sponsor@example.test');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByLabel('Show my name on the sponsorship board')).not.toBeChecked();
+  await page.getByRole('button', { name: 'Review answers', exact: true }).click();
+  await expect(page.locator('.smart-form-booking-summary')).toContainText('9 February 2027');
+  expect(writes).toHaveLength(0);
   await page.getByRole('button', { name: 'Request sponsorship', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Booking request received', exact: true }),
@@ -160,8 +166,10 @@ test('a newly reserved date clears selection but keeps the request error and con
   const { writes, errors } = await fixture(page, { failRequest: true });
   await page.goto('/ramadan/suhoor');
   await page.getByRole('button', { name: /^Day 1,/ }).click();
-  await page.getByLabel('Your name', { exact: true }).fill('Returning sponsor');
-  await page.getByLabel('Phone or email', { exact: true }).fill('returning@example.test');
+  await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
+  await page.getByLabel('Your name', { exact: false }).fill('Returning sponsor');
+  await page.getByLabel('Phone or email', { exact: false }).fill('returning@example.test');
+  await page.getByRole('button', { name: 'Review answers', exact: true }).click();
   await page.getByRole('button', { name: 'Request sponsorship', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText(
     'That day has just been reserved. Choose another date.',
@@ -170,8 +178,9 @@ test('a newly reserved date clears selection but keeps the request error and con
   await expect(page.getByRole('button', { name: /^Day 1,/ })).toBeDisabled();
   await expect(page.getByLabel('Your name', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: /^Day 4,/ }).click();
-  await expect(page.getByLabel('Your name', { exact: true })).toHaveValue('Returning sponsor');
-  await expect(page.getByLabel('Phone or email', { exact: true })).toHaveValue(
+  await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
+  await expect(page.getByLabel('Your name', { exact: false })).toHaveValue('Returning sponsor');
+  await expect(page.getByLabel('Phone or email', { exact: false })).toHaveValue(
     'returning@example.test',
   );
   expect(writes).toHaveLength(1);

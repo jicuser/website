@@ -16,7 +16,7 @@
 | `liquid-glass.css`       | Glass tokens, public control/card material in both modes and accessibility fallbacks |
 | `admin.css`              | Staff workspace shell, editors, login and responsive behaviour                       |
 | `tv-admin.css`           | TV settings/editor controls only; never the live TV renderer                         |
-| `custom-forms.css`       | Form builder, response inbox and form-admin layout                                   |
+| `custom-forms.css`       | Guided public forms, form builder, response inbox and form-admin layout              |
 | `content-workflow.css`   | Posters, programme pages and structured content workflow                             |
 | `projects.css`           | Building project tiles                                                               |
 | `booking-calendars.css`  | Shared hall and Ramadan day selectors, editors and printable tables                  |

@@ -113,11 +113,13 @@ test('portal access is in the menu, Worship keeps reading links, and volunteerin
   await expect(
     page.getByRole('heading', { name: 'Volunteer with JIC', exact: true }),
   ).toBeVisible();
+  await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
   await page.getByLabel('Name', { exact: false }).fill('Example volunteer');
   await page.getByLabel('Email address', { exact: false }).fill('volunteer@example.test');
   await page
     .getByLabel('Your message', { exact: false })
     .fill('I can help at weekend community events.');
+  await page.getByRole('button', { name: 'Review answers', exact: true }).click();
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
   expect(writes).toHaveLength(1);

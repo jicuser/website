@@ -24,6 +24,7 @@ export default function CustomFormQuestion({ field, fields, index, onChange, onR
           <small>
             {FIELD_TYPES.find(([id]) => id === field.type)?.[1]}
             {field.required ? ' · Required' : ' · Optional'}
+            {field.show_when ? ' · Conditional follow-up' : ''}
           </small>
         </span>
       </summary>
@@ -78,7 +79,7 @@ export default function CustomFormQuestion({ field, fields, index, onChange, onR
           </Field>
         )}
         <details className="custom-form-advanced">
-          <summary>Help, examples & rules</summary>
+          <summary>Help, examples & branching</summary>
           <Field label="Help text (optional)">
             <input
               maxLength={300}
@@ -159,6 +160,10 @@ export default function CustomFormQuestion({ field, fields, index, onChange, onR
               ))}
             </select>
           </Field>
+          <p className="workspace-meta">
+            Choose an earlier answer to control this question. It is skipped when the condition does
+            not match.
+          </p>
           {field.show_when && (
             <div className="workspace-grid">
               <Field label="Condition">
@@ -208,6 +213,19 @@ export default function CustomFormQuestion({ field, fields, index, onChange, onR
                   >
                     <option value="true">Confirmed</option>
                     <option value="false">Not confirmed</option>
+                  </select>
+                ) : parent?.type === 'select' ? (
+                  <select
+                    value={field.show_when.value}
+                    onChange={(event) =>
+                      patch({ show_when: { ...field.show_when, value: event.target.value } })
+                    }
+                  >
+                    {parent.options.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
                   </select>
                 ) : (
                   <input

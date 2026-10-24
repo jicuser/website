@@ -15,7 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useContent } from '@/context/ContentContext';
 import { navigationName } from '@/lib/navigationConfiguration';
 import { PAGE_PLACEMENTS, pageProblem, pageSlug, workflowChanged } from '@/lib/pageContent';
-import CustomFormsFields from './CustomFormsFields';
+import SmartForm from './SmartForm';
 
 const initial = () => ({
   title: '',
@@ -86,7 +86,10 @@ export default function CustomFormsBuilder({
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
-  const setFields = (fields) => patch({ schema: { ...draft.schema, fields } });
+  const setFields = (fields) => {
+    setPreviewAnswers({});
+    patch({ schema: { ...draft.schema, fields } });
+  };
   useEffect(() => {
     if (!canAddPage) return undefined;
     const controller = new AbortController();
@@ -287,6 +290,7 @@ export default function CustomFormsBuilder({
             <div className="custom-form-quick-add">
               {[
                 ['enquiry', 'Enquiry'],
+                ['triage', 'Guided enquiry'],
                 ['registration', 'Registration'],
                 ['blank', 'Start blank'],
               ].map(([id, label]) => (
@@ -478,6 +482,10 @@ export default function CustomFormsBuilder({
         </details>
 
         <h3>2. Questions</h3>
+        <p className="workspace-meta">
+          Visitors answer short steps, then review before sending. Use branching rules to ask
+          follow-up questions only when needed. Contact details are grouped after the request.
+        </p>
         {draft.schema.fields.map((field, index) => (
           <CustomFormQuestion
             key={field.id}
@@ -617,24 +625,20 @@ export default function CustomFormsBuilder({
         </details>
       </fieldset>
       {preview && (
-        <div className="workspace-card workspace-form">
+        <SmartForm
+          key={JSON.stringify(draft.schema)}
+          fields={draft.schema.fields}
+          answers={previewAnswers}
+          onAnswersChange={setPreviewAnswers}
+          preview
+        >
           <h3>Question preview</h3>
           <h4>{draft.title || 'Your form'}</h4>
           <p>{draft.description}</p>
-          <fieldset>
-            <CustomFormsFields
-              fields={draft.schema.fields}
-              answers={previewAnswers}
-              onChange={(id, value) =>
-                setPreviewAnswers((current) => ({ ...current, [id]: value }))
-              }
-              preview
-            />
-          </fieldset>
           <p className="workspace-meta">
-            Use the choices above to check conditional questions. Preview does not send a response.
+            Try each answer to check the steps and branching. Preview does not send a response.
           </p>
-        </div>
+        </SmartForm>
       )}
       <div className="workspace-actions custom-form-save-actions">
         <button

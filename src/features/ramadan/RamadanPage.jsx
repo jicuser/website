@@ -12,6 +12,9 @@ import SponsorshipKey from './SponsorshipKey';
 import SponsorshipRange from './SponsorshipRange';
 import SponsorshipTable from './SponsorshipTable';
 import useRamadanCalendar from './useRamadanCalendar';
+import SmartForm from '@/components/workspace/SmartForm';
+import '@/styles/workspace.css';
+import '@/styles/custom-forms.css';
 import '@/styles/booking-calendars.css';
 import '@/styles/ramadan.css';
 import {
@@ -73,8 +76,44 @@ export default function RamadanPage({ kind = null }) {
     ...ramadanDay(state.data, kind, date),
     disabled: !canSponsorDay(state.data, kind, date),
   });
-  async function submit(event) {
-    event.preventDefault();
+  const requestFields = [
+    {
+      id: 'amount',
+      type: 'number',
+      label: 'Amount per day (£)',
+      required: kind === 'daily',
+      minimum: 0.01,
+      maximum: 1000000,
+    },
+    { id: 'name', type: 'text', label: 'Your name', required: true },
+    { id: 'contact', type: 'text', label: 'Phone or email', required: true },
+    { id: 'show_name', type: 'checkbox', label: 'Show my name on the sponsorship board' },
+  ];
+  function requestProblem(fields, values) {
+    for (const field of fields) {
+      if (field.id === 'name' && (values.name.trim().length < 2 || values.name.length > 120))
+        return { field: field.id, message: 'Enter your name using 2–120 characters.' };
+      if (field.id === 'contact') {
+        const value = values.contact.trim();
+        const valid = value.includes('@')
+          ? value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+          : value.length <= 80 &&
+            /^[+\d\s().-]+$/.test(value) &&
+            value.replace(/\D/g, '').length >= 6;
+        if (!valid)
+          return { field: field.id, message: 'Enter a valid phone number or email address.' };
+      }
+      if (field.id === 'amount' && values.amount !== '') {
+        try {
+          toPence(values.amount);
+        } catch (failure) {
+          return { field: field.id, message: failure.message };
+        }
+      }
+    }
+    return null;
+  }
+  async function submit() {
     if (busy || !selected.length || !open) return;
     setError('');
     let pence;
@@ -300,7 +339,41 @@ export default function RamadanPage({ kind = null }) {
                 </div>
               </section>
             ) : selected.length ? (
-              <form className="booking-panel sponsorship-request" onSubmit={submit}>
+              <SmartForm
+                key={`${season.id}:${kind}:${[...selected].sort().join(',')}`}
+                className="booking-panel sponsorship-request"
+                fields={requestFields}
+                answers={{
+                  name,
+                  contact,
+                  amount: amount === '' ? '' : Number(amount),
+                  show_name: showName,
+                }}
+                onAnswersChange={(values) => {
+                  setName(values.name || '');
+                  setContact(values.contact || '');
+                  setAmount(
+                    values.amount === '' || values.amount == null ? '' : String(values.amount),
+                  );
+                  setShowName(values.show_name === true);
+                  setError('');
+                }}
+                busy={busy}
+                onSubmit={submit}
+                submitLabel="Request sponsorship"
+                validateStep={requestProblem}
+                reviewContext={
+                  <div className="smart-form-booking-summary">
+                    <strong>Selected dates</strong>
+                    <ul>
+                      {[...selected].sort().map((date) => (
+                        <li key={date}>{fullDate(date)}</li>
+                      ))}
+                    </ul>
+                    {amount && <p>Total pledge: {money(Number(amount) * 100 * selected.length)}</p>}
+                  </div>
+                }
+              >
                 <h2>
                   {selected.length
                     ? `${selected.length} ${selected.length === 1 ? 'day' : 'days'} selected`
@@ -313,53 +386,8 @@ export default function RamadanPage({ kind = null }) {
                       ? `${fullDate([...selected].sort()[0])} + ${selected.length - 1} more`
                       : 'Tap an available day to get started.'}
                 </p>
-                <label className="booking-field">
-                  Your name
-                  <input
-                    required
-                    minLength={2}
-                    maxLength={120}
-                    autoComplete="name"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                  />
-                </label>
-                <label className="booking-field">
-                  Phone or email
-                  <input
-                    required
-                    maxLength={254}
-                    value={contact}
-                    onChange={(event) => setContact(event.target.value)}
-                  />
-                </label>
-                <label className="booking-field">
-                  Amount per day (£{kind === 'daily' ? '' : ', optional'})
-                  <input
-                    required={kind === 'daily'}
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(event) => setAmount(event.target.value)}
-                  />
-                </label>
-                {amount && /^\d+(\.\d{1,2})?$/.test(amount) && selected.length > 1 && (
-                  <p>Total pledge: {money(Math.round(Number(amount) * 100) * selected.length)}</p>
-                )}
-                <label className="ramadan-check">
-                  <input
-                    type="checkbox"
-                    checked={showName}
-                    onChange={(event) => setShowName(event.target.checked)}
-                  />{' '}
-                  Show my name on the sponsorship board
-                </label>
-                <div className="booking-actions">
-                  <button className="primary" disabled={busy || !selected.length}>
-                    {busy ? 'Sending…' : 'Request sponsorship'}
-                  </button>
-                </div>
                 <small>The team will arrange confirmation and payment.</small>
-              </form>
+              </SmartForm>
             ) : (
               <section className="booking-panel sponsorship-request-prompt">
                 <h2>Choose your dates first</h2>

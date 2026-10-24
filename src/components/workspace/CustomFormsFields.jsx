@@ -9,19 +9,28 @@ export default function CustomFormsFields({
   uploads = {},
   preview = false,
   disabled = false,
+  guided = false,
+  idPrefix = 'answer',
+  errorField,
+  errorId,
+  hideLabel = false,
 }) {
   return visibleFields(fields, answers).map((field) => {
     const value = answers[field.id];
-    const inputId = `answer-${field.id}`;
+    const inputId = `${idPrefix}-${field.id}`;
+    const choiceCards =
+      guided && ['select', 'multiselect'].includes(field.type) && field.options?.length <= 8;
     const common = {
       id: inputId,
       name: field.id,
       disabled,
       required: field.required,
+      'aria-invalid': errorField === field.id || undefined,
       'aria-describedby':
         [
           field.help && `${inputId}-hint`,
           ['file', 'image'].includes(field.type) && `${inputId}-help`,
+          errorField === field.id && errorId,
         ]
           .filter(Boolean)
           .join(' ') || undefined,
@@ -46,6 +55,44 @@ export default function CustomFormsFields({
           value={value || ''}
           onChange={(event) => onChange(field.id, event.target.value)}
         />
+      );
+    } else if (choiceCards) {
+      const multiple = field.type === 'multiselect';
+      const selectedValues = Array.isArray(value) ? value : [];
+      input = (
+        <div
+          className="smart-form-choices"
+          role={multiple ? 'group' : 'radiogroup'}
+          aria-labelledby={`${inputId}-label`}
+          aria-describedby={common['aria-describedby']}
+        >
+          {field.options.map((option, index) => {
+            const selected = multiple ? selectedValues.includes(option) : value === option;
+            return (
+              <label className={selected ? 'is-selected' : ''} key={option}>
+                <input
+                  type={multiple ? 'checkbox' : 'radio'}
+                  name={field.id}
+                  id={`${inputId}-${index}`}
+                  checked={selected}
+                  disabled={disabled}
+                  aria-invalid={common['aria-invalid']}
+                  onChange={() =>
+                    onChange(
+                      field.id,
+                      multiple
+                        ? selected
+                          ? selectedValues.filter((item) => item !== option)
+                          : [...selectedValues, option]
+                        : option,
+                    )
+                  }
+                />
+                <span>{option}</span>
+              </label>
+            );
+          })}
+        </div>
       );
     } else if (['select', 'multiselect'].includes(field.type)) {
       const multiple = field.type === 'multiselect';
@@ -95,6 +142,22 @@ export default function CustomFormsFields({
             </span>
           )}
           {uploads[field.id]?.error && <span role="alert">{uploads[field.id].error}</span>}
+          {(uploads[field.id]?.name || uploads[field.id]?.error) && (
+            <button
+              type="button"
+              disabled={disabled || preview}
+              aria-label={`Remove ${field.label} attachment`}
+              onClick={(event) => {
+                const input = event.currentTarget
+                  .closest('.workspace-field')
+                  ?.querySelector('input[type="file"]');
+                if (input) input.value = '';
+                onFile?.(field, null);
+              }}
+            >
+              Remove attachment
+            </button>
+          )}
         </>
       );
     } else {
@@ -130,10 +193,17 @@ export default function CustomFormsFields({
         className={`workspace-field ${field.type === 'checkbox' ? 'custom-form-check' : ''}`}
         key={field.id}
       >
-        <label htmlFor={inputId}>
-          {field.label}
-          {field.required && <span aria-label="required"> *</span>}
-        </label>
+        {choiceCards ? (
+          <span id={`${inputId}-label`} className={hideLabel ? 'sr-only' : 'smart-field-label'}>
+            {field.label}
+            {field.required && <span aria-label="required"> *</span>}
+          </span>
+        ) : (
+          <label htmlFor={inputId} className={hideLabel ? 'sr-only' : undefined}>
+            {field.label}
+            {field.required && <span aria-label="required"> *</span>}
+          </label>
+        )}
         {input}
         {field.help && (
           <span id={`${inputId}-hint`} className="workspace-meta">

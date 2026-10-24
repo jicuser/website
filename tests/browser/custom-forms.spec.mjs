@@ -112,12 +112,14 @@ test('public form hides stale conditional answers and reuses its retry key', asy
   await expect(
     page.getByRole('heading', { name: 'Volunteer registration', exact: true }),
   ).toBeVisible();
+  await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
   await page.getByLabel('Your name').fill('Example volunteer');
   await page.getByLabel('Contact by').selectOption('Phone');
   await page.getByLabel('Telephone number').fill('0123456789');
   await page.getByLabel('Contact by').selectOption('Email');
   await expect(page.getByLabel('Telephone number')).toHaveCount(0);
   await page.getByLabel('Email address').fill('volunteer@example.org');
+  await page.getByRole('button', { name: 'Review answers', exact: true }).click();
   await page.getByRole('button', { name: 'Send response', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Please try again.');
   await page.getByRole('button', { name: 'Send response', exact: true }).click();
@@ -419,13 +421,15 @@ test('response email offers an external draft without sending from the portal', 
 test('public draft clears when the signed-in identity changes', async ({ page }) => {
   const errors = await setup(page, { signedIn: true });
   await page.goto('/forms/volunteer-registration');
+  await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
   await page.getByLabel('Your name').fill('Private previous account');
   await page.evaluate(async () => {
     const { supabase } = await import('/src/lib/supabaseClient.js');
     await supabase.auth.signOut({ scope: 'local' });
   });
+  await page.getByRole('button', { name: 'Show all questions', exact: true }).click();
   await expect(page.getByLabel('Your name')).toHaveValue('');
-  await expect(page.getByRole('button', { name: 'Send response', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Review answers', exact: true })).toBeVisible();
   await expect(page.getByLabel('Your name')).toBeEditable();
   expect(errors).toEqual([]);
 });
@@ -476,7 +480,7 @@ test('clearing an in-flight attachment prevents its late completion from reattac
     },
   });
   await page.goto('/forms/volunteer-registration');
-  const input = page.getByLabel('Optional photograph');
+  const input = page.getByLabel('Optional photograph', { exact: true });
   await input.setInputFiles({
     name: 'example.png',
     mimeType: 'image/png',
@@ -486,10 +490,13 @@ test('clearing an in-flight attachment prevents its late completion from reattac
   });
   try {
     await expect.poll(() => finishStarted).toBe(true);
-    await input.setInputFiles([]);
+    await page
+      .getByRole('button', { name: 'Remove Optional photograph attachment', exact: true })
+      .click();
   } finally {
     releaseFinish();
   }
+  await page.getByRole('button', { name: 'Review answers', exact: true }).click();
   await page.getByRole('button', { name: 'Send response', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Thank you' })).toBeVisible();
   expect(submissions[0].answers).toEqual({});
