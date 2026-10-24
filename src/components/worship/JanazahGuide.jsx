@@ -24,32 +24,6 @@ export default function JanazahGuide() {
           Imam when praying with the congregation; ask the Imam about your circumstances.
         </p>
       </header>
-      <div className="worship-reading-card worship-janazah-resources">
-        <h2>Full guide and funeral support</h2>
-        <p>
-          Read {book.title} from Maktaba-tul-Madina, with the full method, supplications and
-          rulings.
-        </p>
-        <div className="worship-external-links">
-          <a href={book.pdf} target="_blank" rel="noopener noreferrer">
-            <BookOpen size={16} aria-hidden="true" />
-            Open English PDF <ExternalLink size={14} aria-hidden="true" />
-          </a>
-          <a href={book.urduPdf} target="_blank" rel="noopener noreferrer">
-            <BookOpen size={16} aria-hidden="true" />
-            Open Urdu PDF <ExternalLink size={14} aria-hidden="true" />
-          </a>
-          <Link to="/forms/funeral-enquiry">Ask about funeral support</Link>
-          <Link to="/contact">Contact the centre</Link>
-        </div>
-        <p className="worship-reading-footnote">
-          By Ameer-e-Ahl-e-Sunnat; English translation by Dawat-e-Islami.{' '}
-          <a href={book.source} target="_blank" rel="noopener noreferrer">
-            Publisher’s library
-          </a>
-          . PDFs open in a new tab.
-        </p>
-      </div>
       <ReadingControls
         fontSize={fontSize}
         onFontSizeChange={setFontSize}
@@ -101,6 +75,32 @@ export default function JanazahGuide() {
           </li>
         ))}
       </ol>
+      <div className="worship-reading-card worship-janazah-resources">
+        <h2>Full guide and funeral support</h2>
+        <p>
+          Read {book.title} from Maktaba-tul-Madina, with the full method, supplications and
+          rulings.
+        </p>
+        <div className="worship-external-links">
+          <a href={book.pdf} target="_blank" rel="noopener noreferrer">
+            <BookOpen size={16} aria-hidden="true" />
+            Open English PDF <ExternalLink size={14} aria-hidden="true" />
+          </a>
+          <a href={book.urduPdf} target="_blank" rel="noopener noreferrer">
+            <BookOpen size={16} aria-hidden="true" />
+            Open Urdu PDF <ExternalLink size={14} aria-hidden="true" />
+          </a>
+          <Link to="/forms/funeral-enquiry">Ask about funeral support</Link>
+          <Link to="/contact">Contact the centre</Link>
+        </div>
+        <p className="worship-reading-footnote">
+          By Ameer-e-Ahl-e-Sunnat; English translation by Dawat-e-Islami.{' '}
+          <a href={book.source} target="_blank" rel="noopener noreferrer">
+            Publisher’s library
+          </a>
+          . PDFs open in a new tab.
+        </p>
+      </div>
       <p className="worship-reading-footnote">
         Method and supplications:{' '}
         <a href={`${book.pdf}#page=12`} target="_blank" rel="noopener noreferrer">
