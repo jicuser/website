@@ -4,11 +4,11 @@
  * Keep backdrop passes shallow on mobile to reduce GPU and memory pressure. */
 
 html[data-theme] {
-  --jic-glass-control: rgba(250, 251, 253, 0.24);
+  --jic-glass-control: var(--jic-glass-reminder);
   --jic-glass-reminder: rgba(250, 251, 253, 0.2);
-  --jic-glass-tile: rgba(250, 251, 253, 0.34);
-  --jic-glass-panel: rgba(250, 251, 253, 0.52);
-  --jic-glass-panel-strong: rgba(250, 251, 253, 0.74);
+  --jic-glass-tile: var(--jic-glass-reminder);
+  --jic-glass-panel: var(--jic-glass-reminder);
+  --jic-glass-panel-strong: var(--jic-glass-reminder);
   --jic-glass-border: rgba(255, 255, 255, 0.58);
   --jic-glass-highlight: rgba(255, 255, 255, 0.42);
   --jic-glass-shadow: 0 10px 30px rgba(7, 19, 36, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.42);
@@ -18,23 +18,13 @@ html[data-theme] {
     rgba(255, 255, 255, 0.035) 52%,
     transparent
   );
-  --jic-glass-tile-sheen: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.14),
-    rgba(255, 255, 255, 0.025) 52%,
-    transparent
-  );
-  --jic-glass-panel-sheen: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.12),
-    rgba(255, 255, 255, 0.02) 55%,
-    transparent
-  );
+  --jic-glass-tile-sheen: var(--jic-glass-control-sheen);
+  --jic-glass-panel-sheen: var(--jic-glass-control-sheen);
   --jic-glass-action-sheen: linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 55%);
   --jic-glass-overlay-filter: blur(8px);
   --jic-glass-control-filter: blur(18px) saturate(175%);
-  --jic-glass-panel-filter: blur(24px) saturate(165%);
-  --jic-glass-dense-filter: blur(28px) saturate(150%);
+  --jic-glass-panel-filter: var(--jic-glass-control-filter);
+  --jic-glass-dense-filter: var(--jic-glass-control-filter);
   --jic-glass-ink: #081222;
   --jic-glass-muted: #26364a;
   --jic-glass-accent: #6b3a0c;
@@ -44,17 +34,15 @@ html[data-theme] {
 }
 
 html[data-theme='dark'] {
-  --jic-glass-control: rgba(9, 29, 51, 0.72);
+  --jic-glass-control: var(--jic-glass-reminder);
   --jic-glass-reminder: rgba(9, 29, 51, 0.38);
-  --jic-glass-tile: rgba(11, 33, 56, 0.7);
-  --jic-glass-panel: rgba(10, 29, 50, 0.78);
-  --jic-glass-panel-strong: rgba(9, 27, 47, 0.94);
+  --jic-glass-tile: var(--jic-glass-reminder);
+  --jic-glass-panel: var(--jic-glass-reminder);
+  --jic-glass-panel-strong: var(--jic-glass-reminder);
   --jic-glass-border: rgba(143, 178, 207, 0.32);
   --jic-glass-highlight: rgba(172, 204, 229, 0.16);
   --jic-glass-shadow: 0 12px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(172, 204, 229, 0.1);
   --jic-glass-control-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.08), transparent 65%);
-  --jic-glass-tile-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.06), transparent 65%);
-  --jic-glass-panel-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.04), transparent 65%);
   --jic-glass-ink: #ffffff;
   --jic-glass-muted: #edf2f8;
   --jic-glass-accent: #f3ce86;
@@ -189,7 +177,7 @@ html[data-theme]
   backdrop-filter: var(--jic-glass-control-filter);
 }
 
-/* Medium surfaces: tiles, cards and utility strips. */
+/* Cards and controls share the daily reflection material. Layout stays component-owned. */
 html[data-theme]
   :is(
     .jic-public-route,
@@ -234,6 +222,7 @@ html[data-theme]
     .jic-account-step,
     .jic-question-list details,
     .jic-home-prayer,
+    .jic-salawat-note,
     .jic-home-live-banner,
     .portal-signin,
     .workspace-card,
@@ -304,7 +293,7 @@ html[data-theme] .jic-public-route .jic-daily-reminder > button {
   backdrop-filter: var(--jic-glass-control-filter);
 }
 
-/* Form controls use a stronger tint for legibility, but avoid nested blur passes. */
+/* Fields retain an opaque reading surface inside the shared glass. */
 html[data-theme]
   :is(
     .jic-public-route,
@@ -314,7 +303,7 @@ html[data-theme]
     .ops-social-dialog
   )
   :is(input:not([type='checkbox']):not([type='radio']), textarea, select) {
-  background: var(--jic-glass-panel-strong);
+  background: var(--jic-surface);
   color: var(--jic-text);
   border-color: var(--jic-glass-border);
   box-shadow: inset 0 1px 0 var(--jic-glass-highlight);
@@ -530,8 +519,8 @@ html[data-theme][data-surface='glass'] .jic-site-footer :is(a, p, small, .jic-fo
   html[data-theme] {
     --jic-glass-overlay-filter: blur(5px);
     --jic-glass-control-filter: blur(10px) saturate(165%);
-    --jic-glass-panel-filter: blur(14px) saturate(155%);
-    --jic-glass-dense-filter: blur(16px) saturate(145%);
+    --jic-glass-panel-filter: var(--jic-glass-control-filter);
+    --jic-glass-dense-filter: var(--jic-glass-control-filter);
     --jic-glass-shadow: 0 7px 22px rgba(0, 0, 0, 0.17), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   }
 }

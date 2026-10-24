@@ -115,7 +115,7 @@ for (const width of [390, 1280]) {
     await openHome(page, 'dark', width);
     const prayer = page.locator('#jic-prayer-dock');
     const updates = page.locator('.jic-mobile-info-banner');
-    await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
+    await expect(prayer).toHaveCount(0);
     const pageGeometry = () =>
       page.evaluate(() => ({
         headerHeight: document.querySelector('.jic-unified-header').getBoundingClientRect().height,
@@ -123,7 +123,7 @@ for (const width of [390, 1280]) {
       }));
     const geometry = await pageGeometry();
     await page.evaluate(() => window.scrollTo(0, 450));
-    await expect(prayer).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('html')).toHaveAttribute('data-prayer-dock-hidden', 'true');
     if (width < 768) {
       await expect(updates).toHaveAttribute('aria-hidden', 'true');
       await expect(updates).toBeHidden();
@@ -134,20 +134,20 @@ for (const width of [390, 1280]) {
     await expect(prayer).toBeHidden();
     expect(await pageGeometry()).toEqual(geometry);
     await page.evaluate(() => window.scrollTo(0, 410));
-    await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
-    await expect(prayer).toBeVisible();
+    await expect(prayer).toHaveCount(0);
+    await expect(page.locator('.jic-home-prayer')).toBeVisible();
     if (width < 768) await expect(updates).toBeVisible();
     await page.evaluate(() => window.scrollTo(0, 460));
-    await expect(prayer).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('html')).toHaveAttribute('data-prayer-dock-hidden', 'true');
     if (width < 768) {
       await page.evaluate(() => window.scrollTo(0, 410));
-      await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
+      await expect(prayer).toHaveCount(0);
       await page.locator('.jic-mobile-prayer-content').click();
       await expect(page).toHaveURL('/prayer-times');
       await expect(page.locator('#jic-prayer-details')).toBeHidden();
     }
     await page.goto('/services');
-    await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
+    await expect(prayer).toHaveAttribute('aria-hidden', 'true');
     expect(errors).toEqual([]);
   });
 }

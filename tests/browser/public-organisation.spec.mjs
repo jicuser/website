@@ -101,7 +101,10 @@ test('portal access is in the menu, Worship keeps reading links, and volunteerin
   await expect(page.locator('.jic-mobile-prayer-heading > span').first()).toHaveText(
     'Today’s prayer times',
   );
-  await expect(page.locator('.jic-mobile-prayer-link')).toHaveText('Full timetable');
+  await expect(
+    page.locator('.jic-home-prayer').getByRole('link', { name: 'Full timetable', exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
   await expect(page.locator('.jic-mobile-prayer-heading small')).toHaveCount(0);
   await page.locator('.jic-menu-word').click();
   await expect(page.locator('.jic-menu-account')).toHaveAttribute('href', '/portal');

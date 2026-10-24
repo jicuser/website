@@ -4,7 +4,7 @@ import { defineConfig, loadEnv } from 'vite';
 import { validateBuildSettings } from './scripts/build-settings.mjs';
 import { pagePreviews } from './scripts/page-previews.mjs';
 
-// Allow only this Codespace's preview host; keep Vite's host protection enabled.
+// Explicit preview hosts keep Vite's host protection enabled.
 const codespaceHost = process.env.CODESPACE_NAME
   ? `${process.env.CODESPACE_NAME}-3000.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN || 'app.github.dev'}`
   : null;
@@ -15,7 +15,7 @@ export default defineConfig(({ command, mode }) => {
   if (command === 'build') validateBuildSettings(env);
   return {
     plugins: [react(), pagePreviews({ env })],
-    server: { allowedHosts: codespaceHost ? [codespaceHost] : [] },
+    server: { allowedHosts: ['terminal.local', ...(codespaceHost ? [codespaceHost] : [])] },
     resolve: {
       extensions: ['.jsx', '.js', '.tsx', '.ts', '.json'],
       alias: { '@': path.resolve(__dirname, './src') },

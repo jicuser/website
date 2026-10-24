@@ -62,7 +62,7 @@ async function setup(page, { welcome = false } = {}) {
     });
   });
   await page.goto('/');
-  await expect(page.locator('.jic-prayer-dock')).toContainText('5:15');
+  await expect(page.locator('.jic-home-prayer')).toContainText('5:15');
   return {
     hold: () => {
       holdRequests = true;
@@ -71,14 +71,17 @@ async function setup(page, { welcome = false } = {}) {
   };
 }
 
-test('home shortcuts fit small phones and the prayer pill opens the timetable', async ({
+test('home shortcuts fit small phones and the prayer card opens the timetable', async ({
   page,
 }, testInfo) => {
   await setup(page);
   const dock = page.locator('#jic-prayer-dock');
   const details = page.locator('#jic-prayer-details');
   await expect(details).toBeHidden();
-  expect(await dock.evaluate((node) => node.getBoundingClientRect().height)).toBeLessThan(84);
+  await expect(dock).toHaveCount(0);
+  expect(
+    await page.locator('.jic-home-prayer').evaluate((node) => node.getBoundingClientRect().height),
+  ).toBeLessThan(240);
   await page.locator('.jic-mobile-prayer-content').click();
   await expect(page).toHaveURL('/prayer-times');
   await expect(
@@ -110,12 +113,11 @@ test('home shortcuts fit small phones and the prayer pill opens the timetable', 
     const servicePositions = await page.locator('.jic-home-shortcuts').evaluate((nav) => {
       const links = [...nav.querySelectorAll('a')];
       const prayer = document.querySelector('.jic-home-prayer').getBoundingClientRect();
-      const dockTop = document.querySelector('#jic-prayer-dock').getBoundingClientRect().top;
       return {
         firstLinks: links.slice(0, 2).map((link) => link.getAttribute('href')),
         servicesVisible: links.slice(0, 2).every((link) => {
           const box = link.getBoundingClientRect();
-          return box.top >= 0 && box.bottom < dockTop;
+          return box.top >= 0 && box.bottom < innerHeight;
         }),
         servicesBeforePrayer: nav.getBoundingClientRect().bottom < prayer.top,
       };
@@ -154,19 +156,20 @@ test('desktop timetable stays compact and links to the next congregation', async
   for (const width of [1024, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.evaluate(() => window.scrollTo(0, 0));
-    const dock = page.locator('#jic-prayer-dock');
-    await expect(page.locator('#jic-prayer-details')).toBeVisible();
-    await expect(dock.locator('.jic-today-prayer')).toHaveCount(6);
-    await expect(dock.locator('.jic-today-prayer.is-next')).toContainText('Dhuhr');
-    await expect(dock.locator('.jic-next-prayer-summary')).toContainText('Next jama’ah · Dhuhr');
+    const dock = page.locator('.jic-home-prayer');
+    await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
+    await expect(dock).toBeVisible();
+    await expect(dock.locator('.jic-mini-prayer:not(.jic-mini-prayer-labels)')).toHaveCount(5);
+    await expect(dock.locator('.jic-mini-prayer.is-next')).toContainText('Dhuhr');
+    await expect(dock.locator('.jic-home-prayer-main')).toContainText('Dhuhr');
     const sizes = await dock.evaluate((node) => ({
       height: node.getBoundingClientRect().height,
       overflow: document.documentElement.scrollWidth > innerWidth + 1,
-      linksFit: [...node.querySelectorAll('.jic-today-prayer')].every(
+      linksFit: [...node.querySelectorAll('.jic-mini-prayer:not(.jic-mini-prayer-labels)')].every(
         (link) => link.scrollWidth <= link.clientWidth + 1,
       ),
     }));
-    expect(sizes.height).toBeLessThan(width >= 1100 ? 106 : 150);
+    expect(sizes.height).toBeLessThan(240);
     expect(sizes.overflow).toBe(false);
     expect(sizes.linksFit).toBe(true);
     if (width === 1440)
@@ -196,6 +199,15 @@ test('salawat closes automatically and stays dismissed for the visit', async ({ 
   const welcome = page.getByRole('complementary', { name: 'Salawat', exact: true });
   await expect(welcome).toBeVisible();
   await expect(welcome).toHaveCSS('position', 'fixed');
+  const offset = await welcome.evaluate((node) => {
+    const r = node.getBoundingClientRect();
+    return {
+      x: Math.abs(r.x + r.width / 2 - document.documentElement.clientWidth / 2),
+      y: Math.abs(r.y + r.height / 2 - innerHeight / 2),
+    };
+  });
+  expect(offset.x).toBeLessThanOrEqual(1);
+  expect(offset.y).toBeLessThanOrEqual(1);
   await page.clock.fastForward(6000);
   await expect(welcome).toHaveCount(0);
   await page.reload();
@@ -214,7 +226,7 @@ for (const method of ['cross', 'outside', 'escape']) {
   });
 }
 
-test('mobile footer stays uncovered and Home returns to the prayer pill', async ({
+test('mobile footer stays uncovered and Home returns to the prayer card', async ({
   page,
 }, testInfo) => {
   await setup(page);
@@ -223,9 +235,9 @@ test('mobile footer stays uncovered and Home returns to the prayer pill', async 
   ).toHaveCount(1);
   await page.locator('.jic-site-footer').scrollIntoViewIfNeeded();
   const dock = page.locator('#jic-prayer-dock');
-  await expect(dock).toHaveAttribute('aria-hidden', 'true');
+  await expect(dock).toHaveCount(0);
   await page.waitForTimeout(800);
-  await expect(dock).toHaveAttribute('aria-hidden', 'true');
+  await expect(dock).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Scroll to top', exact: true })).toHaveCount(0);
   const iconPositions = await page
     .locator('.jic-footer-icons a')
@@ -238,7 +250,8 @@ test('mobile footer stays uncovered and Home returns to the prayer pill', async 
     .getByRole('button', { name: 'Home', exact: true })
     .click();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
-  await expect(dock).not.toHaveAttribute('aria-hidden', 'true');
+  await expect(dock).toHaveCount(0);
+  await expect(page.locator('.jic-home-prayer')).toBeVisible();
 });
 
 test('Home cancels a prayer timetable navigation while its page is still loading', async ({
@@ -346,11 +359,11 @@ test('the slim daily reminder follows Salah bar scrolling and restores on naviga
   expect(originalHeight).toBeLessThan(76);
   await page.mouse.wheel(0, 750);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
-  await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('html')).toHaveAttribute('data-prayer-dock-hidden', 'true');
   await expect(reminder).toHaveCSS('visibility', 'hidden');
   await expect(reminder).toHaveCSS('opacity', '0');
   await page.mouse.wheel(0, -120);
-  await expect(page.locator('#jic-prayer-dock')).not.toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('html')).not.toHaveAttribute('data-prayer-dock-hidden', 'true');
   await expect(reminder).toHaveCSS('visibility', 'visible');
   await expect(reminder).toHaveCSS('opacity', '1');
   const reminderTop = await reminder.evaluate((node) => node.getBoundingClientRect().top);

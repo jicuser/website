@@ -26,7 +26,7 @@ for (const theme of ['light', 'dark']) {
       .evaluate((node) => getComputedStyle(node, '::after').backgroundColor);
     expect(photoVeil).toBe(theme === 'dark' ? 'rgb(8, 15, 29)' : 'rgb(249, 247, 241)');
     await page.evaluate(() => scrollTo(0, 600));
-    await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('html')).toHaveAttribute('data-prayer-dock-hidden', 'true');
     await page.evaluate(() => scrollTo(0, 0));
     await expect(page.locator('.jic-mobile-info-banner')).not.toHaveAttribute(
       'aria-hidden',

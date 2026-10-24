@@ -107,7 +107,9 @@ for (const width of [320, 390]) {
         ),
         pageFits: document.documentElement.scrollWidth <= innerWidth + 1,
       }));
-      expect(layout.height).toBeLessThanOrEqual(185);
+      expect(layout.height).toBeLessThanOrEqual(240);
+      await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
+      await expect(card.locator('.jic-mini-prayer:not(.jic-mini-prayer-labels)')).toHaveCount(5);
       expect(layout.fits).toBe(true);
       expect(layout.pageFits).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`slim-home-${theme}-${width}.png`) });
@@ -176,7 +178,8 @@ test('mobile prayer overview is a labelled link to the full timetable', async ({
   await openHome(page, 390);
   const overview = page.getByRole('link', { name: /Today.s prayer times:.*View full timetable/ });
   await expect(overview).toBeVisible();
-  await expect(overview).toContainText('Full timetable');
+  await expect(overview).toContainText('Today’s prayer times');
+  await expect(page.locator('.jic-home-prayer')).toContainText('Timetable');
   await overview.click();
   await expect(page).toHaveURL('/prayer-times');
 });

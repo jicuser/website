@@ -165,7 +165,8 @@ for (const [path, width] of [
         .click();
     }
     await expect(page).toHaveURL('/');
-    await expect(dock).toBeVisible();
+    await expect(dock).toHaveCount(0);
+    await expect(page.locator('.jic-home-prayer')).toBeVisible();
     expect(state.errors).toEqual([]);
     expect(state.writes).toEqual([]);
   });

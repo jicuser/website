@@ -2,18 +2,20 @@
 .jic-salawat-note {
   position: fixed;
   z-index: 80;
-  inset: max(90px, calc(env(safe-area-inset-top) + 70px)) 12px auto;
-  box-shadow: 0 12px 40px #0005;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: start;
   gap: 12px;
-  width: min(680px, calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter)));
-  margin: 0 auto;
-  padding: 12px 12px 10px 16px;
-  border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  background: var(--jic-surface);
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100dvh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  margin: 0;
+  padding: 24px 48px;
+  border: 1px solid var(--jic-glass-border);
+  border-radius: 18px;
   color: var(--jic-text);
+  text-align: center;
 }
 .jic-salawat-note > div {
   flex: 1;
@@ -31,7 +33,7 @@
 }
 .jic-salawat-note .jic-salawat-arabic {
   font:
-    1.35rem/1.65 Georgia,
+    1.6rem/1.8 Georgia,
     'Times New Roman',
     serif;
 }
@@ -47,14 +49,17 @@
   color: var(--jic-text-secondary);
 }
 .jic-spiritual-dismiss {
+  position: absolute;
+  top: 4px;
+  right: 4px;
   display: grid;
   flex: 0 0 44px;
   width: 44px;
   height: 44px;
   place-items: center;
-  border: 1px solid var(--jic-border);
+  border: 0;
   border-radius: 10px;
-  background: var(--jic-bg);
+  background: transparent;
   color: inherit;
   cursor: pointer;
 }

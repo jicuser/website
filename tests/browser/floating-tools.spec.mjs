@@ -53,14 +53,14 @@ for (const width of [1280]) {
     );
     expect(targets.every(Boolean)).toBe(true);
     await page.evaluate(() => scrollTo(0, 650));
-    await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('html')).toHaveAttribute('data-prayer-dock-hidden', 'true');
     await expect(tools).toBeVisible();
     await expect.poll(async () => (await tools.boundingBox()).y).toBe(initial.y);
     let box = await tools.boundingBox();
     expect(box.y).toBe(initial.y);
     expect(box.x + box.width).toBeLessThanOrEqual(width);
     await page.evaluate(() => scrollTo(0, 600));
-    await expect(page.locator('#jic-prayer-dock')).not.toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('html')).not.toHaveAttribute('data-prayer-dock-hidden', 'true');
     await expect(tools).toBeVisible();
     box = await tools.boundingBox();
     expect(box.y).toBe(initial.y);

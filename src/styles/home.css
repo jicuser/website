@@ -397,7 +397,28 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
   overflow: hidden;
 }
 .jic-home-prayer-main {
-  padding: 10px 12px 8px;
+  display: block;
+  padding: 8px 12px 6px;
+  color: inherit;
+  text-decoration: none;
+}
+.jic-home-prayer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-bottom: 4px;
+}
+.jic-home-prayer-meta :is(.jic-home-eyebrow, .jic-home-prayer-note) {
+  margin: 0;
+}
+.jic-home-prayer-meta .jic-home-prayer-note {
+  font-size: 11px;
+}
+.jic-home-prayer-today {
+  border-top: 1px solid var(--jic-glass-border);
+  padding: 4px 6px;
 }
 .jic-home-eyebrow {
   margin: 0 0 2px;
@@ -444,7 +465,9 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
 }
 .jic-home-jummah a {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2px 6px;
   justify-content: center;
   align-items: center;
   min-height: 44px;
@@ -651,36 +674,6 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
   }
 }
 
-.jic-home-prayer-main {
-  display: block;
-  padding: 12px 14px;
-  color: inherit;
-  text-decoration: none;
-}
-.jic-home-prayer-main .jic-home-eyebrow {
-  margin: 0 0 4px;
-}
-.jic-home-prayer-time {
-  gap: 12px;
-}
-.jic-home-prayer-time h2,
-.jic-home-prayer-time strong {
-  font-size: clamp(1.15rem, 4vw, 1.65rem);
-}
-.jic-home-prayer-note {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
-}
-.jic-home-jummah a {
-  min-height: 44px;
-  flex-direction: row;
-  gap: 8px;
-  padding: 6px;
-}
-.jic-home-prayer-footer a {
-  min-height: 44px;
-  padding: 6px 4px;
-}
 .jic-home-community-links {
   display: flex;
   flex-wrap: wrap;

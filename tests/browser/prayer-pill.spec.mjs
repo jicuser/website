@@ -77,7 +77,8 @@ for (const width of [320, 390]) {
       const nav = page.getByRole('navigation', { name: 'Quick navigation' });
       await expect(nav.getByRole('button')).toHaveText(['Home']);
       await expect(pill.locator('button, [aria-expanded]')).toHaveCount(0);
-      await expect(pill).toContainText('Full timetable');
+      await expect(pill).toContainText('Today’s prayer times');
+      await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
       await pill.click();
       await expect(page).toHaveURL('/prayer-times');
       await expect(
@@ -106,11 +107,11 @@ for (const width of [320, 390]) {
         });
       const before = await documentPosition();
       await page.evaluate(() => scrollTo(0, 500));
-      await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
+      await expect(page.locator('html')).toHaveAttribute('data-prayer-dock-hidden', 'true');
       // Home stays in the branding row; hiding the dock must not move page content.
       expect(await documentPosition()).toEqual(before);
       await page.evaluate(() => scrollTo(0, 400));
-      await expect(page.locator('#jic-prayer-dock')).not.toHaveAttribute('aria-hidden', 'true');
+      await expect(page.locator('html')).not.toHaveAttribute('data-prayer-dock-hidden', 'true');
       await nav.getByRole('button', { name: 'Home' }).click();
       await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
       await page.screenshot({ path: testInfo.outputPath(`prayer-pill-${theme}-${width}.png`) });

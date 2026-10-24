@@ -10,13 +10,13 @@
   width: max-content;
   max-width: calc(100% - 24px);
   padding: 2px 4px 2px 14px;
-  border: 1px solid var(--jic-border);
+  border: 1px solid var(--jic-glass-border);
   border-radius: 28px;
-  background: color-mix(in srgb, var(--jic-surface) 92%, transparent);
+  background: var(--jic-glass-control-sheen), var(--jic-glass-control);
   color: var(--jic-text);
-  box-shadow: 0 6px 24px #0003;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--jic-glass-shadow);
+  backdrop-filter: var(--jic-glass-control-filter);
+  -webkit-backdrop-filter: var(--jic-glass-control-filter);
   font-size: 13px;
 }
 .jic-radio-live-notice > svg {

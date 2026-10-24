@@ -8,7 +8,7 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   await page.route('**/preview-api/**', (route) =>
     route.fulfill({ contentType: 'application/json', body: '[]' }),
   );
-  await page.goto('/');
+  await page.goto('/prayer-times');
   await expect(page.locator('.jic-mobile-prayer-summary')).toBeVisible();
   await expect(page.locator('.jic-mobile-prayer-summary')).toContainText('Today’s prayer times');
   await expect(page.locator('.jic-mobile-info-banner')).toBeVisible();
