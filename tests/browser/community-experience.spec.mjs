@@ -15,10 +15,11 @@ async function publicSite(page) {
 
 test('homepage leads with masjid activity and compact practical links', async ({ page }) => {
   await publicSite(page);
-  const services = page.locator('.service-explorer--compact');
+  const services = page.getByRole('navigation', { name: 'Services and learning' });
   await expect(services).toBeVisible();
-  // Certificates remain hidden until the workspace feature is enabled.
-  await expect(services.locator('.service-explorer-card')).toHaveCount(4);
+  await expect(services.getByRole('link')).toHaveCount(6);
+  await expect(page.locator('.service-explorer--compact')).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'More from JIC' })).toBeVisible();
   await expect(page.getByRole('searchbox', { name: 'Search services' })).toHaveCount(0);
   await expect(page.getByRole('group', { name: 'Filter services' })).toHaveCount(0);
   await expect(
@@ -30,7 +31,7 @@ test('homepage leads with masjid activity and compact practical links', async ({
       .evaluate(
         (node) =>
           node.getBoundingClientRect().top >
-          document.querySelector('.service-explorer--compact').getBoundingClientRect().top,
+          document.querySelector('.jic-home-shortcuts').getBoundingClientRect().top,
       ),
   ).toBe(true);
   expect(
@@ -67,8 +68,8 @@ test('hidden services are absent from compact homepage links', async ({ page }) 
     }),
   );
   await page.goto('/');
-  await expect(page.locator('.service-explorer')).toBeVisible();
-  await expect(page.locator('.service-explorer a[href="/services/hall-booking"]')).toHaveCount(0);
+  await expect(page.locator('.jic-home-shortcuts')).toBeVisible();
+  await expect(page.locator('.jic-home-shortcuts a[href="/services/hall-booking"]')).toHaveCount(0);
   await expect(
     page.getByText('Does a hall enquiry confirm my booking?', { exact: true }),
   ).toHaveCount(0);
