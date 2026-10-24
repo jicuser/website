@@ -830,3 +830,238 @@
   padding-top: 16px;
   border-top: 1px solid var(--jic-border);
 }
+
+/* One calendar and one selected-day panel; no stack of meal cards. */
+.meal-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.meal-page-heading p {
+  margin: 0 0 12px;
+}
+.meal-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.meal-workspace > * {
+  min-width: 0;
+}
+.meal-calendar .sponsorship-days-heading {
+  margin-bottom: 8px;
+}
+.meal-calendar h2,
+.meal-summary h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.meal-selected h2 {
+  font-size: 1.15rem;
+  margin: 0 0 12px;
+  scroll-margin-top: 100px;
+}
+.meal-kind-choice {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 0 12px;
+}
+.meal-kind-choice button {
+  min-height: 44px;
+  justify-content: center;
+  padding: 8px;
+}
+.meal-summary h3 {
+  font-size: 1rem;
+  margin: 14px 0 8px;
+}
+.meal-dishes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.meal-dishes li {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--jic-border);
+}
+.meal-dishes li span:first-child {
+  overflow-wrap: anywhere;
+}
+.meal-dishes li span:last-child {
+  flex-shrink: 0;
+}
+.meal-totals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+}
+.meal-totals small {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--jic-text-secondary);
+}
+.meal-totals strong {
+  display: block;
+  font-size: 1.4rem;
+}
+.meal-totals > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.meal-totals > span:first-child {
+  display: block;
+}
+.meal-notes,
+.meal-availability {
+  font-size: 0.875rem;
+}
+.meal-request {
+  border-top: 1px solid var(--jic-border);
+  padding-top: 12px;
+}
+.meal-day-editor {
+  margin-top: 0;
+  padding: 14px;
+}
+.meal-day-editor .sponsorship-editor-heading {
+  margin-bottom: 10px;
+}
+.meal-day-editor .sponsorship-editor {
+  border: 0;
+  padding: 0;
+}
+.meal-availability-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  margin: 12px 0;
+  cursor: pointer;
+}
+.meal-availability-toggle small {
+  display: block;
+  color: var(--jic-text-secondary);
+  font-size: 0.75rem;
+}
+.meal-availability-toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--jic-gold);
+}
+.meal-dish-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(75px, 0.55fr) 44px;
+  gap: 6px;
+  align-items: end;
+  margin: 8px 0;
+}
+.meal-dish-row .booking-field {
+  margin: 0;
+  font-size: 0.8rem;
+}
+.meal-dish-row input {
+  padding: 8px;
+}
+.meal-dish-row button {
+  min-height: 44px;
+  padding: 8px;
+  justify-content: center;
+}
+.meal-price-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.meal-price-fields .booking-field {
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+.meal-extra {
+  margin-top: 12px;
+  border-block: 1px solid var(--jic-border);
+}
+.meal-extra summary {
+  min-height: 44px;
+  padding: 12px 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.meal-day-prompt {
+  padding: 18px;
+  border: 1px dashed var(--jic-border);
+  border-radius: 12px;
+}
+.meal-day-prompt h3 {
+  margin: 0;
+}
+.meal-day-prompt p {
+  font-size: 0.875rem;
+  margin: 8px 0 0;
+}
+@media (min-width: 900px) {
+  .meal-workspace {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  }
+}
+.ramadan-board-menu {
+  display: flex;
+  align-items: center;
+  gap: 1cqw;
+  min-width: 0;
+  font-size: clamp(10px, 1.3cqw, 22px);
+}
+.ramadan-board-menu strong {
+  flex-shrink: 0;
+  max-width: 45%;
+}
+.ramadan-board-menu :is(strong, span) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.meal-workspace > .booking-panel + .booking-panel {
+  margin-top: 0;
+}
+.meal-change-date {
+  margin-bottom: 12px;
+}
+@media (max-width: 899px) {
+  .meal-workspace.has-selected-day > .meal-calendar,
+  .meal-admin-workspace.has-selected-day > .sponsorship-month {
+    display: none;
+  }
+  .meal-workspace.has-selected-day {
+    gap: 0;
+  }
+  .meal-booking-page .meal-page-heading {
+    align-items: start;
+  }
+  .meal-booking-page .meal-page-heading h1 {
+    font-size: 1.8rem;
+  }
+  .meal-booking-page .meal-page-heading > a {
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+}
+@media (max-width: 899px) {
+  .ramadan-manager.is-day-open .sponsorship-booking-toolbar,
+  .ramadan-manager.is-day-open .sponsorship-availability-options,
+  .ramadan-manager.is-day-open .sponsorship-booking-panel > .sponsorship-key,
+  .ramadan-manager.is-day-open > .sponsorship-meal-choice,
+  .ramadan-manager.is-day-open > .sponsorship-booking-summary {
+    display: none;
+  }
+}

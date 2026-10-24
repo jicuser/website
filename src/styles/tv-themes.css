@@ -230,3 +230,35 @@
     justify-self: center;
   }
 }
+
+/* Labelled palette chips keep every colour choice in a compact group. */
+.tv-theme-choices {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+.tv-theme-choices > button {
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-rows: auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+}
+.tv-theme-choices > button > strong {
+  font-size: 0.85rem;
+}
+.tv-theme-choices > button > span:last-child {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+}
+.tv-theme-choices .tv-theme-swatch {
+  display: block;
+  grid-row: auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--tv-background) 50%, var(--tv-accent) 50%);
+}
+.tv-theme-choices .tv-theme-swatch > * {
+  display: none;
+}

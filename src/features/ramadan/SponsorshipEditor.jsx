@@ -1,6 +1,7 @@
 import React, { useId } from 'react';
 import { fullDate } from '@/lib/bookingCalendar';
 import { SPONSORSHIP_STATUS } from './model';
+import MealSummary from './MealSummary';
 
 export default function SponsorshipEditor({
   day,
@@ -18,6 +19,7 @@ export default function SponsorshipEditor({
   onToggleDay,
 }) {
   const fieldId = useId();
+  const snapshot = entries.find((row) => row.id === editing)?.offer_snapshot;
   return (
     <section className="sponsorship-editor" aria-labelledby="sponsorship-editor-heading">
       <header className="sponsorship-editor-heading">
@@ -33,6 +35,12 @@ export default function SponsorshipEditor({
           Close
         </button>
       </header>
+      {snapshot && (
+        <details className="meal-extra">
+          <summary>Menu agreed at booking</summary>
+          <MealSummary offer={snapshot} />
+        </details>
+      )}
       {entries.length > 0 && (
         <div
           className="booking-actions sponsorship-editor-sponsors"

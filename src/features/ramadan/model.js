@@ -35,11 +35,14 @@ export const ramadanOpen = (data, kind) => {
 };
 export function ramadanDay(data, kind, date) {
   const row = data?.days?.find((entry) => entry.kind === kind && entry.day_date === date);
-  const enabled =
-    data?.day_settings?.find((entry) => entry.kind === kind && entry.day_date === date)?.enabled !==
-    false;
+  const offer = data?.day_settings?.find((entry) => entry.kind === kind && entry.day_date === date);
+  const complete =
+    !offer?.offer_version ||
+    (offer.dishes?.length > 0 && offer.price_pence > 0 && offer.people_fed > 0);
+  const enabled = offer?.enabled !== false && complete;
   return {
     ...row,
+    ...offer,
     enabled,
     status: !enabled
       ? 'closed'

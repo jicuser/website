@@ -16,6 +16,8 @@ import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
 import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 import PageNavigator from '@/components/admin/PageNavigator';
+import ServiceGuidanceFields from './ServiceGuidanceFields';
+import { journeyForPath } from '@/lib/serviceGuidance';
 import HallDetailsEditor from '@/features/content/HallDetailsEditor';
 import '@/styles/page-editor.css';
 
@@ -166,7 +168,18 @@ export default function PageEditor({
 
   const persist = useCallback(
     async (next) => {
-      const payload = { title: next.title || '', body: next.body || '', image: next.image || '' };
+      if (
+        next.guidance?.some(
+          (item) => item.enabled !== false && (!item.question?.trim() || !item.answer?.trim()),
+        )
+      )
+        throw new Error('Add a question and answer for each visible guidance item.');
+      const payload = {
+        title: next.title || '',
+        body: next.body || '',
+        image: next.image || '',
+        ...(next.guidance ? { guidance: next.guidance } : {}),
+      };
       const { data, error: saveError } = await supabase
         .from('page_content')
         .upsert(
@@ -359,6 +372,13 @@ export default function PageEditor({
                     </button>
                   )}
                 </div>
+                {journeyForPath(selected) && (
+                  <ServiceGuidanceFields
+                    value={draft.guidance}
+                    journey={journeyForPath(selected)}
+                    onChange={(value) => change('guidance', value)}
+                  />
+                )}
               </fieldset>
               <div className="admin-actions">
                 <button

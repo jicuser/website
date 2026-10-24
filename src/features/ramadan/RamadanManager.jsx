@@ -7,6 +7,7 @@ import SponsorshipKey from './SponsorshipKey';
 import SponsorshipRange from './SponsorshipRange';
 import SponsorshipBookings from './SponsorshipBookings';
 import SponsorshipEditor from './SponsorshipEditor';
+import MealDayEditor from './MealDayEditor';
 import RamadanOptions from './RamadanOptions';
 import RamadanSetup from './RamadanSetup';
 import { daysInRange, fullDate, seasonDays, seasonLength } from '@/lib/bookingCalendar';
@@ -56,6 +57,7 @@ export default function RamadanManager() {
     [task, setTask] = useState('bookings'),
     [kind, setKind] = useState('iftar'),
     [daySettings, setDaySettings] = useState([]),
+    [mealDrafts, setMealDrafts] = useState({}),
     [selected, setSelected] = useState(''),
     [form, setForm] = useState(blankSponsor),
     [editing, setEditing] = useState(null),
@@ -69,6 +71,15 @@ export default function RamadanManager() {
   const table = useRef(null),
     loadVersion = useRef(0),
     editorHeading = useRef(null);
+  useEffect(() => {
+    if (!Object.keys(mealDrafts).length) return;
+    const warn = (event) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [mealDrafts]);
   const loadSeasons = useCallback(async (preferred) => {
     const result = await supabase
       .from('ramadan_seasons')
@@ -128,7 +139,7 @@ export default function RamadanManager() {
       });
       const settings = await supabase
         .from('ramadan_day_settings')
-        .select('kind,day_date,enabled')
+        .select('*')
         .eq('season_id', seasonId);
       if (settings.error) throw settings.error;
       if (version === loadVersion.current) {
@@ -160,8 +171,10 @@ export default function RamadanManager() {
     setMessage('');
     try {
       await work();
+      return true;
     } catch (failure) {
       setError(failure.message || 'The change was not saved.');
+      return false;
     } finally {
       setBusy(false);
     }
@@ -186,13 +199,54 @@ export default function RamadanManager() {
       );
     });
   }
+  async function saveMeal(payload) {
+    return act(async () => {
+      const result = await supabase.rpc('save_ramadan_meal', {
+        p_body: { ...payload, season_id: seasonId, day_date: selected, kind },
+      });
+      if (result.error || !result.data?.offer_version)
+        throw new Error(result.error?.message || 'Meal was not saved.');
+      setDaySettings((current) => [
+        ...current.filter((row) => row.kind !== kind || row.day_date !== selected),
+        result.data,
+      ]);
+      if (!editing)
+        setForm((current) => ({
+          ...current,
+          amount: payload.price_pence ? String(payload.price_pence / 100) : '',
+        }));
+      setMessage('Meal saved.');
+    });
+  }
+  function changeKind(value) {
+    setKind(value);
+    setEditing(null);
+    setFilter('all');
+    const record = records.find(
+      (row) => row.kind === value && row.day_date === selected && row.status !== 'cancelled',
+    );
+    if (record) edit(record);
+    else
+      setForm({
+        ...blankSponsor,
+        amount: String(
+          (daySettings.find((row) => row.kind === value && row.day_date === selected)
+            ?.price_pence ??
+            season?.[`${value}_target_pence`] ??
+            0) / 100 || '',
+        ),
+      });
+  }
   function newSponsor(date) {
     setSelected(date);
     setEditing(null);
     setForm({
       ...blankSponsor,
-      amount:
-        kind === 'suhoor'
+      amount: daySettings.find((row) => row.kind === kind && row.day_date === date)?.price_pence
+        ? String(
+            daySettings.find((row) => row.kind === kind && row.day_date === date).price_pence / 100,
+          )
+        : kind === 'suhoor'
           ? String((season.suhoor_target_pence || 0) / 100 || '')
           : kind === 'iftar'
             ? String((season.iftar_target_pence || 0) / 100 || '')
@@ -312,9 +366,34 @@ export default function RamadanManager() {
       onToggleDay={() => toggleDays([selected], !dayEnabled(selected))}
     />
   );
+  const mealEditor =
+    selectedDay && kind !== 'daily' ? (
+      <MealDayEditor
+        seasonId={seasonId}
+        drafts={mealDrafts}
+        setDrafts={setMealDrafts}
+        onKindChange={changeKind}
+        day={selectedDay}
+        kind={kind}
+        offer={daySettings.find((row) => row.kind === kind && row.day_date === selected)}
+        busy={busy || loading}
+        onSave={saveMeal}
+        onClose={() => setSelected('')}
+        bookingEditor={editor}
+        bookingCount={
+          current.filter((row) => row.day_date === selected && row.status !== 'cancelled').length
+        }
+        headingRef={editorHeading}
+      />
+    ) : (
+      editor
+    );
   if (!allowed) return <p>Ramadan management access is required.</p>;
   return (
-    <section className="booking-workspace ramadan-manager" aria-label="Ramadan management">
+    <section
+      className={`booking-workspace ramadan-manager ${selected && dayView === 'month' ? 'is-day-open' : ''}`}
+      aria-label="Ramadan management"
+    >
       <header>
         <div className="sponsorship-section-heading">
           <h2>Ramadan</h2>
@@ -437,11 +516,7 @@ export default function RamadanManager() {
                 aria-pressed={kind === key}
                 disabled={busy}
                 onClick={() => {
-                  setKind(key);
-                  setSelected('');
-                  setEditing(null);
-                  setForm(blankSponsor);
-                  setFilter('all');
+                  changeKind(key);
                 }}
               >
                 {label}
@@ -578,7 +653,9 @@ export default function RamadanManager() {
               />
             </div>
             {dayView === 'month' && (
-              <>
+              <div
+                className={`meal-workspace meal-admin-workspace ${selected ? 'has-selected-day' : ''}`}
+              >
                 <SponsorshipMonth
                   days={days}
                   visibleDates={new Set(rows.map((row) => row.date))}
@@ -586,6 +663,7 @@ export default function RamadanManager() {
                   selected={selected}
                   disabled={busy || loading}
                   onSelect={selectDay}
+                  help="Tap a day to set its menu, availability or booking."
                   dayInfo={(date) => {
                     const entries = current.filter(
                       (row) => row.day_date === date && row.status !== 'cancelled',
@@ -603,8 +681,13 @@ export default function RamadanManager() {
                     };
                   }}
                 />
-                {editor}
-              </>
+                {mealEditor || (
+                  <div className="meal-day-prompt">
+                    <h3>Choose a day</h3>
+                    <p>Set Iftar or Suhoor availability, add dishes and set the meal price.</p>
+                  </div>
+                )}
+              </div>
             )}
           </section>
         </>

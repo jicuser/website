@@ -38,3 +38,13 @@
 .admin-console:has(.content-page-editor) .admin-navigation {
   display: none;
 }
+.content-page-editor .page-editor-controls > details.admin-panel {
+  display: block;
+  padding-block: 0;
+}
+.content-section > summary {
+  font-weight: 650;
+}
+.content-section[open] {
+  padding-bottom: 16px !important;
+}

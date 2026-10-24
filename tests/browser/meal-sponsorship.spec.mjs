@@ -31,7 +31,23 @@ async function fixture(page, { home = false, failRequest = false } = {}) {
       },
       { kind: 'suhoor', day_date: '2027-02-10', confirmed: 0, pending: 1, names: [] },
     ],
-    day_settings: [{ kind: 'suhoor', day_date: '2027-02-11', enabled: false }],
+    day_settings: [
+      { kind: 'suhoor', day_date: '2027-02-11', enabled: false },
+      ...['iftar', 'suhoor'].map((kind) => ({
+        kind,
+        day_date: '2027-02-12',
+        enabled: true,
+        offer_version: 1,
+        menu_title: kind === 'iftar' ? 'Community Iftar' : 'Morning meal',
+        dishes: [
+          { name: 'Rice', cost_pence: 10000 },
+          { name: 'Curry', cost_pence: 5000 },
+        ],
+        price_pence: kind === 'iftar' ? 15000 : 12000,
+        people_fed: 50,
+        menu_notes: 'Vegetarian option available',
+      })),
+    ],
   };
   page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
@@ -69,29 +85,6 @@ async function fixture(page, { home = false, failRequest = false } = {}) {
   });
   return { writes, errors };
 }
-test('a Suhoor meal request selects days independently from Iftar and blocks reserved or closed days', async ({
-  page,
-}) => {
-  const { writes, errors } = await fixture(page);
-  await page.goto('/ramadan/suhoor');
-  await expect(page.getByRole('heading', { name: 'Sponsor a Suhoor', exact: true })).toBeVisible();
-  const first = page.getByRole('button', { name: /^Day 1,/ });
-  await expect(first).toBeEnabled();
-  await expect(page.getByRole('button', { name: /^Day 2,/ })).toBeDisabled();
-  await expect(page.getByRole('button', { name: /^Day 3,/ })).toBeDisabled();
-  await first.click();
-  await expect(first).toHaveAttribute('aria-pressed', 'true');
-  await page.getByLabel('Your name', { exact: true }).fill('Suhoor sponsor');
-  await page.getByLabel('Phone or email', { exact: true }).fill('sponsor@example.test');
-  await page.getByRole('button', { name: 'Request sponsorship', exact: true }).click();
-  await expect(
-    page.getByRole('heading', { name: 'Booking request received', exact: true }),
-  ).toBeVisible();
-  expect(writes).toHaveLength(1);
-  expect(writes[0].kind).toBe('suhoor');
-  expect(writes[0].dates).toEqual(['2027-02-09']);
-  expect(errors).toEqual([]);
-});
 test('the homepage day-card option links to the enabled meal booking pages', async ({ page }) => {
   const { errors } = await fixture(page, { home: true });
   await page.goto('/');
@@ -102,74 +95,74 @@ test('the homepage day-card option links to the enabled meal booking pages', asy
   expect(errors).toEqual([]);
 });
 
-for (const width of [320, 390]) {
-  test(`public sponsorship month keeps multi-selection and a real scrolling table at ${width}px`, async ({
+for (const width of [320, 390, 1366]) {
+  test(`date then meal shows the published price and servings at ${width}px`, async ({
     page,
-  }) => {
-    await page.setViewportSize({ width, height: 844 });
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
     const { writes, errors } = await fixture(page);
-    await page.goto('/ramadan/suhoor');
-    await expect(page.getByRole('button', { name: 'Month', exact: true })).toHaveAttribute(
+    await page.goto('/ramadan');
+    const month = page.getByRole('group', {
+      name: 'Ramadan month',
+      exact: true,
+      includeHidden: true,
+    });
+    await expect(month.getByRole('button')).toHaveCount(30);
+    expect((await month.boundingBox()).height).toBeLessThan(480);
+    await expect(page.getByLabel('Your name', { exact: true })).toHaveCount(0);
+    await month.getByRole('button', { name: /^Day 4,/ }).click();
+    const meal = page.getByRole('region', { name: 'Selected meal', exact: true });
+    await expect(meal.getByText('Community Iftar', { exact: true })).toBeVisible();
+    await expect(meal.getByText('Feeds 50 people', { exact: true })).toBeVisible();
+    await expect(meal.getByText('£150.00', { exact: true })).toBeVisible();
+    await meal.getByRole('button', { name: 'Suhoor', exact: true }).click();
+    await expect(meal.getByText('Morning meal', { exact: true })).toBeVisible();
+    await expect(meal.getByText('£120.00', { exact: true })).toBeVisible();
+    await expect(month.locator('button[aria-label^="Day 4,"]')).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    const month = page.getByRole('group', { name: 'Ramadan month' });
-    await expect(page.getByLabel('Your name', { exact: true })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Choose your dates first' })).toBeVisible();
-    await expect(month.getByRole('button')).toHaveCount(30);
-    expect((await month.boundingBox()).height).toBeLessThan(550);
-    await expect(month.getByRole('button', { name: /^Day 2,/ })).toBeDisabled();
-    await expect(month.getByRole('button', { name: /^Day 3,/ })).toBeDisabled();
-    const first = month.getByRole('button', { name: /^Day 1,/ });
-    const last = month.getByRole('button', { name: /^Day 30,/ });
-    await first.click();
-    await last.click();
-    await expect(first).toHaveAttribute('aria-pressed', 'true');
-    await expect(last).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByRole('heading', { name: '2 days selected', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Table', exact: true }).click();
-    const tableRegion = page.getByRole('region', { name: 'Ramadan sponsorship table' });
-    expect(
-      await tableRegion.locator('table').evaluate((node) => getComputedStyle(node).display),
-    ).toBe('table');
-    expect(await tableRegion.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath('meal-booking.png'), fullPage: true });
+    await meal.getByRole('button', { name: 'Book this meal', exact: true }).click();
+    await page.getByLabel('Your name', { exact: true }).fill('Meal sponsor');
+    await page.getByLabel('Phone or email', { exact: true }).fill('sponsor@example.test');
+    await page.getByRole('button', { name: 'Request sponsorship', exact: true }).click();
     await expect(
-      tableRegion.getByRole('button', { name: 'Select 30 Ramadan, 10 March 2027' }),
-    ).toHaveAttribute('aria-pressed', 'true');
-    await page.getByRole('button', { name: 'Month', exact: true }).click();
-    await page.getByText('Choose a date range', { exact: true }).click();
-    const range = page.getByRole('group', { name: 'Sponsorship date range' });
-    await range.getByLabel('From', { exact: true }).selectOption('2027-02-27');
-    await range.getByLabel('To', { exact: true }).selectOption('2027-03-03');
-    await expect(month.getByRole('button')).toHaveCount(30);
-    await expect(month.locator('button:enabled')).toHaveCount(5);
-    await page.getByRole('button', { name: 'Clear selection', exact: true }).click();
-    await expect(first).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.getByLabel('Your name', { exact: true })).toHaveCount(0);
+      page.getByRole('heading', { name: 'Booking request received', exact: true }),
+    ).toBeVisible();
+    expect(writes[0]).toMatchObject({
+      kind: 'suhoor',
+      dates: ['2027-02-12'],
+      amount_pence: 12000,
+      offer_versions: { '2027-02-12': 1 },
+    });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
-    expect(writes).toEqual([]);
     expect(errors).toEqual([]);
   });
 }
 
-test('a newly reserved date clears selection but keeps the request error and contact draft', async ({
+test('reserved meals can be viewed but not booked; changing dates keeps the contact draft', async ({
   page,
 }) => {
   const { writes, errors } = await fixture(page, { failRequest: true });
   await page.goto('/ramadan/suhoor');
+  await page.getByRole('button', { name: /^Day 2,/ }).click();
+  await expect(page.getByRole('button', { name: 'Book this meal', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Change date', exact: true }).click();
   await page.getByRole('button', { name: /^Day 1,/ }).click();
+  await page.getByRole('button', { name: 'Book this meal', exact: true }).click();
   await page.getByLabel('Your name', { exact: true }).fill('Returning sponsor');
   await page.getByLabel('Phone or email', { exact: true }).fill('returning@example.test');
   await page.getByRole('button', { name: 'Request sponsorship', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText(
-    'That day has just been reserved. Choose another date.',
+  await expect(page.getByRole('alert')).toContainText('That day has just been reserved.');
+  await expect(page.getByRole('button', { name: 'Request sponsorship', exact: true })).toHaveCount(
+    0,
   );
-  await expect(page.getByRole('heading', { name: 'Choose your dates first' })).toBeVisible();
-  await expect(page.getByRole('button', { name: /^Day 1,/ })).toBeDisabled();
-  await expect(page.getByLabel('Your name', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Change date', exact: true }).click();
   await page.getByRole('button', { name: /^Day 4,/ }).click();
+  await page.getByRole('button', { name: 'Book this meal', exact: true }).click();
   await expect(page.getByLabel('Your name', { exact: true })).toHaveValue('Returning sponsor');
   await expect(page.getByLabel('Phone or email', { exact: true })).toHaveValue(
     'returning@example.test',

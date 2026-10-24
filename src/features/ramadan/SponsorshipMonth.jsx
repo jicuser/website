@@ -6,7 +6,7 @@ import { SponsorshipMark } from './SponsorshipKey';
 /** Show the whole Ramadan, including UK month boundaries, without moving filtered dates. */
 export default function SponsorshipMonth({
   days,
-  visibleDates,
+  visibleDates = new Set(days.map((day) => day.date)),
   kind,
   selected,
   dayInfo,
