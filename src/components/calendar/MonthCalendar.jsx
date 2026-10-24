@@ -60,9 +60,13 @@ export default function MonthCalendar({
             >
               <strong>{date.getDate()}</strong>
               <span>
-                {{ Available: 'Open', Provisional: 'Held', Booked: 'Busy', Closed: 'Shut' }[
-                  info.label
-                ] || info.label}
+                {{
+                  Available: 'Open',
+                  Provisional: 'Held',
+                  Booked: 'Busy',
+                  Closed: 'Shut',
+                  'Ask us': 'Ask',
+                }[info.label] || info.label}
               </span>
             </button>
           );

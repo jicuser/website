@@ -373,8 +373,11 @@ for (const width of [320, 390]) {
     await page.goto('/services/hall-booking');
     const available = page.getByRole('button', { name: '24/10/2026 · Available', exact: true });
     const held = page.getByRole('button', { name: '25/10/2026 · Provisional', exact: true });
+    const unknown = page.getByRole('button', { name: '23/10/2026 · Ask us', exact: true });
     await expect(available).toHaveText('24Open');
     await expect(held).toHaveText('25Held');
+    await expect(unknown).toHaveText('23Ask');
+    await expect(unknown).toHaveAttribute('title', 'Ask us');
     await available.click();
     await expect(available).toHaveAttribute('aria-pressed', 'true');
     await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });

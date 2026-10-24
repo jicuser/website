@@ -70,9 +70,15 @@ for (const width of [1280]) {
     );
     for (const route of ['/team', '/donate', '/prayer-times/reminders']) {
       await page.goto(route);
+      if (route === '/team') {
+        await expect(page).toHaveURL('/about#team');
+        await expect(page.locator('#team')).toBeFocused();
+      }
       await expect(tools).toBeVisible();
       await expect.poll(async () => (await tools.boundingBox()).y).toBe(initial.y);
       expect((await tools.boundingBox()).x).toBe(initial.x);
+      // About links open their shared section; branding stays in the document flow.
+      await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
       const brand = await page.locator('.jic-free-nav-row').boundingBox();
       expect(brand.y).toBeGreaterThanOrEqual(initial.y + initial.height);
     }

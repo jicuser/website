@@ -82,9 +82,10 @@ for (const theme of ['dark', 'light']) {
     await expect(page).toHaveURL('/fundraise/appeal-1');
     await page.getByRole('link', { name: '← All fundraising' }).click();
     await expect(page).toHaveURL('/fundraise');
-    await expect(page.getByRole('navigation', { name: 'Current section' })).toContainText(
-      'Get involved',
-    );
+    const location = page.locator('.jic-section-picker > summary');
+    await expect(location).toContainText('Get involved');
+    await expect(location).toContainText('Campaigns');
+    await expect(page.locator('.jic-section-location')).toBeHidden();
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
       false,
     );
