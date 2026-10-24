@@ -5,8 +5,10 @@ export function usePrayerDockVisibility(panelRef, routeKey, paused, quiet = fals
   const [hidden, setHidden] = useState(false);
   const controller = useRef(null);
   useLayoutEffect(() => {
-    setHidden(quiet);
-    if (paused || !panelRef.current) return undefined;
+    if (paused || !panelRef.current) {
+      setHidden(quiet);
+      return undefined;
+    }
     controller.current = observePrayerDockScroll({
       panel: panelRef.current,
       onChange: setHidden,

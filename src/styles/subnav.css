@@ -159,3 +159,10 @@
     display: none;
   }
 }
+
+/* The dock stays visible in document flow at this header layout breakpoint. */
+@media (min-width: 768px) and (max-height: 500px) and (orientation: landscape) {
+  .jic-task-prayer-toggle {
+    display: none;
+  }
+}

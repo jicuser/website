@@ -199,3 +199,72 @@ test('passive salawat remains readable with reduced motion, contrast and solid a
   expect(state.errors).toEqual([]);
   expect(state.writes).toEqual([]);
 });
+
+for (const width of [667, 1024]) {
+  test(`short landscape task dock remains accessible and restores portrait policy at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 375 });
+    const state = await fixture(page);
+    await page.goto('/services/hall-booking/');
+    const dock = page.locator('#jic-prayer-dock');
+    if (width < 768) {
+      await expect(dock).toHaveAttribute('aria-hidden', 'true');
+      await expect(dock).toHaveAttribute('inert', '');
+      await expect(dock).toBeHidden();
+      await page.getByRole('button', { name: 'Show prayer times', exact: true }).click();
+      await expect(dock).toBeVisible();
+      await expect(dock).not.toHaveAttribute('aria-hidden', 'true');
+      await expect(dock).not.toHaveAttribute('inert', '');
+      await expect(
+        page.getByRole('button', { name: 'Hide prayer times', exact: true }),
+      ).toBeVisible();
+      await expect(page.locator('.jic-mobile-dock')).toHaveCSS('position', 'fixed');
+      await expect
+        .poll(() => dock.evaluate((node) => node.getBoundingClientRect().bottom <= innerHeight + 1))
+        .toBe(true);
+    } else {
+      await expect(dock).toBeVisible();
+      await expect(dock).not.toHaveAttribute('aria-hidden', 'true');
+      await expect(dock).not.toHaveAttribute('inert', '');
+      await expect(dock).toHaveCSS('position', 'static');
+      await expect(page.locator('.jic-mobile-dock')).toHaveCSS('position', 'static');
+      await expect(page.locator('.jic-task-prayer-toggle')).toBeHidden();
+      expect(
+        await dock.evaluate(
+          (node) =>
+            node.getBoundingClientRect().bottom <=
+            document.querySelector('#main-content').getBoundingClientRect().top,
+        ),
+      ).toBe(true);
+    }
+    const calendarControl = page.locator('.hall-calendar button').first();
+    await page.keyboard.press('Tab');
+    await calendarControl.focus();
+    await expect(calendarControl).toBeFocused();
+    if (width < 768) {
+      await expect(dock).toHaveAttribute('aria-hidden', 'true');
+      await expect(dock).toHaveAttribute('inert', '');
+      await expect(dock).toBeHidden();
+    } else {
+      await expect(dock).not.toHaveAttribute('aria-hidden', 'true');
+      await expect(dock).not.toHaveAttribute('inert', '');
+    }
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(dock).toBeHidden();
+    const reveal = page.getByRole('button', { name: 'Show prayer times', exact: true });
+    await reveal.click();
+    await expect(dock).toBeVisible();
+    await page.keyboard.press('Tab');
+    await calendarControl.focus();
+    await expect(dock).toBeHidden();
+    await page.goto('/forms/contact-us/');
+    await expect(page.getByLabel('Name', { exact: false })).toBeVisible();
+    await expect(dock).toBeHidden();
+    await page.goto('/');
+    await expect(dock).toBeVisible();
+    expect(state.errors).toEqual([]);
+    expect(state.writes).toEqual([]);
+  });
+}

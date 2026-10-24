@@ -4,12 +4,16 @@ export const PRAYER_DOCK_SCROLL_DISTANCE = 12;
 // Visibility never changes the panel's measured size or the page's scroll range.
 export function observePrayerDockScroll({ panel, onChange, browser = window, quiet = false }) {
   const { document } = browser;
-  const inFlow = browser.matchMedia('(max-height: 500px) and (orientation: landscape)');
+  // Match the static placement owned by header.css; narrower phones still float.
+  const inFlow = browser.matchMedia(
+    '(min-width: 768px) and (max-height: 500px) and (orientation: landscape)',
+  );
   let previousY = Math.max(0, browser.scrollY);
   let previousWidth = browser.innerWidth;
   let distance = 0;
   let upwardDistance = 0;
-  let hidden = false;
+  // Publish the initial settled state even when the panel starts visible.
+  let hidden;
   let scrollHidden = false;
   let keyboardFocus = false;
   let pointerInside = false;

@@ -21,18 +21,19 @@ function eventTarget() {
   };
 }
 
-function fixture(options = {}) {
+function fixture({ initialInFlow = false, ...options } = {}) {
   let now = 0;
   let timerId = 0;
   const timers = new Map();
   const changes = [];
+  let initialHidden;
   const footer = {};
   let intersect;
   let disconnected = false;
   const document = { ...eventTarget(), activeElement: null, querySelector: () => footer };
   const panelControl = {};
   const panel = { ...eventTarget(), contains: (node) => node === panelControl };
-  const media = { ...eventTarget(), matches: false };
+  const media = { ...eventTarget(), matches: initialInFlow };
   const browser = {
     ...eventTarget(),
     document,
@@ -61,7 +62,10 @@ function fixture(options = {}) {
   const cleanup = observePrayerDockScroll({
     panel,
     browser,
-    onChange: (value) => changes.push(value),
+    onChange: (value) => {
+      if (initialHidden === undefined) initialHidden = value;
+      else changes.push(value);
+    },
     ...options,
   });
   return {
@@ -71,6 +75,7 @@ function fixture(options = {}) {
     panelControl,
     media,
     changes,
+    initialHidden,
     cleanup,
     toggle: () => cleanup.toggle(),
     footer: (visible) => intersect([{ isIntersecting: visible }]),
@@ -292,13 +297,32 @@ test('desktop bars also stay hidden until a deliberate upward scroll', () => {
 
 test('alert setup keeps floating bars tucked away until explicitly requested', () => {
   const f = fixture({ quiet: true });
-  assert.deepEqual(f.changes, [true]);
+  assert.equal(f.initialHidden, true);
+  assert.deepEqual(f.changes, []);
   f.scroll(0);
   f.scroll(200);
   f.scroll(180);
+  assert.deepEqual(f.changes, []);
+  f.toggle();
+  assert.deepEqual(f.changes, [false]);
+  f.scroll(200);
+  assert.deepEqual(f.changes, [false, true]);
+});
+
+test('initial visibility is published even when a quiet task starts in flow', () => {
+  assert.equal(fixture().initialHidden, false);
+  const f = fixture({ quiet: true, initialInFlow: true });
+  assert.equal(f.initialHidden, false);
+  f.scroll(200);
+  f.toggle();
+  assert.deepEqual(f.changes, []);
+  f.media.matches = false;
+  f.media.emit('change');
   assert.deepEqual(f.changes, [true]);
   f.toggle();
   assert.deepEqual(f.changes, [true, false]);
-  f.scroll(200);
+  f.document.activeElement = { matches: () => true };
+  f.document.emit('focusin');
+  f.advance(0);
   assert.deepEqual(f.changes, [true, false, true]);
 });
