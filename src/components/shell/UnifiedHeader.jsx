@@ -41,6 +41,7 @@ import {
 } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
+import { isPublicTaskRoute } from '@/lib/publicTaskRoute';
 import { nextCongregation } from '@/lib/nextCongregation';
 import { displayTime } from '@/lib/timetable';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
@@ -71,8 +72,10 @@ export default function UnifiedHeader() {
   const addedPages = usePublishedPages();
   const menuGroups = visibleNavigation(PUBLIC_MENU_GROUPS, getContent, addedPages);
   const directoryGroups = compactMenuNavigation(menuGroups);
-  const { pathname, key: routeKey } = useLocation();
+  const { pathname: routePath, key: routeKey } = useLocation();
+  const pathname = routePath.replace(/\/+$/, '') || '/';
   const alertSetup = pathname === '/prayer-times/reminders';
+  const taskRoute = isPublicTaskRoute(pathname);
   const navigate = useNavigate();
   const { todaysTimes, jummahTimes, currentDate, isLoadingPrayerTimes } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
@@ -86,11 +89,11 @@ export default function UnifiedHeader() {
     [radioError, setRadioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false),
     [donationOpen, setDonationOpen] = useState(false);
-  const { hidden: prayerDockHidden } = usePrayerDockVisibility(
+  const { hidden: prayerDockHidden, toggle: togglePrayerDock } = usePrayerDockVisibility(
     prayerDockRef,
     routeKey,
     menuOpen || donationOpen,
-    alertSetup,
+    taskRoute,
   );
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
   const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1200px)').matches);
@@ -132,6 +135,7 @@ export default function UnifiedHeader() {
   );
   const selected = navigation?.current?.path;
   const breadcrumbs = navigationBreadcrumbs(navigation);
+  const hasSectionPicker = subtabs.length > 0 && !alertSetup && pathname !== '/get-involved';
   const menuSection =
     pathname === '/social-media'
       ? pathname
@@ -315,7 +319,7 @@ export default function UnifiedHeader() {
         }}
         aria-hidden="true"
       />
-      <header className={cn('jic-unified-header', alertSetup && 'is-task-mode')}>
+      <header className={cn('jic-unified-header', taskRoute && 'is-task-mode')}>
         <MobileInfoBanner
           ref={mobileBannerRef}
           collapsed={prayerDockHidden}
@@ -374,7 +378,10 @@ export default function UnifiedHeader() {
             </div>
           </div>
           {breadcrumbs.length > 0 && (
-            <nav className="jic-section-location" aria-label="Current section">
+            <nav
+              className={cn('jic-section-location', hasSectionPicker && 'has-section-picker')}
+              aria-label="Current section"
+            >
               {breadcrumbs.map((item, index) => (
                 <React.Fragment key={item.path}>
                   {index > 0 && <ChevronRight size={14} aria-hidden="true" />}
@@ -408,26 +415,59 @@ export default function UnifiedHeader() {
               )}
             </nav>
           )}
-          {subtabs.length > 0 && !alertSetup && pathname !== '/get-involved' && (
+          {hasSectionPicker && (
             <details key={pathname} className="jic-section-picker">
               <summary>
-                <span>{navigation.current?.name || `Browse ${navigation.name}`}</span>
+                <span>
+                  <small>
+                    {breadcrumbs
+                      .slice(0, -1)
+                      .map((item) => item.name)
+                      .join(' / ') || navigation.name}
+                  </small>
+                  <strong>
+                    {programme
+                      ? `${programme.title}${pathname.startsWith('/forms/') ? ' · Form' : ''}`
+                      : navigation.current?.name || `Browse ${navigation.name}`}
+                  </strong>
+                </span>
                 <ChevronDown size={16} aria-hidden="true" />
               </summary>
               <nav aria-label={`${navigation.name} pages`}>
+                {breadcrumbs
+                  .filter((item) => !subtabs.some((tab) => tab.path === item.path))
+                  .map((item) => (
+                    <Link key={item.path} to={item.path}>
+                      {item.name}
+                    </Link>
+                  ))}
                 {subtabs.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
-                    aria-current={item.path === selected ? 'page' : undefined}
+                    aria-current={
+                      item.path === selected
+                        ? programme || pathname !== item.path
+                          ? 'location'
+                          : 'page'
+                        : undefined
+                    }
                   >
                     {item.name}
                   </Link>
                 ))}
+                {programme && (
+                  <Link
+                    to={programme.to}
+                    aria-current={pathname === programme.to ? 'page' : undefined}
+                  >
+                    {programme.title}
+                  </Link>
+                )}
               </nav>
             </details>
           )}
-          {subtabs.length > 0 && !alertSetup && pathname !== '/get-involved' && (
+          {hasSectionPicker && (
             <nav
               ref={subnavRef}
               className="jic-unified-subnav"
@@ -450,6 +490,17 @@ export default function UnifiedHeader() {
                 </Link>
               ))}
             </nav>
+          )}
+          {taskRoute && (
+            <button
+              type="button"
+              className="jic-task-prayer-toggle"
+              onClick={togglePrayerDock}
+              aria-controls="jic-prayer-dock"
+              aria-expanded={!prayerDockHidden}
+            >
+              {prayerDockHidden ? 'Show prayer times' : 'Hide prayer times'}
+            </button>
           )}
         </div>
       </header>
@@ -549,7 +600,7 @@ export default function UnifiedHeader() {
             availability={availability}
             playing={playing}
             busy={radioLoading}
-            hidden={menuOpen || donationOpen || alertSetup}
+            hidden={menuOpen || donationOpen || taskRoute}
             onListen={toggleRadio}
           />
         </Suspense>

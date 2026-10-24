@@ -659,14 +659,22 @@
 .service-explorer-card {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr) 18px;
-  align-items: start;
+  align-items: center;
   gap: 14px;
   min-width: 0;
-  padding: 18px;
+  padding: 12px;
   border: 1px solid var(--jic-border);
-  border-radius: 14px;
+  border-radius: 12px;
   color: var(--jic-text);
   text-decoration: none;
+}
+.service-explorer--full .service-explorer-card {
+  --jic-glass-tile: var(--jic-surface);
+  --jic-glass-tile-sheen: linear-gradient(transparent, transparent);
+  --jic-glass-panel-filter: none;
+  --jic-glass-shadow: none;
+  --jic-glass-border: var(--jic-border);
+  min-height: 84px;
 }
 .service-explorer-card:hover {
   border-color: var(--jic-gold);
@@ -699,7 +707,7 @@
 }
 .service-explorer-card-description {
   display: block;
-  margin: 6px 0 0;
+  margin: 3px 0 0;
   color: var(--jic-text-secondary);
   font-size: 0.875rem;
   line-height: 1.5;
@@ -795,7 +803,7 @@
     width: 100%;
   }
   .service-explorer-card {
-    padding: 16px;
+    padding: 12px;
     gap: 12px;
   }
   .service-explorer-footer {

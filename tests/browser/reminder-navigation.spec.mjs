@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 const pageErrors = new WeakMap();
-test.beforeEach(({ page }) => {
+test.beforeEach(async ({ page }) => {
+  await page.route('**/*', (route) =>
+    ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname)
+      ? route.continue()
+      : route.abort(),
+  );
   const errors = [];
   pageErrors.set(page, errors);
   page.on('pageerror', (error) => errors.push(error.message));
@@ -182,37 +187,44 @@ test('Nikah and Salah alert setup open the intended public pages', async ({ page
   ).toBeVisible();
 });
 
-for (const target of ['card', 'background']) {
-  test(`salawat closes immediately when tapping the ${target}`, async ({ page }, testInfo) => {
-    await setup(page, { welcome: true });
-    const welcome = page.getByRole('dialog', { name: 'Salawat' });
-    await expect(welcome).toBeVisible();
-    await expect(welcome).not.toContainText(/seconds/i);
-    if (target === 'card') await page.screenshot({ path: testInfo.outputPath('welcome.png') });
-    if (target === 'card') await page.locator('.jic-salawat-arabic').tap();
-    else await welcome.tap({ position: { x: 8, y: 100 } });
-    await expect(welcome).toBeHidden({ timeout: 500 });
-    await page.reload();
-    await expect(welcome).toBeHidden();
-  });
-}
-
-test('a scroll gesture dismisses salawat without trapping the page', async ({ page }) => {
+test('first visit is immediately usable and salawat stays stable until explicit dismissal', async ({
+  page,
+}) => {
   await setup(page, { welcome: true });
-  const welcome = page.getByRole('dialog', { name: 'Salawat' });
-  await expect(welcome).toBeVisible();
-  const client = await page.context().newCDPSession(page);
-  await client.send('Input.dispatchTouchEvent', {
-    type: 'touchStart',
-    touchPoints: [{ x: 190, y: 650 }],
-  });
-  await client.send('Input.dispatchTouchEvent', {
-    type: 'touchMove',
-    touchPoints: [{ x: 190, y: 480 }],
-  });
-  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  await expect(welcome).toBeHidden({ timeout: 500 });
+  const welcome = page.getByRole('complementary', { name: 'Salawat', exact: true });
+  await expect(welcome).toHaveCount(1);
+  await expect(page.getByRole('dialog', { name: 'Salawat' })).toHaveCount(0);
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#main-content')).toBeFocused();
+  const geometry = () =>
+    welcome.evaluate((node) => ({
+      top: node.getBoundingClientRect().top + scrollY,
+      height: node.getBoundingClientRect().height,
+      position: getComputedStyle(node).position,
+      filter: getComputedStyle(node).backdropFilter,
+    }));
+  const before = await geometry();
+  expect(before.position).toBe('static');
+  expect(before.filter).toBe('none');
+  await page.clock.install();
+  await page.clock.fastForward(60000);
+  expect(await geometry()).toEqual(before);
+  await page.locator('.jic-hero h1').click();
+  await page.locator('.jic-hero-sub').click();
+  await expect(page.locator('.jic-reflection-overlay')).toHaveCount(0);
+  await page.mouse.wheel(0, 300);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  await expect(welcome).toHaveCount(1);
+  await welcome.getByText('Transliteration & translations', { exact: true }).click();
+  await expect(welcome).toContainText('Sallal-lahu ‘ala Sayyidina Muhammad');
+  await expect(welcome).toContainText('Allah send prayers upon our master Muhammad.');
+  await expect(welcome.locator('[lang="ur"]')).toBeVisible();
+  await welcome.getByRole('button', { name: 'Dismiss salawat' }).click();
+  await expect(welcome).toHaveCount(0);
+  await page.reload();
+  await expect(welcome).toHaveCount(0);
 });
 
 test('mobile footer stays uncovered and Home returns to the prayer pill', async ({
