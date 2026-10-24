@@ -20,6 +20,7 @@ import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import { useAuth } from '@/context/AuthContext';
 import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
 import { isPublicTaskRoute } from '@/lib/publicTaskRoute';
+import PublicBackdrop from '@/components/shell/PublicBackdrop';
 
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
 
@@ -55,6 +56,7 @@ function PublicLayout() {
     <div
       className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
     >
+      <PublicBackdrop />
       <a className="jic-skip-link" href="#main-content">
         Skip to content
       </a>

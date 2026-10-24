@@ -61,7 +61,7 @@ for (const [theme, width] of [
     const row = choices.locator('a').first();
     await row.focus();
     await expect(row).toHaveCSS('outline-style', 'solid');
-    await expect(row).toHaveCSS('backdrop-filter', 'none');
+    await expect(row).not.toHaveCSS('backdrop-filter', 'none');
     expect((await row.boundingBox()).height).toBeLessThan(150);
     await picker.locator('summary').click();
     const pages = picker.getByRole('navigation');

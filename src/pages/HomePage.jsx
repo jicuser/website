@@ -16,7 +16,6 @@ import MosqueIcon from '@/components/icons/MosqueIcon';
 import useCommunityLink from '@/hooks/useCommunityLink';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import HomePrayerCard from '@/components/home/HomePrayerCard';
-import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import { SITE } from '@/content/site';
 import { useContent } from '@/context/ContentContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
@@ -174,7 +173,6 @@ export default function HomePage() {
   return (
     <div className="jic-premium-home">
       <section className="jic-hero">
-        <PublicBackdrop />
         <div className="jic-hero-inner">
           <div className="jic-hero-copy">
             <p className="jic-kicker">JAMATIA ISLAMIC CENTRE · BIRMINGHAM</p>
