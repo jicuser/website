@@ -197,20 +197,7 @@ export default function HomePage() {
       <section className="jic-hero">
         <div className="jic-hero-inner">
           <div className="jic-hero-copy">
-            <p className="jic-kicker">JAMATIA ISLAMIC CENTRE · BIRMINGHAM</p>
-            <h1 style={{ whiteSpace: 'pre-line' }}>
-              {hero.title || (
-                <>
-                  A place for faith.
-                  <br />
-                  <em>A home for community.</em>
-                </>
-              )}
-            </h1>
-            <p className="jic-hero-sub" style={{ whiteSpace: 'pre-line' }}>
-              {hero.body ||
-                'Come to pray. Find a class. Be part of something closer to home. Welcome to Jamatia Islamic Centre.'}
-            </p>
+            <h1 className="jic-home-welcome">Worship. Learn. Grow. Together.</h1>
             <nav className="jic-home-shortcuts" aria-label="Services and learning">
               {shortcuts.map(({ key, ...card }) => (
                 <HomeDestination key={key} {...card} />
