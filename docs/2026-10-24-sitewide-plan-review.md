@@ -34,3 +34,12 @@ The plan's restricted support-case service needs confirmed staffing, access/rete
 3. Release the frontend from the approved Git commit. No production database migration or hosting release is performed merely by creating this commit.
 
 Validation includes graph traversal/backtracking, registry/search/visibility, deduplication, RLS/permissions, private drafts, atomic publication, stale saves, mobile layouts, real preview behaviour and retained service flows. Test fixtures contain no production bookings or personal records.
+
+## Verification results
+
+- 785 unit/database tests pass, including guidance traversal and invalid data, private drafts, role restrictions, publication and stale-save rejection.
+- Lint, TypeScript and the production build pass. Startup JavaScript is 238,951 gzip bytes against a 240,000-byte budget.
+- All 235 default Chromium browser cases have passing coverage across the broad run and targeted correction reruns. New journeys cover 320, 390, 430, 768 and 1280px; screenshots were reviewed for Home, Hub and Careers. Cold development-server startup failures were rerun independently. GitHub runs its own clean browser checks, WebKit phone checks and feature-enabled forms/certificates checks.
+- The wider review also retained selected poster placements in a compact disclosure, aligned the Home feature editor with the new layout, kept Home prayer information unobstructed, and corrected horizontal TV prayer text sizing.
+
+No production data was used for these checks. Production migrations and the hosting release remain separate from Git publication.

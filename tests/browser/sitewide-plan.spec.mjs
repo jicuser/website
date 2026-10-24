@@ -152,7 +152,7 @@ test('guided answers stay in memory and changing direction drops the previous br
   await page.getByRole('button', { name: 'An interview', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Prepare a few clear examples' })).toBeVisible();
   await expect(page.getByText('Make your CV fit the role')).toHaveCount(0);
-  await expect(page).toHaveURL('/services/skills-careers');
+  await expect(page).toHaveURL('/services/skills-careers/');
   expect(
     await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } })),
   ).toEqual(storage);

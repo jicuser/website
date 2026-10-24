@@ -117,13 +117,22 @@ for (const width of [390, 1280]) {
     const updates = page.locator('.jic-mobile-info-banner');
     if (width < 768) await expect(prayer).toHaveAttribute('aria-hidden', 'true');
     else await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
+    if (width < 768) {
+      await page.goto('/services');
+      await expect(page.locator('.service-explorer')).toBeVisible();
+      await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
+    }
     const pageGeometry = () =>
-      page.evaluate(() => ({
-        headerHeight: document.querySelector('.jic-unified-header').getBoundingClientRect().height,
-        heroTop: document.querySelector('.jic-hero').getBoundingClientRect().top + scrollY,
-      }));
+      page.evaluate(
+        (selector) => ({
+          headerHeight: document.querySelector('.jic-unified-header').getBoundingClientRect()
+            .height,
+          heroTop: document.querySelector(selector).getBoundingClientRect().top + scrollY,
+        }),
+        width < 768 ? '.service-explorer' : '.jic-hero',
+      );
     const geometry = await pageGeometry();
-    await page.evaluate((y) => window.scrollTo(0, y), width < 768 ? 900 : 450);
+    await page.evaluate(() => window.scrollTo(0, 450));
     await expect(prayer).toHaveAttribute('aria-hidden', 'true');
     if (width < 768) {
       await expect(updates).toHaveAttribute('aria-hidden', 'true');
@@ -134,14 +143,14 @@ for (const width of [390, 1280]) {
     await page.waitForTimeout(1100);
     await expect(prayer).toBeHidden();
     expect(await pageGeometry()).toEqual(geometry);
-    await page.evaluate((y) => window.scrollTo(0, y), width < 768 ? 850 : 410);
+    await page.evaluate(() => window.scrollTo(0, 410));
     await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
     await expect(prayer).toBeVisible();
     if (width < 768) await expect(updates).toBeVisible();
-    await page.evaluate((y) => window.scrollTo(0, y), width < 768 ? 920 : 460);
+    await page.evaluate(() => window.scrollTo(0, 460));
     await expect(prayer).toHaveAttribute('aria-hidden', 'true');
     if (width < 768) {
-      await page.evaluate((y) => window.scrollTo(0, y), width < 768 ? 850 : 410);
+      await page.evaluate(() => window.scrollTo(0, 410));
       await expect(prayer).not.toHaveAttribute('aria-hidden', 'true');
       await page.locator('.jic-mobile-prayer-content').click();
       await expect(page).toHaveURL('/prayer-times');

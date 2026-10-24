@@ -688,7 +688,7 @@ html[data-theme] .jic-tv-display.is-dhikr {
   overflow: hidden;
 }
 .scene-timetable-prayers strong {
-  font-size: min(3.2cqw, 22cqh);
+  font-size: min(3cqw, 22cqh);
   color: #f0d791;
 }
 .scene-timetable-prayers small {
