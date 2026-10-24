@@ -183,8 +183,11 @@ test('Nikah and Salah alert setup open the intended public pages', async ({ page
   await expect(page).toHaveURL('/prayer-times/reminders');
   await expect(page.getByRole('heading', { name: 'Salah alerts', exact: true })).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Enable Salah alerts', exact: true }),
+    page.getByRole('heading', { name: 'Add JIC to your Home Screen', exact: true }),
   ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Enable Salah alerts', exact: true })).toHaveCount(
+    0,
+  );
 });
 
 test('first visit is immediately usable and salawat stays stable until explicit dismissal', async ({
