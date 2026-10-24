@@ -86,7 +86,8 @@ for (const width of [320, 390, 1280]) {
       .poll(() => photo.evaluate((img) => img.complete && img.naturalWidth > 0))
       .toBe(true);
     expect((await photo.boundingBox()).height).toBeLessThan(width < 700 ? 260 : 500);
-    expect((await combined.boundingBox()).height).toBeLessThan(width < 700 ? 2400 : 1750);
+    // Allow the purpose illustrations and platform font metrics within three phone viewports.
+    expect((await combined.boundingBox()).height).toBeLessThan(width < 700 ? 2500 : 1750);
     await combined
       .getByRole('navigation', { name: 'On this page' })
       .getByRole('link', { name: 'Our story', exact: true })
