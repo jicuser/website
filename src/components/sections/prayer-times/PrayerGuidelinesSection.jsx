@@ -6,10 +6,10 @@ const PrayerGuidelinesSection = () => (
     <header>
       <h2 id="prayer-visit-heading">Before your visit</h2>
       <nav aria-label="Prayer guides">
-        <Link className="jic-button" to="/worship/prayer-guide">
+        <Link data-glass="clear" to="/worship/prayer-guide">
           Salah guide
         </Link>
-        <Link className="jic-button" to="/worship/janazah-guide">
+        <Link data-glass="clear" to="/worship/janazah-guide">
           Janazah prayer guide
         </Link>
       </nav>

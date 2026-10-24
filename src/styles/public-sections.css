@@ -343,6 +343,14 @@
   justify-content: space-between;
   margin-bottom: 8px;
 }
+.jic-prayer-visit nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+}
 .jic-prayer-visit h2 {
   margin: 0;
   font:
