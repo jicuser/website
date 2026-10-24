@@ -1,0 +1,582 @@
+/* Shared overview density; readers, calendars and operational screens keep their own metrics. */
+.hub-utility-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  align-items: center;
+  margin: 16px 0;
+}
+.hub-utility-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.875rem;
+  color: var(--jic-gold);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.service-explorer--full .service-explorer-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.service-explorer--full .service-explorer-card {
+  min-height: 96px;
+  padding: 14px;
+  border-radius: 12px;
+}
+.service-explorer--full .service-explorer-card h3 {
+  font-size: 1rem;
+}
+.service-explorer--full .service-explorer-card-description {
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.service-explorer--full .service-explorer-card-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+}
+.service-explorer--full .service-explorer-card-icon svg {
+  width: 21px;
+  height: 21px;
+}
+.service-explorer--full .service-explorer-title {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+.service-explorer--full {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+.service-explorer-result-count {
+  margin: 10px 0;
+  font-size: 0.8rem;
+}
+.guided-help {
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  padding: 20px;
+  margin: 20px 0;
+  max-width: 850px;
+}
+.guided-help h2 {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin: 12px 0 16px;
+}
+.guided-help h2:focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 4px;
+}
+.guided-help-progress {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--jic-muted);
+}
+.guided-help-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.guided-help-choices button,
+.guided-help-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  background: var(--jic-bg);
+  color: var(--jic-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.guided-help-choices button svg {
+  flex-shrink: 0;
+}
+.guided-help-choices button:hover {
+  border-color: var(--jic-gold);
+}
+.guided-help-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.guided-help-result p,
+.guided-help-result li {
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+.guided-help-result ol {
+  padding-left: 22px;
+  list-style: decimal;
+  margin: 12px 0;
+}
+.guided-resource-links {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+.guided-resource-links a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 44px;
+  color: var(--jic-gold);
+}
+.guided-resource-links small {
+  width: 100%;
+  color: var(--jic-muted);
+  font-size: 0.75rem;
+}
+.community-help-page > .managed-page-content {
+  margin: 16px 0;
+}
+.community-help-note {
+  font-size: 0.85rem;
+  color: var(--jic-muted);
+  max-width: 80ch;
+  line-height: 1.6;
+}
+.community-help-page .service-urgent {
+  border-left: 3px solid var(--jic-gold);
+  padding: 12px;
+  background: var(--jic-surface);
+}
+.community-help-page .service-urgent a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.education-overview {
+  max-width: 1120px;
+  margin: auto;
+  padding: 0 16px;
+}
+.education-overview .guided-help {
+  margin: 0 auto 20px;
+}
+.home-whats-on > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.home-whats-on > header > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  min-height: 44px;
+  color: var(--jic-gold);
+}
+.whats-on-rows {
+  border-top: 1px solid var(--jic-border);
+}
+.whats-on-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--jic-border);
+  align-items: start;
+}
+.whats-on-row > div {
+  min-width: 0;
+}
+.whats-on-row h3 {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin: 0;
+}
+.whats-on-row p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 4px 0;
+  color: var(--jic-muted);
+}
+.whats-on-row a,
+.whats-on-row summary,
+.whats-on-row button {
+  font-size: 0.8rem;
+  color: var(--jic-gold);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.whats-on-row details a {
+  text-decoration: underline;
+}
+.whats-on-row summary {
+  display: list-item;
+  padding: 12px 0;
+}
+.whats-on-symbol {
+  color: var(--jic-gold);
+  padding-top: 4px;
+}
+.whats-on-poster {
+  min-width: 44px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+}
+.whats-on-poster img {
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.jic-home-content {
+  gap: 24px;
+}
+.jic-home-content > .jic-home-section {
+  margin-block: 0;
+  padding-block: 8px;
+}
+.jic-premium-home .jic-hero {
+  padding-block: 28px;
+}
+.jic-premium-home .jic-hero h1 {
+  font-size: clamp(2rem, 3.4vw, 3rem);
+}
+.home-worship-links {
+  margin-bottom: 0;
+}
+.home-visit-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid var(--jic-border);
+  padding-top: 12px;
+  font-size: 0.875rem;
+}
+.home-visit-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.jic-home-footer-strip {
+  margin-block: 0;
+}
+.compact-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 16px 0;
+  font-size: 0.875rem;
+}
+.compact-pagination button {
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-height: 44px;
+}
+.compact-pagination button:disabled {
+  opacity: 0.45;
+}
+.about-jump-links [aria-current='page'] {
+  background: var(--jic-surface);
+  border-color: var(--jic-gold);
+}
+.about-overview.about-combined {
+  padding-bottom: 24px;
+}
+.worship-hub-grid {
+  gap: 10px;
+}
+.worship-hub-grid > a {
+  display: flex;
+  align-items: start;
+  padding: 16px;
+  gap: 14px;
+}
+.worship-hub-grid > a > svg,
+.worship-hub-grid > a > .reading-illustration {
+  width: 56px;
+  height: 64px;
+  flex-shrink: 0;
+}
+.worship-hub-grid h2 {
+  font-size: 1.15rem;
+}
+.worship-hub-grid p {
+  font-size: 0.85rem;
+}
+[data-content-layout='list'] .service-explorer-grid,
+[data-content-layout='list'] .jic-home-shortcuts,
+[data-content-layout='list'] .worship-hub-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.jic-public-route[data-palette='forest'] {
+  --jic-gold: #256044;
+  --jic-gold-strong: #1c5038;
+  --jic-bg: #f4f8f3;
+  --jic-surface: #fcfefb;
+  --jic-action: #aad5ad;
+  --jic-border: #ccd9cd;
+  --jic-teal: #256044;
+}
+.dark .jic-public-route[data-palette='forest'] {
+  --jic-gold: #a6dab5;
+  --jic-gold-strong: #c1e8ca;
+  --jic-bg: #0b1914;
+  --jic-surface: #152a21;
+  --jic-action: #aad5ad;
+  --jic-border: #345346;
+  --jic-teal: #a6dab5;
+}
+.jic-public-route[data-palette='slate'] {
+  --jic-gold: #405c7b;
+  --jic-gold-strong: #304863;
+  --jic-bg: #f4f6f9;
+  --jic-surface: #fcfdff;
+  --jic-action: #bdcee3;
+  --jic-border: #cdd5e0;
+  --jic-teal: #405c7b;
+}
+.dark .jic-public-route[data-palette='slate'] {
+  --jic-gold: #b4cceb;
+  --jic-gold-strong: #ccddf2;
+  --jic-bg: #111923;
+  --jic-surface: #1c2a3a;
+  --jic-action: #bdcee3;
+  --jic-border: #3b4d64;
+  --jic-teal: #b4cceb;
+}
+.jic-public-route {
+  background-color: var(--jic-bg);
+}
+.appearance-workspace {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: 16px;
+  align-items: start;
+}
+.website-appearance fieldset {
+  min-width: 0;
+}
+.website-appearance label,
+.guidance-choice-editor label {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+  font-size: 0.875rem;
+}
+.website-appearance select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  padding: 8px;
+  color: var(--jic-text);
+  background: var(--jic-surface);
+}
+.website-appearance summary {
+  min-height: 44px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+.website-appearance p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.appearance-preview {
+  min-width: 0;
+}
+.appearance-preview-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.appearance-frame {
+  overflow: auto;
+  max-width: 100%;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  background: var(--jic-bg);
+}
+.appearance-frame iframe {
+  display: block;
+  width: 390px;
+  max-width: 100%;
+  height: 680px;
+  border: 0;
+  margin: 0 auto;
+}
+.appearance-frame.tablet iframe {
+  width: 768px;
+  max-width: none;
+}
+.appearance-frame.desktop iframe {
+  width: 1200px;
+  max-width: none;
+}
+.guidance-choice-editor {
+  border: 1px solid var(--jic-border);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+@media (max-width: 700px) {
+  .service-explorer--full .service-explorer-grid {
+    gap: 8px;
+  }
+  .service-explorer--full .service-explorer-card {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 8px;
+    min-height: 0;
+    padding: 12px;
+  }
+  .service-explorer--full .service-explorer-card h3 {
+    font-size: 0.9rem;
+  }
+  .service-explorer--full .service-explorer-card-arrow {
+    display: none;
+  }
+  .service-explorer--full .service-explorer-card-description {
+    font-size: 0.78rem;
+  }
+  .service-explorer--full .service-explorer-card-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+  .guided-help {
+    padding: 16px;
+  }
+  .guided-help-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .guided-help-choices button {
+    font-size: 0.9rem;
+  }
+  .jic-premium-home .jic-hero {
+    padding-top: 16px;
+  }
+  .jic-premium-home .jic-hero-sub {
+    font-size: 0.9rem;
+    margin-block: 12px;
+  }
+  .jic-premium-home .jic-home-shortcuts {
+    gap: 8px;
+  }
+  .jic-premium-home .jic-home-destination {
+    padding: 10px;
+    min-height: 56px;
+  }
+  .jic-premium-home .jic-home-destination strong {
+    font-size: 0.8rem;
+  }
+  .jic-premium-home .jic-home-destination-icon {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+  }
+  .jic-premium-home .jic-home-destination > svg {
+    display: none;
+  }
+  .home-whats-on > header {
+    align-items: start;
+  }
+  .home-whats-on > header > a {
+    max-width: 130px;
+    line-height: 1.4;
+  }
+  .appearance-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  [data-content-layout='list'] .service-explorer-card {
+    flex-direction: row;
+    align-items: center;
+  }
+  .worship-hub-grid > a > svg,
+  .worship-hub-grid > a > .reading-illustration {
+    width: 40px;
+    height: 48px;
+  }
+}
+@media (max-width: 350px) {
+  .service-explorer--full .service-explorer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.community-help-page .managed-page-content.is-unframed {
+  padding: 0;
+  margin: 14px 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.community-help-page .managed-page-content h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.25;
+}
+.community-help-page .managed-page-content p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+@media (max-width: 767px) {
+  .jic-unified-inner {
+    padding-top: 0;
+  }
+  .jic-free-nav-row {
+    margin-top: 0;
+    padding-block: 0;
+    min-height: 56px;
+  }
+  .jic-free-brand {
+    flex-basis: 132px;
+  }
+  .jic-mobile-quick-nav {
+    align-self: center;
+  }
+  .jic-menu-word {
+    font-size: 2rem;
+  }
+  .jic-home-shortcuts .jic-home-destination {
+    padding: 6px 4px;
+    gap: 4px;
+    min-height: 56px;
+  }
+  .jic-home-shortcuts .jic-home-destination-copy strong {
+    font-size: 0.75rem;
+  }
+  .jic-home-shortcuts .jic-home-destination-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+  }
+}
+.compact-programme-notices {
+  max-width: 68rem;
+  margin: 1rem auto;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--jic-border);
+  border-radius: 1rem;
+}
+.compact-programme-notices > summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.compact-programme-notices[open] > summary {
+  margin-bottom: 0.75rem;
+}

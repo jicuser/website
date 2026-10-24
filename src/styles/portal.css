@@ -25,7 +25,7 @@
   background: var(--jic-surface);
   border: 1px solid var(--jic-border);
   border-radius: 18px;
-  padding: clamp(18px, 3vw, 24px);
+  padding: clamp(14px, 3vw, 24px);
 }
 .jic-member-portal .portal-signin h2 {
   font-family: var(--jic-heading-font);

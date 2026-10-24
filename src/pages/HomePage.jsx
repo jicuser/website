@@ -1,32 +1,23 @@
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  BookOpen,
-  Play,
-  Radio,
-  Users,
-  Building2,
-  ArrowRight,
-  Megaphone,
-  Heart,
-  HeartHandshake,
-} from 'lucide-react';
+import { BookOpen, Play, Radio, Users, Building2, ArrowRight, Megaphone } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
 import useCommunityLink from '@/hooks/useCommunityLink';
-import ProgrammePosters from '@/components/ProgrammePosters';
+const WhatsOn = lazy(() => import('@/components/home/WhatsOn'));
+
+import { COMMUNITY_SERVICES, HOME_SERVICE_IDS } from '@/content/communityServices';
+import ServiceIcon from '@/features/services/ServiceIcon';
+import { siteDesign } from '@/lib/siteDesign';
 import HomePrayerCard from '@/components/home/HomePrayerCard';
 import { SITE } from '@/content/site';
 import { useContent } from '@/context/ContentContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
-import { displayTime } from '@/lib/timetable';
 import { isPageVisible } from '@/lib/pageVisibility';
 import { cn } from '@/lib/utils';
 
 const HomeRamadan = lazy(() => import('@/features/ramadan/HomeRamadan'));
-
-const ServiceExplorer = lazy(() => import('@/features/services/ServiceExplorer'));
 
 const DEFAULT_CARDS = [
   {
@@ -113,7 +104,7 @@ function useHomeTiles() {
 }
 
 export default function HomePage() {
-  const { events, announcement, livestream } = useHomeLiveContent();
+  const { events, announcement, livestream, loading, stale } = useHomeLiveContent();
   const whatsapp = useCommunityLink();
   const cards = useHomeTiles();
   const [playingUrl, setPlayingUrl] = useState(null);
@@ -125,50 +116,18 @@ export default function HomePage() {
   const liveUrl = safeWebUrl(livestream?.stream_url) || SITE.socials.youtube;
   const embedUrl = useMemo(() => youtubeEmbedUrl(livestream?.stream_url), [livestream]);
   const hasLiveStream = Boolean(livestream?.enabled && safeWebUrl(livestream.stream_url));
-  const shortcuts = [
-    {
-      key: 'janazah',
-      title: 'Janazah',
-      text: 'Funeral support',
-      to: '/funerals',
-      icon: HeartHandshake,
-    },
-    {
-      key: 'nikah',
-      title: 'Nikah',
-      text: 'Marriage services',
-      to: '/services/nikah',
-      icon: Heart,
-    },
-    {
-      key: 'courses',
-      title: 'Courses',
-      text: 'Find a class',
-      to: '/education/courses',
-      icon: BookOpen,
-    },
-    {
-      ...cards.find((card) => card.key === 'madrassah'),
-      text: 'Learn & enrol',
-    },
-    {
-      key: 'hall',
-      title: 'Hall hire',
-      text: 'Enquire & book',
-      to: '/services/hall-booking',
-      icon: Building2,
-    },
-    {
-      key: 'volunteer',
-      title: 'Volunteer',
-      text: 'Help at the centre',
-      to: '/get-involved/volunteer',
-      icon: Users,
-    },
-  ].filter((card) => !card.to || isPageVisible(getContent, card.to));
-  const communityCards = cards.filter(
-    (card) => !['madrassah', 'services'].includes(card.key) && isPageVisible(getContent, card.to),
-  );
+  const design = siteDesign(getContent);
+  const shortcuts = HOME_SERVICE_IDS.map((id) =>
+    COMMUNITY_SERVICES.find((item) => item.id === id),
+  ).filter((item) => isPageVisible(getContent, item.to));
+  const project = cards.find((card) => card.key === 'projects');
+  const projectFeature = isPageVisible(getContent, project.to) ? (
+    <section className="jic-home-section home-feature" aria-label="Our masjid project">
+      <HomeDestination {...project} />
+    </section>
+  ) : null;
+  const ramadan =
+    getContent('ramadan:home-enabled', 'false') === 'true' && isPageVisible(getContent, '/ramadan');
 
   return (
     <div className="jic-premium-home">
@@ -190,13 +149,35 @@ export default function HomePage() {
                 'Come to pray. Find a class. Be part of something closer to home. Welcome to Jamatia Islamic Centre.'}
             </p>
             <nav className="jic-home-shortcuts" aria-label="Services and learning">
-              {shortcuts.map(({ key, ...card }) => (
-                <HomeDestination key={key} {...card} />
+              {shortcuts.map((item) => (
+                <Link key={item.id} to={item.to} className="jic-home-destination">
+                  <span className="jic-home-destination-icon">
+                    <ServiceIcon
+                      name={design.icons[item.id] || item.icon}
+                      size={21}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span className="jic-home-destination-copy">
+                    <strong>{item.shortTitle || item.title}</strong>
+                  </span>
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
               ))}
             </nav>
-            <Link to="/contact#map" className="jic-home-visit">
-              Plan your visit <ArrowRight size={16} aria-hidden="true" />
-            </Link>
+            <nav className="hub-utility-links home-worship-links" aria-label="Reading and services">
+              {[
+                ['Adhkar', '/worship/daily-duas'],
+                ['Read Qur’an', '/worship/quran'],
+                ['Community Hub', '/services'],
+              ]
+                .filter(([, to]) => isPageVisible(getContent, to))
+                .map(([title, to]) => (
+                  <Link key={to} to={to}>
+                    {title}
+                  </Link>
+                ))}
+            </nav>
           </div>
           <HomePrayerCard />
         </div>
@@ -223,71 +204,15 @@ export default function HomePage() {
           </a>
         )}
 
-        {getContent('ramadan:home-enabled', 'false') === 'true' && (
-          <Suspense fallback={null}>
-            <HomeRamadan />
-          </Suspense>
-        )}
-
-        <ProgrammePosters />
-
-        {events.length > 0 && (
-          <section className="jic-upcoming-events" aria-labelledby="upcoming-events-title">
-            <h2 id="upcoming-events-title">Upcoming events</h2>
-            {events.length > 3 && (
-              <Link className="jic-text-link" to="/events">
-                All events <ArrowRight size={16} />
-              </Link>
-            )}
-            <div className="jic-event-cards">
-              {events.slice(0, 3).map((event) => (
-                <article key={event.id} className="jic-event-card">
-                  {safeWebUrl(event.poster_url) && (
-                    <img src={event.poster_url} alt={`${event.title} poster`} loading="lazy" />
-                  )}
-                  <h3>{event.title}</h3>
-                  <p>
-                    <time dateTime={event.event_date}>
-                      {new Date(`${event.event_date}T12:00:00`).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </time>
-                    {event.start_time ? ` · ${displayTime(event.start_time)}` : ''}
-                  </p>
-                  {event.location && <p>{event.location}</p>}
-                  {event.description && <p>{event.description}</p>}
-                  {safeWebUrl(event.registration_url) && (
-                    <a href={safeWebUrl(event.registration_url)} target="_blank" rel="noreferrer">
-                      Event details & registration
-                    </a>
-                  )}
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <Suspense
-          fallback={
-            <p className="jic-home-section" role="status">
-              Loading services…
-            </p>
-          }
-        >
-          <ServiceExplorer compact />
+        <Suspense fallback={<p role="status">Loading what’s on…</p>}>
+          <WhatsOn events={events} loading={loading} stale={stale} />
         </Suspense>
-
-        {communityCards.length > 0 && (
-          <section className="jic-home-section" aria-labelledby="home-community-title">
-            <h2 id="home-community-title">Community at JIC</h2>
-            <nav className="jic-home-community-grid" aria-label="Community and services">
-              {communityCards.map(({ key, ...card }) => (
-                <HomeDestination key={key} {...card} />
-              ))}
-            </nav>
-          </section>
+        {ramadan ? (
+          <Suspense fallback={null}>
+            <HomeRamadan fallback={projectFeature} />
+          </Suspense>
+        ) : (
+          projectFeature
         )}
 
         {hasLiveStream && (
@@ -331,6 +256,12 @@ export default function HomePage() {
           </section>
         )}
 
+        <div className="home-visit-row">
+          <Link to="/contact#map">
+            Visit us · Sparkhill, Birmingham <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+          <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}>Call {SITE.phone}</a>
+        </div>
         <a
           className="jic-home-footer-strip"
           href={whatsapp}

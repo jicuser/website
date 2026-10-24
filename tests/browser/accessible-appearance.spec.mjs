@@ -28,6 +28,8 @@ for (const theme of ['light', 'dark']) {
     await page.evaluate(() => scrollTo(0, 600));
     await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
     await page.evaluate(() => scrollTo(0, 0));
+    await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
+    await page.goto('/services');
     await expect(page.locator('.jic-mobile-info-banner')).not.toHaveAttribute(
       'aria-hidden',
       'true',

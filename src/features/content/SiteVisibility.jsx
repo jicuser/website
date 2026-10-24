@@ -130,9 +130,15 @@ export default function SiteVisibility() {
               <SimpleToggle
                 key={page.path}
                 label={page.name}
-                detail={['/', '/privacy'].includes(page.path) ? 'Always on' : undefined}
+                detail={
+                  ['/', '/privacy', '/services/support'].includes(page.path)
+                    ? 'Always on'
+                    : undefined
+                }
                 checked={page.visible}
-                disabled={Boolean(busy) || ['/', '/privacy'].includes(page.path)}
+                disabled={
+                  Boolean(busy) || ['/', '/privacy', '/services/support'].includes(page.path)
+                }
                 onChange={(visible) => toggle(page, visible)}
               />
             ))}

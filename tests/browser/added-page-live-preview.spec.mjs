@@ -51,7 +51,13 @@ async function fixture(page) {
         },
       ];
     else if (name === 'get_site_page') data = null;
-    else if (name === 'page_content') {
+    else if (name === 'save_website_page') {
+      const payload = request.postDataJSON();
+      const body = { content_key: `page:${payload.p_path}`, content_value: payload.p_content };
+      state.content[body.content_key] = body;
+      state.writes.push(body);
+      data = null;
+    } else if (name === 'page_content') {
       if (request.method() === 'POST') {
         const body = request.postDataJSON();
         state.content[body.content_key] = body;
@@ -63,7 +69,7 @@ async function fixture(page) {
       }
     }
     if (
-      /^(save_|publish_|submit_)/.test(name) ||
+      (/^(save_|publish_|submit_)/.test(name) && name !== 'save_website_page') ||
       new URL(request.url()).pathname.includes('/functions/')
     )
       state.writes.push(name);

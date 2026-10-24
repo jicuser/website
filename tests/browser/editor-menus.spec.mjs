@@ -52,7 +52,12 @@ async function fixture(page) {
         token_type: 'bearer',
       };
     } else if (path.endsWith('/rpc/get_my_profile')) data = actor;
-    else if (path.endsWith('/page_content')) {
+    else if (path.endsWith('/rpc/save_website_page')) {
+      const write = { content_key: `page:${body.p_path}`, content_value: body.p_content };
+      state.writes.push(write);
+      state.content[write.content_key] = write.content_value;
+      data = null;
+    } else if (path.endsWith('/page_content')) {
       if (body) {
         state.writes.push(body);
         state.content[body.content_key] = body.content_value;
@@ -114,9 +119,9 @@ test('page drafts render in the real website preview before publishing without a
 test('menu names and order save together and appear in public navigation', async ({ page }) => {
   const state = await fixture(page);
   await page.goto('/admin?section=menus');
-  await page.getByRole('button', { name: 'Reorder Ramadan', exact: true }).click();
-  await page.getByRole('button', { name: 'Move Ramadan up', exact: true }).click();
-  await page.getByLabel('Learning section name', { exact: true }).fill('Learning together');
+  await page.getByRole('button', { name: 'Reorder Community Hub', exact: true }).click();
+  await page.getByRole('button', { name: 'Move Community Hub up', exact: true }).click();
+  await page.getByLabel('Community Hub section name', { exact: true }).fill('Learning together');
   await page
     .locator('#staff-content')
     .getByRole('button', { name: 'Save menu', exact: true })
@@ -124,14 +129,14 @@ test('menu names and order save together and appear in public navigation', async
   await expect(page.getByText('Menu names and order saved.', { exact: true })).toBeVisible();
   expect(state.writes).toHaveLength(1);
   const saved = JSON.parse(state.content.site_navigation);
-  expect(saved.labels['/education']).toBe('Learning together');
-  expect(saved.order.indexOf('/ramadan')).toBeLessThan(saved.order.indexOf('/worship'));
+  expect(saved.labels['/services']).toBe('Learning together');
+  expect(saved.order.indexOf('/services')).toBeLessThan(saved.order.indexOf('/worship'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Menu', exact: true }).click();
   const menu = page.getByRole('dialog', { name: 'Navigation menu', exact: true });
   await expect(menu.getByRole('link', { name: 'Learning together', exact: true })).toBeVisible();
   const names = await menu.locator('.jic-unified-menu-row > a').allTextContents();
-  expect(names.indexOf('Ramadan')).toBeLessThan(names.indexOf('Adhkar, Qur’an & Janazah Guide'));
+  expect(names.indexOf('Learning together')).toBeLessThan(names.indexOf('Worship'));
   expect(state.errors).toEqual([]);
 });
 
@@ -147,11 +152,11 @@ for (const width of [320, 390]) {
       expect((await group.boundingBox()).height).toBeLessThan(65);
     }
     await expect(page.locator('.menu-editor__pages')).toHaveCount(0);
-    const handle = page.getByRole('button', { name: 'Reorder Ramadan', exact: true });
+    const handle = page.getByRole('button', { name: 'Reorder Community Hub', exact: true });
     await handle.scrollIntoViewIfNeeded();
     const source = await handle.boundingBox();
     const target = await page
-      .getByRole('button', { name: 'Reorder About', exact: true })
+      .getByRole('button', { name: 'Reorder Salah Times', exact: true })
       .boundingBox();
     const client = await page.context().newCDPSession(page);
     const x = source.x + source.width / 2;
@@ -168,8 +173,10 @@ for (const width of [320, 390]) {
     }
     await expect(page.locator('.menu-editor .drop-before')).toHaveCount(1);
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    await expect(groups.nth(1).getByLabel('Ramadan section name')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Move Ramadan up', exact: true })).toHaveCount(0);
+    await expect(groups.nth(1).getByLabel('Community Hub section name')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Move Community Hub up', exact: true }),
+    ).toHaveCount(0);
     expect(state.writes).toHaveLength(0);
 
     await page.getByRole('button', { name: /^Pages in About/ }).click();
@@ -190,10 +197,10 @@ for (const width of [320, 390]) {
       .click();
     await expect(page.getByText('Menu names and order saved.', { exact: true })).toBeVisible();
     const saved = JSON.parse(state.content.site_navigation);
-    expect(saved.order[1]).toBe('/ramadan');
+    expect(saved.order[1]).toBe('/services');
     expect(saved.children['/about']).toEqual(reorderedPages);
     await page.reload();
-    await expect(groups.nth(1).getByLabel('Ramadan section name')).toBeVisible();
+    await expect(groups.nth(1).getByLabel('Community Hub section name')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
@@ -239,7 +246,7 @@ for (const theme of ['light', 'dark']) {
     await expect(page).toHaveURL(/\/about#social$/);
     await expect(
       page
-        .getByRole('navigation', { name: 'On this page' })
+        .getByRole('navigation', { name: 'About JIC topics' })
         .getByRole('link', { name: 'Visit & contact', exact: true }),
     ).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(

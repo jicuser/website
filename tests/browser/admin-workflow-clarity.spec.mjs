@@ -288,18 +288,18 @@ test('visibility summaries reveal search and filter matches and persist toggles'
   await expect(groups.first()).toHaveJSProperty('tagName', 'DETAILS');
   await expect(groups.first()).not.toHaveAttribute('open');
   await page.getByLabel('Find a page').fill('prayer');
-  await expect(page.getByRole('switch', { name: 'Prayer Times', exact: true })).toBeVisible();
-  await page.getByRole('switch', { name: 'Prayer Times', exact: true }).click();
+  await expect(page.getByRole('switch', { name: 'Salah Times', exact: true })).toBeVisible();
+  await page.getByRole('switch', { name: 'Salah Times', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('off');
   await page.getByLabel('Find a page').fill('');
   await page.getByRole('combobox', { name: 'Show', exact: true }).selectOption('off');
-  await expect(page.getByRole('switch', { name: 'Prayer Times', exact: true })).toHaveAttribute(
+  await expect(page.getByRole('switch', { name: 'Salah Times', exact: true })).toHaveAttribute(
     'aria-checked',
     'false',
   );
   await page.reload();
   await page.getByRole('combobox', { name: 'Show', exact: true }).selectOption('off');
-  await expect(page.getByRole('switch', { name: 'Prayer Times', exact: true })).toBeVisible();
+  await expect(page.getByRole('switch', { name: 'Salah Times', exact: true })).toBeVisible();
   expect(writes).toEqual([
     {
       table: 'save_site_visibility',

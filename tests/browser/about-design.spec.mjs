@@ -69,27 +69,20 @@ for (const width of [320, 390, 1280]) {
     const combined = page.locator('.about-combined');
     await expect(combined).toBeVisible();
     await expect(combined.getByRole('heading', { level: 1 })).toHaveCount(1);
-    await expect(combined.locator('.about-photo')).toHaveCount(1);
+    await expect(combined.locator('.about-photo')).toHaveCount(0);
     await expect(
-      combined.getByRole('navigation', { name: 'On this page' }).getByRole('link'),
+      combined.getByRole('navigation', { name: 'About JIC topics' }).getByRole('link'),
     ).toHaveCount(5);
     await expect(combined.locator('.about-purpose-symbol')).toHaveCount(3);
     await expect(combined.locator('.about-jump-links a[href="/about#overview"]')).toHaveCount(0);
-    await expect(combined.locator(':scope > .about-section')).toHaveCount(5);
-    await expect(combined.locator('.about-timeline')).toContainText('1979');
-    await expect(combined.locator('.about-financial-totals')).toContainText('£545,030');
+    await expect(combined.locator(':scope > .about-section')).toHaveCount(0);
     await expect(combined.locator('details[open]')).toHaveCount(0);
     await expect(combined.locator('iframe')).toHaveCount(0);
     expect(state.reads.filter((path) => /team_members|get_public_form/.test(path))).toEqual([]);
-    const photo = combined.locator('.about-photo img');
-    await expect
-      .poll(() => photo.evaluate((img) => img.complete && img.naturalWidth > 0))
-      .toBe(true);
-    expect((await photo.boundingBox()).height).toBeLessThan(width < 700 ? 260 : 500);
     // Allow the purpose illustrations and platform font metrics within three phone viewports.
     expect((await combined.boundingBox()).height).toBeLessThan(width < 700 ? 2500 : 1750);
     await combined
-      .getByRole('navigation', { name: 'On this page' })
+      .getByRole('navigation', { name: 'About JIC topics' })
       .getByRole('link', { name: 'Our story', exact: true })
       .click();
     await expect(page).toHaveURL(/\/about#history$/);
@@ -179,7 +172,7 @@ test('social previews load on request and return focus to the compact channel bu
   await page.goto('/social-media');
   const content = page.locator('.about-social');
   await expect(content.locator('.about-channel')).toHaveCount(6);
-  await expect(page.locator('.about-photo')).toHaveCount(1);
+  await expect(page.locator('.about-photo')).toHaveCount(0);
   await expect(page.locator('.ops-social-live iframe')).toHaveCount(0);
   const button = content.getByRole('button', { name: 'Preview Facebook', exact: true });
   await button.click();
@@ -219,7 +212,7 @@ test('combined sections keep their saved content, visibility, menu labels and sh
       },
     ],
   });
-  await page.goto('/about');
+  await page.goto('/about#history');
   const content = page.locator('.about-combined');
   await expect(
     content.getByRole('heading', { name: 'Our saved story', exact: true }),
@@ -228,7 +221,7 @@ test('combined sections keep their saved content, visibility, menu labels and sh
     content.getByText('Published history from the office.', { exact: true }),
   ).toBeVisible();
   await expect(content.getByText('A published extra section.', { exact: true })).toBeVisible();
-  await expect(content.getByText('Published team information.', { exact: true })).toBeVisible();
+  await expect(content.getByText('Published team information.', { exact: true })).toHaveCount(0);
   await expect(content.locator('#finances')).toHaveCount(0);
   await expect
     .poll(() =>
@@ -236,8 +229,8 @@ test('combined sections keep their saved content, visibility, menu labels and sh
         .locator(':scope > .about-section')
         .evaluateAll((nodes) => nodes.map((node) => node.id)),
     )
-    .toEqual(['team', 'history', 'contact', 'social']);
-  const links = content.getByRole('navigation', { name: 'On this page' }).getByRole('link');
+    .toEqual(['history']);
+  const links = content.getByRole('navigation', { name: 'About JIC topics' }).getByRole('link');
   await expect(links).toHaveText([
     'Our community team',
     'Our story',
@@ -247,6 +240,7 @@ test('combined sections keep their saved content, visibility, menu labels and sh
   await links.filter({ hasText: 'Our community team' }).click();
   await expect(page).toHaveURL(/\/about#team$/);
   await expect(page.locator('#team')).toBeFocused();
+  await expect(content.getByText('Published team information.', { exact: true })).toBeVisible();
   await expect(page.locator('#team details')).toHaveAttribute('open', '');
   await page.goto('/social-media?from=shared#facebook');
   await expect(page).toHaveURL(/\/about\?from=shared#facebook$/);
@@ -288,8 +282,8 @@ test('About retains moved visible sections and keeps additional pages as configu
         .locator(':scope > .about-section')
         .evaluateAll((nodes) => nodes.map((node) => node.id)),
     )
-    .toEqual(['contact', 'history', 'social', 'team']);
-  const links = content.getByRole('navigation', { name: 'On this page' }).getByRole('link');
+    .toEqual([]);
+  const links = content.getByRole('navigation', { name: 'About JIC topics' }).getByRole('link');
   await expect(links).toHaveText([
     'Visit us',
     'Community story',

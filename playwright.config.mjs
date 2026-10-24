@@ -5,7 +5,9 @@ export default defineConfig({
   // Workspace-only flows use their feature-enabled server in playwright.forms.config.mjs.
   testIgnore: ['custom-forms.spec.mjs', 'certificates.spec.mjs'],
   workers: 1,
-  timeout: 20000,
+  timeout: 30000,
+  // Vite serves unbundled modules; cold route loads can exceed five seconds on shared runners.
+  expect: { timeout: 10000 },
   use: {
     ...devices['iPhone 13'],
     browserName: 'chromium',

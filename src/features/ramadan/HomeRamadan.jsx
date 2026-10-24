@@ -15,7 +15,7 @@ import {
 } from './model';
 import '@/styles/ramadan.css';
 const icons = { iftar: Moon, suhoor: Sun, daily: Heart };
-export default function HomeRamadan() {
+export default function HomeRamadan({ fallback = null }) {
   const { data } = useRamadanCalendar(true),
     { getContent } = useContent();
   const options = ramadanSettings(data),
@@ -26,12 +26,12 @@ export default function HomeRamadan() {
     !options.website_enabled ||
     !isPageVisible(getContent, '/ramadan')
   )
-    return null;
+    return fallback;
   const days = seasonDays(season),
     choices = Object.entries(RAMADAN_KINDS).filter(
       ([kind]) => ramadanOpen(data, kind) && isPageVisible(getContent, RAMADAN_PATHS[kind]),
     );
-  if (!choices.length) return null;
+  if (!choices.length) return fallback;
   return (
     <section className="home-sponsorships" aria-label="Ramadan meal sponsorships">
       <header>

@@ -76,10 +76,15 @@ for (const [theme, width] of [
     await expect(directory.locator('.service-explorer-card')).toContainText('Nikah');
     await directory.getByRole('button', { name: 'Clear service search', exact: true }).click();
     await directory.getByRole('button', { name: /^Learning/ }).click();
-    await expect(directory.locator('.service-explorer-card')).toHaveCount(1);
-    await expect(directory.locator('.service-explorer-card')).toContainText('Adult learning');
+    await expect(directory.locator('.service-explorer-card')).toHaveCount(2);
+    await expect(directory.locator('.service-explorer-card').first()).toContainText(
+      'Education & Madrassah',
+    );
     await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
-    await expect(directory.locator('.service-explorer-card')).toHaveCSS('backdrop-filter', 'none');
+    await expect(directory.locator('.service-explorer-card').first()).toHaveCSS(
+      'backdrop-filter',
+      'none',
+    );
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
       true,
     );
@@ -263,6 +268,9 @@ for (const width of [667, 1024]) {
     await expect(page.getByLabel('Name', { exact: false })).toBeVisible();
     await expect(dock).toBeHidden();
     await page.goto('/');
+    await expect(page.locator('.jic-home-prayer')).toBeVisible();
+    await expect(dock).toBeHidden();
+    await page.goto('/services');
     await expect(dock).toBeVisible();
     expect(state.errors).toEqual([]);
     expect(state.writes).toEqual([]);

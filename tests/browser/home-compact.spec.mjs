@@ -53,10 +53,10 @@ for (const width of [320, 390]) {
       await expect(shortcuts.locator('strong')).toHaveText([
         'Janazah',
         'Nikah',
-        'Courses',
-        'Madrassah',
+        'Learning',
+        'Get support',
+        'Careers',
         'Hall hire',
-        'Volunteer',
       ]);
       expect(
         await shortcuts
@@ -65,10 +65,10 @@ for (const width of [320, 390]) {
       ).toEqual([
         '/funerals',
         '/services/nikah',
-        '/education/courses',
-        '/madrassah',
+        '/education',
+        '/services/support',
+        '/services/skills-careers',
         '/services/hall-booking',
-        '/get-involved/volunteer',
       ]);
       expect(
         await shortcuts.locator('a').evaluateAll((nodes) =>
@@ -129,7 +129,7 @@ for (const width of [320, 390, 1280]) {
     page,
   }) => {
     await openHome(page, width);
-    const cards = page.locator('.jic-programme-card');
+    const cards = page.locator('.home-whats-on .whats-on-row');
     await expect(cards.first()).toBeVisible();
     await cards.first().scrollIntoViewIfNeeded();
     await expect
@@ -142,11 +142,11 @@ for (const width of [320, 390, 1280]) {
       .toBeGreaterThan(0);
     const layout = await cards.evaluateAll((nodes) =>
       nodes.map((node) => {
-        const poster = node.querySelector('.jic-poster-button');
-        const copy = node.querySelector('.jic-programme-copy');
+        const poster = node.querySelector('.whats-on-poster');
+        const copy = node.querySelector(':scope > div');
         return {
           height: node.getBoundingClientRect().height,
-          sideBySide: poster.getBoundingClientRect().right <= copy.getBoundingClientRect().left + 1,
+          sideBySide: copy.getBoundingClientRect().right <= poster.getBoundingClientRect().left + 1,
           contentFits: copy.scrollWidth <= copy.clientWidth + 1,
         };
       }),
@@ -174,6 +174,7 @@ for (const width of [320, 390, 1280]) {
 
 test('mobile prayer overview is a labelled link to the full timetable', async ({ page }) => {
   await openHome(page, 390);
+  await page.goto('/services');
   const overview = page.getByRole('link', { name: /Today.s prayer times:.*View full timetable/ });
   await expect(overview).toBeVisible();
   await expect(overview).toContainText('Full timetable');

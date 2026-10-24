@@ -67,11 +67,15 @@ export function installPagePreviewBridge(onContent) {
     const content = Object.fromEntries(
       Object.entries(value.content || {}).filter(
         ([key, text]) =>
-          [`page:${pathname}`, 'hall_details'].includes(key) &&
+          [`page:${pathname}`, 'hall_details', 'site_design'].includes(key) &&
           typeof text === 'string' &&
           text.length <= CONTENT_LIMIT,
       ),
     );
+    if (['light', 'dark'].includes(value.appearance)) {
+      document.documentElement.classList.toggle('dark', value.appearance === 'dark');
+      document.documentElement.dataset.theme = value.appearance;
+    }
     const sections = Array.isArray(value.sections) ? value.sections.slice(0, 24) : null;
     const page = pathname.startsWith('/pages/') ? sanitizePreviewPage(value.page) : null;
     window.__jicPagePreview = { path: pathname, sections, page };

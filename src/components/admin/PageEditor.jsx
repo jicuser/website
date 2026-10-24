@@ -16,6 +16,9 @@ import PageSectionsEditor from '@/components/admin/PageSectionsEditor';
 import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 import PageNavigator from '@/components/admin/PageNavigator';
+import GuidedHelpEditor from './GuidedHelpEditor';
+import { GUIDED_HELP } from '@/content/guidedHelp';
+import { guidedHelpProblem } from '@/lib/guidedHelp';
 import ServiceGuidanceFields from './ServiceGuidanceFields';
 import { journeyForPath } from '@/lib/serviceGuidance';
 import HallDetailsEditor from '@/features/content/HallDetailsEditor';
@@ -39,6 +42,7 @@ export default function PageEditor({
   const [previewPane, setPreviewPane] = useState(false);
   const [sectionPreview, setSectionPreview] = useState(null);
   const [extraContent, setExtraContent] = useState({});
+  const baselineValue = useRef(null);
   const frame = useRef(null);
   const previewBox = useRef(null);
   const [previewWidth, setPreviewWidth] = useState(600);
@@ -124,6 +128,7 @@ export default function PageEditor({
       .then(({ data, error: loadError }) => {
         if (!active) return;
         if (loadError) throw loadError;
+        baselineValue.current = data?.content_value ?? null;
         setDraft({
           ...pageDefaults(page),
           ...(data?.content_value ? JSON.parse(data.content_value) : {}),
@@ -174,26 +179,23 @@ export default function PageEditor({
         )
       )
         throw new Error('Add a question and answer for each visible guidance item.');
+      if (next.guidedJourney && guidedHelpProblem(next.guidedJourney))
+        throw new Error(guidedHelpProblem(next.guidedJourney));
       const payload = {
         title: next.title || '',
         body: next.body || '',
         image: next.image || '',
         ...(next.guidance ? { guidance: next.guidance } : {}),
+        ...(next.guidedJourney ? { guidedJourney: next.guidedJourney } : {}),
       };
-      const { data, error: saveError } = await supabase
-        .from('page_content')
-        .upsert(
-          {
-            content_key: pageKey(selected),
-            content_value: JSON.stringify(payload),
-            content_type: 'json',
-            page: selected,
-          },
-          { onConflict: 'content_key' },
-        )
-        .select('content_key');
+      const content = JSON.stringify(payload);
+      const { error: saveError } = await supabase.rpc('save_website_page', {
+        p_path: selected,
+        p_content: content,
+        p_expected: baselineValue.current,
+      });
       if (saveError) throw saveError;
-      if (data?.length !== 1) throw new Error('The page was not saved.');
+      baselineValue.current = content;
       await refreshContent();
       setDraft(next);
       setDirty(false);
@@ -265,7 +267,7 @@ export default function PageEditor({
             <h2>Edit website pages</h2>
           </div>
           <Link className="admin-button" to="/admin/home-tiles">
-            Home tiles <ArrowUpRight size={16} />
+            Home feature <ArrowUpRight size={16} />
           </Link>
         </div>
       )}
@@ -372,6 +374,13 @@ export default function PageEditor({
                     </button>
                   )}
                 </div>
+                {GUIDED_HELP[selected] && (
+                  <GuidedHelpEditor
+                    value={draft.guidedJourney}
+                    fallback={GUIDED_HELP[selected]}
+                    onChange={(value) => change('guidedJourney', value)}
+                  />
+                )}
                 {journeyForPath(selected) && (
                   <ServiceGuidanceFields
                     value={draft.guidance}

@@ -34,7 +34,6 @@ async function uploadTileImage(file, key) {
 
 export default function TileContentAdminPage() {
   const [tiles, setTiles] = useState(DEFAULT_TILES);
-  const [selected, setSelected] = useState('services');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -91,7 +90,7 @@ export default function TileContentAdminPage() {
         .from('page_content')
         .upsert(payload, { onConflict: 'content_key' });
       if (saveError) throw saveError;
-      setMessage('Home tiles updated successfully.');
+      setMessage('Home feature updated successfully.');
     } catch (e) {
       setError(e.message || String(e));
     } finally {
@@ -111,10 +110,10 @@ export default function TileContentAdminPage() {
               <ArrowLeft size={16} />
               Back to admin
             </Link>
-            <h1 className="text-2xl font-bold sm:text-3xl">Homepage tile content</h1>
+            <h1 className="text-2xl font-bold sm:text-3xl">Home feature</h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-400">
-              Edit the headings and descriptions on the homepage tiles. You can also add or remove a
-              picture for each tile.
+              Edit the project feature shown on Home when Ramadan sponsorships are not featured.
+              Choose service icons and colours in Website appearance.
             </p>
           </div>
           <button
@@ -136,30 +135,22 @@ export default function TileContentAdminPage() {
             {error}
           </div>
         )}
-        <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Homepage tiles">
-          {tiles.map((tile) => (
-            <button
-              type="button"
-              key={tile.key}
-              disabled={busy}
-              aria-pressed={selected === tile.key}
-              onClick={() => setSelected(tile.key)}
-              className={`min-h-11 rounded-lg border px-3 py-2 text-sm ${selected === tile.key ? 'border-amber-300 bg-amber-300/10' : 'border-white/20'}`}
-            >
-              {tile.title}
-            </button>
-          ))}
-        </div>
+        <Link
+          className="mb-4 inline-flex min-h-11 items-center text-amber-200 underline"
+          to="/admin?section=appearance"
+        >
+          Website appearance · service icons and colours
+        </Link>
         <div className="grid gap-4">
           {tiles.map(
             (tile, index) =>
-              tile.key === selected && (
+              tile.key === 'projects' && (
                 <section
                   key={tile.key}
                   className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-2xl sm:p-5"
                 >
                   <div className="mb-4 text-xs font-semibold uppercase tracking-[.16em] text-amber-300">
-                    Fixed tile: {tile.key}
+                    Project feature
                   </div>
                   <label className="mb-3 block text-sm font-medium">
                     Heading

@@ -48,6 +48,14 @@ export const ADMIN_SECTIONS = [
       ]
     : []),
   {
+    id: 'appearance',
+    name: 'Website appearance',
+    permission: 'content',
+    group: 'Website content',
+    description: 'Preview colours, compact layouts and icons; save a draft or publish.',
+    keywords: ['colours', 'palette', 'theme', 'layout', 'design', 'icons'],
+  },
+  {
     id: 'visibility',
     name: 'Show or hide pages',
     permission: 'content',

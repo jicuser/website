@@ -4,6 +4,14 @@ export function isPublicTaskRoute(pathname) {
   return (
     ['/forms', '/ramadan', '/fundraise', '/get-involved'].some(
       (root) => path === root || path.startsWith(`${root}/`),
-    ) || ['/donate', '/contact', '/prayer-times/reminders', '/services/hall-booking'].includes(path)
+    ) ||
+    [
+      '/donate',
+      '/contact',
+      '/prayer-times/reminders',
+      '/services/hall-booking',
+      '/services/support',
+      '/services/skills-careers',
+    ].includes(path)
   );
 }

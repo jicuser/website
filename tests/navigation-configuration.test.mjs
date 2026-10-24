@@ -11,7 +11,7 @@ import {
 test('saved labels/order apply to the complete menu without changing destinations', () => {
   const config = {
     labels: { '/education': 'Learning together', '/contact': 'Contact the office' },
-    order: ['/ramadan', '/', '/education'],
+    order: ['/services', '/', '/worship'],
     children: { '/about': ['/contact', '/about'] },
   };
   const get = (key, fallback) =>
@@ -19,9 +19,14 @@ test('saved labels/order apply to the complete menu without changing destination
   const groups = compactMenuNavigation(configuredNavigation(PUBLIC_MENU_GROUPS, get));
   assert.deepEqual(
     groups.slice(0, 3).map((group) => group.path),
-    ['/ramadan', '/', '/education'],
+    ['/services', '/', '/worship'],
   );
-  assert.equal(groups.find((group) => group.path === '/education').name, 'Learning together');
+  assert.equal(
+    groups
+      .find((group) => group.path === '/services')
+      .children.find((page) => page.path === '/education').name,
+    'Learning together',
+  );
   const about = groups.find((group) => group.path === '/about');
   assert.equal(about.children[0].name, 'Contact the office');
   assert.equal(about.children[0].path, '/contact');

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { BookOpen, Heart, Trophy } from 'lucide-react';
@@ -94,11 +95,23 @@ export default function YouthPage({ view = 'overview' }) {
       </Helmet>
       <div className="jic-youth-page">
         {view === 'overview' && (
-          <PageHeading title="Youth">
+          <PageHeading title="Youth & events">
             Activities, learning and opportunities for young people.
           </PageHeading>
         )}
-        {view === 'itikaf' ? <YouthRegistrationSection /> : <YouthActivitiesSection />}
+        {view === 'itikaf' ? (
+          <YouthRegistrationSection />
+        ) : (
+          <>
+            <nav className="hub-utility-links" aria-label="Youth choices">
+              <Link to="/events">Upcoming events</Link>
+              <Link to="/education/programmes">Published programmes</Link>
+              <Link to="/get-involved/volunteer">Volunteer</Link>
+              <Link to="/youth/itikaf">I‘tikaf registration</Link>
+            </nav>
+            <YouthActivitiesSection />
+          </>
+        )}
       </div>
     </>
   );

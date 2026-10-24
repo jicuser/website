@@ -1,6 +1,6 @@
 import { OPTIMIZED_IMAGES } from '@/content/optimizedImages';
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Expand, Megaphone } from 'lucide-react';
 import usePosters from '@/hooks/usePosters';
 import { usePublishedPages } from '@/context/PublishedPagesContext';
@@ -9,9 +9,11 @@ import { posterAppearsOnPage, posterWebsiteLocations } from '@/lib/programmePlac
 import ImageViewer from '@/components/ImageViewer';
 import SwipeRail from '@/components/SwipeRail';
 import AnnouncementViewer from '@/components/posters/AnnouncementViewer';
+import { EventRows } from '@/components/home/WhatsOn';
 
-export default function ProgrammePosters({ listing = false }) {
+export default function ProgrammePosters({ listing = false, compact = false }) {
   const { pathname } = useLocation();
+  const [params, setParams] = useSearchParams();
   const programmes = usePosters();
   const pages = usePublishedPages();
   const [selected, setSelected] = useState(null);
@@ -26,7 +28,14 @@ export default function ProgrammePosters({ listing = false }) {
       const page = pages.find((candidate) => candidate.source_poster_id === item.id);
       return page ? { ...item, to: pageUrl(page), registration: page.registration } : item;
     });
-  const posters = listing ? publicPosters : publicPosters.slice(0, 4);
+  const page = Math.max(
+    0,
+    Math.min(
+      Math.max(0, Math.ceil(publicPosters.length / 6) - 1),
+      Number.parseInt(params.get('page') || '1', 10) - 1 || 0,
+    ),
+  );
+  const posters = listing ? publicPosters.slice(page * 6, page * 6 + 6) : publicPosters.slice(0, 4);
   if (!posters.length)
     return listing ? (
       <section className="jic-programme-listing" aria-label="Published programmes">
@@ -34,6 +43,14 @@ export default function ProgrammePosters({ listing = false }) {
         <Link to="/contact">Contact the centre</Link>
       </section>
     ) : null;
+  if (compact)
+    return (
+      <details className="jic-programmes compact-programme-notices">
+        <summary>Notices & programmes</summary>
+        <EventRows rows={posters.slice(0, 3)} />
+        <Link to="/education/programmes">All programmes & posters</Link>
+      </details>
+    );
   const cards = posters.map((item) => (
     <article className="jic-programme-card" key={item.id}>
       {item.kind === 'announcement' ? (
@@ -87,6 +104,27 @@ export default function ProgrammePosters({ listing = false }) {
       {listing ? (
         <section className="jic-programme-listing" aria-label="Published programmes">
           <div className="jic-programme-grid">{cards}</div>
+          {publicPosters.length > 6 && (
+            <nav className="compact-pagination" aria-label="Programme pages">
+              <button
+                type="button"
+                disabled={!page}
+                onClick={() => setParams({ page: String(page) })}
+              >
+                Previous
+              </button>
+              <span>
+                Page {page + 1} of {Math.ceil(publicPosters.length / 6)}
+              </span>
+              <button
+                type="button"
+                disabled={(page + 1) * 6 >= publicPosters.length}
+                onClick={() => setParams({ page: String(page + 2) })}
+              >
+                Next
+              </button>
+            </nav>
+          )}
         </section>
       ) : (
         <SwipeRail

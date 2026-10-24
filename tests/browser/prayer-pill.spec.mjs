@@ -30,7 +30,7 @@ async function setup(page, theme, friday = false) {
       body: JSON.stringify(url.pathname.endsWith('/prayer_times') ? rows : []),
     });
   });
-  await page.goto('/');
+  await page.goto('/services');
   await expect(page.locator('.jic-mini-prayer-start').nth(1)).toHaveText('6:15am');
 }
 
@@ -91,9 +91,7 @@ for (const width of [320, 390]) {
       await expect(home).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
       await expect(home).toHaveCSS('border-top-width', '0px');
       await expect(home).toHaveCSS('box-shadow', 'none');
-      expect((await home.boundingBox()).y + (await home.boundingBox()).height).toBeLessThan(
-        (await pill.boundingBox()).y,
-      );
+      await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
       const documentPosition = () =>
         home.evaluate((node) => {
           const rect = node.getBoundingClientRect();
@@ -110,7 +108,8 @@ for (const width of [320, 390]) {
       // Home stays in the branding row; hiding the dock must not move page content.
       expect(await documentPosition()).toEqual(before);
       await page.evaluate(() => scrollTo(0, 400));
-      await expect(page.locator('#jic-prayer-dock')).not.toHaveAttribute('aria-hidden', 'true');
+      // The Home prayer card is visible here, so the duplicate dock stays quiet.
+      await expect(page.locator('#jic-prayer-dock')).toHaveAttribute('aria-hidden', 'true');
       await nav.getByRole('button', { name: 'Home' }).click();
       await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
       await page.screenshot({ path: testInfo.outputPath(`prayer-pill-${theme}-${width}.png`) });

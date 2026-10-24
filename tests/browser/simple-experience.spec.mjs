@@ -262,28 +262,26 @@ test('form creation provides templates, automatic addresses, optional titles and
   expect(state.errors).toEqual([]);
 });
 
-test('Ramadan table selects a range across UK months and skips reserved or closed meals', async ({
+test('Ramadan month opens one date and keeps reserved or closed meals unavailable', async ({
   page,
 }) => {
   const { state } = await fixture(page);
   await page.goto('/ramadan/iftar');
-  await page.getByRole('button', { name: 'Table', exact: true }).click();
-  await page.getByText('Choose a date range', { exact: true }).click();
-  const range = page.getByRole('group', { name: 'Sponsorship date range' });
-  await range.getByLabel('From', { exact: true }).selectOption('2027-02-27');
-  await range.getByLabel('To', { exact: true }).selectOption('2027-03-03');
-  await range.getByRole('button', { name: 'Select these days' }).click();
-  const table = page.getByRole('region', { name: 'Ramadan sponsorship table' });
-  await expect(table.getByText('19 Ramadan', { exact: true })).toBeVisible();
-  await expect(table.getByText('3 March 2027', { exact: true })).toBeVisible();
-  await expect(
-    table.getByRole('button', { name: 'Select 20 Ramadan, 28 February 2027' }),
-  ).toBeDisabled();
+  const month = page.getByRole('group', { name: 'Ramadan month' });
+  await month.getByRole('button', { name: /Day 20, 28 February 2027/ }).click();
+  await expect(page.getByRole('button', { name: 'Book this meal', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Change date', exact: true }).click();
+  await month.getByRole('button', { name: /Day 21, 1 March 2027/ }).click();
+  await expect(page.getByRole('button', { name: 'Book this meal', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Change date', exact: true }).click();
+  await month.getByRole('button', { name: /Day 23, 3 March 2027/ }).click();
+  await expect(page.getByRole('heading', { name: '3 March 2027', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Book this meal', exact: true }).click();
   await page.getByLabel('Your name', { exact: true }).fill('Meal sponsor');
   await page.getByLabel('Phone or email', { exact: true }).fill('sponsor@example.invalid');
   await page.getByRole('button', { name: 'Request sponsorship', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Booking request received' })).toBeVisible();
-  expect(state.writes[0].dates).toEqual(['2027-02-27', '2027-03-02', '2027-03-03']);
+  expect(state.writes[0].dates).toEqual(['2027-03-03']);
   expect(state.errors).toEqual([]);
 });
 
@@ -293,12 +291,8 @@ test('Ramadan without a season keeps one overview notice and a useful direct mea
   const { state } = await fixture(page);
   state.season = null;
   await page.goto('/ramadan');
-  const notice = page.locator('.ramadan-timetable-notice');
-  await expect(
-    notice.getByRole('heading', { name: 'Ramadan timetable coming soon' }),
-  ).toBeVisible();
-  await expect(notice.getByRole('heading', { name: 'Meal bookings coming soon' })).toBeVisible();
-  await expect(page.locator('.sponsorship-page > .booking-panel')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Meal bookings coming soon' })).toBeVisible();
+  await expect(page.locator('.meal-booking-page > .booking-panel')).toHaveCount(1);
   await page.goto('/ramadan/iftar');
   await expect(page.getByRole('heading', { name: 'Meal bookings coming soon' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ramadan timetable coming soon' })).toHaveCount(0);
@@ -408,7 +402,7 @@ test('public metadata changes with navigation and keeps one canonical without se
     'https://www.jicmasjid.org/services/hall-booking',
   );
   await page.goto('/ramadan');
-  await expect(page.getByRole('heading', { name: 'Ramadan timetable coming soon' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ramadan meals', exact: true })).toBeVisible();
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
     'content',
     'Ramadan | Jamatia Islamic Centre',

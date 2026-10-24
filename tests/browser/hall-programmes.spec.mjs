@@ -90,11 +90,13 @@ test('compact previews link to the complete public programme catalogue', async (
     ],
   });
   await page.goto('/');
-  const previews = page.locator('.jic-programmes');
-  await expect(previews.getByRole('article')).toHaveCount(4);
-  const viewAll = previews.getByRole('link', { name: 'View all programmes' });
-  await expect(viewAll).toHaveAttribute('href', '/education/programmes');
+  const previews = page.locator('.home-whats-on');
+  await expect(previews.getByRole('article')).toHaveCount(3);
+  const viewAll = previews.getByRole('link', { name: 'All events & programmes' });
+  await expect(viewAll).toHaveAttribute('href', '/events');
   await viewAll.click();
+  await expect(page).toHaveURL('/events');
+  await page.getByRole('link', { name: 'All programmes & posters', exact: true }).click();
   await expect(page).toHaveURL('/education/programmes');
   await expect(page.getByRole('heading', { name: 'Programmes', exact: true })).toBeVisible();
   await expect(page.locator('.jic-programme-card')).toHaveCount(6);
