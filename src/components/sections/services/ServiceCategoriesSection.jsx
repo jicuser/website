@@ -7,6 +7,7 @@ import ReligiousServicesTab from './ReligiousServicesTab';
 import EducationalProgramsTab from './EducationalProgramsTab';
 import ServiceJourney from '@/components/services/ServiceJourney';
 import { SERVICE_JOURNEYS } from '@/content/serviceJourneys';
+import CommunityGuidancePage from '@/pages/CommunityGuidancePage';
 import SpecialServicesSection from './SpecialServicesSection';
 
 const categories = {
@@ -23,8 +24,9 @@ const services = NAV_GROUPS.find((group) => group.path === '/services');
 export default function ServiceCategoriesSection() {
   const { pathname, hash } = useLocation();
   const path = legacyAnchors[hash] || pathname.replace(/\/+$/, '');
-  if (path === '/services/community')
+  if (path === '/services/community' && hash === '#enquire')
     return <ServiceJourney journey={SERVICE_JOURNEYS.community} />;
+  if (path === '/services/community') return <CommunityGuidancePage kind="support" />;
   const Category = categories[path];
   const title = services.children.find((page) => page.path === path)?.name;
   if (!Category) return <ServicesLanding />;

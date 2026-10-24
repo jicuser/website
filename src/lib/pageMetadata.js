@@ -26,6 +26,14 @@ const descriptions = {
     'Contact Jamatia Islamic Centre, find our Woodlands Road address and send an enquiry to the centre’s team.',
   '/services':
     'Find prayer times, Nikah and funeral support, hall enquiries, classes and community services at Jamatia Islamic Centre.',
+  '/services/support':
+    'Find wellbeing, practical assistance and support information through short, optional guided choices at JIC.',
+  '/services/skills-careers':
+    'Get practical CV, interview, job search and training guidance with official careers resources.',
+  '/services/marriage-family':
+    'Explore Nikah preparation, marriage and family guidance at Jamatia Islamic Centre.',
+  '/events':
+    'Browse published events, gatherings, programmes and notices at Jamatia Islamic Centre.',
   '/services/hall-booking':
     'View the JIC hall availability calendar and send your preferred date and event details to the centre’s team.',
   '/services/nikah':

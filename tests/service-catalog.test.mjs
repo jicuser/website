@@ -11,7 +11,7 @@ test('the catalogue connects each JIC service to its existing destination', () =
   const destinations = Object.fromEntries(
     (catalog.SERVICE_CATALOG || []).map(({ id, to }) => [id, to]),
   );
-  assert.deepEqual(destinations, {
+  const existing = {
     prayer: '/prayer-times',
     learning: '/education',
     madrassah: '/madrassah',
@@ -19,10 +19,23 @@ test('the catalogue connects each JIC service to its existing destination', () =
     funerals: '/funerals',
     hall: '/services/hall-booking',
     youth: '/youth',
-    community: '/get-involved',
+    community: '/get-involved/volunteer',
     giving: '/donate',
     portal: '/portal',
-  });
+  };
+  for (const [id, to] of Object.entries(existing)) assert.equal(destinations[id], to);
+  for (const id of [
+    'support',
+    'family',
+    'careers',
+    'adhkar',
+    'quran',
+    'salah-guide',
+    'janazah-guide',
+    'dalail',
+    'ramadan',
+  ])
+    assert.ok(destinations[id]);
 });
 
 test('an empty search includes the catalogue in its editorial order', () => {
@@ -32,11 +45,11 @@ test('an empty search includes the catalogue in its editorial order', () => {
 test('search finds everyday language as well as service names', () => {
   assert.deepEqual(
     findServices({ query: '  MARRIAGE  ' }).map(({ id }) => id),
-    ['nikah'],
+    ['family', 'nikah'],
   );
   assert.deepEqual(
     findServices({ query: 'SaLaH' }).map(({ id }) => id),
-    ['prayer'],
+    ['prayer', 'salah-guide'],
   );
   assert.deepEqual(
     findServices({ query: 'preferred date' }).map(({ id }) => id),
@@ -47,7 +60,7 @@ test('search finds everyday language as well as service names', () => {
 test('every search word must match the same service', () => {
   assert.deepEqual(
     findServices({ query: 'quran children' }).map(({ id }) => id),
-    ['madrassah'],
+    ['learning', 'madrassah'],
   );
   assert.deepEqual(findServices({ query: 'quran funeral' }), []);
 });
@@ -59,14 +72,14 @@ test('search handles apostrophes and accents in visitor input', () => {
   );
   assert.deepEqual(
     findServices({ query: 'madrássah' }).map(({ id }) => id),
-    ['madrassah'],
+    ['learning', 'madrassah'],
   );
 });
 
 test('categories narrow the results and combine with search', () => {
   assert.deepEqual(
     findServices({ category: 'learning' }).map(({ id }) => id),
-    ['learning', 'madrassah'],
+    ['careers', 'learning', 'madrassah'],
   );
   assert.deepEqual(
     findServices({ category: 'learning', query: 'parent' }).map(({ id }) => id),
@@ -87,17 +100,20 @@ test('CMS-hidden destinations stay hidden in every discovery mode', () => {
     'Visibility filtering must be available',
   );
   const visible = catalog.getVisibleServices(getContent);
-  assert.equal(visible.length, 8);
+  assert.equal(visible.length, catalog.SERVICE_CATALOG.length - 2);
   assert.equal(
     visible.some(({ id }) => ['nikah', 'portal'].includes(id)),
     false,
   );
-  assert.deepEqual(findServices({ query: 'marriage', getContent }), []);
+  assert.deepEqual(
+    findServices({ query: 'marriage', getContent }).map(({ id }) => id),
+    ['family'],
+  );
   assert.deepEqual(
     findServices({ category: 'account', getContent }).map(({ id }) => id),
     [],
   );
-  assert.equal(findServices({ category: 'life-events', getContent }).length, 2);
+  assert.equal(findServices({ category: 'life-events', getContent }).length, 3);
 });
 
 test('certificate search leads to the portal instead of a standalone service', () => {
@@ -122,12 +138,15 @@ test('hidden certificate guidance stays out of search while the portal remains a
 test('a new CMS visibility value changes the results without changing the catalogue', () => {
   const content = new Map([['page-visibility:/madrassah', 'false']]);
   const getContent = (key, fallback) => content.get(key) ?? fallback;
-  assert.deepEqual(findServices({ query: 'children', getContent }), []);
+  assert.deepEqual(
+    findServices({ query: 'children', getContent }).map(({ id }) => id),
+    ['learning'],
+  );
 
   content.set('page-visibility:/madrassah', 'true');
   assert.deepEqual(
     findServices({ query: 'children', getContent }).map(({ id }) => id),
-    ['madrassah'],
+    ['learning', 'madrassah'],
   );
 });
 

@@ -298,7 +298,7 @@ test('header Menu stays open until a slow Prayer Times route is ready', async ({
   await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
   const menu = page.getByRole('dialog', { name: 'Navigation menu' });
   const loading = page.waitForRequest('**/src/pages/PrayerTimesPage.jsx*');
-  await menu.getByRole('link', { name: 'Prayer Times', exact: true }).click();
+  await menu.getByRole('link', { name: 'Salah Times', exact: true }).click();
   await loading;
   try {
     await expect(menu).toBeVisible();
@@ -321,7 +321,7 @@ test('Prayer Times shows already loaded times without another loading flash', as
     await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
     await page
       .getByRole('dialog', { name: 'Navigation menu' })
-      .getByRole('link', { name: 'Prayer Times', exact: true })
+      .getByRole('link', { name: 'Salah Times', exact: true })
       .click();
     await expect(page).toHaveURL('/prayer-times');
     await expect(
@@ -333,7 +333,7 @@ test('Prayer Times shows already loaded times without another loading flash', as
     await page.screenshot({ path: testInfo.outputPath('prayer-times.png') });
     await page.locator('.jic-section-picker > summary').click();
     await page
-      .getByRole('navigation', { name: 'Prayer Times pages' })
+      .getByRole('navigation', { name: 'Salah Times pages' })
       .getByRole('link', { name: 'Monthly Timetable', exact: true })
       .click();
     await expect(page.getByRole('heading', { name: 'Monthly Timetable', exact: true })).toBeVisible(
@@ -375,7 +375,7 @@ test('the slim daily reminder follows Salah bar scrolling and restores on naviga
   await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
   await page
     .locator('#jic-site-menu')
-    .getByRole('link', { name: 'Prayer Times', exact: true })
+    .getByRole('link', { name: 'Salah Times', exact: true })
     .click();
   await expect(
     page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),

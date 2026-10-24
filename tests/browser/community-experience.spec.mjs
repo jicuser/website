@@ -18,7 +18,7 @@ test('homepage leads with masjid activity and compact practical links', async ({
   const services = page.locator('.service-explorer--compact');
   await expect(services).toBeVisible();
   // Certificates remain hidden until the workspace feature is enabled.
-  await expect(services.locator('.service-explorer-card')).toHaveCount(2);
+  await expect(services.locator('.service-explorer-card')).toHaveCount(4);
   await expect(page.getByRole('searchbox', { name: 'Search services' })).toHaveCount(0);
   await expect(page.getByRole('group', { name: 'Filter services' })).toHaveCount(0);
   await expect(
@@ -26,10 +26,10 @@ test('homepage leads with masjid activity and compact practical links', async ({
   ).toHaveCount(0);
   expect(
     await page
-      .locator('.jic-programmes')
+      .locator('.community-programme-feed')
       .evaluate(
         (node) =>
-          node.getBoundingClientRect().top <
+          node.getBoundingClientRect().top >
           document.querySelector('.service-explorer--compact').getBoundingClientRect().top,
       ),
   ).toBe(true);
@@ -43,10 +43,10 @@ test('the services page keeps the complete searchable directory in short rows', 
 }) => {
   await publicSite(page);
   await page.goto('/services');
-  await expect(page.getByRole('heading', { name: 'Services at JIC' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Community Hub' })).toBeVisible();
   await expect(page.locator('.jic-daily-reminder')).toHaveCount(0);
   await page.getByRole('searchbox', { name: 'Search services' }).fill('nikah');
-  await expect(page.locator('.service-explorer-card')).toHaveCount(1);
+  await expect(page.locator('.service-explorer-card')).toHaveCount(2);
   const result = page
     .locator('.service-explorer-grid')
     .getByRole('link', { name: 'Nikah', exact: true });

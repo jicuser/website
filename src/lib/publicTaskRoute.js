@@ -2,7 +2,7 @@
 export function isPublicTaskRoute(pathname) {
   const path = pathname.replace(/\/+$/, '') || '/';
   return (
-    ['/forms', '/ramadan', '/fundraise', '/get-involved'].some(
+    ['/forms', '/ramadan', '/fundraise', '/get-involved', '/services', '/funerals'].some(
       (root) => path === root || path.startsWith(`${root}/`),
     ) || ['/donate', '/contact', '/prayer-times/reminders', '/services/hall-booking'].includes(path)
   );

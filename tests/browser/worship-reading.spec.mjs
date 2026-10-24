@@ -59,9 +59,9 @@ test('readers expose real adhkar, Janazah recitations and the canonical prayer-t
 }) => {
   await publicSite(page);
   await page.goto('/worship');
-  await expect(page.locator('.worship-hub-grid > a')).toHaveCount(3);
-  await expect(page.locator('.worship-resource-illustration')).toHaveCount(3);
-  await page.locator('.worship-hub-grid a[href="/worship/daily-duas"]').click();
+  await expect(page.locator('.worship-compact-resources > a')).toHaveCount(6);
+  await expect(page.locator('.worship-compact-resources > a')).toHaveCount(6);
+  await page.locator('.worship-compact-resources a[href="/worship/daily-duas"]').click();
   await expect(page.getByRole('heading', { name: 'Morning adhkar', exact: true })).toBeVisible();
   await expect(page.locator('.worship-recitation-arabic')).toHaveCount(3);
   await page.getByRole('button', { name: 'Evening', exact: true }).click();
@@ -95,11 +95,11 @@ test('Arabic and reading choices fit narrow phones in both themes', async ({ pag
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/worship');
-    await expect(page.locator('.worship-resource-illustration')).toHaveCount(3);
+    await expect(page.locator('.worship-compact-resources > a')).toHaveCount(6);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
-    await page.locator('.worship-hub-grid a[href="/worship/daily-duas"]').click();
+    await page.locator('.worship-compact-resources a[href="/worship/daily-duas"]').click();
     await page.getByLabel('Arabic text size', { exact: true }).fill('48');
     await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
     for (const theme of ['light', 'dark']) {

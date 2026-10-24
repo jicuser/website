@@ -54,10 +54,10 @@ test('compact footer keeps records under the portal', () => {
 test('public sections retain their own identity on overview pages', () => {
   for (const [path, name] of [
     ['/', 'Home'],
-    ['/about', 'About'],
-    ['/prayer-times', 'Prayer Times'],
-    ['/worship', 'Adhkar, Qur’an & Janazah Guide'],
-    ['/services', 'Services'],
+    ['/about', 'About JIC'],
+    ['/prayer-times', 'Salah Times'],
+    ['/worship', 'Worship'],
+    ['/services', 'Community Hub'],
     ['/projects', 'Our Masjid Project'],
     ['/education', 'Education'],
     ['/youth', 'Youth'],
@@ -90,7 +90,7 @@ test('subsections select the specific page instead of their overview prefix', ()
 test('About child routes outside /about keep the About parent context', () => {
   for (const path of ['/team', '/contact', '/financial-history', '/social-media']) {
     const section = activeNavigation(path);
-    assert.equal(section.name, 'About', path);
+    assert.equal(section.name, 'About JIC', path);
     assert.equal(section.primaryPath, '/about', path);
     assert.equal(section.current.path, path, path);
   }
@@ -99,7 +99,7 @@ test('About child routes outside /about keep the About parent context', () => {
 test('funeral details retain Services and the Funeral Services subsection', () => {
   for (const path of ['/funerals', '/funerals/what-to-do', '/funerals/contact-support']) {
     const section = activeNavigation(path);
-    assert.equal(section.name, 'Services', path);
+    assert.equal(section.name, 'Community Hub', path);
     assert.equal(section.primaryPath, '/services', path);
     assert.equal(section.current.name, 'Funeral Services', path);
     assert.equal(section.current.path, '/funerals', path);
@@ -210,7 +210,7 @@ test('donating is separate from volunteering and fundraising navigation', () => 
 test('compact menu sections own merged sections without claiming cross-linked pages', () => {
   const groups = navigation.compactMenuNavigation(PUBLIC_MENU_GROUPS);
   const about = groups.find((group) => group.path === '/about');
-  const learning = groups.find((group) => group.path === '/education');
+  const learning = groups.find((group) => group.path === '/services');
   assert.ok(about.sectionPaths.includes('/projects'));
   assert.ok(learning.sectionPaths.includes('/youth'));
   assert.ok(learning.sectionPaths.includes('/madrassah'));

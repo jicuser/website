@@ -1,6 +1,7 @@
 import React from 'react';
 import { BookOpen, GraduationCap, UserPlus } from 'lucide-react';
 import PageHeading from '@/components/PageHeading';
+import GuidancePanel from '@/features/guidance/GuidancePanel';
 import PageChoices from '@/components/PageChoices';
 
 const choices = [
@@ -23,9 +24,12 @@ const choices = [
 export default function EducationPage() {
   return (
     <div className="page-transition">
-      <PageHeading title="Education">
+      <PageHeading title="Education & Madrassah">
         Find classes, course details and enrolment information.
       </PageHeading>
+      <div className="guidance-page-width">
+        <GuidancePanel journeyId="education" />
+      </div>
       <PageChoices items={choices} label="Education choices" />
     </div>
   );

@@ -1,0 +1,170 @@
+import { test, expect } from '@playwright/test';
+import { GUIDED_JOURNEYS } from '../../src/features/guidance/journeys.js';
+
+async function prepare(page, theme = 'light') {
+  await page.addInitScript((value) => {
+    sessionStorage.setItem('jic-salawat-shown', '1');
+    localStorage.setItem('jic-theme', value);
+  }, theme);
+  await page.route('**/*', (route) =>
+    ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname)
+      ? route.continue()
+      : route.abort(),
+  );
+  await page.route('**/preview-api/**', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: route.request().url().includes('/rpc/get_public_form') ? 'null' : '[]',
+    }),
+  );
+}
+
+test('Hub gives direct services, worship and a five-section menu', async ({ page }) => {
+  await prepare(page);
+  await page.goto('/services');
+  await expect(page.getByRole('heading', { name: 'Community Hub', exact: true })).toBeVisible();
+  const directory = page.locator('.service-explorer-grid');
+  for (const href of [
+    '/services/support',
+    '/services/marriage-family',
+    '/services/skills-careers',
+    '/education',
+    '/funerals',
+    '/worship/daily-duas',
+    '/worship/quran',
+  ]) {
+    await expect(directory.locator(`a[href="${href}"]`)).toBeVisible();
+  }
+  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  await expect(page.locator('#jic-site-menu .jic-unified-menu-row > a')).toHaveCount(5);
+});
+
+test('careers questions give a useful result, backtracking clears the branch, and restart resets', async ({
+  page,
+}) => {
+  await prepare(page);
+  await page.goto('/services/skills-careers');
+  const guide = page.locator('.guidance-panel');
+  await guide.getByRole('button', { name: 'My CV', exact: true }).click();
+  await expect(guide.getByRole('heading', { name: 'Where are you starting?' })).toBeFocused();
+  await guide.getByRole('button', { name: 'I need my first CV' }).click();
+  await expect(guide.getByRole('heading', { name: 'Build your first CV' })).toBeVisible();
+  await expect(guide.locator('form,input,textarea')).toHaveCount(0);
+  await guide.getByRole('button', { name: 'Back', exact: true }).click();
+  await guide.getByRole('button', { name: 'Back', exact: true }).click();
+  await guide.getByRole('button', { name: 'An interview', exact: true }).click();
+  await expect(guide.getByRole('heading', { name: 'Prepare for your interview' })).toBeVisible();
+  await expect(guide.getByText('Build your first CV', { exact: true })).toHaveCount(0);
+  await guide.getByRole('button', { name: 'Start again' }).click();
+  await expect(
+    guide.getByRole('heading', { name: 'What would you like to work on?' }),
+  ).toBeVisible();
+});
+
+test('support answers cause no writes, storage or URL changes and clear on leaving', async ({
+  page,
+}) => {
+  await prepare(page);
+  await page.goto('/services/support');
+  const guide = page.locator('.guidance-panel');
+  await expect(page.locator('.guidance-urgent a[href="tel:999"]')).toBeVisible();
+  const storage = () =>
+    page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }));
+  const before = await storage();
+  const requests = [];
+  page.on('request', (request) =>
+    requests.push({ url: request.url(), method: request.method(), data: request.postData() }),
+  );
+  await guide.getByRole('button', { name: 'Grief or bereavement' }).click();
+  await guide.getByRole('button', { name: 'Support with bereavement' }).click();
+  await expect(guide.getByRole('heading', { name: 'Support through bereavement' })).toBeVisible();
+  expect(await storage()).toEqual(before);
+  await expect(page).toHaveURL('/services/support');
+  expect(requests.filter((request) => request.method !== 'GET')).toEqual([]);
+  await page.locator('.guidance-back-link').click();
+  await page.locator('.service-explorer-grid a[href="/services/support"]').click();
+  await expect(guide.getByRole('heading', { name: 'What would help today?' })).toBeVisible();
+});
+
+test('every careers, support and family branch reaches its result without a form', async ({
+  page,
+}) => {
+  await prepare(page);
+  for (const [id, path] of [
+    ['careers', '/services/skills-careers'],
+    ['support', '/services/support'],
+    ['family', '/services/marriage-family'],
+  ]) {
+    const journey = GUIDED_JOURNEYS[id];
+    const paths = [];
+    function walk(nodeId, choices) {
+      const node = journey.nodes[nodeId];
+      if (!node.choices) paths.push({ choices, title: node.title });
+      else node.choices.forEach((choice) => walk(choice.next, [...choices, choice.label]));
+    }
+    walk('start', []);
+    await page.goto(path);
+    const guide = page.locator('.guidance-panel');
+    for (const route of paths) {
+      for (const name of route.choices)
+        await guide.getByRole('button', { name, exact: true }).click();
+      await expect(guide.getByRole('heading', { name: route.title, exact: true })).toBeVisible();
+      await expect(guide.locator('form,input,textarea')).toHaveCount(0);
+      await guide.getByRole('button', { name: 'Start again' }).click();
+    }
+  }
+});
+
+test('Nikah and funeral contacts are direct and enquiry forms are opened deliberately', async ({
+  page,
+}) => {
+  await prepare(page);
+  for (const path of ['/services/nikah', '/funerals', '/get-involved/volunteer']) {
+    await page.goto(path);
+    await expect(page.locator('.service-guided-heading a[href^="tel:"]')).toBeVisible();
+    await expect(page.locator('.service-enquiry')).toHaveCount(0);
+    await page
+      .getByRole('navigation', { name: 'On this page' })
+      .getByRole('link', { name: 'What to prepare' })
+      .click();
+    await expect(
+      page.getByRole('heading', { name: 'Helpful details to have ready' }),
+    ).toBeVisible();
+    await expect(page.locator('.service-enquiry')).toHaveCount(0);
+    await page
+      .getByRole('navigation', { name: 'On this page' })
+      .getByRole('link', { name: 'Make an enquiry' })
+      .click();
+    await expect(page.locator('.service-enquiry')).toBeVisible();
+  }
+});
+
+for (const theme of ['light', 'dark']) {
+  test(`compact public pages fit phones and desktop in ${theme}`, async ({ page }, testInfo) => {
+    test.setTimeout(90000);
+    await prepare(page, theme);
+    for (const width of [320, 390, 430, 768, 1280]) {
+      await page.setViewportSize({ width, height: 844 });
+      for (const path of [
+        '/',
+        '/services',
+        '/services/support',
+        '/services/skills-careers',
+        '/worship',
+        '/events',
+      ]) {
+        await page.goto(path);
+        await expect(page.locator('#main-content h1').first()).toBeVisible();
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+          `${path} at ${width}`,
+        ).toBe(true);
+        if (width === 390 && ['/', '/services', '/services/skills-careers'].includes(path))
+          await page.screenshot({
+            path: testInfo.outputPath(`${path.replaceAll('/', '-') || 'home'}-${theme}.png`),
+            fullPage: true,
+          });
+      }
+    }
+  });
+}

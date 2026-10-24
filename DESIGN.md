@@ -22,7 +22,7 @@ These are JIC implementation choices. The reference branding extraction reported
 
 - `HomePage` retains published prayer, event, poster and livestream behaviour.
 - `features/services` owns the CMS-aware searchable service catalogue and reusable directory.
-- The homepage shows current activities and three compact support links; full search and the complete catalogue belong on Services. Learning, account and help destinations remain available through their own pages and navigation.
+- The homepage uses four compact help/reading shortcuts and a three-row events/programmes feed. The Community Hub shows major services directly, followed by worship and account resources; it owns full service search. Shared poster identities merge event/poster entries without dropping recurring event dates.
 - `portal.css` owns member sign-in/workspace geometry.
 - `features/admin` owns permission-aware task discovery and staff overview states.
 - `theme.css` owns semantic colours; individual component styles own geometry.
@@ -43,3 +43,15 @@ Sections use centred reading widths; cards collapse into a single column on smal
 ## Assets
 
 The mosque photograph is JIC's existing `/optimized/jic-aerial-sunset.webp`. Existing programme posters retain their original files for viewing/download.
+
+## Compact navigation and guided help
+
+The public menu has five roots: Home, Salah Times, Worship, Community Hub and About JIC. Education, Madrassah, Youth, Ramadan and Get involved remain independent working routes under the Hub. Existing section definitions remain available to editors and page tabs; menu labels/order and page visibility still use existing CMS settings.
+
+`features/guidance` owns static, branch-validated public guidance and its renderer. Each route leads to a checklist or an existing destination before any optional submission. Choices stay in component memory, reset on route departure/pagehide and never enter storage, analytics, query parameters or a staff inbox. The urgent/specialist links are always visible on support and family pages. This is signposting, not diagnosis or an automated eligibility decision. The release does not add confidential case handling, CV-review appointments or live vacancies.
+
+Nikah, funeral and volunteer pages show one selected content section at a time. Stable anchors select preparation, questions and enquiry views. The original managed form schema and submission flow load only when the enquiry is selected; legacy community enquiries remain at `/services/community#enquire` and `/forms/community-enquiry`.
+
+Support, family and careers headings use the existing page editor, once per page. Journey branches live in reviewed source data; they are not executable CMS content. New pages can be hidden with the existing visibility controls, and hidden destinations are filtered from the Hub, search and guide result links.
+
+External resources use clearly labelled NHS, GOV.UK and National Careers Service destinations. Core source pages were checked on 24 October 2026. They are external resources, not services promised by JIC. No database migration is needed for this public navigation and guidance release.

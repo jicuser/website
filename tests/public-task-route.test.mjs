@@ -5,6 +5,9 @@ import { isPublicTaskRoute } from '../src/lib/publicTaskRoute.js';
 test('public task policy accepts trailing slashes without matching similarly named content routes', () => {
   for (const path of [
     '/services/hall-booking',
+    '/services',
+    '/services/support',
+    '/funerals',
     '/forms/contact-us',
     '/prayer-times/reminders',
     '/contact',
@@ -15,7 +18,6 @@ test('public task policy accepts trailing slashes without matching similarly nam
   }
   for (const path of [
     '/',
-    '/services',
     '/prayer-times',
     '/education/courses',
     '/contact-details',

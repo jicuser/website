@@ -816,3 +816,203 @@
     transform: none;
   }
 }
+
+/* Hub: grouped services first, then compact direct resources. */
+.service-explorer--full .service-explorer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.service-explorer--full .service-explorer-card {
+  display: flex;
+  min-height: 90px;
+  padding: 14px;
+  border-radius: 14px;
+  gap: 12px;
+}
+.service-explorer--full .service-explorer-card h3 {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+.service-explorer--full .service-explorer-card-description {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+.service-explorer--full .service-explorer-card-copy {
+  flex: 1;
+}
+.service-explorer--full .service-explorer-card-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+}
+.service-explorer--full .service-explorer-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.service-explorer--full .service-explorer-card--resource {
+  min-height: 60px;
+}
+.service-explorer--full .service-explorer-card--resource .service-explorer-card-description {
+  display: none;
+}
+.hub-contact-row {
+  width: min(100% - 32px, 1120px);
+  margin: 0 auto 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  border-top: 1px solid var(--jic-border);
+  padding-top: 12px;
+}
+.hub-contact-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 600;
+}
+.worship-compact-resources {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.worship-compact-resources a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  min-height: 76px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.worship-compact-resources strong,
+.worship-compact-resources small {
+  display: block;
+}
+.worship-compact-resources strong {
+  font-weight: 650;
+}
+.worship-compact-resources small {
+  color: var(--jic-text-secondary);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+.worship-compact-resources svg {
+  flex-shrink: 0;
+}
+@media (max-width: 900px) {
+  .service-explorer--full .service-explorer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .service-explorer--full .service-explorer-card {
+    gap: 8px;
+    padding: 12px;
+    flex-wrap: wrap;
+    align-content: start;
+  }
+  .service-explorer--full .service-explorer-card-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .service-explorer--full .service-explorer-card-copy {
+    flex-basis: 100%;
+    order: 2;
+  }
+  .service-explorer--full .service-explorer-card-arrow {
+    margin-left: auto;
+  }
+  .service-explorer--full .service-explorer-card--resource {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .service-explorer--full .service-explorer-card--resource .service-explorer-card-copy {
+    order: 0;
+  }
+  .service-explorer--full .service-explorer-card--resource .service-explorer-card-arrow {
+    display: none;
+  }
+  .worship-compact-resources {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 359px) {
+  .service-explorer--full .service-explorer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.service-page--guided {
+  max-width: 960px;
+  padding-block: 24px;
+}
+.service-page--guided h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+.service-guided-heading .managed-page-content p {
+  max-width: 68ch;
+  margin-top: 10px;
+}
+.service-page--guided .service-section {
+  margin-block: 24px;
+}
+.service-page--guided .service-jump-links {
+  margin-block: 20px;
+  gap: 4px 12px;
+}
+.service-page--guided .service-jump-links a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.service-page--guided .service-jump-links a[aria-current] {
+  box-shadow: inset 0 -2px var(--jic-gold-strong);
+  background: var(--jic-surface);
+  font-weight: 700;
+}
+.service-page--guided .service-related a {
+  padding: 14px;
+}
+.service-page--guided .service-enquiry {
+  margin-top: 24px;
+}
+.service-explorer--compact .service-explorer-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.service-explorer--compact .service-explorer-card {
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 72px;
+  padding: 12px;
+}
+.service-explorer--compact .service-explorer-card-icon {
+  width: 24px;
+  height: 28px;
+}
+.service-explorer--compact .service-explorer-card-description,
+.service-explorer--compact .service-explorer-card-arrow {
+  display: none;
+}
+.service-explorer--compact .service-explorer-card h3 {
+  font-size: 0.94rem;
+}
+@media (max-width: 900px) {
+  .service-explorer--compact .service-explorer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 359px) {
+  .service-explorer--compact .service-explorer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.hub-programmes {
+  width: min(var(--jic-content-width), calc(100% - 32px));
+  margin: 24px auto;
+}

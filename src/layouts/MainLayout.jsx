@@ -49,7 +49,9 @@ function PublicLayout() {
     isHome ||
     pathname.startsWith('/worship') ||
     (pathname.startsWith('/prayer-times') && pathname !== '/prayer-times/reminders');
-  const isDiscovery = ['/search', '/social-media', '/education/programmes'].includes(pathname);
+  const isDiscovery = ['/search', '/social-media', '/education/programmes', '/events'].includes(
+    pathname,
+  );
   const isTask = isPublicTaskRoute(pathname);
 
   return (

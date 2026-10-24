@@ -42,10 +42,10 @@ export const WORSHIP_TABS = [
   { name: 'Prayer Guide', path: '/worship/prayer-guide' },
   { name: 'Janazah Guide', path: '/worship/janazah-guide' },
 ];
-export const NAV_GROUPS = [
+const SECTION_GROUPS = [
   { name: 'Home', path: '/', children: [] },
   {
-    name: 'About',
+    name: 'About JIC',
     path: '/about',
     children: [
       { name: 'About JIC', path: '/about' },
@@ -57,7 +57,7 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    name: 'Prayer Times',
+    name: 'Salah Times',
     path: '/prayer-times',
     children: [
       { name: 'Today', path: '/prayer-times' },
@@ -66,7 +66,7 @@ export const NAV_GROUPS = [
       { name: 'Salah Alerts', path: '/prayer-times/reminders' },
     ],
   },
-  { name: 'Adhkar, Qur’an & Janazah Guide', path: '/worship', children: WORSHIP_TABS },
+  { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
   {
     name: 'Ramadan',
     path: '/ramadan',
@@ -78,10 +78,14 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    name: 'Services',
+    name: 'Community Hub',
     path: '/services',
     children: [
-      { name: 'All services', path: '/services' },
+      { name: 'Browse the Hub', path: '/services' },
+      { name: 'Events & programmes', path: '/events' },
+      { name: 'Support & Wellbeing', path: '/services/support' },
+      { name: 'Marriage & Family', path: '/services/marriage-family' },
+      { name: 'Skills & Careers', path: '/services/skills-careers' },
       { name: 'Religious Services', path: '/services/religious' },
       { name: 'Educational Programmes', path: '/services/education' },
       { name: 'Community Services', path: '/services/community' },
@@ -112,6 +116,13 @@ export const NAV_GROUPS = [
     ],
   },
 ];
+// Preserve section definitions for existing tabs and editors; order the public roots first.
+const primaryOrder = ['/', '/prayer-times', '/worship', '/services', '/about'];
+export const NAV_GROUPS = [...SECTION_GROUPS].sort(
+  (a, b) =>
+    (primaryOrder.includes(a.path) ? primaryOrder.indexOf(a.path) : 99) -
+    (primaryOrder.includes(b.path) ? primaryOrder.indexOf(b.path) : 99),
+);
 export const NAV_ITEMS = [
   ...NAV_GROUPS.map(({ name, path }) => ({ name, path })),
   { name: 'Financial History', path: '/financial-history' },

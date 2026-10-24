@@ -14,13 +14,12 @@ import {
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
 import useCommunityLink from '@/hooks/useCommunityLink';
-import ProgrammePosters from '@/components/ProgrammePosters';
+import CommunityProgrammeList from '@/features/home/CommunityProgrammeList';
 import HomePrayerCard from '@/components/home/HomePrayerCard';
 import { SITE } from '@/content/site';
 import { useContent } from '@/context/ContentContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
-import { displayTime } from '@/lib/timetable';
 import { isPageVisible } from '@/lib/pageVisibility';
 import { cn } from '@/lib/utils';
 
@@ -31,8 +30,8 @@ const ServiceExplorer = lazy(() => import('@/features/services/ServiceExplorer')
 const DEFAULT_CARDS = [
   {
     key: 'services',
-    title: 'Services',
-    text: 'Religious, educational and community services for all.',
+    title: 'Community Hub',
+    text: 'Find services and useful guidance in one place.',
     to: '/services',
     cta: 'Explore Services',
     icon: MosqueIcon,
@@ -229,46 +228,6 @@ export default function HomePage() {
           </Suspense>
         )}
 
-        <ProgrammePosters />
-
-        {events.length > 0 && (
-          <section className="jic-upcoming-events" aria-labelledby="upcoming-events-title">
-            <h2 id="upcoming-events-title">Upcoming events</h2>
-            {events.length > 3 && (
-              <Link className="jic-text-link" to="/events">
-                All events <ArrowRight size={16} />
-              </Link>
-            )}
-            <div className="jic-event-cards">
-              {events.slice(0, 3).map((event) => (
-                <article key={event.id} className="jic-event-card">
-                  {safeWebUrl(event.poster_url) && (
-                    <img src={event.poster_url} alt={`${event.title} poster`} loading="lazy" />
-                  )}
-                  <h3>{event.title}</h3>
-                  <p>
-                    <time dateTime={event.event_date}>
-                      {new Date(`${event.event_date}T12:00:00`).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </time>
-                    {event.start_time ? ` · ${displayTime(event.start_time)}` : ''}
-                  </p>
-                  {event.location && <p>{event.location}</p>}
-                  {event.description && <p>{event.description}</p>}
-                  {safeWebUrl(event.registration_url) && (
-                    <a href={safeWebUrl(event.registration_url)} target="_blank" rel="noreferrer">
-                      Event details & registration
-                    </a>
-                  )}
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
         <Suspense
           fallback={
             <p className="jic-home-section" role="status">
@@ -278,6 +237,8 @@ export default function HomePage() {
         >
           <ServiceExplorer compact />
         </Suspense>
+
+        <CommunityProgrammeList events={events} />
 
         {communityCards.length > 0 && (
           <section className="jic-home-section" aria-labelledby="home-community-title">

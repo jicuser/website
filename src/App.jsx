@@ -27,6 +27,7 @@ const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const PublicFormPage = lazy(() => import('@/pages/PublicFormPage'));
 const ContentPage = lazy(() => import('@/pages/ContentPage'));
 const AdultCoursesPage = lazy(() => import('@/pages/AdultCoursesPage'));
+const EventsPage = lazy(() => import('@/pages/EventsPage'));
 const EducationPage = lazy(() => import('@/pages/EducationPage'));
 const ProgrammesPage = lazy(() => import('@/pages/ProgrammesPage'));
 const EducationEnrolmentPage = lazy(() => import('@/pages/EducationEnrolmentPage'));
@@ -59,6 +60,7 @@ const ProjectsPage = lazy(() => import('@/pages/ProjectsPage'));
 const SectionPage = lazy(() => import('@/pages/SectionPage'));
 const GuidedServicePage = lazy(() => import('@/pages/GuidedServicePage'));
 const CertificatesGuidePage = lazy(() => import('@/pages/CertificatesGuidePage'));
+const CommunityGuidancePage = lazy(() => import('@/pages/CommunityGuidancePage'));
 const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
 const WorshipPage = lazy(() => import('@/pages/WorshipPage'));
 const RadioPlayerPage = lazy(() => import('@/pages/RadioPlayerPage'));
@@ -144,6 +146,7 @@ function AppRoutes() {
             <Route path="talks" element={<SermonArchive />} />
             <Route path="privacy" element={<PrivacyPage />} />
             <Route path="search" element={<SearchPage />} />
+            <Route path="events" element={<EventsPage />} />
 
             <Route
               path="prayer-times"
@@ -168,6 +171,15 @@ function AppRoutes() {
             <Route path="worship/daily-salah" element={<WorshipPage />} />
 
             <Route path="services" element={<ServicesPage />} />
+            <Route path="services/support" element={<CommunityGuidancePage kind="support" />} />
+            <Route
+              path="services/marriage-family"
+              element={<CommunityGuidancePage kind="family" />}
+            />
+            <Route
+              path="services/skills-careers"
+              element={<CommunityGuidancePage kind="careers" />}
+            />
             <Route path="services/certificates" element={<CertificatesGuidePage />} />
             <Route path="services/religious" element={<ServicesPage />} />
             <Route path="services/education" element={<ServicesPage />} />

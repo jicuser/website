@@ -72,14 +72,17 @@ for (const [theme, width] of [
     const directory = page.locator('.service-explorer--full');
     await expect(directory.locator('a[href="/madrassah"]')).toHaveCount(0);
     await directory.getByRole('searchbox').fill('nikah');
-    await expect(directory.locator('.service-explorer-card')).toHaveCount(1);
-    await expect(directory.locator('.service-explorer-card')).toContainText('Nikah');
+    await expect(directory.locator('.service-explorer-card')).toHaveCount(2);
+    await expect(directory.locator('a[href="/services/nikah"]')).toContainText('Nikah');
     await directory.getByRole('button', { name: 'Clear service search', exact: true }).click();
     await directory.getByRole('button', { name: /^Learning/ }).click();
-    await expect(directory.locator('.service-explorer-card')).toHaveCount(1);
-    await expect(directory.locator('.service-explorer-card')).toContainText('Adult learning');
+    await expect(directory.locator('.service-explorer-card')).toHaveCount(2);
+    await expect(directory.locator('a[href="/education"]')).toContainText('Education & Madrassah');
     await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
-    await expect(directory.locator('.service-explorer-card')).toHaveCSS('backdrop-filter', 'none');
+    await expect(directory.locator('.service-explorer-card').first()).toHaveCSS(
+      'backdrop-filter',
+      'none',
+    );
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
       true,
     );

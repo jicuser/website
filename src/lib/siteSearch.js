@@ -1,4 +1,5 @@
 import { PUBLIC_PAGES } from '../content/pageDirectory.js';
+import { SERVICE_CATALOG } from '../features/services/catalog.js';
 import { SOCIAL_CHANNELS } from '../content/socials.js';
 
 const aliases = {
@@ -37,6 +38,17 @@ for (const channel of SOCIAL_CHANNELS)
     section: 'Social Media',
     description: channel.description,
   });
+for (const service of SERVICE_CATALOG) {
+  const existing = pages.get(service.to);
+  pages.set(service.to, {
+    ...existing,
+    title: existing?.title || service.title,
+    path: service.to,
+    section: existing?.section || 'Community Hub',
+    description: service.description,
+    keywords: service.keywords.join(' '),
+  });
+}
 export const SEARCH_PAGES = [...pages.values()];
 
 const normalise = (value) =>
@@ -54,7 +66,9 @@ export function searchPages(query, entries = SEARCH_PAGES) {
     .map((entry) => {
       const title = normalise(entry.title);
       const haystack = normalise(
-        [entry.title, entry.section, entry.description, aliases[entry.path]].join(' '),
+        [entry.title, entry.section, entry.description, entry.keywords, aliases[entry.path]].join(
+          ' ',
+        ),
       );
       return {
         ...entry,

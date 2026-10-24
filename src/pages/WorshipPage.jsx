@@ -3,7 +3,10 @@ import { ArrowRight, Loader2 } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import GuideResource from '@/components/GuideResource';
 import PageHeading from '@/components/PageHeading';
-import ReadingIllustration from '@/components/worship/ReadingIllustration';
+import '@/styles/services.css';
+import GuidancePanel from '@/features/guidance/GuidancePanel';
+import { useContent } from '@/context/ContentContext';
+import { getVisibleServices } from '@/features/services/catalog';
 
 // Reading text and the surah directory load only when their reader is opened.
 const AdhkarReader = lazy(() => import('@/components/worship/AdhkarReader'));
@@ -24,56 +27,36 @@ const salahSteps = [
 
 export default function WorshipPage() {
   const { pathname } = useLocation();
+  const { getContent } = useContent();
+  const resources = getVisibleServices(getContent).filter(
+    (service) => service.category === 'prayer',
+  );
   if (pathname === '/worship/daily-salah') return <Navigate to="/prayer-times" replace />;
 
   return (
     <div className="worship-page">
       {pathname === '/worship' && (
         <>
-          <PageHeading title="Adhkar, Qur’an & Janazah Guide">
-            Choose a reading or open the funeral prayer guide.
+          <PageHeading title="Worship">
+            Adhkar, Qur’an and prayer guides, ready when you need them.
           </PageHeading>
-          <div className="worship-hub-grid">
-            <Link to="/worship/daily-duas">
-              <ReadingIllustration resource="adhkar" />
-              <div>
-                <span className="worship-resource-label">Morning · Evening · After Salah</span>
-                <h2>Adhkar</h2>
-                <p>Read Arabic, follow the transliteration and understand the meaning.</p>
-                <span className="worship-resource-action">
-                  Start reading <ArrowRight size={16} aria-hidden="true" />
-                </span>
-              </div>
-            </Link>
-            <Link to="/worship/quran">
-              <ReadingIllustration resource="quran" />
-              <div>
-                <span className="worship-resource-label">Arabic & English translation</span>
-                <h2>Read Qur’an</h2>
-                <p>Find a surah and save your place to continue another time.</p>
-                <span className="worship-resource-action">
-                  Choose a surah <ArrowRight size={16} aria-hidden="true" />
-                </span>
-              </div>
-            </Link>
-            <Link to="/worship/janazah-guide">
-              <ReadingIllustration resource="janazah" />
-              <div>
-                <span className="worship-resource-label">The four takbirs</span>
-                <h2>Janazah Guide</h2>
-                <p>Follow the recitations, with the full guide in English or Urdu.</p>
-                <span className="worship-resource-action">
-                  Read the guide <ArrowRight size={16} aria-hidden="true" />
-                </span>
-              </div>
+          <div className="guidance-page-width">
+            <nav className="worship-compact-resources" aria-label="Worship resources">
+              {resources.map((resource) => (
+                <Link key={resource.id} to={resource.to}>
+                  <span>
+                    <strong>{resource.title}</strong>
+                    <small>{resource.description}</small>
+                  </span>
+                  <ArrowRight size={18} aria-hidden="true" />
+                </Link>
+              ))}
+            </nav>
+            <GuidancePanel journeyId="worship" />
+            <Link className="guidance-back-link" to="/prayer-times/reminders">
+              Salah reminders <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
-          <nav className="worship-secondary-links" aria-label="More worship resources">
-            <Link to="/worship/prayer-guide">Salah guide</Link>
-            <Link to="/prayer-times">Prayer times</Link>
-            <Link to="/prayer-times/reminders">Salah reminders</Link>
-            <Link to="/worship/dalail-al-khayrat">Dala’il al-Khayrat</Link>
-          </nav>
         </>
       )}
       <Suspense

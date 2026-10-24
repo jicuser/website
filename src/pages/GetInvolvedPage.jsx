@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, HeartHandshake, Users, Flag } from 'lucide-react';
+import GuidancePanel from '@/features/guidance/GuidancePanel';
 import PageHeading from '@/components/PageHeading';
 import ServiceJourney from '@/components/services/ServiceJourney';
 import { SERVICE_JOURNEYS } from '@/content/serviceJourneys';
@@ -33,6 +34,7 @@ export default function GetInvolvedPage() {
       <PageHeading title="Get involved">
         Give your time, bring people together or fundraise for JIC.
       </PageHeading>
+      <GuidancePanel journeyId="volunteer" />
       <nav className="ops-involvement-list" aria-label="Ways to get involved">
         {ways.map(({ to, title, text, icon: Icon }) => (
           <Link to={to} key={to} className="ops-involvement-link">
@@ -54,6 +56,7 @@ export default function GetInvolvedPage() {
 
 const volunteerJourney = {
   ...SERVICE_JOURNEYS.community,
+  guideId: 'volunteer',
   formSlug: 'contact-us',
   title: 'Volunteer with JIC',
   intro:

@@ -152,13 +152,10 @@ for (const theme of ['light', 'dark']) {
     const menu = page.getByRole('dialog', { name: 'Navigation menu' });
     await expect(menu.locator('.jic-unified-menu-row > a')).toHaveText([
       'Home',
-      'About',
-      'Prayer Times',
-      'Adhkar, Qur’an & Janazah Guide',
-      'Ramadan',
-      'Services',
-      'Learning',
-      'Get involved',
+      'Salah Times',
+      'Worship',
+      'Community Hub',
+      'About JIC',
     ]);
     await expect(menu.locator('.jic-menu-account')).toBeVisible();
     const actions = menu.getByRole('navigation', { name: 'Quick actions' });
@@ -178,16 +175,16 @@ for (const theme of ['light', 'dark']) {
     await expect(menu).toHaveCSS('backdrop-filter', /blur/);
     const tint = await menu.evaluate((node) => getComputedStyle(node).backgroundColor);
     expect(tint).toMatch(/rgba\(|\/ 0\./);
-    await menu.getByRole('button', { name: 'Expand Services subpages' }).click();
+    await menu.getByRole('button', { name: 'Expand Community Hub subpages' }).click();
     await expect(menu.getByRole('link', { name: 'Certificates', exact: true })).toHaveCount(0);
-    await menu.getByRole('button', { name: 'Collapse Services subpages' }).click();
+    await menu.getByRole('button', { name: 'Collapse Community Hub subpages' }).click();
     const donate = menu.getByRole('button', { name: 'Donate', exact: true });
     await expect(donate).toBeInViewport();
     await page.screenshot({ path: testInfo.outputPath(`compact-menu-${theme}.png`) });
-    await menu.getByRole('button', { name: 'Expand Learning subpages' }).click();
+    await menu.getByRole('button', { name: 'Expand Community Hub subpages' }).click();
     await expect(menu.getByRole('link', { name: 'Madrassah', exact: true })).toBeVisible();
     await expect(menu.getByRole('link', { name: 'Youth', exact: true })).toBeVisible();
-    await menu.getByRole('button', { name: 'Expand About subpages' }).click();
+    await menu.getByRole('button', { name: 'Expand About JIC subpages' }).click();
     await expect(menu.getByRole('link', { name: 'Youth', exact: true })).toBeHidden();
     await expect(menu.getByRole('link', { name: 'Social Media', exact: true })).toBeVisible();
     await menu.getByRole('link', { name: 'Our Masjid Project', exact: true }).click();

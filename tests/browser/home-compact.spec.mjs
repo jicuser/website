@@ -129,7 +129,7 @@ for (const width of [320, 390, 1280]) {
     page,
   }) => {
     await openHome(page, width);
-    const cards = page.locator('.jic-programme-card');
+    const cards = page.locator('.programme-feed-row');
     await expect(cards.first()).toBeVisible();
     await cards.first().scrollIntoViewIfNeeded();
     await expect
@@ -142,8 +142,8 @@ for (const width of [320, 390, 1280]) {
       .toBeGreaterThan(0);
     const layout = await cards.evaluateAll((nodes) =>
       nodes.map((node) => {
-        const poster = node.querySelector('.jic-poster-button');
-        const copy = node.querySelector('.jic-programme-copy');
+        const poster = node.querySelector('.programme-feed-thumb');
+        const copy = node.querySelector(':scope > div');
         return {
           height: node.getBoundingClientRect().height,
           sideBySide: poster.getBoundingClientRect().right <= copy.getBoundingClientRect().left + 1,
@@ -211,7 +211,7 @@ test('a compact announcement opens its complete text at a readable size', async 
     }),
   );
   await page.goto('/');
-  const button = page.getByRole('button', { name: 'Read Community meeting announcement' });
+  const button = page.getByRole('button', { name: 'View Community meeting notice' });
   await expect(button).toBeVisible();
   await button.click();
   const viewer = page.getByRole('dialog', { name: 'Community meeting' });

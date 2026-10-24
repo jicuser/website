@@ -4,10 +4,10 @@ import { PUBLIC_PAGES, pageName } from '../src/content/pageDirectory.js';
 import { NAV_GROUPS, MADRASSAH_TABS, MASJID_EXTENSION_TABS } from '../src/content/nav.js';
 import {
   EDITABLE_PAGES,
+  mainContentPaths,
   supplementalContentPaths,
   pageDefaults,
 } from '../src/content/editablePages.js';
-import { standaloneSections } from '../src/content/sectionRoutes.js';
 import { SEARCH_PAGES } from '../src/lib/siteSearch.js';
 import { ADMIN_SECTIONS, ADMIN_GROUPS } from '../src/content/adminNavigation.js';
 import { PAGE_PLACEMENTS } from '../src/lib/pageContent.js';
@@ -39,7 +39,7 @@ test('every nested Madrassah and extension destination is available to editors',
 });
 
 test('each editable page has one content location and additional content starts empty', () => {
-  const main = new Set(standaloneSections.map(([path]) => `/${path}`));
+  const main = mainContentPaths;
   for (const page of EDITABLE_PAGES) {
     const owners =
       Number(page.path === '/') +

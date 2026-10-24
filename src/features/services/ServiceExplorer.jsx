@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ChevronRight,
   BookOpen,
+  Briefcase,
   CalendarDays,
   Gift,
   GraduationCap,
@@ -19,11 +20,14 @@ import MosqueSymbol from '@/components/icons/MosqueSymbol';
 import { useContent } from '@/context/ContentContext';
 import { isPageVisible } from '@/lib/pageVisibility';
 import { filterServices, getVisibleServices, SERVICE_CATEGORIES } from './catalog';
+import GuidancePanel from '@/features/guidance/GuidancePanel';
+import { HUB_PRIMARY_IDS } from './catalog';
 import '@/styles/services.css';
 
 const icons = {
   mosque: MosqueSymbol,
   book: BookOpen,
+  briefcase: Briefcase,
   graduation: GraduationCap,
   heart: Heart,
   support: HeartHandshake,
@@ -49,8 +53,12 @@ export default function ServiceExplorer({ compact = false }) {
   const results = filterServices({ category: activeCategory, query, getContent });
   const hasFilters = activeCategory !== 'all' || query.trim().length > 0;
   const displayedServices = compact
-    ? visibleServices.filter(({ id }) => ['hall', 'certificates', 'community'].includes(id))
-    : results;
+    ? visibleServices.filter(({ id }) => ['support', 'careers', 'adhkar', 'quran'].includes(id))
+    : [...results].sort(
+        (a, b) =>
+          (HUB_PRIMARY_IDS.includes(a.id) ? HUB_PRIMARY_IDS.indexOf(a.id) : 99) -
+          (HUB_PRIMARY_IDS.includes(b.id) ? HUB_PRIMARY_IDS.indexOf(b.id) : 99),
+      );
   const directoryVisible = isPageVisible(getContent, '/services');
   const contactVisible = isPageVisible(getContent, '/contact');
   const Heading = compact ? 'h2' : 'h1';
@@ -80,23 +88,24 @@ export default function ServiceExplorer({ compact = false }) {
       <header className="service-explorer-header">
         <div className="service-explorer-intro">
           <Heading id={headingId} className="service-explorer-title">
-            {compact ? 'Services & support' : 'Services at JIC'}
+            {compact ? 'Find what you need' : 'Community Hub'}
           </Heading>
           {!compact && (
             <p className="service-explorer-description">
-              Find prayer times, classes and practical support from the centre.
+              Browse a service or let us guide you to a useful next step.
             </p>
           )}
         </div>
         {compact && directoryVisible && (
           <Link className="service-explorer-all-link" to="/services">
-            All services <ArrowRight size={16} aria-hidden="true" />
+            Explore the Hub <ArrowRight size={16} aria-hidden="true" />
           </Link>
         )}
       </header>
 
       {!compact && (
         <>
+          <GuidancePanel journeyId="hub" />
           <div className="service-explorer-controls" id={compact ? undefined : 'choose-service'}>
             <div className="service-explorer-search-row">
               <div className="service-explorer-search">
@@ -162,7 +171,7 @@ export default function ServiceExplorer({ compact = false }) {
                 <Link
                   key={service.id}
                   to={service.to}
-                  className={`service-explorer-card ${service.id === 'prayer' ? 'service-explorer-card--prayer' : ''}`}
+                  className={`service-explorer-card ${!HUB_PRIMARY_IDS.includes(service.id) ? 'service-explorer-card--resource' : ''}`}
                   aria-labelledby={titleId}
                 >
                   <span className="service-explorer-card-icon" aria-hidden="true">

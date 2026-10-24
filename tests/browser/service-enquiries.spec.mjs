@@ -4,9 +4,8 @@ import { CONTACT_FORM, CONTACT_RECEIPT } from './helpers/builtInForms.mjs';
 const services = [
   ['/funerals', 'Janazah & funeral support', 'funeral-enquiry'],
   ['/services/nikah', 'Nikah at JIC', 'nikah-enquiry'],
-  ['/services/community', 'Community support at JIC', 'community-enquiry'],
-  ['/services#community', 'Community support at JIC', 'community-enquiry'],
-  ['/services/community/', 'Community support at JIC', 'community-enquiry'],
+  ['/services/community#enquire', 'Community support at JIC', 'community-enquiry'],
+  ['/services/community/#enquire', 'Community support at JIC', 'community-enquiry'],
   ['/services/nikah/', 'Nikah at JIC', 'nikah-enquiry'],
   ['/funerals/', 'Janazah & funeral support', 'funeral-enquiry'],
 ];
@@ -69,7 +68,15 @@ for (const [path, title, slug] of services) {
       await page.goto(destination);
       if (destination === path) {
         await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
-        await expect(page.getByRole('list', { name: 'How it works' }).locator('li')).toHaveCount(3);
+        if (!destination.endsWith('#enquire')) {
+          await expect(page.getByRole('list', { name: 'How it works' }).locator('li')).toHaveCount(
+            3,
+          );
+          await page
+            .getByRole('navigation', { name: 'On this page' })
+            .getByRole('link', { name: 'Make an enquiry' })
+            .click();
+        }
         if (slug === 'funeral-enquiry')
           await expect(
             page.getByText('This inbox is not an emergency service.', { exact: false }),
@@ -112,6 +119,11 @@ for (const [path, title, slug] of services) {
     const state = await serviceFixture(page, { closed: true });
     for (const destination of [path, `/forms/${slug}`]) {
       await page.goto(destination);
+      if (destination === path && !destination.endsWith('#enquire'))
+        await page
+          .getByRole('navigation', { name: 'On this page' })
+          .getByRole('link', { name: 'Make an enquiry' })
+          .click();
       await expect(page.getByRole('heading', { name: /is currently closed/ })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Send enquiry', exact: true })).toHaveCount(0);
       await expect(

@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { BookOpen, Heart, Trophy } from 'lucide-react';
+import GuidancePanel from '@/features/guidance/GuidancePanel';
 import PageHeading from '@/components/PageHeading';
 import ItikaafRegistrationForm from '@/components/sections/youth/ItikaafRegistrationForm';
 
@@ -88,6 +89,11 @@ export default function YouthPage({ view = 'overview' }) {
     <>
       <Helmet>
         <title>
+          {view === 'overview' && (
+            <div className="guidance-page-width">
+              <GuidancePanel journeyId="youth" />
+            </div>
+          )}
           {view === 'itikaf' ? "I'tikaf Registration | Jamatia Islamic Centre" : PAGE_TITLE}
         </title>
         <meta name="description" content={META_DESCRIPTION} />
@@ -97,6 +103,11 @@ export default function YouthPage({ view = 'overview' }) {
           <PageHeading title="Youth">
             Activities, learning and opportunities for young people.
           </PageHeading>
+        )}
+        {view === 'overview' && (
+          <div className="guidance-page-width">
+            <GuidancePanel journeyId="youth" />
+          </div>
         )}
         {view === 'itikaf' ? <YouthRegistrationSection /> : <YouthActivitiesSection />}
       </div>

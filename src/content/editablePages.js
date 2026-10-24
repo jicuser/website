@@ -9,7 +9,13 @@ export function editablePagePath(path) {
   const canonicalPath = canonicalPagePath(path);
   return EDITABLE_PAGES.some((page) => page.path === canonicalPath) ? canonicalPath : '/';
 }
-const mainContentPaths = new Set(standaloneSections.map(([path]) => `/${path}`));
+export const mainContentPaths = new Set([
+  ...standaloneSections.map(([path]) => `/${path}`),
+  '/services/support',
+  '/services/marriage-family',
+  '/services/skills-careers',
+  '/services/community',
+]);
 export const supplementalContentPaths = new Set(
   PUBLIC_PAGES.filter((page) => page.path !== '/' && !mainContentPaths.has(page.path)).map(
     (page) => page.path,

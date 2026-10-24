@@ -1,0 +1,252 @@
+/* Compact navigation and private, in-memory guided help use shared theme tokens. */
+.community-guidance-page,
+.guidance-page-width {
+  width: min(100% - 32px, 960px);
+  margin: 0 auto;
+  padding-block: 24px;
+  color: var(--jic-text);
+}
+.community-guidance-heading {
+  margin-block: 20px;
+}
+.community-guidance-heading h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+.community-guidance-heading p {
+  color: var(--jic-text-secondary);
+  max-width: 65ch;
+  margin-top: 10px;
+}
+.guidance-back-link,
+.guidance-panel a,
+.guidance-direct-links a,
+.guidance-urgent a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 650;
+}
+.guidance-back-link {
+  font-size: 0.875rem;
+}
+.guidance-panel {
+  border: 1px solid var(--jic-border);
+  background: var(--jic-surface);
+  border-radius: 18px;
+  padding: clamp(16px, 3vw, 26px);
+  margin-block: 20px;
+  color: var(--jic-text);
+  min-width: 0;
+}
+.guidance-panel h2 {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+.guidance-panel p {
+  line-height: 1.6;
+}
+.guidance-panel :is(button, a),
+.guidance-direct-links a {
+  touch-action: manipulation;
+}
+.guidance-panel :is(button, a):focus-visible,
+.guidance-direct-links a:focus-visible,
+.guidance-urgent a:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+.guidance-panel h2:focus {
+  outline: none;
+}
+.guidance-invitation {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.guidance-invitation > svg {
+  flex-shrink: 0;
+  color: var(--jic-gold-strong);
+}
+.guidance-invitation > div {
+  flex: 1;
+}
+.guidance-invitation p {
+  font-size: 0.9rem;
+  color: var(--jic-text-secondary);
+  margin-top: 4px;
+}
+.guidance-invitation button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  min-height: 44px;
+  border: 1px solid var(--jic-gold-strong);
+  border-radius: 10px;
+  white-space: nowrap;
+  font-weight: 650;
+}
+.guidance-toolbar,
+.guidance-toolbar > div,
+.guidance-toolbar > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.guidance-toolbar {
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: var(--jic-text-secondary);
+}
+.guidance-toolbar button,
+.guidance-footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  min-height: 44px;
+  min-width: 44px;
+}
+.guidance-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+.guidance-choices button {
+  display: flex;
+  text-align: left;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-height: 56px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.guidance-choices button:hover {
+  border-color: var(--jic-gold-strong);
+  background: var(--jic-surface-strong, var(--jic-surface));
+}
+.guidance-choices button > svg {
+  flex-shrink: 0;
+  color: var(--jic-gold-strong);
+}
+.guidance-choices small {
+  display: block;
+  font-weight: 400;
+}
+.guidance-body {
+  margin-top: 10px;
+  color: var(--jic-text-secondary);
+  max-width: 68ch;
+}
+.guidance-result ol {
+  list-style: decimal;
+  padding-left: 24px;
+  margin-block: 18px;
+}
+.guidance-result li {
+  padding: 4px 0 4px 5px;
+  line-height: 1.6;
+}
+.guidance-links {
+  display: flex;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.guidance-links a {
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 0.9rem;
+}
+.guidance-links a:first-child {
+  border-color: var(--jic-gold-strong);
+}
+.guidance-panel .guidance-complete {
+  font-size: 0.85rem;
+  color: var(--jic-text-secondary);
+  margin-top: 18px;
+}
+.guidance-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid var(--jic-border);
+  margin-top: 18px;
+  padding-top: 6px;
+  font-size: 0.875rem;
+}
+.guidance-panel .guidance-privacy {
+  font-size: 0.78rem;
+  color: var(--jic-text-secondary);
+  margin-top: 8px;
+}
+.guidance-urgent {
+  padding: 12px 16px;
+  border-left: 3px solid var(--jic-gold-strong);
+  background: var(--jic-surface);
+  border-radius: 0 12px 12px 0;
+  font-size: 0.875rem;
+}
+.guidance-urgent p {
+  line-height: 1.5;
+}
+.guidance-urgent p a {
+  display: inline;
+}
+.guidance-urgent > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+}
+.guidance-direct-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 20px;
+  border-top: 1px solid var(--jic-border);
+  padding-top: 12px;
+  font-size: 0.875rem;
+}
+.guidance-direct-links > span {
+  color: var(--jic-text-secondary);
+}
+.guidance-service-note {
+  font-size: 0.85rem;
+  color: var(--jic-text-secondary);
+  margin-top: 18px;
+}
+@media (max-width: 560px) {
+  .guidance-choices {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .guidance-invitation {
+    flex-wrap: wrap;
+  }
+  .guidance-invitation > div {
+    flex-basis: calc(100% - 42px);
+  }
+  .guidance-invitation button {
+    margin-left: 38px;
+  }
+  .guidance-toolbar {
+    flex-wrap: wrap;
+  }
+  .guidance-choices button {
+    padding: 12px;
+  }
+}

@@ -96,15 +96,25 @@ export function compactMenuNavigation(groups) {
   const parents = new Map([
     ['/projects', '/about'],
     ['/social-media', '/about'],
-    ['/madrassah', '/education'],
-    ['/youth', '/education'],
+    ['/madrassah', '/services'],
+    ['/education', '/services'],
+    ['/youth', '/services'],
+    ['/get-involved', '/services'],
+    ['/ramadan', '/services'],
   ]);
   const roots = new Set(groups.map((group) => group.path));
   return groups
     .filter((group) => !['/portal', '/donate'].includes(group.path))
     .filter((group) => !roots.has(parents.get(group.path)))
     .map((group) => {
-      const children = [...group.children];
+      // Older category routes remain available, but do not duplicate the new Hub destinations.
+      const children = group.children.filter(
+        (child) =>
+          group.path !== '/services' ||
+          !['/services/religious', '/services/education', '/services/community'].includes(
+            child.path,
+          ),
+      );
       for (const destination of groups) {
         if (
           parents.get(destination.path) === group.path &&
@@ -115,7 +125,7 @@ export function compactMenuNavigation(groups) {
       }
       return {
         ...group,
-        name: group.path === '/education' && !group.customName ? 'Learning' : group.name,
+        name: group.name,
         children: orderedNavigation(children, group.childOrder),
         sectionPaths: [
           group.path,

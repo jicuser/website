@@ -13,7 +13,7 @@ for (const width of [390, 1280]) {
     await expect(page.locator('.service-explorer-grid')).toBeVisible();
     const edges = await page
       .locator(
-        '.jic-hero-inner, .service-explorer--compact, .jic-programmes, .jic-home-community-grid',
+        '.jic-hero-inner, .service-explorer--compact, .community-programme-feed, .jic-home-community-grid',
       )
       .evaluateAll((nodes) =>
         nodes.map((node) => {
@@ -56,7 +56,7 @@ for (const width of [390, 1280]) {
         Math.max(...cards.map((card) => card.action)) -
           Math.min(...cards.map((card) => card.action)),
       ).toBeLessThanOrEqual(1);
-      await expect(page.locator('.jic-programme-copy').first()).toBeVisible();
+      await expect(page.locator('.programme-feed-row > div').first()).toBeVisible();
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
       true,

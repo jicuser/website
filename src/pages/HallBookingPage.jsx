@@ -5,6 +5,7 @@ import { hallDateStatus, hallMonthRange } from '@/lib/serviceEnquiries';
 import { CALENDAR_COLOURS, HALL_STATUSES, fullDate } from '@/lib/bookingCalendar';
 import { displayTime, londonDate } from '@/lib/timetable';
 import MonthCalendar from '@/components/calendar/MonthCalendar';
+import GuidancePanel from '@/features/guidance/GuidancePanel';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import { useContent } from '@/context/ContentContext';
@@ -126,6 +127,7 @@ export default function HallBookingPage() {
           )}
         </section>
       ) : null}
+      <GuidancePanel journeyId="hall" />
       <div className="hall-page-content">
         <ManagedPageContent optional headingLevel={2} />
         <ManagedPageSections />

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Search, ArrowUpRight } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { SEARCH_PAGES, searchPages } from '@/lib/siteSearch';
+import { isPageVisible } from '@/lib/pageVisibility';
 import { useContent } from '@/context/ContentContext';
 
 export default function SearchPage() {
@@ -25,7 +26,10 @@ export default function SearchPage() {
       return page;
     }
   });
-  const results = searchPages(query, entries);
+  const results = searchPages(
+    query,
+    entries.filter((entry) => isPageVisible(getContent, entry.path)),
+  );
   return (
     <section className="jic-search-page" aria-labelledby="search-title">
       <Helmet>
