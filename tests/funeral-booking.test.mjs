@@ -50,7 +50,9 @@ test('funeral branches retain relevant answers and phone contact without requiri
 });
 
 test('facility content keeps fixed identities and discards unsafe images', () => {
-  assert.equal(readFuneralFacilities('{broken').length, 5);
+  assert.deepEqual(readFuneralFacilities('{broken').map(({ id }) => id), [
+    'ambulance', 'hearse', 'washing', 'cold-room', 'prayer-hall', 'family-room',
+  ]);
   for (const image of [
     'javascript:alert(1)',
     '//evil.test/photo',

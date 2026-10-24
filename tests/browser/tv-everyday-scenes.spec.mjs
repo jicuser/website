@@ -89,6 +89,7 @@ for (const width of [390, 1280]) {
     const { writes, errors } = await openScreens(page);
     await expect(page.locator('.tv-screen-miniature')).toHaveCount(4);
     await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
+    await page.locator('.tv-workspace').getByRole('tab', { name: 'Scenes', exact: true }).click();
     const everyday = page.getByRole('region', { name: 'Everyday content', exact: true });
     await everyday
       .getByRole('combobox', { name: 'Scene to keep on screen' })
@@ -117,8 +118,8 @@ for (const width of [390, 1280]) {
       true,
     );
     await page
-      .locator('.tv-save-actions')
-      .getByRole('button', { name: 'Save display settings', exact: true })
+      .locator('.tv-workspace-publish')
+      .getByRole('button', { name: 'Publish changes', exact: true })
       .click();
     await expect.poll(() => writes.length).toBe(1);
     expect(writes[0].action).toBe('save-background');
@@ -133,7 +134,7 @@ for (const width of [390, 1280]) {
       persistent_layer_ids: { landscape: ['standby-times', 'standby-clock'], portrait: [] },
     });
     expect(writes[0].settings.display_layouts).toEqual(DEFAULT_TV_SETTINGS.display_layouts);
-    await expect(page.getByText('All changes saved', { exact: true })).toBeVisible();
+    await expect(page.getByText('All changes published', { exact: true })).toBeVisible();
     expect(errors).toEqual([]);
   });
 }
