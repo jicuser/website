@@ -73,28 +73,31 @@ function AreaPhotos({ area, details }) {
   );
 }
 
-export default function NikahVenue({ venue }) {
+export default function NikahVenue({ venue, selectedGroup, onGroupChange, headingRef }) {
   const [selected, setSelected] = useState('facilities');
   const available = groups.filter(([id]) =>
     NIKAH_AREAS.some((area) => area.group === id && venue[area.id].visible),
   );
-  const group = available.some(([id]) => id === selected) ? selected : available[0]?.[0];
+  const requested = selectedGroup ?? selected;
+  const group = available.some(([id]) => id === requested) ? requested : available[0]?.[0];
   if (!available.length) return null;
   return (
     <section id="facilities" className="nikah-venue" aria-labelledby="nikah-venue-title">
-      <h2 id="nikah-venue-title">At the masjid</h2>
-      <div className="nikah-venue-switch" role="group" aria-label="Explore the venue">
-        {available.map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            aria-pressed={group === id}
-            aria-controls="nikah-venue-content"
-            onClick={() => setSelected(id)}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="nikah-venue-header">
+        <h2 id="nikah-venue-title" ref={headingRef} tabIndex={-1}>At the masjid</h2>
+        <div className="nikah-venue-switch" role="group" aria-label="Explore the venue">
+          {available.map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={group === id}
+              aria-controls="nikah-venue-content"
+              onClick={() => (onGroupChange ? onGroupChange(id) : setSelected(id))}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
       <div id="nikah-venue-content" className={`nikah-venue-grid nikah-venue-grid--${group}`}>
         {NIKAH_AREAS.filter((area) => area.group === group && venue[area.id].visible).map(
