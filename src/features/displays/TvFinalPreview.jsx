@@ -35,7 +35,7 @@ export function TvScaledPreview({ orientation, children }) {
   );
 }
 
-export default function TvFinalPreview({ open, onClose, orientation, title, children }) {
+export default function TvFinalPreview({ open, onClose, orientation, title, children, previewLabel = 'draft preview' }) {
   const closeRef = useRef(onClose);
   const closeButton = useRef(null);
   const dialog = useRef(null);
@@ -89,7 +89,7 @@ export default function TvFinalPreview({ open, onClose, orientation, title, chil
         <div>
           <strong>{title}</strong>
           <span>
-            {orientation === 'portrait' ? 'Portrait · 9:16' : 'Landscape · 16:9'} · draft preview
+            {orientation === 'portrait' ? 'Portrait · 9:16' : 'Landscape · 16:9'} · {previewLabel}
           </span>
         </div>
         <button ref={closeButton} type="button" className="admin-button" onClick={onClose}>
