@@ -17,6 +17,7 @@ import CommunityLinksEditor from '@/components/admin/CommunityLinksEditor';
 import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 import PageNavigator from '@/components/admin/PageNavigator';
 import HallDetailsEditor from '@/features/content/HallDetailsEditor';
+import FuneralFacilitiesEditor from '@/features/content/FuneralFacilitiesEditor';
 import '@/styles/page-editor.css';
 
 export default function PageEditor({
@@ -81,6 +82,10 @@ export default function PageEditor({
   }, [postPreview]);
   const previewHall = useCallback(
     (value) => setExtraContent({ hall_details: JSON.stringify(value) }),
+    [],
+  );
+  const previewFuneral = useCallback(
+    (value) => setExtraContent({ funeral_facilities: JSON.stringify(value) }),
     [],
   );
   useEffect(() => {
@@ -382,6 +387,7 @@ export default function PageEditor({
             </section>
 
             {selected === '/services/hall-booking' && <HallDetailsEditor onPreview={previewHall} />}
+            {selected === '/funerals' && <FuneralFacilitiesEditor onPreview={previewFuneral} />}
             <PageSectionsEditor
               key={selected}
               pagePath={selected}

@@ -49,9 +49,8 @@ export const SERVICE_JOURNEYS = {
     formSlug: 'funeral-enquiry',
     eyebrow: 'Here when you need us',
     title: 'Janazah & funeral support',
-    intro:
-      'A clear first step at a difficult time. Speak to the centre about Janazah arrangements and the support your family needs.',
-    action: 'Ask for funeral support',
+    intro: 'Here to help with funeral arrangements and care for your loved one.',
+    action: 'Arrange a funeral',
     subject: 'Janazah / funeral support',
     steps: [
       [

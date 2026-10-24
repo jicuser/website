@@ -68,7 +68,10 @@ for (const [path, title, slug] of services) {
       await page.goto(destination);
       if (destination === path) {
         await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
-        await expect(page.locator('.service-questions')).toBeVisible();
+        if (slug === 'funeral-enquiry') {
+          await page.getByRole('link', { name: 'Arrange a funeral', exact: true }).click();
+          await expect(page.locator('.funeral-call')).toHaveAttribute('href', 'tel:01217786612');
+        } else await expect(page.locator('.service-questions')).toBeVisible();
       }
       if (destination !== path)
         await expect(
@@ -85,7 +88,7 @@ for (const [path, title, slug] of services) {
       await page.getByRole('button', { name: 'Review answers', exact: true }).click();
       await page.getByRole('button', { name: 'Send enquiry', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
-      if (slug === 'nikah-enquiry')
+      if (['nikah-enquiry', 'funeral-enquiry'].includes(slug))
         await expect(page.getByText('This does not confirm a booking or date.')).toBeVisible();
     }
     expect(state.reads.length).toBeGreaterThanOrEqual(2);
@@ -110,6 +113,8 @@ for (const [path, title, slug] of services) {
     const state = await serviceFixture(page, { closed: true });
     for (const destination of [path, `/forms/${slug}`]) {
       await page.goto(destination);
+      if (destination === path && slug === 'funeral-enquiry')
+        await page.getByRole('link', { name: 'Arrange a funeral', exact: true }).click();
       await expect(page.getByRole('heading', { name: /is currently closed/ })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Send enquiry', exact: true })).toHaveCount(0);
       await expect(

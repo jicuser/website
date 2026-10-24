@@ -1,0 +1,183 @@
+.funeral-page {
+  padding-block: 20px 32px;
+}
+.funeral-page .managed-page-content {
+  padding: 0;
+  margin: 10px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.funeral-page .managed-page-content h1 {
+  font-size: clamp(1.75rem, 3.8vw, 2.5rem);
+  line-height: 1.15;
+}
+.funeral-page .managed-page-content p {
+  margin-top: 10px;
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 40rem;
+}
+.funeral-page .managed-page-content img {
+  display: none;
+}
+.funeral-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.funeral-actions .service-button {
+  min-height: 52px;
+}
+.funeral-call span {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+.funeral-call small {
+  font-size: 0.75rem;
+  font-weight: 450;
+}
+.funeral-page .funeral-contact-note {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+.funeral-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-block: 20px 24px;
+  max-width: 640px;
+}
+.funeral-shortcuts a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 88px;
+  padding: 12px 8px;
+  border: 1px solid var(--jic-border);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.funeral-shortcuts svg {
+  color: var(--jic-gold-strong);
+  flex-shrink: 0;
+}
+.funeral-shortcuts a:hover,
+.funeral-shortcuts a[aria-current] {
+  border-color: var(--jic-gold-strong);
+  background: var(--jic-surface-soft, var(--jic-surface));
+}
+.funeral-page .funeral-content {
+  scroll-margin-top: var(--header-h, 140px);
+}
+.funeral-content:focus {
+  outline: none;
+}
+.funeral-page .funeral-section-heading h2 {
+  font-size: 1.25rem;
+}
+.funeral-page .funeral-section-heading p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.funeral-facilities {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.funeral-facility {
+  overflow: hidden;
+  border: 1px solid var(--jic-border);
+  border-radius: 16px;
+  background: var(--jic-surface);
+  min-width: 0;
+}
+.funeral-facility-media {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  color: var(--jic-gold-strong);
+  background: linear-gradient(135deg, transparent, #b58a3e12), var(--jic-surface);
+  border-bottom: 1px solid var(--jic-border);
+}
+.funeral-facility-media img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.funeral-facility-copy {
+  padding: 16px;
+}
+.funeral-page .funeral-facility-copy h3 {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+.funeral-page .funeral-facility-copy p {
+  margin-top: 6px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.funeral-content .public-custom-form {
+  width: 100%;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.funeral-content .public-custom-form .workspace-wrap {
+  max-width: 720px;
+  margin: 0;
+}
+.funeral-checklist {
+  margin-block: 16px;
+  padding-left: 24px;
+  list-style: disc;
+  line-height: 1.8;
+}
+.funeral-facilities-editor fieldset {
+  display: grid;
+  gap: 16px;
+}
+.funeral-facilities-editor__preview {
+  width: min(100%, 320px);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 12px;
+}
+@media (max-width: 720px) {
+  .funeral-facilities {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .funeral-facility-copy {
+    padding: 12px;
+  }
+}
+@media (max-width: 359px) {
+  .funeral-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .funeral-actions .service-button {
+    width: 100%;
+  }
+  .funeral-shortcuts a {
+    font-size: 0.8125rem;
+  }
+  .funeral-facilities {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

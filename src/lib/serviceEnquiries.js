@@ -10,7 +10,7 @@ export const SERVICE_ENQUIRIES = [
   {
     slug: 'funeral-enquiry',
     title: 'Funeral support',
-    page: '/funerals/contact-support',
+    page: '/funerals',
     pageName: 'Funeral services',
     description:
       'Send a message to the centre about funeral support. This inbox is not an emergency service.',
@@ -36,7 +36,14 @@ export const serviceEnquiry = (slug) =>
   SERVICE_ENQUIRIES.find((item) => item.slug === slug) || null;
 export function serviceEnquiryForPath(path) {
   const pathname = path.split(/[?#]/)[0].replace(/\/+$/, '') || '/';
-  if (['/funerals', '/funerals/what-to-do', '/services/funeral-services'].includes(pathname))
+  if (
+    [
+      '/funerals',
+      '/funerals/what-to-do',
+      '/funerals/contact-support',
+      '/services/funeral-services',
+    ].includes(pathname)
+  )
     return serviceEnquiry('funeral-enquiry');
   if (pathname === '/services/community-services') return serviceEnquiry('community-enquiry');
   return SERVICE_ENQUIRIES.find((item) => item.page === pathname) || null;

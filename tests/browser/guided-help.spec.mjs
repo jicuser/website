@@ -131,7 +131,7 @@ test('every careers, support and family topic reaches its result without a form'
 
 test('service questions and useful details share one page', async ({ page }) => {
   await prepare(page);
-  for (const path of ['/services/nikah', '/funerals', '/get-involved/volunteer']) {
+  for (const path of ['/services/nikah', '/get-involved/volunteer']) {
     await page.goto(path);
     await expect(page.locator('.service-guided-heading a[href^="tel:"]')).toBeVisible();
     await expect(page.locator('.service-questions')).toBeVisible();

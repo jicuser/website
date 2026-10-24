@@ -250,7 +250,7 @@ function PublicForm({
                 ? 'Your enquiry has been received. The centre’s team can use your contact details to follow up.'
                 : 'Your response has been received.'}
             </p>
-            {['nikah-enquiry', 'hall-booking'].includes(slug) && (
+            {['nikah-enquiry', 'hall-booking', 'funeral-enquiry'].includes(slug) && (
               <p>This does not confirm a booking or date.</p>
             )}
             <p className="workspace-meta">Reference: {receipt}</p>

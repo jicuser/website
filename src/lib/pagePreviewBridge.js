@@ -67,7 +67,11 @@ export function installPagePreviewBridge(onContent) {
     const content = Object.fromEntries(
       Object.entries(value.content || {}).filter(
         ([key, text]) =>
-          [`page:${pathname}`, 'hall_details'].includes(key) &&
+          [
+            `page:${pathname}`,
+            ...(pathname === '/services/hall-booking' ? ['hall_details'] : []),
+            ...(pathname === '/funerals' ? ['funeral_facilities'] : []),
+          ].includes(key) &&
           typeof text === 'string' &&
           text.length <= CONTENT_LIMIT,
       ),

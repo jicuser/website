@@ -66,6 +66,10 @@ The public page-family review covers narrow phones, standard phones and desktop 
 
 ## Guided forms
 
+The Janazah page uses a short introduction, direct call/arrange actions and three small shortcuts for facilities, daily prayer times and the existing Janazah prayer guide. Five larger facility cards use editable photos with icon fallbacks. The funeral page editor selects one facility at a time, with photo, caption and visibility controls reflected in its preview. No stock photographs stand in for JIC facilities.
+
+Funeral requests use the published, versioned `funeral-enquiry` form in one journey. The questions cover the requested service, when the person passed away, their location and collection needs, with specific transport/facility follow-ups and contact details last. Planning-ahead requests skip the deceased/collection questions. Existing form closure, staff routing, server validation and historical responses remain authoritative; the receipt does not confirm arrangements. Migration `funeral_booking_questions` upgrades an unchanged existing funeral form and stops if there are custom questions or unpublished changes.
+
 Public built-in and custom forms use `SmartForm`: short steps, the existing published conditional rules, relevant follow-ups and a review before explicit submission. Small option sets use labelled choice cards; related details are grouped into at most three fields. Contact details follow the request unless they control a branch. Visitors can switch to all relevant questions, go back, or edit a reviewed answer. Changed branches discard hidden answers and invalidate pending attachments. No answers are placed in browser storage or URLs; attachments upload on selection, as the interface explains.
 
 The form editor previews this same journey and offers a guided enquiry starter. Publishing, schema versions, responsible staff, inbox routing, receipts and idempotency remain unchanged. No schema migration is needed. Ramadan requests reuse the step and review controls after calendar selection, retaining the existing reservation and payment-confirmation rules. Short sign-in and settings controls remain direct.

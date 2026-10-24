@@ -44,6 +44,7 @@ const groups = [
   ],
   ['health', 'Health information', ['medical_conditions', 'allergies', 'medications']],
   ['date', 'Preferred date and time', ['preferred_date', 'preferred_time']],
+  ['funeral-location', 'Where is your loved one now?', ['current_location', 'location_details']],
 ];
 
 /** Keep branch controls before their follow-ups; gather contact details after the request. */
