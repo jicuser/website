@@ -117,7 +117,9 @@ export default function SalahRemindersPage() {
                 ? 'This device could not be checked'
                 : state?.active
                   ? 'Reminders on for this device'
-                  : 'Reminders off for this device'}
+                  : state?.support === 'install'
+                    ? 'iPhone setup needed'
+                    : 'Reminders off for this device'}
           </strong>
         </div>
         {loading && <p role="status">Loading reminder setup…</p>}
@@ -134,16 +136,18 @@ export default function SalahRemindersPage() {
         )}
         {state?.support === 'install' && (
           <div className="salah-reminders__setup">
-            <h2>On iPhone</h2>
+            <h2>Add JIC to your Home Screen</h2>
             <ol>
               <li>
                 In Safari, tap <Share2 size={16} aria-hidden="true" /> Share →{' '}
                 <strong>Add to Home Screen</strong>.
               </li>
               <li>
-                Open the JIC icon, go to Salah alerts and tap <strong>Enable Salah alerts</strong>.
+                Open the <strong>JIC Home Screen icon</strong>, then go to Salah alerts and tap{' '}
+                <strong>Enable Salah alerts</strong>.
               </li>
             </ol>
+            <p>Alerts are enabled in the Home Screen app.</p>
           </div>
         )}
         {state?.support === 'blocked' && (
@@ -166,36 +170,44 @@ export default function SalahRemindersPage() {
 
         {problem && <p className="salah-reminders__hint">{problem}</p>}
         {changed && <p className="salah-reminders__hint">Your changes are not saved yet.</p>}
-        <p className="salah-reminders__summary">
-          <strong>
-            {settings.prayers.length === 5
-              ? 'All five prayers'
-              : `${settings.prayers.length} prayers`}
-          </strong>
-          <span>
-            {[
-              settings.jamaah && `${settings.jamaahMinutes} minutes before Jama’ah`,
-              settings.start && `${settings.startMinutes} minutes before Salah begins`,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </span>
-        </p>
+        {state?.support === 'supported' && (
+          <p className="salah-reminders__summary">
+            <strong>
+              {settings.prayers.length === 5
+                ? 'All five prayers'
+                : `${settings.prayers.length} prayers`}
+            </strong>
+            <span>
+              {[
+                settings.jamaah && `${settings.jamaahMinutes} minutes before Jama’ah`,
+                settings.start && `${settings.startMinutes} minutes before Salah begins`,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </span>
+          </p>
+        )}
         <div className="salah-reminders__actions">
-          <button
-            type="button"
-            className="jic-primary-cta"
-            disabled={
-              busy ||
-              loading ||
-              !state?.config.ready ||
-              state?.support !== 'supported' ||
-              Boolean(problem)
-            }
-            onClick={() => act('save')}
-          >
-            {busy ? 'Please wait…' : state?.active ? 'Save alert settings' : 'Enable Salah alerts'}
-          </button>
+          {state?.support === 'supported' && (
+            <button
+              type="button"
+              className="jic-primary-cta"
+              disabled={
+                busy ||
+                loading ||
+                !state?.config.ready ||
+                state?.support !== 'supported' ||
+                Boolean(problem)
+              }
+              onClick={() => act('save')}
+            >
+              {busy
+                ? 'Please wait…'
+                : state?.active
+                  ? 'Save alert settings'
+                  : 'Enable Salah alerts'}
+            </button>
+          )}
           {state?.active && (
             <button
               type="button"
@@ -216,7 +228,7 @@ export default function SalahRemindersPage() {
               Turn off Salah alerts
             </button>
           )}
-          {(state?.support !== 'supported' || error) && (
+          {((state?.support !== 'supported' && state?.support !== 'install') || error) && (
             <button
               type="button"
               className="jic-secondary-cta"
@@ -227,72 +239,74 @@ export default function SalahRemindersPage() {
             </button>
           )}
         </div>
-        <details className="salah-reminders__customise">
-          <summary>Customise alerts</summary>
-          <fieldset disabled={busy || loading} className="salah-reminders__choices">
-            {[
-              ['start', 'Salah start time', 'startMinutes'],
-              ['jamaah', 'Jama’ah time', 'jamaahMinutes'],
-            ].map(([key, label, minutes]) => (
-              <div className="salah-reminders__choice" key={key}>
-                <label className="salah-reminders__switch">
-                  <input
-                    type="checkbox"
-                    role="switch"
-                    checked={settings[key]}
-                    onChange={(event) =>
-                      setSettings((current) => ({ ...current, [key]: event.target.checked }))
-                    }
-                  />
-                  <strong>{label}</strong>
-                </label>
-                {settings[key] && (
-                  <label className="salah-reminders__minutes">
-                    Remind me
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min="0"
-                      max="60"
-                      step="1"
-                      aria-label={`Minutes before ${label}`}
-                      value={settings[minutes]}
-                      onChange={(event) =>
-                        setSettings((current) => ({
-                          ...current,
-                          [minutes]: event.target.value === '' ? '' : Number(event.target.value),
-                        }))
-                      }
-                    />
-                    <span>minutes before</span>
-                  </label>
-                )}
-              </div>
-            ))}
-            <details className="salah-reminders__prayers">
-              <summary>Choose prayers · {settings.prayers.length} selected</summary>
-              <div>
-                {REMINDER_PRAYERS.map((prayer) => (
-                  <label key={prayer}>
+        {state?.support === 'supported' && (
+          <details className="salah-reminders__customise">
+            <summary>Customise alerts</summary>
+            <fieldset disabled={busy || loading} className="salah-reminders__choices">
+              {[
+                ['start', 'Salah start time', 'startMinutes'],
+                ['jamaah', 'Jama’ah time', 'jamaahMinutes'],
+              ].map(([key, label, minutes]) => (
+                <div className="salah-reminders__choice" key={key}>
+                  <label className="salah-reminders__switch">
                     <input
                       type="checkbox"
-                      checked={settings.prayers.includes(prayer)}
+                      role="switch"
+                      checked={settings[key]}
                       onChange={(event) =>
-                        setSettings((current) => ({
-                          ...current,
-                          prayers: event.target.checked
-                            ? [...current.prayers, prayer]
-                            : current.prayers.filter((item) => item !== prayer),
-                        }))
+                        setSettings((current) => ({ ...current, [key]: event.target.checked }))
                       }
                     />
-                    {prayer === 'dhuhr' ? 'Dhuhr' : prayer[0].toUpperCase() + prayer.slice(1)}
+                    <strong>{label}</strong>
                   </label>
-                ))}
-              </div>
-            </details>
-          </fieldset>
-        </details>
+                  {settings[key] && (
+                    <label className="salah-reminders__minutes">
+                      Remind me
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        max="60"
+                        step="1"
+                        aria-label={`Minutes before ${label}`}
+                        value={settings[minutes]}
+                        onChange={(event) =>
+                          setSettings((current) => ({
+                            ...current,
+                            [minutes]: event.target.value === '' ? '' : Number(event.target.value),
+                          }))
+                        }
+                      />
+                      <span>minutes before</span>
+                    </label>
+                  )}
+                </div>
+              ))}
+              <details className="salah-reminders__prayers">
+                <summary>Choose prayers · {settings.prayers.length} selected</summary>
+                <div>
+                  {REMINDER_PRAYERS.map((prayer) => (
+                    <label key={prayer}>
+                      <input
+                        type="checkbox"
+                        checked={settings.prayers.includes(prayer)}
+                        onChange={(event) =>
+                          setSettings((current) => ({
+                            ...current,
+                            prayers: event.target.checked
+                              ? [...current.prayers, prayer]
+                              : current.prayers.filter((item) => item !== prayer),
+                          }))
+                        }
+                      />
+                      {prayer === 'dhuhr' ? 'Dhuhr' : prayer[0].toUpperCase() + prayer.slice(1)}
+                    </label>
+                  ))}
+                </div>
+              </details>
+            </fieldset>
+          </details>
+        )}
         <details className="salah-reminders__about">
           <summary>About these alerts</summary>
           <p className="salah-reminders__hint">

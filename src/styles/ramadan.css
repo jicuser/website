@@ -648,9 +648,31 @@
   color: var(--jic-text-secondary);
 }
 .sponsorship-month-day .sponsorship-month-status {
+  display: grid;
+  place-items: center;
   color: var(--jic-text);
-  font-size: 9px;
+  min-height: 13px;
   white-space: nowrap;
+}
+.sponsorship-key svg {
+  color: var(--day-colour);
+  flex-shrink: 0;
+}
+.sponsorship-key {
+  font-size: 0.75rem;
+  gap: 8px 12px;
+}
+.sponsorship-option-group {
+  min-width: 0;
+  padding: 0;
+  margin: 20px 0 0;
+  border: 0;
+}
+.sponsorship-option-group legend {
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--jic-text-secondary);
 }
 .sponsorship-month-day[aria-pressed='true'] {
   outline: 2px solid var(--jic-gold);
@@ -661,7 +683,8 @@
   opacity: 0.35;
   cursor: default;
 }
-.sponsorship-month + .sponsorship-editor {
+.sponsorship-month + .sponsorship-editor,
+.sponsorship-bookings + .sponsorship-editor {
   margin-top: 16px;
 }
 .sponsorship-status-cell small {
@@ -671,15 +694,29 @@
   color: var(--jic-text-secondary);
 }
 .sponsorship-table-wrap {
-  container: sponsorship-list / inline-size;
+  position: relative;
   max-width: 100%;
+  overflow-x: auto;
+}
+.sponsorship-table-hint {
+  margin: 0 0 8px;
+  color: var(--jic-text-secondary);
+  font-size: 0.75rem;
+}
+.sponsorship-table-wrap:focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 3px;
 }
 .sponsorship-mobile-table {
-  table-layout: fixed;
+  min-width: 580px;
+  table-layout: auto;
+}
+.sponsorship-admin-table {
+  min-width: 660px;
 }
 .sponsorship-mobile-table :is(th, td) {
   vertical-align: top;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .sponsorship-mobile-table .sponsorship-day-cell {
   width: 16%;
@@ -698,9 +735,6 @@
 }
 .sponsorship-print-detail {
   display: none;
-}
-.sponsorship-editor-row > td {
-  padding: 0;
 }
 .sponsorship-editor {
   padding: clamp(12px, 2vw, 20px);
@@ -779,75 +813,14 @@
     margin-top: 0;
   }
 }
-@media screen {
-  @container sponsorship-list (max-width: 650px) {
-    .sponsorship-mobile-table,
-    .sponsorship-mobile-table tbody {
-      display: block;
-      width: 100%;
-    }
-    .sponsorship-mobile-table thead {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-    }
-    .sponsorship-mobile-table tbody {
-      display: grid;
-      gap: 10px;
-    }
-    .sponsorship-mobile-table tr {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 8px 12px;
-      padding: 12px;
-      border: 1px solid var(--jic-border);
-      border-radius: 10px;
-    }
-    .sponsorship-mobile-table
-      :is(
-        th,
-        td,
-        .sponsorship-day-cell,
-        .sponsorship-date-cell,
-        .sponsorship-status-cell,
-        .sponsorship-action-cell
-      ) {
-      display: block;
-      width: auto;
-      padding: 0;
-      border: 0;
-    }
-    .sponsorship-mobile-table .sponsorship-date-cell {
-      text-align: right;
-      font-size: 0.8rem;
-      color: var(--jic-text-secondary);
-    }
-    .sponsorship-mobile-table .sponsorship-status-cell {
-      grid-column: 1 / -1;
-    }
-    .sponsorship-mobile-table .sponsorship-sponsor-cell {
-      grid-column: 1 / -1;
-    }
-    .sponsorship-mobile-table .sponsorship-action-cell {
-      grid-column: 1 / -1;
-      justify-self: end;
-    }
-    .sponsorship-mobile-table .sponsorship-print-detail {
-      display: none;
-    }
-    .sponsorship-mobile-table td[colspan] {
-      grid-column: 1 / -1;
-    }
-    .sponsorship-mobile-table .sponsorship-editor-row {
-      display: block;
-      padding: 0;
-      border: 0;
-    }
-  }
-}
 @media print {
+  .sponsorship-table-hint {
+    display: none;
+  }
+  .sponsorship-mobile-table,
+  .sponsorship-admin-table {
+    min-width: 0;
+  }
   .sponsorship-print-detail {
     display: table-cell;
   }

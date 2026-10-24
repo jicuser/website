@@ -141,6 +141,73 @@ test('safeguarding opens with a useful empty state and optional recording guidan
   expect(evidence.errors).toEqual([]);
 });
 
+test('sign out shows pending and retry states, retains a failed login, and removes it durably on success', async ({
+  page,
+}) => {
+  const evidence = await openAdmin(page, { section: 'dashboard' });
+  const dialogs = [];
+  page.on('dialog', async (dialog) => {
+    dialogs.push(dialog.message());
+    await dialog.dismiss();
+  });
+  let requests = 0;
+  let release;
+  const firstResponse = new Promise((resolve) => (release = resolve));
+  await page.route('**/auth/v1/logout*', async (route) => {
+    const request = ++requests;
+    if (request === 1) await firstResponse;
+    await route.fulfill({
+      status: request < 3 ? 503 : 204,
+      contentType: 'application/json',
+      body: request < 3 ? JSON.stringify({ message: 'Connection unavailable' }) : '',
+    });
+  });
+  await page.locator('.admin-account-menu > summary').click();
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  const pending = page.getByRole('button', { name: 'Signing out…', exact: true });
+  await expect(pending).toBeDisabled();
+  await pending.evaluate((button) => {
+    button.click();
+    button.click();
+  });
+  expect(requests).toBe(1);
+  release();
+  await expect(page.getByRole('alert')).toContainText('You are still signed in');
+  expect(requests).toBe(2);
+  expect(dialogs).toEqual([]);
+  await expect(page.locator('.admin-toolbar')).toBeVisible();
+  expect(await page.evaluate(() => sessionStorage.getItem('sb-127-auth-token'))).toBeTruthy();
+  await page.getByRole('button', { name: 'Try sign out again', exact: true }).click();
+  await expect(page).toHaveURL(/\/admin\/login/);
+  expect(requests).toBe(3);
+  expect(await page.evaluate(() => sessionStorage.getItem('sb-127-auth-token'))).toBeNull();
+  await page.reload();
+  await expect(page).toHaveURL(/\/admin\/login/);
+  await expect(page.locator('input[type="email"]')).toBeVisible();
+  expect(evidence.writes).toEqual([]);
+  expect(evidence.errors).toEqual([]);
+});
+
+test('cancelling sign out preserves unsaved input and makes no logout request', async ({
+  page,
+}) => {
+  const evidence = await openAdmin(page, { section: 'announcements' });
+  let requests = 0;
+  await page.route('**/auth/v1/logout*', (route) => {
+    requests++;
+    return route.fulfill({ status: 204, body: '' });
+  });
+  await page.getByRole('button', { name: 'New notice', exact: true }).click();
+  await page.getByLabel('Title', { exact: true }).fill('Unsaved notice');
+  await page.locator('.admin-account-menu > summary').click();
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.getByLabel('Title', { exact: true })).toHaveValue('Unsaved notice');
+  expect(requests).toBe(0);
+  expect(evidence.writes).toEqual([]);
+  expect(evidence.errors).toEqual([]);
+});
+
 // Intercept external data only. The application router, Auth provider and editors run unchanged.
 async function openAdmin(
   page,

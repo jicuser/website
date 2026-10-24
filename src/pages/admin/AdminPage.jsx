@@ -1071,6 +1071,9 @@ export default function AdminPage() {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const [sectionBack, setSectionBack] = useState(null);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState('');
+  const signOutPending = useRef(false);
   const registerBack = useCallback((handler) => {
     setSectionBack(() => (typeof handler === 'function' ? handler : null));
   }, []);
@@ -1090,9 +1093,23 @@ export default function AdminPage() {
     setActive(key);
   };
   const safeSignOut = async () => {
-    if (saving) return;
+    if (saving || signOutPending.current) return;
     if (dirty && !window.confirm('Sign out and discard unsaved changes?')) return;
-    await signOut().catch(() => window.alert('Sign out could not be confirmed. Please try again.'));
+    signOutPending.current = true;
+    setSigningOut(true);
+    setSignOutError('');
+    try {
+      await signOut();
+    } catch (failure) {
+      setSignOutError(
+        failure?.name === 'TimeoutError' || failure?.message?.includes('still waiting')
+          ? 'Sign out is still waiting for the connection. You are still signed in.'
+          : 'You are still signed in. Check your connection and try again.',
+      );
+    } finally {
+      signOutPending.current = false;
+      setSigningOut(false);
+    }
   };
 
   const section = {
@@ -1217,7 +1234,7 @@ export default function AdminPage() {
               </div>
               <button
                 type="button"
-                disabled={saving}
+                disabled={saving || signingOut}
                 onClick={() => {
                   if (!dirty || window.confirm('Discard unsaved changes?'))
                     navigate('/portal?workspace=personal');
@@ -1228,7 +1245,7 @@ export default function AdminPage() {
               </button>
               <button
                 type="button"
-                disabled={saving}
+                disabled={saving || signingOut}
                 onClick={() => {
                   if (!dirty || window.confirm('Discard unsaved changes?'))
                     navigate('/admin/setup?mode=change');
@@ -1249,9 +1266,14 @@ export default function AdminPage() {
                 )}
                 {theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
               </button>
-              <button type="button" disabled={saving} onClick={safeSignOut}>
+              {signOutError && (
+                <p className="admin-error" role="alert">
+                  {signOutError}
+                </p>
+              )}
+              <button type="button" disabled={saving || signingOut} onClick={safeSignOut}>
                 <LogOut size={17} aria-hidden="true" />
-                Sign out
+                {signingOut ? 'Signing out…' : signOutError ? 'Try sign out again' : 'Sign out'}
               </button>
             </div>
           </details>

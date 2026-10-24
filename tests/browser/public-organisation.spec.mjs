@@ -200,6 +200,35 @@ test('Salah alerts enable the default in one action and preserve custom settings
   expect(writes[1].expected).toBe('2026-10-18T14:00:00Z');
 });
 
+test('iPhone alerts show the Home Screen prerequisite without an unusable Enable button', async ({
+  page,
+}) => {
+  const writes = await prepare(page);
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'userAgent', { value: 'Mozilla/5.0 iPhone Safari' });
+    Object.defineProperty(navigator, 'standalone', { value: false });
+    window.__notificationPrompts = 0;
+    window.Notification = class {
+      static permission = 'default';
+      static async requestPermission() {
+        window.__notificationPrompts++;
+        return 'granted';
+      }
+    };
+  });
+  await page.goto('/prayer-times/reminders');
+  await expect(page.getByText('iPhone setup needed', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Add JIC to your Home Screen' })).toBeVisible();
+  await expect(page.locator('.salah-reminders__setup')).toContainText('JIC Home Screen icon');
+  await expect(page.getByRole('button', { name: 'Enable Salah alerts', exact: true })).toHaveCount(
+    0,
+  );
+  await expect(page.getByText('Customise alerts', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Check this device again' })).toHaveCount(0);
+  expect(await page.evaluate(() => window.__notificationPrompts)).toBe(0);
+  expect(writes).toEqual([]);
+});
+
 test('certificates are found through the portal rather than offered as a service', async ({
   page,
 }) => {

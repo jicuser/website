@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import SponsorshipMonth from './SponsorshipMonth';
+import SponsorshipKey from './SponsorshipKey';
 import SponsorshipRange from './SponsorshipRange';
 import SponsorshipBookings from './SponsorshipBookings';
 import SponsorshipEditor from './SponsorshipEditor';
@@ -12,7 +13,7 @@ import { daysInRange, fullDate, seasonDays, seasonLength } from '@/lib/bookingCa
 import { collectPages } from '@/lib/formDownloads';
 import { printTable } from '@/lib/printTable';
 import { money, toPence } from '@/features/operations/model';
-import { RAMADAN_COLOURS, RAMADAN_KINDS, SPONSORSHIP_STATUS, ramadanStatus } from './model';
+import { RAMADAN_KINDS, SPONSORSHIP_STATUS } from './model';
 import '@/styles/ramadan.css';
 
 const blankSeason = {
@@ -383,7 +384,9 @@ export default function RamadanManager() {
               aria-label="Ramadan publication"
             >
               <div className="sponsorship-section-heading">
-                <h3>{season.published ? 'This Ramadan is live' : 'This Ramadan is a draft'}</h3>
+                <h3>
+                  {season.published ? 'Ramadan is published' : 'Draft · hidden from visitors'}
+                </h3>
                 <button
                   type="button"
                   className="booking-button"
@@ -393,18 +396,25 @@ export default function RamadanManager() {
                   {season.published ? 'Unpublish Ramadan' : 'Publish Ramadan'}
                 </button>
               </div>
-              <p>Published dates appear in the places switched on below.</p>
+              <p>
+                {season.published
+                  ? 'Choose the booking options and places to show below.'
+                  : 'These dates are a draft and are hidden from visitors until you publish this Ramadan.'}
+              </p>
             </section>
           )}
-          <RamadanOptions />
+          <RamadanOptions
+            hasSeason={Boolean(season)}
+            publishedTitle={seasons.find((value) => value.published)?.title || ''}
+          />
           <div className="booking-actions">
-            <Link to="/ramadan">View website</Link>
-            {season && (
+            <Link to="/ramadan">Open Ramadan page</Link>
+            {season?.published && (
               <Link to={`/ramadan/display?kind=${kind}`} target="_blank" rel="noopener noreferrer">
-                Open screen display
+                Open sponsorship board
               </Link>
             )}
-            {auth.can('tv') && <Link to="/admin?section=tv">Choose TV layout</Link>}
+            {auth.can('tv') && <Link to="/admin?section=tv">Choose a TV screen</Link>}
           </div>
         </>
       )}
@@ -552,18 +562,7 @@ export default function RamadanManager() {
                 </button>
               </div>
             </details>
-            <div className="booking-key" aria-label="Sponsorship availability colours">
-              {['available', 'pending', 'confirmed', 'closed'].map((status) => (
-                <span key={status}>
-                  <i
-                    className="booking-dot"
-                    aria-hidden="true"
-                    style={{ '--day-colour': RAMADAN_COLOURS[status] }}
-                  />
-                  {ramadanStatus(kind, status)}
-                </span>
-              ))}
-            </div>
+            <SponsorshipKey kind={kind} />
             {loading && <p role="status">Loading sponsorships…</p>}
             <div hidden={dayView !== 'table'}>
               <SponsorshipBookings

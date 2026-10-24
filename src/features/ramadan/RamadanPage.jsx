@@ -7,14 +7,16 @@ import { isPageVisible } from '@/lib/pageVisibility';
 import { daysInRange, fullDate, seasonDays } from '@/lib/bookingCalendar';
 import { money, toPence } from '@/features/operations/model';
 import { printTable } from '@/lib/printTable';
-import SponsorshipDays from './SponsorshipDays';
+import SponsorshipMonth from './SponsorshipMonth';
+import SponsorshipKey from './SponsorshipKey';
 import SponsorshipRange from './SponsorshipRange';
 import SponsorshipTable from './SponsorshipTable';
 import useRamadanCalendar from './useRamadanCalendar';
+import '@/styles/booking-calendars.css';
+import '@/styles/ramadan.css';
 import {
   RAMADAN_KINDS,
   RAMADAN_PATHS,
-  RAMADAN_COLOURS,
   canSponsorDay,
   ramadanDay,
   ramadanOpen,
@@ -29,7 +31,7 @@ export default function RamadanPage({ kind = null }) {
   const days = useMemo(() => seasonDays(season), [season]);
   const [selected, setSelected] = useState([]),
     [range, setRange] = useState({}),
-    [dayView, setDayView] = useState('days'),
+    [dayView, setDayView] = useState('month'),
     [name, setName] = useState(''),
     [contact, setContact] = useState(''),
     [amount, setAmount] = useState(''),
@@ -206,6 +208,7 @@ export default function RamadanPage({ kind = null }) {
               <div className="sponsorship-days-heading">
                 <h2>Choose your days</h2>
                 <span>
+                  {selected.length ? `${selected.length} selected · ` : ''}
                   {eligible.length} {kind === 'daily' ? 'days open' : 'days available'}
                 </span>
               </div>
@@ -215,7 +218,7 @@ export default function RamadanPage({ kind = null }) {
                 aria-label="Sponsorship view"
               >
                 {[
-                  ['days', 'Days'],
+                  ['month', 'Month'],
                   ['table', 'Table'],
                 ].map(([value, label]) => (
                   <button
@@ -251,26 +254,18 @@ export default function RamadanPage({ kind = null }) {
                   disabled={busy || !!receipt}
                 />
               ) : (
-                <SponsorshipDays
-                  days={visibleDays}
+                <SponsorshipMonth
+                  days={days}
+                  visibleDates={new Set(visibleDays.map((day) => day.date))}
                   kind={kind}
                   selected={selected}
                   onSelect={selectDay}
                   disabled={busy || !!receipt}
                   dayInfo={dayInfo}
+                  help="Choose one or more available days. Numbers are Ramadan days; dates are UK dates."
                 />
               )}
-              <div className="booking-key">
-                {['available', 'pending', 'confirmed', 'closed'].map((status) => (
-                  <span key={status}>
-                    <i
-                      className="booking-dot"
-                      style={{ '--day-colour': RAMADAN_COLOURS[status] }}
-                    />
-                    {ramadanStatus(kind, status)}
-                  </span>
-                ))}
-              </div>
+              <SponsorshipKey kind={kind} />
               {!receipt && (
                 <div className="booking-actions">
                   {kind === 'daily' && (
@@ -304,7 +299,7 @@ export default function RamadanPage({ kind = null }) {
                   </button>
                 </div>
               </section>
-            ) : (
+            ) : selected.length ? (
               <form className="booking-panel sponsorship-request" onSubmit={submit}>
                 <h2>
                   {selected.length
@@ -365,6 +360,11 @@ export default function RamadanPage({ kind = null }) {
                 </div>
                 <small>The team will arrange confirmation and payment.</small>
               </form>
+            ) : (
+              <section className="booking-panel sponsorship-request-prompt">
+                <h2>Choose your dates first</h2>
+                <p>Select one or more available days above to add your details.</p>
+              </section>
             )}
           </div>
           {error && <p role="alert">{error}</p>}

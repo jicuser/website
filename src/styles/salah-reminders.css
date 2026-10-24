@@ -85,6 +85,19 @@
   display: grid;
   gap: 10px;
 }
+.salah-reminders__setup h2 {
+  margin: 0 0 12px;
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+.salah-reminders__setup li {
+  line-height: 1.6;
+}
+.salah-reminders__setup p {
+  margin: 12px 0 0;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+}
 .salah-reminders__setup svg {
   display: inline;
   vertical-align: middle;
