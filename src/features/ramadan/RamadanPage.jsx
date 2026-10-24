@@ -120,6 +120,7 @@ export default function RamadanPage({ kind = null }) {
     }
   }
   const title = kind ? RAMADAN_KINDS[kind] : 'Ramadan';
+  const awaitingSeason = !state.loading && !state.error && !season;
   return (
     <div className="booking-workspace sponsorship-page">
       <header>
@@ -142,6 +143,15 @@ export default function RamadanPage({ kind = null }) {
         >
           <h2 id="ramadan-timetable-heading">Ramadan timetable coming soon</h2>
           <p>Prayer, Suhoor and Iftar times will be shared here once confirmed.</p>
+          {awaitingSeason && (
+            <div className="ramadan-meal-notice">
+              <h2>Meal bookings coming soon</h2>
+              <p>The centre will open sponsorship days here.</p>
+              <Link className="booking-button" to="/contact">
+                Contact the centre
+              </Link>
+            </div>
+          )}
         </section>
       )}
       {(!state.loading || season) && choices.length > 0 && (
@@ -171,7 +181,7 @@ export default function RamadanPage({ kind = null }) {
           </button>
         </p>
       )}
-      {!state.loading && !state.error && !season && (
+      {kind && awaitingSeason && (
         <section className="booking-panel">
           <h2>Meal bookings coming soon</h2>
           <p>The centre will open sponsorship days here.</p>
