@@ -17,6 +17,7 @@ export default function SponsorshipTable({
       role="region"
       aria-label="Ramadan sponsorship table"
     >
+      <p className="sponsorship-table-hint">Scroll across to see all columns.</p>
       <table className="booking-table sponsorship-availability-table sponsorship-mobile-table">
         <thead>
           <tr>

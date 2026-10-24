@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.use({ screenshot: 'off' });
 const id = (n) => `40000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 
-async function fixture(page) {
+async function fixture(page, { published = true, otherPublished = false } = {}) {
   const actor = {
     id: id(1),
     display_name: 'Sponsorship staff',
@@ -21,7 +21,7 @@ async function fixture(page) {
       title: 'Configured Ramadan',
       start_date: '2027-02-09',
       day_count: 30,
-      published: true,
+      published,
       iftar_target_pence: 20000,
       suhoor_target_pence: 10000,
       daily_target_pence: 500,
@@ -103,7 +103,13 @@ async function fixture(page) {
         token_type: 'bearer',
       };
     } else if (path.endsWith('/rpc/get_my_profile')) data = actor;
-    else if (path.endsWith('/ramadan_seasons')) data = [state.season];
+    else if (path.endsWith('/ramadan_seasons'))
+      data = [
+        state.season,
+        ...(otherPublished
+          ? [{ ...state.season, id: id(8), title: 'Published Ramadan', published: true }]
+          : []),
+      ];
     else if (path.endsWith('/ramadan_sponsorships')) data = state.records;
     else if (path.endsWith('/ramadan_settings')) data = state.settings;
     else if (path.endsWith('/rpc/save_ramadan_options')) {
@@ -156,11 +162,11 @@ test('phone bookings show readable rows and expand private details while Setup s
   await expect(first.getByText('Confirmed', { exact: true })).toBeVisible();
   await expect(workspace.getByRole('switch')).toHaveCount(0);
   await expect(workspace.getByLabel('First UK date · 1 Ramadan')).toHaveCount(0);
-  expect(await first.evaluate((node) => getComputedStyle(node).display)).toBe('grid');
+  expect(await first.evaluate((node) => getComputedStyle(node).display)).toBe('table-row');
   expect(
     await workspace
       .locator('.sponsorship-bookings')
-      .evaluate((node) => node.scrollWidth <= node.clientWidth),
+      .evaluate((node) => node.scrollWidth > node.clientWidth),
   ).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
@@ -169,6 +175,9 @@ test('phone bookings show readable rows and expand private details while Setup s
   await expect(editor.getByLabel('Phone', { exact: true })).toHaveValue('07123456789');
   await expect(editor.getByLabel('Staff notes', { exact: true })).toHaveValue('Private staff note');
   await editor.getByLabel('Staff notes', { exact: true }).fill('Keep this unsaved staff note');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+    page.viewportSize().width,
+  );
   state.failSave = true;
   await editor.getByRole('button', { name: 'Save changes', exact: true }).click();
   await expect(workspace.getByRole('alert')).toContainText('Sponsorship save failed.');
@@ -259,6 +268,71 @@ test('desktop keeps a real table and prints only the chosen dates and booking st
   expect(state.errors).toEqual([]);
 });
 
+test('draft visibility separates saved meal choices from publication and TV placement', async ({
+  page,
+}) => {
+  const state = await fixture(page, { published: false });
+  const workspace = page.getByRole('region', { name: 'Ramadan management' });
+  await workspace.getByRole('button', { name: 'Website & screens', exact: true }).click();
+  const publication = workspace.getByRole('region', { name: 'Ramadan publication' });
+  await expect(publication).toContainText('Draft · hidden from visitors');
+  await expect(publication).toContainText('These dates are a draft and are hidden from visitors');
+  await expect(workspace.getByRole('group', { name: 'What people can sponsor' })).toBeVisible();
+  await expect(
+    workspace.getByRole('group', { name: 'Where to show published sponsorships' }),
+  ).toBeVisible();
+  await expect(workspace.getByRole('switch', { name: 'Iftar bookings' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await expect(workspace.getByRole('switch', { name: 'TV sponsorship board' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await expect(
+    workspace.getByText('Add this board to a TV layout or rotation in TV screens.'),
+  ).toBeVisible();
+  await expect(workspace.getByRole('link', { name: 'Open sponsorship board' })).toHaveCount(0);
+  expect(state.writes).toEqual([]);
+  await workspace.getByRole('switch', { name: 'Suhoor bookings' }).click();
+  await expect(workspace.getByRole('switch', { name: 'Suhoor bookings' })).toHaveAttribute(
+    'aria-checked',
+    'false',
+  );
+  expect(state.writes.at(-1).p_body).toEqual({ suhoor_enabled: false });
+  await expect(publication).toContainText('Draft · hidden from visitors');
+  await publication.getByRole('button', { name: 'Publish Ramadan', exact: true }).click();
+  await expect(publication).toContainText('Ramadan is published');
+  await expect(workspace.getByRole('link', { name: 'Open sponsorship board' })).toBeVisible();
+  expect(state.writes.at(-1).p_body).toMatchObject({ id: id(2), published: true });
+  expect(state.errors).toEqual([]);
+});
+
+test('site-wide switches identify the published Ramadan while a different draft is selected', async ({
+  page,
+}) => {
+  const state = await fixture(page, { published: false, otherPublished: true });
+  const workspace = page.getByRole('region', { name: 'Ramadan management' });
+  await workspace
+    .getByRole('combobox', { name: 'Ramadan sponsorships', exact: true })
+    .selectOption(id(2));
+  await workspace.getByRole('button', { name: 'Website & screens', exact: true }).click();
+  await expect(workspace.getByRole('region', { name: 'Ramadan publication' })).toContainText(
+    'These dates are a draft and are hidden from visitors',
+  );
+  await expect(workspace.locator('.sponsorship-options-scope')).toContainText(
+    'Changes apply immediately to the published Ramadan: Published Ramadan.',
+  );
+  expect(state.writes).toEqual([]);
+  await workspace.getByRole('switch', { name: 'Iftar bookings', exact: true }).click();
+  await expect(
+    workspace.getByRole('switch', { name: 'Iftar bookings', exact: true }),
+  ).toHaveAttribute('aria-checked', 'false');
+  expect(state.writes.at(-1)).toEqual({ action: 'options', p_body: { iftar_enabled: false } });
+  expect(state.season.published).toBe(false);
+  expect(state.errors).toEqual([]);
+});
+
 for (const width of [320, 390]) {
   test(`Ramadan month fits at ${width}px and keeps dates in place when filtered`, async ({
     page,
@@ -280,12 +354,15 @@ for (const width of [320, 390]) {
     expect(initial.filter((cell) => cell.width < 24 || cell.height < 44 || cell.overflows)).toEqual(
       [],
     );
-    await expect(month.getByRole('button', { name: /^Day 1,/ })).toContainText('Taken');
+    await expect(month.getByRole('button', { name: /^Day 1,/ }).locator('svg')).toHaveCount(1);
     await expect(month.getByRole('button', { name: /^Day 1,/ })).toHaveAttribute(
       'aria-label',
       /Sponsored/,
     );
-    await expect(month.getByRole('button', { name: /^Day 2,/ })).toContainText('Held');
+    await expect(month.getByRole('button', { name: /^Day 2,/ })).toHaveAttribute(
+      'aria-label',
+      /Reserved/,
+    );
     await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
     for (const theme of ['light', 'dark']) {
       await page.evaluate((value) => {

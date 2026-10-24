@@ -1,6 +1,7 @@
 import React from 'react';
 import { fullDate } from '@/lib/bookingCalendar';
 import { RAMADAN_COLOURS, ramadanStatus } from './model';
+import { SponsorshipMark } from './SponsorshipKey';
 
 /** Show the whole Ramadan, including UK month boundaries, without moving filtered dates. */
 export default function SponsorshipMonth({
@@ -11,15 +12,13 @@ export default function SponsorshipMonth({
   dayInfo,
   onSelect,
   disabled,
+  help = 'Tap a day to view or add a sponsor.',
 }) {
   if (!days.length) return null;
   const offset = (new Date(`${days[0].date}T12:00:00`).getDay() + 6) % 7;
   return (
     <div className="sponsorship-month" role="group" aria-label="Ramadan month">
-      <p className="sponsorship-month-help">
-        Tap a day to view or add a sponsor. Open: available · Held: reserved ·{' '}
-        {kind === 'daily' ? 'Given: supported' : 'Taken: sponsored'}.
-      </p>
+      <p className="sponsorship-month-help">{help}</p>
       <div className="sponsorship-month-week" aria-hidden="true">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
           <span key={day}>{day}</span>
@@ -44,17 +43,17 @@ export default function SponsorshipMonth({
               className={`sponsorship-month-day ${matches ? '' : 'is-filtered'}`}
               style={{ '--day-colour': RAMADAN_COLOURS[info.status] }}
               aria-label={`Day ${day.number}, ${fullDate(day.date)}, ${status}`}
-              aria-pressed={selected === day.date}
-              disabled={disabled || !matches}
+              aria-pressed={
+                Array.isArray(selected) ? selected.includes(day.date) : selected === day.date
+              }
+              disabled={disabled || !matches || info.disabled}
               onClick={() => onSelect(day.date)}
               title={`${day.number} Ramadan · ${ukDate} · ${status}`}
             >
               <strong>{day.number}</strong>
               <span>{ukDate}</span>
-              <span className="sponsorship-month-status" aria-hidden="true">
-                {{ Available: 'Open', Sponsored: 'Taken', Supported: 'Given', Reserved: 'Held' }[
-                  status
-                ] || status}
+              <span className="sponsorship-month-status" aria-hidden="true" title={status}>
+                <SponsorshipMark status={info.status} />
               </span>
             </button>
           );

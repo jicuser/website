@@ -5,7 +5,7 @@ import SimpleToggle from '@/components/admin/SimpleToggle';
 import { RAMADAN_DEFAULTS } from './model';
 import '@/styles/booking-calendars.css';
 
-export default function RamadanOptions({ onChanged }) {
+export default function RamadanOptions({ onChanged, hasSeason = true, publishedTitle = '' }) {
   const { refreshContent } = useContent();
   const [options, setOptions] = useState(null),
     [busy, setBusy] = useState(false),
@@ -47,27 +47,54 @@ export default function RamadanOptions({ onChanged }) {
   }
   return (
     <section className="booking-panel sponsorship-options" aria-label="Sponsorship options">
-      <h3>Show sponsorships</h3>
+      <h3>Booking &amp; display choices</h3>
+      <p className="sponsorship-options-scope">
+        {publishedTitle
+          ? `Site-wide switches. Changes apply immediately to the published Ramadan: ${publishedTitle}.`
+          : 'Site-wide switches. These choices apply when a Ramadan is published.'}
+      </p>
+      {!hasSeason && <p>Create a Ramadan in Setup before publishing these choices.</p>}
       {error && <p role="alert">{error}</p>}
       {!options && !error && <p role="status">Loading options…</p>}
       {options && (
         <>
-          {[
-            ['website_enabled', 'Ramadan page'],
-            ['iftar_enabled', 'Iftar bookings'],
-            ['suhoor_enabled', 'Suhoor bookings'],
-            ['daily_enabled', 'Daily Giving'],
-            ['home_enabled', 'Show on homepage'],
-            ['tv_enabled', 'Show on TVs'],
-          ].map(([key, label]) => (
-            <SimpleToggle
-              key={key}
-              label={label}
-              checked={options[key]}
-              disabled={busy}
-              onChange={(value) => save(key, value)}
-            />
-          ))}
+          <fieldset className="sponsorship-option-group">
+            <legend>What people can sponsor</legend>
+            {[
+              ['iftar_enabled', 'Iftar bookings'],
+              ['suhoor_enabled', 'Suhoor bookings'],
+              ['daily_enabled', 'Daily Giving'],
+            ].map(([key, label]) => (
+              <SimpleToggle
+                key={key}
+                label={label}
+                checked={options[key]}
+                disabled={busy}
+                onChange={(value) => save(key, value)}
+              />
+            ))}
+          </fieldset>
+          <fieldset className="sponsorship-option-group">
+            <legend>Where to show published sponsorships</legend>
+            {[
+              ['website_enabled', 'Ramadan page', 'Lets visitors request sponsorships.'],
+              ['home_enabled', 'Show on homepage', 'Requires the Ramadan page to be on.'],
+              [
+                'tv_enabled',
+                'TV sponsorship board',
+                'Add this board to a TV layout or rotation in TV screens.',
+              ],
+            ].map(([key, label, detail]) => (
+              <SimpleToggle
+                key={key}
+                label={label}
+                detail={detail}
+                checked={options[key]}
+                disabled={busy}
+                onChange={(value) => save(key, value)}
+              />
+            ))}
+          </fieldset>
           {options.home_enabled && (
             <fieldset className="sponsorship-layout-choice">
               <legend>Homepage style</legend>
