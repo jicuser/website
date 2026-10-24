@@ -1,3 +1,5 @@
+import NoticePlacementEditor from '@/components/admin/NoticePlacementEditor';
+import { noticePlacement } from '@/lib/noticePlacement';
 import { IMAGE_ACCEPT } from '@/lib/images';
 import { createImageUploader } from '@/lib/imageUpload';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -515,6 +517,7 @@ function AnnouncementsSection() {
     published: true,
     starts_at: '',
     expires_at: '',
+    display_settings: noticePlacement(),
   });
   const [form, setForm] = useState(makeBlank);
   const [saved, setSaved] = useState(makeBlank);
@@ -602,6 +605,7 @@ function AnnouncementsSection() {
           published: !!row.published,
           starts_at: toDateTimeLocal(row.starts_at || null),
           expires_at: toDateTimeLocal(row.expires_at || null),
+          display_settings: noticePlacement(row.display_settings),
         }
       : makeBlank();
     setForm(next);
@@ -715,6 +719,11 @@ function AnnouncementsSection() {
               />{' '}
               Published
             </label>
+            <NoticePlacementEditor
+              value={form.display_settings}
+              title={form.title}
+              onChange={(display_settings) => setForm({ ...form, display_settings })}
+            />
             <details className="mt-4 rounded-lg border p-3">
               <summary className="cursor-pointer text-sm font-semibold">
                 Schedule (optional)
@@ -809,6 +818,7 @@ function LivestreamSection() {
     title: 'JIC Live',
     stream_url: '',
     scheduled_at: '',
+    display_settings: noticePlacement(),
   };
   const [form, setForm] = useState(blank);
   const [saved, setSaved] = useState(blank);
@@ -838,6 +848,7 @@ function LivestreamSection() {
         title: data.title || '',
         stream_url: data.stream_url || '',
         scheduled_at: toDateTimeLocal(data.scheduled_at || null),
+        display_settings: noticePlacement(data.display_settings),
       };
       setForm(next);
       setSaved(next);
@@ -967,6 +978,11 @@ function LivestreamSection() {
               />{' '}
               Show livestream
             </label>
+            <NoticePlacementEditor
+              value={form.display_settings}
+              title={form.title}
+              onChange={(display_settings) => setForm({ ...form, display_settings })}
+            />
             <details className="rounded-lg border p-3">
               <summary className="cursor-pointer text-sm font-semibold">
                 Schedule (optional)

@@ -6,7 +6,7 @@ const EmbeddedPublicForm = lazy(() =>
 
 export default function BuiltInForm(props) {
   return (
-    <Suspense fallback={<p role="status">Loading form…</p>}>
+    <Suspense fallback={<p role="status">Loading questions…</p>}>
       <EmbeddedPublicForm {...props} />
     </Suspense>
   );

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import HumanCheck from '@/components/HumanCheck';
+import React, { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import '@/styles/operations.css';
@@ -32,6 +33,7 @@ const features = [
 export default function AccountRequestPage() {
   const { user, profile } = useAuth();
   const location = useLocation();
+  const protection = useRef(null);
   const [form, setForm] = useState({
     display_name: profile?.display_name || '',
     email: user?.email || location.state?.email || '',
@@ -62,7 +64,7 @@ export default function AccountRequestPage() {
     setError('');
     try {
       const { data, error: invokeError } = await supabase.functions.invoke('request-access', {
-        body: form,
+        body: { ...form, security: protection.current.proof() },
       });
       if (invokeError || !data?.ok) {
         let detail;
@@ -79,6 +81,7 @@ export default function AccountRequestPage() {
     } catch (requestError) {
       setError(requestError.message);
     } finally {
+      protection.current?.reset();
       setBusy(false);
     }
   }
@@ -221,6 +224,7 @@ export default function AccountRequestPage() {
             <p className="workspace-meta">
               Already approved? <Link to="/portal">Sign in to the portal</Link>.
             </p>
+            <HumanCheck ref={protection} />
           </form>
         )}
       </div>

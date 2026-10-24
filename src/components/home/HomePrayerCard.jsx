@@ -2,22 +2,25 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Bell, Radio } from 'lucide-react';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
-import { nextCongregation } from '@/lib/nextCongregation';
+import { nextHomeCongregation } from '@/lib/nextCongregation';
 import { displayTime } from '@/lib/timetable';
 
 export default function HomePrayerCard() {
   const {
     todaysTimes,
+    tomorrowsTimes,
     jummahTimes,
     currentDate,
     isLoadingPrayerTimes: isLoading,
     error,
   } = usePublicPrayerTimes();
-  const next = nextCongregation(todaysTimes, jummahTimes, currentDate);
+  const next = nextHomeCongregation(todaysTimes, tomorrowsTimes, jummahTimes, currentDate);
   return (
     <aside className="jic-home-prayer" aria-label="Prayer and radio">
-      <div className="jic-home-prayer-main">
-        <p className="jic-home-eyebrow">{next ? 'Next jama’ah' : 'Prayer times'}</p>
+      <Link to="/prayer-times" className="jic-home-prayer-main" aria-label="Open prayer timetable">
+        <p className="jic-home-eyebrow">
+          {next?.tomorrow ? 'Tomorrow’s jama’ah' : next ? 'Next jama’ah' : 'Prayer times'}
+        </p>
         {next ? (
           <>
             <div className="jic-home-prayer-time">
@@ -35,11 +38,11 @@ export default function HomePrayerCard() {
               : error
                 ? 'Times are unavailable. Please check with the centre.'
                 : todaysTimes
-                  ? 'View the full timetable for prayer and Jummah times.'
+                  ? 'Today’s jama’ah times have finished.'
                   : 'Today’s times have not been published yet.'}
           </p>
         )}
-      </div>
+      </Link>
       <div className="jic-home-jummah" role="group" aria-label="Friday Jummah times">
         {[0, 1].map((index) => (
           <Link

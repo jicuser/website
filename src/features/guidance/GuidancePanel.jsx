@@ -55,7 +55,7 @@ export function UrgentHelp() {
 
 export default function GuidancePanel({
   journeyId,
-  defaultOpen = false,
+  defaultOpen = true,
   initialNode = 'start',
   onClose,
 }) {
@@ -131,7 +131,7 @@ function GuidanceSession({ journeyId, defaultOpen, initialNode, onClose }) {
               setOpen(true);
             }}
           >
-            Guide me <ArrowRight size={17} aria-hidden="true" />
+            Get started <ArrowRight size={17} aria-hidden="true" />
           </button>
         </div>
       ) : (
@@ -148,7 +148,7 @@ function GuidanceSession({ journeyId, defaultOpen, initialNode, onClose }) {
                 </button>
               )}
               {(!defaultOpen || onClose) && (
-                <button type="button" onClick={close} aria-label="Close guided help">
+                <button type="button" onClick={close} aria-label="Close questions">
                   <X size={18} aria-hidden="true" />
                 </button>
               )}
@@ -190,9 +190,7 @@ function GuidanceSession({ journeyId, defaultOpen, initialNode, onClose }) {
                   This destination is currently unavailable. Please call the centre for information.
                 </p>
               )}
-              <p className="guidance-complete">
-                You can finish here. No form or account is needed for this guidance.
-              </p>
+              <p className="guidance-complete">Choose an option above to continue.</p>
             </div>
           )}
           <footer className="guidance-footer">

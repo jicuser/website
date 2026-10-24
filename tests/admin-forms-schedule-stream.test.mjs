@@ -53,10 +53,10 @@ test('presentation status is server-derived and quick present skips the naming s
   assert.match(setup, /Presentation still live/);
 });
 
-test('public services open guides and retain the hall enquiry journey', async () => {
+test('public services keep service routes and hall questions on the same page', async () => {
   const hall = await read('src/pages/HallBookingPage.jsx');
   const services = await read('src/components/sections/services/ReligiousServicesTab.jsx');
-  assert.match(hall, /\/forms\/hall-booking/);
+  assert.match(hall, /<BuiltInForm[^>]+slug="hall-booking"/);
   assert.match(services, /\/services\/nikah/);
   assert.match(services, /\/funerals/);
 });

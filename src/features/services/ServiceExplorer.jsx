@@ -112,9 +112,7 @@ export default function ServiceExplorer({ compact = false }) {
             {compact ? 'Find what you need' : 'Community Hub'}
           </Heading>
           {!compact && (
-            <p className="service-explorer-description">
-              Browse a service or let us guide you to a useful next step.
-            </p>
+            <p className="service-explorer-description">Services, activities and support at JIC.</p>
           )}
         </div>
         {compact && directoryVisible && (

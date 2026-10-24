@@ -1,3 +1,4 @@
+import { verifyFormProtection, ProtectionError } from '../_shared/form-protection.mjs';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import { validateSubmission } from './validation.mjs';
 
@@ -36,9 +37,11 @@ Deno.serve(async (req) => {
     const bytes = new Uint8Array(size);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
-    submission = validateSubmission(JSON.parse(new TextDecoder().decode(bytes)));
+    const body = JSON.parse(new TextDecoder().decode(bytes));
+    await verifyFormProtection(req, body, { env: (key) => Deno.env.get(key) });
+    submission = validateSubmission(body);
   } catch (error) {
-    return reply(400, { error: error instanceof Error && !(error instanceof SyntaxError) ? error.message : 'Invalid form.' });
+    return reply(error instanceof ProtectionError ? error.status : 400, { error: error instanceof Error && !(error instanceof SyntaxError) ? error.message : 'Invalid form.' });
   }
 
   try {

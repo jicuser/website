@@ -44,8 +44,11 @@ test('careers questions give a useful result, backtracking clears the branch, an
 }) => {
   await prepare(page);
   await page.goto('/services/skills-careers');
-  await page.getByRole('button', { name: 'Guide me', exact: true }).click();
   const guide = page.locator('.guidance-panel');
+  await page
+    .getByRole('group', { name: 'Topics', exact: true })
+    .getByRole('button', { name: 'CV & interviews', exact: true })
+    .click();
   await guide.getByRole('button', { name: 'My CV', exact: true }).click();
   await expect(guide.getByRole('heading', { name: 'Where are you starting?' })).toBeFocused();
   await guide.getByRole('button', { name: 'I need my first CV' }).click();
@@ -77,7 +80,6 @@ test('support answers cause no writes, storage or URL changes and clear on leavi
     requests.push({ url: request.url(), method: request.method(), data: request.postData() }),
   );
   await page.getByRole('button', { name: 'Bereavement', exact: true }).click();
-  await page.getByRole('button', { name: 'Guide me', exact: true }).click();
   await guide.getByRole('button', { name: 'Support with bereavement' }).click();
   await expect(guide.getByRole('heading', { name: 'Support through bereavement' })).toBeVisible();
   expect(await storage()).toEqual(before);
@@ -85,7 +87,7 @@ test('support answers cause no writes, storage or URL changes and clear on leavi
   expect(requests.filter((request) => request.method !== 'GET')).toEqual([]);
   await page.locator('.guidance-back-link').click();
   await page.locator('.service-explorer-grid a[href="/services/support"]').click();
-  await expect(guide).toHaveCount(0);
+  await expect(guide).toBeVisible();
   await expect(page.getByRole('button', { name: 'Wellbeing', exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
@@ -117,38 +119,25 @@ test('every careers, support and family topic reaches its result without a form'
           .getByRole('group', { name: 'Topics', exact: true })
           .getByRole('button', { name: topic.label, exact: true })
           .click();
-        await page.getByRole('button', { name: 'Guide me', exact: true }).click();
         for (const name of route.choices)
           await guide.getByRole('button', { name, exact: true }).click();
         await expect(guide.getByRole('heading', { name: route.title, exact: true })).toBeVisible();
         await expect(guide.locator('form,input,textarea')).toHaveCount(0);
-        await guide.getByRole('button', { name: 'Close guided help' }).click();
+        await page.reload();
       }
     }
   }
 });
 
-test('Nikah and funeral contacts are direct and enquiry forms are opened deliberately', async ({
-  page,
-}) => {
+test('service questions and useful details share one page', async ({ page }) => {
   await prepare(page);
   for (const path of ['/services/nikah', '/funerals', '/get-involved/volunteer']) {
     await page.goto(path);
     await expect(page.locator('.service-guided-heading a[href^="tel:"]')).toBeVisible();
-    await expect(page.locator('.service-enquiry')).toHaveCount(0);
-    await page
-      .getByRole('navigation', { name: 'On this page' })
-      .getByRole('link', { name: 'What to prepare' })
-      .click();
-    await expect(
-      page.getByRole('heading', { name: 'Helpful details to have ready' }),
-    ).toBeVisible();
-    await expect(page.locator('.service-enquiry')).toHaveCount(0);
-    await page
-      .getByRole('navigation', { name: 'On this page' })
-      .getByRole('link', { name: 'Make an enquiry' })
-      .click();
-    await expect(page.locator('.service-enquiry')).toBeVisible();
+    await expect(page.locator('.service-questions')).toBeVisible();
+    await page.getByText('What to prepare', { exact: true }).click();
+    await expect(page.locator('#prepare')).toHaveAttribute('open', '');
+    await expect(page.getByRole('button', { name: 'Guide me', exact: true })).toHaveCount(0);
   }
 });
 

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarDays } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react';
 import usePosters from '@/hooks/usePosters';
 import { usePublishedPages } from '@/context/PublishedPagesContext';
 import { useContent } from '@/context/ContentContext';
@@ -19,6 +19,8 @@ export default function CommunityProgrammeList({
   listing = false,
   placementPath = '/',
 }) {
+  const rail = useRef(null);
+  const [page, setPage] = useState(0);
   const posters = usePosters();
   const pages = usePublishedPages();
   const { getContent } = useContent();
@@ -35,6 +37,15 @@ export default function CommunityProgrammeList({
       return page ? { ...item, to: pageUrl(page) } : item;
     });
   const items = programmeFeed(events, published);
+  const pagesCount = Math.ceil(items.length / 3);
+  function move(direction) {
+    const element = rail.current;
+    if (!element) return;
+    element.scrollBy({
+      left: direction * element.clientWidth,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  }
   if (!items.length && !listing) return null;
   return (
     <section className="community-programme-feed" aria-labelledby="programme-feed-title">
@@ -51,8 +62,39 @@ export default function CommunityProgrammeList({
           No activities are listed at the moment. Please contact the centre for current details.
         </p>
       )}
-      <div className="programme-feed-rows">
-        {items.slice(0, listing ? limit : 3).map((item) => {
+      {!listing && pagesCount > 1 && (
+        <nav className="programme-feed-controls" aria-label="Browse activities">
+          <button
+            type="button"
+            aria-label="Previous activities"
+            disabled={page === 0}
+            onClick={() => move(-1)}
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <span aria-live="polite">
+            {Math.min(page + 1, pagesCount)} / {pagesCount}
+          </span>
+          <button
+            type="button"
+            aria-label="Next activities"
+            disabled={page >= pagesCount - 1}
+            onClick={() => move(1)}
+          >
+            <ArrowRight size={18} />
+          </button>
+        </nav>
+      )}
+      <div
+        ref={rail}
+        className={`programme-feed-rows ${listing ? '' : 'programme-feed-carousel'}`}
+        onScroll={
+          listing
+            ? undefined
+            : () => setPage(Math.round(rail.current.scrollLeft / rail.current.clientWidth))
+        }
+      >
+        {items.slice(0, listing ? limit : undefined).map((item) => {
           const external = safeWebUrl(item.to);
           const internal =
             typeof item.to === 'string' &&

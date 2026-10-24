@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { londonDate } from '@/lib/timetable';
 
 /** The website and TV read the same published events and livestream settings. */
-export default function useHomeLiveContent({ eventLimit = 4, refreshMs = 60000 } = {}) {
+export default function useHomeLiveContent({ eventLimit = 60, refreshMs = 60000 } = {}) {
   const [content, setContent] = useState({
     events: [],
     announcement: null,

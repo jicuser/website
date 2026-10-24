@@ -61,3 +61,31 @@ export function nextCongregation(times, jummahTimes = [], date = new Date()) {
       .sort((a, b) => a.at - b.at)[0] || null
   );
 }
+
+// Use only the dated, published next-day row, including across the London DST change.
+export function nextHomeCongregation(today, tomorrow, sessions = [], date = new Date()) {
+  const next = nextCongregation(today, sessions, date);
+  if (next) return next;
+  if (!today || !tomorrow?.d_date || minutes(tomorrow.jamaah_fajr) === null) return null;
+  const day = date.toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+  const isha = minutes(today.jamaah_isha);
+  const now = minutes(
+    date.toLocaleTimeString('en-GB', {
+      timeZone: 'Europe/London',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }),
+  );
+  if ((today.d_date && today.d_date !== day) || isha === null || now <= isha) return null;
+  const expected = new Date(`${day}T12:00:00Z`);
+  expected.setUTCDate(expected.getUTCDate() + 1);
+  if (tomorrow.d_date !== expected.toISOString().slice(0, 10)) return null;
+  return {
+    name: 'Fajr',
+    time: tomorrow.jamaah_fajr,
+    begins: tomorrow.fajr,
+    beginsLabel: 'Salah begins',
+    tomorrow: true,
+  };
+}

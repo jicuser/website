@@ -12,16 +12,19 @@ import { EDITABLE_PAGES } from '../src/content/editablePages.js';
 
 const { activeNavigation } = navigation;
 
-test('compact footer keeps records under the portal', () => {
+test('compact footer omits portal sign-in while the menu retains access', () => {
   assert.deepEqual(
     FOOTER_LINKS.map((item) => item.name),
-    ['Community Hub', 'Timetable', 'Get involved', 'Contact Us', 'Portal login'],
+    ['Community Hub', 'Timetable', 'Get involved', 'Contact Us'],
   );
   assert.equal(
     FOOTER_LINKS.find((item) => item.name === 'Timetable').path,
     '/prayer-times/monthly',
   );
-  assert.equal(FOOTER_LINKS.find((item) => item.name === 'Portal login').path, '/portal');
+  assert.equal(
+    FOOTER_LINKS.some((item) => item.path === '/portal'),
+    false,
+  );
   assert.equal(
     FOOTER_LINKS.some((item) => item.name === 'Certificates'),
     false,

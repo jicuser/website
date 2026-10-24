@@ -5,7 +5,7 @@ import { hallDateStatus, hallMonthRange } from '@/lib/serviceEnquiries';
 import { CALENDAR_COLOURS, HALL_STATUSES, fullDate } from '@/lib/bookingCalendar';
 import { displayTime, londonDate } from '@/lib/timetable';
 import MonthCalendar from '@/components/calendar/MonthCalendar';
-import GuidancePanel from '@/features/guidance/GuidancePanel';
+import BuiltInForm from '@/components/sections/BuiltInForm';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
 import { useContent } from '@/context/ContentContext';
@@ -127,7 +127,6 @@ export default function HallBookingPage() {
           )}
         </section>
       ) : null}
-      <GuidancePanel journeyId="hall" />
       <div className="hall-page-content">
         <ManagedPageContent optional headingLevel={2} />
         <ManagedPageSections />
@@ -221,11 +220,11 @@ export default function HallBookingPage() {
                   Tell us your preferred time, event and guest numbers. The office will confirm the
                   details.
                 </p>
-                <div className="booking-actions">
-                  <Link className="primary" to={`/forms/hall-booking?date=${selected}`}>
-                    Enquire about this date
-                  </Link>
-                </div>
+                <BuiltInForm
+                  key={selected}
+                  slug="hall-booking"
+                  initialAnswers={{ preferred_date: selected }}
+                />
               </>
             )}
             <div className="booking-actions">

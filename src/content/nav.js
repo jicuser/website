@@ -143,5 +143,4 @@ export const FOOTER_LINKS = [
   { name: 'Timetable', path: '/prayer-times/monthly' },
   { name: 'Get involved', path: '/get-involved' },
   { name: 'Contact Us', path: '/contact' },
-  { name: 'Portal login', path: '/portal' },
 ];

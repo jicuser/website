@@ -190,45 +190,29 @@ test('Nikah and Salah alert setup open the intended public pages', async ({ page
   );
 });
 
-test('first visit is immediately usable and salawat stays stable until explicit dismissal', async ({
-  page,
-}) => {
+test('salawat closes automatically and stays dismissed for the visit', async ({ page }) => {
+  await page.clock.install();
   await setup(page, { welcome: true });
   const welcome = page.getByRole('complementary', { name: 'Salawat', exact: true });
-  await expect(welcome).toHaveCount(1);
-  await expect(page.getByRole('dialog', { name: 'Salawat' })).toHaveCount(0);
-  await page.keyboard.press('Tab');
-  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
-  await page.keyboard.press('Enter');
-  await expect(page.locator('#main-content')).toBeFocused();
-  const geometry = () =>
-    welcome.evaluate((node) => ({
-      top: node.getBoundingClientRect().top + scrollY,
-      height: node.getBoundingClientRect().height,
-      position: getComputedStyle(node).position,
-      filter: getComputedStyle(node).backdropFilter,
-    }));
-  const before = await geometry();
-  expect(before.position).toBe('static');
-  expect(before.filter).toBe('none');
-  await page.clock.install();
-  await page.clock.fastForward(60000);
-  expect(await geometry()).toEqual(before);
-  await page.locator('.jic-hero h1').click();
-  await page.locator('.jic-hero-sub').click();
-  await expect(page.locator('.jic-reflection-overlay')).toHaveCount(0);
-  await page.mouse.wheel(0, 300);
-  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
-  await expect(welcome).toHaveCount(1);
-  await welcome.getByText('Transliteration & translations', { exact: true }).click();
-  await expect(welcome).toContainText('Sallal-lahu ‘ala Sayyidina Muhammad');
-  await expect(welcome).toContainText('Allah send prayers upon our master Muhammad.');
-  await expect(welcome.locator('[lang="ur"]')).toBeVisible();
-  await welcome.getByRole('button', { name: 'Dismiss salawat' }).click();
+  await expect(welcome).toBeVisible();
+  await expect(welcome).toHaveCSS('position', 'fixed');
+  await page.clock.fastForward(6000);
   await expect(welcome).toHaveCount(0);
   await page.reload();
   await expect(welcome).toHaveCount(0);
 });
+
+for (const method of ['cross', 'outside', 'escape']) {
+  test(`salawat can be dismissed with ${method}`, async ({ page }) => {
+    await setup(page, { welcome: true });
+    const welcome = page.getByRole('complementary', { name: 'Salawat', exact: true });
+    await expect(welcome).toBeVisible();
+    if (method === 'cross') await welcome.getByRole('button', { name: 'Dismiss salawat' }).click();
+    if (method === 'outside') await page.mouse.click(5, 5);
+    if (method === 'escape') await page.keyboard.press('Escape');
+    await expect(welcome).toHaveCount(0);
+  });
+}
 
 test('mobile footer stays uncovered and Home returns to the prayer pill', async ({
   page,

@@ -153,3 +153,28 @@ test('livestream rejects insecure and credential-bearing URLs before updating se
   await expect(page.getByRole('alert')).toContainText('stream URL');
   expect(writes).toEqual([]);
 });
+
+test('livestream placement can be dragged, selected and saved with notification preferences', async ({
+  page,
+}) => {
+  const writes = await openCatalogue(page, 'livestream');
+  await page.getByLabel('Home page position', { exact: true }).selectOption('after-events');
+  await page.getByLabel('Show a website notification', { exact: true }).check();
+  const preview = page.getByLabel('Website placement preview', { exact: true });
+  const card = preview.getByRole('button', { name: 'Drag notice to choose its position' });
+  await card.scrollIntoViewIfNeeded();
+  const area = await preview.boundingBox();
+  const box = await card.boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(area.x + 25, area.y + 25, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.getByLabel('Notification position', { exact: true })).toHaveValue('top-left');
+  await page.locator('form').getByRole('button', { name: 'Save livestream', exact: true }).click();
+  await expect.poll(() => writes.length).toBe(1);
+  expect(writes[0].payload.display_settings).toEqual({
+    placement: 'after-events',
+    notification: true,
+    position: 'top-left',
+  });
+});

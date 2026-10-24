@@ -1,11 +1,15 @@
-/* A session welcome in document flow: no timed removal, blur or focus changes. */
+/* Brief, dismissible welcome; never occupies space above the footer. */
 .jic-salawat-note {
+  position: fixed;
+  z-index: 80;
+  inset: max(90px, calc(env(safe-area-inset-top) + 70px)) 12px auto;
+  box-shadow: 0 12px 40px #0005;
   display: flex;
   align-items: start;
   gap: 12px;
   width: min(680px, calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter)));
-  margin: 24px auto;
-  padding: 12px 12px 4px 16px;
+  margin: 0 auto;
+  padding: 12px 12px 10px 16px;
   border: 1px solid var(--jic-border);
   border-radius: 12px;
   background: var(--jic-surface);

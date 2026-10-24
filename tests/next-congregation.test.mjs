@@ -58,3 +58,12 @@ test('stale timetable dates and malformed times are not presented as upcoming', 
   assert.equal(at('2026-10-15T07:00:00Z', { jamaah_dhuhr: '25:99', jamaah_asr: '13:15 PM' }), null);
   assert.equal(at('2026-10-15T07:00:00Z', { jamaah_dhuhr: '13:45:00' }).time, '13:45:00');
 });
+
+test('home shows tomorrow’s published Fajr after Isha and rejects stale rows over DST', async () => {
+  const { nextHomeCongregation } = await import('../src/lib/nextCongregation.js');
+  const date = new Date('2026-10-24T22:30:00Z');
+  const tomorrow = { ...times, d_date: '2026-10-25' };
+  assert.equal(nextHomeCongregation(times, tomorrow, [], date).tomorrow, true);
+  assert.equal(nextHomeCongregation(times, { ...tomorrow, d_date: '2026-10-26' }, [], date), null);
+  assert.equal(nextHomeCongregation(times, null, [], date), null);
+});

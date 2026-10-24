@@ -104,7 +104,7 @@ const supportNodes = {
   ]),
   wellbeing: result(
     'Find wellbeing information',
-    'The NHS has information about mental health and how to access support. This guide does not assess your health.',
+    'The NHS explains mental health support and how to access it.',
     ['Open the NHS guidance to explore support options.', 'Use urgent help if you need help now.'],
     [HELP_RESOURCES.wellbeing, HELP_RESOURCES.urgent],
   ),
@@ -169,7 +169,7 @@ const supportNodes = {
   ),
   browse: result(
     'Browse help directly',
-    'Choose a resource without sharing any personal details with this guide.',
+    'Choose a resource for the support you need.',
     [],
     [HELP_RESOURCES.wellbeing, HELP_RESOURCES.practical, programmes],
   ),
@@ -304,7 +304,7 @@ export const GUIDED_JOURNEYS = {
       funeral: supportNodes.arrangements,
       support: result(
         'Support & wellbeing',
-        'Find practical information and support options without sending a form.',
+        'Find practical help and support options.',
         [],
         [link('Find the right help', '/services/support')],
       ),
@@ -339,7 +339,7 @@ export const GUIDED_JOURNEYS = {
   },
   support: {
     title: 'Find the right help',
-    description: 'Choose a topic to see useful information. No personal details are needed.',
+    description: 'Choose a topic to find support.',
     sensitive: true,
     nodes: supportNodes,
   },
@@ -349,7 +349,7 @@ export const GUIDED_JOURNEYS = {
     nodes: careersNodes,
   },
   family: {
-    title: 'Marriage & family guidance',
+    title: 'Marriage & family support',
     description: 'Choose your need to see the relevant next steps.',
     sensitive: true,
     nodes: {

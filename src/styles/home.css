@@ -650,3 +650,50 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
     min-height: 80px;
   }
 }
+
+.jic-home-prayer-main {
+  display: block;
+  padding: 12px 14px;
+  color: inherit;
+  text-decoration: none;
+}
+.jic-home-prayer-main .jic-home-eyebrow {
+  margin: 0 0 4px;
+}
+.jic-home-prayer-time {
+  gap: 12px;
+}
+.jic-home-prayer-time h2,
+.jic-home-prayer-time strong {
+  font-size: clamp(1.15rem, 4vw, 1.65rem);
+}
+.jic-home-prayer-note {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+}
+.jic-home-jummah a {
+  min-height: 44px;
+  flex-direction: row;
+  gap: 8px;
+  padding: 6px;
+}
+.jic-home-prayer-footer a {
+  min-height: 44px;
+  padding: 6px 4px;
+}
+.jic-home-community-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+  width: min(var(--jic-content-width), calc(100% - var(--jic-page-gutter) * 2));
+  margin: 12px auto 20px;
+  border-top: 1px solid var(--jic-border);
+}
+.jic-home-community-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}

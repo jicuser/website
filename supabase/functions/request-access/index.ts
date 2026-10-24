@@ -1,3 +1,4 @@
+import { verifyFormProtection, ProtectionError } from '../_shared/form-protection.mjs';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import { readJson } from '../_shared/read-json.mjs';
 const headers = {
@@ -13,6 +14,7 @@ Deno.serve(async (req) => {
   let body;
   try {
     body = await readJson(req);
+    await verifyFormProtection(req, body, { env: (key) => Deno.env.get(key) });
     if (typeof body !== 'object' || !body) throw new Error('Please complete the form.');
     if (body.website) return json({ ok: true });
     if (body.consent !== true) throw new Error('Please confirm that JIC can contact you about access.');
@@ -22,7 +24,7 @@ Deno.serve(async (req) => {
     if (body.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) throw new Error('Enter a valid email address.');
     if (String(body.message || '').length > 2000) throw new Error('Please keep the message under 2,000 characters.');
     if (!Array.isArray(body.requested_features) || body.requested_features.length > 8) throw new Error('Choose the access you need.');
-  } catch (error) { return json({ error: error.message || 'Check the form.' }, 400); }
+  } catch (error) { return json({ error: error.message || 'Check the form.' }, error instanceof ProtectionError ? error.status : 400); }
   try {
     const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const db = createClient(Deno.env.get('SUPABASE_URL')!, service, { auth: { persistSession: false, autoRefreshToken: false } });

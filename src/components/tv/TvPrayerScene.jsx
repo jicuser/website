@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TV_DHIKR } from '@/content/tvReminders';
 import { countdownParts } from '@/lib/tvCountdown';
 export default function TvPrayerScene({ sequence, jummahNotice, settings = {} }) {
@@ -42,53 +42,42 @@ export default function TvPrayerScene({ sequence, jummahNotice, settings = {} })
         </p>
       </section>
     );
-  return (
-    <section className="tv-dhikr" lang="ar" dir="rtl" aria-label={TV_DHIKR.title}>
-      <h1>{TV_DHIKR.title}</h1>
-      <div className="tv-dhikr-columns">
-        <div className="tv-dhikr-opening">
-          <div className="tv-dhikr-card">
-            <p className="tv-dhikr-counted">
-              <span>{TV_DHIKR.forgiveness.arabic}</span>
-              <DhikrCount count={TV_DHIKR.forgiveness.count} />
-            </p>
-            <p>{TV_DHIKR.peace}</p>
-          </div>
-          <div className="tv-dhikr-card">
-            <p>{TV_DHIKR.tawhid}</p>
-            <p>{TV_DHIKR.generosity}</p>
-          </div>
-        </div>
-        <div className="tv-dhikr-card tv-dhikr-kursi">
-          <h2>{TV_DHIKR.kursi.label}</h2>
-          <p>{TV_DHIKR.kursi.arabic}</p>
-        </div>
-      </div>
-      <div className="tv-dhikr-tasbih">
-        {TV_DHIKR.tasbih.map((item) => (
-          <p className="tv-dhikr-counted" key={item.arabic}>
-            <span>{item.arabic}</span>
-            <DhikrCount count={item.count} />
-          </p>
-        ))}
-      </div>
-      <div className="tv-dhikr-completion">
-        <h2>
-          {TV_DHIKR.completion.label} <DhikrCount count={TV_DHIKR.completion.count} />
-        </h2>
-        <p>{TV_DHIKR.completion.arabic}</p>
-      </div>
-    </section>
-  );
+  return <DhikrImage />;
 }
 
-function DhikrCount({ count }) {
-  const digits = String(count).replace(/\d/g, (digit) => '٠١٢٣٤٥٦٧٨٩'[Number(digit)]);
-  const label =
-    count === 1 ? 'مَرَّةٌ وَاحِدَةٌ' : `${digits} ${count < 11 ? 'مَرَّاتٍ' : 'مَرَّةً'}`;
+function DhikrImage() {
+  const frame = useRef(null);
+  const [portrait, setPortrait] = useState(false);
+  useEffect(() => {
+    const element = frame.current;
+    const measure = () => setPortrait(element.clientHeight > element.clientWidth);
+    measure();
+    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(measure) : null;
+    observer?.observe(element);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
   return (
-    <span className="tv-dhikr-count" aria-label={label}>
-      {digits} ×
-    </span>
+    <section ref={frame} className="tv-dhikr tv-dhikr-image" aria-label={TV_DHIKR.title}>
+      <img
+        src={`/tv/after-salah-${portrait ? 'portrait' : 'landscape'}.png`}
+        alt="Adhkar after salah, including Ayat al-Kursi and repetition counts"
+      />
+      <div className="sr-only" lang="ar" dir="rtl">
+        <h1>{TV_DHIKR.title}</h1>
+        <p>{TV_DHIKR.forgiveness.arabic} × ٣</p>
+        <p>{TV_DHIKR.peace}</p>
+        <p>{TV_DHIKR.tawhid}</p>
+        <p>{TV_DHIKR.generosity}</p>
+        <p>{TV_DHIKR.kursi.arabic}</p>
+        {TV_DHIKR.tasbih.map((item) => (
+          <p key={item.arabic}>{item.arabic} × ٣٣</p>
+        ))}
+        <p>{TV_DHIKR.completion.arabic} × ١</p>
+      </div>
+    </section>
   );
 }

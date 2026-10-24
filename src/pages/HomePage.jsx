@@ -1,3 +1,4 @@
+import { noticePlacement } from '@/lib/noticePlacement';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -24,8 +25,6 @@ import { isPageVisible } from '@/lib/pageVisibility';
 import { cn } from '@/lib/utils';
 
 const HomeRamadan = lazy(() => import('@/features/ramadan/HomeRamadan'));
-
-const ServiceExplorer = lazy(() => import('@/features/services/ServiceExplorer'));
 
 const DEFAULT_CARDS = [
   {
@@ -169,6 +168,30 @@ export default function HomePage() {
     (card) => !['madrassah', 'services'].includes(card.key) && isPageVisible(getContent, card.to),
   );
 
+  const renderNotices = (position) => (
+    <>
+      {announcement && noticePlacement(announcement.display_settings).placement === position && (
+        <section className="jic-announcement jic-popup-surface">
+          <Megaphone size={18} />
+          <strong>{announcement.title}</strong>
+          <span>{announcement.body}</span>
+        </section>
+      )}
+
+      {hasLiveStream && noticePlacement(livestream.display_settings).placement === position && (
+        <a href="#live" className="jic-home-live-banner">
+          <span className="jic-home-live-badge">
+            <Radio size={16} aria-hidden="true" /> Live now
+          </span>
+          <strong>{livestream.title || 'JIC Live'}</strong>
+          <span>
+            Watch <ArrowRight size={17} aria-hidden="true" />
+          </span>
+        </a>
+      )}
+    </>
+  );
+
   return (
     <div className="jic-premium-home">
       <section className="jic-hero">
@@ -202,25 +225,7 @@ export default function HomePage() {
       </section>
 
       <div className="jic-home-content">
-        {announcement && (
-          <section className="jic-announcement jic-popup-surface">
-            <Megaphone size={18} />
-            <strong>{announcement.title}</strong>
-            <span>{announcement.body}</span>
-          </section>
-        )}
-
-        {hasLiveStream && (
-          <a href="#live" className="jic-home-live-banner">
-            <span className="jic-home-live-badge">
-              <Radio size={16} aria-hidden="true" /> Live now
-            </span>
-            <strong>{livestream.title || 'JIC Live'}</strong>
-            <span>
-              Watch <ArrowRight size={17} aria-hidden="true" />
-            </span>
-          </a>
-        )}
+        {renderNotices('before-events')}
 
         {getContent('ramadan:home-enabled', 'false') === 'true' && (
           <Suspense fallback={null}>
@@ -228,29 +233,22 @@ export default function HomePage() {
           </Suspense>
         )}
 
-        <Suspense
-          fallback={
-            <p className="jic-home-section" role="status">
-              Loading services…
-            </p>
-          }
-        >
-          <ServiceExplorer compact />
-        </Suspense>
-
         <CommunityProgrammeList events={events} />
+        {renderNotices('after-events')}
 
-        {communityCards.length > 0 && (
-          <section className="jic-home-section" aria-labelledby="home-community-title">
-            <h2 id="home-community-title">Community at JIC</h2>
-            <nav className="jic-home-community-grid" aria-label="Community and services">
-              {communityCards.map(({ key, ...card }) => (
-                <HomeDestination key={key} {...card} />
-              ))}
-            </nav>
-          </section>
-        )}
+        <nav className="jic-home-community-links" aria-label="More from JIC">
+          <Link to="/services">
+            Community Hub <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+          {communityCards.map((card) => (
+            <Link key={card.key} to={card.to}>
+              {card.key === 'projects' ? 'Our projects' : 'Youth'}{' '}
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          ))}
+        </nav>
 
+        {renderNotices('after-community')}
         {hasLiveStream && (
           <section id="live" className="jic-live-section">
             <div className="jic-live-heading">

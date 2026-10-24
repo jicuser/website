@@ -1,3 +1,4 @@
+import HumanCheck from '@/components/HumanCheck';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import PageMetadata from '@/components/shell/PageMetadata';
@@ -23,15 +24,21 @@ export default function PublicFormPage() {
   if (auth.loading && !auth.user)
     return (
       <div className="community-workspace public-custom-form">
-        <p role="status">Loading form…</p>
+        <p role="status">Loading questions…</p>
       </div>
     );
   return <PublicForm key={`${slug}:${auth.user?.id || 'anonymous'}`} slug={slug} />;
 }
 
-export function EmbeddedPublicForm({ slug, subject = '', title, headingLevel = 2 }) {
+export function EmbeddedPublicForm({
+  slug,
+  subject = '',
+  title,
+  headingLevel = 2,
+  initialAnswers = {},
+}) {
   const auth = useAuth();
-  if (auth.loading && !auth.user) return <p role="status">Loading form…</p>;
+  if (auth.loading && !auth.user) return <p role="status">Loading questions…</p>;
   return (
     <PublicForm
       key={`${slug}:${subject}:${auth.user?.id || 'anonymous'}`}
@@ -40,11 +47,19 @@ export function EmbeddedPublicForm({ slug, subject = '', title, headingLevel = 2
       subject={subject}
       titleOverride={title}
       headingLevel={headingLevel}
+      initialAnswers={initialAnswers}
     />
   );
 }
 
-function PublicForm({ slug, embedded = false, subject = '', titleOverride, headingLevel = 2 }) {
+function PublicForm({
+  slug,
+  embedded = false,
+  subject = '',
+  titleOverride,
+  headingLevel = 2,
+  initialAnswers = {},
+}) {
   const auth = useAuth();
   const { search } = useLocation();
   const requestedProgramme = programmeSlugFromSearch(search);
@@ -57,11 +72,15 @@ function PublicForm({ slug, embedded = false, subject = '', titleOverride, headi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const service = serviceEnquiry(slug);
-  const [answers, setAnswers] = useState(() => hallFormPrefill(slug, search));
+  const [answers, setAnswers] = useState(() => ({
+    ...hallFormPrefill(slug, search),
+    ...initialAnswers,
+  }));
   const [uploads, setUploads] = useState({});
   const [busy, setBusy] = useState(false);
   const [receipt, setReceipt] = useState('');
   const attempt = useRef(crypto.randomUUID());
+  const protection = useRef(null);
   const mounted = useRef(true);
   const activeUploads = useRef(new Map());
   const FormHeading = embedded && headingLevel !== 1 ? 'h2' : 'h1';
@@ -216,13 +235,13 @@ function PublicForm({ slug, embedded = false, subject = '', titleOverride, headi
             <Link to={programme.to}>← Back to {programme.title}</Link>
           </p>
         )}
-        {service && !programme && !receipt && (
+        {service && !embedded && !programme && !receipt && (
           <p>
             <Link to={service.page}>← Back to {service.pageName}</Link>
           </p>
         )}
         {loading ? (
-          <p role="status">Loading form…</p>
+          <p role="status">Loading questions…</p>
         ) : receipt ? (
           <div className="workspace-card">
             {embedded ? <h2>Thank you</h2> : <h1>Thank you</h1>}
@@ -280,6 +299,7 @@ function PublicForm({ slug, embedded = false, subject = '', titleOverride, headi
                   .map(([, item]) => ({ id: item.id, upload_token: item.upload_token }));
                 const result = await formAction(supabase, {
                   action: 'submit',
+                  security: protection.current.proof(),
                   slug,
                   version: form.version,
                   answers: payload,
@@ -294,18 +314,17 @@ function PublicForm({ slug, embedded = false, subject = '', titleOverride, headi
               } catch (failure) {
                 setError(failure.message);
               } finally {
+                protection.current?.reset();
                 setBusy(false);
               }
             }}
           >
-            <FormHeading>{titleOverride || form.title}</FormHeading>
-            <p>{form.description}</p>
-            <p className="workspace-meta">
-              Your response goes to the centre. Bookings and places need confirmation.
-            </p>
+            {!embedded && <FormHeading>{titleOverride || form.title}</FormHeading>}
+            {!embedded && <p>{form.description}</p>}
             <p className="workspace-meta">
               <Link to="/privacy">How we use your information</Link>
             </p>
+            <HumanCheck ref={protection} />
           </SmartForm>
         ) : (
           !error && (

@@ -28,6 +28,7 @@ jobs:
       VITE_ENABLE_CERTIFICATES: ${{ inputs.certificates && 'true' || 'false' }}
       VITE_WONDERFUL_DONATE_URL: ${{ vars.VITE_WONDERFUL_DONATE_URL }}
       VITE_MEDIA_RELAY_URL: ${{ vars.VITE_MEDIA_RELAY_URL }}
+      VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

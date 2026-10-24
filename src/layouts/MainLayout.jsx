@@ -1,3 +1,7 @@
+import { noticePlacement } from '@/lib/noticePlacement';
+import SiteNotice from '@/components/shell/SiteNotice';
+import useHomeLiveContent from '@/hooks/useHomeLiveContent';
+import { safeWebUrl } from '@/lib/video';
 import { useContent } from '@/context/ContentContext';
 import { isPageVisible } from '@/lib/pageVisibility';
 import React, { lazy, Suspense } from 'react';
@@ -40,6 +44,7 @@ function PublicLayout() {
   const { pathname: routePath, search } = useLocation();
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const { isAdmin } = useAuth();
+  const { announcement, livestream } = useHomeLiveContent({ eventLimit: 1 });
   const { getContent } = useContent();
   const visible = isPageVisible(getContent, pathname) || isAdmin;
   const preview = new URLSearchParams(search).get('preview') === '1';
@@ -90,8 +95,8 @@ function PublicLayout() {
               <ManagedPageSections key={pathname} />
             )}
             {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
-            {!isDiscovery && !isTask && <PublishedPageLinks />}
-            {!isAbout && !isDiscovery && !isTask && <RelatedContent />}
+            {!isHome && !isDiscovery && !isTask && <PublishedPageLinks />}
+            {!isHome && !isAbout && !isDiscovery && !isTask && <RelatedContent />}
           </div>
         ) : (
           <section className="jic-page-loading">
@@ -101,7 +106,14 @@ function PublicLayout() {
           </section>
         )}
       </main>
-      {!preview && !isTask && <SpiritualOverlays />}
+      {!preview && isHome && <SpiritualOverlays />}
+      {!preview &&
+        !isTask &&
+        (announcement && noticePlacement(announcement.display_settings).notification ? (
+          <SiteNotice item={announcement} />
+        ) : livestream?.enabled && safeWebUrl(livestream.stream_url) ? (
+          <SiteNotice item={livestream} prefix="live" to="/#live" />
+        ) : null)}
       <Footer />
       <ScrollToTop />
       {isAdmin && !preview && (

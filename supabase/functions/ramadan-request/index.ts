@@ -1,3 +1,4 @@
+import { verifyFormProtection, ProtectionError } from '../_shared/form-protection.mjs';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import { readJson } from '../_shared/read-json.mjs';
 const headers = {
@@ -13,6 +14,7 @@ Deno.serve(async (req) => {
   let body;
   try {
     body = await readJson(req);
+    await verifyFormProtection(req, body, { env: (key) => Deno.env.get(key) });
     if (!body || typeof body !== 'object' || Array.isArray(body))
       throw new Error('Check your details.');
     if (body.website) return json({ reference: 'REQUEST-RECEIVED' });
@@ -64,7 +66,7 @@ Deno.serve(async (req) => {
     )
       throw new Error('Check your request.');
   } catch (error) {
-    return json({ error: error.message || 'Check your details.' }, 400);
+    return json({ error: error.message || 'Check your details.' }, error instanceof ProtectionError ? error.status : 400);
   }
   try {
     const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

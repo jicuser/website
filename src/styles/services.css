@@ -1055,3 +1055,27 @@
   :is(.service-explorer-card-description, .service-explorer-card-arrow) {
   display: none;
 }
+
+.service-page--questions {
+  max-width: 800px;
+}
+.service-questions .public-custom-form.is-embedded {
+  padding: 0;
+  background: transparent;
+}
+.service-questions .workspace-wrap {
+  padding: 0;
+}
+.service-questions .workspace-card {
+  padding: 16px;
+  border-radius: 14px;
+}
+.service-questions .workspace-smart-form > .workspace-meta {
+  margin: 0;
+}
+.service-information {
+  margin-top: 20px;
+}
+.service-information .service-steps {
+  margin-top: 12px;
+}

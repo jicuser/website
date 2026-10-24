@@ -820,8 +820,8 @@ html[data-prayer-dock-hidden='true'] .jic-daily-reminder:not(:has(:focus-visible
     font-weight: 600;
   }
   .jic-public-route {
-    /* Reserve the prayer pill and home-indicator inset once. */
-    padding-bottom: calc(var(--jic-mobile-visible-dock-height) + 12px);
+    /* Keep the footer flush; its own safe-area padding handles the home indicator. */
+    padding-bottom: 0;
   }
   .jic-mobile-dock {
     position: fixed;

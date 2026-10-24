@@ -1,3 +1,4 @@
+import { verifyFormProtection, publicProtectionConfig, ProtectionError } from '../_shared/form-protection.mjs';
 import { createClient } from 'npm:@supabase/supabase-js@2.30.0';
 import { validateUpload, hasExpectedSignature, safeFilename, responsesCsv } from './validation.mjs';
 import { createZip } from './zip.mjs';
@@ -55,6 +56,8 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return reply(405, { error: 'Use POST.' });
   try {
     const body = await readJson(req);
+    if (body.action === 'security_config') return reply(200, publicProtectionConfig((key) => Deno.env.get(key)));
+    if (body.action === 'submit') await verifyFormProtection(req, body, { env: (key) => Deno.env.get(key) });
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'), url = Deno.env.get('SUPABASE_URL');
     if (!serviceKey || !url) throw new RequestError('Form service is not configured.', 503);
     const client = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -161,6 +164,7 @@ Deno.serve(async (req) => {
     }
     throw new RequestError('Unknown form action.');
   } catch (error) {
+    if (error instanceof ProtectionError) return reply(error.status, { error: error.message });
     if (error instanceof RequestError) return reply(error.status, { error: error.message });
     if (error instanceof SyntaxError) return reply(400, { error: 'Invalid JSON request.' });
     // Validation errors contain only fixed labels/field names, never answers or credentials.

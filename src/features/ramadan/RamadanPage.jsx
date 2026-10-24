@@ -1,3 +1,4 @@
+import HumanCheck from '@/components/HumanCheck';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Moon, Sun, ArrowRight } from 'lucide-react';
@@ -42,6 +43,7 @@ export default function RamadanPage({ kind = null }) {
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [receipt, setReceipt] = useState('');
+  const protection = useRef(null);
   const requestKey = useRef(crypto.randomUUID()),
     table = useRef(null);
   const target = season?.[`${kind}_target_pence`] || 0;
@@ -130,6 +132,7 @@ export default function RamadanPage({ kind = null }) {
         phone = email ? '' : contact.trim();
       const result = await supabase.functions.invoke('ramadan-request', {
         body: {
+          security: protection.current.proof(),
           season_id: season.id,
           kind,
           dates: selected,
@@ -157,6 +160,7 @@ export default function RamadanPage({ kind = null }) {
       setError(failure.message);
       state.refresh();
     } finally {
+      protection.current?.reset();
       setBusy(false);
     }
   }
@@ -387,6 +391,7 @@ export default function RamadanPage({ kind = null }) {
                       : 'Tap an available day to get started.'}
                 </p>
                 <small>The team will arrange confirmation and payment.</small>
+                <HumanCheck ref={protection} />
               </SmartForm>
             ) : (
               <section className="booking-panel sponsorship-request-prompt">

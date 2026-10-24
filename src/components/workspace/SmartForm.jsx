@@ -141,7 +141,7 @@ export default function SmartForm({
               focusHeading();
             }}
           >
-            {all ? 'Guide me step by step' : 'Show all questions'}
+            {all ? 'One step at a time' : 'Show all questions'}
           </button>
         )}
       </div>
@@ -206,9 +206,7 @@ export default function SmartForm({
         </p>
       )}
       <p className="workspace-meta smart-form-note">
-        {review
-          ? 'Check these answers before sending.'
-          : 'Questions adapt to your answers. Fields marked * are required.'}
+        {review ? 'Check these answers before sending.' : 'Fields marked * are required.'}
       </p>
       {active.some((field) => ['file', 'image'].includes(field.type)) && !review && (
         <p className="workspace-meta">

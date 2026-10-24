@@ -1,6 +1,5 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import {
-  ArrowRight,
   BookOpen,
   Briefcase,
   Compass,
@@ -32,14 +31,11 @@ const icons = {
 export default function GuidanceTopics({ journeyId }) {
   const topics = GUIDANCE_TOPICS[journeyId];
   const [selected, setSelected] = useState(0);
-  const [guiding, setGuiding] = useState(false);
-  const startButton = useRef(null);
   const detailsId = useId();
   const topic = topics[selected];
   useEffect(() => {
     const clear = () => {
       setSelected(0);
-      setGuiding(false);
     };
     window.addEventListener('pagehide', clear);
     return () => window.removeEventListener('pagehide', clear);
@@ -57,7 +53,6 @@ export default function GuidanceTopics({ journeyId }) {
               aria-controls={detailsId}
               onClick={() => {
                 setSelected(index);
-                setGuiding(false);
               }}
             >
               <Icon size={19} aria-hidden="true" />
@@ -67,30 +62,12 @@ export default function GuidanceTopics({ journeyId }) {
         })}
       </div>
       <div className="guidance-topic-detail" id={detailsId}>
-        {guiding ? (
-          <GuidancePanel
-            journeyId={journeyId}
-            initialNode={topic.node}
-            defaultOpen
-            onClose={() => {
-              setGuiding(false);
-              requestAnimationFrame(() => startButton.current?.focus());
-            }}
-          />
-        ) : (
-          <>
-            <h2>{topic.label}</h2>
-            <p>{topic.description}</p>
-            <button
-              ref={startButton}
-              type="button"
-              className="guidance-start"
-              onClick={() => setGuiding(true)}
-            >
-              Guide me <ArrowRight size={17} aria-hidden="true" />
-            </button>
-          </>
-        )}
+        <GuidancePanel
+          key={topic.node}
+          journeyId={journeyId}
+          initialNode={topic.node}
+          defaultOpen
+        />
       </div>
     </section>
   );
