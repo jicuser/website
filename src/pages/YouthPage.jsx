@@ -1,9 +1,10 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { BookOpen, Heart, Trophy } from 'lucide-react';
+import { BookOpen, Heart, Moon, Trophy } from 'lucide-react';
 import GuidancePanel from '@/features/guidance/GuidancePanel';
 import PageHeading from '@/components/PageHeading';
+import PageChoices from '@/components/PageChoices';
 import ItikaafRegistrationForm from '@/components/sections/youth/ItikaafRegistrationForm';
 
 const PAGE_TITLE = 'Youth | Jamatia Islamic Centre';
@@ -12,47 +13,31 @@ const META_DESCRIPTION = 'Youth programmes and activities at Jamatia Islamic Cen
 const activities = [
   {
     title: 'Faith & Learning',
-    text: 'Ask about youth circles, Islamic studies and learning at the centre.',
+    text: 'Classes and study circles.',
     icon: BookOpen,
+    path: '/youth/classes-skills',
   },
   {
-    title: 'Community Service',
-    text: 'Ask about volunteering and how young people can help at JIC.',
+    title: 'Volunteering',
+    text: 'Find ways to help at JIC.',
     icon: Heart,
+    path: '/youth/volunteering',
   },
   {
     title: 'Social & Sports',
-    text: 'Check which activities are currently available and how to take part.',
+    text: 'Explore current activities.',
     icon: Trophy,
+    path: '/youth/activities',
   },
+  { title: 'I’tikaf', text: 'Registration and information.', icon: Moon, path: '/youth/itikaf' },
 ];
 
 function YouthActivitiesSection() {
   return (
-    <section
-      id="activities"
-      className="jic-anchor-target py-6 md:py-8"
-      aria-label="Youth activities"
-    >
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-5xl">
-          <div className="grid gap-4 md:grid-cols-3">
-            {activities.map(({ title, text, icon: Icon }) => (
-              <article
-                key={title}
-                className="rounded-2xl border border-border bg-card p-5 shadow-sm"
-              >
-                <div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
-                  <Icon size={22} />
-                </div>
-                <h2 className="text-lg font-bold text-card-foreground">{title}</h2>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
+    <PageChoices
+      label="Youth activities"
+      items={activities.map(({ text, ...item }) => ({ ...item, description: text }))}
+    />
   );
 }
 
@@ -89,11 +74,6 @@ export default function YouthPage({ view = 'overview' }) {
     <>
       <Helmet>
         <title>
-          {view === 'overview' && (
-            <div className="guidance-page-width">
-              <GuidancePanel journeyId="youth" />
-            </div>
-          )}
           {view === 'itikaf' ? "I'tikaf Registration | Jamatia Islamic Centre" : PAGE_TITLE}
         </title>
         <meta name="description" content={META_DESCRIPTION} />
@@ -104,12 +84,12 @@ export default function YouthPage({ view = 'overview' }) {
             Activities, learning and opportunities for young people.
           </PageHeading>
         )}
+        {view === 'itikaf' ? <YouthRegistrationSection /> : <YouthActivitiesSection />}
         {view === 'overview' && (
           <div className="guidance-page-width">
             <GuidancePanel journeyId="youth" />
           </div>
         )}
-        {view === 'itikaf' ? <YouthRegistrationSection /> : <YouthActivitiesSection />}
       </div>
     </>
   );

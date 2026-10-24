@@ -27,6 +27,15 @@
   padding: calc(48px + max(6px, env(safe-area-inset-top))) max(8px, env(safe-area-inset-right)) 0
     max(8px, env(safe-area-inset-left));
 }
+.jic-inner-route .jic-unified-inner {
+  width: min(calc(var(--jic-content-width) + 32px), 100%);
+  padding-top: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--jic-border);
+}
+.jic-inner-route .jic-unified-header.is-task-mode {
+  padding-top: max(8px, env(safe-area-inset-top));
+}
 .jic-unified-info {
   overflow: hidden;
   border: 1px solid var(--jic-glass-border);

@@ -218,7 +218,7 @@ test('glass text retains 4.5:1 contrast over the page veil at both photo extreme
     const tokens = Object.fromEntries(
       rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]),
     );
-    for (const route of ['', ' .jic-inner-route']) {
+    for (const route of ['']) {
       const veilSelector =
         route && selector === 'html[data-theme]' ? 'html[data-theme=light]' : selector;
       const veilRule = postcss
@@ -265,6 +265,34 @@ test('glass text retains 4.5:1 contrast over the page veil at both photo extreme
         }
       }
     }
+  }
+});
+
+test('inner-page text and actions retain accessible contrast on every shared surface', () => {
+  const css = postcss.parse(
+    readFileSync(new URL('../src/styles/liquid-glass.css', import.meta.url), 'utf8'),
+  );
+  const palette = (selector) =>
+    Object.fromEntries(
+      css.nodes
+        .find((node) => node.type === 'rule' && node.selector.replace(/["']/g, '') === selector)
+        .nodes.filter((node) => node.type === 'decl')
+        .map((node) => [node.prop, node.value]),
+    );
+  const light = palette('html[data-theme] .jic-public-route.jic-inner-route');
+  const dark = { ...light, ...palette('html[data-theme=dark] .jic-public-route.jic-inner-route') };
+  for (const tokens of [light, dark]) {
+    for (const background of [
+      '--jic-bg',
+      '--jic-bg-secondary',
+      '--jic-surface',
+      '--jic-control-active',
+    ]) {
+      for (const text of ['--jic-text', '--jic-text-secondary', '--jic-gold-strong']) {
+        assert.ok(contrast(tokens[text], tokens[background]) >= 4.5, `${text} on ${background}`);
+      }
+    }
+    assert.ok(contrast(tokens['--jic-primary-bg'], tokens['--jic-primary-ink']) >= 4.5);
   }
 });
 

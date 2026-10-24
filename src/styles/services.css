@@ -1016,3 +1016,42 @@
   width: min(var(--jic-content-width), calc(100% - 32px));
   margin: 24px auto;
 }
+.service-explorer-group + .service-explorer-group {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--jic-border);
+}
+.service-explorer-group > h2 {
+  margin-bottom: 12px;
+}
+.service-explorer--full > .guidance-panel {
+  margin: 24px 0 0;
+}
+.service-explorer--full.is-browsing .service-explorer-card {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-height: 76px;
+  padding: 12px;
+  gap: 10px;
+  border-radius: 12px;
+}
+.service-explorer--full.is-browsing .service-explorer-card-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  padding: 0;
+  background: transparent;
+}
+.service-explorer--full.is-browsing .service-explorer-card-copy {
+  flex: 1;
+  min-width: 0;
+}
+.service-explorer--full.is-browsing .service-explorer-card h3 {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+.service-explorer--full.is-browsing
+  :is(.service-explorer-card-description, .service-explorer-card-arrow) {
+  display: none;
+}

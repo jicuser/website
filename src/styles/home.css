@@ -5,12 +5,6 @@ html[data-theme] {
 html[data-theme='dark'] {
   --jic-photo-veil: rgba(3, 9, 15, 0.66);
 }
-html[data-theme='light'] .jic-inner-route {
-  --jic-photo-veil: rgba(250, 251, 253, 0.84);
-}
-html[data-theme='dark'] .jic-inner-route {
-  --jic-photo-veil: rgba(3, 9, 15, 0.76);
-}
 /* Accessibility preferences give unboxed copy a predictable reading surface. */
 @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
   html[data-theme],
@@ -18,7 +12,7 @@ html[data-theme='dark'] .jic-inner-route {
     --jic-photo-veil: var(--jic-bg);
   }
 }
-/* One stationary photograph sits behind the whole public document. */
+/* The photograph belongs to the home page; inner pages use a quiet reading canvas. */
 .jic-public-route {
   position: relative;
   isolation: isolate;
@@ -46,9 +40,6 @@ html[data-theme='dark'] .jic-inner-route {
 }
 html[data-theme='light'] .jic-page-backdrop img {
   filter: brightness(1.2) saturate(0.75);
-}
-html[data-theme='dark'] .jic-inner-route .jic-page-backdrop img {
-  filter: brightness(1.12) saturate(0.9);
 }
 html[data-theme] .jic-public-route :is(.jic-public-main, .page-transition) {
   background: transparent;

@@ -76,14 +76,15 @@
 }
 .jic-programme-card {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: 68px minmax(0, 1fr);
   border: 1px solid var(--jic-border);
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   background: var(--jic-surface);
   color: var(--jic-text);
 }
 .jic-poster-button {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -97,7 +98,7 @@
 .jic-poster-button img {
   display: block;
   width: 100%;
-  height: 128px;
+  height: 90px;
   object-fit: contain;
   object-position: center;
 }
@@ -107,7 +108,10 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 4px;
-  font-size: 12px;
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  font-size: 11px;
   line-height: 1.3;
   padding: 5px 3px;
   background: #0c1930e8;
@@ -124,12 +128,12 @@
 }
 .jic-programme-copy h3 {
   margin: 0;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 650;
   line-height: 1.25;
 }
 .jic-programme-copy p {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--jic-text-secondary);
   margin: 0;
@@ -168,13 +172,13 @@
 .jic-programme-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 10px;
 }
 .jic-programme-listing .jic-programme-card {
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: 80px minmax(0, 1fr);
 }
 .jic-programme-listing .jic-poster-button img {
-  height: 160px;
+  height: 110px;
 }
 .jic-related {
   display: flex;

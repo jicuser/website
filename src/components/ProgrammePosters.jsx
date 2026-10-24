@@ -7,7 +7,6 @@ import { usePublishedPages } from '@/context/PublishedPagesContext';
 import { pageUrl } from '@/lib/pageContent';
 import { posterAppearsOnPage, posterWebsiteLocations } from '@/lib/programmePlacement';
 import ImageViewer from '@/components/ImageViewer';
-import SwipeRail from '@/components/SwipeRail';
 import AnnouncementViewer from '@/components/posters/AnnouncementViewer';
 
 export default function ProgrammePosters({ listing = false }) {
@@ -61,8 +60,8 @@ export default function ProgrammePosters({ listing = false }) {
             width="1224"
             height="1730"
           />
-          <span>
-            <Expand size={16} /> View poster
+          <span aria-hidden="true">
+            <Expand size={14} />
           </span>
         </button>
       )}
@@ -89,23 +88,21 @@ export default function ProgrammePosters({ listing = false }) {
           <div className="jic-programme-grid">{cards}</div>
         </section>
       ) : (
-        <SwipeRail
-          title={
-            group === 'home'
-              ? 'What’s on'
-              : ['education', 'madrassah', 'worship'].includes(group)
-                ? 'Classes & gatherings'
-                : 'Notices & activities'
-          }
-          className="jic-programmes"
-          action={
+        <section className="jic-rail-section jic-programmes" aria-label="Notices and activities">
+          <header className="jic-rail-heading">
+            <h2>
+              {group === 'home'
+                ? 'What’s on'
+                : ['education', 'madrassah', 'worship'].includes(group)
+                  ? 'Classes & gatherings'
+                  : 'Notices & activities'}
+            </h2>
             <Link className="jic-rail-all" to="/education/programmes">
               View all programmes <ArrowRight size={16} aria-hidden="true" />
             </Link>
-          }
-        >
-          {cards}
-        </SwipeRail>
+          </header>
+          <div className="jic-programme-grid">{cards}</div>
+        </section>
       )}
       {selected?.kind === 'announcement' ? (
         <AnnouncementViewer poster={selected} onClose={() => setSelected(null)} />

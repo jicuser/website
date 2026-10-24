@@ -15,21 +15,11 @@ const { activeNavigation } = navigation;
 test('compact footer keeps records under the portal', () => {
   assert.deepEqual(
     FOOTER_LINKS.map((item) => item.name),
-    [
-      'Donate',
-      'Get involved',
-      'Portal login',
-      'Contact Us',
-      'Download Salah timetable',
-      'Services',
-      'Our Masjid Project',
-      'Education',
-      'Youth',
-    ],
+    ['Community Hub', 'Timetable', 'Get involved', 'Contact Us', 'Portal login'],
   );
   assert.equal(
-    FOOTER_LINKS.find((item) => item.name === 'Download Salah timetable').path,
-    '/prayer-times/monthly#phone-wallpaper',
+    FOOTER_LINKS.find((item) => item.name === 'Timetable').path,
+    '/prayer-times/monthly',
   );
   assert.equal(FOOTER_LINKS.find((item) => item.name === 'Portal login').path, '/portal');
   assert.equal(

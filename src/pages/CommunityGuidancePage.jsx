@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { ArrowLeft } from 'lucide-react';
 import ManagedPageContent from '@/components/ManagedPageContent';
-import GuidancePanel, { GuidanceLink, UrgentHelp } from '@/features/guidance/GuidancePanel';
+import { GuidanceLink, UrgentHelp } from '@/features/guidance/GuidancePanel';
+import GuidanceTopics from '@/features/guidance/GuidanceTopics';
 import { GUIDANCE_PAGES } from '@/features/guidance/journeys';
 
 export default function CommunityGuidancePage({ kind }) {
@@ -14,14 +15,20 @@ export default function CommunityGuidancePage({ kind }) {
         <title>{page.title} | Jamatia Islamic Centre</title>
         <meta name="description" content={page.intro} />
       </Helmet>
-      <Link className="guidance-back-link" to="/services">
-        <ArrowLeft size={16} aria-hidden="true" /> Community Hub
-      </Link>
-      <header className="community-guidance-heading">
-        <ManagedPageContent fallbackTitle={page.title} fallbackBody={page.intro} />
-      </header>
-      {['support', 'family'].includes(kind) && <UrgentHelp />}
-      <GuidancePanel journeyId={page.journey} defaultOpen />
+      <div className="community-guidance-workspace">
+        <header className="community-guidance-heading">
+          <Link className="guidance-back-link guidance-eyebrow" to="/services">
+            <ArrowLeft size={14} aria-hidden="true" /> JIC · Community Hub
+          </Link>
+          <ManagedPageContent
+            className="is-unframed"
+            fallbackTitle={page.title}
+            fallbackBody={page.intro}
+          />
+        </header>
+        {['support', 'family'].includes(kind) && <UrgentHelp />}
+        <GuidanceTopics key={kind} journeyId={page.journey} />
+      </div>
       <nav className="guidance-direct-links" aria-label="Browse directly">
         <span>Go straight to</span>
         {page.links.map((item) => (

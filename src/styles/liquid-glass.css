@@ -74,6 +74,55 @@ html[data-theme][data-surface='glass']
   --jic-gold: var(--jic-glass-accent);
 }
 
+/* Inner pages share an opaque canvas and three surface levels. Glass is reserved
+ * for the photographic home page and transient overlays. */
+html[data-theme] .jic-public-route.jic-inner-route {
+  --jic-bg: #f4f5f7;
+  --jic-bg-secondary: #edf0f4;
+  --jic-surface: #fffefa;
+  --jic-text: #182d43;
+  --jic-text-secondary: #536174;
+  --jic-muted: #536174;
+  --jic-border: #d7dde5;
+  --jic-gold: #805b21;
+  --jic-gold-strong: #805b21;
+  --jic-primary-bg: #183149;
+  --jic-primary-ink: #ffffff;
+  --jic-control-active: #fff1d4;
+  --jic-glass-control: var(--jic-bg-secondary);
+  --jic-glass-tile: var(--jic-surface);
+  --jic-glass-panel: var(--jic-surface);
+  --jic-glass-panel-strong: var(--jic-surface);
+  --jic-glass-border: var(--jic-border);
+  --jic-glass-ink: #182d43;
+  --jic-glass-muted: #536174;
+  --jic-glass-accent: #805b21;
+  --jic-glass-shadow: none;
+  --jic-glass-control-sheen: none;
+  --jic-glass-tile-sheen: none;
+  --jic-glass-panel-sheen: none;
+  --jic-glass-control-filter: none;
+  --jic-glass-panel-filter: none;
+  --jic-glass-dense-filter: none;
+}
+html[data-theme='dark'] .jic-public-route.jic-inner-route {
+  --jic-bg: #0d1724;
+  --jic-bg-secondary: #1c2c3e;
+  --jic-surface: #152335;
+  --jic-text: #eff3f8;
+  --jic-text-secondary: #bac6d5;
+  --jic-muted: #bac6d5;
+  --jic-border: #344457;
+  --jic-gold: #e3bb70;
+  --jic-gold-strong: #e3bb70;
+  --jic-glass-ink: #eff3f8;
+  --jic-glass-muted: #bac6d5;
+  --jic-glass-accent: #e3bb70;
+  --jic-primary-bg: #e3bb70;
+  --jic-primary-ink: #14273b;
+  --jic-control-active: #2b3744;
+}
+
 /* Named controls and data-glass opt in. Plain buttons, image triggers and staff
  * actions retain their own appearance. Both modes use this same material owner. */
 html[data-theme]
@@ -120,7 +169,6 @@ html[data-theme]
     .jic-secondary-cta,
     .jic-unified-subnav-link,
     .jic-footer-donate,
-    .jic-footer-icons a,
     .jic-scroll-top,
     .jic-rail-controls button,
     .extension-hub-controls button,
@@ -337,7 +385,7 @@ html[data-theme]
   ) {
   border-color: var(--jic-gold);
   box-shadow:
-    inset 0 -3px var(--jic-gold),
+    inset 0 -1px var(--jic-gold),
     var(--jic-glass-shadow);
   font-weight: 750;
 }
@@ -420,6 +468,19 @@ html[data-theme]
     .portal-signin button[type='submit']
   ) {
   border-color: var(--jic-gold);
+}
+
+html[data-theme] .jic-inner-route :is(.ops-button, .service-button.is-primary, .jic-solid-link) {
+  background: var(--jic-primary-bg);
+  border-color: var(--jic-primary-bg);
+  color: var(--jic-primary-ink);
+}
+html[data-theme]
+  .jic-inner-route
+  :is(.ops-toggle, .ops-amounts, .ops-tabs, .service-explorer-categories)
+  button[aria-pressed='true'] {
+  background: var(--jic-control-active);
+  color: var(--jic-text);
 }
 
 html[data-theme] .jic-public-route .service-explorer-search input {

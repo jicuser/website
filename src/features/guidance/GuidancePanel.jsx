@@ -43,35 +43,41 @@ export function UrgentHelp() {
   return (
     <aside className="guidance-urgent" aria-label="Urgent and specialist help">
       <p>
-        <strong>Immediate danger?</strong> Call <a href="tel:999">999</a>. You can go directly to
-        specialist help.
+        <strong>Immediate danger?</strong> Call <a href="tel:999">999</a>.
       </p>
       <div>
         <GuidanceLink item={HELP_RESOURCES.urgent} />
-        <GuidanceLink item={HELP_RESOURCES.safety} />
+        <GuidanceLink item={{ ...HELP_RESOURCES.safety, label: 'Domestic abuse support' }} />
       </div>
     </aside>
   );
 }
 
-export default function GuidancePanel({ journeyId, defaultOpen = false }) {
+export default function GuidancePanel({
+  journeyId,
+  defaultOpen = false,
+  initialNode = 'start',
+  onClose,
+}) {
   const location = useLocation();
   // A route change discards temporary answers, even when a page component is reused.
   return (
     <GuidanceSession
-      key={`${journeyId}:${location.pathname}`}
+      key={`${journeyId}:${location.pathname}:${initialNode}`}
       journeyId={journeyId}
       defaultOpen={defaultOpen}
+      initialNode={initialNode}
+      onClose={onClose}
     />
   );
 }
 
-function GuidanceSession({ journeyId, defaultOpen }) {
+function GuidanceSession({ journeyId, defaultOpen, initialNode, onClose }) {
   const journey = GUIDED_JOURNEYS[journeyId];
   const [open, setOpen] = useState(defaultOpen);
-  const [trail, setTrail] = useState(['start']);
+  const [trail, setTrail] = useState([initialNode]);
   const heading = useRef(null);
-  const interacted = useRef(false);
+  const interacted = useRef(Boolean(onClose));
   const instanceId = useId();
   const node = journey?.nodes[trail[trail.length - 1]];
   const { getContent } = useContent();
@@ -81,12 +87,12 @@ function GuidanceSession({ journeyId, defaultOpen }) {
   // Page cache/navigation must not retain a sensitive session.
   useEffect(() => {
     const clear = () => {
-      setTrail(['start']);
+      setTrail([initialNode]);
       setOpen(defaultOpen);
     };
     window.addEventListener('pagehide', clear);
     return () => window.removeEventListener('pagehide', clear);
-  }, [defaultOpen]);
+  }, [defaultOpen, initialNode]);
   if (!journey || !node) return null;
   const move = (next) => {
     if (!journey.nodes[next]) return;
@@ -95,11 +101,12 @@ function GuidanceSession({ journeyId, defaultOpen }) {
   };
   const reset = () => {
     interacted.current = true;
-    setTrail(['start']);
+    setTrail([initialNode]);
   };
   const close = () => {
     reset();
     setOpen(false);
+    onClose?.();
   };
   const links = (node.links || []).filter(
     (item) => !item.to.startsWith('/') || isPageVisible(getContent, item.to),
@@ -140,7 +147,7 @@ function GuidanceSession({ journeyId, defaultOpen }) {
                   <RotateCcw size={15} aria-hidden="true" /> Start again
                 </button>
               )}
-              {!defaultOpen && (
+              {(!defaultOpen || onClose) && (
                 <button type="button" onClick={close} aria-label="Close guided help">
                   <X size={18} aria-hidden="true" />
                 </button>
@@ -189,6 +196,11 @@ function GuidanceSession({ journeyId, defaultOpen }) {
             </div>
           )}
           <footer className="guidance-footer">
+            {trail.length === 1 && onClose && (
+              <button type="button" onClick={close}>
+                <ArrowLeft size={16} aria-hidden="true" /> Back to topics
+              </button>
+            )}
             {trail.length > 1 && (
               <button
                 type="button"

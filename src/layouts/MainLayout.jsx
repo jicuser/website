@@ -19,7 +19,7 @@ import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import { useAuth } from '@/context/AuthContext';
 import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
-import { isPublicTaskRoute } from '@/lib/publicTaskRoute';
+import { isPublicTaskRoute, isPublicReadingRoute } from '@/lib/publicTaskRoute';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
 
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
@@ -47,18 +47,18 @@ function PublicLayout() {
   const isAbout = ABOUT_PATHS.includes(pathname);
   const showReminder =
     isHome ||
-    pathname.startsWith('/worship') ||
+    pathname === '/worship' ||
     (pathname.startsWith('/prayer-times') && pathname !== '/prayer-times/reminders');
   const isDiscovery = ['/search', '/social-media', '/education/programmes', '/events'].includes(
     pathname,
   );
-  const isTask = isPublicTaskRoute(pathname);
+  const isTask = isPublicTaskRoute(pathname) || isPublicReadingRoute(pathname);
 
   return (
     <div
       className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
     >
-      <PublicBackdrop />
+      {isHome && <PublicBackdrop />}
       <a className="jic-skip-link" href="#main-content">
         Skip to content
       </a>

@@ -2,21 +2,21 @@
 
 ## Direction
 
-A welcoming public website for a real community centre: worship, learning, practical support and personal account access. Liquid Glass surfaces, clear editorial headings and focused service sections make those journeys easy to understand on a phone. Navy, neutral glass and brand gold form one visual language across navigation, page actions, service cards and the member portal.
+A welcoming public website for a real community centre: worship, learning, practical support and personal account access. Calm reading surfaces, clear headings and focused service sections make those journeys easy to understand on a phone. Navy, pearl surfaces and restrained gold accents form one visual language across navigation, page actions, service cards and the member portal.
 
-Reference: https://uselabbaik.com, inspected on 18 October 2026 alongside the supplied mobile captures. The reference informs spacing, hierarchy and graphics. JIC is a public masjid website: its homepage prioritises prayer, current activities and practical support rather than a software sales story. JIC retains its own navy-and-gold Liquid Glass identity. Its software pricing, product illustrations, logos and automation claims are not part of JIC's design.
+Reference: https://uselabbaik.com, inspected on 18 October 2026 alongside the supplied mobile captures. The reference informs spacing, hierarchy and graphics. JIC is a public masjid website: its homepage prioritises prayer, current activities and practical support rather than a software sales story. JIC retains its navy-and-gold identity, with glass on the photographic homepage and transient overlays. Its software pricing, product illustrations, logos and automation claims are not part of JIC's design.
 
-## JIC tokens
+## Inner-page tokens
 
 | Role           | Light theme | Dark theme |
 | -------------- | ----------- | ---------- |
-| Page           | `#f9f7f1`   | `#080f1d`  |
-| Surface        | `#fffefa`   | `#112a43`  |
-| Primary text   | `#081222`   | `#f4f6fa`  |
-| Secondary text | `#26364a`   | `#b7c3d5`  |
-| Brand gold     | `#89501b`   | `#e9bc67`  |
+| Page           | `#f4f5f7`   | `#0d1724`  |
+| Surface        | `#fffefa`   | `#152335`  |
+| Primary text   | `#182d43`   | `#eff3f8`  |
+| Secondary text | `#536174`   | `#bac6d5`  |
+| Brand gold     | `#805b21`   | `#e3bb70`  |
 
-These are JIC implementation choices. The reference branding extraction reported `#FAF8F3`, `#00A892`, DM Sans and Amiri; JIC retains its existing body font stack and uses Georgia for editorial headings to avoid another font dependency.
+These are JIC implementation choices. The reference branding extraction reported `#FAF8F3`, `#00A892`, DM Sans and Amiri; Inner pages use the native system sans-serif stack with a shared type scale. The approved script wordmark and homepage display title keep their existing fonts.
 
 ## Components and ownership
 
@@ -26,7 +26,7 @@ These are JIC implementation choices. The reference branding extraction reported
 - `portal.css` owns member sign-in/workspace geometry.
 - `features/admin` owns permission-aware task discovery and staff overview states.
 - `theme.css` owns semantic colours; individual component styles own geometry.
-- `liquid-glass.css` owns shared controls and surfaces. Gold edges/underlines identify primary actions and selected choices without changing their glass fill. Solid mode and reduced transparency remain supported.
+- `liquid-glass.css` owns shared controls and surfaces. Gold borders and a subtle tint identify selected choices; filled primary actions are reserved for the next step. Solid mode and reduced transparency remain supported.
 
 Staff navigation groups tasks behind disclosures and search, with one account menu. Section IDs, permissions and unsaved-change checks remain stable.
 
@@ -36,9 +36,9 @@ Use real destination links and content. Empty records remain empty; an enquiry i
 
 ## Responsive and interaction rules
 
-Public sections align to a shared 1120px content width with fluid 16–32px gutters. A single homepage flow owns compact 32px section gaps; other page sections use 40–72px gaps; cards use shared padding and keep actions aligned without forcing fixed heights on phones. Related fields stay close together, while separate tasks have larger group gaps. Homepage programme cards show the poster, schedule and a direct details link; extended descriptions remain on the programme page.
+Public sections align to a shared 1120px content width with fluid 16–32px gutters. A single homepage flow owns compact 32px section gaps; other page sections use 24–40px gaps; cards use shared padding and keep actions aligned without forcing fixed heights on phones. Related fields stay close together, while separate tasks have larger group gaps. Homepage programme cards show the poster, schedule and a direct details link; extended descriptions remain on the programme page.
 
-Sections use centred reading widths; cards collapse into a single column on small phones. Essential Janazah/Nikah links remain above prayer details on mobile. Controls have at least 44px targets; mobile text inputs use 16px to avoid browser focus zoom. Directory filters remain keyboard accessible. Optional staff guidance uses native details controls. Daily reminders appear on the homepage, prayer and worship pages. Mobile search and appearance controls live in the menu; the expanded prayer panel shows a single timetable with a close control. Respect reduced motion and preserve saved appearance choices; new visitors start in the light theme.
+Sections use centred reading widths; short destination choices use two columns on phones, while detailed records use full-width rows. Essential Janazah/Nikah links remain above prayer details on mobile. Controls have at least 44px targets; mobile text inputs use 16px to avoid browser focus zoom. Directory filters remain keyboard accessible. Optional staff guidance uses native details controls. Daily reminders appear on the homepage, timetable views and Worship landing page; readers remain distraction-free. Mobile search and appearance controls live in the menu; the expanded prayer panel shows a single timetable with a close control. Respect reduced motion and preserve saved appearance choices; new visitors start in the light theme.
 
 ## Assets
 
@@ -55,3 +55,11 @@ Nikah, funeral and volunteer pages show one selected content section at a time. 
 Support, family and careers headings use the existing page editor, once per page. Journey branches live in reviewed source data; they are not executable CMS content. New pages can be hidden with the existing visibility controls, and hidden destinations are filtered from the Hub, search and guide result links.
 
 External resources use clearly labelled NHS, GOV.UK and National Careers Service destinations. Core source pages were checked on 24 October 2026. They are external resources, not services promised by JIC. No database migration is needed for this public navigation and guidance release.
+
+## Page consistency review
+
+Inner pages now use a plain pearl or navy canvas, with one heading scale, restrained gold selection states and consistent borders. The photographic background remains on Home. Main content follows a short introduction, direct choices, selected details and optional related content. Content surfaces are opaque; text and controls no longer compete with a full-page photograph.
+
+Support, family and careers pages use compact topic buttons followed by one selected description and a Guide me action. Temporary choices and answers remain in component memory and reset on departure. Youth and Madrassah destinations use short cards; extra Madrassah background is expandable. Programme notices are compact rows with the original full poster viewer. Giving groups the amount selection and bank information without a duplicate hero action; single-option Ramadan pages avoid linking to themselves. Reading controls are expandable, and prayer overlays start hidden on inner pages outside the main timetable views.
+
+The public page-family review covers narrow phones, standard phones and desktop layouts in both themes, plus guidance, form, menu, reading-preference and poster-publishing behaviour. This is presentation and navigation work; there is no database migration or change to payment collection.

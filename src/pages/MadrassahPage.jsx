@@ -3,31 +3,30 @@ import { BookOpen, FileText, Mail, UserPlus } from 'lucide-react';
 import PageHeading from '@/components/PageHeading';
 import PageChoices from '@/components/PageChoices';
 import AboutSection from '@/components/sections/madrassah/AboutSection';
-import CallToActionSection from '@/components/sections/madrassah/CallToActionSection';
 
 const overviewTiles = [
   {
-    description: 'Ask about admissions and a place for a new pupil.',
+    description: 'Apply for a pupil place.',
     path: '/madrassah/enrolment',
     icon: UserPlus,
   },
   {
-    description: 'Explore classes, courses and learning opportunities.',
+    description: 'Explore classes and courses.',
     path: '/madrassah/classes-courses',
     icon: BookOpen,
   },
   {
-    description: 'Information and support for current pupils and parents.',
+    description: 'Parent and pupil information.',
     path: '/madrassah/student-portal',
     icon: FileText,
   },
   {
-    description: 'Get in touch with the Madrassah team for help or enquiries.',
+    description: 'Speak to the Madrassah team.',
     path: '/madrassah/contact',
     icon: Mail,
   },
   {
-    description: 'Read the key Madrassah policies and parent information.',
+    description: 'Policies and guidance.',
     path: '/madrassah/policies',
     icon: FileText,
   },
@@ -41,7 +40,6 @@ export default function MadrassahPage() {
       </PageHeading>
       <PageChoices items={overviewTiles} label="Madrassah choices" />
       <AboutSection />
-      <CallToActionSection />
     </div>
   );
 }

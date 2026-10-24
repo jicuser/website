@@ -2,17 +2,31 @@
 .jic-inner-page .page-transition {
   padding-top: 0;
 }
-.jic-inner-page h1 {
+.jic-public-main.jic-inner-page h1 {
   font-family: var(--jic-heading-font);
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  line-height: 1.15;
-  margin-bottom: 12px;
+  font-size: var(--jic-title-size);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  margin: 0 0 8px;
   overflow-wrap: anywhere;
 }
-.jic-inner-page h2 {
+.jic-public-main.jic-inner-page h2 {
   font-family: var(--jic-heading-font);
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  line-height: 1.25;
+  font-size: var(--jic-section-title-size);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+.jic-inner-route {
+  font-family: var(--jic-body-font);
+  background: var(--jic-bg);
+}
+.jic-public-main.jic-inner-page {
+  padding-bottom: 32px;
+}
+.jic-inner-page :is(h3, h4) {
+  font-family: var(--jic-body-font);
 }
 .jic-inner-page .text-lg {
   font-size: 1rem;
@@ -27,10 +41,10 @@
   max-width: 100%;
 }
 .jic-inner-page section:is(.py-16, .py-20) {
-  padding-block: 28px;
+  padding-block: 20px;
 }
 .jic-inner-page .page-transition > section:first-child:not(.jic-prayer-title) {
-  padding-block: 28px;
+  padding-block: 20px;
 }
 .jic-inner-page [role='tablist'] {
   margin-inline: auto;
@@ -118,7 +132,7 @@
 }
 @media (min-width: 1025px) {
   .jic-inner-page .page-transition > section:first-child:not(.jic-prayer-title) {
-    padding-block: 46px;
+    padding-block: 24px;
   }
 }
 
@@ -271,9 +285,12 @@
 
 /* Section introductions and destination cards use the same hierarchy on every device. */
 .jic-page-heading {
-  width: min(100%, 1152px);
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
   margin-inline: auto;
-  padding: 24px 16px 16px;
+  padding: 24px 0 20px;
 }
 .jic-page-heading p {
   max-width: 65ch;
@@ -284,23 +301,49 @@
 }
 .jic-page-choices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  width: min(100%, 1152px);
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
   margin-inline: auto;
-  padding: 0 16px 24px;
+  padding: 0 0 20px;
 }
 .jic-page-choice {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
-  min-height: 72px;
+  min-height: 80px;
   padding: 12px;
   border: 1px solid var(--jic-border);
   border-radius: 12px;
   background: var(--jic-surface);
   color: var(--jic-text);
+}
+.jic-page-choice strong {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+@media (max-width: 600px) {
+  .jic-page-choice {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+  }
+  .jic-page-choice > svg:first-child {
+    margin-top: 2px;
+    width: 20px;
+    height: 20px;
+  }
+  .jic-page-choice strong {
+    font-size: 0.875rem;
+  }
+  .jic-page-choice > svg:last-child {
+    display: none;
+  }
 }
 .jic-page-choice > svg {
   flex-shrink: 0;
@@ -319,6 +362,12 @@
   color: var(--jic-text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
+}
+@media (max-width: 600px) {
+  .jic-page-choice span > span {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
 }
 .jic-page-choice:is(:hover, :focus-visible) {
   border-color: var(--jic-gold);
@@ -413,4 +462,49 @@
 .jic-page-addition {
   width: min(calc(100% - 32px), 1024px);
   margin: 24px auto;
+}
+.jic-details-section {
+  width: min(
+    var(--jic-content-width),
+    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
+  );
+  margin: 0 auto 24px;
+  border-block: 1px solid var(--jic-border);
+  color: var(--jic-text);
+}
+.jic-details-section > summary {
+  min-height: 48px;
+  padding-block: 12px;
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 0.9375rem;
+}
+.jic-details-section > div {
+  padding: 0 0 16px;
+  max-width: 75ch;
+}
+.jic-details-section p {
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.jic-information-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+.jic-information-list li {
+  display: flex;
+  gap: 12px;
+  align-items: start;
+}
+.jic-information-list li > svg {
+  color: var(--jic-gold-strong);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.jic-information-list h3 {
+  font-size: 0.9375rem;
+  font-weight: 650;
+  margin-bottom: 4px;
 }

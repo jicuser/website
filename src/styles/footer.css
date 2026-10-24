@@ -61,9 +61,9 @@
   place-items: center;
   min-width: 0;
   height: 44px;
-  border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  background: var(--jic-glass-control);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
   color: var(--jic-text);
 }
 .jic-footer-icons a svg {

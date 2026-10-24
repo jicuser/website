@@ -60,6 +60,27 @@ export default function ServiceExplorer({ compact = false }) {
           (HUB_PRIMARY_IDS.includes(b.id) ? HUB_PRIMARY_IDS.indexOf(b.id) : 99),
       );
   const directoryVisible = isPageVisible(getContent, '/services');
+  const groups =
+    compact || hasFilters
+      ? [{ label: '', items: displayedServices }]
+      : [
+          {
+            label: 'Community services',
+            items: displayedServices.filter((service) => HUB_PRIMARY_IDS.includes(service.id)),
+          },
+          {
+            label: 'Worship & prayer',
+            items: displayedServices.filter(
+              (service) => service.category === 'prayer' && !HUB_PRIMARY_IDS.includes(service.id),
+            ),
+          },
+          {
+            label: 'More at JIC',
+            items: displayedServices.filter(
+              (service) => service.category !== 'prayer' && !HUB_PRIMARY_IDS.includes(service.id),
+            ),
+          },
+        ];
   const contactVisible = isPageVisible(getContent, '/contact');
   const Heading = compact ? 'h2' : 'h1';
   const headingId = `${instanceId}-heading`;
@@ -81,7 +102,7 @@ export default function ServiceExplorer({ compact = false }) {
 
   return (
     <section
-      className={`service-explorer ${compact ? 'service-explorer--compact' : 'service-explorer--full'}`}
+      className={`service-explorer ${compact ? 'service-explorer--compact' : 'service-explorer--full'} ${!hasFilters ? 'is-browsing' : ''}`}
       aria-labelledby={headingId}
       id={compact ? undefined : 'service-finder'}
     >
@@ -105,7 +126,6 @@ export default function ServiceExplorer({ compact = false }) {
 
       {!compact && (
         <>
-          <GuidancePanel journeyId="hub" />
           <div className="service-explorer-controls" id={compact ? undefined : 'choose-service'}>
             <div className="service-explorer-search-row">
               <div className="service-explorer-search">
@@ -163,33 +183,42 @@ export default function ServiceExplorer({ compact = false }) {
       )}
       <div id={resultsId}>
         {displayedServices.length ? (
-          <div className="service-explorer-grid">
-            {displayedServices.map((service) => {
-              const Icon = icons[service.icon];
-              const titleId = `${instanceId}-${service.id}`;
-              return (
-                <Link
-                  key={service.id}
-                  to={service.to}
-                  className={`service-explorer-card ${!HUB_PRIMARY_IDS.includes(service.id) ? 'service-explorer-card--resource' : ''}`}
-                  aria-labelledby={titleId}
-                >
-                  <span className="service-explorer-card-icon" aria-hidden="true">
-                    <Icon />
-                  </span>
-                  <span className="service-explorer-card-copy">
-                    <h3 id={titleId}>{service.title}</h3>
-                    <span className="service-explorer-card-description">{service.description}</span>
-                  </span>
-                  <ChevronRight
-                    className="service-explorer-card-arrow"
-                    size={18}
-                    aria-hidden="true"
-                  />
-                </Link>
-              );
-            })}
-          </div>
+          groups
+            .filter((group) => group.items.length)
+            .map((group) => (
+              <section className="service-explorer-group" key={group.label || 'results'}>
+                {group.label && <h2>{group.label}</h2>}
+                <div className="service-explorer-grid">
+                  {group.items.map((service) => {
+                    const Icon = icons[service.icon];
+                    const titleId = `${instanceId}-${service.id}`;
+                    return (
+                      <Link
+                        key={service.id}
+                        to={service.to}
+                        className={`service-explorer-card ${!HUB_PRIMARY_IDS.includes(service.id) ? 'service-explorer-card--resource' : ''}`}
+                        aria-labelledby={titleId}
+                      >
+                        <span className="service-explorer-card-icon" aria-hidden="true">
+                          <Icon />
+                        </span>
+                        <span className="service-explorer-card-copy">
+                          <h3 id={titleId}>{service.title}</h3>
+                          <span className="service-explorer-card-description">
+                            {service.description}
+                          </span>
+                        </span>
+                        <ChevronRight
+                          className="service-explorer-card-arrow"
+                          size={18}
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            ))
         ) : (
           <div className="service-explorer-empty">
             <Search size={28} aria-hidden="true" />
@@ -210,7 +239,8 @@ export default function ServiceExplorer({ compact = false }) {
         )}
       </div>
 
-      {!compact && contactVisible && (
+      {!compact && <GuidancePanel journeyId="hub" />}
+      {!compact && contactVisible && !displayedServices.length && (
         <div className="service-explorer-footer">
           <p>
             Need help finding the right service?{' '}

@@ -7,3 +7,13 @@ export function isPublicTaskRoute(pathname) {
     ) || ['/donate', '/contact', '/prayer-times/reminders', '/services/hall-booking'].includes(path)
   );
 }
+
+export function isPublicReadingRoute(pathname) {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  return path.startsWith('/worship/');
+}
+
+export function prefersQuietPrayerDock(pathname) {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  return !['/', '/prayer-times', '/prayer-times/monthly', '/prayer-times/jummah'].includes(path);
+}

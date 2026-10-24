@@ -72,6 +72,7 @@ test('readers expose real adhkar, Janazah recitations and the canonical prayer-t
   await page.getByRole('link', { name: 'Glorify Allah', exact: true }).click();
   await expect(page.locator('#adhkar-after-salah-tasbih')).toBeFocused();
   await expect(page).toHaveURL(/collection=after-salah#adhkar-after-salah-tasbih$/);
+  await page.locator('.worship-preferences > summary').click();
   await page.getByLabel('Show meaning', { exact: true }).uncheck();
   await expect(page.locator('.worship-meaning')).toHaveCount(0);
   await page.goto('/worship/janazah-guide');
@@ -100,6 +101,7 @@ test('Arabic and reading choices fit narrow phones in both themes', async ({ pag
       true,
     );
     await page.locator('.worship-compact-resources a[href="/worship/daily-duas"]').click();
+    await page.locator('.worship-preferences > summary').click();
     await page.getByLabel('Arabic text size', { exact: true }).fill('48');
     await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
     for (const theme of ['light', 'dark']) {
@@ -129,6 +131,7 @@ test('Qur’an search, reading controls and saved verse survive a reload', async
   await page.getByRole('button', { name: '114. An-Naas — Mankind', exact: true }).click();
   await expect(page.locator('.worship-quran-ayah')).toHaveCount(6);
   await page.getByRole('button', { name: 'Save verse 114:3', exact: true }).click();
+  await page.locator('.worship-preferences > summary').click();
   await page.getByLabel('Show English translation', { exact: true }).uncheck();
   await page.getByLabel('Arabic text size', { exact: true }).fill('40');
   await expect(page.locator('.worship-quran-translation')).toHaveCount(0);

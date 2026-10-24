@@ -133,17 +133,12 @@ export default function DonationsPage() {
           <p className="ops-eyebrow">A little from each of us. More for everyone.</p>
           <h1>Donate to JIC</h1>
           <p>Support the place where our community prays, learns and comes together.</p>
-          <div className="ops-actions">
-            <a className="ops-button" href="#give">
-              Make a donation <Heart size={17} />
-            </a>
-          </div>
         </div>
       </header>
       <section className="ops-give-layout ops-section" id="give">
-        <div>
+        <div className="ops-donation-planner">
           <h2>Choose your donation</h2>
-          <p>Choose an amount to plan your donation, then make the transfer through your bank.</p>
+          <p>Select an amount, then transfer through your banking app.</p>
           <div className="ops-toggle" aria-label="Donation frequency">
             {[
               ['once', 'One off'],

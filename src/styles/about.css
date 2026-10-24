@@ -18,9 +18,9 @@
 }
 .about-page .about-masthead h1 {
   font-family: var(--jic-heading-font);
-  font-size: clamp(1.9rem, 4.5vw, 3.25rem);
-  line-height: 1.08;
-  font-weight: 500;
+  font-size: var(--jic-title-size);
+  line-height: 1.2;
+  font-weight: 750;
   letter-spacing: -0.035em;
   margin: 0 0 14px;
 }
@@ -90,9 +90,9 @@
 }
 .about-page .about-section-intro :is(h2, h3) {
   font-family: var(--jic-heading-font);
-  font-size: clamp(1.35rem, 3vw, 2rem);
-  font-weight: 500;
-  line-height: 1.2;
+  font-size: var(--jic-section-title-size);
+  font-weight: 700;
+  line-height: 1.35;
   margin: 0 0 8px;
 }
 .about-history-story {

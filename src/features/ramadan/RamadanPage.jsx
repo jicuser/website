@@ -156,7 +156,7 @@ export default function RamadanPage({ kind = null }) {
           )}
         </section>
       )}
-      {(!state.loading || season) && choices.length > 0 && (
+      {(!state.loading || season) && choices.length > 0 && (!kind || choices.length > 1) && (
         <nav className="sponsorship-kind-links" aria-label="Ramadan sponsorship options">
           {choices.map(([key, label]) => {
             const Icon = icons[key];

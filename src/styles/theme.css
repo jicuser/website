@@ -2,9 +2,13 @@
 :root {
   --jic-content-width: 1120px;
   --jic-page-gutter: clamp(16px, 3vw, 32px);
-  --jic-space-section: clamp(40px, 6vw, 72px);
-  --jic-space-card: clamp(20px, 2.5vw, 28px);
-  --jic-gap: clamp(16px, 2.5vw, 24px);
+  --jic-space-section: clamp(24px, 4vw, 40px);
+  --jic-space-card: clamp(16px, 2vw, 24px);
+  --jic-gap: clamp(12px, 2vw, 20px);
+  --jic-reading-width: 800px;
+  --jic-body-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --jic-title-size: clamp(1.65rem, 3.5vw, 2.1rem);
+  --jic-section-title-size: clamp(1.125rem, 2.5vw, 1.35rem);
   --jic-action: #e2b45d;
   --jic-teal: #6b3a0c;
   --jic-logo-metal: #89501b;
@@ -33,7 +37,7 @@
   --jic-text-secondary: #26364a;
   --jic-muted: #526071;
   --jic-border: #dedfd5;
-  --jic-heading-font: Georgia, 'Times New Roman', serif;
+  --jic-heading-font: var(--jic-body-font);
   --jic-experience-green: #0b2036;
   --jic-experience-mint: #e7edf4;
   --jic-gold: #89501b;

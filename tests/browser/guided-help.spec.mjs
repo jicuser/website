@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { GUIDED_JOURNEYS } from '../../src/features/guidance/journeys.js';
+import { GUIDED_JOURNEYS, GUIDANCE_TOPICS } from '../../src/features/guidance/journeys.js';
 
 async function prepare(page, theme = 'light') {
   await page.addInitScript((value) => {
@@ -44,6 +44,7 @@ test('careers questions give a useful result, backtracking clears the branch, an
 }) => {
   await prepare(page);
   await page.goto('/services/skills-careers');
+  await page.getByRole('button', { name: 'Guide me', exact: true }).click();
   const guide = page.locator('.guidance-panel');
   await guide.getByRole('button', { name: 'My CV', exact: true }).click();
   await expect(guide.getByRole('heading', { name: 'Where are you starting?' })).toBeFocused();
@@ -57,7 +58,7 @@ test('careers questions give a useful result, backtracking clears the branch, an
   await expect(guide.getByText('Build your first CV', { exact: true })).toHaveCount(0);
   await guide.getByRole('button', { name: 'Start again' }).click();
   await expect(
-    guide.getByRole('heading', { name: 'What would you like to work on?' }),
+    guide.getByRole('heading', { name: 'What would you like help with?' }),
   ).toBeVisible();
 });
 
@@ -75,7 +76,8 @@ test('support answers cause no writes, storage or URL changes and clear on leavi
   page.on('request', (request) =>
     requests.push({ url: request.url(), method: request.method(), data: request.postData() }),
   );
-  await guide.getByRole('button', { name: 'Grief or bereavement' }).click();
+  await page.getByRole('button', { name: 'Bereavement', exact: true }).click();
+  await page.getByRole('button', { name: 'Guide me', exact: true }).click();
   await guide.getByRole('button', { name: 'Support with bereavement' }).click();
   await expect(guide.getByRole('heading', { name: 'Support through bereavement' })).toBeVisible();
   expect(await storage()).toEqual(before);
@@ -83,10 +85,14 @@ test('support answers cause no writes, storage or URL changes and clear on leavi
   expect(requests.filter((request) => request.method !== 'GET')).toEqual([]);
   await page.locator('.guidance-back-link').click();
   await page.locator('.service-explorer-grid a[href="/services/support"]').click();
-  await expect(guide.getByRole('heading', { name: 'What would help today?' })).toBeVisible();
+  await expect(guide).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Wellbeing', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
 });
 
-test('every careers, support and family branch reaches its result without a form', async ({
+test('every careers, support and family topic reaches its result without a form', async ({
   page,
 }) => {
   await prepare(page);
@@ -96,21 +102,28 @@ test('every careers, support and family branch reaches its result without a form
     ['family', '/services/marriage-family'],
   ]) {
     const journey = GUIDED_JOURNEYS[id];
-    const paths = [];
-    function walk(nodeId, choices) {
-      const node = journey.nodes[nodeId];
-      if (!node.choices) paths.push({ choices, title: node.title });
-      else node.choices.forEach((choice) => walk(choice.next, [...choices, choice.label]));
-    }
-    walk('start', []);
     await page.goto(path);
     const guide = page.locator('.guidance-panel');
-    for (const route of paths) {
-      for (const name of route.choices)
-        await guide.getByRole('button', { name, exact: true }).click();
-      await expect(guide.getByRole('heading', { name: route.title, exact: true })).toBeVisible();
-      await expect(guide.locator('form,input,textarea')).toHaveCount(0);
-      await guide.getByRole('button', { name: 'Start again' }).click();
+    for (const topic of GUIDANCE_TOPICS[id]) {
+      const paths = [];
+      function walk(nodeId, choices) {
+        const node = journey.nodes[nodeId];
+        if (!node.choices) paths.push({ choices, title: node.title });
+        else node.choices.forEach((choice) => walk(choice.next, [...choices, choice.label]));
+      }
+      walk(topic.node, []);
+      for (const route of paths) {
+        await page
+          .getByRole('group', { name: 'Topics', exact: true })
+          .getByRole('button', { name: topic.label, exact: true })
+          .click();
+        await page.getByRole('button', { name: 'Guide me', exact: true }).click();
+        for (const name of route.choices)
+          await guide.getByRole('button', { name, exact: true }).click();
+        await expect(guide.getByRole('heading', { name: route.title, exact: true })).toBeVisible();
+        await expect(guide.locator('form,input,textarea')).toHaveCount(0);
+        await guide.getByRole('button', { name: 'Close guided help' }).click();
+      }
     }
   }
 });

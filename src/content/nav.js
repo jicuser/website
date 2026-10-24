@@ -139,13 +139,9 @@ export const PUBLIC_MENU_GROUPS = [
   { name: 'Portal login', path: '/portal', children: [], editable: false },
 ];
 export const FOOTER_LINKS = [
-  { name: 'Donate', path: '/donate' },
+  { name: 'Community Hub', path: '/services' },
+  { name: 'Timetable', path: '/prayer-times/monthly' },
   { name: 'Get involved', path: '/get-involved' },
-  { name: 'Portal login', path: '/portal' },
   { name: 'Contact Us', path: '/contact' },
-  { name: 'Download Salah timetable', path: '/prayer-times/monthly#phone-wallpaper' },
-  { name: 'Services', path: '/services' },
-  { name: 'Our Masjid Project', path: '/projects' },
-  { name: 'Education', path: '/education' },
-  { name: 'Youth', path: '/youth' },
+  { name: 'Portal login', path: '/portal' },
 ];

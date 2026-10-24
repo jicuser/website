@@ -41,7 +41,7 @@ import {
 } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
-import { isPublicTaskRoute } from '@/lib/publicTaskRoute';
+import { prefersQuietPrayerDock } from '@/lib/publicTaskRoute';
 import { nextCongregation } from '@/lib/nextCongregation';
 import { displayTime } from '@/lib/timetable';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
@@ -75,7 +75,7 @@ export default function UnifiedHeader() {
   const { pathname: routePath, key: routeKey } = useLocation();
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const alertSetup = pathname === '/prayer-times/reminders';
-  const taskRoute = isPublicTaskRoute(pathname);
+  const taskRoute = prefersQuietPrayerDock(pathname);
   const navigate = useNavigate();
   const { todaysTimes, jummahTimes, currentDate, isLoadingPrayerTimes } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),

@@ -177,11 +177,15 @@ const supportNodes = {
 
 const careersNodes = {
   start: question('What would you like to work on?', [
+    choice('CV & interviews', 'preparation'),
+    choice('Finding work', 'work'),
+    choice('Training', 'training'),
+    choice('Apprenticeships', 'apprenticeship'),
+    choice('I’m not sure yet', 'explore'),
+  ]),
+  preparation: question('What would you like help with?', [
     choice('My CV', 'cv'),
     choice('An interview', 'interview'),
-    choice('Finding work', 'work'),
-    choice('Training or apprenticeships', 'training'),
-    choice('I’m not sure yet', 'explore'),
   ]),
   cv: question('Where are you starting?', [
     choice('I need my first CV', 'first-cv'),
@@ -244,6 +248,16 @@ const careersNodes = {
       link('Find a course', 'https://nationalcareers.service.gov.uk/find-a-course'),
       link('Find an apprenticeship', 'https://www.gov.uk/apply-apprenticeship'),
     ],
+  ),
+  apprenticeship: result(
+    'Find an apprenticeship',
+    'Compare opportunities and check the requirements before applying.',
+    [
+      'Check the role, location, entry requirements and training provided.',
+      'Confirm the closing date and application instructions.',
+      'Prepare a CV that shows your relevant skills and experience.',
+    ],
+    [link('Find an apprenticeship on GOV.UK', 'https://www.gov.uk/apply-apprenticeship')],
   ),
   explore: result(
     'Explore your skills and interests',
@@ -615,8 +629,7 @@ export const GUIDED_JOURNEYS = {
 export const GUIDANCE_PAGES = {
   support: {
     title: 'Support & Wellbeing',
-    intro:
-      'Practical help, wellbeing and connection. Choose what you need; there is no form to complete.',
+    intro: 'Find practical help, wellbeing information and ways to connect.',
     journey: 'support',
     links: [HELP_RESOURCES.wellbeing, HELP_RESOURCES.practical, programmes],
   },
@@ -632,11 +645,111 @@ export const GUIDANCE_PAGES = {
   },
   careers: {
     title: 'Skills & Careers',
-    intro: 'Small, practical steps for your CV, job search, interview or training.',
+    intro: 'Find a useful next step for work or learning.',
     journey: 'careers',
     links: [HELP_RESOURCES.cv, HELP_RESOURCES.careers],
-    note: 'These are self-service resources. JIC appointments, CV reviews and job placements are not offered through this page.',
+    note: 'Guidance and external resources. For JIC activities, see the published programmes.',
   },
+};
+
+/** Short topic labels are separate from the question and result copy. */
+export const GUIDANCE_TOPICS = {
+  careers: [
+    {
+      label: 'CV & interviews',
+      icon: 'cv',
+      node: 'preparation',
+      description: 'Start a CV, improve an existing one or prepare for an interview.',
+    },
+    {
+      label: 'Find work',
+      icon: 'work',
+      node: 'work',
+      description: 'Find roles, plan applications and explore careers advice.',
+    },
+    {
+      label: 'Training',
+      icon: 'learning',
+      node: 'training',
+      description: 'Compare courses, skills and training routes.',
+    },
+    {
+      label: 'Apprenticeships',
+      icon: 'skills',
+      node: 'apprenticeship',
+      description: 'Explore opportunities and prepare to apply.',
+    },
+  ],
+  support: [
+    {
+      label: 'Wellbeing',
+      icon: 'wellbeing',
+      node: 'wellbeing',
+      description: 'Find trusted information about wellbeing and accessing support.',
+    },
+    {
+      label: 'Practical help',
+      icon: 'practical',
+      node: 'practical',
+      description: 'Find help with food, housing or money worries.',
+    },
+    {
+      label: 'Bereavement',
+      icon: 'grief',
+      node: 'grief',
+      description: 'Find support with grief, Janazah arrangements or the prayer.',
+    },
+    {
+      label: 'Meet people',
+      icon: 'people',
+      node: 'connection',
+      description: 'Explore gatherings, activities and volunteering.',
+    },
+    {
+      label: 'Safety concerns',
+      icon: 'safety',
+      node: 'safety',
+      description: 'Go directly to specialist safety and domestic abuse support.',
+    },
+    {
+      label: 'Browse help',
+      icon: 'browse',
+      node: 'browse',
+      description: 'Choose a trusted resource without answering any questions.',
+    },
+  ],
+  family: [
+    {
+      label: 'Nikah',
+      icon: 'wellbeing',
+      node: 'nikah',
+      description: 'Review the ceremony steps and practical arrangements.',
+    },
+    {
+      label: 'Marriage preparation',
+      icon: 'learning',
+      node: 'prepare',
+      description: 'Prepare your questions and find the next step.',
+    },
+    {
+      label: 'Family & parenting',
+      icon: 'people',
+      node: 'family',
+      description: 'Find an appropriate starting point for family questions.',
+    },
+    {
+      label: 'Relationships',
+      icon: 'grief',
+      node: 'relationship',
+      description: 'Find information for relationship difficulties or separation.',
+    },
+    {
+      label: 'Safety concerns',
+      icon: 'safety',
+      node: 'safety',
+      description: 'Access specialist support directly.',
+    },
+  ],
 };
 
 /** Validate branches at build/test time; no executable rules are accepted from CMS. */

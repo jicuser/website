@@ -57,6 +57,28 @@
   padding: 18px 0 48px;
   color: var(--jic-text);
 }
+.worship-page > .jic-page-heading,
+.worship-page > .guidance-page-width {
+  width: 100%;
+  padding-top: 0;
+}
+.worship-preferences {
+  margin-block: 16px;
+  border-block: 1px solid var(--jic-border);
+}
+.worship-preferences > summary {
+  min-height: 44px;
+  padding: 12px 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.worship-preferences > summary span {
+  color: var(--jic-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-left: 8px;
+}
 .worship-hub-grid,
 .worship-guide-grid,
 .worship-salah-grid {

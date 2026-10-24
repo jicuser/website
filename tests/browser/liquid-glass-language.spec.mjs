@@ -15,9 +15,7 @@ async function openPublic(page, theme, path) {
 }
 
 for (const theme of ['light', 'dark']) {
-  test(`${theme} giving and service controls share the navigation glass material`, async ({
-    page,
-  }) => {
+  test(`${theme} giving and service controls share clear selected states`, async ({ page }) => {
     await openPublic(page, theme, '/donate');
     const material = (node) => {
       const style = getComputedStyle(node);
@@ -27,19 +25,19 @@ for (const theme of ['light', 'dark']) {
         colour: style.color,
       };
     };
-    const action = page.getByRole('link', { name: 'Make a donation', exact: true });
+    const action = page.getByRole('button', { name: 'One off', exact: true });
     await expect(action).toBeVisible();
     const navigation = await action.evaluate(material);
-    expect(navigation.sheen).toContain('linear-gradient');
+    expect(navigation.sheen).toBe('none');
     await page.goto('/services');
     await expect(page.getByRole('heading', { name: 'Community Hub' })).toBeVisible();
     const choice = page
       .getByRole('group', { name: 'Filter services' })
       .getByRole('button', { name: 'Learning' });
     await choice.click();
-    expect((await choice.evaluate(material)).sheen).toContain('linear-gradient');
-    expect((await choice.evaluate(material)).colour).toBe(navigation.colour);
-    expect((await choice.evaluate(material)).background).toBe(navigation.background);
+    expect((await choice.evaluate(material)).sheen).toBe('none');
+    await expect(choice).toHaveCSS('color', navigation.colour);
+    await expect(choice).toHaveCSS('background-color', navigation.background);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
       false,
     );
@@ -51,7 +49,8 @@ test('project navigation has one overview and Giving has its own location', asyn
   const breadcrumb = page.getByRole('navigation', { name: 'Current section' });
   await expect(breadcrumb).toContainText('Giving');
   await expect(breadcrumb).not.toContainText('Our Masjid Project');
-  await expect(page.locator('.ops-giving-hero .ops-actions a')).toHaveCount(1);
+  await expect(page.locator('.ops-giving-hero .ops-actions a')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Choose your donation' })).toBeVisible();
   await page.goto('/projects');
   const tabs = page.locator('.jic-unified-subnav');
   await expect(tabs.locator('a[href="/projects/masjid-extension"]')).toHaveCount(0);
