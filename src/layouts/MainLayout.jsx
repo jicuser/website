@@ -11,7 +11,6 @@ import ManagedPageSections from '@/components/ManagedPageSections';
 import { supplementalContentPaths } from '@/content/editablePages';
 import { ABOUT_PATHS } from '@/content/aboutSections';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
-import FloatingPageTools from '@/components/shell/FloatingPageTools';
 import RelatedContent from '@/components/RelatedContent';
 import ProgrammePosters from '@/components/ProgrammePosters';
 import PublishedPageLinks from '@/features/content/PublishedPageLinks';
@@ -68,7 +67,6 @@ function PublicLayout() {
         Skip to content
       </a>
       <UnifiedHeader />
-      <FloatingPageTools />
       <main
         id="main-content"
         tabIndex={-1}
