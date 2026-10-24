@@ -12,10 +12,9 @@ const pages = new Map();
 function add(page) {
   if (!pages.has(page.path)) pages.set(page.path, page);
 }
-for (const group of NAV_GROUPS) {
-  add({ name: group.name, path: group.path, group: group.name });
+for (const group of NAV_GROUPS) add({ name: group.name, path: group.path, group: group.name });
+for (const group of NAV_GROUPS)
   for (const child of group.children) add({ ...child, group: group.name });
-}
 add({ name: 'Get involved', path: '/get-involved', group: 'Get involved' });
 for (const page of GET_INVOLVED_NAVIGATION.children) {
   if (page.path !== '/fundraise/new') add({ ...page, group: 'Get involved' });
@@ -27,6 +26,14 @@ for (const [group, tabs] of [
   for (const child of tabs) add({ ...child, group });
 }
 for (const [path, group, name] of standaloneSections) add({ path: `/${path}`, group, name });
+
+for (const [path, name] of [
+  ['/services/religious', 'Religious services'],
+  ['/services/education', 'Educational services'],
+  ['/services/community', 'Community enquiries'],
+  ['/events', 'What’s on'],
+])
+  add({ path, name, group: 'Community Hub' });
 
 // Guidance remains reachable from the portal and existing links, not as a service.
 add({ name: 'Certificate help', path: '/services/certificates', group: 'Portal' });

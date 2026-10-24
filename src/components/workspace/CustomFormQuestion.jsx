@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FIELD_TYPES } from '@/lib/customForms';
 import { canMoveQuestion } from '@/lib/formBuilder';
 import { Field } from './shared';
 
-export default function CustomFormQuestion({ field, fields, index, onChange, onRemove, onMove }) {
-  const [expanded, setExpanded] = useState(!field.label);
+export default function CustomFormQuestion({
+  field,
+  fields,
+  index,
+  onChange,
+  onRemove,
+  onMove,
+  group,
+  expanded,
+  onExpand,
+}) {
   const patch = (value) => onChange({ ...field, ...value });
   const previous = fields
     .slice(0, index)
@@ -14,8 +23,9 @@ export default function CustomFormQuestion({ field, fields, index, onChange, onR
   return (
     <details
       className="custom-question"
+      name={group}
       open={expanded}
-      onToggle={(event) => setExpanded(event.currentTarget.open)}
+      onToggle={(event) => onExpand(event.currentTarget.open)}
     >
       <summary>
         <span className="custom-question-number">{index + 1}</span>

@@ -45,12 +45,17 @@ export function activeNavigation(pathname) {
   const nested = nestedSections.find(
     (section) => matchesPath(pathname, section.path) || parentPath === section.path,
   );
-  const primary = NAV_GROUPS.find((group) =>
-    nested
-      ? group.path === nested.primaryPath
-      : matchesPath(pathname, group.path) ||
-        group.children.some((child) => matchesPath(pathname, child.path)),
-  );
+  const direct = NAV_GROUPS.filter((group) => matchesPath(pathname, group.path)).sort(
+    (a, b) => b.path.length - a.path.length,
+  )[0];
+  const primary =
+    (!nested && direct) ||
+    NAV_GROUPS.find((group) =>
+      nested
+        ? group.path === nested.primaryPath
+        : matchesPath(pathname, group.path) ||
+          group.children.some((child) => matchesPath(pathname, child.path)),
+    );
   if (!primary) return null;
   const section = nested || primary;
   // Both project overview URLs render the same timeline. Keep one visible destination.
@@ -96,9 +101,21 @@ export function compactMenuNavigation(groups) {
   const parents = new Map([
     ['/projects', '/about'],
     ['/social-media', '/about'],
+    ['/education', '/services'],
     ['/madrassah', '/education'],
-    ['/youth', '/education'],
+    ['/youth', '/services'],
+    ['/get-involved', '/services'],
+    ['/ramadan', '/services'],
   ]);
+  const belongsTo = (path, parent) => {
+    const seen = new Set();
+    while (parents.has(path) && !seen.has(path)) {
+      seen.add(path);
+      path = parents.get(path);
+      if (path === parent) return true;
+    }
+    return false;
+  };
   const roots = new Set(groups.map((group) => group.path));
   return groups
     .filter((group) => !['/portal', '/donate'].includes(group.path))
@@ -115,12 +132,12 @@ export function compactMenuNavigation(groups) {
       }
       return {
         ...group,
-        name: group.path === '/education' && !group.customName ? 'Learning' : group.name,
+        name: group.name,
         children: orderedNavigation(children, group.childOrder),
         sectionPaths: [
           group.path,
           ...groups
-            .filter((destination) => parents.get(destination.path) === group.path)
+            .filter((destination) => belongsTo(destination.path, group.path))
             .map((destination) => destination.path),
         ],
       };

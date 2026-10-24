@@ -5,7 +5,7 @@ const userId = '10000000-0000-4000-8000-000000000001';
 const formId = '10000000-0000-4000-8000-000000000010';
 
 async function fixture(page) {
-  const state = { writes: [], errors: [] };
+  const state = { writes: [], errors: [], content: {} };
   page.on('pageerror', (error) => state.errors.push(error.message));
   await page.addInitScript((id) => {
     sessionStorage.setItem('jic-salawat-shown', '1');
@@ -51,8 +51,25 @@ async function fixture(page) {
         },
       ];
     else if (name === 'get_site_page') data = null;
+    else if (name === 'save_website_page') {
+      const payload = request.postDataJSON();
+      const body = { content_key: `page:${payload.p_path}`, content_value: payload.p_content };
+      state.content[body.content_key] = body;
+      state.writes.push(body);
+      data = null;
+    } else if (name === 'page_content') {
+      if (request.method() === 'POST') {
+        const body = request.postDataJSON();
+        state.content[body.content_key] = body;
+        state.writes.push(body);
+        data = [{ content_key: body.content_key }];
+      } else {
+        const filter = new URL(request.url()).searchParams.get('content_key');
+        data = filter ? state.content[filter.slice(3)] || null : Object.values(state.content);
+      }
+    }
     if (
-      /^(save_|publish_|submit_)/.test(name) ||
+      (/^(save_|publish_|submit_)/.test(name) && name !== 'save_website_page') ||
       new URL(request.url()).pathname.includes('/functions/')
     )
       state.writes.push(name);
@@ -82,6 +99,10 @@ test('an unsaved added page updates the actual website preview without a write o
     .fill('A draft programme introduction before any save.');
   await page.getByLabel('When / schedule', { exact: true }).fill('Draft schedule information');
   await page.getByLabel('Page picture address', { exact: true }).fill('/jic-aerial-sunset.jpg');
+  await page
+    .locator('summary')
+    .filter({ hasText: /^Registration$/ })
+    .click();
   await page.getByLabel('Registration', { exact: true }).selectOption('interest');
   await page.getByLabel('Linked form', { exact: true }).selectOption(formId);
   await expect(
@@ -147,5 +168,38 @@ test('a standalone unpublished page ignores draft preview messages', async ({ pa
   ).toBeVisible();
   await expect(page.getByText('Unaccepted draft', { exact: true })).toHaveCount(0);
   expect(state.writes).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
+test('staff edit and hide guided answers from the page editor, then visitors see those answers', async ({
+  page,
+}) => {
+  const state = await fixture(page);
+  await page.goto('/admin?section=content&page=%2Fservices%2Fcommunity');
+  const guide = page.locator('.service-guidance-editor');
+  await guide.locator(':scope > summary').click();
+  const first = guide.locator('details').nth(0);
+  await first.locator('summary').click();
+  await first.getByLabel('Question', { exact: true }).fill('Where do classes appear?');
+  await first
+    .getByRole('textbox', { name: 'Helpful answer', exact: true })
+    .fill('Choose Adult education below to view classes.');
+  const second = guide.locator('details').nth(1);
+  await second.locator('summary').click();
+  await second.getByRole('switch').uncheck();
+  await page
+    .locator('.page-editor-controls')
+    .getByRole('button', { name: 'Save page', exact: true })
+    .click();
+  await expect.poll(() => state.writes.length).toBe(1);
+  expect(JSON.parse(state.writes[0].content_value).guidance[1].enabled).toBe(false);
+  await page.goto('/services/community');
+  await page.getByRole('button', { name: 'Where do classes appear?', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Your guidance' })).toContainText(
+    'Choose Adult education below',
+  );
+  await expect(
+    page.getByRole('button', { name: 'Can I offer a particular skill?', exact: true }),
+  ).toHaveCount(0);
   expect(state.errors).toEqual([]);
 });

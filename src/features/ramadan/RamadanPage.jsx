@@ -12,6 +12,7 @@ import SponsorshipKey from './SponsorshipKey';
 import SponsorshipRange from './SponsorshipRange';
 import SponsorshipTable from './SponsorshipTable';
 import useRamadanCalendar from './useRamadanCalendar';
+import MealBookingPage from './MealBookingPage';
 import '@/styles/booking-calendars.css';
 import '@/styles/ramadan.css';
 import {
@@ -25,6 +26,14 @@ import {
 
 const icons = { iftar: Moon, suhoor: Sun, daily: Heart };
 export default function RamadanPage({ kind = null }) {
+  return kind === 'daily' ? (
+    <DailyGivingPage kind={kind} />
+  ) : (
+    <MealBookingPage initialKind={kind} />
+  );
+}
+
+function DailyGivingPage({ kind }) {
   const state = useRamadanCalendar(true),
     season = state.data?.season;
   const { getContent } = useContent();

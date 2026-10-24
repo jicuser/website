@@ -89,12 +89,44 @@ export default function UnifiedHeader() {
     [radioError, setRadioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false),
     [donationOpen, setDonationOpen] = useState(false);
-  const { hidden: prayerDockHidden, toggle: togglePrayerDock } = usePrayerDockVisibility(
+  const [homePrayerVisible, setHomePrayerVisible] = useState(false);
+  useLayoutEffect(() => {
+    if (pathname !== '/') {
+      setHomePrayerVisible(false);
+      return undefined;
+    }
+    const mobile = window.matchMedia('(max-width: 767px)');
+    let intersecting = false;
+    const update = () => setHomePrayerVisible(mobile.matches && intersecting);
+    const observer = new IntersectionObserver(([entry]) => {
+      intersecting = entry.isIntersecting;
+      update();
+    });
+    // Home may still be loading its route chunk when the shared header mounts.
+    const observeCard = () => {
+      const card = document.querySelector('.jic-home-prayer');
+      if (!card) return false;
+      observer.observe(card);
+      return true;
+    };
+    const mounted = new MutationObserver(() => {
+      if (observeCard()) mounted.disconnect();
+    });
+    if (!observeCard()) mounted.observe(document.body, { childList: true, subtree: true });
+    mobile.addEventListener('change', update);
+    return () => {
+      observer.disconnect();
+      mounted.disconnect();
+      mobile.removeEventListener('change', update);
+    };
+  }, [pathname, routeKey]);
+  const { hidden: scrollDockHidden, toggle: togglePrayerDock } = usePrayerDockVisibility(
     prayerDockRef,
     routeKey,
     menuOpen || donationOpen,
     taskRoute,
   );
+  const prayerDockHidden = scrollDockHidden || homePrayerVisible;
   const [expandedMenuGroups, setExpandedMenuGroups] = useState({});
   const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1200px)').matches);
   useEffect(() => {

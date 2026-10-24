@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useId } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { validateDraft } from '@/lib/customForms';
 import {
@@ -52,6 +52,8 @@ export default function CustomFormsBuilder({
   const [pageTitle, setPageTitle] = useState('');
   const [pagePlacement, setPagePlacement] = useState('/education');
   const [selectedPage, setSelectedPage] = useState('');
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const questionGroup = useId();
   const [savedPage, setSavedPage] = useState(null);
   const [publishLinkedPage, setPublishLinkedPage] = useState(false);
   const [addressTouched, setAddressTouched] = useState(Boolean(definition || initialDraft.slug));
@@ -481,6 +483,13 @@ export default function CustomFormsBuilder({
         {draft.schema.fields.map((field, index) => (
           <CustomFormQuestion
             key={field.id}
+            group={questionGroup}
+            expanded={selectedQuestion === field.id}
+            onExpand={(open) =>
+              setSelectedQuestion((current) =>
+                open ? field.id : current === field.id ? null : current,
+              )
+            }
             field={field}
             index={index}
             fields={draft.schema.fields}
@@ -501,9 +510,11 @@ export default function CustomFormsBuilder({
               key={preset.id}
               type="button"
               disabled={draft.schema.fields.length >= 40}
-              onClick={() =>
-                setFields([...draft.schema.fields, newQuestion(draft.schema.fields, preset.id)])
-              }
+              onClick={() => {
+                const question = newQuestion(draft.schema.fields, preset.id);
+                setFields([...draft.schema.fields, question]);
+                setSelectedQuestion(question.id);
+              }}
             >
               + {preset.name}
             </button>
@@ -511,7 +522,11 @@ export default function CustomFormsBuilder({
           <button
             type="button"
             disabled={draft.schema.fields.length >= 40}
-            onClick={() => setFields([...draft.schema.fields, newQuestion(draft.schema.fields)])}
+            onClick={() => {
+              const question = newQuestion(draft.schema.fields);
+              setFields([...draft.schema.fields, question]);
+              setSelectedQuestion(question.id);
+            }}
           >
             Add question
           </button>

@@ -102,3 +102,16 @@
     display: none;
   }
 }
+.service-guidance-editor > summary,
+.service-guidance-editor details > summary {
+  min-height: 44px;
+  padding: 12px 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+.service-guidance-editor details {
+  padding: 0 12px 10px;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  margin: 6px 0;
+}

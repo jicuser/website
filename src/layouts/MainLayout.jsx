@@ -8,8 +8,8 @@ import { supplementalContentPaths } from '@/content/editablePages';
 import { ABOUT_PATHS } from '@/content/aboutSections';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
 import FloatingPageTools from '@/components/shell/FloatingPageTools';
-import RelatedContent from '@/components/RelatedContent';
-import ProgrammePosters from '@/components/ProgrammePosters';
+const RelatedContent = lazy(() => import('@/components/RelatedContent'));
+const ProgrammePosters = lazy(() => import('@/components/ProgrammePosters'));
 import PublishedPageLinks from '@/features/content/PublishedPageLinks';
 import { PublishedPagesProvider } from '@/context/PublishedPagesContext';
 import { ProgrammeJourneyProvider } from '@/context/ProgrammeJourneyContext';
@@ -20,6 +20,7 @@ import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import { useAuth } from '@/context/AuthContext';
 import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
 import { isPublicTaskRoute } from '@/lib/publicTaskRoute';
+import { siteDesign, designForPage } from '@/lib/siteDesign';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
 
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
@@ -41,6 +42,7 @@ function PublicLayout() {
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const { isAdmin } = useAuth();
   const { getContent } = useContent();
+  const design = designForPage(siteDesign(getContent), pathname);
   const visible = isPageVisible(getContent, pathname) || isAdmin;
   const preview = new URLSearchParams(search).get('preview') === '1';
   const isHome = pathname === '/';
@@ -49,11 +51,27 @@ function PublicLayout() {
     isHome ||
     pathname.startsWith('/worship') ||
     (pathname.startsWith('/prayer-times') && pathname !== '/prayer-times/reminders');
-  const isDiscovery = ['/search', '/social-media', '/education/programmes'].includes(pathname);
+  const isDiscovery = [
+    '/',
+    '/services',
+    '/services/support',
+    '/services/skills-careers',
+    '/events',
+    '/search',
+    '/about',
+    '/social-media',
+    '/education/programmes',
+    '/education',
+    '/youth',
+    '/worship',
+  ].includes(pathname);
   const isTask = isPublicTaskRoute(pathname);
+  const isReader = pathname.startsWith('/worship/');
 
   return (
     <div
+      data-palette={design.palette}
+      data-content-layout={design.layout}
       className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
     >
       <PublicBackdrop />
@@ -87,9 +105,14 @@ function PublicLayout() {
             {!isAbout && pathname !== '/services/hall-booking' && (
               <ManagedPageSections key={pathname} />
             )}
-            {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
-            {!isDiscovery && !isTask && <PublishedPageLinks />}
-            {!isAbout && !isDiscovery && !isTask && <RelatedContent />}
+            <Suspense fallback={null}>
+              {['/services', '/education', '/youth', '/worship'].includes(pathname) && (
+                <ProgrammePosters compact />
+              )}
+              {!isHome && !isDiscovery && !isTask && !isReader && <ProgrammePosters />}
+              {!isDiscovery && !isTask && !isReader && <PublishedPageLinks />}
+              {!isAbout && !isDiscovery && !isTask && !isReader && <RelatedContent />}
+            </Suspense>
           </div>
         ) : (
           <section className="jic-page-loading">

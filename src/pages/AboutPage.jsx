@@ -9,6 +9,7 @@ import SocialLinks from '@/components/about/SocialLinks';
 import ContactSection from '@/components/about/ContactSection';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
+import { SOCIAL_CHANNELS } from '@/content/socials';
 import { ABOUT_SECTIONS, aboutSectionLink } from '@/content/aboutSections';
 import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { useContent } from '@/context/ContentContext';
@@ -61,9 +62,18 @@ export default function AboutPage() {
       ({ path }) => visible(path) && !aboutChildren.some((child) => child.path === path),
     ),
   ];
+  const anchor = hash.slice(1);
+  const selectedId =
+    anchor === 'map'
+      ? 'contact'
+      : SOCIAL_CHANNELS.some((channel) => channel.id === anchor)
+        ? 'social'
+        : anchor === 'other-team-members'
+          ? 'team'
+          : anchor;
   const orderedSections = sectionLinks
     .map(({ path }) => ABOUT_SECTIONS.find((section) => section.path === path))
-    .filter((section) => section && visible(section.path));
+    .filter((section) => section && section.id === selectedId && visible(section.path));
   const sectionContent = {
     history: <HistorySection />,
     team: (
@@ -95,17 +105,25 @@ export default function AboutPage() {
   };
   return (
     <article id="overview" tabIndex={-1} className="about-page about-overview about-combined">
-      <AboutMasthead title="A place for faith. A home for community." photo>
+      <AboutMasthead title="About JIC">
         <p>
           Worship, learning and community at Jamatia Islamic Centre on Woodlands Road, Sparkhill,
           Birmingham.
         </p>
       </AboutMasthead>
-      <nav className="about-jump-links" aria-label="On this page">
+      <nav className="about-jump-links" aria-label="About JIC topics">
         {sectionLinks
           .filter(({ path }) => path !== '/about')
           .map(({ path, name }) => (
-            <Link key={path} to={aboutSectionLink(path)}>
+            <Link
+              key={path}
+              to={aboutSectionLink(path)}
+              aria-current={
+                ABOUT_SECTIONS.find((section) => section.path === path)?.id === selectedId
+                  ? 'page'
+                  : undefined
+              }
+            >
               {navigationName(
                 getContent,
                 path,
@@ -116,30 +134,32 @@ export default function AboutPage() {
       </nav>
       <ManagedPageContent pagePath="/about" optional headingLevel={2} className="is-unframed" />
       <ManagedPageSections pagePath="/about" />
-      <nav className="about-purpose-links" aria-label="Life at the centre">
-        {[
-          [Heart, 'Prayer & worship', 'Daily salah & Jummah', '/prayer-times'],
-          [BookOpen, 'Learning', 'Classes & Madrassah', '/education'],
-          [Users, 'Community services', 'Support & care', '/services'],
-        ]
-          .filter(([, , , path]) => visible(path))
-          .map(([Icon, name, description, to]) => (
-            <Link key={to} to={to}>
-              <span className="about-purpose-symbol" aria-hidden="true">
-                <svg viewBox="0 0 80 84" fill="none">
-                  <path d="M8 80V37C8 20 23 9 40 4C57 9 72 20 72 37V80" />
-                  <path d="M1 80H79M15 73V38C15 25 27 16 40 11C53 16 65 25 65 38V73" />
-                </svg>
-                <Icon size={27} strokeWidth={1.5} />
-              </span>
-              <span className="about-purpose-copy">
-                <strong>{name}</strong>
-                <small>{description}</small>
-              </span>
-              <ArrowRight size={15} aria-hidden="true" />
-            </Link>
-          ))}
-      </nav>
+      {!selectedId && (
+        <nav className="about-purpose-links" aria-label="Life at the centre">
+          {[
+            [Heart, 'Prayer & worship', 'Daily salah & Jummah', '/prayer-times'],
+            [BookOpen, 'Learning', 'Classes & Madrassah', '/education'],
+            [Users, 'Community services', 'Support & care', '/services'],
+          ]
+            .filter(([, , , path]) => visible(path))
+            .map(([Icon, name, description, to]) => (
+              <Link key={to} to={to}>
+                <span className="about-purpose-symbol" aria-hidden="true">
+                  <svg viewBox="0 0 80 84" fill="none">
+                    <path d="M8 80V37C8 20 23 9 40 4C57 9 72 20 72 37V80" />
+                    <path d="M1 80H79M15 73V38C15 25 27 16 40 11C53 16 65 25 65 38V73" />
+                  </svg>
+                  <Icon size={27} strokeWidth={1.5} />
+                </span>
+                <span className="about-purpose-copy">
+                  <strong>{name}</strong>
+                  <small>{description}</small>
+                </span>
+                <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            ))}
+        </nav>
+      )}
       {orderedSections.map((section) => (
         <Section
           key={section.path}

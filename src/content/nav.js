@@ -1,3 +1,4 @@
+import { COMMUNITY_SERVICES } from './communityServices.js';
 /** Legacy extension address retained for existing CMS content and shared links. */
 export const MASJID_EXTENSION_TABS = [
   { name: 'Masjid Extension', path: '/projects/masjid-extension' },
@@ -42,10 +43,10 @@ export const WORSHIP_TABS = [
   { name: 'Prayer Guide', path: '/worship/prayer-guide' },
   { name: 'Janazah Guide', path: '/worship/janazah-guide' },
 ];
-export const NAV_GROUPS = [
+const ALL_NAV_GROUPS = [
   { name: 'Home', path: '/', children: [] },
   {
-    name: 'About',
+    name: 'About JIC',
     path: '/about',
     children: [
       { name: 'About JIC', path: '/about' },
@@ -57,7 +58,7 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    name: 'Prayer Times',
+    name: 'Salah Times',
     path: '/prayer-times',
     children: [
       { name: 'Today', path: '/prayer-times' },
@@ -66,7 +67,7 @@ export const NAV_GROUPS = [
       { name: 'Salah Alerts', path: '/prayer-times/reminders' },
     ],
   },
-  { name: 'Adhkar, Qur’an & Janazah Guide', path: '/worship', children: WORSHIP_TABS },
+  { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
   {
     name: 'Ramadan',
     path: '/ramadan',
@@ -78,16 +79,11 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    name: 'Services',
+    name: 'Community Hub',
     path: '/services',
     children: [
-      { name: 'All services', path: '/services' },
-      { name: 'Religious Services', path: '/services/religious' },
-      { name: 'Educational Programmes', path: '/services/education' },
-      { name: 'Community Services', path: '/services/community' },
-      { name: 'Funeral Services', path: '/funerals' },
-      { name: 'Nikah', path: '/services/nikah' },
-      { name: 'Hall Booking', path: '/services/hall-booking' },
+      { name: 'Explore the Hub', path: '/services' },
+      ...COMMUNITY_SERVICES.map(({ title, to }) => ({ name: title, path: to })),
     ],
   },
   {
@@ -112,6 +108,15 @@ export const NAV_GROUPS = [
     ],
   },
 ];
+export const NAV_GROUPS = [
+  ...['/', '/prayer-times', '/worship', '/services', '/about'].map((path) =>
+    ALL_NAV_GROUPS.find((group) => group.path === path),
+  ),
+  ...ALL_NAV_GROUPS.filter(
+    (group) => !['/', '/prayer-times', '/worship', '/services', '/about'].includes(group.path),
+  ),
+];
+
 export const NAV_ITEMS = [
   ...NAV_GROUPS.map(({ name, path }) => ({ name, path })),
   { name: 'Financial History', path: '/financial-history' },
@@ -128,13 +133,9 @@ export const PUBLIC_MENU_GROUPS = [
   { name: 'Portal login', path: '/portal', children: [], editable: false },
 ];
 export const FOOTER_LINKS = [
-  { name: 'Donate', path: '/donate' },
-  { name: 'Get involved', path: '/get-involved' },
+  { name: 'Community Hub', path: '/services' },
   { name: 'Portal login', path: '/portal' },
-  { name: 'Contact Us', path: '/contact' },
-  { name: 'Download Salah timetable', path: '/prayer-times/monthly#phone-wallpaper' },
-  { name: 'Services', path: '/services' },
+  { name: 'Visit & contact', path: '/contact' },
+  { name: 'Salah timetable', path: '/prayer-times/monthly#phone-wallpaper' },
   { name: 'Our Masjid Project', path: '/projects' },
-  { name: 'Education', path: '/education' },
-  { name: 'Youth', path: '/youth' },
 ];

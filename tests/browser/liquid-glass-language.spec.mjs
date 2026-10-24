@@ -32,10 +32,10 @@ for (const theme of ['light', 'dark']) {
     const navigation = await action.evaluate(material);
     expect(navigation.sheen).toContain('linear-gradient');
     await page.goto('/services');
-    await expect(page.getByRole('heading', { name: 'Services at JIC' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Community Hub' })).toBeVisible();
     const choice = page
       .getByRole('group', { name: 'Filter services' })
-      .getByRole('button', { name: 'Learning' });
+      .getByRole('button', { name: /^Learning & work/ });
     await choice.click();
     expect((await choice.evaluate(material)).sheen).toContain('linear-gradient');
     expect((await choice.evaluate(material)).colour).toBe(navigation.colour);

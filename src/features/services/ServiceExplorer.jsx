@@ -1,46 +1,32 @@
-import React, { useId, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  ArrowRight,
-  ChevronRight,
-  BookOpen,
-  CalendarDays,
-  Gift,
-  GraduationCap,
-  Heart,
-  HeartHandshake,
-  Search,
-  Sparkles,
-  UserCircle,
-  Users,
-  X,
-} from 'lucide-react';
-import MosqueSymbol from '@/components/icons/MosqueSymbol';
+import React, { useId, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowRight, ChevronRight, Search, X } from 'lucide-react';
+import ServiceIcon from './ServiceIcon';
+import { siteDesign } from '@/lib/siteDesign';
 import { useContent } from '@/context/ContentContext';
 import { isPageVisible } from '@/lib/pageVisibility';
 import { filterServices, getVisibleServices, SERVICE_CATEGORIES } from './catalog';
 import '@/styles/services.css';
-
-const icons = {
-  mosque: MosqueSymbol,
-  book: BookOpen,
-  graduation: GraduationCap,
-  heart: Heart,
-  support: HeartHandshake,
-  calendar: CalendarDays,
-  sparkles: Sparkles,
-  users: Users,
-  giving: Gift,
-  account: UserCircle,
-};
 
 /** One CMS-aware service finder, shared by the homepage and full directory. */
 export default function ServiceExplorer({ compact = false }) {
   const { getContent } = useContent();
   const instanceId = useId();
   const searchRef = useRef(null);
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('all');
+  const [params, setParams] = useSearchParams();
+  const query = params.get('q') || '';
+  const category = params.get('category') || 'all';
+  const design = siteDesign(getContent);
+  const setFilters = (patch) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        for (const [key, value] of Object.entries(patch))
+          value && value !== 'all' ? next.set(key, value) : next.delete(key);
+        return next;
+      },
+      { replace: true, preventScrollReset: true },
+    );
   const visibleServices = getVisibleServices(getContent);
   const categories = SERVICE_CATEGORIES.filter(
     ({ id }) => id === 'all' || visibleServices.some((service) => service.category === id),
@@ -49,7 +35,7 @@ export default function ServiceExplorer({ compact = false }) {
   const results = filterServices({ category: activeCategory, query, getContent });
   const hasFilters = activeCategory !== 'all' || query.trim().length > 0;
   const displayedServices = compact
-    ? visibleServices.filter(({ id }) => ['hall', 'certificates', 'community'].includes(id))
+    ? visibleServices.filter(({ id }) => ['support', 'careers', 'community'].includes(id))
     : results;
   const directoryVisible = isPageVisible(getContent, '/services');
   const contactVisible = isPageVisible(getContent, '/contact');
@@ -59,13 +45,12 @@ export default function ServiceExplorer({ compact = false }) {
   const resultsId = `${instanceId}-results`;
 
   function clearSearch() {
-    setQuery('');
+    setFilters({ q: '' });
     searchRef.current?.focus();
   }
 
   function resetFilters() {
-    setQuery('');
-    setCategory('all');
+    setFilters({ q: '', category: 'all' });
     searchRef.current?.focus();
   }
 
@@ -80,11 +65,11 @@ export default function ServiceExplorer({ compact = false }) {
       <header className="service-explorer-header">
         <div className="service-explorer-intro">
           <Heading id={headingId} className="service-explorer-title">
-            {compact ? 'Services & support' : 'Services at JIC'}
+            {compact ? 'Services & support' : 'Community Hub'}
           </Heading>
           {!compact && (
             <p className="service-explorer-description">
-              Find prayer times, classes and practical support from the centre.
+              Choose a service, get useful guidance and contact the team when you need to.
             </p>
           )}
         </div>
@@ -109,7 +94,7 @@ export default function ServiceExplorer({ compact = false }) {
                   id={searchId}
                   type="search"
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event) => setFilters({ q: event.target.value.slice(0, 120) })}
                   placeholder="What can we help you find?"
                   aria-controls={resultsId}
                   autoComplete="off"
@@ -132,7 +117,7 @@ export default function ServiceExplorer({ compact = false }) {
                     key={id}
                     type="button"
                     aria-pressed={activeCategory === id}
-                    onClick={() => setCategory(id)}
+                    onClick={() => setFilters({ category: id })}
                   >
                     {label}
                     <span aria-hidden="true">{count}</span>
@@ -156,7 +141,6 @@ export default function ServiceExplorer({ compact = false }) {
         {displayedServices.length ? (
           <div className="service-explorer-grid">
             {displayedServices.map((service) => {
-              const Icon = icons[service.icon];
               const titleId = `${instanceId}-${service.id}`;
               return (
                 <Link
@@ -166,7 +150,7 @@ export default function ServiceExplorer({ compact = false }) {
                   aria-labelledby={titleId}
                 >
                   <span className="service-explorer-card-icon" aria-hidden="true">
-                    <Icon />
+                    <ServiceIcon name={design.icons[service.id] || service.icon} />
                   </span>
                   <span className="service-explorer-card-copy">
                     <h3 id={titleId}>{service.title}</h3>
@@ -201,6 +185,22 @@ export default function ServiceExplorer({ compact = false }) {
         )}
       </div>
 
+      {!compact && (
+        <nav className="hub-utility-links" aria-label="Worship and account">
+          {[
+            ['Adhkar', '/worship/daily-duas'],
+            ['Read Qur’an', '/worship/quran'],
+            ['Salah times', '/prayer-times'],
+            ['My portal & certificates', '/portal'],
+          ]
+            .filter(([, to]) => isPageVisible(getContent, to))
+            .map(([name, to]) => (
+              <Link key={to} to={to}>
+                {name}
+              </Link>
+            ))}
+        </nav>
+      )}
       {!compact && contactVisible && (
         <div className="service-explorer-footer">
           <p>

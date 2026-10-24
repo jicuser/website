@@ -359,7 +359,7 @@ test('poster locations override a linked page listing and preserve screen settin
   await expect(locations).toBeVisible();
   await expect(locations.getByLabel('What’s on (homepage)', { exact: true })).toBeChecked();
   await locations.getByLabel('What’s on (homepage)', { exact: true }).uncheck();
-  await locations.getByLabel('Services', { exact: true }).check();
+  await locations.getByLabel('Community Hub', { exact: true }).check();
   expect(evidence.writes).toHaveLength(0);
   await page
     .locator('.admin-toolbar')
@@ -383,6 +383,7 @@ test('poster locations override a linked page listing and preserve screen settin
       .getByRole('heading', { name: 'Open Qur’an Circle', exact: true }),
   ).toHaveCount(0);
   await page.goto('/services');
+  await page.getByText('Notices & programmes', { exact: true }).click();
   await expect(
     page
       .locator('.jic-programmes')

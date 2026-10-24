@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { searchPages } from '../src/lib/siteSearch.js';
 import * as catalog from '../src/features/services/catalog.js';
 
 function findServices(options) {
@@ -12,16 +13,14 @@ test('the catalogue connects each JIC service to its existing destination', () =
     (catalog.SERVICE_CATALOG || []).map(({ id, to }) => [id, to]),
   );
   assert.deepEqual(destinations, {
-    prayer: '/prayer-times',
+    support: '/services/support',
     learning: '/education',
-    madrassah: '/madrassah',
+    careers: '/services/skills-careers',
     nikah: '/services/nikah',
     funerals: '/funerals',
     hall: '/services/hall-booking',
     youth: '/youth',
-    community: '/get-involved',
-    giving: '/donate',
-    portal: '/portal',
+    community: '/get-involved/volunteer',
   });
 });
 
@@ -35,8 +34,10 @@ test('search finds everyday language as well as service names', () => {
     ['nikah'],
   );
   assert.deepEqual(
-    findServices({ query: 'SaLaH' }).map(({ id }) => id),
-    ['prayer'],
+    searchPages('SaLaH')
+      .filter(({ path }) => path === '/prayer-times')
+      .map(({ path }) => path),
+    ['/prayer-times'],
   );
   assert.deepEqual(
     findServices({ query: 'preferred date' }).map(({ id }) => id),
@@ -47,30 +48,32 @@ test('search finds everyday language as well as service names', () => {
 test('every search word must match the same service', () => {
   assert.deepEqual(
     findServices({ query: 'quran children' }).map(({ id }) => id),
-    ['madrassah'],
+    ['learning'],
   );
   assert.deepEqual(findServices({ query: 'quran funeral' }), []);
 });
 
 test('search handles apostrophes and accents in visitor input', () => {
   assert.deepEqual(
-    findServices({ query: 'JAMA\u0027AH' }).map(({ id }) => id),
-    ['prayer'],
+    searchPages('JAMA\u0027AH')
+      .filter(({ path }) => path === '/prayer-times')
+      .map(({ path }) => path),
+    ['/prayer-times'],
   );
   assert.deepEqual(
     findServices({ query: 'madrássah' }).map(({ id }) => id),
-    ['madrassah'],
+    ['learning'],
   );
 });
 
 test('categories narrow the results and combine with search', () => {
   assert.deepEqual(
     findServices({ category: 'learning' }).map(({ id }) => id),
-    ['learning', 'madrassah'],
+    ['learning', 'careers'],
   );
   assert.deepEqual(
     findServices({ category: 'learning', query: 'parent' }).map(({ id }) => id),
-    ['madrassah'],
+    ['learning'],
   );
   assert.deepEqual(findServices({ category: 'giving', query: 'nikah' }), []);
 });
@@ -87,7 +90,7 @@ test('CMS-hidden destinations stay hidden in every discovery mode', () => {
     'Visibility filtering must be available',
   );
   const visible = catalog.getVisibleServices(getContent);
-  assert.equal(visible.length, 8);
+  assert.equal(visible.length, 7);
   assert.equal(
     visible.some(({ id }) => ['nikah', 'portal'].includes(id)),
     false,
@@ -101,33 +104,27 @@ test('CMS-hidden destinations stay hidden in every discovery mode', () => {
 });
 
 test('certificate search leads to the portal instead of a standalone service', () => {
-  const results = findServices({ query: 'certificate' });
+  const results = searchPages('certificate').filter(({ path }) => path === '/portal');
   assert.deepEqual(
-    results.map(({ to }) => to),
+    results.map(({ path }) => path),
     ['/portal'],
   );
 });
 
-test('hidden certificate guidance stays out of search while the portal remains available', () => {
-  const getContent = (key, fallback) =>
-    key === 'page-visibility:/services/certificates' ? 'false' : fallback;
-  const results = findServices({ query: 'certificate', getContent });
-  assert.equal(
-    results.some(({ to }) => to === '/services/certificates'),
-    false,
-  );
-  assert.ok(results.some(({ to }) => to === '/portal'));
+test('certificate guidance stays in account utilities and outside the eight service groups', () => {
+  assert.deepEqual(findServices({ query: 'certificate' }), []);
+  assert.ok(searchPages('certificate').some(({ path }) => path === '/portal'));
 });
 
 test('a new CMS visibility value changes the results without changing the catalogue', () => {
-  const content = new Map([['page-visibility:/madrassah', 'false']]);
+  const content = new Map([['page-visibility:/education', 'false']]);
   const getContent = (key, fallback) => content.get(key) ?? fallback;
   assert.deepEqual(findServices({ query: 'children', getContent }), []);
 
-  content.set('page-visibility:/madrassah', 'true');
+  content.set('page-visibility:/education', 'true');
   assert.deepEqual(
     findServices({ query: 'children', getContent }).map(({ id }) => id),
-    ['madrassah'],
+    ['learning'],
   );
 });
 

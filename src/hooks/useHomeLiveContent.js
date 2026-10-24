@@ -3,7 +3,11 @@ import { supabase } from '@/lib/supabaseClient';
 import { londonDate } from '@/lib/timetable';
 
 /** The website and TV read the same published events and livestream settings. */
-export default function useHomeLiveContent({ eventLimit = 4, refreshMs = 60000 } = {}) {
+export default function useHomeLiveContent({
+  eventLimit = 4,
+  eventOffset = 0,
+  refreshMs = 60000,
+} = {}) {
   const [content, setContent] = useState({
     events: [],
     announcement: null,
@@ -29,7 +33,7 @@ export default function useHomeLiveContent({ eventLimit = 4, refreshMs = 60000 }
             .eq('published', true)
             .gte('event_date', londonDate())
             .order('event_date', { ascending: true })
-            .limit(eventLimit)
+            .range(eventOffset, eventOffset + eventLimit - 1)
             .abortSignal(request.signal),
           supabase
             .from('announcements')
@@ -65,6 +69,7 @@ export default function useHomeLiveContent({ eventLimit = 4, refreshMs = 60000 }
         busy = false;
       }
     };
+    setContent((previous) => ({ ...previous, events: [], loading: true, stale: false }));
     refresh();
     const timer = window.setInterval(refresh, refreshMs);
     window.addEventListener('online', refresh);
@@ -78,6 +83,6 @@ export default function useHomeLiveContent({ eventLimit = 4, refreshMs = 60000 }
       window.removeEventListener('focus', refresh);
       window.removeEventListener('jic-content-updated', refresh);
     };
-  }, [eventLimit, refreshMs]);
+  }, [eventLimit, eventOffset, refreshMs]);
   return content;
 }

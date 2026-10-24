@@ -59,6 +59,8 @@ const ProjectsPage = lazy(() => import('@/pages/ProjectsPage'));
 const SectionPage = lazy(() => import('@/pages/SectionPage'));
 const GuidedServicePage = lazy(() => import('@/pages/GuidedServicePage'));
 const CertificatesGuidePage = lazy(() => import('@/pages/CertificatesGuidePage'));
+const CommunityHelpPage = lazy(() => import('@/pages/CommunityHelpPage'));
+const EventsPage = lazy(() => import('@/pages/EventsPage'));
 const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
 const WorshipPage = lazy(() => import('@/pages/WorshipPage'));
 const RadioPlayerPage = lazy(() => import('@/pages/RadioPlayerPage'));
@@ -167,6 +169,9 @@ function AppRoutes() {
             <Route path="worship/janazah-guide" element={<WorshipPage />} />
             <Route path="worship/daily-salah" element={<WorshipPage />} />
 
+            <Route path="services/support" element={<CommunityHelpPage />} />
+            <Route path="services/skills-careers" element={<CommunityHelpPage />} />
+            <Route path="events" element={<EventsPage />} />
             <Route path="services" element={<ServicesPage />} />
             <Route path="services/certificates" element={<CertificatesGuidePage />} />
             <Route path="services/religious" element={<ServicesPage />} />

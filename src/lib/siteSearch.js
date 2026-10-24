@@ -1,14 +1,17 @@
+import { COMMUNITY_SERVICES } from '../content/communityServices.js';
 import { PUBLIC_PAGES } from '../content/pageDirectory.js';
 import { SOCIAL_CHANNELS } from '../content/socials.js';
 
 const aliases = {
   '/prayer-times':
-    'salah namaz salat jamaat jamaah timetable today birmingham west midlands woodlands road masjid jic',
+    'prayer salah namaz salat jamaat jamaah timetable today birmingham west midlands woodlands road masjid jic',
   '/prayer-times/jummah': 'juma jumma friday khutbah sermon',
   '/madrassah': 'madrasah madrasa school children education',
   '/youth/itikaf': 'itikaf itikaaf itikaph ramadan',
   '/contact': 'address map directions visit phone email parking',
   '/projects/how-to-support': 'donate donation sadaqah charity building appeal',
+  '/worship/daily-duas': 'adhkar azkar adkar dua duas dhikr morning evening',
+  '/worship/quran': 'quran qur’an koran surah reading',
   '/radio': 'listen audio live radio stream',
   '/social-media': 'social media facebook instagram youtube tiktok twitter x videos livestream',
 };
@@ -37,6 +40,15 @@ for (const channel of SOCIAL_CHANNELS)
     section: 'Social Media',
     description: channel.description,
   });
+for (const service of COMMUNITY_SERVICES) {
+  pages.set(service.to, {
+    title: pages.get(service.to)?.title || service.title,
+    path: service.to,
+    section: 'Community Hub',
+    description: service.description,
+  });
+  aliases[service.to] = service.keywords.join(' ');
+}
 export const SEARCH_PAGES = [...pages.values()];
 
 const normalise = (value) =>

@@ -11,11 +11,11 @@ import { buildPageNavigator, findNavigatorPages } from '../src/lib/pageNavigator
 const sections = buildPageNavigator(EDITABLE_PAGES);
 const expectedSections = [
   'Home',
-  'About',
-  'Prayer Times',
-  'Adhkar, Qur’an & Janazah Guide',
+  'Salah Times',
+  'Worship',
+  'Community Hub',
+  'About JIC',
   'Ramadan',
-  'Services',
   'Our Masjid Project',
   'Education',
   'Youth',
@@ -89,8 +89,8 @@ test('nested pages retain clear names inside Education, Services and Our Masjid 
   assert.equal(find('/projects/masjid-extension/timeline').section, 'Our Masjid Project');
   assert.equal(find('/projects/masjid-extension/timeline').label, 'Extension Timeline');
   assert.equal(find('/projects/main-prayer-hall').label, 'Main Prayer Hall');
-  assert.equal(find('/funerals/contact-support').section, 'Services');
-  assert.equal(find('/contact').section, 'About');
+  assert.equal(find('/funerals/contact-support').section, 'Community Hub');
+  assert.equal(find('/contact').section, 'About JIC');
   assert.equal(find('/social-media').section, 'Social Media');
 });
 
@@ -167,10 +167,10 @@ test('browsing a section does not navigate or discard the currently edited page'
   assert.equal(section(tree, 'Madrassah').props['aria-expanded'], true);
   assert.equal(page(tree, '/madrassah/policies').props['aria-current'], 'page');
   assert.equal(nodes(tree, (node) => node.props?.['aria-current'] === 'page').length, 1);
-  section(tree, 'Services').props.onClick();
+  section(tree, 'Community Hub').props.onClick();
   tree = render();
   assert.deepEqual(calls, []);
-  assert.equal(section(tree, 'Services').props['aria-expanded'], true);
+  assert.equal(section(tree, 'Community Hub').props['aria-expanded'], true);
   assert.equal(section(tree, 'Madrassah').props['aria-expanded'], false);
   assert.ok(
     nodes(tree, (node) => node.type === 'strong').some(
@@ -227,7 +227,7 @@ test('saving disables navigation and guards against a programmatic page selectio
   for (const node of nodes(tree, (node) => ['input', 'select', 'button'].includes(node.type)))
     assert.equal(node.props.disabled, true);
   page(tree, '/education/courses').props.onClick();
-  section(tree, 'Services').props.onClick();
+  section(tree, 'Community Hub').props.onClick();
   assert.deepEqual(calls, []);
 });
 

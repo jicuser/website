@@ -407,7 +407,7 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
           Manage added pages
         </button>
         <Link className="admin-button" to="/admin/home-tiles">
-          Home tiles
+          Home feature
         </Link>
       </div>
       <details className="admin-panel">

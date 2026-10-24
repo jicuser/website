@@ -61,6 +61,7 @@ const Safeguarding = lazy(() => import('@/features/operations/Safeguarding'));
 const ProjectEditor = lazy(() => import('@/features/projects/ProjectEditor'));
 const HallBookings = lazy(() => import('@/features/bookings/HallBookings'));
 const SiteVisibility = lazy(() => import('@/features/content/SiteVisibility'));
+const WebsiteAppearance = lazy(() => import('@/features/content/WebsiteAppearance'));
 const MenuEditor = lazy(() => import('@/features/content/MenuEditor'));
 const RamadanManager = lazy(() => import('@/features/ramadan/RamadanManager'));
 const CertificatesManager = lazy(() => import('@/features/certificates/Certificates'));
@@ -74,6 +75,7 @@ const ghost = `${btn} admin-editor-secondary`;
 const danger = `${btn} admin-editor-danger`;
 
 const SECTION_ICONS = {
+  appearance: Sun,
   menus: ChevronDown,
   visibility: Eye,
   hall: CalendarDays,
@@ -1113,6 +1115,11 @@ export default function AdminPage() {
   };
 
   const section = {
+    appearance: (
+      <Suspense fallback={<p role="status">Opening appearance…</p>}>
+        <WebsiteAppearance />
+      </Suspense>
+    ),
     menus: (
       <Suspense fallback={<p role="status">Opening menus…</p>}>
         <MenuEditor />

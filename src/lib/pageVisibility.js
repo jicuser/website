@@ -9,11 +9,11 @@ import {
 export const pageVisibilityKey = (path) =>
   `page-visibility:${canonicalPagePath(path.split(/[?#]/)[0].replace(/\/+$/, '') || '/')}`;
 export function isPageEnabled(getContent, path) {
-  if (['/', '/privacy'].includes(path.split(/[?#]/)[0])) return true;
+  if (['/', '/privacy', '/services/support'].includes(path.split(/[?#]/)[0])) return true;
   return getContent(pageVisibilityKey(path), 'true') !== 'false';
 }
 export function isPageVisible(getContent, path) {
-  if (['/', '/privacy'].includes(path.split(/[?#]/)[0])) return true;
+  if (['/', '/privacy', '/services/support'].includes(path.split(/[?#]/)[0])) return true;
   if (path.startsWith('/ramadan/') && getContent(pageVisibilityKey('/ramadan'), 'true') === 'false')
     return false;
   return isPageEnabled(getContent, path);

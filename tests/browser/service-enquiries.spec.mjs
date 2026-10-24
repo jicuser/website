@@ -69,7 +69,10 @@ for (const [path, title, slug] of services) {
       await page.goto(destination);
       if (destination === path) {
         await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+        await expect(page.getByLabel('Your name', { exact: false })).toHaveCount(0);
+        await page.getByRole('button', { name: 'How it works', exact: true }).click();
         await expect(page.getByRole('list', { name: 'How it works' }).locator('li')).toHaveCount(3);
+        await page.getByRole('button', { name: 'Contact the team', exact: true }).click();
         if (slug === 'funeral-enquiry')
           await expect(
             page.getByText('This inbox is not an emergency service.', { exact: false }),
@@ -112,6 +115,8 @@ for (const [path, title, slug] of services) {
     const state = await serviceFixture(page, { closed: true });
     for (const destination of [path, `/forms/${slug}`]) {
       await page.goto(destination);
+      if (destination === path)
+        await page.getByRole('button', { name: 'Contact the team', exact: true }).click();
       await expect(page.getByRole('heading', { name: /is currently closed/ })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Send enquiry', exact: true })).toHaveCount(0);
       await expect(
@@ -181,4 +186,21 @@ test('hall enquiry keeps the selected date, hides prayer controls while typing, 
   expect(writes).toHaveLength(1);
   expect(writes[0].answers.preferred_date).toBe('2026-10-28');
   expect(errors).toEqual([]);
+});
+
+test('guided answers and direct links resolve a question without opening a form', async ({
+  page,
+}) => {
+  const state = await serviceFixture(page);
+  await page.goto('/services/community');
+  await page
+    .getByRole('button', { name: 'Where can I see current activities?', exact: true })
+    .click();
+  await expect(page.getByRole('region', { name: 'Your guidance' })).toContainText(
+    'Youth and Education',
+  );
+  await expect(page.getByRole('link', { name: /Youth at JIC/ })).toBeVisible();
+  await expect(page.getByLabel('Your name', { exact: false })).toHaveCount(0);
+  expect(state.reads).toEqual([]);
+  expect(state.writes).toEqual([]);
 });

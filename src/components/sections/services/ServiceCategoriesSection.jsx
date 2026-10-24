@@ -26,7 +26,9 @@ export default function ServiceCategoriesSection() {
   if (path === '/services/community')
     return <ServiceJourney journey={SERVICE_JOURNEYS.community} />;
   const Category = categories[path];
-  const title = services.children.find((page) => page.path === path)?.name;
+  const title =
+    services.children.find((page) => page.path === path)?.name ||
+    (path === '/services/religious' ? 'Religious services' : 'Educational services');
   if (!Category) return <ServicesLanding />;
   return (
     <>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { seasonDays } from '@/lib/bookingCalendar';
+import { money } from '@/features/operations/model';
 import useRamadanCalendar from './useRamadanCalendar';
 import { RAMADAN_COLOURS, ramadanDay, ramadanStatus, ramadanSettings } from './model';
 import '@/styles/ramadan.css';
@@ -8,6 +9,19 @@ export default function RamadanBoard({ kind = 'iftar', portrait = false }) {
   const state = useRamadanCalendar(true),
     season = state.data?.season;
   const options = ramadanSettings(state.data);
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/London',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+  const nextMeal =
+    kind !== 'daily' &&
+    state.data?.day_settings
+      ?.filter(
+        (row) => row.kind === kind && row.enabled && row.offer_version > 0 && row.day_date >= today,
+      )
+      .sort((a, b) => a.day_date.localeCompare(b.day_date))[0];
   const heading =
     kind === 'daily'
       ? 'Daily Giving'
@@ -59,6 +73,23 @@ export default function RamadanBoard({ kind = 'iftar', portrait = false }) {
               );
             })}
           </div>
+          {nextMeal && (
+            <footer className="ramadan-board-menu">
+              <strong>
+                {nextMeal.day_date === today
+                  ? 'Today'
+                  : new Date(`${nextMeal.day_date}T12:00:00`).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                    })}{' '}
+                · {nextMeal.menu_title || 'Meal menu'}
+              </strong>
+              <span>
+                {nextMeal.dishes.map((dish) => dish.name).join(' · ')} ·{' '}
+                {money(nextMeal.price_pence)} · Feeds {nextMeal.people_fed}
+              </span>
+            </footer>
+          )}
         </>
       ) : (
         <div className="ramadan-board-status">

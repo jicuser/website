@@ -317,8 +317,8 @@ export default function ContentPageEditor({ page, poster, initialPlacement, onSa
               />
             </label>
           </section>
-          <section className="admin-panel">
-            <h4>Content</h4>
+          <details className="admin-panel content-section" name="content-page-section" open>
+            <summary>Content & picture</summary>
             <label>
               Page details
               <textarea
@@ -350,9 +350,9 @@ export default function ContentPageEditor({ page, poster, initialPlacement, onSa
                 />
               </label>
             )}
-          </section>
-          <section className="admin-panel">
-            <h4>Menu</h4>
+          </details>
+          <details className="admin-panel content-section" name="content-page-section">
+            <summary>Menu & page address</summary>
             <label>
               Website section
               <select
@@ -404,9 +404,12 @@ export default function ContentPageEditor({ page, poster, initialPlacement, onSa
                 The address stays {pageUrl(draft)} if you move the page to another section.
               </small>
             </details>
-          </section>
-          <section className="admin-panel content-registration-setup">
-            <h4>Registration</h4>
+          </details>
+          <details
+            className="admin-panel content-section content-registration-setup"
+            name="content-page-section"
+          >
+            <summary>Registration</summary>
             <p>
               Link a form when people need to register or apply. Choosing no registration hides the
               button without closing the form or deleting responses.
@@ -465,7 +468,7 @@ export default function ContentPageEditor({ page, poster, initialPlacement, onSa
                 </small>
               </>
             )}
-          </section>
+          </details>
           <section className="admin-panel content-page-toggle">
             <h4>Visibility</h4>
             <p>

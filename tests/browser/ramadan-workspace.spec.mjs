@@ -16,6 +16,7 @@ async function fixture(page, { published = true, otherPublished = false } = {}) 
     errors: [],
     writes: [],
     failSave: false,
+    daySettings: [],
     season: {
       id: id(2),
       title: 'Configured Ramadan',
@@ -112,7 +113,22 @@ async function fixture(page, { published = true, otherPublished = false } = {}) 
       ];
     else if (path.endsWith('/ramadan_sponsorships')) data = state.records;
     else if (path.endsWith('/ramadan_settings')) data = state.settings;
-    else if (path.endsWith('/rpc/save_ramadan_options')) {
+    else if (path.endsWith('/ramadan_day_settings')) data = state.daySettings;
+    else if (path.endsWith('/rpc/save_ramadan_meal')) {
+      state.writes.push({ action: 'meal', ...body });
+      if (state.failSave) {
+        status = 400;
+        data = { message: 'Meal save failed.' };
+      } else {
+        data = { ...body.p_body, offer_version: body.p_body.expected_version + 1 };
+        state.daySettings = [
+          ...state.daySettings.filter(
+            (row) => row.kind !== data.kind || row.day_date !== data.day_date,
+          ),
+          data,
+        ];
+      }
+    } else if (path.endsWith('/rpc/save_ramadan_options')) {
       state.writes.push({ action: 'options', ...body });
       state.settings = { ...state.settings, ...body.p_body };
       data = state.settings;
@@ -196,9 +212,11 @@ test('phone bookings show readable rows and expand private details while Setup s
   await expect(editor).toHaveCount(0);
   await workspace.getByRole('button', { name: 'Month', exact: true }).click();
   await workspace.getByRole('button', { name: /^Day 1,/ }).click();
+  await workspace.getByRole('button', { name: 'Bookings · 1', exact: true }).click();
   await expect(editor.getByLabel('Phone', { exact: true })).toHaveValue('07123456789');
   await editor.getByRole('button', { name: 'Close', exact: true }).click();
   await workspace.getByRole('button', { name: /^Day 3,/ }).click();
+  await workspace.getByRole('button', { name: 'Bookings', exact: true }).last().click();
   const newSponsor = workspace.getByRole('region', { name: 'Add sponsorship', exact: true });
   await expect(newSponsor.getByLabel('Sponsor name', { exact: true })).toHaveValue('');
   await expect(newSponsor.getByLabel('Amount (£)', { exact: true })).toHaveValue('200');
@@ -386,12 +404,17 @@ for (const width of [320, 390]) {
     const second = month.getByRole('button', { name: /^Day 2,/ });
     expect((await second.boundingBox()).x).toBe(initial[1].x);
     await second.click();
+    await workspace.getByRole('button', { name: 'Bookings · 1', exact: true }).click();
     const editor = workspace.getByRole('region', { name: 'Edit sponsorship', exact: true });
     await expect(editor.getByLabel('Sponsor name', { exact: true })).toHaveValue('Second sponsor');
     await editor.getByRole('button', { name: 'Close', exact: true }).click();
     await workspace.getByRole('button', { name: 'Suhoor', exact: true }).click();
     await expect(month.locator('button:enabled')).toHaveCount(30);
     await month.getByRole('button', { name: /^Day 30,/ }).click();
+    await workspace
+      .getByRole('group', { name: 'Day details' })
+      .getByRole('button', { name: 'Bookings', exact: true })
+      .click();
     await expect(
       workspace.getByRole('region', { name: 'Add sponsorship', exact: true }),
     ).toBeVisible();
@@ -403,3 +426,44 @@ for (const width of [320, 390]) {
     expect(state.errors).toEqual([]);
   });
 }
+
+test('one day editor saves dishes, costs and servings, keeps drafts between meals and preserves them on failure', async ({
+  page,
+}, testInfo) => {
+  const state = await fixture(page);
+  const workspace = page.getByRole('region', { name: 'Ramadan management' });
+  await workspace.getByRole('button', { name: /^Day 4,/ }).click();
+  const editor = workspace.getByRole('region', { name: 'Day meal settings' });
+  await expect(editor.getByLabel('Menu title', { exact: true })).toBeVisible();
+  await editor.getByLabel('Menu title', { exact: true }).fill('Community Iftar');
+  await editor.getByRole('button', { name: 'Add dish', exact: true }).click();
+  await editor.getByLabel('Dish 1', { exact: true }).fill('Rice and curry');
+  await editor.getByLabel('Dish 1 cost (£)', { exact: true }).fill('150');
+  await editor.getByRole('button', { name: 'Use dish total', exact: true }).click();
+  await editor.getByLabel('People fed', { exact: true }).fill('50');
+  await editor.getByRole('combobox', { name: 'Selected meal', exact: true }).selectOption('suhoor');
+  await expect(editor.getByLabel('Menu title', { exact: true })).toHaveValue('');
+  await editor.getByRole('combobox', { name: 'Selected meal', exact: true }).selectOption('iftar');
+  await expect(editor.getByLabel('Menu title', { exact: true })).toHaveValue('Community Iftar');
+  state.failSave = true;
+  await editor.getByRole('button', { name: 'Save meal', exact: true }).click();
+  await expect(workspace.getByRole('alert')).toContainText('Meal save failed.');
+  await expect(editor.getByLabel('Dish 1', { exact: true })).toHaveValue('Rice and curry');
+  state.failSave = false;
+  await editor.getByRole('button', { name: 'Save meal', exact: true }).click();
+  await expect(workspace.getByRole('status')).toContainText('Meal saved.');
+  expect(state.writes.at(-1).p_body).toMatchObject({
+    kind: 'iftar',
+    day_date: '2027-02-12',
+    price_pence: 15000,
+    people_fed: 50,
+    dishes: [{ name: 'Rice and curry', cost_pence: 15000 }],
+  });
+  await editor.getByRole('switch').uncheck();
+  await editor.getByRole('button', { name: 'Save meal', exact: true }).click();
+  await expect(workspace.getByRole('status')).toContainText('Meal saved.');
+  expect(state.writes.at(-1).p_body).toMatchObject({ enabled: false, expected_version: 1 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('meal-admin.png'), fullPage: true });
+  expect(state.errors).toEqual([]);
+});

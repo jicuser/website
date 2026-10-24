@@ -90,7 +90,7 @@ export default function TileContentAdminPage() {
         .from('page_content')
         .upsert(payload, { onConflict: 'content_key' });
       if (saveError) throw saveError;
-      setMessage('Home tiles updated successfully.');
+      setMessage('Home feature updated successfully.');
     } catch (e) {
       setError(e.message || String(e));
     } finally {
@@ -110,10 +110,10 @@ export default function TileContentAdminPage() {
               <ArrowLeft size={16} />
               Back to admin
             </Link>
-            <h1 className="text-2xl font-bold sm:text-3xl">Homepage tile content</h1>
+            <h1 className="text-2xl font-bold sm:text-3xl">Home feature</h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-400">
-              Edit the headings and descriptions on the homepage tiles. You can also add or remove a
-              picture for each tile.
+              Edit the project feature shown on Home when Ramadan sponsorships are not featured.
+              Choose service icons and colours in Website appearance.
             </p>
           </div>
           <button
@@ -135,63 +135,76 @@ export default function TileContentAdminPage() {
             {error}
           </div>
         )}
-        <div className="grid gap-4 md:grid-cols-2">
-          {tiles.map((tile, index) => (
-            <section
-              key={tile.key}
-              className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-2xl sm:p-5"
-            >
-              <div className="mb-4 text-xs font-semibold uppercase tracking-[.16em] text-amber-300">
-                Fixed tile: {tile.key}
-              </div>
-              <label className="mb-3 block text-sm font-medium">
-                Heading
-                <input
-                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-white outline-none focus:border-amber-300/50"
-                  value={tile.title}
-                  onChange={(e) => update(index, { title: e.target.value })}
-                />
-              </label>
-              <label className="mb-3 block text-sm font-medium">
-                Description
-                <textarea
-                  rows="3"
-                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-white outline-none focus:border-amber-300/50"
-                  value={tile.text}
-                  onChange={(e) => update(index, { text: e.target.value })}
-                />
-              </label>
-              {tile.image && (
-                <img src={tile.image} alt="" className="mb-3 h-36 w-full rounded-xl object-cover" />
-              )}
-              <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-                <input
-                  className="min-w-0 rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white"
-                  placeholder="Optional image URL"
-                  value={tile.image || ''}
-                  onChange={(e) => update(index, { image: e.target.value })}
-                />
-                <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-sm">
-                  <ImagePlus size={16} />
-                  Upload
-                  <input
-                    type="file"
-                    accept={IMAGE_ACCEPT}
-                    className="hidden"
-                    onChange={(e) => chooseImage(index, e.target.files?.[0])}
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={() => update(index, { image: '' })}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white/80 hover:bg-white/10"
+        <Link
+          className="mb-4 inline-flex min-h-11 items-center text-amber-200 underline"
+          to="/admin?section=appearance"
+        >
+          Website appearance · service icons and colours
+        </Link>
+        <div className="grid gap-4">
+          {tiles.map(
+            (tile, index) =>
+              tile.key === 'projects' && (
+                <section
+                  key={tile.key}
+                  className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-2xl sm:p-5"
                 >
-                  <Trash2 size={16} />
-                  Remove
-                </button>
-              </div>
-            </section>
-          ))}
+                  <div className="mb-4 text-xs font-semibold uppercase tracking-[.16em] text-amber-300">
+                    Project feature
+                  </div>
+                  <label className="mb-3 block text-sm font-medium">
+                    Heading
+                    <input
+                      className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-white outline-none focus:border-amber-300/50"
+                      value={tile.title}
+                      onChange={(e) => update(index, { title: e.target.value })}
+                    />
+                  </label>
+                  <label className="mb-3 block text-sm font-medium">
+                    Description
+                    <textarea
+                      rows="3"
+                      className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-white outline-none focus:border-amber-300/50"
+                      value={tile.text}
+                      onChange={(e) => update(index, { text: e.target.value })}
+                    />
+                  </label>
+                  {tile.image && (
+                    <img
+                      src={tile.image}
+                      alt=""
+                      className="mb-3 h-36 w-full rounded-xl object-cover"
+                    />
+                  )}
+                  <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+                    <input
+                      className="min-w-0 rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm text-white"
+                      placeholder="Optional image URL"
+                      value={tile.image || ''}
+                      onChange={(e) => update(index, { image: e.target.value })}
+                    />
+                    <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-sm">
+                      <ImagePlus size={16} />
+                      Upload
+                      <input
+                        type="file"
+                        accept={IMAGE_ACCEPT}
+                        className="hidden"
+                        onChange={(e) => chooseImage(index, e.target.files?.[0])}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => update(index, { image: '' })}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white/80 hover:bg-white/10"
+                    >
+                      <Trash2 size={16} />
+                      Remove
+                    </button>
+                  </div>
+                </section>
+              ),
+          )}
         </div>
       </div>
     </div>
