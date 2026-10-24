@@ -25,10 +25,15 @@ test('saved labels/order apply to the complete menu without changing destination
   const about = groups.find((group) => group.path === '/about');
   assert.equal(about.children[0].name, 'Contact the office');
   assert.equal(about.children[0].path, '/contact');
-  assert.equal(about.children[1].name, 'Overview');
+  assert.equal(about.children[1].name, 'About JIC');
   assert.equal(
     PUBLIC_MENU_GROUPS.find((group) => group.path === '/about').children[0].path,
     '/about',
+  );
+  assert.equal(
+    groups.flatMap((group) => group.children).some((child) => /\boverview\b/i.test(child.name)),
+    false,
+    'section choices describe their purpose without generic overview links',
   );
 });
 

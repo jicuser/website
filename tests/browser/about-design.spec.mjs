@@ -72,7 +72,9 @@ for (const width of [320, 390, 1280]) {
     await expect(combined.locator('.about-photo')).toHaveCount(1);
     await expect(
       combined.getByRole('navigation', { name: 'On this page' }).getByRole('link'),
-    ).toHaveCount(6);
+    ).toHaveCount(5);
+    await expect(combined.locator('.about-purpose-symbol')).toHaveCount(3);
+    await expect(combined.locator('.about-jump-links a[href="/about#overview"]')).toHaveCount(0);
     await expect(combined.locator(':scope > .about-section')).toHaveCount(5);
     await expect(combined.locator('.about-timeline')).toContainText('1979');
     await expect(combined.locator('.about-financial-totals')).toContainText('£545,030');
@@ -236,7 +238,6 @@ test('combined sections keep their saved content, visibility, menu labels and sh
     .toEqual(['team', 'history', 'contact', 'social']);
   const links = content.getByRole('navigation', { name: 'On this page' }).getByRole('link');
   await expect(links).toHaveText([
-    'Overview',
     'Our community team',
     'Our story',
     'Visit & contact',
@@ -292,7 +293,6 @@ test('About retains moved visible sections and keeps additional pages as configu
     'Visit us',
     'Community story',
     'Our story',
-    'Overview',
     'Stay connected',
     'Centre people',
   ]);
