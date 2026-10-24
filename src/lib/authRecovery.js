@@ -16,6 +16,8 @@ export function createAuthRecovery(client, onState, { timeoutMs = 10000 } = {}) 
   let subscription;
   let pendingProfile;
   let signingIn = false;
+  let signingOut = false;
+  let signOutRequestPending = false;
   const timers = new Set();
   const patch = (changes) => {
     if (disposed) return;
@@ -133,6 +135,8 @@ export function createAuthRecovery(client, onState, { timeoutMs = 10000 } = {}) 
       restore().catch(() => {});
     },
     async signIn(email, password) {
+      if (signingOut || signOutRequestPending)
+        throw new Error('Sign out is still waiting for the connection. Please try again.');
       signingIn = true;
       ++eventRevision;
       invalidate();
@@ -156,12 +160,31 @@ export function createAuthRecovery(client, onState, { timeoutMs = 10000 } = {}) 
       }
     },
     async signOut() {
-      const { error } = await deadline(() => client.auth.signOut({ scope: 'local' }), {
-        message: 'Log out timed out. Check your connection and try again.',
-      });
-      if (error) throw error;
-      ++eventRevision;
-      await acceptSession(null);
+      if (signingOut || signOutRequestPending)
+        throw new Error('Sign out is still waiting for the connection. Please try again.');
+      signingOut = true;
+      try {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          signOutRequestPending = true;
+          const { error } = await deadline(
+            async () => {
+              try {
+                return await client.auth.signOut({ scope: 'local' });
+              } finally {
+                signOutRequestPending = false;
+              }
+            },
+            { message: 'Log out timed out. Check your connection and try again.' },
+          );
+          if (!error) break;
+          // Only a settled SDK failure may retry; the timeout cannot cancel it.
+          if (attempt || error.name !== 'AuthRetryableFetchError') throw error;
+        }
+        ++eventRevision;
+        await acceptSession(null);
+      } finally {
+        signingOut = false;
+      }
     },
     retry: restore,
     dispose() {
