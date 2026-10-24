@@ -1,0 +1,32 @@
+name: Design review snapshot
+on:
+  push:
+    branches: [design/sitewide-experience-20261025]
+    paths: [.github/workflows/design-review-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci
+      - name: Package tracked source and public build dependencies
+        run: |
+          mkdir -p /tmp/jic-design-snapshot/source
+          git archive HEAD | tar -x -C /tmp/jic-design-snapshot/source
+          cp -a node_modules /tmp/jic-design-snapshot/source/node_modules
+          tar -czf /tmp/jic-design-snapshot.tgz -C /tmp/jic-design-snapshot source
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: jic-design-source
+          path: /tmp/jic-design-snapshot.tgz
+          if-no-files-found: error
+          retention-days: 1
