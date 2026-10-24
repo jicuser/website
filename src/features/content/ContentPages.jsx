@@ -387,6 +387,15 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
           ＋ Add page
         </button>
       </div>
+      <label className="page-directory__search">
+        Find a page
+        <input
+          type="search"
+          placeholder="Page name or section…"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </label>
       <div className="admin-actions">
         <Link className="admin-button" to="/admin?section=visibility">
           Show or hide pages
@@ -406,15 +415,6 @@ export default function ContentPages({ initialPath = '/', registerBack }) {
         <HeaderContentEditor />
         <CommunityLinksEditor />
       </details>
-      <label className="page-directory__search">
-        Find a page
-        <input
-          type="search"
-          placeholder="Page name or section…"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
-      </label>
       {message && <p role="status">{message}</p>}
       <p>Open a page to view or edit it. Switch off to hide it without deleting its content.</p>
       {sections.map((section) => {

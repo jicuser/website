@@ -293,16 +293,18 @@ export default function PageEditor({
             <section className="admin-panel">
               <div className="admin-heading">
                 <div>
-                  <h3>{page.name}</h3>
+                  {!workspace && <h3>{page.name}</h3>}
                   <p>
                     {additionalContent
                       ? 'Add information below this page’s main content. Save to publish it on the website.'
                       : 'Edit this page’s introduction. Save to publish your changes on the website.'}
                   </p>
                 </div>
-                <a href={selected} target="_blank" rel="noreferrer" className="admin-button">
-                  Open page <ExternalLink size={15} />
-                </a>
+                {!workspace && (
+                  <a href={selected} target="_blank" rel="noreferrer" className="admin-button">
+                    Open page <ExternalLink size={15} />
+                  </a>
+                )}
               </div>
               {error && (
                 <div role="alert" className="admin-error">

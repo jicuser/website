@@ -25,6 +25,9 @@ const blank = () => ({
 });
 export default function Safeguarding() {
   const state = useRecords(loader);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const opener = useRef(null);
+  const newRecord = useRef(null);
   const [form, setForm] = useState(blank),
     [editing, setEditing] = useState(null),
     [busy, setBusy] = useState(false),
@@ -61,8 +64,35 @@ export default function Safeguarding() {
     initial.current = JSON.stringify(next);
     setForm(next);
     setEditing(null);
+    setEditorOpen(false);
+    window.requestAnimationFrame(() =>
+      (opener.current?.isConnected ? opener.current : newRecord.current)?.focus(),
+    );
   }
-  useRegisterAdminSave(save, JSON.stringify(form) !== initial.current, 'Save review record', busy);
+  function openEditor(event, record = null) {
+    if (
+      JSON.stringify(form) !== initial.current &&
+      !window.confirm('Discard unsaved review changes?')
+    )
+      return;
+    opener.current = event.currentTarget;
+    const next = record ? { ...record, policy_confirmed: false } : blank();
+    initial.current = JSON.stringify(next);
+    setForm(next);
+    setEditing(record);
+    setEditorOpen(true);
+    setError('');
+    window.requestAnimationFrame(() => {
+      formRef.current?.querySelector('input')?.focus();
+      formRef.current?.scrollIntoView({ block: 'nearest' });
+    });
+  }
+  useRegisterAdminSave(
+    save,
+    editorOpen && JSON.stringify(form) !== initial.current,
+    'Save review record',
+    busy,
+  );
   async function remove(r) {
     if (
       !window.confirm(
@@ -106,9 +136,19 @@ export default function Safeguarding() {
           ]}
         />
       )}
-      <div className="ops-finance-layout">
+      <div className="ops-review-workspace">
         <div>
-          <h2>Review queue</h2>
+          <div className="ops-heading">
+            <h2>Review queue</h2>
+            <button
+              ref={newRecord}
+              className="ops-button"
+              disabled={busy}
+              onClick={(event) => openEditor(event)}
+            >
+              New record
+            </button>
+          </div>
           {records.length === 0 && !state.loading && !state.error && (
             <p className="ops-empty">No review records yet.</p>
           )}
@@ -130,18 +170,10 @@ export default function Safeguarding() {
                 <button
                   className="ops-secondary"
                   disabled={busy}
-                  onClick={() => {
-                    if (
-                      JSON.stringify(form) !== initial.current &&
-                      !window.confirm('Discard unsaved review changes?')
-                    )
-                      return;
-                    setEditing(r);
-                    setForm({ ...r, policy_confirmed: false });
-                    initial.current = JSON.stringify({ ...r, policy_confirmed: false });
-                  }}
+                  onClick={(event) => openEditor(event, r)}
+                  aria-label={`Edit ${r.subject_name}`}
                 >
-                  Open record
+                  Edit record
                 </button>
                 <button className="ops-secondary" disabled={busy} onClick={() => remove(r)}>
                   Remove after review
@@ -150,131 +182,136 @@ export default function Safeguarding() {
             </article>
           ))}
         </div>
-        <form
-          ref={formRef}
-          className="ops-panel ops-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            save();
-          }}
-        >
-          <div className="ops-heading">
-            <h2>{editing ? 'Update review' : 'Record a check'}</h2>
-            {editing && (
+        {editorOpen && (
+          <form
+            ref={formRef}
+            className="ops-panel ops-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              save();
+            }}
+          >
+            <div className="ops-heading">
+              <h2>{editing ? 'Update review' : 'Record a check'}</h2>
               <button
                 className="ops-secondary"
                 type="button"
+                disabled={busy}
                 onClick={() => {
                   if (
-                    JSON.stringify(form) === initial.current ||
-                    window.confirm('Discard unsaved changes?')
+                    JSON.stringify(form) !== initial.current &&
+                    !window.confirm('Discard unsaved review changes?')
                   )
-                    reset();
+                    return;
+                  reset();
                 }}
               >
-                New record
+                Cancel
               </button>
-            )}
-          </div>
-          <fieldset disabled={busy}>
-            <Field label="Staff / volunteer name">
-              <input
-                required
-                minLength={2}
-                maxLength={160}
-                value={form.subject_name}
-                onChange={(e) => set('subject_name', e.target.value)}
-              />
-            </Field>
-            <Field label="Role checked for">
-              <input
-                required
-                minLength={2}
-                maxLength={120}
-                value={form.role_name}
-                onChange={(e) => set('role_name', e.target.value)}
-              />
-            </Field>
-            <Field label="Eligible check level">
-              <select value={form.check_level} onChange={(e) => set('check_level', e.target.value)}>
-                {levels.map(([id, label]) => (
-                  <option key={id} value={id}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <div className="ops-form-grid">
-              {[
-                ['checked_on', 'Check date'],
-                ['review_on', 'Next internal review'],
-                ['retention_review_on', 'Retention review'],
-              ].map(([key, label]) => (
-                <Field label={label} key={key}>
-                  <input
-                    required
-                    type="date"
-                    max={key === 'checked_on' ? today : undefined}
-                    min={key === 'checked_on' ? undefined : form.checked_on}
-                    value={form[key]}
-                    onChange={(e) => set(key, e.target.value)}
-                  />
-                </Field>
-              ))}
             </div>
-            <Field label="Follow-up status">
-              <select value={form.status} onChange={(e) => set('status', e.target.value)}>
-                <option value="recorded">Check recorded</option>
-                <option value="review_needed">Review needed</option>
-                <option value="action_required">Action required</option>
-              </select>
-            </Field>
-            <Field
-              label="JIC policy / lawful-basis reference"
-              hint="Reference the approved policy. Do not enter criminal-record details."
-            >
-              <input
-                required
-                minLength={5}
-                maxLength={300}
-                value={form.policy_reference}
-                onChange={(e) => set('policy_reference', e.target.value)}
-              />
-            </Field>
-            <label className="ops-check">
-              <input
-                required
-                type="checkbox"
-                checked={form.policy_confirmed}
-                onChange={(e) => set('policy_confirmed', e.target.checked)}
-              />
-              <span>
-                I have confirmed role eligibility, our lawful basis and the required policy for
-                keeping this record.
-              </span>
-            </label>
-            <button className="ops-button" disabled={busy}>
-              {busy ? 'Saving…' : 'Save review record'}
-            </button>
-          </fieldset>
-          <p className="ops-help">
-            <a
-              href="https://www.gov.uk/guidance/dbs-check-requests-guidance-for-employers"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              DBS employer guidance
-            </a>{' '}
-            ·{' '}
-            <a
-              href="https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/a-guide-to-lawful-basis/criminal-offence-data/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ICO guidance
-            </a>
-          </p>
-        </form>
+            <fieldset disabled={busy}>
+              <Field label="Staff / volunteer name">
+                <input
+                  required
+                  minLength={2}
+                  maxLength={160}
+                  value={form.subject_name}
+                  onChange={(e) => set('subject_name', e.target.value)}
+                />
+              </Field>
+              <Field label="Role checked for">
+                <input
+                  required
+                  minLength={2}
+                  maxLength={120}
+                  value={form.role_name}
+                  onChange={(e) => set('role_name', e.target.value)}
+                />
+              </Field>
+              <Field label="Eligible check level">
+                <select
+                  value={form.check_level}
+                  onChange={(e) => set('check_level', e.target.value)}
+                >
+                  {levels.map(([id, label]) => (
+                    <option key={id} value={id}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <div className="ops-form-grid">
+                {[
+                  ['checked_on', 'Check date'],
+                  ['review_on', 'Next internal review'],
+                  ['retention_review_on', 'Retention review'],
+                ].map(([key, label]) => (
+                  <Field label={label} key={key}>
+                    <input
+                      required
+                      type="date"
+                      max={key === 'checked_on' ? today : undefined}
+                      min={key === 'checked_on' ? undefined : form.checked_on}
+                      value={form[key]}
+                      onChange={(e) => set(key, e.target.value)}
+                    />
+                  </Field>
+                ))}
+              </div>
+              <Field label="Follow-up status">
+                <select value={form.status} onChange={(e) => set('status', e.target.value)}>
+                  <option value="recorded">Check recorded</option>
+                  <option value="review_needed">Review needed</option>
+                  <option value="action_required">Action required</option>
+                </select>
+              </Field>
+              <Field
+                label="JIC policy / lawful-basis reference"
+                hint="Reference the approved policy. Do not enter criminal-record details."
+              >
+                <input
+                  required
+                  minLength={5}
+                  maxLength={300}
+                  value={form.policy_reference}
+                  onChange={(e) => set('policy_reference', e.target.value)}
+                />
+              </Field>
+              <label className="ops-check">
+                <input
+                  required
+                  type="checkbox"
+                  checked={form.policy_confirmed}
+                  onChange={(e) => set('policy_confirmed', e.target.checked)}
+                />
+                <span>
+                  I have confirmed role eligibility, our lawful basis and the required policy for
+                  keeping this record.
+                </span>
+              </label>
+              <button className="ops-button" disabled={busy}>
+                {busy ? 'Saving…' : 'Save review record'}
+              </button>
+            </fieldset>
+            <p className="ops-help">
+              <a
+                href="https://www.gov.uk/guidance/dbs-check-requests-guidance-for-employers"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                DBS employer guidance
+              </a>{' '}
+              ·{' '}
+              <a
+                href="https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/a-guide-to-lawful-basis/criminal-offence-data/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ICO guidance
+              </a>
+            </p>
+          </form>
+        )}
       </div>
     </section>
   );

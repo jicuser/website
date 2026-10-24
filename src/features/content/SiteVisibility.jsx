@@ -111,8 +111,19 @@ export default function SiteVisibility() {
       {error && <p role="alert">{error}</p>}
       {message && <p role="status">{message}</p>}
       {[...new Set(shown.map((page) => page.group))].map((group) => (
-        <section className="booking-panel site-visibility-section" key={group}>
-          <h3>{group}</h3>
+        <details
+          className="booking-panel site-visibility-section"
+          key={`${group}-${query.trim()}-${filter}`}
+          open={query.trim() || filter !== 'all' ? true : undefined}
+        >
+          <summary>
+            <strong>{group}</strong>
+            <span>
+              {shown.filter((page) => page.group === group).length} pages ·{' '}
+              {rows.filter((page) => page.group === group && page.visible).length} on ·{' '}
+              {rows.filter((page) => page.group === group && !page.visible).length} off
+            </span>
+          </summary>
           {shown
             .filter((page) => page.group === group)
             .map((page) => (
@@ -125,7 +136,7 @@ export default function SiteVisibility() {
                 onChange={(visible) => toggle(page, visible)}
               />
             ))}
-        </section>
+        </details>
       ))}
       {!shown.length && <p>No pages match your search.</p>}
     </section>
