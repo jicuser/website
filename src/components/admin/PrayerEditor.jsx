@@ -401,41 +401,48 @@ export default function PrayerEditor() {
           Date
           <input disabled={busy || loading} type="date" value={date} onChange={changeDate} />
         </label>
-        <div className="prayer-daily-fields">
-          {['fajr', 'zuhr', 'asr', 'maghrib', 'isha'].map((prayer) => (
-            <fieldset
-              className="prayer-time-pair"
-              key={prayer}
-              disabled={loading || busy || loadFailed}
-            >
-              <legend>
-                {prayerFields.find(([key]) => key === `${prayer}_begins`)[1].replace(' begins', '')}
-              </legend>
-              {prayerFields
-                .filter(([key]) => key.startsWith(`${prayer}_`))
-                .map(([key, title]) => (
-                  <label key={key}>
-                    <span aria-hidden="true">{key.endsWith('_begins') ? 'Start' : 'Jama’ah'}</span>
-                    <input
-                      aria-label={title}
-                      type="time"
-                      value={form[key]?.slice(0, 5) || ''}
-                      onChange={(event) => setForm({ ...form, [key]: event.target.value })}
-                    />
-                  </label>
-                ))}
-            </fieldset>
-          ))}
-          <label className="prayer-sunrise">
-            Sunrise
-            <input
-              disabled={loading || busy || loadFailed}
-              type="time"
-              value={form.sunrise?.slice(0, 5) || ''}
-              onChange={(event) => setForm({ ...form, sunrise: event.target.value })}
-            />
-          </label>
-        </div>
+        <table className="prayer-daily-fields" aria-label="Daily prayer times">
+          <thead>
+            <tr>
+              <th scope="col">Prayer</th>
+              <th scope="col">Start</th>
+              <th scope="col">Jama’ah</th>
+            </tr>
+          </thead>
+          <tbody>
+            {['fajr', 'zuhr', 'asr', 'maghrib', 'isha'].map((prayer) => (
+              <tr key={prayer}>
+                <th scope="row">
+                  {prayerFields
+                    .find(([key]) => key === `${prayer}_begins`)[1]
+                    .replace(' begins', '')}
+                </th>
+                {prayerFields
+                  .filter(([key]) => key.startsWith(`${prayer}_`))
+                  .map(([key, title]) => (
+                    <td key={key}>
+                      <input
+                        aria-label={title}
+                        disabled={loading || busy || loadFailed}
+                        type="time"
+                        value={form[key]?.slice(0, 5) || ''}
+                        onChange={(event) => setForm({ ...form, [key]: event.target.value })}
+                      />
+                    </td>
+                  ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <label className="prayer-sunrise">
+          Sunrise
+          <input
+            disabled={loading || busy || loadFailed}
+            type="time"
+            value={form.sunrise?.slice(0, 5) || ''}
+            onChange={(event) => setForm({ ...form, sunrise: event.target.value })}
+          />
+        </label>
         <label className="admin-check">
           <input
             type="checkbox"

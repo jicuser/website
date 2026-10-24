@@ -2270,37 +2270,46 @@ html.dark .admin-console .admin-field-error {
   display: none;
 }
 .prayer-daily-fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: 12px;
-  margin-block: 16px;
+  width: 100%;
+  max-width: 720px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  margin-block: 8px;
 }
-.prayer-time-pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  min-width: 0;
-  margin: 0;
-  padding: 10px 12px 12px;
-  border: 1px solid var(--jic-border);
-  border-radius: 10px;
-}
-.prayer-time-pair legend {
-  padding-inline: 4px;
+.prayer-daily-fields th {
+  padding: 0 4px;
+  text-align: left;
+  font-size: 14px;
   font-weight: 650;
 }
-.prayer-time-pair label,
-.prayer-sunrise {
-  display: grid;
-  min-width: 0;
-  gap: 6px;
+.prayer-daily-fields thead th {
+  color: var(--jic-text-secondary);
 }
-.prayer-time-pair input,
-.prayer-sunrise input {
+.prayer-daily-fields th:first-child {
+  width: 24%;
+  padding-left: 0;
+}
+.prayer-daily-fields td {
+  padding: 0 4px;
+}
+.prayer-daily-fields td:last-child {
+  padding-right: 0;
+}
+.admin-console .admin-panel .prayer-daily-fields input,
+.admin-console .admin-panel .prayer-sunrise input {
   width: 100%;
   min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 4px;
 }
-.prayer-sunrise {
-  align-content: start;
-  padding: 10px 12px;
+.admin-console .admin-panel label.prayer-sunrise {
+  display: grid;
+  grid-template-columns: minmax(64px, 1fr) minmax(0, 2fr);
+  align-items: center;
+  min-width: 0;
+  max-width: 350px;
+  gap: 8px;
+  margin-bottom: 16px;
 }

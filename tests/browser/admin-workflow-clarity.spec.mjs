@@ -98,6 +98,54 @@ async function openWorkspace(
   return writes;
 }
 
+for (const width of [320, 390, 1280]) {
+  test(`daily prayer inputs share headings and fit without losing touch targets at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const writes = await openWorkspace(page, 'prayer');
+    const times = page.getByRole('table', { name: 'Daily prayer times' });
+    await expect(times.getByRole('columnheader')).toHaveText(['Prayer', 'Start', 'Jama’ah']);
+    await expect(times.getByRole('rowheader')).toHaveText([
+      'Fajr',
+      'Dhuhr',
+      'Asr',
+      'Maghrib',
+      'Isha',
+    ]);
+    await expect(times.locator('input')).toHaveCount(10);
+    const geometry = await times.evaluate((table) => ({
+      height: table.getBoundingClientRect().height,
+      width: table.getBoundingClientRect().width,
+      parentWidth: table.parentElement.clientWidth,
+      smallInputs: [...table.querySelectorAll('input')].filter(
+        (input) => input.getBoundingClientRect().height < 44,
+      ).length,
+      clippedInputs: [...table.querySelectorAll('input')].filter(
+        (input) => input.scrollWidth > input.clientWidth,
+      ).length,
+    }));
+    expect(geometry.height).toBeLessThan(360);
+    expect(geometry.width).toBeLessThanOrEqual(geometry.parentWidth);
+    expect(geometry.smallInputs).toBe(0);
+    expect(geometry.clippedInputs).toBe(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.getByLabel('Asr Jama’ah', { exact: true }).fill('16:20');
+    await page.getByLabel('Sunrise', { exact: true }).fill('07:10');
+    await page.getByRole('button', { name: 'Jummah', exact: true }).click();
+    await page.getByRole('button', { name: 'Daily times', exact: true }).click();
+    await expect(page.getByLabel('Asr Jama’ah', { exact: true })).toHaveValue('16:20');
+    await page.getByRole('button', { name: 'Save date', exact: true }).click();
+    await expect(page.locator('.admin-success')).toContainText('Timetable saved.');
+    expect(writes.find((write) => write.table === 'prayer_times')?.body).toMatchObject({
+      asr_jamah: '16:20',
+      sunrise: '07:10',
+    });
+  });
+}
+
 test('prayer task views retain drafts and save daily and weekly changes together', async ({
   page,
 }) => {
