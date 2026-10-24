@@ -1,136 +1,306 @@
 .funeral-page {
-  padding-block: 20px 32px;
+  padding-block: 14px 28px;
+  --funeral-radius: 18px;
+}
+.funeral-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--jic-text);
+}
+.funeral-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.75;
+}
+.funeral-heading {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(18px, 4vw, 36px);
+  border: 1px solid var(--jic-border);
+  border-radius: 22px;
+  background: radial-gradient(ellipse at 95% 10%, #d7ab4e24, transparent 65%), var(--jic-surface);
+}
+.funeral-heading::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 20px;
+  right: -20px;
+  width: 32%;
+  height: 115%;
+  border: 1px solid #d7ab4e38;
+  border-radius: 50% 50% 0 0;
+  box-shadow: 0 0 0 16px #d7ab4e06, 0 0 0 32px #d7ab4e06;
+  pointer-events: none;
 }
 .funeral-page .managed-page-content {
+  position: static;
+  display: block;
   padding: 0;
-  margin: 10px 0 0;
+  margin: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
 }
+.funeral-page .managed-page-copy {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  max-width: 38rem;
+}
 .funeral-page .managed-page-content h1 {
-  font-size: clamp(1.75rem, 3.8vw, 2.5rem);
-  line-height: 1.15;
+  margin: 0;
+  font-size: clamp(1.8rem, 4.5vw, 3.25rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  background: transparent;
 }
 .funeral-page .managed-page-content p {
-  margin-top: 10px;
-  font-size: 1rem;
+  margin-top: 12px;
+  max-width: 32rem;
+  font-size: clamp(0.9375rem, 2vw, 1.125rem);
   line-height: 1.5;
-  max-width: 40rem;
+  background: transparent;
 }
 .funeral-page .managed-page-content img {
-  display: none;
+  display: block;
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -1;
+  width: 48%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+  opacity: 0.28;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 70%);
+  mask-image: linear-gradient(90deg, transparent, #000 70%);
 }
 .funeral-actions {
-  display: flex;
-  flex-wrap: wrap;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 22px;
+  max-width: 680px;
 }
 .funeral-actions .service-button {
-  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  min-width: 0;
+  min-height: 76px;
+  padding: 14px 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 16px;
+  font-size: 0.9375rem;
+  line-height: 1.3;
+  text-decoration: none;
+  background: var(--jic-surface);
+  color: var(--jic-text);
 }
-.funeral-call span {
+.funeral-actions .funeral-call.is-primary {
+  background: linear-gradient(135deg, #f3d58b, #d3a348);
+  color: #172131;
+  border-color: #f3d58b;
+  box-shadow: inset 0 1px 0 #ffffff75, 0 5px 20px #d3a34814;
+}
+.funeral-actions svg {
+  flex-shrink: 0;
+}
+.funeral-actions .service-button > svg:last-child {
+  margin-left: auto;
+}
+.funeral-actions span {
   display: grid;
-  gap: 2px;
+  min-width: 0;
+  gap: 4px;
   text-align: left;
+  font-weight: 650;
 }
-.funeral-call small {
+.funeral-actions small {
   font-size: 0.75rem;
   font-weight: 450;
 }
 .funeral-page .funeral-contact-note {
-  margin-top: 8px;
-  font-size: 0.8125rem;
-  line-height: 1.45;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 .funeral-shortcuts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-block: 20px 24px;
-  max-width: 640px;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 10px;
+  margin-block: 12px 26px;
 }
 .funeral-shortcuts a {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  gap: 8px;
-  min-height: 88px;
-  padding: 12px 8px;
+  gap: 10px;
+  min-width: 0;
+  min-height: 104px;
+  padding: 14px;
   border: 1px solid var(--jic-border);
-  border-radius: 12px;
-  background: var(--jic-surface);
+  border-radius: var(--funeral-radius);
+  background: linear-gradient(135deg, #ffffff08, transparent), var(--jic-surface);
   color: var(--jic-text);
-  text-align: center;
   text-decoration: none;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 650;
   line-height: 1.3;
 }
-.funeral-shortcuts svg {
+.funeral-shortcuts small {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.78;
+}
+.funeral-shortcuts svg,
+.funeral-facility-icon,
+.funeral-next-steps svg {
   color: var(--jic-gold-strong);
   flex-shrink: 0;
 }
+.funeral-shortcuts .funeral-shortcut-arrow {
+  position: absolute;
+  top: 17px;
+  right: 12px;
+  color: inherit;
+  opacity: 0.6;
+}
 .funeral-shortcuts a:hover,
-.funeral-shortcuts a[aria-current] {
+.funeral-shortcuts a[aria-current],
+.funeral-next-steps a:hover,
+.funeral-next-steps a[aria-current] {
   border-color: var(--jic-gold-strong);
-  background: var(--jic-surface-soft, var(--jic-surface));
+}
+.funeral-page a:focus-visible {
+  outline: 2px solid var(--jic-gold-strong);
+  outline-offset: 4px;
 }
 .funeral-page .funeral-content {
-  scroll-margin-top: var(--header-h, 140px);
+  scroll-margin-top: calc(var(--header-h, 140px) + 16px);
 }
 .funeral-content:focus {
   outline: none;
 }
 .funeral-page .funeral-section-heading h2 {
-  font-size: 1.25rem;
+  margin: 0;
+  font-size: clamp(1.2rem, 3vw, 1.625rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
 .funeral-page .funeral-section-heading p {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 .funeral-facilities {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
   margin-top: 16px;
 }
 .funeral-facility {
   overflow: hidden;
   border: 1px solid var(--jic-border);
-  border-radius: 16px;
-  background: var(--jic-surface);
+  border-radius: var(--funeral-radius);
+  background: linear-gradient(135deg, #ffffff08, transparent), var(--jic-surface);
   min-width: 0;
 }
+.funeral-facility:focus-within,
+.funeral-facility:hover {
+  border-color: var(--jic-gold-strong);
+}
+.funeral-facility-link {
+  display: block;
+  height: 100%;
+  color: var(--jic-text);
+  text-decoration: none;
+}
+.funeral-page .funeral-facility-link:focus-visible {
+  outline-offset: -4px;
+  border-radius: var(--funeral-radius);
+}
 .funeral-facility-media {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 7;
   display: grid;
   place-items: center;
+  overflow: hidden;
   color: var(--jic-gold-strong);
-  background: linear-gradient(135deg, transparent, #b58a3e12), var(--jic-surface);
-  border-bottom: 1px solid var(--jic-border);
+  background: radial-gradient(ellipse at 70% 5%, #d7ab4e16, transparent 80%), var(--jic-surface);
 }
 .funeral-facility-media img {
   width: 100%;
   height: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 7;
   object-fit: cover;
 }
 .funeral-facility-copy {
-  padding: 16px;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 17px;
+  align-items: start;
+  gap: 10px;
+  padding: 14px 12px;
+}
+.funeral-facility-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--jic-border);
+  border-radius: 50%;
+}
+.funeral-facility-arrow {
+  align-self: center;
+  opacity: 0.65;
 }
 .funeral-page .funeral-facility-copy h3 {
-  font-size: 1rem;
+  margin: 0;
+  font-size: 0.9375rem;
   line-height: 1.35;
 }
 .funeral-page .funeral-facility-copy p {
-  margin-top: 6px;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  margin-top: 5px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+.funeral-next-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+.funeral-next-steps a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.funeral-next-steps a:first-child {
+  background: linear-gradient(135deg, #d7ab4e1a, transparent), var(--jic-surface);
 }
 .funeral-content .public-custom-form {
   width: 100%;
@@ -163,21 +333,73 @@
     gap: 10px;
   }
   .funeral-facility-copy {
+    grid-template-columns: minmax(0, 1fr) 15px;
+    gap: 6px;
     padding: 12px;
+  }
+  .funeral-facility-icon {
+    display: none;
+  }
+  .funeral-page .funeral-facility-copy h3 {
+    font-size: 0.875rem;
+  }
+  .funeral-page .funeral-facility-copy p {
+    font-size: 0.75rem;
+  }
+  .funeral-actions .service-button {
+    gap: 8px;
+    padding: 12px;
+    font-size: 0.875rem;
+  }
+  .funeral-actions .service-button > svg:last-child {
+    display: none;
+  }
+  .funeral-next-steps a {
+    flex-direction: column;
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 0.75rem;
+  }
+  .funeral-next-steps a:first-child > svg:last-child {
+    display: none;
+  }
+}
+@media (max-width: 420px) {
+  .funeral-shortcuts {
+    gap: 8px;
+  }
+  .funeral-shortcuts a {
+    padding: 12px 9px;
+    min-height: 96px;
+    font-size: 0.8125rem;
+  }
+  .funeral-shortcuts small {
+    font-size: 0.6875rem;
+  }
+  .funeral-actions .service-button > svg:first-child {
+    width: 18px;
   }
 }
 @media (max-width: 359px) {
   .funeral-actions {
-    display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .funeral-actions .service-button {
     width: 100%;
+    min-height: 60px;
   }
-  .funeral-shortcuts a {
-    font-size: 0.8125rem;
+  .funeral-shortcuts small,
+  .funeral-shortcuts .funeral-shortcut-arrow {
+    display: none;
   }
   .funeral-facilities {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-contrast: more) {
+  .funeral-breadcrumb a,
+  .funeral-shortcuts small,
+  .funeral-facility-arrow {
+    opacity: 1;
   }
 }

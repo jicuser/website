@@ -5,7 +5,9 @@ import {
   ArrowRight,
   BookOpen,
   Building2,
+  CalendarDays,
   Car,
+  ChevronRight,
   Clock,
   Heart,
   Phone,
@@ -28,31 +30,45 @@ const icons = {
   hearse: Car,
   washing: Droplets,
   'cold-room': Snowflake,
+  'prayer-hall': Building2,
   'family-room': Heart,
 };
 
 function FacilityCard({ facility }) {
   const [failed, setFailed] = useState(false);
-  const Icon = icons[facility.id];
+  const Icon = icons[facility.id] || Building2;
   useEffect(() => setFailed(false), [facility.image]);
   return (
     <article className="funeral-facility">
-      <div className="funeral-facility-media">
-        {facility.image && !failed ? (
-          <img
-            src={facility.image}
-            alt={facility.alt || facility.title}
-            loading="lazy"
-            onError={() => setFailed(true)}
-          />
-        ) : (
-          <Icon size={36} strokeWidth={1.25} aria-hidden="true" />
-        )}
-      </div>
-      <div className="funeral-facility-copy">
-        <h3>{facility.title}</h3>
-        <p>{facility.description}</p>
-      </div>
+      <Link
+        className="funeral-facility-link"
+        to="/funerals#enquire"
+        aria-label={`Enquire about ${facility.title}`}
+      >
+        <div className="funeral-facility-media">
+          {facility.image && !failed ? (
+            <img
+              src={facility.image}
+              alt={facility.alt || facility.title}
+              loading="lazy"
+              decoding="async"
+              onError={() => setFailed(true)}
+            />
+          ) : (
+            <Icon size={36} strokeWidth={1.25} aria-hidden="true" />
+          )}
+        </div>
+        <div className="funeral-facility-copy">
+          <span className="funeral-facility-icon">
+            <Icon size={20} strokeWidth={1.5} aria-hidden="true" />
+          </span>
+          <div>
+            <h3>{facility.title}</h3>
+            <p>{facility.description}</p>
+          </div>
+          <ChevronRight className="funeral-facility-arrow" size={17} aria-hidden="true" />
+        </div>
+      </Link>
     </article>
   );
 }
@@ -78,25 +94,35 @@ export default function FuneralPage() {
 
   return (
     <div className="service-page funeral-page">
+      <nav className="funeral-breadcrumb" aria-label="Breadcrumb">
+        <Link to="/services">Community Hub</Link>
+        <ChevronRight size={14} aria-hidden="true" />
+        <span aria-current="page">Funeral Services</span>
+      </nav>
       <header className="funeral-heading">
-        <Link className="guidance-back-link" to="/services">
-          Community Hub
-        </Link>
         <ManagedPageContent
           pagePath="/funerals"
-          fallbackTitle="Janazah & funeral support"
-          fallbackBody="Here to help with funeral arrangements and care for your loved one."
+          fallbackTitle="Funeral Services"
+          fallbackBody="Supporting you with funeral arrangements and care for your loved one."
         />
         <div className="funeral-actions">
-          <Link className="service-button is-primary" to="/funerals#enquire">
-            Arrange a funeral <ArrowRight size={17} aria-hidden="true" />
-          </Link>
-          <a className="service-button funeral-call" href={`tel:${SITE.phone.replace(/\s/g, '')}`}>
-            <Phone size={18} aria-hidden="true" />
+          <a
+            className="service-button funeral-call is-primary"
+            href={`tel:${SITE.phone.replace(/\s/g, '')}`}
+          >
+            <Phone size={23} aria-hidden="true" />
             <span>
               Call us<small>{SITE.phone}</small>
             </span>
+            <ChevronRight size={18} aria-hidden="true" />
           </a>
+          <Link className="service-button funeral-arrange" to="/funerals#enquire">
+            <CalendarDays size={23} aria-hidden="true" />
+            <span>
+              Arrange a funeral<small>Tell us what you need</small>
+            </span>
+            <ChevronRight size={18} aria-hidden="true" />
+          </Link>
         </div>
         <p className="funeral-contact-note">For urgent arrangements, please call us.</p>
       </header>
@@ -106,19 +132,22 @@ export default function FuneralPage() {
           to="/funerals#facilities"
           aria-current={selected === 'facilities' ? 'location' : undefined}
         >
-          <Building2 size={22} aria-hidden="true" />
-          <span>View facilities</span>
+          <Building2 size={23} aria-hidden="true" />
+          <span>View facilities<small>Spaces & transport</small></span>
+          <ChevronRight className="funeral-shortcut-arrow" size={16} aria-hidden="true" />
         </Link>
         {isPageVisible(getContent, '/prayer-times') && (
           <Link to="/prayer-times">
-            <Clock size={22} aria-hidden="true" />
-            <span>Prayer times</span>
+            <Clock size={23} aria-hidden="true" />
+            <span>Prayer times<small>Today’s salah</small></span>
+            <ChevronRight className="funeral-shortcut-arrow" size={16} aria-hidden="true" />
           </Link>
         )}
         {isPageVisible(getContent, '/worship/janazah-guide') && (
           <Link to="/worship/janazah-guide">
-            <BookOpen size={22} aria-hidden="true" />
-            <span>Janazah prayer guide</span>
+            <BookOpen size={23} aria-hidden="true" />
+            <span>Janazah guide<small>Prayer guidance</small></span>
+            <ChevronRight className="funeral-shortcut-arrow" size={16} aria-hidden="true" />
           </Link>
         )}
       </nav>
@@ -162,8 +191,8 @@ export default function FuneralPage() {
         ) : (
           <>
             <div className="funeral-section-heading">
-              <h2>Facilities & transport</h2>
-              <p>Speak to our team about availability and arrangements.</p>
+              <h2>Our facilities & services</h2>
+              <p>Care, preparation and transport. Our team will confirm availability.</p>
             </div>
             <div className="funeral-facilities">
               {facilities.map((facility) => (
@@ -174,6 +203,21 @@ export default function FuneralPage() {
           </>
         )}
       </section>
+      <nav className="funeral-next-steps" aria-label="Funeral support">
+        <Link to="/funerals#enquire" aria-current={selected === 'enquire' ? 'location' : undefined}>
+          <CalendarDays size={19} aria-hidden="true" />
+          <span>Book a service</span>
+          <ArrowRight size={15} aria-hidden="true" />
+        </Link>
+        <Link to="/funerals#prepare" aria-current={selected === 'prepare' ? 'location' : undefined}>
+          <BookOpen size={19} aria-hidden="true" />
+          <span>What to prepare</span>
+        </Link>
+        <Link to="/funerals#questions" aria-current={selected === 'questions' ? 'location' : undefined}>
+          <Heart size={19} aria-hidden="true" />
+          <span>Your questions</span>
+        </Link>
+      </nav>
     </div>
   );
 }

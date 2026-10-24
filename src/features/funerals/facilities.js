@@ -14,6 +14,11 @@ export const FUNERAL_FACILITIES = [
   },
   { id: 'cold-room', title: 'Cold room', description: 'Care before the funeral takes place.' },
   {
+    id: 'prayer-hall',
+    title: 'Janazah prayer hall',
+    description: 'Space for family and community prayers.',
+  },
+  {
     id: 'family-room',
     title: 'Family & viewing room',
     description: 'A quiet space for family to gather and pay their respects.',
