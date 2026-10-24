@@ -772,3 +772,39 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
 html[data-theme='dark'] .jic-home-route {
   --jic-photo-veil: rgba(3, 9, 15, .7);
 }
+
+/* Compact, horizontally browsable timetable; the day strip is the only scroll area. */
+.jic-home-welcome { max-width: 26ch !important; font-size: clamp(24px, 4vw, 38px) !important; line-height: 1.2 !important; }
+.jic-prayer-browser { padding: 0; }
+.jic-prayer-browser-heading { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px 8px; }
+.jic-prayer-browser-heading > div { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; }
+.jic-prayer-browser-heading strong { color:var(--jic-gold); font-size:15px; }
+.jic-prayer-browser-heading span { font-size:13px; }
+.jic-prayer-browser-heading small { font-size:12px; color:var(--jic-text-secondary); }
+.jic-prayer-today-button { min-height:36px; padding:4px 12px; border:1px solid var(--jic-glass-border); border-radius:10px; color:inherit; background:transparent; }
+.jic-prayer-browser-controls { display:flex; align-items:center; gap:2px; padding:0 6px 8px; }
+.jic-prayer-browser-controls > button { flex:0 0 32px; display:grid; place-items:center; min-height:44px; color:var(--jic-gold); }
+.jic-prayer-browser-controls > button:disabled { opacity:.25; }
+.jic-prayer-day-strip { display:flex; gap:6px; overflow-x:auto; flex:1; min-width:0; scrollbar-width:none; scroll-snap-type:x proximity; }
+.jic-prayer-day-strip::-webkit-scrollbar { display:none; }
+.jic-prayer-day-strip button { flex:0 0 auto; min-height:38px; padding:7px 12px; border:1px solid var(--jic-glass-border); border-radius:10px; color:inherit; font-size:12px; white-space:nowrap; scroll-snap-align:center; }
+.jic-prayer-day-strip button[aria-current="date"] { border-color:var(--jic-gold); color:var(--jic-gold); background:color-mix(in srgb,var(--jic-gold) 12%,transparent); }
+.jic-prayer-browser-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; padding:0 8px 10px; }
+.jic-prayer-browser-item { display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px; min-width:0; padding:10px 2px; border-radius:10px; background:color-mix(in srgb,var(--jic-glass-border) 35%,transparent); }
+.jic-prayer-browser-item strong { font-size:12px; }
+.jic-prayer-browser-item small { font-size:10px; color:var(--jic-text-secondary); white-space:nowrap; }
+.jic-prayer-browser-item span { font-size:10px; color:var(--jic-text-secondary); }
+.jic-prayer-browser-item b { font-size:12px; color:var(--jic-gold); white-space:nowrap; }
+.jic-prayer-browser-empty { padding:14px; font-size:13px; }
+.jic-prayer-browser-jummah { display:flex; flex-wrap:wrap; justify-content:center; gap:6px 20px; padding:7px 10px 10px; font-size:12px; }
+.jic-prayer-browser-jummah strong { margin-left:4px; color:var(--jic-gold); }
+.jic-prayer-browser .jic-home-prayer-footer { border-top:1px solid var(--jic-glass-border); }
+@media(max-width:767px) {
+ .jic-home-welcome { font-size:clamp(23px,6.2vw,29px) !important; }
+ .jic-prayer-browser-heading { padding:10px 10px 6px; }
+ .jic-prayer-browser-grid { gap:3px; padding-inline:5px; }
+ .jic-prayer-browser-item { padding:9px 1px; }
+ .jic-prayer-browser-item strong { font-size:11px; }
+ .jic-prayer-browser-item small { font-size:9px; letter-spacing:-.03em; }
+ .jic-prayer-browser-item b { font-size:11px; }
+}
