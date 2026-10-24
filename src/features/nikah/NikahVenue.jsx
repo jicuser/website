@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  ArrowRight,
   Building2,
   Car,
   ChefHat,
@@ -13,26 +14,28 @@ import { NIKAH_AREAS } from './venue';
 
 const icons = { hall: Building2, kitchen: ChefHat, decorations: Sparkles, parking: Car };
 const groups = [
-  ['facilities', 'Facilities'],
-  ['examples', 'Decorated examples'],
-  ['parking', 'Parking'],
+  ['facilities', 'Facilities', Building2],
+  ['examples', 'Decorated examples', ImageIcon],
+  ['parking', 'Parking', Car],
 ];
 
 function AreaPhotos({ area, details }) {
   const [selected, setSelected] = useState(0);
   const [expanded, setExpanded] = useState(false);
-  const index = Math.min(selected, Math.max(0, details.photos.length - 1));
-  const photo = details.photos[index];
+  const [failedPhotos, setFailedPhotos] = useState([]);
+  const photos = details.photos.filter((item) => !failedPhotos.includes(item.url));
+  const index = Math.min(selected, Math.max(0, photos.length - 1));
+  const photo = photos[index];
   const Icon = icons[area.icon];
   const move = (direction) =>
-    setSelected((index + direction + details.photos.length) % details.photos.length);
-  const controls = details.photos.length > 1 && (
+    setSelected((index + direction + photos.length) % photos.length);
+  const controls = photos.length > 1 && (
     <div className="nikah-photo-controls">
       <button type="button" onClick={() => move(-1)} aria-label={`Previous ${area.title} photo`}>
         <ChevronLeft size={18} aria-hidden="true" />
       </button>
       <span aria-live="polite">
-        {index + 1} / {details.photos.length}
+        {index + 1} / {photos.length}
       </span>
       <button type="button" onClick={() => move(1)} aria-label={`Next ${area.title} photo`}>
         <ChevronRight size={18} aria-hidden="true" />
@@ -40,7 +43,7 @@ function AreaPhotos({ area, details }) {
     </div>
   );
   return (
-    <article className={`nikah-venue-card ${photo ? 'has-photo' : 'awaiting-photo'}`}>
+    <article className={`nikah-venue-card ${photo ? 'has-photo' : 'awaiting-photo'}${area.id === 'kitchen' ? ' is-wide' : ''}`}>
       {photo ? (
         <button
           type="button"
@@ -48,7 +51,8 @@ function AreaPhotos({ area, details }) {
           onClick={() => setExpanded(true)}
           aria-label={`Enlarge ${area.title} photo`}
         >
-          <img src={photo.url} alt={photo.alt || area.title} loading="lazy" decoding="async" />
+          <img src={photo.url} alt={photo.alt || area.title} loading="lazy" decoding="async"
+            onError={() => setFailedPhotos((current) => [...current, photo.url])} />
           <span>
             <ImageIcon size={15} aria-hidden="true" /> View photo
           </span>
@@ -60,12 +64,22 @@ function AreaPhotos({ area, details }) {
         </div>
       )}
       <div className="nikah-venue-copy">
-        <h3>{area.title}</h3>
-        {details.description && <p>{details.description}</p>}
-        {controls}
+        <span className="nikah-space-icon"><Icon size={25} strokeWidth={1.5} aria-hidden="true" /></span>
+        <div className="nikah-space-description">
+          <h3>{area.title}</h3>
+          {details.description ? <p>{details.description}</p> : photo ? <p>Explore the space and photos</p> : null}
+          {controls}
+        </div>
+        {photo && (
+          <button type="button" className="nikah-space-open" aria-label={`View ${area.title} photos`}
+            onClick={() => setExpanded(true)}>
+            <ArrowRight size={20} aria-hidden="true" />
+          </button>
+        )}
       </div>
       {expanded && photo && (
         <ImageViewer image={{ ...photo, title: area.title }} onClose={() => setExpanded(false)}>
+          {details.description && <p>{details.description}</p>}
           {controls}
         </ImageViewer>
       )}
@@ -85,8 +99,9 @@ export default function NikahVenue({ venue, selectedGroup, onGroupChange, headin
     <section id="facilities" className="nikah-venue" aria-labelledby="nikah-venue-title">
       <div className="nikah-venue-header">
         <h2 id="nikah-venue-title" ref={headingRef} tabIndex={-1}>At the masjid</h2>
+        <p>Explore our spaces and facilities for your Nikah.</p>
         <div className="nikah-venue-switch" role="group" aria-label="Explore the venue">
-          {available.map(([id, label]) => (
+          {available.map(([id, label, Icon]) => (
             <button
               key={id}
               type="button"
@@ -94,7 +109,7 @@ export default function NikahVenue({ venue, selectedGroup, onGroupChange, headin
               aria-controls="nikah-venue-content"
               onClick={() => (onGroupChange ? onGroupChange(id) : setSelected(id))}
             >
-              {label}
+              <Icon size={20} strokeWidth={1.5} aria-hidden="true" /><span>{label}</span>
             </button>
           ))}
         </div>

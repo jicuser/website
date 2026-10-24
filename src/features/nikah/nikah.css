@@ -1,361 +1,358 @@
-/* Nikah's approved editorial layout. All rules stay within this feature;
-   published photos and the shared light/dark surface tokens remain authoritative. */
-.service-page.nikah-page {
-  --nikah-gold-fill: #e7be70;
-  --nikah-gold-ink: #14273b;
-  max-width: 1040px;
-  padding-block: 16px 28px;
-}
-.nikah-page :is(button, a, summary):focus-visible {
-  outline: 3px solid var(--jic-gold);
-  outline-offset: 3px;
-}
-.nikah-page :is(button, a) {
-  -webkit-tap-highlight-color: transparent;
-}
-.nikah-page svg { flex-shrink: 0; }
-.nikah-hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border: 1px solid var(--jic-border);
-  border-radius: 22px;
-  padding: clamp(20px, 4vw, 36px) 16px 16px;
-  background: radial-gradient(ellipse at 95% 5%, color-mix(in srgb, var(--jic-gold) 18%, transparent), transparent 62%), var(--jic-surface);
-}
-.nikah-hero::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  width: 230px;
-  height: 290px;
-  right: -30px;
-  top: 28px;
+/* Shared feature primitives retained for forms, photograph controls and accessibility. */
+.nikah-reference svg { flex-shrink: 0; }
+.nikah-reference :is(button, a) { -webkit-tap-highlight-color: transparent; }
+.nikah-reference .nikah-hero { position: relative; isolation: isolate; }
+.nikah-reference .nikah-hero::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
   border: 1px solid color-mix(in srgb, var(--jic-gold) 25%, transparent);
   border-radius: 130px 130px 0 0;
   box-shadow: 0 0 0 16px color-mix(in srgb, var(--jic-gold) 4%, transparent), 0 0 0 32px color-mix(in srgb, var(--jic-gold) 3%, transparent);
 }
-.nikah-hero-photo {
+.nikah-reference .nikah-hero-photo { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.nikah-reference .nikah-hero--photo::before {
+  inset: 0; border: 0; border-radius: 0; box-shadow: none;
+  background: linear-gradient(90deg, var(--jic-bg) 0%, color-mix(in srgb, var(--jic-bg) 96%, transparent) 36%, color-mix(in srgb, var(--jic-bg) 35%, transparent) 100%), linear-gradient(0deg, var(--jic-bg), transparent 72%);
+}
+.nikah-reference .nikah-heading .guidance-back-link { display: inline-flex; align-items: center; text-decoration: none; }
+.nikah-reference .nikah-actions { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.nikah-reference .nikah-actions > button { display: flex; align-items: center; min-width: 0; text-align: left; cursor: pointer; }
+.nikah-reference .nikah-actions > button:only-child { grid-column: 1 / -1; }
+.nikah-reference .nikah-action-copy { display: grid; min-width: 0; }
+.nikah-reference .nikah-quick-links { display: grid; grid-auto-columns: minmax(0, 1fr); }
+.nikah-reference .nikah-quick-links:empty { display: none; }
+.nikah-reference .nikah-quick-links > :is(button, a) { display: flex; align-items: center; min-width: 0; border: 1px solid var(--jic-border); background: var(--jic-surface); color: var(--jic-text); text-decoration: none; line-height: 1.35; }
+.nikah-reference :is(section[id], h2[tabindex]) { scroll-margin-top: 190px; }
+.nikah-reference .nikah-venue-switch button { border: 1px solid var(--jic-border); color: var(--jic-text-secondary); line-height: 1.35; }
+.nikah-reference .nikah-venue-grid { display: grid; }
+.nikah-reference .nikah-venue-card { min-width: 0; overflow: hidden; border: 1px solid var(--jic-border); background: var(--jic-surface); }
+.nikah-reference .nikah-venue-photo { display: block; width: 100%; overflow: hidden; background: var(--jic-bg-secondary); }
+.nikah-reference .nikah-venue-placeholder {
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  gap: 9px; padding: 14px 8px; color: var(--jic-text-secondary); text-align: center; font-size: 0.75rem;
+  background: radial-gradient(ellipse at top, color-mix(in srgb, var(--jic-gold) 10%, transparent), transparent), var(--jic-bg-secondary);
+}
+.nikah-reference .nikah-venue-placeholder svg { color: var(--jic-gold); }
+.nikah-reference .nikah-venue-copy p { white-space: pre-line; overflow-wrap: anywhere; }
+:is(.nikah-reference, .jic-image-viewer) .nikah-photo-controls { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; font-size: 0.75rem; }
+:is(.nikah-reference, .jic-image-viewer) .nikah-photo-controls button { min-width: 44px; min-height: 44px; display: grid; place-items: center; border: 1px solid var(--jic-border); border-radius: 50%; color: var(--jic-text); }
+.nikah-reference :is(.nikah-venue-note, .nikah-booking-note) { font-size: 0.8rem; color: var(--jic-text-secondary); line-height: 1.5; margin-top: 10px; }
+.nikah-reference .nikah-information ul { margin: 0 0 14px 20px; list-style: disc; }
+.nikah-reference .nikah-booking { padding: 20px; margin: 12px 0 24px; border: 1px solid var(--jic-border); border-radius: 18px; background: var(--jic-surface); }
+.nikah-reference .nikah-booking-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.nikah-reference .nikah-booking-heading h2 { font-size: 1.15rem; }
+.nikah-reference .nikah-close-booking { min-height: 44px; text-decoration: underline; text-underline-offset: 4px; font-size: 0.8rem; }
+.nikah-reference .nikah-booking-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.nikah-reference .nikah-booking-options button { min-height: 44px; padding: 8px 13px; border: 1px solid var(--jic-border); border-radius: 24px; background: transparent; color: var(--jic-text-secondary); font-size: 0.8rem; }
+.nikah-reference .nikah-booking-options button[aria-pressed='true'] { color: #14273b; background: #e7be70; border-color: #e7be70; font-weight: 650; }
+.nikah-reference .nikah-booking-note { margin-bottom: 14px; }
+.nikah-reference .nikah-booking .workspace-card { border: 0; padding: 0; background: transparent; }
+.nikah-reference .nikah-booking[hidden], .nikah-reference .nikah-booking [hidden] { display: none; }
+.nikah-reference .nikah-additional-content:empty { display: none; }
+.nikah-reference .nikah-additional-content .managed-page-content { margin-top: 24px; padding: 16px; border-radius: 12px; }
+.nikah-reference .nikah-additional-content h2 { font-size: 1.15rem; }
+.nikah-reference :is(.nikah-actions > button, .nikah-quick-links > a, .nikah-quick-links > button, .nikah-space-open):hover { border-color: var(--nikah-accent); }
+@media (prefers-reduced-motion: reduce) { .nikah-reference * { scroll-behavior: auto; transition: none; } }
+/* Approved Nikah reference. Feature-scoped; shared theme/appearance tokens remain in control. */
+.nikah-page.nikah-reference {
+  --nikah-accent: var(--jic-gold, #e8bd69);
+  --nikah-edge: var(--jic-border, #30475c);
+  max-width: 1040px;
+  padding-block: 12px 28px;
+}
+.nikah-reference .nikah-hero {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+}
+.nikah-reference .nikah-hero:not(.nikah-hero--photo)::before {
+  opacity: 0.45;
+  right: -36px;
+  top: 2px;
+  height: 230px;
+  width: 180px;
+}
+.nikah-reference .nikah-heading { padding: 0; }
+.nikah-reference .nikah-heading .guidance-back-link {
+  color: var(--nikah-accent);
+  min-height: 44px;
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.nikah-reference .nikah-heading h1 {
+  color: var(--jic-text);
+  margin: 0 0 8px;
+  font: 600 clamp(2.5rem, 7vw, 4rem)/1.1 Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.035em;
+}
+.nikah-reference .nikah-heading > p {
+  max-width: none;
+  margin: 0;
+  color: var(--jic-text-secondary);
+  font-size: clamp(0.9rem, 2.5vw, 1.08rem);
+  line-height: 1.5;
+}
+.nikah-reference .nikah-actions { gap: 10px; margin-top: 20px; }
+.nikah-reference .nikah-actions > button {
+  gap: 10px;
+  min-height: 92px;
+  padding: 14px 12px;
+  border: 1px solid var(--nikah-edge);
+  border-radius: 14px;
+  color: var(--jic-text);
+  background: linear-gradient(145deg, #ffffff08, transparent 75%), var(--jic-surface);
+}
+.nikah-reference .nikah-actions > .nikah-action-primary {
+  border-color: var(--nikah-accent);
+  box-shadow: inset 0 0 0 1px #e8bd6933, 0 0 18px #e8bd6920;
+  background: linear-gradient(120deg, #e8bd691b, transparent 70%), var(--jic-surface);
+}
+.nikah-reference .nikah-actions > button > svg:first-child {
+  display: block;
+  width: 34px;
+  height: 38px;
+  color: var(--nikah-accent);
+}
+.nikah-reference .nikah-action-copy { gap: 4px; flex: 1; }
+.nikah-reference .nikah-action-copy strong {
+  font: 600 clamp(1.05rem, 2.8vw, 1.45rem)/1.2 Georgia, 'Times New Roman', serif;
+}
+.nikah-reference .nikah-actions .nikah-action-copy small {
+  color: var(--jic-text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+.nikah-reference .nikah-round-arrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  margin-left: auto;
+  border: 1px solid var(--nikah-edge);
+  border-radius: 50%;
+}
+.nikah-reference .nikah-action-primary .nikah-round-arrow {
+  color: var(--nikah-accent);
+  border-color: var(--nikah-accent);
+}
+.nikah-reference .nikah-quick-links {
+  grid-auto-flow: column;
+  grid-template-columns: none;
+  gap: 10px;
+  margin: 10px 0 22px;
+}
+.nikah-reference .nikah-quick-links > :is(button, a) {
+  min-height: 46px;
+  padding: 10px 12px;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 9px;
+  text-align: left;
+  font-size: 0.8rem;
+  border-radius: 12px;
+}
+.nikah-reference .nikah-quick-links svg { color: currentColor; width: 19px; }
+.nikah-reference .nikah-quick-links svg:last-child { margin-left: auto; width: 15px; }
+.nikah-reference .nikah-venue-header {
+  display: block;
+  margin-bottom: 10px;
+}
+.nikah-reference :is(.nikah-venue-header h2, .nikah-information > h2) {
+  margin: 0;
+  color: var(--jic-text);
+  font: 600 clamp(1.55rem, 4.3vw, 2.3rem)/1.2 Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.025em;
+}
+.nikah-reference .nikah-venue-header > p {
+  margin: 5px 0 12px;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.nikah-reference .nikah-venue-switch {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+.nikah-reference .nikah-venue-switch button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  text-align: center;
+  background: var(--jic-surface);
+}
+.nikah-reference .nikah-venue-switch button[aria-pressed='true'] {
+  background: linear-gradient(110deg, #ffe09a, #cda15e);
+  color: #102338;
+  border-color: #f5ce7e;
+  box-shadow: 0 0 14px #e8bd6925;
+}
+.nikah-reference .nikah-venue-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.nikah-reference .nikah-venue-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+}
+.nikah-reference .nikah-venue-card.is-wide,
+.nikah-reference .nikah-venue-grid--examples .nikah-venue-card,
+.nikah-reference .nikah-venue-grid--parking .nikah-venue-card { grid-column: 1 / -1; }
+.nikah-reference .nikah-venue-card.has-photo,
+.nikah-reference .nikah-venue-card:last-child:nth-child(odd) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+}
+.nikah-reference .nikah-venue-card.has-photo > :is(.nikah-venue-photo, .nikah-venue-copy) { grid-area: 1 / 1; }
+.nikah-reference .nikah-venue-photo,
+.nikah-reference .nikah-venue-card:last-child:nth-child(odd) .nikah-venue-photo {
+  position: relative;
+  height: 100%;
+  min-height: 180px;
+  aspect-ratio: auto;
+  padding: 0;
+  border: 0;
+}
+.nikah-reference .nikah-venue-photo img {
   position: absolute;
   inset: 0;
-  z-index: -2;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
 }
-.nikah-hero--photo::before {
-  inset: 0;
-  width: auto;
-  height: auto;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  background: linear-gradient(90deg, var(--jic-bg) 0%, color-mix(in srgb, var(--jic-bg) 96%, transparent) 36%, color-mix(in srgb, var(--jic-bg) 35%, transparent) 100%), linear-gradient(0deg, var(--jic-bg), transparent 72%);
-}
-.nikah-heading { position: relative; padding-inline: 4px; }
-.nikah-heading .guidance-back-link {
-  display: inline-flex;
+.nikah-reference .nikah-venue-photo > span { display: none; }
+.nikah-reference .nikah-venue-card.is-wide .nikah-venue-photo { min-height: 130px; }
+.nikah-reference .nikah-venue-placeholder { min-height: 100px; }
+.nikah-reference .nikah-venue-copy {
+  display: flex;
   align-items: center;
-  gap: 7px;
-  min-height: 44px;
-  margin-top: -10px;
-  color: var(--jic-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-decoration: none;
+  gap: 8px;
+  padding: 12px 10px;
+  min-width: 0;
 }
-.nikah-heading .guidance-back-link:hover { color: var(--jic-gold); }
-.nikah-page .nikah-heading h1 {
-  margin: 4px 0 12px;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(2.25rem, 6vw, 3.75rem);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.035em;
-}
-.nikah-heading h1 span { color: var(--jic-gold); }
-.nikah-page .nikah-heading > p {
-  max-width: 31rem;
-  margin: 0;
-  font-size: clamp(0.875rem, 2vw, 1rem);
-  line-height: 1.6;
-  text-wrap: pretty;
-}
-.nikah-actions {
+.nikah-reference .has-photo .nikah-venue-copy {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 22px;
+  align-self: end;
+  pointer-events: none;
+  padding-top: 24px;
+  color: #f5f7fc;
+  background: linear-gradient(0deg, #061624f5 0%, #061624e8 65%, #06162400);
 }
-.nikah-actions > button {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  min-height: 84px;
-  padding: 16px 18px;
-  border-radius: 15px;
-  border: 1px solid var(--jic-border);
-  background: var(--jic-surface);
-  color: var(--jic-text);
-  text-align: left;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
-}
-.nikah-actions > button:only-child { grid-column: 1 / -1; }
-.nikah-actions > button > svg:first-child { color: var(--jic-gold); }
-.nikah-actions > button > svg:last-child { margin-left: auto; }
-.nikah-action-copy { display: grid; gap: 4px; min-width: 0; }
-.nikah-action-copy strong { font-size: 1.1rem; line-height: 1.25; font-weight: 700; }
-.nikah-action-copy small { font-size: 0.75rem; line-height: 1.4; color: var(--jic-text-secondary); }
-.nikah-actions > .nikah-action-primary,
-.nikah-planning-start {
-  background: linear-gradient(120deg, #f4d58d, var(--nikah-gold-fill));
-  color: var(--nikah-gold-ink);
-  border-color: var(--nikah-gold-fill);
-}
-.nikah-actions > .nikah-action-primary > svg:first-child,
-.nikah-actions > .nikah-action-primary small { color: var(--nikah-gold-ink); }
-.nikah-actions > button:hover,
-.nikah-actions > button[aria-expanded='true'] {
-  border-color: var(--jic-gold);
-  box-shadow: 0 3px 14px color-mix(in srgb, var(--jic-gold) 15%, transparent);
-}
-.nikah-quick-links {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  gap: 10px;
-  margin: 12px 0 24px;
-}
-.nikah-quick-links:empty { display: none; }
-.nikah-quick-links > :is(button, a) {
-  min-width: 0;
-  min-height: 88px;
-  padding: 12px 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 9px;
-  border: 1px solid var(--jic-border);
-  border-radius: 14px;
-  background: var(--jic-surface);
-  color: var(--jic-text);
-  text-align: center;
-  text-decoration: none;
-  font-size: 0.8rem;
-  font-weight: 500;
-  line-height: 1.35;
-}
-.nikah-quick-links svg { color: var(--jic-gold); }
-.nikah-quick-links > :is(button, a):hover { border-color: var(--jic-gold); }
-.nikah-page :is(section[id], h2[tabindex]) { scroll-margin-top: 190px; }
-.nikah-venue-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-.nikah-page :is(.nikah-venue-header, .nikah-planning-heading) h2 {
-  margin: 0;
-  font: 500 clamp(1.35rem, 3vw, 1.8rem)/1.25 Georgia, 'Times New Roman', serif;
-  letter-spacing: -0.02em;
-}
-.nikah-venue-switch,
-.nikah-booking-options { display: flex; flex-wrap: wrap; gap: 6px; }
-.nikah-venue-switch button,
-.nikah-booking-options button {
-  min-height: 44px;
-  padding: 8px 13px;
-  border: 1px solid var(--jic-border);
-  border-radius: 24px;
-  background: transparent;
-  color: var(--jic-text-secondary);
-  font-size: 0.8rem;
-  line-height: 1.35;
-}
-.nikah-venue-switch button[aria-pressed='true'],
-.nikah-booking-options button[aria-pressed='true'] {
-  color: var(--nikah-gold-ink);
-  background: var(--nikah-gold-fill);
-  border-color: var(--nikah-gold-fill);
-  font-weight: 650;
-}
-.nikah-venue-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-.nikah-venue-grid--examples,
-.nikah-venue-grid--parking { grid-template-columns: minmax(0, 1fr); }
-.nikah-venue-card {
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--jic-border);
-  border-radius: 16px;
-  background: var(--jic-surface);
-}
-.nikah-venue-photo {
-  display: block;
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 11;
-  overflow: hidden;
-  background: var(--jic-bg-secondary);
-}
-.nikah-venue-photo img { width: 100%; height: 100%; object-fit: cover; }
-.nikah-venue-photo > span {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: #102333ee;
-  color: #fff;
-  font-size: 0.7rem;
-  line-height: 1.4;
-}
-.nikah-venue-placeholder {
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 9px;
-  padding: 14px 8px;
-  color: var(--jic-text-secondary);
-  background: radial-gradient(ellipse at top, color-mix(in srgb, var(--jic-gold) 10%, transparent), transparent), var(--jic-bg-secondary);
-  font-size: 0.75rem;
-  text-align: center;
-}
-.nikah-venue-placeholder svg { color: var(--jic-gold); }
-.nikah-venue-copy { padding: 13px; }
-.nikah-page .nikah-venue-copy h3 {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  letter-spacing: -0.015em;
-}
-.nikah-venue-copy p { margin-top: 7px; font-size: 0.85rem; white-space: pre-line; overflow-wrap: anywhere; }
-.nikah-photo-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  margin-top: 8px;
-  font-size: 0.75rem;
-}
-.nikah-photo-controls button {
-  min-width: 44px;
-  min-height: 44px;
+.nikah-reference .nikah-space-icon {
   display: grid;
   place-items: center;
-  border: 1px solid var(--jic-border);
-  border-radius: 50%;
-  color: var(--jic-text);
+  flex: 0 0 32px;
+  height: 36px;
+  color: var(--nikah-accent);
 }
-.nikah-venue-grid--examples .has-photo,
-.nikah-venue-grid--parking .has-photo { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
-.nikah-page :is(.nikah-venue-note, .nikah-booking-note) {
-  font-size: 0.8rem;
+.nikah-reference .nikah-space-description { min-width: 0; flex: 1; }
+.nikah-reference .nikah-venue-copy h3 {
+  font: 600 1rem/1.25 Georgia, 'Times New Roman', serif;
+  margin: 0;
+  color: inherit;
+}
+.nikah-reference .nikah-venue-copy p {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin: 5px 0 0;
   color: var(--jic-text-secondary);
-  line-height: 1.5;
-  margin-top: 10px;
 }
-.nikah-planning {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid var(--jic-border);
-  border-radius: 18px;
-  background: radial-gradient(ellipse at top right, color-mix(in srgb, var(--jic-gold) 12%, transparent), transparent 75%), var(--jic-surface);
+.nikah-reference .has-photo .nikah-venue-copy p {
+  color: #d3dce5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
 }
-.nikah-planning-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.nikah-page .nikah-planning-heading p { font-size: 0.8rem; margin: 6px 0 0; line-height: 1.5; }
-.nikah-planning-start {
-  display: inline-flex;
+.nikah-reference .nikah-space-open {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e8bd6980;
+  border-radius: 50%;
+  color: #f4c975;
+  background: #0b203288;
+}
+.nikah-reference .has-photo :is(.nikah-space-open, .nikah-photo-controls) { pointer-events: auto; }
+.nikah-reference .has-photo .nikah-photo-controls { color: #f5f7fc; }
+.nikah-reference .has-photo .nikah-photo-controls button { color: inherit; }
+.nikah-reference .nikah-information {
+  margin: 18px 0 0;
+  padding: 0;
+  border: 0;
+}
+.nikah-reference .nikah-information > h2 { font-size: clamp(1.35rem, 3.8vw, 1.9rem); margin-bottom: 10px; }
+.nikah-reference .nikah-information > details {
+  border: 1px solid var(--nikah-edge);
+  border-radius: 11px;
+  margin: 7px 0 0;
+  padding: 0;
+  background: var(--jic-surface);
+  overflow: clip;
+}
+.nikah-reference .nikah-information > details > summary {
+  display: flex;
   align-items: center;
-  justify-content: center;
   gap: 12px;
-  min-height: 44px;
-  padding: 10px 16px;
-  border-radius: 24px;
-  border: 1px solid var(--nikah-gold-fill);
-  font-size: 0.85rem;
-  font-weight: 650;
+  min-height: 48px;
+  padding: 10px 12px;
+  color: var(--jic-text);
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.35;
+  list-style: none;
+  cursor: pointer;
 }
-.nikah-planning-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 22px 0 0; }
-.nikah-planning-steps li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; text-align: center; font-size: 0.8rem; line-height: 1.4; }
-.nikah-planning-steps li:not(:last-child)::after { content: ''; position: absolute; width: 24%; top: 23px; left: 94%; height: 1px; background: var(--jic-border); }
-.nikah-step-icon { display: grid; place-items: center; position: relative; width: 46px; height: 46px; border-radius: 50%; background: var(--jic-bg-secondary); color: var(--jic-gold); }
-.nikah-step-icon > span { position: absolute; left: -9px; top: -3px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--jic-surface); color: var(--jic-text-secondary); border: 1px solid var(--jic-border); font-size: 0.7rem; }
-.nikah-more-information { margin-top: 16px; border: 1px solid var(--jic-border); border-radius: 18px; background: var(--jic-surface); }
-.nikah-more-information > summary { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 20px; cursor: pointer; list-style: none; }
-.nikah-more-information > summary::-webkit-details-marker { display: none; }
-.nikah-more-information > summary strong { display: block; font: 500 1.2rem/1.35 Georgia, 'Times New Roman', serif; }
-.nikah-more-information > summary small { display: block; color: var(--jic-text-secondary); font-size: 0.8rem; line-height: 1.5; margin-top: 6px; }
-.nikah-details-label { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; padding: 8px 13px; border: 1px solid var(--jic-border); border-radius: 24px; font-size: 0.8rem; white-space: nowrap; }
-.nikah-more-information[open] > summary .nikah-details-label svg { transform: rotate(180deg); }
-.nikah-information { margin: 0 20px; padding: 0 0 12px; border-top: 1px solid var(--jic-border); }
-.nikah-information summary { font-size: 0.9rem; padding-block: 14px; }
-.nikah-information ul { margin: 0 0 14px 20px; list-style: disc; font-size: 0.9rem; line-height: 1.7; }
-.nikah-information details:last-child { border-bottom: 0; }
-.nikah-booking { padding: 20px; margin: 12px 0 24px; border: 1px solid var(--jic-border); border-radius: 18px; background: var(--jic-surface); }
-.nikah-booking-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-.nikah-page .nikah-booking-heading h2 { font-size: 1.15rem; }
-.nikah-close-booking { min-height: 44px; text-decoration: underline; text-underline-offset: 4px; font-size: 0.8rem; }
-.nikah-booking-note { margin-bottom: 14px; }
-.nikah-booking .workspace-card { border: 0; padding: 0; background: transparent; }
-.nikah-booking[hidden], .nikah-booking [hidden] { display: none; }
-.nikah-additional-content:empty { display: none; }
-.nikah-additional-content .managed-page-content { margin-top: 24px; padding: 16px; border-radius: 12px; }
-.nikah-additional-content h2 { font-size: 1.15rem; }
-@media (max-width: 600px) {
-  .nikah-hero { padding: 20px 12px 12px; border-radius: 18px; }
-  .nikah-actions { gap: 8px; margin-top: 18px; }
-  .nikah-actions > button { gap: 8px; padding: 13px 10px; border-radius: 12px; }
-  .nikah-action-copy strong { font-size: 0.95rem; }
-  .nikah-action-copy small { font-size: 0.7rem; }
-  .nikah-quick-links { gap: 7px; margin-bottom: 20px; }
-  .nikah-quick-links > :is(button, a) { padding: 10px 5px; min-height: 88px; font-size: 0.72rem; border-radius: 12px; }
-  .nikah-venue-header { gap: 10px; }
-  .nikah-venue-switch { gap: 5px; }
-  .nikah-venue-switch button { padding-inline: 10px; font-size: 0.75rem; }
-  .nikah-venue-grid { gap: 9px; }
-  .nikah-venue-copy { padding: 10px; }
-  .nikah-page .nikah-venue-copy h3 { font-size: 0.85rem; }
-  .nikah-venue-placeholder { font-size: 0.7rem; }
-  .nikah-venue-grid--examples .has-photo,
-  .nikah-venue-grid--parking .has-photo { display: block; }
-  .nikah-planning { padding: 16px; }
-  .nikah-planning-steps { gap: 10px; }
-  .nikah-planning-steps li { font-size: 0.72rem; }
-  .nikah-more-information > summary { padding: 16px; }
-  .nikah-information { margin-inline: 16px; }
-  .nikah-booking { padding: 14px; }
+.nikah-reference .nikah-information summary::-webkit-details-marker { display: none; }
+.nikah-reference .nikah-information summary::marker { content: ''; }
+.nikah-reference .nikah-information summary svg { color: var(--nikah-accent); }
+.nikah-reference .nikah-faq-chevron { margin-left: auto; }
+.nikah-reference details[open] > summary .nikah-faq-chevron { transform: rotate(180deg); }
+.nikah-reference .nikah-faq-answer { padding: 0 14px 14px 45px; }
+.nikah-reference .nikah-faq-answer :is(p, li) { font-size: 0.85rem; line-height: 1.6; }
+.nikah-reference :is(button, a, summary):focus-visible { outline: 3px solid var(--nikah-accent); outline-offset: -3px; }
+@media (min-width: 700px) {
+  .nikah-reference .nikah-actions > button { min-height: 112px; padding: 18px 22px; gap: 18px; }
+  .nikah-reference .nikah-actions > button > svg:first-child { width: 50px; height: 54px; }
+  .nikah-reference .nikah-action-copy small { font-size: 0.9rem; }
+  .nikah-reference .nikah-round-arrow { width: 40px; height: 40px; flex-basis: 40px; }
+  .nikah-reference .nikah-venue-photo { min-height: 280px; }
+  .nikah-reference .nikah-venue-card.is-wide .nikah-venue-photo { min-height: 190px; }
+  .nikah-reference .nikah-venue-copy { padding: 18px; gap: 14px; }
+  .nikah-reference .nikah-venue-copy h3 { font-size: 1.35rem; }
 }
-@media (max-width: 460px) {
-  .nikah-actions > button > svg:last-child { display: none; }
-  .nikah-actions > button > svg:first-child { width: 21px; height: 21px; }
-  .nikah-venue-grid--facilities { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .nikah-venue-grid--facilities .nikah-venue-card:last-child:nth-child(odd) { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
-  .nikah-venue-grid--facilities .nikah-venue-card:last-child:nth-child(odd) .nikah-venue-photo { height: 100%; min-height: 100px; }
+@media (max-width: 399px) {
+  .nikah-reference .nikah-actions > button { padding: 12px 9px; gap: 6px; }
+  .nikah-reference .nikah-actions > button > svg:first-child { width: 27px; height: 32px; }
+  .nikah-reference .nikah-round-arrow { flex-basis: 24px; width: 24px; height: 24px; }
+  .nikah-reference .nikah-action-copy strong { font-size: 1rem; }
+  .nikah-reference .nikah-action-copy small { font-size: 0.7rem; }
+  .nikah-reference .nikah-venue-switch button { padding: 8px 7px; gap: 5px; font-size: 0.72rem; }
+  .nikah-reference .nikah-venue-switch svg { width: 17px; }
+  .nikah-reference .nikah-quick-links > :is(button, a) { font-size: 0.75rem; padding: 9px 8px; gap: 5px; }
+  .nikah-reference .nikah-venue-copy { flex-wrap: wrap; gap: 5px; }
+  .nikah-reference .nikah-venue-card:not(.is-wide) .nikah-space-icon { display: none; }
 }
-@media (max-width: 360px) {
-  .nikah-actions > button > svg:first-child { display: none; }
-  .nikah-quick-links { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .nikah-quick-links > :is(button, a) { min-height: 64px; flex-direction: row; text-align: left; gap: 8px; padding: 10px; }
-  .nikah-venue-switch button { padding-inline: 8px; font-size: 0.72rem; }
-  .nikah-planning-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-  .nikah-planning-steps li::after { display: none; }
+@media (max-width: 339px) {
+  .nikah-reference .nikah-actions { grid-template-columns: minmax(0, 1fr); }
+  .nikah-reference .nikah-actions > button { min-height: 78px; gap: 12px; }
+  .nikah-reference .nikah-venue-switch { flex-wrap: wrap; }
+  .nikah-reference .nikah-quick-links { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }
+  .nikah-reference .nikah-venue-grid { grid-template-columns: minmax(0, 1fr); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .nikah-page * { scroll-behavior: auto; transition: none; }
-}
+
+.jic-image-viewer .nikah-photo-controls button:focus-visible { outline: 3px solid var(--jic-gold); outline-offset: 2px; }

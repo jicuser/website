@@ -11,7 +11,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 const require = createRequire(import.meta.url);
 const root = new URL('../', import.meta.url).pathname;
 
-// Exercise the real page, gallery and venue sanitiser without backend/network I/O.
+// Render the real feature and sanitiser; substitute only router/backend boundaries.
 function fixture(content = {}, hash = '') {
   const cache = new Map();
   const stubs = {
@@ -23,7 +23,11 @@ function fixture(content = {}, hash = '') {
     '@/lib/pageVisibility': { isPageVisible: () => !content.hideHall },
     '@/content/serviceJourneys': { SERVICE_JOURNEYS: { nikah: {
       checklist: ['Confirm the requirements with the team.'],
-      faqs: [['Is my date confirmed?', 'The team will confirm availability.']],
+      faqs: [
+        ['Can I check a date before making arrangements?', 'The team will confirm availability.'],
+        ['Is hall hire included?', 'Confirm hall arrangements with the team.'],
+        ['How do I get my certificate?', 'Speak to the team about your certificate.'],
+      ],
     } } },
     '@/components/ManagedPageContent': { default: () => null },
     '@/components/ManagedPageSections': { default: () => null },
@@ -67,18 +71,21 @@ function fixture(content = {}, hash = '') {
   };
 }
 
-test('approved layout has one hero, four compact shortcuts, planning and on-demand information', () => {
+test('approved reference has two booking cards, two slim shortcuts and four direct FAQ rows', () => {
   const html = fixture().page();
   assert.equal((html.match(/<h1/g) || []).length, 1);
   assert.match(html, /class="nikah-hero/);
   assert.match(html, /aria-label="Book Nikah"/);
   assert.match(html, /aria-label="Book hall"/);
-  assert.match(html, /aria-label="Decorated examples gallery"/);
-  for (const label of ['View facilities', 'Check hall dates', 'Decorated examples', 'Parking information',
-    'Plan your Nikah', 'Start planning', 'Need more information?', 'Team confirms']) assert.ok(html.includes(label), label);
+  for (const label of ['Explore the spaces and arrange your day.', 'Make a booking for your special day.',
+    'Find and book a suitable hall.', 'View facilities', 'Check hall dates', 'Decorated examples',
+    'Parking', 'Frequently asked questions', 'What to prepare']) assert.ok(html.includes(label), label);
+  const quickLinks = html.match(/<nav class="nikah-quick-links"[\s\S]*?<\/nav>/)?.[0];
+  assert.ok(quickLinks);
+  assert.equal((quickLinks.match(/<(?:a|button)\b/g) || []).length, 2);
+  assert.equal((html.match(/<details\b/g) || []).length, 4);
   assert.match(html, /id="enquire"[^>]*hidden=""/);
-  assert.doesNotMatch(html, /data-form=/);
-  assert.doesNotMatch(html, /tel:|Guide me|https:\/\/images\.unsplash/);
+  assert.doesNotMatch(html, /data-form=|nikah-planning|Need more information\?|tel:|Guide me|https:\/\/images\.unsplash/);
 });
 
 test('hero uses a published visible photograph, never hidden or unsafe media', () => {
@@ -103,19 +110,31 @@ test('gallery can be selected from the page and safely falls back when an area i
   assert.match(unavailable, /nikah-venue-grid--facilities/);
 });
 
-test('hidden areas and hall booking remove the related shortcuts and controls', () => {
+test('hidden areas and hall booking remove their related shortcuts and controls', () => {
   const html = fixture({ hideHall: true, nikah_venue: {
     mens_hall: { visible: false }, ladies_hall: { visible: false }, kitchen: { visible: false },
     decorations: { visible: false }, parking: { visible: false },
   } }).page();
   for (const label of ['Book hall', 'Check hall dates', 'View facilities', 'Parking information',
     'Decorated examples', 'At the masjid']) assert.ok(!html.includes(label), label);
-  assert.ok(html.includes('Book Nikah') && html.includes('Start planning'));
+  assert.ok(html.includes('Book Nikah'));
 });
 
-test('existing enquire deep link still opens the published Nikah form only', () => {
-  const html = fixture({}, '#enquire').page();
-  assert.match(html, /data-form="nikah-enquiry" data-booking="nikah"/);
-  assert.doesNotMatch(html, /id="enquire"[^>]*hidden=""/);
-  assert.doesNotMatch(html, /data-form="hall-booking"/);
+test('enquire and book deep links open only the published Nikah form', () => {
+  for (const hash of ['#enquire', '#book']) {
+    const html = fixture({}, hash).page();
+    assert.match(html, /data-form="nikah-enquiry" data-booking="nikah"/);
+    assert.doesNotMatch(html, /id="enquire"[^>]*hidden=""/);
+    assert.doesNotMatch(html, /data-form="hall-booking"/);
+  }
+});
+
+test('gallery includes the full-width kitchen and honest empty and published photo states', () => {
+  const empty = fixture().venue('facilities');
+  assert.match(empty, /nikah-venue-card[^\"]*is-wide/);
+  assert.match(empty, /Photos to follow/);
+  assert.doesNotMatch(empty, /<img/);
+  const photos = fixture({ nikah_venue: { mens_hall: { photos: [{ url: '/real.jpg', alt: 'Actual hall' }] } } }).venue('facilities');
+  assert.match(photos, /src="\/real.jpg" alt="Actual hall"/);
+  assert.match(photos, /aria-label="View Men’s hall photos"/);
 });
