@@ -11,6 +11,7 @@ import { serviceEnquiry, hallFormPrefill } from '@/lib/serviceEnquiries';
 import { checked } from '@/components/workspace/shared';
 import { SITE } from '@/content/site';
 import SmartForm from '@/components/workspace/SmartForm';
+import { BOOKING_LABELS, bookingQuestions, bookingPayload } from '@/features/nikah/booking';
 import {
   validateAnswers,
   validateUpload,
@@ -36,6 +37,7 @@ export function EmbeddedPublicForm({
   title,
   headingLevel = 2,
   initialAnswers = {},
+  bookingType,
 }) {
   const auth = useAuth();
   if (auth.loading && !auth.user) return <p role="status">Loading questions…</p>;
@@ -48,6 +50,7 @@ export function EmbeddedPublicForm({
       titleOverride={title}
       headingLevel={headingLevel}
       initialAnswers={initialAnswers}
+      bookingType={bookingType}
     />
   );
 }
@@ -59,6 +62,7 @@ function PublicForm({
   titleOverride,
   headingLevel = 2,
   initialAnswers = {},
+  bookingType,
 }) {
   const auth = useAuth();
   const { search } = useLocation();
@@ -84,6 +88,12 @@ function PublicForm({
   const mounted = useRef(true);
   const activeUploads = useRef(new Map());
   const FormHeading = embedded && headingLevel !== 1 ? 'h2' : 'h1';
+  const booking =
+    (slug === 'nikah-enquiry' && ['nikah', 'both'].includes(bookingType)) ||
+    (slug === 'hall-booking' && bookingType === 'hall')
+      ? bookingType
+      : undefined;
+  const questions = bookingQuestions(form?.schema.fields || [], booking);
   useEffect(() => {
     setManagedForm(null);
     if (!auth.user) return undefined;
@@ -196,7 +206,7 @@ function PublicForm({
   }
 
   function updateAnswers(next) {
-    const visible = new Set(visibleFields(form.schema.fields, next).map((field) => field.id));
+    const visible = new Set(visibleFields(questions.fields, next).map((field) => field.id));
     // A changed branch must also invalidate an upload that is still in flight.
     for (const id of activeUploads.current.keys())
       if (!visible.has(id)) activeUploads.current.delete(id);
@@ -267,14 +277,26 @@ function PublicForm({
               </Link>
             </p>
           </div>
+        ) : form && booking && !questions.message ? (
+          <div className="workspace-card">
+            <p>Please contact the centre to arrange this booking.</p>
+            <Link to="/contact">Contact the centre</Link>
+          </div>
         ) : form ? (
           <SmartForm
-            fields={form.schema.fields}
+            fields={questions.fields}
             answers={answers}
             onAnswersChange={updateAnswers}
             onFile={upload}
             uploads={uploads}
             busy={busy}
+            reviewContext={
+              booking && (
+                <p>
+                  <strong>Booking:</strong> {BOOKING_LABELS[booking]}
+                </p>
+              )
+            }
             submitLabel={
               slug === 'contact-us'
                 ? 'Send message'
@@ -287,7 +309,9 @@ function PublicForm({
               setBusy(true);
               setError('');
               try {
-                const entered = visibleAnswers(form.schema.fields, answers);
+                const entered = booking
+                  ? bookingPayload(form.schema, answers, booking)
+                  : visibleAnswers(form.schema.fields, answers);
                 const contextField = form.schema.fields.find(
                   (field) => field.type === 'textarea' && typeof entered[field.id] === 'string',
                 );

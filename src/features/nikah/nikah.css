@@ -1,0 +1,303 @@
+.nikah-page {
+  max-width: 960px;
+  padding-block: 20px 32px;
+}
+.nikah-heading {
+  margin-bottom: 16px;
+}
+.nikah-heading .guidance-back-link {
+  min-height: 36px;
+  font-size: 0.8rem;
+}
+.nikah-heading h1 {
+  font-size: clamp(1.65rem, 4vw, 2.2rem);
+  line-height: 1.2;
+  margin: 6px 0;
+}
+.nikah-heading > p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+.nikah-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.nikah-actions > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  min-height: 60px;
+  border-radius: 12px;
+  border: 1px solid var(--jic-border);
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  font-weight: 650;
+  text-align: left;
+}
+.nikah-actions > button:first-child {
+  border-color: var(--jic-gold);
+}
+.nikah-actions > button svg:first-child {
+  color: var(--jic-gold);
+}
+.nikah-actions > button svg:last-child {
+  margin-left: auto;
+}
+.nikah-actions svg {
+  flex-shrink: 0;
+}
+.nikah-actions button:hover,
+.nikah-actions button[aria-expanded='true'] {
+  border-color: var(--jic-gold);
+  background: var(--jic-surface-2, var(--jic-surface));
+}
+.nikah-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  margin: 6px 0 16px;
+}
+.nikah-quick-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.nikah-page :is(button, a, summary):focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+.nikah-venue {
+  scroll-margin-top: 160px;
+}
+.nikah-venue > h2 {
+  font-size: 1.15rem;
+  margin-bottom: 12px;
+}
+.nikah-venue-switch,
+.nikah-booking-options {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.nikah-venue-switch button,
+.nikah-booking-options button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--jic-text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+.nikah-venue-switch button[aria-pressed='true'],
+.nikah-booking-options button[aria-pressed='true'] {
+  color: var(--jic-text);
+  border-color: var(--jic-gold);
+  background: var(--jic-surface);
+  box-shadow: inset 0 -2px var(--jic-gold);
+  font-weight: 650;
+}
+.nikah-venue-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.nikah-venue-grid--examples,
+.nikah-venue-grid--parking {
+  grid-template-columns: minmax(0, 1fr);
+}
+.nikah-venue-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.nikah-venue-photo {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--jic-surface);
+}
+.nikah-venue-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.nikah-venue-photo > span {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #102333e8;
+  color: #fff;
+  font-size: 0.7rem;
+}
+.nikah-venue-placeholder {
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--jic-text-secondary);
+  background: color-mix(in srgb, var(--jic-gold) 5%, var(--jic-surface));
+  font-size: 0.75rem;
+}
+.nikah-venue-placeholder svg {
+  color: var(--jic-gold);
+}
+.nikah-venue-copy {
+  padding: 12px;
+}
+.nikah-venue-copy h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.nikah-venue-copy p {
+  margin-top: 7px;
+  font-size: 0.85rem;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.nikah-photo-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+.nikah-photo-controls button {
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--jic-border);
+  border-radius: 8px;
+  color: var(--jic-text);
+}
+.nikah-venue-grid--examples .has-photo,
+.nikah-venue-grid--parking .has-photo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+}
+.nikah-venue-note,
+.nikah-booking-note {
+  font-size: 0.8rem;
+  color: var(--jic-text-secondary);
+  line-height: 1.5;
+  margin-top: 10px;
+}
+.nikah-information {
+  margin-top: 20px;
+  padding: 0;
+}
+.nikah-information summary {
+  font-size: 0.9rem;
+  padding-block: 14px;
+}
+.nikah-information ul {
+  margin: 0 0 14px 20px;
+  list-style: disc;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.nikah-booking {
+  padding: 16px;
+  margin: 10px 0 24px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  scroll-margin-top: 160px;
+}
+.nikah-booking-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.nikah-booking-heading h2 {
+  font-size: 1.15rem;
+  scroll-margin-top: 160px;
+}
+.nikah-close-booking {
+  min-height: 44px;
+  text-decoration: underline;
+  font-size: 0.8rem;
+}
+.nikah-booking-note {
+  margin-bottom: 14px;
+}
+.nikah-booking .workspace-card {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+.nikah-booking [hidden] {
+  display: none;
+}
+.nikah-booking[hidden] {
+  display: none;
+}
+.nikah-additional-content:empty {
+  display: none;
+}
+.nikah-additional-content .managed-page-content {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 12px;
+}
+.nikah-additional-content h2 {
+  font-size: 1.15rem;
+}
+@media (max-width: 600px) {
+  .nikah-venue-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .nikah-venue-grid--facilities .nikah-venue-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .nikah-venue-grid--examples,
+  .nikah-venue-grid--parking {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nikah-venue-grid--examples .has-photo,
+  .nikah-venue-grid--parking .has-photo {
+    display: block;
+  }
+  .nikah-actions > button {
+    gap: 7px;
+    padding: 12px 10px;
+    font-size: 0.9rem;
+  }
+  .nikah-venue-switch {
+    gap: 5px;
+  }
+  .nikah-venue-switch button {
+    padding-inline: 9px;
+    font-size: 0.8rem;
+  }
+  .nikah-booking {
+    padding: 12px;
+  }
+}

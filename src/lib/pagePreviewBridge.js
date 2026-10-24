@@ -71,6 +71,7 @@ export function installPagePreviewBridge(onContent) {
             `page:${pathname}`,
             ...(pathname === '/services/hall-booking' ? ['hall_details'] : []),
             ...(pathname === '/funerals' ? ['funeral_facilities'] : []),
+            ...(pathname === '/services/nikah' ? ['nikah_venue'] : []),
           ].includes(key) &&
           typeof text === 'string' &&
           text.length <= CONTENT_LIMIT,

@@ -71,7 +71,11 @@ for (const [path, title, slug] of services) {
         if (slug === 'funeral-enquiry') {
           await page.getByRole('link', { name: 'Arrange a funeral', exact: true }).click();
           await expect(page.locator('.funeral-call')).toHaveAttribute('href', 'tel:01217786612');
-        } else await expect(page.locator('.service-questions')).toBeVisible();
+        } else {
+          if (slug === 'nikah-enquiry')
+            await page.getByRole('button', { name: 'Book Nikah', exact: true }).click();
+          await expect(page.locator('.service-questions')).toBeVisible();
+        }
       }
       if (destination !== path)
         await expect(
@@ -94,13 +98,16 @@ for (const [path, title, slug] of services) {
     expect(state.reads.length).toBeGreaterThanOrEqual(2);
     expect([...new Set(state.reads)]).toEqual([slug]);
     expect(state.writes).toHaveLength(2);
-    for (const write of state.writes) {
+    for (const [index, write] of state.writes.entries()) {
       expect(write.slug).toBe(slug);
       expect(write.version).toBe(7);
       expect(write.answers).toEqual({
         name: 'Example visitor',
         email: 'visitor@example.test',
-        request: 'Please contact me.',
+        request:
+          slug === 'nikah-enquiry' && index === 0
+            ? 'Booking: Nikah only\n\nPlease contact me.'
+            : 'Please contact me.',
         reply_method: 'Email',
       });
     }
@@ -115,6 +122,8 @@ for (const [path, title, slug] of services) {
       await page.goto(destination);
       if (destination === path && slug === 'funeral-enquiry')
         await page.getByRole('link', { name: 'Arrange a funeral', exact: true }).click();
+      if (destination === path && slug === 'nikah-enquiry')
+        await page.getByRole('button', { name: 'Book Nikah', exact: true }).click();
       await expect(page.getByRole('heading', { name: /is currently closed/ })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Send enquiry', exact: true })).toHaveCount(0);
       await expect(

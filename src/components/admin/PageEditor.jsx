@@ -18,6 +18,7 @@ import HeaderContentEditor from '@/components/admin/HeaderContentEditor';
 import PageNavigator from '@/components/admin/PageNavigator';
 import HallDetailsEditor from '@/features/content/HallDetailsEditor';
 import FuneralFacilitiesEditor from '@/features/content/FuneralFacilitiesEditor';
+import NikahVenueEditor from '@/features/nikah/NikahVenueEditor';
 import '@/styles/page-editor.css';
 
 export default function PageEditor({
@@ -86,6 +87,10 @@ export default function PageEditor({
   );
   const previewFuneral = useCallback(
     (value) => setExtraContent({ funeral_facilities: JSON.stringify(value) }),
+    [],
+  );
+  const previewNikah = useCallback(
+    (value) => setExtraContent({ nikah_venue: JSON.stringify(value) }),
     [],
   );
   useEffect(() => {
@@ -388,6 +393,7 @@ export default function PageEditor({
 
             {selected === '/services/hall-booking' && <HallDetailsEditor onPreview={previewHall} />}
             {selected === '/funerals' && <FuneralFacilitiesEditor onPreview={previewFuneral} />}
+            {selected === '/services/nikah' && <NikahVenueEditor onPreview={previewNikah} />}
             <PageSectionsEditor
               key={selected}
               pagePath={selected}

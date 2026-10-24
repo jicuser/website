@@ -102,3 +102,39 @@
     display: none;
   }
 }
+.nikah-venue-editor-area {
+  padding-block: 12px;
+  border-bottom: 1px solid var(--jic-border);
+}
+.nikah-venue-editor-area summary {
+  cursor: pointer;
+  min-height: 44px;
+  font-weight: 650;
+}
+.nikah-venue-editor-area summary small {
+  font-weight: 400;
+}
+.nikah-venue-editor .nikah-venue-editor-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nikah-venue-editor-toggle input {
+  width: 20px;
+  height: 20px;
+}
+.nikah-venue-editor-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: 12px;
+}
+.nikah-venue-editor-photo {
+  min-width: 0;
+  margin-bottom: 12px;
+}
+.nikah-venue-editor-photo img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 8px;
+}
