@@ -87,6 +87,34 @@
   font-size: 1.35rem;
   font-weight: 800;
 }
+.worship-reading-contents {
+  border-block: 1px solid var(--jic-border);
+  margin-block: 16px;
+}
+.worship-reading-contents summary {
+  cursor: pointer;
+  min-height: 48px;
+  padding-block: 12px;
+  font-weight: 650;
+}
+.worship-reading-contents summary span {
+  margin-inline-start: 8px;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--jic-text-secondary);
+}
+.worship-reading-contents ol {
+  list-style: decimal;
+  padding: 0 0 12px 24px;
+}
+.worship-reading-contents a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 4px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 .worship-reading-intro,
 .worship-step-instruction {
   margin-block: 8px 20px;
@@ -103,6 +131,7 @@
   border-radius: 16px;
   background: var(--jic-surface);
   min-width: 0;
+  scroll-margin-top: 150px;
 }
 .worship-recitation-card > header {
   display: flex;
@@ -136,6 +165,7 @@
 .worship-transliteration,
 .worship-meaning,
 .worship-quran-translation {
+  font-size: 1rem;
   line-height: 1.8;
   margin-block: 16px;
   overflow-wrap: anywhere;
@@ -297,6 +327,9 @@
 .worship-janazah-resources h2 {
   font-size: 1.15rem;
 }
+.worship-janazah-resources {
+  margin-top: 24px;
+}
 .worship-janazah-resources .worship-external-links {
   margin-top: 14px;
 }
@@ -325,6 +358,7 @@
   color: var(--jic-text-secondary);
 }
 .worship-reading :is(button, input, select, a, summary):focus-visible,
+.worship-recitation-card:focus-visible,
 .worship-quran-ayah:focus-visible {
   outline: 3px solid var(--jic-gold-strong);
   outline-offset: 3px;
@@ -332,11 +366,14 @@
 @media (max-width: 600px) {
   .worship-display-controls {
     align-items: stretch;
-    gap: 5px;
+    gap: 4px 16px;
     padding-inline: 12px;
   }
   .worship-display-controls > label {
-    width: 100%;
+    flex: 1 1 140px;
+  }
+  .worship-display-controls > .worship-font-control {
+    flex-basis: 100%;
   }
   .worship-font-control input {
     flex: 1;
@@ -350,6 +387,8 @@
   }
   .worship-collection-picker button {
     flex: 1;
-    padding-inline: 10px;
+    gap: 5px;
+    padding-inline: 8px;
+    font-size: 0.8rem;
   }
 }

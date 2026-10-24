@@ -437,7 +437,7 @@
 }
 .about-jump-links {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 6px;
   margin-bottom: 16px;
 }
@@ -459,14 +459,46 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  padding-block: 8px 4px;
 }
 .about-purpose-links a {
-  display: flex;
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) 16px;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   min-height: 44px;
   font-size: 0.8125rem;
   font-weight: 600;
+}
+.about-purpose-symbol {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 76px;
+  color: var(--jic-gold-strong);
+}
+.about-purpose-symbol > svg:first-child {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.65;
+}
+.about-purpose-copy {
+  display: grid;
+  gap: 5px;
+}
+.about-purpose-copy strong {
+  font-weight: 650;
+  line-height: 1.3;
+}
+.about-purpose-copy small {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--jic-text-secondary);
 }
 .about-purpose-links svg,
 .about-social-links svg {
@@ -474,8 +506,8 @@
   color: var(--jic-gold-strong);
 }
 .about-section {
-  padding-top: 20px;
-  margin-top: 20px;
+  padding-top: 16px;
+  margin-top: 16px;
   border-top: 1px solid var(--jic-border);
   scroll-margin-top: calc(var(--jic-mobile-strip-height, 0px) + 16px);
   outline: none;
@@ -565,13 +597,21 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .about-purpose-links {
-    gap: 4px;
+    gap: 12px;
   }
   .about-purpose-links a {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+    align-content: start;
     font-size: 0.75rem;
-    gap: 6px;
+    gap: 8px;
+  }
+  .about-purpose-symbol {
+    width: 60px;
+    height: 64px;
+  }
+  .about-purpose-copy small {
+    font-size: 0.6875rem;
   }
   .about-purpose-links a > svg:last-child {
     display: none;

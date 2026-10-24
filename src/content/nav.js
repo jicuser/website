@@ -12,7 +12,7 @@ export const GET_INVOLVED_NAVIGATION = {
   name: 'Get involved',
   path: '/get-involved',
   children: [
-    { name: 'Overview', path: '/get-involved' },
+    { name: 'Ways to help', path: '/get-involved' },
     { name: 'Volunteer', path: '/get-involved/volunteer' },
     { name: 'Campaigns', path: '/fundraise' },
     { name: 'Start a fundraiser', path: '/fundraise/new' },
@@ -20,7 +20,7 @@ export const GET_INVOLVED_NAVIGATION = {
   editable: false,
 };
 export const MADRASSAH_TABS = [
-  { name: 'Overview', path: '/madrassah' },
+  { name: 'Madrassah at JIC', path: '/madrassah' },
   { name: 'Pupil Enrolment', path: '/madrassah/enrolment' },
   { name: 'Classes', path: '/madrassah/classes-courses' },
   { name: 'Student Information', path: '/madrassah/student-portal' },
@@ -28,14 +28,14 @@ export const MADRASSAH_TABS = [
   { name: 'Policies', path: '/madrassah/policies' },
 ];
 export const EDUCATION_TABS = [
-  { name: 'Overview', path: '/education' },
+  { name: 'Learning at JIC', path: '/education' },
   { name: 'All programmes', path: '/education/programmes' },
   { name: 'Adult Classes', path: '/education/courses' },
   { name: 'Enrolment', path: '/education/enrolment' },
   { name: 'Madrassah', path: '/madrassah' },
 ];
 export const WORSHIP_TABS = [
-  { name: 'Overview', path: '/worship' },
+  { name: 'Reading & guides', path: '/worship' },
   { name: 'Read Qur’an', path: '/worship/quran' },
   { name: 'Dala’il al-Khayrat', path: '/worship/dalail-al-khayrat' },
   { name: 'Adhkar & Du‘as', path: '/worship/daily-duas' },
@@ -48,7 +48,7 @@ export const NAV_GROUPS = [
     name: 'About',
     path: '/about',
     children: [
-      { name: 'Overview', path: '/about' },
+      { name: 'About JIC', path: '/about' },
       { name: 'Meet the Team', path: '/team' },
       { name: 'Our History', path: '/about/history' },
       { name: 'Financial History', path: '/financial-history' },
@@ -71,7 +71,7 @@ export const NAV_GROUPS = [
     name: 'Ramadan',
     path: '/ramadan',
     children: [
-      { name: 'Overview', path: '/ramadan' },
+      { name: 'Ramadan at JIC', path: '/ramadan' },
       { name: 'Sponsor an Iftar', path: '/ramadan/iftar' },
       { name: 'Sponsor a Suhoor', path: '/ramadan/suhoor' },
       { name: 'Daily Giving', path: '/ramadan/daily-giving' },
@@ -81,7 +81,7 @@ export const NAV_GROUPS = [
     name: 'Services',
     path: '/services',
     children: [
-      { name: 'Overview', path: '/services' },
+      { name: 'All services', path: '/services' },
       { name: 'Religious Services', path: '/services/religious' },
       { name: 'Educational Programmes', path: '/services/education' },
       { name: 'Community Services', path: '/services/community' },
@@ -94,7 +94,7 @@ export const NAV_GROUPS = [
     name: 'Our Masjid Project',
     path: '/projects',
     children: [
-      { name: 'Project overview', path: '/projects' },
+      { name: 'The masjid project', path: '/projects' },
       { name: 'Support JIC', path: '/donate' },
     ],
   },
@@ -103,7 +103,7 @@ export const NAV_GROUPS = [
     name: 'Youth',
     path: '/youth',
     children: [
-      { name: 'Overview', path: '/youth' },
+      { name: 'Youth at JIC', path: '/youth' },
       { name: 'Activities', path: '/youth/activities' },
       { name: "I'tikaf Registration", path: '/youth/itikaf' },
       { name: 'Trips & Events', path: '/youth/trips-events' },

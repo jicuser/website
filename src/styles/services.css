@@ -669,11 +669,6 @@
   text-decoration: none;
 }
 .service-explorer--full .service-explorer-card {
-  --jic-glass-tile: var(--jic-surface);
-  --jic-glass-tile-sheen: linear-gradient(transparent, transparent);
-  --jic-glass-panel-filter: none;
-  --jic-glass-shadow: none;
-  --jic-glass-border: var(--jic-border);
   min-height: 84px;
 }
 .service-explorer-card:hover {

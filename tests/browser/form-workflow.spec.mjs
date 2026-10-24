@@ -272,12 +272,50 @@ test('response-only contact staff see their inbox without question-editing contr
   await page.goto('/admin?section=forms');
   await expect(page.getByRole('button', { name: 'New form', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Edit form', exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Open form', exact: true }).click();
-  await page.getByRole('button', { name: 'Responses (5)', exact: true }).click();
+  await page.getByRole('button', { name: 'Contact Us: review responses', exact: true }).click();
+  await expect(page).toHaveURL(/tab=responses/);
   await expect(page.getByRole('heading', { name: 'Responses', exact: true })).toBeVisible();
   expect(state.writes).toEqual([]);
   expect(state.errors).toEqual([]);
 });
+
+for (const width of [320, 1280]) {
+  test(`form preview is a focused view and preserves drafts and preview answers at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const state = await fixture(page);
+    await page.goto(`/admin?section=forms&form=${contact.id}&edit=1`);
+    const views = page.getByRole('navigation', { name: 'Form editor view' });
+    await expect(views.getByRole('button', { name: 'Edit questions' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await page.getByLabel('Form title', { exact: true }).fill('Contact our team');
+    await views.getByRole('button', { name: 'Preview questions' }).click();
+    await expect(page.getByLabel('Form title', { exact: true })).toBeHidden();
+    await expect(page.getByRole('button', { name: 'Save form draft', exact: true })).toBeEnabled();
+    const preview = page.locator('.custom-form-editor .workspace-card.workspace-form');
+    await expect(preview.getByRole('heading', { name: 'Contact our team' })).toBeVisible();
+    await preview.getByLabel('Your name', { exact: false }).fill('Preview only');
+    await views.getByRole('button', { name: 'Edit questions' }).click();
+    await expect(page.getByLabel('Form title', { exact: true })).toHaveValue('Contact our team');
+    await expect(page.getByRole('button', { name: 'Save form draft', exact: true })).toBeEnabled();
+    await views.getByRole('button', { name: 'Preview questions' }).click();
+    await expect(preview.getByLabel('Your name', { exact: false })).toHaveValue('Preview only');
+    await page.getByRole('button', { name: 'Publish changes', exact: true }).click();
+    await expect.poll(() => state.writes.length).toBe(1);
+    expect(state.writes[0].p_publish).toBe(true);
+    expect(state.writes[0].p_form.title).toBe('Contact our team');
+    expect(state.writes[0].p_form.responsible_ids).toEqual([id(1)]);
+    expect(state.writes[0].p_form.schema).toEqual(contact.schema);
+    expect(state.writes[0]).not.toHaveProperty('answers');
+    expect(state.errors).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  });
+}
 
 test('built-in contact renders published questions and only managers see edit controls', async ({
   page,

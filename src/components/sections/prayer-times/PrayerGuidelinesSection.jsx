@@ -1,33 +1,23 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const PrayerGuidelinesSection = () => (
-  <section className="py-16">
-    <div className="container mx-auto px-4">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Prayer Guidelines</h2>
-        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Important information about prayers at Jamatia Islamic Centre.
-        </p>
-        <nav className="mt-4 flex flex-wrap justify-center gap-3" aria-label="Prayer guides">
-          <Link className="jic-button" to="/worship/prayer-guide">
-            Salah guide
-          </Link>
-          <Link className="jic-button" to="/worship/janazah-guide">
-            Janazah prayer guide
-          </Link>
-        </nav>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6"
-        >
+  <section className="jic-prayer-visit" aria-labelledby="prayer-visit-heading">
+    <header>
+      <h2 id="prayer-visit-heading">Before your visit</h2>
+      <nav aria-label="Prayer guides">
+        <Link data-glass="clear" to="/worship/prayer-guide">
+          Salah guide
+        </Link>
+        <Link data-glass="clear" to="/worship/janazah-guide">
+          Janazah prayer guide
+        </Link>
+      </nav>
+    </header>
+    <details>
+      <summary>Prayer guidance &amp; access</summary>
+      <div className="jic-prayer-visit-guidance">
+        <article>
           <h3 className="text-xl font-bold mb-4">General Guidelines</h3>
           <ul className="space-y-3 text-gray-600 dark:text-gray-300">
             <li className="flex items-start">
@@ -53,16 +43,9 @@ const PrayerGuidelinesSection = () => (
               <span className="text-primary mr-2">•</span>Keep the prayer area clean and tidy
             </li>
           </ul>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6"
-        >
-          <h3 className="text-xl font-bold mb-4">Before your visit</h3>
+        </article>
+        <article>
+          <h3 className="text-xl font-bold mb-4">At the centre</h3>
           <ul className="space-y-3 text-gray-600 dark:text-gray-300">
             <li className="flex items-start">
               <span className="text-primary mr-2">•</span>Ask the centre about prayer areas and
@@ -73,8 +56,8 @@ const PrayerGuidelinesSection = () => (
               joining the prayer
             </li>
             <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>Ask the team if you need help finding
-              your way around
+              <span className="text-primary mr-2">•</span>Ask the team if you need help finding your
+              way around
             </li>
             <li className="flex items-start">
               <span className="text-primary mr-2">•</span>Check the published timetable for prayer
@@ -89,9 +72,9 @@ const PrayerGuidelinesSection = () => (
               driveways and entrances clear
             </li>
           </ul>
-        </motion.div>
+        </article>
       </div>
-    </div>
+    </details>
   </section>
 );
 

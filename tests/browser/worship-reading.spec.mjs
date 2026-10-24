@@ -60,6 +60,7 @@ test('readers expose real adhkar, Janazah recitations and the canonical prayer-t
   await publicSite(page);
   await page.goto('/worship');
   await expect(page.locator('.worship-hub-grid > a')).toHaveCount(3);
+  await expect(page.locator('.worship-resource-illustration')).toHaveCount(3);
   await page.locator('.worship-hub-grid a[href="/worship/daily-duas"]').click();
   await expect(page.getByRole('heading', { name: 'Morning adhkar', exact: true })).toBeVisible();
   await expect(page.locator('.worship-recitation-arabic')).toHaveCount(3);
@@ -67,6 +68,10 @@ test('readers expose real adhkar, Janazah recitations and the canonical prayer-t
   await expect(page.getByRole('heading', { name: 'Evening adhkar', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'After Salah', exact: true }).click();
   await expect(page.locator('.worship-recitation-card')).toHaveCount(6);
+  await page.getByText('In this collection', { exact: false }).click();
+  await page.getByRole('link', { name: 'Glorify Allah', exact: true }).click();
+  await expect(page.locator('#adhkar-after-salah-tasbih')).toBeFocused();
+  await expect(page).toHaveURL(/collection=after-salah#adhkar-after-salah-tasbih$/);
   await page.getByLabel('Show meaning', { exact: true }).uncheck();
   await expect(page.locator('.worship-meaning')).toHaveCount(0);
   await page.goto('/worship/janazah-guide');
@@ -83,6 +88,35 @@ test('readers expose real adhkar, Janazah recitations and the canonical prayer-t
   await expect(page.getByRole('heading', { name: 'For a girl', exact: true })).toBeVisible();
   await page.goto('/worship/daily-salah');
   await expect(page).toHaveURL(/\/prayer-times$/);
+});
+
+test('Arabic and reading choices fit narrow phones in both themes', async ({ page }) => {
+  await publicSite(page);
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/worship');
+    await expect(page.locator('.worship-resource-illustration')).toHaveCount(3);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.locator('.worship-hub-grid a[href="/worship/daily-duas"]').click();
+    await page.getByLabel('Arabic text size', { exact: true }).fill('48');
+    await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      await expect(page.locator('.worship-recitation-arabic').first()).toHaveCSS(
+        'font-size',
+        '48px',
+      );
+      await expect(page.locator('.worship-meaning').first()).toBeVisible();
+      await expect(page.locator('.worship-transliteration').first()).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+    }
+  }
 });
 
 test('Qur’an search, reading controls and saved verse survive a reload', async ({ page }) => {

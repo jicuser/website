@@ -386,10 +386,28 @@
   margin: 0;
   align-content: start;
 }
-.content-form-grid .content-form-card > strong {
+.content-form-grid .content-form-card > :is(strong, .content-form-title) {
   grid-row: 1;
   grid-column: 1;
   align-self: center;
+}
+.admin-console .content-form-card .content-form-title {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--jic-text);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 650;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.content-form-grid .content-form-card > .admin-actions {
+  grid-column: 1 / -1;
 }
 .content-form-grid .content-status {
   grid-row: 1;

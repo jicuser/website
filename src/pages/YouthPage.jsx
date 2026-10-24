@@ -92,7 +92,7 @@ export default function YouthPage({ view = 'overview' }) {
         </title>
         <meta name="description" content={META_DESCRIPTION} />
       </Helmet>
-      <div className="bg-background">
+      <div className="jic-youth-page">
         {view === 'overview' && (
           <PageHeading title="Youth">
             Activities, learning and opportunities for young people.

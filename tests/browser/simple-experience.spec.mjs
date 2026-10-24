@@ -287,6 +287,25 @@ test('Ramadan table selects a range across UK months and skips reserved or close
   expect(state.errors).toEqual([]);
 });
 
+test('Ramadan without a season keeps one overview notice and a useful direct meal page', async ({
+  page,
+}) => {
+  const { state } = await fixture(page);
+  state.season = null;
+  await page.goto('/ramadan');
+  const notice = page.locator('.ramadan-timetable-notice');
+  await expect(
+    notice.getByRole('heading', { name: 'Ramadan timetable coming soon' }),
+  ).toBeVisible();
+  await expect(notice.getByRole('heading', { name: 'Meal bookings coming soon' })).toBeVisible();
+  await expect(page.locator('.sponsorship-page > .booking-panel')).toHaveCount(1);
+  await page.goto('/ramadan/iftar');
+  await expect(page.getByRole('heading', { name: 'Meal bookings coming soon' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ramadan timetable coming soon' })).toHaveCount(0);
+  expect(state.writes).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
 test('Ramadan staff table opens and closes a date range and accepts a 29-day end date', async ({
   page,
 }) => {

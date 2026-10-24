@@ -6,10 +6,10 @@ html[data-theme='dark'] {
   --jic-photo-veil: rgba(3, 9, 15, 0.66);
 }
 html[data-theme='light'] .jic-inner-route {
-  --jic-photo-veil: rgba(250, 251, 253, 0.92);
+  --jic-photo-veil: rgba(250, 251, 253, 0.84);
 }
 html[data-theme='dark'] .jic-inner-route {
-  --jic-photo-veil: rgba(3, 9, 15, 0.86);
+  --jic-photo-veil: rgba(3, 9, 15, 0.76);
 }
 /* Accessibility preferences give unboxed copy a predictable reading surface. */
 @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
@@ -18,14 +18,14 @@ html[data-theme='dark'] .jic-inner-route {
     --jic-photo-veil: var(--jic-bg);
   }
 }
-/* The homepage photograph belongs to its introduction, not the full document. */
+/* One stationary photograph sits behind the whole public document. */
 .jic-public-route {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
 }
 .jic-page-backdrop {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
@@ -375,7 +375,7 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
   row-gap: 32px;
   padding-block: 32px;
   border-top: 1px solid var(--jic-border);
-  background: var(--jic-bg);
+  background: transparent;
 }
 /* One spacing owner prevents adjacent section margins from compounding. */
 .jic-home-route .jic-premium-home .jic-home-content > * {

@@ -46,11 +46,11 @@ html[data-theme] {
 html[data-theme='dark'] {
   --jic-glass-control: rgba(9, 29, 51, 0.72);
   --jic-glass-reminder: rgba(9, 29, 51, 0.38);
-  --jic-glass-tile: rgba(11, 33, 56, 0.78);
-  --jic-glass-panel: rgba(10, 29, 50, 0.84);
+  --jic-glass-tile: rgba(11, 33, 56, 0.7);
+  --jic-glass-panel: rgba(10, 29, 50, 0.78);
   --jic-glass-panel-strong: rgba(9, 27, 47, 0.94);
-  --jic-glass-border: rgba(143, 178, 207, 0.24);
-  --jic-glass-highlight: rgba(172, 204, 229, 0.1);
+  --jic-glass-border: rgba(143, 178, 207, 0.32);
+  --jic-glass-highlight: rgba(172, 204, 229, 0.16);
   --jic-glass-shadow: 0 12px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(172, 204, 229, 0.1);
   --jic-glass-control-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.08), transparent 65%);
   --jic-glass-tile-sheen: linear-gradient(145deg, rgba(115, 173, 213, 0.06), transparent 65%);

@@ -15,7 +15,7 @@ Status must come from real published data. “Details not published” does not 
 - Use `PageChoices` for concise related destinations and the existing service finder for searchable/filterable services. Use longer copy for actual guidance, not repeated navigation panels.
 - Service guides and direct form links must render the same published service form through `BuiltInForm`. Contact Us remains the general enquiry route. Form schema, versions, closed states, receipts and response routing belong to the existing form workflow.
 - Preserve real programme details, service preparation guidance, source references and authenticated reading material. If details are missing, offer a relevant existing enquiry route rather than fabricate a schedule or policy.
-- Keep the photo-led home introduction distinct from the calm sections below it. Theme and contrast preferences must preserve readable text and visible controls.
+- Keep the user's chosen full public photograph visible behind home and inner pages, with one fixed decorative layer and shared translucent materials. Theme veils and opaque contrast/transparency fallbacks preserve readable text and visible controls.
 - Keep prayer start/Jama'ah distinctions and published Jummah times. The Salah dock must respect active tasks, keyboard focus, safe areas and its scroll hide/reveal controls.
 - Spiritual reminders should remain readable, dismissible and passive. A first visit should never require waiting for a blurred page to clear.
 

@@ -1,8 +1,9 @@
 import React, { lazy, Suspense } from 'react';
-import { BookOpen, HeartHandshake, Loader2, MoonStar } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import GuideResource from '@/components/GuideResource';
 import PageHeading from '@/components/PageHeading';
+import ReadingIllustration from '@/components/worship/ReadingIllustration';
 
 // Reading text and the surah directory load only when their reader is opened.
 const AdhkarReader = lazy(() => import('@/components/worship/AdhkarReader'));
@@ -34,19 +35,37 @@ export default function WorshipPage() {
           </PageHeading>
           <div className="worship-hub-grid">
             <Link to="/worship/daily-duas">
-              <MoonStar aria-hidden="true" />
-              <h2>Adhkar</h2>
-              <p>Morning, evening and after Salah, with Arabic, transliteration and meaning.</p>
+              <ReadingIllustration resource="adhkar" />
+              <div>
+                <span className="worship-resource-label">Morning · Evening · After Salah</span>
+                <h2>Adhkar</h2>
+                <p>Read Arabic, follow the transliteration and understand the meaning.</p>
+                <span className="worship-resource-action">
+                  Start reading <ArrowRight size={16} aria-hidden="true" />
+                </span>
+              </div>
             </Link>
             <Link to="/worship/quran">
-              <BookOpen aria-hidden="true" />
-              <h2>Read Qur’an</h2>
-              <p>Find a surah, adjust your reading and save a verse to return to.</p>
+              <ReadingIllustration resource="quran" />
+              <div>
+                <span className="worship-resource-label">Arabic & English translation</span>
+                <h2>Read Qur’an</h2>
+                <p>Find a surah and save your place to continue another time.</p>
+                <span className="worship-resource-action">
+                  Choose a surah <ArrowRight size={16} aria-hidden="true" />
+                </span>
+              </div>
             </Link>
             <Link to="/worship/janazah-guide">
-              <HeartHandshake aria-hidden="true" />
-              <h2>Janazah Guide</h2>
-              <p>Read the recitations for each takbir and open the English or Urdu guide.</p>
+              <ReadingIllustration resource="janazah" />
+              <div>
+                <span className="worship-resource-label">The four takbirs</span>
+                <h2>Janazah Guide</h2>
+                <p>Follow the recitations, with the full guide in English or Urdu.</p>
+                <span className="worship-resource-action">
+                  Read the guide <ArrowRight size={16} aria-hidden="true" />
+                </span>
+              </div>
             </Link>
           </div>
           <nav className="worship-secondary-links" aria-label="More worship resources">

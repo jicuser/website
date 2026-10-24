@@ -102,28 +102,40 @@ export default function AboutPage() {
         </p>
       </AboutMasthead>
       <nav className="about-jump-links" aria-label="On this page">
-        {sectionLinks.map(({ path, name }) => (
-          <Link key={path} to={path === '/about' ? '/about#overview' : aboutSectionLink(path)}>
-            {navigationName(
-              getContent,
-              path,
-              ABOUT_SECTIONS.find((section) => section.path === path)?.name || name,
-            )}
-          </Link>
-        ))}
+        {sectionLinks
+          .filter(({ path }) => path !== '/about')
+          .map(({ path, name }) => (
+            <Link key={path} to={aboutSectionLink(path)}>
+              {navigationName(
+                getContent,
+                path,
+                ABOUT_SECTIONS.find((section) => section.path === path)?.name || name,
+              )}
+            </Link>
+          ))}
       </nav>
       <ManagedPageContent pagePath="/about" optional headingLevel={2} className="is-unframed" />
       <ManagedPageSections pagePath="/about" />
       <nav className="about-purpose-links" aria-label="Life at the centre">
         {[
-          [Heart, 'Prayer & worship', '/prayer-times'],
-          [BookOpen, 'Learning', '/education'],
-          [Users, 'Community services', '/services'],
+          [Heart, 'Prayer & worship', 'Daily salah & Jummah', '/prayer-times'],
+          [BookOpen, 'Learning', 'Classes & Madrassah', '/education'],
+          [Users, 'Community services', 'Support & care', '/services'],
         ]
-          .filter(([, , path]) => visible(path))
-          .map(([Icon, name, to]) => (
+          .filter(([, , , path]) => visible(path))
+          .map(([Icon, name, description, to]) => (
             <Link key={to} to={to}>
-              <Icon size={20} aria-hidden="true" /> {name}
+              <span className="about-purpose-symbol" aria-hidden="true">
+                <svg viewBox="0 0 80 84" fill="none">
+                  <path d="M8 80V37C8 20 23 9 40 4C57 9 72 20 72 37V80" />
+                  <path d="M1 80H79M15 73V38C15 25 27 16 40 11C53 16 65 25 65 38V73" />
+                </svg>
+                <Icon size={27} strokeWidth={1.5} />
+              </span>
+              <span className="about-purpose-copy">
+                <strong>{name}</strong>
+                <small>{description}</small>
+              </span>
               <ArrowRight size={15} aria-hidden="true" />
             </Link>
           ))}
