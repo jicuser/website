@@ -162,6 +162,76 @@ test('a failed prayer load leaves daily, weekly and import fields disabled', asy
   expect(writes).toEqual([]);
 });
 
+test('a pending CSV cannot save after a later daily read fails and remains cancellable until recovery', async ({
+  page,
+}) => {
+  const writes = await openWorkspace(page, 'prayer');
+  const csv = {
+    name: 'pending-timetable.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(
+      'd_date,fajr_begins,fajr_jamah,sunrise,zuhr_begins,zuhr_jamah,asr_begins,asr_jamah,maghrib_begins,maghrib_jamah,isha_begins,isha_jamah\n2026-10-25,05:30,06:00,07:00,12:00,13:00,15:00,16:00,17:00,17:00,19:00,20:00',
+    ),
+  };
+  await page.getByRole('button', { name: 'CSV import', exact: true }).click();
+  await page.locator('input[type="file"]').setInputFiles(csv);
+  await expect(page.locator('.admin-import-preview')).toContainText(
+    'pending-timetable.csv · 1 dates',
+  );
+  let finishRead;
+  const readGate = new Promise((resolve) => {
+    finishRead = resolve;
+  });
+  await page.route('**/preview-api/rest/v1/prayer_times?**', async (route) => {
+    const url = new URL(route.request().url());
+    if (route.request().method() === 'GET' && url.searchParams.get('d_date') === 'eq.2026-10-26') {
+      await readGate;
+      return route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Daily date could not be read.' }),
+      });
+    }
+    return route.fallback();
+  });
+  await page.getByRole('button', { name: 'Daily times', exact: true }).click();
+  await page.getByLabel('Date', { exact: true }).fill('2026-10-26');
+  await page.getByRole('button', { name: 'CSV import', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Save CSV', exact: true })).toBeDisabled();
+  expect(writes).toEqual([]);
+  finishRead();
+  await expect(page.getByRole('alert')).toContainText('Daily date could not be read.');
+  const saveCsv = page.getByRole('button', { name: 'Save CSV', exact: true });
+  await expect(saveCsv).toBeDisabled();
+  await page
+    .locator('.admin-toolbar')
+    .getByRole('button', { name: 'Save timetable changes', exact: true })
+    .click();
+  await expect(page.getByRole('alert')).toContainText('Daily date could not be read.');
+  await expect(page.locator('.admin-success')).toHaveCount(0);
+  await expect(page.locator('.admin-import-preview')).toContainText(
+    'pending-timetable.csv · 1 dates',
+  );
+  expect(writes).toEqual([]);
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(page.locator('.admin-import-preview')).toHaveCount(0);
+  expect(writes).toEqual([]);
+  await page.getByRole('button', { name: 'Daily times', exact: true }).click();
+  await page.getByLabel('Date', { exact: true }).fill('2026-10-27');
+  await expect(page.getByLabel('Fajr begins', { exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'CSV import', exact: true }).click();
+  await page.locator('input[type="file"]').setInputFiles(csv);
+  await expect(saveCsv).toBeEnabled();
+  await saveCsv.click();
+  await expect(page.locator('.admin-success')).toContainText('Timetable saved.');
+  await expect(page.locator('.admin-import-preview')).toHaveCount(0);
+  expect(writes).toHaveLength(1);
+  expect(writes[0]).toMatchObject({
+    table: 'prayer_times',
+    body: [{ d_date: '2026-10-25', fajr_begins: '05:30' }],
+  });
+});
+
 test('visibility summaries reveal search and filter matches and persist toggles', async ({
   page,
 }) => {

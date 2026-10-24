@@ -161,6 +161,7 @@ export default function PrayerEditor() {
   ]);
 
   const saveOne = async (task) => {
+    if (busy || loading || loadFailed) return false;
     setBusy(true);
     setError('');
     setMessage('');
@@ -336,7 +337,7 @@ export default function PrayerEditor() {
             </div>
             <div className="admin-actions">
               <button
-                disabled={busy}
+                disabled={busy || loading || loadFailed}
                 onClick={() => saveOne(publishCsv)}
                 className="admin-button primary"
               >
