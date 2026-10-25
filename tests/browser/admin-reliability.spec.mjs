@@ -427,8 +427,8 @@ for (const width of [390, 1280]) {
         relayConfigured: false,
       },
     });
-    await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
-    await page.getByText('Change layout', { exact: true }).click();
+    await page.getByRole('button', { name: 'Open Men’s Main Hall display', exact: true }).click();
+    await page.getByRole('button', { name: 'Edit display', exact: true }).click();
     const picker = page.getByRole('region', { name: 'Choose a starting layout' });
     await picker.getByRole('button', { name: /^Countdown A large/ }).click();
     const cardContrast = await picker.evaluate((element) => {
@@ -486,8 +486,8 @@ for (const width of [390, 1280]) {
       true,
     );
     await page
-      .locator('.tv-save-actions')
-      .getByRole('button', { name: 'Save display settings', exact: true })
+      .locator('.tv-workspace-publish')
+      .getByRole('button', { name: 'Publish changes', exact: true })
       .click();
     await expect.poll(() => evidence.writes.length).toBe(1);
     const save = evidence.writes[0];
@@ -549,8 +549,9 @@ for (const existingDraft of [false, true]) {
         relayConfigured: false,
       },
     });
-    await page.getByRole('button', { name: 'Edit automatic display', exact: true }).first().click();
-    const layout = page.getByRole('combobox', { name: 'When this layout appears', exact: true });
+    await page.getByRole('button', { name: 'Open Men’s Main Hall display', exact: true }).click();
+    await page.getByRole('button', { name: 'Edit display', exact: true }).click();
+    const layout = page.getByRole('combobox', { name: 'Display moment', exact: true });
     await expect(layout).toBeVisible();
     await expect(layout).toHaveValue('standby');
     const readCount = evidence.tvReads.filter((screen) => screen === 'mens-main').length;
@@ -561,8 +562,8 @@ for (const existingDraft of [false, true]) {
       })
       .toBeGreaterThan(readCount);
     expect(await page.evaluate((key) => sessionStorage.getItem(key), key)).toBe(draft);
-    await page.getByRole('button', { name: 'Back to screens', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Choose a screen', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'TV screens', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'TV screens', exact: true })).toBeVisible();
     expect(await page.evaluate((key) => sessionStorage.getItem(key), key)).toBe(draft);
     expect(evidence.writes).toEqual([]);
     expect(evidence.errors).toEqual([]);

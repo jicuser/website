@@ -11,8 +11,8 @@ export default function TvDraftReview({ saved, draft, screenId, preset }) {
       className="tv-draft-review"
       onToggle={(event) => setExpanded(event.currentTarget.open)}
     >
-      <summary>Review your changes before saving</summary>
-      <p>Compare this screen’s saved settings with your changes. The TV updates when you save.</p>
+      <summary>Review before publishing</summary>
+      <p>Compare the published display with your draft. Only Publish changes updates the screen.</p>
       {changes.length > 0 && (
         <ul aria-label="Changed settings">
           {changes.map((label) => (

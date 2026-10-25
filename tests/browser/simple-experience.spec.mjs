@@ -376,22 +376,22 @@ test('live radio notice follows availability, persists dismissal and starts audi
   expect(state.errors).toEqual([]);
 });
 
-test('TV starts with one task and one primary action per supported screen without writing changes', async ({
+test('TV starts with one action per screen and exposes controls for that display only', async ({
   page,
 }) => {
   const { state, login } = await fixture(page);
   await login();
   await page.goto('/admin?section=tv');
-  await expect(
-    page.getByRole('button', { name: 'Edit automatic display', exact: true }),
-  ).toHaveCount(4);
-  await expect(page.getByRole('button', { name: 'Quick present', exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: /Live presentation Camera/ }).click();
-  await expect(page.getByRole('button', { name: 'Quick present', exact: true })).toHaveCount(3);
-  await expect(page.getByText('Shoe Area', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: /Automatic displays Timetable/ }).click();
-  await page.getByRole('button', { name: 'Edit automatic display', exact: true }).last().click();
-  await expect(page.getByRole('tab', { name: 'Design', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Open .* display$/ })).toHaveCount(4);
+  await expect(page.getByRole('button', { name: 'Go live', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open Shoe Area display', exact: true }).click();
+  await expect(page.getByRole('tab', { name: 'Display', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Go live', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Edit display', exact: true }).click();
+  await expect(page.getByRole('tablist', { name: 'Edit display', exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Layout', exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Content', exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Timing', exact: true })).toBeVisible();
   expect(state.writes).toEqual([]);
   expect(state.errors).toEqual([]);
 });

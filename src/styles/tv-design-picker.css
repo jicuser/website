@@ -1,7 +1,7 @@
 /* Layout chooser only. Real previews keep the display renderer's styles. */
 .tv-design-picker {
-  gap: 16px;
-  padding: var(--jic-space-card, clamp(20px, 2.5vw, 28px));
+  gap: 12px;
+  padding: 12px;
   border: 1px solid var(--jic-border);
   border-radius: 14px;
   background: var(--jic-surface);
@@ -11,7 +11,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 16px;
+  gap: 10px;
   align-items: start;
 }
 .tv-design-heading h3,
@@ -22,19 +22,20 @@
 }
 .tv-design-heading p,
 .tv-design-comparison-heading p {
-  margin-top: 8px;
+  margin-top: 4px;
   max-width: 64ch;
   color: var(--jic-text-secondary);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   line-height: 1.5;
 }
 .tv-design-current {
-  display: grid;
-  gap: 8px;
-  padding: 8px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 10px;
   border: 1px solid var(--jic-border);
   border-radius: 10px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   max-width: 100%;
   overflow-wrap: anywhere;
 }
@@ -45,15 +46,15 @@
   font-weight: 600;
 }
 .tv-design-picker .tv-design-choices {
-  gap: 12px;
+  gap: 8px;
   align-items: stretch;
 }
 .tv-design-picker .tv-design-choices > button {
   grid-template-rows: auto minmax(0, 1fr);
-  padding: 16px;
-  gap: 16px;
+  padding: 10px;
+  gap: 10px;
   height: 100%;
-  border-radius: 14px;
+  border-radius: 11px;
   cursor: pointer;
   transition:
     border-color 0.15s ease,
@@ -70,20 +71,29 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   align-self: stretch;
-  gap: 8px;
+  gap: 5px;
   min-width: 0;
   padding: 0;
   overflow-wrap: anywhere;
 }
 .tv-design-picker .tv-design-choice-copy > strong {
   margin: 0;
+  font-size: 0.85rem;
+}
+.tv-design-picker .tv-design-choice-copy > span {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--jic-text-secondary);
+}
+.tv-design-picker .tv-design-heading h3 {
   font-size: 0.95rem;
+  line-height: 1.4;
 }
 .tv-design-choice-copy > small {
   display: block;
   margin: 0;
   color: var(--jic-text);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 .tv-design-choice-copy > small > span {
@@ -96,9 +106,9 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border: 1px solid #244448;
+  border: 1px solid #294052;
   border-radius: 8px;
-  background: #061e22;
+  background: #071725;
   padding: 7px;
 }
 .tv-design-thumbnail-canvas {
@@ -106,13 +116,13 @@
   display: block;
   width: 100%;
   height: 100%;
-  background: #092a2d;
+  background: #0a1d2d;
   color: #f4f0df;
   overflow: hidden;
   border-radius: 3px;
 }
 .tv-design-thumbnail.is-portrait {
-  background: #092023;
+  background: #071725;
 }
 .tv-design-thumbnail.is-portrait .tv-design-thumbnail-canvas {
   width: 31.64%;
@@ -145,7 +155,7 @@
   align-content: stretch;
   gap: 2px;
   padding: 5px;
-  background: #174446;
+  background: #163346;
 }
 .tv-design-mini-block.is-times > span {
   display: flex;
@@ -207,14 +217,14 @@
   .is-schedule
 ) {
   padding: 5px;
-  background: #174446;
+  background: #163346;
   text-align: center;
 }
 .tv-design-mini-block.is-next {
   flex-wrap: wrap;
   gap: 4px 8px;
   padding: 2px 5px;
-  background: #174446;
+  background: #163346;
   color: #e6c685;
 }
 .tv-design-mini-block.is-next b {
@@ -236,9 +246,9 @@
 }
 .tv-design-comparison {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
-  padding: 16px;
+  padding: 12px;
   border: 1px solid var(--jic-border);
   border-radius: 14px;
   background: var(--jic-surface);
@@ -379,7 +389,7 @@
 }
 @media (max-width: 700px) {
   .tv-design-picker {
-    gap: 16px;
+    gap: 12px;
   }
   .tv-design-heading {
     display: grid;
@@ -391,14 +401,14 @@
     width: fit-content;
   }
   .tv-design-picker .tv-design-choices {
-    gap: 12px;
+    gap: 8px;
   }
   .tv-design-picker .tv-design-choices > button {
     grid-template-columns: minmax(64px, 28%) minmax(0, 1fr);
     grid-template-rows: auto;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
+    gap: 10px;
+    padding: 10px;
   }
   .tv-design-thumbnail {
     padding: 3px;
@@ -423,14 +433,14 @@
     padding: 0;
   }
   .tv-design-choice-copy > strong {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
   .tv-design-choice-copy > small {
     margin: 0;
   }
   .tv-design-comparison {
-    padding: 16px;
-    gap: 16px;
+    padding: 10px;
+    gap: 12px;
   }
   .tv-design-tabs {
     width: 100%;
@@ -453,11 +463,11 @@
 }
 @media (max-width: 400px) {
   .tv-design-picker .tv-design-choices > button {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 8px;
   }
   .tv-design-thumbnail {
-    max-width: 176px;
-    justify-self: center;
+    min-width: 0;
   }
   .tv-design-preview-card > p {
     padding-inline: 12px;

@@ -2,9 +2,23 @@
 
 Each hall has one permanent `/tv179/<hall>` webpage. The address stays the same when a stream starts, changes scenes or ends. When no stream is running, it shows public posters, prayer times and scheduled notices. An active stream shows its selected scene to approved viewers. Display webpages use their own dark theme, regardless of the website theme.
 
+## Screen controls
+
+Open **Admin → TV screens** and select one of the four screen rows. The list uses saved layout miniatures and reports **Automatic display**, **Live presentation**, or **Status unavailable**. These are programme states; they do not claim that a physical television is online. The filters show all destinations, automatic displays, or active presentations.
+
+Each screen opens its own **Display**, **Schedule**, and **Settings** workspace:
+
+- **Display** shows the real renderer using published settings or the current draft, at the selected landscape or portrait aspect ratio. Fullscreen opens a larger preview. It is a layout preview rather than a camera feed of a physical TV.
+- **Edit display** opens **Layout**, **Content**, and **Timing** tabs. Layout provides the timetable presets, orientation, colours and custom canvas. Content controls visible items, posters and everyday scene rotation. Timing contains the existing automatic prayer phases and scheduled overrides.
+- **Schedule** opens the same timing settings directly from the selected screen.
+- **Settings** keeps screen-specific orientation, layout names and display settings together.
+- **Go live** opens that hall's existing presentation workspace. The simple editor offers Screen share, YouTube, Camera, Video, IP camera and Message choices. Selecting a source only opens its draft settings; starting a session is a separate action. **Back to display** returns to the same hall. The Shoe Area retains its automatic display and has no live-session control.
+
+**Save draft** stores unpublished display settings in the current browser tab, scoped to the signed-in user and the selected screen. It does not send a publish request or change a TV. A saved tab draft can be restored after a refresh, and is removed after a successful publication. Closing the tab can remove it. If published settings changed elsewhere, the draft is retained but publishing is blocked until the conflict is resolved by reloading published settings. **Publish changes** continues to use the existing revision-checked `save-background` operation. The comparison control shows the published layout alongside the draft before publication.
+
 ## Choose everyday scenes
 
-In **TV screens**, choose **Automatic displays**, then **Edit automatic display** on the screen card. Each card shows an illustrative miniature of its saved content and whether a fixed scene, rotation, timed override, automatic prayer scene or presentation is selected. It reports the saved programme, rather than confirming playback on a physical TV.
+In **TV screens**, select a screen, choose **Edit display**, then open **Content**. Each card shows an illustrative miniature of its saved content and whether a fixed scene, rotation, timed override, automatic prayer scene or presentation is selected. It reports the saved programme, rather than confirming playback on a physical TV.
 
 **Everyday content** starts with two choices:
 
@@ -13,7 +27,7 @@ In **TV screens**, choose **Automatic displays**, then **Edit automatic display*
 
 **Keep items visible across scenes** selects blocks from the current orientation’s timetable layout. A timetable, logo, clock, next-prayer summary, text or poster can stay in its saved position while the sponsorship scene changes around it. Choose the logo and clock for a shared header or footer. A poster kept on screen retains its own poster timing. The resolver finds clear space for the sponsorship board; a selection that leaves no usable space is rejected. Landscape and portrait fixed-item choices are independent. Replacing a timetable layout removes references to items that no longer exist.
 
-The miniature follows the draft rotation and shows the selected scene and time until the next change. **Preview everyday content** uses the real receiver renderer. Neither preview saves settings. **Save display settings** publishes the programme and layout together through the existing revision-checked `save-background` action.
+The miniature follows the draft rotation and shows the selected scene and time until the next change. **Preview everyday content** uses the real receiver renderer. Neither preview saves settings. **Publish changes** publishes the programme and layout together through the existing revision-checked `save-background` action.
 
 Rotation uses elapsed wall-clock time so devices with the same saved programme stay in sync and refreshing does not restart the loop. Automatic prayer phases and seasonal notices take priority. The existing timed scene rules remain in **Advanced → Scheduled overrides**, in their saved order; the first matching rule overrides everyday content. After an override or prayer phase, the display returns to the scene for the current point in the loop. Persistent items apply to everyday content only.
 
@@ -21,7 +35,7 @@ Old settings open as **Keep one scene → Timetable & notices**, retaining their
 
 ## Choose a timetable layout
 
-Below Everyday content, the timetable layout editor controls the **Timetable & notices** scene and the source of fixed items. **Change layout → Choose a starting layout** offers:
+In **Layout**, the timetable layout editor controls the **Timetable & notices** scene and the source of fixed items. **Choose a starting layout** offers:
 
 - **Timetable & notices:** a timetable and rotating notice, with a compact next-jama’ah footer.
 - **Countdown:** a large next-jama’ah countdown with the prayer timetable below.
@@ -29,7 +43,7 @@ Below Everyday content, the timetable layout editor controls the **Timetable & n
 
 Each has landscape and portrait arrangements in JIC navy, gold and teal. Tap a card to preview it using the real renderer and published timetable. The moment buttons show the existing before-prayer, prayer, dhikr, Friday and Ramadan layouts without changing the live screen. These are forced previews, not a claim that those states are active now.
 
-**Use [layout]** replaces only the current orientation’s everyday layout in the draft. **Restore previous layout** reverses that selection. The other orientation, scheduled scenes, automatic prayer layouts and presentation inputs remain untouched. The custom editor can still move, resize, hide or replace the blocks. **Save display settings** publishes the draft through the existing revision-checked Supabase save.
+**Use [layout]** replaces only the current orientation’s everyday layout in the draft. **Restore previous layout** reverses that selection. The other orientation, scheduled scenes, automatic prayer layouts and presentation inputs remain untouched. The custom editor can still move, resize, hide or replace the blocks. **Publish changes** publishes the draft through the existing revision-checked Supabase save.
 
 The new boards highlight the next congregation; Friday uses the published Jummah sessions. Countdown explicitly means **jama’ah**, not the start of the prayer window. After Isha, tomorrow’s actual dated timetable supplies the next time. Missing or stale data shows an unavailable message, never an invented Fajr. Countdown respects Europe/London and the British clock changes. Small next-prayer blocks remain summaries; larger blocks show hours, minutes and seconds.
 
@@ -41,12 +55,12 @@ The Labbaik reference was reviewed at https://uselabbaik.com/prayer-board. Its p
 
 ## Set up a stream
 
-1. In **Hall streams**, choose the hall and press **Next**.
-2. Enter a descriptive **Stream name** and press **Next · arrange inputs**. One blank scene is created. **Add scene** adds another immediately, up to six; scene names are not requested.
+1. In **TV screens**, select the hall and choose **Go live**. An active session opens its management controls.
+2. Check the **Session name** and choose a live content source. One blank scene is created for a new setup. **Presentation mode → Advanced** exposes multiple inputs and scenes. **Add scene** adds another immediately, up to six; scene names are not requested.
 3. In each scene choose one to four inputs. Pick a side-by-side, grid, sidebar or picture-in-picture arrangement. Each blank input displays **+ Select input type**.
 4. Press an input to open its settings form. Choose screen sharing, a device camera, CCTV, a YouTube link, a saved video URL, posters, prayer times, next prayer, a clock or text from the **Input type** dropdown. Complete only the fields for the selected type. Required fields show an error beside the field and receive focus. Existing inputs open the same form with their details filled in.
 5. Apply the input, then move or resize it in the preview. Device inputs use **Continue to connection**; this replaces the settings form with connection controls. The settings cog reopens the form and input-type dropdown. **Connect device** beneath the selected input opens its connection controls directly. Inputs can overlap; snapping aligns edges. Bring forward and Send back change stacking. Removing content keeps a blank input ready to use again.
-6. Press **Start stream**. Prepared camera/screen inputs begin publishing. The same green button becomes red **End stream**. **Update live layout** applies later layout edits without restarting the stream.
+6. Press **Start live** for the selected hall. Prepared camera/screen inputs begin publishing. The same green button becomes red **End stream**. **Update live layout** applies later layout edits without restarting the stream.
 
 A camera or screen has one descriptive, reusable name. Entering its details keeps the dialog open on connection controls, so the operator can prepare local capture or copy its contributor link. Closing the dialog keeps capture running and visible in the canvas. Preview sound is muted to avoid feedback; source audio and the display's master mute are separate controls.
 

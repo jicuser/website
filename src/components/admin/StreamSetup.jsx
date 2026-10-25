@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Monitor, Radio, Video } from 'lucide-react';
-import { TV_SCREENS, tvRequest } from '@/lib/tvControl';
+import { ArrowLeft, Radio } from 'lucide-react';
+import { TV_SCREENS } from '@/lib/tvControl';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
@@ -16,14 +16,7 @@ import BackgroundSettings from '@/features/displays/BackgroundSettings';
 import DeviceInputs from '@/features/displays/DeviceInputs';
 import TvConnections from '@/features/displays/TvConnections';
 import SessionOutput from '@/features/displays/SessionOutput';
-import TvLayoutThumbnail from '@/features/displays/TvLayoutThumbnail';
-import { usePrayerTimes } from '@/components/sections/prayer-times/PrayerTimesLogic';
-import { tvAutomaticState } from '@/lib/tvAutomaticState';
-import {
-  activeTvScene,
-  normaliseTvSettings,
-  tvAutomaticScene,
-} from '../../../supabase/functions/_shared/tv.js';
+import TvScreenList from '@/features/displays/TvScreenList';
 import '@/styles/tv-admin.css';
 import '@/styles/tv-design-picker.css';
 
@@ -34,205 +27,11 @@ function CaptureDock({ slot, onTarget }) {
   return <div className="scene-capture-dock" ref={attach} />;
 }
 
-function ScreenOverview({ onOpen }) {
-  const [task, setTask] = useState('layout');
-  const [states, setStates] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
-  const [now, setNow] = useState(() => new Date());
-  const prayers = usePrayerTimes({ includeTomorrow: true });
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const load = useCallback(async (signal) => {
-    setLoading(true);
-    setMessage('');
-    const results = await Promise.allSettled(
-      TV_SCREENS.map((screen) => tvRequest('admin', screen.id, {}, { staff: true, signal })),
-    );
-    if (signal?.aborted) return;
-    const next = {};
-    results.forEach((result, index) => {
-      next[TV_SCREENS[index].id] =
-        result.status === 'fulfilled' ? { data: result.value } : { error: result.reason?.message };
-    });
-    setStates(next);
-    if (results.some((result) => result.status === 'rejected'))
-      setMessage('Some screen status could not be checked. You can still open its controls.');
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    load(controller.signal);
-    return () => controller.abort();
-  }, [load]);
-
-  return (
-    <>
-      <div className="admin-heading">
-        <div>
-          <span className="admin-eyebrow">TV & SCREENS</span>
-          <h2>Choose a screen</h2>
-          <p>
-            {task === 'layout'
-              ? 'Choose a screen. Fixed keeps one scene; Rotation cycles saved content.'
-              : 'Show a camera, video or presentation on a hall screen.'}
-          </p>
-        </div>
-        <button className="admin-button" disabled={loading} onClick={() => load()}>
-          {loading ? 'Checking…' : 'Refresh status'}
-        </button>
-      </div>
-      <div className="tv-start-tasks" role="group" aria-label="What would you like to do?">
-        <button type="button" aria-pressed={task === 'layout'} onClick={() => setTask('layout')}>
-          <Monitor size={22} aria-hidden="true" />
-          <span>
-            <strong>Automatic displays</strong>
-            <small>Timetable, notices & sponsorship boards</small>
-          </span>
-        </button>
-        <button
-          type="button"
-          aria-pressed={task === 'presentation'}
-          onClick={() => setTask('presentation')}
-        >
-          <Video size={22} aria-hidden="true" />
-          <span>
-            <strong>Live presentation</strong>
-            <small>Camera, video or screen sharing</small>
-          </span>
-        </button>
-      </div>
-      {message && (
-        <p className="stream-feedback" role="status">
-          {message}
-        </p>
-      )}
-      <div className="tv-screen-overview-grid">
-        {TV_SCREENS.filter((screen) => task === 'layout' || screen.id !== 'shoe-area').map(
-          (screen) => {
-            const state = states[screen.id];
-            const data = state?.data;
-            const presenting = Boolean(data?.presentation);
-            const settings = data ? normaliseTvSettings(data.settings) : null;
-            const automatic = settings
-              ? tvAutomaticScene(settings, now, {
-                  preset: tvAutomaticState(settings, now, prayers, screen.id).preset,
-                })
-              : null;
-            const content = presenting
-              ? {
-                  name: activeTvScene(settings)?.name || 'Presentation',
-                  scene: activeTvScene(settings),
-                  source: 'presentation',
-                }
-              : automatic;
-            return (
-              <article className="admin-panel tv-screen-overview-card" key={screen.id}>
-                {content?.scene ? (
-                  <figure className="tv-screen-miniature">
-                    <TvLayoutThumbnail
-                      scene={content.scene}
-                      orientation={settings.display_orientation}
-                    />
-                    <figcaption className="sr-only">
-                      {content.name} saved content preview
-                    </figcaption>
-                  </figure>
-                ) : (
-                  <div className="tv-screen-preview-unavailable" aria-hidden="true">
-                    <Monitor size={28} />
-                  </div>
-                )}
-                <div className="tv-screen-overview-body">
-                  <div className="tv-screen-overview-title">
-                    <strong>{screen.label}</strong>
-                    <span>
-                      {data
-                        ? presenting
-                          ? 'Presentation active'
-                          : 'Automatic display'
-                        : loading
-                          ? 'Checking…'
-                          : 'Status unavailable'}
-                    </span>
-                  </div>
-                  {content?.scene && (
-                    <p className="tv-screen-overview-mode">
-                      <strong>{content.name}</strong>
-                      <span>
-                        {content.source === 'rotation'
-                          ? `Rotation · scene ${content.rotation_index + 1} of ${settings.everyday_display.rotation.length}`
-                          : content.source === 'scheduled'
-                            ? 'Timed override'
-                            : content.source === 'automatic'
-                              ? 'Automatic prayer display'
-                              : content.source === 'presentation'
-                                ? 'Live presentation layout'
-                                : 'Fixed scene'}
-                      </span>
-                    </p>
-                  )}
-                  {state?.error && <small>Could not read live status</small>}
-                  {presenting && (
-                    <small>Automatic displays return when the presentation ends.</small>
-                  )}
-                  <div className="admin-actions">
-                    {task === 'layout' && (
-                      <button
-                        className="admin-button primary"
-                        onClick={() => onOpen(screen.id, false, true)}
-                      >
-                        Edit automatic display
-                      </button>
-                    )}
-                    {task === 'presentation' &&
-                      (presenting ? (
-                        <button
-                          className="admin-button primary"
-                          onClick={() => onOpen(screen.id, false, false)}
-                        >
-                          Manage live presentation
-                        </button>
-                      ) : (
-                        <button
-                          className="admin-button"
-                          onClick={() => onOpen(screen.id, true, false)}
-                        >
-                          Quick present
-                        </button>
-                      ))}
-                    {task === 'presentation' && !presenting && (
-                      <details className="tv-screen-more">
-                        <summary>More options</summary>
-                        <button
-                          className="admin-button"
-                          onClick={() => onOpen(screen.id, false, false)}
-                        >
-                          Presentation setup
-                        </button>
-                      </details>
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          },
-        )}
-      </div>
-    </>
-  );
-}
-
 export default function StreamSetup({ registerBack }) {
   const { user } = useAuth();
   const [openHall, setOpenHall] = useState('');
   const [quickStart, setQuickStart] = useState(false);
-  const [backgroundOnly, setBackgroundOnly] = useState(false);
+  const [backgroundOnly, setBackgroundOnly] = useState(true);
   const closeWorkspace = useCallback(() => {
     setQuickStart(false);
     setBackgroundOnly(false);
@@ -252,19 +51,20 @@ export default function StreamSetup({ registerBack }) {
   if (openHall)
     return (
       <HallWorkspace
-        key={`${user.id}:${openHall}`}
+        key={`${user.id}:${openHall}:${backgroundOnly ? 'display' : 'live'}`}
         screenId={openHall}
         userId={user.id}
         quickStart={quickStart}
         backgroundOnly={backgroundOnly}
         onSwitchScreen={switchScreen}
-        onBack={closeWorkspace}
+        onBack={backgroundOnly ? closeWorkspace : () => openWorkspace(openHall, false, true)}
+        onGoLive={() => openWorkspace(openHall, true, false)}
         registerBack={registerBack}
       />
     );
   return (
-    <section className="stream-setup">
-      <ScreenOverview onOpen={openWorkspace} />
+    <section className="stream-setup admin-tv-editor tv-screen-picker">
+      <TvScreenList onOpen={(screenId) => openWorkspace(screenId, false, true)} />
     </section>
   );
 }
@@ -276,6 +76,7 @@ function HallWorkspace({
   backgroundOnly,
   onSwitchScreen,
   onBack,
+  onGoLive,
   registerBack,
 }) {
   const setup = useStreamSetup(screenId, userId, {
@@ -312,13 +113,18 @@ function HallWorkspace({
 
   useEffect(() => {
     if (!quickStart || !hall || !setup.data || setup.stage !== 2 || setup.form) return;
-    setup.build('Quick presentation');
-  }, [quickStart, hall, setup.data, setup.stage, setup.form]);
+    setup.build(`${screen.label} presentation`);
+  }, [quickStart, hall, setup.data, setup.stage, setup.form, screen.label]);
 
   leaveRef.current = () => {
     if (busy || saving) return;
     if (backgroundOnly || !hall) {
-      if (dirty && !window.confirm('Discard unsaved display changes and return to screens?'))
+      if (
+        dirty &&
+        !window.confirm(
+          'Leave unpublished display changes? A draft you saved remains in this browser tab.',
+        )
+      )
         return;
     } else if (form) {
       if (
@@ -343,28 +149,24 @@ function HallWorkspace({
   );
   return (
     <div className="stream-setup admin-tv-editor">
-      <div className="stream-setup-heading">
-        <div>
-          {!backgroundOnly && (
-            <span className="admin-eyebrow stream-step-indicator jic-prompt">
-              {hall
-                ? setup.started
-                  ? 'PRESENTATION LIVE'
-                  : quickStart
-                    ? 'QUICK PRESENT'
-                    : 'PRESENTATION SETUP'
-                : 'AUTOMATIC DISPLAY'}
-            </span>
-          )}
-          <h2>{screen.label}</h2>
-        </div>
+      <div className={`stream-setup-heading ${!backgroundOnly && hall ? 'tv-live-heading' : ''}`}>
         <button
-          className="admin-button"
+          type="button"
+          className="admin-button tv-screen-back"
           disabled={busy || saving}
           onClick={() => leaveRef.current()}
         >
-          Back to screens
+          <ArrowLeft size={18} aria-hidden="true" />
+          <span className="sr-only">
+            {backgroundOnly || !hall ? 'TV screens' : 'Back to display'}
+          </span>
         </button>
+        <div className="tv-screen-heading-title">
+          <h2>
+            {backgroundOnly || !hall ? screen.label : setup.started ? 'Live session' : 'Go live'}
+          </h2>
+          {!backgroundOnly && hall && <span>{screen.label}</span>}
+        </div>
       </div>
       {setup.message && (!backgroundOnly || !data) && (
         <p className="stream-feedback" role="status">
@@ -396,26 +198,29 @@ function HallWorkspace({
         <p>Loading screen settings…</p>
       ) : (
         <>
-          {hall && !quickStart && !backgroundOnly && (
-            <StreamSettingsLibrary
-              value={data.settings}
-              onChange={(settings, template) => {
-                if (loadBlocked) return;
-                if (
-                  stage === 3 &&
-                  setup.dirty &&
-                  !window.confirm('Replace this unpublished draft with saved settings?')
-                )
-                  return;
-                setup.loadSettings(settings, template);
-              }}
-              templates={data.templates}
-              savedTemplate={setup.savedTemplate}
-              disabled={busy}
-              loadBlocked={loadBlocked}
-            />
+          {hall && !backgroundOnly && (
+            <details className="tv-workspace-disclosure">
+              <summary>Saved live setups</summary>
+              <StreamSettingsLibrary
+                value={data.settings}
+                onChange={(settings, template) => {
+                  if (loadBlocked) return;
+                  if (
+                    stage === 3 &&
+                    setup.dirty &&
+                    !window.confirm('Replace this unpublished draft with saved settings?')
+                  )
+                    return;
+                  setup.loadSettings(settings, template);
+                }}
+                templates={data.templates}
+                savedTemplate={setup.savedTemplate}
+                disabled={busy}
+                loadBlocked={loadBlocked}
+              />
+            </details>
           )}
-          {!quickStart && !backgroundOnly && (
+          {!backgroundOnly && (
             <details className="admin-panel stream-address">
               <summary>Display webpage address</summary>
               <p>
@@ -459,7 +264,7 @@ function HallWorkspace({
                   aria-busy={busy && setup.operation === 'end'}
                   onClick={() => setup.run(setup.end, 'end')}
                 >
-                  {busy && setup.operation === 'end' ? 'Ending…' : 'End presentation'}
+                  {busy && setup.operation === 'end' ? 'Ending…' : 'End live'}
                 </button>
               </div>
               <details>
@@ -472,7 +277,7 @@ function HallWorkspace({
               </details>
             </section>
           )}
-          {hall && stage === 2 && !quickStart && !backgroundOnly && (
+          {hall && stage === 2 && (!quickStart || form) && !backgroundOnly && (
             <section className="admin-panel">
               <h3>
                 <span className="jic-prompt">Name your presentation</span>
@@ -518,14 +323,26 @@ function HallWorkspace({
               </form>
             </section>
           )}
-          {hall && stage === 2 && quickStart && !backgroundOnly && (
+          {hall && stage === 2 && quickStart && !form && !backgroundOnly && (
             <section className="admin-panel" aria-live="polite">
-              <p>Preparing Quick Present…</p>
+              <p>Preparing live setup…</p>
             </section>
           )}
           {hall && stage === 3 && form && !backgroundOnly && (
             <>
-              {!quickStart && setup.streamName && <h3>{setup.streamName}</h3>}
+              {quickStart && !setup.started ? (
+                <label className="tv-live-name">
+                  <span>Session name</span>
+                  <input
+                    value={setup.streamName}
+                    maxLength={60}
+                    disabled={busy}
+                    onChange={(event) => setup.setStreamName(event.target.value)}
+                  />
+                </label>
+              ) : (
+                setup.streamName && <h3>{setup.streamName}</h3>
+              )}
               <SceneEditor
                 value={form}
                 onChange={setup.setForm}
@@ -603,7 +420,9 @@ function HallWorkspace({
                         setup.publish().catch((error) => setup.setMessage(error.message))
                       }
                     >
-                      {busy && setup.operation === 'start' ? 'Starting…' : 'Start presenting'}
+                      {busy && setup.operation === 'start'
+                        ? 'Starting…'
+                        : `Start live on ${screen.label}`}
                     </button>
                   )}
                   {setup.started && setup.dirty && (
@@ -637,6 +456,11 @@ function HallWorkspace({
               </div>
             </>
           )}
+          {hall && !backgroundOnly && !data.presentation && (
+            <p className="tv-workspace-notice">
+              The normal display resumes when you end the live session.
+            </p>
+          )}
           {hall && !backgroundOnly && data.presentation && (
             <TvConnections
               screenId={screenId}
@@ -650,7 +474,9 @@ function HallWorkspace({
           {hall && !backgroundOnly && setup.started && <SessionOutput screenId={screenId} />}
           {(backgroundOnly || !hall) && (
             <BackgroundSettings
+              userId={userId}
               screenId={screenId}
+              onGoLive={hall ? onGoLive : undefined}
               data={data}
               currentEvents={currentEvents}
               onRefresh={setup.refresh}

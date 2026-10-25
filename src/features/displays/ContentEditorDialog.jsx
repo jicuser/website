@@ -34,6 +34,40 @@ const typeOf = (layer) =>
       ? 'poster'
       : layer.type;
 
+// Both the source tiles and the input dropdown prepare the same unsaved form.
+function createContentDraft(area, type, scene, deviceSources) {
+  const next = { ...clearRegion(area), type };
+  if (type.startsWith('input-')) {
+    next.type = 'input';
+    next.capture = type === 'input-screen' ? 'screen' : 'camera';
+    const available = INPUT_SLOTS.filter(
+      (slot) =>
+        !scene.layers.some(
+          (item) => item.id !== area.id && item.type === 'input' && item.slot === slot,
+        ),
+    );
+    const same = area.type === 'input' ? area : null;
+    const unused = available.find((slot) => !deviceSources.some((item) => item.slot === slot));
+    const reused = deviceSources.find(
+      (item) => available.includes(item.slot) && item.capture === next.capture,
+    );
+    next.slot = same?.slot || unused || reused?.slot;
+    if (!next.slot) {
+      throw new Error(
+        'All four device inputs are in use. Reuse a camera or screen already added to this scene.',
+      );
+    }
+    next.name = same?.name || (!unused && reused?.name) || '';
+  }
+  if (['youtube', 'video', 'camera', 'input', 'schedule'].includes(next.type)) next.audio = false;
+  if (['youtube', 'video', 'camera'].includes(next.type)) next.url = '';
+  if (next.type === 'camera') next.protocol = 'hls';
+  if (next.type === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
+  if (next.type === 'text') next.text = '';
+  if (next.type === 'ramadan') next.ramadan_kind = 'iftar';
+  return next;
+}
+
 export default function ContentEditorDialog({
   area,
   scene,
@@ -43,10 +77,13 @@ export default function ContentEditorDialog({
   posters,
   renderDeviceInput,
   showConnection = false,
+  initialType = '',
   onClose,
 }) {
   const editorId = useId();
-  const [draft, setDraft] = useState(() => ({ ...area }));
+  const [draft, setDraft] = useState(() =>
+    initialType ? createContentDraft(area, initialType, scene, tvInputSources(value)) : { ...area },
+  );
   const [errors, setErrors] = useState({});
   const [connectionOpen, setConnectionOpen] = useState(
     showConnection && area.type === 'input' && !nameProblem(area.name, 'device name'),
@@ -90,37 +127,11 @@ export default function ContentEditorDialog({
 
   function chooseContent(type) {
     if (!draft) return;
-    const next = { ...clearRegion(draft), type };
-    if (type.startsWith('input-')) {
-      next.type = 'input';
-      next.capture = type === 'input-screen' ? 'screen' : 'camera';
-      const available = INPUT_SLOTS.filter(
-        (slot) =>
-          !scene.layers.some(
-            (item) => item.id !== draft.id && item.type === 'input' && item.slot === slot,
-          ),
-      );
-      const same = draft.type === 'input' ? draft : null;
-      const unused = available.find((slot) => !deviceSources.some((item) => item.slot === slot));
-      const reused = deviceSources.find(
-        (item) => available.includes(item.slot) && item.capture === next.capture,
-      );
-      next.slot = same?.slot || unused || reused?.slot;
-      if (!next.slot) {
-        setErrors({
-          type: 'All four device inputs are in use. Reuse a camera or screen already added to this scene.',
-        });
-        return;
-      }
-      next.name = same?.name || (!unused && reused?.name) || '';
+    try {
+      changeDraft(createContentDraft(draft, type, scene, deviceSources));
+    } catch (error) {
+      setErrors({ type: error.message });
     }
-    if (['youtube', 'video', 'camera', 'input', 'schedule'].includes(next.type)) next.audio = false;
-    if (['youtube', 'video', 'camera'].includes(next.type)) next.url = '';
-    if (next.type === 'camera') next.protocol = 'hls';
-    if (next.type === 'poster') Object.assign(next, { poster_ids: [], rotation_seconds: 20 });
-    if (next.type === 'text') next.text = '';
-    if (next.type === 'ramadan') next.ramadan_kind = 'iftar';
-    changeDraft(next);
   }
 
   function saveContent(event) {

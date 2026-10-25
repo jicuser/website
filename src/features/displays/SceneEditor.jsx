@@ -1,5 +1,15 @@
 import React, { useEffect, useId, useState } from 'react';
-import { Plus, Settings2, Link2 } from 'lucide-react';
+import {
+  Plus,
+  Settings2,
+  Link2,
+  ScreenShare,
+  Youtube,
+  Camera,
+  Video,
+  Monitor,
+  MessageSquare,
+} from 'lucide-react';
 import {
   SOURCE_TYPES,
   MAX_SCENES,
@@ -23,6 +33,15 @@ const sourceLabel = (layer) =>
     : layer.type === 'input'
       ? inputLabel(layer)
       : SOURCE_TYPES.find(([type]) => type === layer.type)?.[1] || 'Posters';
+const liveSources = [
+  { type: 'input-screen', label: 'Screen share', Icon: ScreenShare },
+  { type: 'youtube', label: 'YouTube', Icon: Youtube },
+  { type: 'input-camera', label: 'Camera', Icon: Camera },
+  { type: 'video', label: 'Video', Icon: Video },
+  { type: 'camera', label: 'IP camera', Icon: Monitor },
+  { type: 'text', label: 'Message', Icon: MessageSquare },
+];
+
 export default function SceneEditor({
   value,
   onChange,
@@ -45,6 +64,7 @@ export default function SceneEditor({
   const [now, setNow] = useState(() => new Date());
   const [selected, setSelected] = useState('');
   const [editing, setEditing] = useState(null);
+  const [editingType, setEditingType] = useState('');
   const [snap, setSnap] = useState(true);
   const [showConnection, setShowConnection] = useState(false);
   const history = useSceneHistory(screenId);
@@ -100,10 +120,11 @@ export default function SceneEditor({
     setEditing(null);
   }
 
-  function edit(item, connection = false) {
+  function edit(item, connection = false, contentType = '') {
     if (disabled) return;
     setSelected(item.id);
     setShowConnection(connection);
+    setEditingType(contentType);
     setEditing({ ...item });
   }
 
@@ -155,17 +176,38 @@ export default function SceneEditor({
         <div>
           <h3 id={`${editorId}-heading`}>
             <span className="jic-prompt">
-              {advanced ? 'Arrange your scene' : 'Present one input'}
+              {advanced ? 'Arrange your scene' : 'Choose live content'}
             </span>
           </h3>
           <p>
             {advanced
               ? 'Tap an input to select it. Drag it to move; use the corners to resize.'
-              : 'Select one input, connect your device, then press Start presenting.'}
+              : 'Choose a source, complete its details, then start your live session.'}
           </p>
         </div>
         <span className="scene-count">Preview</span>
       </div>
+      {!advanced && scene.layers[0] && (
+        <div className="tv-live-source-options" role="group" aria-label="Live content source">
+          {liveSources.map(({ type, label, Icon }) => {
+            const source = scene.layers[0];
+            const selectedType = source.type === 'input' ? `input-${source.capture}` : source.type;
+            return (
+              <button
+                key={type}
+                type="button"
+                className="tv-live-source-option"
+                aria-pressed={selectedType === type}
+                disabled={disabled}
+                onClick={() => edit(source, false, type)}
+              >
+                <Icon size={23} aria-hidden="true" />
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
       <div className="scene-toolbar">
         <label>
           Presentation mode
@@ -416,8 +458,9 @@ export default function SceneEditor({
       </div>
       {editing && (
         <ContentEditorDialog
-          key={`${scene.id}-${editing.id}`}
+          key={`${scene.id}-${editing.id}-${editingType}`}
           area={editing}
+          initialType={editingType}
           scene={scene}
           value={value}
           onChange={change}

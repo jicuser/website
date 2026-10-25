@@ -39,7 +39,7 @@ test('course planner automatically renders assigned active days without duplicat
   assert.match(source, /Do not add it twice/);
 });
 
-test('presentation status is server-derived and quick present skips the naming step', async () => {
+test('presentation status remains server-derived and selected-screen live setup skips the naming step', async () => {
   const status = await read('src/features/displays/ActiveStreamList.jsx');
   const setup = await read('src/components/admin/StreamSetup.jsx');
   assert.match(status, /tvRequest\(/);
@@ -47,8 +47,7 @@ test('presentation status is server-derived and quick present skips the naming s
   assert.match(status, /'Offline'/);
   assert.match(status, /active server session/);
   assert.match(status, /another admin device/);
-  assert.match(setup, /Quick present/);
-  assert.match(setup, /setup\.build\('Quick presentation'\)/);
+  assert.match(setup, /setup\.build\(/);
   assert.match(setup, /stage === 2 && !quickStart/);
   assert.match(setup, /Presentation still live/);
 });
