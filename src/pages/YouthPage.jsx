@@ -80,7 +80,7 @@ export default function YouthPage({ view = 'overview' }) {
       </Helmet>
       <div className="jic-youth-page">
         {view === 'overview' && (
-          <PageHeading title="Youth">
+          <PageHeading title="Youth" eyebrow="Community Hub" icon={Trophy}>
             Activities, learning and opportunities for young people.
           </PageHeading>
         )}

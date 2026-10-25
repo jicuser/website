@@ -1,42 +1,36 @@
 import React from 'react';
-import { BookOpen, FileText, Mail, UserPlus } from 'lucide-react';
+import { BookOpen, FileText, GraduationCap, Mail, Users, UserPlus } from 'lucide-react';
 import PageHeading from '@/components/PageHeading';
 import PageChoices from '@/components/PageChoices';
 import AboutSection from '@/components/sections/madrassah/AboutSection';
 
 const overviewTiles = [
   {
-    description: 'Apply for a pupil place.',
     path: '/madrassah/enrolment',
+    description: 'Apply for a pupil place.',
     icon: UserPlus,
+    featured: true,
   },
   {
-    description: 'Explore classes and courses.',
+    path: '/madrassah/student-portal',
+    description: 'Information for current pupils and parents.',
+    icon: Users,
+  },
+  {
     path: '/madrassah/classes-courses',
+    description: 'Explore learning topics and classes.',
     icon: BookOpen,
   },
-  {
-    description: 'Parent and pupil information.',
-    path: '/madrassah/student-portal',
-    icon: FileText,
-  },
-  {
-    description: 'Speak to the Madrassah team.',
-    path: '/madrassah/contact',
-    icon: Mail,
-  },
-  {
-    description: 'Policies and guidance.',
-    path: '/madrassah/policies',
-    icon: FileText,
-  },
+  { path: '/madrassah/contact', description: 'Speak to the Madrassah team.', icon: Mail },
+  { path: '/madrassah/policies', description: 'Policies and parent guidance.', icon: FileText },
+  { path: '/education/courses', description: 'Looking for adult learning?', icon: GraduationCap },
 ];
-
 export default function MadrassahPage() {
   return (
-    <div className="page-transition">
-      <PageHeading title="Madrassah">
-        Pupil classes, enrolment and information for parents.
+    <div className="page-transition jic-learning-page">
+      <PageHeading title="Madrassah" eyebrow="Learning at JIC" icon={BookOpen}>
+        Learning, character and a place to grow. Find a class for your child or information for your
+        family.
       </PageHeading>
       <PageChoices items={overviewTiles} label="Madrassah choices" />
       <AboutSection />

@@ -96,9 +96,7 @@ export default function AdminOverview({ onChoose, icons }) {
         <Icon size={22} aria-hidden="true" />
         <span>
           <strong>{name}</strong>
-          <small id={`admin-tool-help-${id}`} className="sr-only">
-            {description}
-          </small>
+          <small id={`admin-tool-help-${id}`}>{description}</small>
         </span>
       </button>
     );
@@ -282,8 +280,11 @@ export default function AdminOverview({ onChoose, icons }) {
                   }}
                 >
                   <Icon size={22} aria-hidden="true" />
-                  <strong>{item.name}</strong>
-                  <small>{item.tasks.length} tools</small>
+                  <span>
+                    <strong>{item.name}</strong>
+                    <small>{GROUP_HELP[item.name] || `${item.tasks.length} tools`}</small>
+                  </span>
+                  <ArrowRight size={16} aria-hidden="true" />
                 </button>
               );
             })}

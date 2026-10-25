@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/browser',
-  testMatch: ['custom-forms.spec.mjs', 'certificates.spec.mjs'],
+  testMatch: ['custom-forms.spec.mjs', 'certificates.spec.mjs', 'sitewide-learning.spec.mjs'],
   outputDir: 'test-results/workspace',
   workers: 1,
   timeout: 30000,

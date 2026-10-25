@@ -342,3 +342,80 @@
   width: auto;
   min-height: auto;
 }
+
+/* Course workspace: filters, then one focused section; hidden forms retain their drafts. */
+.learning-introduction {
+  margin-bottom: 16px;
+}
+.community-workspace .learning-introduction h2 {
+  margin: 0 0 6px;
+  font-family: var(--jic-display-font);
+  font-size: 1.75rem;
+}
+.learning-introduction p,
+.learning-course-heading p {
+  font-size: 0.875rem;
+  color: var(--jic-text-secondary);
+  line-height: 1.5;
+}
+.learning-filters {
+  padding: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: var(--jic-radius-card);
+  background: var(--jic-surface);
+  margin-bottom: 20px;
+}
+.learning-course-heading {
+  margin-bottom: 16px;
+}
+.community-workspace .learning-course-heading h2 {
+  margin: 0 0 6px;
+}
+.learning-section-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 5px;
+  margin-bottom: 18px;
+  border: 1px solid var(--jic-border);
+  border-radius: 15px;
+  background: var(--jic-surface);
+  scrollbar-width: thin;
+}
+.community-workspace .learning-section-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 10px 12px;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.community-workspace .learning-section-tabs button[aria-selected='true'] {
+  background: var(--jic-action);
+  color: #14273b;
+  border-color: var(--jic-gold);
+  font-weight: 650;
+}
+.learning-workspace [role='tabpanel'][hidden] {
+  display: none;
+}
+.learning-workspace [role='tabpanel']:focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 5px;
+}
+.community-workspace .learning-workspace [role='tabpanel'] > h2 {
+  font-size: 1.125rem;
+  margin: 0 0 14px;
+}
+@media (max-width: 600px) {
+  .learning-filters {
+    gap: 12px;
+    padding: 14px;
+  }
+  .learning-section-tabs {
+    margin-inline: -2px;
+  }
+}

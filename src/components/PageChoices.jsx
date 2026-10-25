@@ -12,14 +12,18 @@ export default function PageChoices({ items, label }) {
   if (!visibleItems.length) return null;
   return (
     <nav className="jic-page-choices" aria-label={label}>
-      {visibleItems.map(({ path, title, description, icon: Icon }) => (
-        <Link key={path} to={path} className="jic-page-choice">
-          {Icon && <Icon className="jic-page-choice-icon" size={22} aria-hidden="true" />}
-          <span>
+      {visibleItems.map(({ path, title, description, icon: Icon, featured }) => (
+        <Link key={path} to={path} className={`jic-page-choice${featured ? ' is-featured' : ''}`}>
+          {Icon && (
+            <span className="jic-page-choice-symbol" aria-hidden="true">
+              <Icon size={24} strokeWidth={1.5} />
+            </span>
+          )}
+          <span className="jic-page-choice-copy">
             <strong>{title || navigationName(getContent, path, pageName(path))}</strong>
             {description && <span>{description}</span>}
           </span>
-          <ChevronRight size={18} aria-hidden="true" />
+          <ChevronRight className="jic-page-choice-arrow" size={18} aria-hidden="true" />
         </Link>
       ))}
     </nav>

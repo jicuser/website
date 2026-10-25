@@ -18,7 +18,9 @@ const choices = [
 export default function EducationEnrolmentPage() {
   return (
     <section className="page-transition">
-      <PageHeading title="Enrolment">Who would you like to enrol?</PageHeading>
+      <PageHeading title="Enrolment" eyebrow="Learning at JIC" icon={GraduationCap}>
+        Who would you like to enrol?
+      </PageHeading>
       <PageChoices items={choices} label="Enrolment options" />
     </section>
   );

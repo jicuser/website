@@ -8,7 +8,7 @@ export default function AdultCoursesPage() {
   const { loading, error } = usePublishedPagesStatus();
   return (
     <section>
-      <PageHeading title="Adult Classes">
+      <PageHeading title="Adult Classes" eyebrow="Learning at JIC">
         Open a course for its dates, details and registration options.
       </PageHeading>
       {!courses.length && (
