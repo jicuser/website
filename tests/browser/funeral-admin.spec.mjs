@@ -55,7 +55,10 @@ test('facility editing previews photos and visibility before publishing through 
     editor.getByRole('heading', { name: 'Funeral facilities & transport' }),
   ).toBeVisible();
   const preview = page.frameLocator('iframe[title="Funeral Services website preview"]');
-  await expect(preview.locator('.funeral-facility')).toHaveCount(5);
+  await expect(preview.locator('.funeral-facility')).toHaveCount(6);
+  await expect(
+    preview.getByRole('heading', { name: 'Family & viewing room', exact: true }),
+  ).toBeVisible();
   await editor.getByLabel('Card title', { exact: true }).fill('Collection vehicle');
   await editor.getByLabel('Photo URL', { exact: true }).fill('/jic-aerial-sunset.jpg');
   await editor.getByLabel('Photo description', { exact: true }).fill('Test collection photo');
@@ -64,9 +67,9 @@ test('facility editing previews photos and visibility before publishing through 
   ).toBeVisible();
   await expect(preview.getByRole('img', { name: 'Test collection photo' })).toBeVisible();
   expect(writes).toEqual([]);
-  await editor.getByLabel('Facility', { exact: true }).selectOption('cold-room');
+  await editor.getByRole('combobox', { name: 'Facility', exact: true }).selectOption('cold-room');
   await editor.getByLabel('Show on the website', { exact: true }).uncheck();
-  await expect(preview.locator('.funeral-facility')).toHaveCount(4);
+  await expect(preview.locator('.funeral-facility')).toHaveCount(5);
   await editor.getByRole('button', { name: 'Save facilities', exact: true }).click();
   await expect(editor.getByRole('status')).toHaveText('Facilities saved to the website.');
   expect(writes).toHaveLength(1);

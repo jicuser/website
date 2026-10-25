@@ -30,7 +30,7 @@ async function setup(page, theme, friday = false) {
       body: JSON.stringify(url.pathname.endsWith('/prayer_times') ? rows : []),
     });
   });
-  await page.goto('/');
+  await page.goto('/prayer-times');
   await expect(page.locator('.jic-mini-prayer-start').nth(1)).toHaveText('6:15am');
 }
 
@@ -75,25 +75,35 @@ for (const width of [320, 390]) {
       expect(layout.fits).toBe(true);
       expect(layout.height).toBeLessThanOrEqual(76);
       const nav = page.getByRole('navigation', { name: 'Quick navigation' });
-      await expect(nav.getByRole('button')).toHaveText(['Home']);
+      await expect(nav.getByRole('button', { name: 'Appearance settings' })).toBeVisible();
+      await expect(nav.getByRole('button', { name: 'Open navigation menu' })).toBeVisible();
+      await expect(nav.getByRole('link', { name: 'Search site' })).toHaveAttribute(
+        'href',
+        '/search',
+      );
       await expect(pill.locator('button, [aria-expanded]')).toHaveCount(0);
       await expect(pill).toContainText('Today’s prayer times');
-      await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
+      await expect(page.locator('#jic-prayer-dock')).toBeVisible();
       await pill.click();
       await expect(page).toHaveURL('/prayer-times');
       await expect(
         page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
       ).toBeVisible();
       await expect(page.locator('#jic-prayer-details')).toBeHidden();
-      const home = nav.getByRole('button', { name: 'Home' });
+      const home = page.getByRole('banner').getByRole('link', {
+        name: 'Jamatia Islamic Centre home',
+        exact: true,
+      });
+      await expect(home).toHaveAttribute('href', '/');
       await home.click();
       await expect(page).toHaveURL('/');
       await expect(page.locator('.jic-hero')).toBeVisible();
+      await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
       await expect(home).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
       await expect(home).toHaveCSS('border-top-width', '0px');
       await expect(home).toHaveCSS('box-shadow', 'none');
       expect((await home.boundingBox()).y + (await home.boundingBox()).height).toBeLessThan(
-        (await pill.boundingBox()).y,
+        (await page.locator('.jic-home-prayer').boundingBox()).y,
       );
       const documentPosition = () =>
         home.evaluate((node) => {
@@ -112,11 +122,11 @@ for (const width of [320, 390]) {
       expect(await documentPosition()).toEqual(before);
       await page.evaluate(() => scrollTo(0, 400));
       await expect(page.locator('html')).not.toHaveAttribute('data-prayer-dock-hidden', 'true');
-      await nav.getByRole('button', { name: 'Home' }).click();
+      await home.click();
       await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
       await page.screenshot({ path: testInfo.outputPath(`prayer-pill-${theme}-${width}.png`) });
       await page.goto('/team');
-      await nav.getByRole('button', { name: 'Home' }).click();
+      await home.click();
       await expect(page).toHaveURL('/');
     });
   }

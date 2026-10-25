@@ -77,7 +77,7 @@ for (const width of [320, 390]) {
             const title = node.querySelector('strong');
             return (
               rect.height >= 44 &&
-              rect.height <= 60 &&
+              rect.height <= 64 &&
               title.scrollWidth <= title.clientWidth + 1 &&
               title.getBoundingClientRect().height <=
                 parseFloat(getComputedStyle(title).lineHeight) + 1
@@ -85,42 +85,71 @@ for (const width of [320, 390]) {
           }),
         ),
       ).toBe(true);
-      const card = page.getByRole('complementary', { name: 'Prayer and radio' });
-      await expect(card.getByRole('heading', { name: 'Dhuhr', exact: true })).toBeVisible();
-      await expect(card.locator('.jic-home-prayer-time')).toContainText('1:45 PM');
-      const friday = card.getByRole('group', { name: 'Friday Jummah times' });
-      await expect(friday.getByRole('link').nth(0)).toContainText('1:20 PM');
-      await expect(friday.getByRole('link').nth(1)).toContainText('2:40 PM');
-      await expect(friday.getByRole('link').nth(1)).toHaveAttribute('href', '/prayer-times/jummah');
-      await expect(card.getByRole('link', { name: 'Set up Salah alerts' })).toHaveAttribute(
+      const card = page.getByRole('complementary', { name: 'Daily prayer timetable' });
+      const prayers = card.locator('.jic-prayer-browser-item');
+      await expect(prayers.locator('strong')).toHaveText([
+        'Fajr',
+        'Dhuhr',
+        'Asr',
+        'Maghrib',
+        'Isha',
+      ]);
+      await expect(prayers.nth(1).locator('small')).toHaveText('Start 12:58 PM');
+      await expect(prayers.nth(1).locator('b')).toHaveText('1:45 PM');
+      const friday = card.locator('.jic-prayer-browser-jummah');
+      await expect(friday.locator('span').nth(0)).toHaveText('Jummah 1 1:20 PM');
+      await expect(friday.locator('span').nth(1)).toHaveText('Jummah 2 2:40 PM');
+      await expect(card.getByRole('link', { name: 'Timetable' })).toHaveAttribute(
+        'href',
+        '/prayer-times',
+      );
+      await expect(card.getByRole('link', { name: 'Salah alerts' })).toHaveAttribute(
         'href',
         '/prayer-times/reminders',
       );
-      await expect(card.getByRole('link', { name: 'Listen to JIC Radio' })).toHaveAttribute(
-        'href',
-        '/radio',
-      );
-      const layout = await card.evaluate((node) => ({
-        height: node.getBoundingClientRect().height,
-        fits: [...node.querySelectorAll('a')].every(
-          (link) => link.scrollWidth <= link.clientWidth + 1,
-        ),
-        pageFits: document.documentElement.scrollWidth <= innerWidth + 1,
-      }));
-      expect(layout.height).toBeLessThanOrEqual(240);
+      await expect(card.getByRole('link', { name: 'JIC Radio' })).toHaveAttribute('href', '/radio');
+      const layout = await card.evaluate((node) => {
+        const bounds = (selector) => node.querySelector(selector).getBoundingClientRect();
+        return {
+          timetableHeight:
+            bounds('.jic-home-prayer-footer').bottom - bounds('.jic-prayer-browser-grid').top,
+          dateControlsHeight:
+            bounds('.jic-prayer-browser-controls').bottom -
+            bounds('.jic-prayer-browser-heading').top,
+          fits: [...node.querySelectorAll('a')].every(
+            (link) => link.scrollWidth <= link.clientWidth + 1,
+          ),
+          pageFits: document.documentElement.scrollWidth <= innerWidth + 1,
+        };
+      });
+      expect(layout.timetableHeight).toBeLessThanOrEqual(240);
+      expect(layout.dateControlsHeight).toBeLessThanOrEqual(120);
       await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
-      await expect(card.locator('.jic-mini-prayer:not(.jic-mini-prayer-labels)')).toHaveCount(5);
+      await expect(prayers).toHaveCount(5);
       expect(layout.fits).toBe(true);
       expect(layout.pageFits).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`slim-home-${theme}-${width}.png`) });
-      await friday.getByRole('link').nth(1).click();
-      await expect(page).toHaveURL('/prayer-times/jummah');
+      await card.getByRole('button', { name: 'Next day', exact: true }).click();
+      await expect(card.locator('.jic-prayer-day-strip [aria-current="date"]')).toHaveText(
+        'Fri, 16 Oct',
+      );
+      await expect(card.locator('.jic-prayer-browser-heading')).toContainText('Fri, 16 Oct 2026');
+      await card
+        .locator('.jic-prayer-browser-heading')
+        .getByRole('button', { name: 'Today', exact: true })
+        .click();
+      await expect(card.locator('.jic-prayer-day-strip [aria-current="date"]')).toHaveText('Today');
+      await card.getByRole('link', { name: 'Timetable', exact: true }).click();
+      await expect(page).toHaveURL('/prayer-times');
       if (width === 390 && theme === 'light') {
         await page.clock.setFixedTime(new Date('2026-10-16T12:30:00Z'));
         await page.goto('/');
-        await expect(card.getByRole('heading', { name: 'Jummah 2', exact: true })).toBeVisible();
-        await expect(card.locator('.jic-home-prayer-time')).toContainText('2:40 PM');
-        await expect(friday.getByRole('link').nth(0)).toContainText('1:20 PM');
+        await expect(card.locator('.jic-prayer-browser-heading')).toContainText('Fri, 16 Oct 2026');
+        await expect(card.locator('.jic-prayer-day-strip [aria-current="date"]')).toHaveText(
+          'Today',
+        );
+        await expect(friday.locator('span').nth(0)).toHaveText('Jummah 1 1:20 PM');
+        await expect(friday.locator('span').nth(1)).toHaveText('Jummah 2 2:40 PM');
       }
     });
   }
@@ -174,12 +203,17 @@ for (const width of [320, 390, 1280]) {
   });
 }
 
-test('mobile prayer overview is a labelled link to the full timetable', async ({ page }) => {
+test('mobile daily prayer timetable includes a labelled link to the full timetable', async ({
+  page,
+}) => {
   await openHome(page, 390);
-  const overview = page.getByRole('link', { name: /Today.s prayer times:.*View full timetable/ });
+  const card = page.getByRole('complementary', { name: 'Daily prayer timetable' });
+  const overview = card
+    .getByRole('navigation', { name: 'Prayer links' })
+    .getByRole('link', { name: 'Timetable', exact: true });
   await expect(overview).toBeVisible();
-  await expect(overview).toContainText('Today’s prayer times');
-  await expect(page.locator('.jic-home-prayer')).toContainText('Timetable');
+  await expect(overview).toHaveAttribute('href', '/prayer-times');
+  await expect(card.locator('.jic-prayer-browser-heading')).toContainText('Today');
   await overview.click();
   await expect(page).toHaveURL('/prayer-times');
 });

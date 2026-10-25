@@ -69,17 +69,23 @@ for (const [theme, width] of [
     await pages.locator('a[href="/education/courses"]').click();
     await expect(page).toHaveURL('/education/courses');
     await page.goto('/services');
-    const directory = page.locator('.service-explorer--full');
+    const directory = page.getByRole('region', { name: 'Community Hub', exact: true });
+    await expect(directory).toBeVisible();
     await expect(directory.locator('a[href="/madrassah"]')).toHaveCount(0);
     await directory.getByRole('searchbox').fill('nikah');
-    await expect(directory.locator('.service-explorer-card')).toHaveCount(2);
-    await expect(directory.locator('a[href="/services/nikah"]')).toContainText('Nikah');
+    const results = directory.locator('.community-hub-results');
+    await expect(results.getByRole('link')).toHaveCount(2);
+    await expect(results.locator('a[href="/services/nikah"]')).toContainText('Nikah');
     await directory.getByRole('button', { name: 'Clear service search', exact: true }).click();
     await directory.getByRole('button', { name: /^Learning/ }).click();
-    await expect(directory.locator('.service-explorer-card')).toHaveCount(2);
+    await expect(directory.getByRole('button', { name: 'Learning', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(directory.locator('.community-hub-card')).toHaveCount(2);
     await expect(directory.locator('a[href="/education"]')).toContainText('Education & Madrassah');
     await page.emulateMedia({ contrast: 'more', reducedMotion: 'reduce' });
-    await expect(directory.locator('.service-explorer-card').first()).toHaveCSS(
+    await expect(directory.locator('.community-hub-card').first()).toHaveCSS(
       'backdrop-filter',
       'none',
     );
@@ -142,7 +148,7 @@ for (const [path, width] of [
       page.getByRole('button', { name: 'Hide prayer times', exact: true }),
     ).toHaveAttribute('aria-expanded', 'true');
     const control = path.startsWith('/forms')
-      ? page.getByLabel('Name', { exact: false })
+      ? page.getByRole('textbox', { name: /Your message/ })
       : page.locator('.hall-calendar button').first();
     await page.keyboard.press('Tab');
     await control.focus();
@@ -153,17 +159,10 @@ for (const [path, width] of [
     await page.evaluate(() => scrollTo(0, 400));
     await page.evaluate(() => scrollTo(0, 0));
     await expect(dock).toBeHidden();
-    if (width < 768) {
-      await page
-        .getByRole('navigation', { name: 'Quick navigation' })
-        .getByRole('button', { name: 'Home' })
-        .click();
-    } else {
-      await page
-        .getByRole('banner')
-        .getByRole('link', { name: 'Jamatia Islamic Centre home', exact: true })
-        .click();
-    }
+    await page
+      .getByRole('banner')
+      .getByRole('link', { name: 'Jamatia Islamic Centre home', exact: true })
+      .click();
     await expect(page).toHaveURL('/');
     await expect(dock).toHaveCount(0);
     await expect(page.locator('.jic-home-prayer')).toBeVisible();
@@ -264,10 +263,11 @@ for (const width of [667, 1024]) {
     await calendarControl.focus();
     await expect(dock).toBeHidden();
     await page.goto('/forms/contact-us/');
-    await expect(page.getByLabel('Name', { exact: false })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: /Your message/ })).toBeVisible();
     await expect(dock).toBeHidden();
     await page.goto('/');
-    await expect(dock).toBeVisible();
+    await expect(dock).toHaveCount(0);
+    await expect(page.locator('.jic-home-prayer')).toBeVisible();
     expect(state.errors).toEqual([]);
     expect(state.writes).toEqual([]);
   });

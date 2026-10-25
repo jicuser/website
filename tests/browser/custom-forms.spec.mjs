@@ -353,6 +353,7 @@ test('course upload removes an unattached object if metadata save fails', async 
   });
   await page.goto('/portal?tab=learning');
   await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption(formId);
+  await page.getByRole('tab', { name: 'Resources', exact: true }).click();
   const editor = page
     .locator('form')
     .filter({ has: page.getByRole('heading', { name: 'Add course material', exact: true }) });

@@ -139,7 +139,7 @@
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.42);
+  color: var(--jic-text-secondary);
 }
 .admin-login-password input {
   padding-left: 42px;

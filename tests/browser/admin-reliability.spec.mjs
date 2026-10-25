@@ -53,7 +53,7 @@ for (const width of [320, 390, 1280]) {
       columns: getComputedStyle(grid).gridTemplateColumns.split(' ').length,
       heights: [...grid.children].map((tile) => tile.getBoundingClientRect().height),
     }));
-    expect(sizes.columns).toBe(width < 700 ? 2 : 4);
+    expect(sizes.columns).toBe(width < 700 ? 1 : width < 1100 ? 2 : 3);
     expect(Math.max(...sizes.heights) - Math.min(...sizes.heights)).toBeLessThan(1);
     expect(Math.min(...sizes.heights)).toBeGreaterThanOrEqual(44);
     const areas = page.locator('.admin-area-tiles');

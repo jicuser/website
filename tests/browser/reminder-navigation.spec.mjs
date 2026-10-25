@@ -15,6 +15,15 @@ test.afterEach(({ page }) => {
   expect(pageErrors.get(page)).toEqual([]);
 });
 
+const homeLink = (page) =>
+  page.getByRole('banner').getByRole('link', { name: 'Jamatia Islamic Centre home', exact: true });
+const timetableLink = (page) =>
+  page
+    .getByRole('complementary', { name: 'Daily prayer timetable' })
+    .getByRole('link', { name: 'Timetable', exact: true });
+const menuButton = (page) =>
+  page.getByRole('banner').getByRole('button', { name: 'Open navigation menu', exact: true });
+
 // Only external data is stubbed. The actual router, hooks and UI run in the browser.
 async function setup(page, { welcome = false } = {}) {
   if (!welcome) {
@@ -80,18 +89,21 @@ test('home shortcuts fit small phones and the prayer card opens the timetable', 
   await expect(details).toBeHidden();
   await expect(dock).toHaveCount(0);
   expect(
-    await page.locator('.jic-home-prayer').evaluate((node) => node.getBoundingClientRect().height),
-  ).toBeLessThan(240);
-  await page.locator('.jic-mobile-prayer-content').click();
+    await page
+      .locator('.jic-home-prayer')
+      .evaluate(
+        (node) =>
+          node.querySelector('.jic-home-prayer-footer').getBoundingClientRect().bottom -
+          node.querySelector('.jic-prayer-browser-grid').getBoundingClientRect().top,
+      ),
+  ).toBeLessThanOrEqual(240);
+  await timetableLink(page).click();
   await expect(page).toHaveURL('/prayer-times');
   await expect(
     page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
   ).toBeVisible();
   await expect(details).toBeHidden();
-  await page
-    .getByRole('navigation', { name: 'Quick navigation' })
-    .getByRole('button', { name: 'Home' })
-    .click();
+  await homeLink(page).click();
   await expect(page).toHaveURL('/');
   await expect(page.locator('.jic-hero')).toBeVisible();
 
@@ -99,11 +111,15 @@ test('home shortcuts fit small phones and the prayer card opens the timetable', 
     page.locator('.jic-hero').getByRole('link', { name: /My account|Sign in|portal/i }),
   ).toHaveCount(0);
   await expect(
-    page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }),
+    page.locator('.jic-home-prayer').getByRole('link', { name: 'Salah alerts' }),
   ).toHaveAttribute('href', '/prayer-times/reminders');
   await expect(page.locator('.jic-header-portal')).toHaveCount(0);
-  await page.locator('.jic-menu-word').click();
-  await expect(page.locator('.jic-menu-account')).toHaveAttribute('href', '/portal');
+  await menuButton(page).click();
+  await expect(
+    page
+      .getByRole('dialog', { name: 'Navigation menu' })
+      .getByRole('link', { name: 'Portal login' }),
+  ).toHaveAttribute('href', '/portal');
   await page.keyboard.press('Escape');
 
   for (const width of [320, 390, 767]) {
@@ -136,7 +152,7 @@ test('home shortcuts fit small phones and the prayer card opens the timetable', 
       );
     expect(overflow, `Home overflow at ${width}px`).toBe(false);
     await page.locator('.jic-home-shortcuts').scrollIntoViewIfNeeded();
-    await expect(page.locator('.jic-free-actions-slot')).toBeHidden();
+    await expect(page.getByRole('navigation', { name: 'Quick navigation' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Scroll to top', exact: true })).toBeHidden();
     if (width === 390)
       await page.screenshot({ path: testInfo.outputPath('homepage-grouped-mobile.png') });
@@ -148,7 +164,7 @@ test('home shortcuts fit small phones and the prayer card opens the timetable', 
   await expect(page).toHaveURL('/funerals');
 });
 
-test('desktop timetable stays compact and links to the next congregation', async ({
+test('desktop timetable keeps all five prayers aligned and links to the full timetable', async ({
   page,
 }, testInfo) => {
   await page.clock.setFixedTime(new Date('2026-10-15T09:00:00Z'));
@@ -159,19 +175,35 @@ test('desktop timetable stays compact and links to the next congregation', async
     const dock = page.locator('.jic-home-prayer');
     await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
     await expect(dock).toBeVisible();
-    await expect(dock.locator('.jic-mini-prayer:not(.jic-mini-prayer-labels)')).toHaveCount(5);
-    await expect(dock.locator('.jic-mini-prayer.is-next')).toContainText('Dhuhr');
-    await expect(dock.locator('.jic-home-prayer-main')).toContainText('Dhuhr');
+    const prayers = dock.locator('.jic-prayer-browser-item');
+    await expect(prayers.locator('strong')).toHaveText(['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']);
+    await expect(prayers.filter({ hasText: 'Dhuhr' }).locator('b')).toHaveText('1:30 PM');
+    await expect(timetableLink(page)).toHaveAttribute('href', '/prayer-times');
     const sizes = await dock.evaluate((node) => ({
-      height: node.getBoundingClientRect().height,
+      timetableHeight:
+        node.querySelector('.jic-home-prayer-footer').getBoundingClientRect().bottom -
+        node.querySelector('.jic-prayer-browser-grid').getBoundingClientRect().top,
+      dateControlsHeight:
+        node.querySelector('.jic-prayer-browser-controls').getBoundingClientRect().bottom -
+        node.querySelector('.jic-prayer-browser-heading').getBoundingClientRect().top,
       overflow: document.documentElement.scrollWidth > innerWidth + 1,
-      linksFit: [...node.querySelectorAll('.jic-mini-prayer:not(.jic-mini-prayer-labels)')].every(
-        (link) => link.scrollWidth <= link.clientWidth + 1,
+      cellsFit: [...node.querySelectorAll('.jic-prayer-browser-item')].every((cell) =>
+        [...cell.children].every((child) => child.scrollWidth <= cell.clientWidth + 1),
+      ),
+      alignedRows: ['small', 'b'].map(
+        (selector) =>
+          new Set(
+            [...node.querySelectorAll('.jic-prayer-browser-item')].map(
+              (cell) => cell.querySelector(selector).getBoundingClientRect().top,
+            ),
+          ).size,
       ),
     }));
-    expect(sizes.height).toBeLessThan(240);
+    expect(sizes.timetableHeight).toBeLessThanOrEqual(240);
+    expect(sizes.dateControlsHeight).toBeLessThanOrEqual(120);
     expect(sizes.overflow).toBe(false);
-    expect(sizes.linksFit).toBe(true);
+    expect(sizes.cellsFit).toBe(true);
+    expect(sizes.alignedRows).toEqual([1, 1]);
     if (width === 1440)
       await page.screenshot({ path: testInfo.outputPath('homepage-compact-desktop.png') });
   }
@@ -182,7 +214,7 @@ test('Nikah and Salah alert setup open the intended public pages', async ({ page
   await page.locator('.jic-home-shortcuts').getByRole('link', { name: /Nikah/ }).click();
   await expect(page).toHaveURL('/services/nikah');
   await page.goto('/');
-  await page.locator('.jic-home-prayer').getByRole('link', { name: 'Set up Salah alerts' }).click();
+  await page.locator('.jic-home-prayer').getByRole('link', { name: 'Salah alerts' }).click();
   await expect(page).toHaveURL('/prayer-times/reminders');
   await expect(page.getByRole('heading', { name: 'Salah alerts', exact: true })).toBeVisible();
   await expect(
@@ -232,7 +264,7 @@ test('mobile footer stays uncovered and Home returns to the prayer card', async 
   await setup(page);
   await expect(
     page.getByRole('navigation', { name: 'Quick navigation' }).getByRole('button'),
-  ).toHaveCount(1);
+  ).toHaveCount(2);
   await page.locator('.jic-site-footer').scrollIntoViewIfNeeded();
   const dock = page.locator('#jic-prayer-dock');
   await expect(dock).toHaveCount(0);
@@ -245,10 +277,7 @@ test('mobile footer stays uncovered and Home returns to the prayer card', async 
   expect(iconPositions).toHaveLength(9);
   expect(new Set(iconPositions).size).toBe(1);
   await page.screenshot({ path: testInfo.outputPath('compact-mobile-footer.png') });
-  await page
-    .getByRole('navigation', { name: 'Quick navigation' })
-    .getByRole('button', { name: 'Home', exact: true })
-    .click();
+  await homeLink(page).click();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(dock).toHaveCount(0);
   await expect(page.locator('.jic-home-prayer')).toBeVisible();
@@ -267,14 +296,11 @@ test('Home cancels a prayer timetable navigation while its page is still loading
     await route.continue();
   });
   const loading = page.waitForRequest('**/src/pages/PrayerTimesPage.jsx*');
-  await page.locator('.jic-mobile-prayer-content').click();
+  await timetableLink(page).click();
   await loading;
   await expect(page).toHaveURL('/prayer-times');
   try {
-    await page
-      .getByRole('navigation', { name: 'Quick navigation' })
-      .getByRole('button', { name: 'Home', exact: true })
-      .click();
+    await homeLink(page).click();
     await expect(page).toHaveURL('/');
   } finally {
     releaseChunk();
@@ -292,10 +318,10 @@ test('header Menu stays open until a slow Prayer Times route is ready', async ({
     await gate;
     await route.continue();
   });
-  await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
+  await menuButton(page).click();
   const menu = page.getByRole('dialog', { name: 'Navigation menu' });
   const loading = page.waitForRequest('**/src/pages/PrayerTimesPage.jsx*');
-  await menu.getByRole('link', { name: 'Salah Times', exact: true }).click();
+  await menu.getByRole('link', { name: 'Salah timetable', exact: true }).click();
   await loading;
   try {
     await expect(menu).toBeVisible();
@@ -315,10 +341,10 @@ test('Prayer Times shows already loaded times without another loading flash', as
   const api = await setup(page);
   api.hold();
   try {
-    await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
+    await menuButton(page).click();
     await page
       .getByRole('dialog', { name: 'Navigation menu' })
-      .getByRole('link', { name: 'Salah Times', exact: true })
+      .getByRole('link', { name: 'Salah timetable', exact: true })
       .click();
     await expect(page).toHaveURL('/prayer-times');
     await expect(
@@ -343,7 +369,7 @@ test('Prayer Times shows already loaded times without another loading flash', as
 
 test('selecting the current page still closes the header Menu', async ({ page }) => {
   await setup(page);
-  await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
+  await menuButton(page).click();
   const menu = page.getByRole('dialog', { name: 'Navigation menu' });
   await menu.getByRole('link', { name: 'Home', exact: true }).click();
   await expect(menu).toBeHidden({ timeout: 500 });
@@ -369,10 +395,10 @@ test('the slim daily reminder follows Salah bar scrolling and restores on naviga
   const reminderTop = await reminder.evaluate((node) => node.getBoundingClientRect().top);
   expect(reminderTop).toBeGreaterThanOrEqual(0);
   expect(reminderTop).toBeLessThan(100);
-  await page.getByRole('banner').getByRole('button', { name: 'Menu', exact: true }).click();
+  await menuButton(page).click();
   await page
     .locator('#jic-site-menu')
-    .getByRole('link', { name: 'Salah Times', exact: true })
+    .getByRole('link', { name: 'Salah timetable', exact: true })
     .click();
   await expect(
     page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),

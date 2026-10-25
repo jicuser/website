@@ -9,7 +9,10 @@ for (const [theme, width] of [
   test(`shared public design is readable and fits ${width}px ${theme}`, async ({ page }, info) => {
     test.setTimeout(90000);
     await page.setViewportSize({ width, height: 844 });
-    await page.addInitScript((theme) => localStorage.setItem('jic-theme', theme), theme);
+    await page.addInitScript((theme) => {
+      if (window.top !== window) return;
+      localStorage.setItem('jic-theme', theme);
+    }, theme);
     const state = await sitewideFixture(page);
     for (const path of [
       '/education',

@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 import { CONTACT_FORM, CONTACT_RECEIPT } from './helpers/builtInForms.mjs';
 
 const services = [
-  ['/funerals', 'Janazah & funeral support', 'funeral-enquiry'],
+  ['/funerals', 'Funeral Services', 'funeral-enquiry'],
   ['/services/nikah', 'Nikah at JIC', 'nikah-enquiry'],
   ['/services/community#enquire', 'Community support at JIC', 'community-enquiry'],
   ['/services/community/#enquire', 'Community support at JIC', 'community-enquiry'],
   ['/services/nikah/', 'Nikah at JIC', 'nikah-enquiry'],
-  ['/funerals/', 'Janazah & funeral support', 'funeral-enquiry'],
+  ['/funerals/', 'Funeral Services', 'funeral-enquiry'],
 ];
 
 function publishedService(slug) {
@@ -69,7 +69,7 @@ for (const [path, title, slug] of services) {
       if (destination === path) {
         await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
         if (slug === 'funeral-enquiry') {
-          await page.getByRole('link', { name: 'Arrange a funeral', exact: true }).click();
+          await page.getByRole('link', { name: /^Arrange a funeral/ }).click();
           await expect(page.locator('.funeral-call')).toHaveAttribute('href', 'tel:01217786612');
         } else {
           if (slug === 'nikah-enquiry')
@@ -121,7 +121,7 @@ for (const [path, title, slug] of services) {
     for (const destination of [path, `/forms/${slug}`]) {
       await page.goto(destination);
       if (destination === path && slug === 'funeral-enquiry')
-        await page.getByRole('link', { name: 'Arrange a funeral', exact: true }).click();
+        await page.getByRole('link', { name: /^Arrange a funeral/ }).click();
       if (destination === path && slug === 'nikah-enquiry')
         await page.getByRole('button', { name: 'Book Nikah', exact: true }).click();
       await expect(page.getByRole('heading', { name: /is currently closed/ })).toBeVisible();
@@ -186,7 +186,7 @@ test('hall enquiry keeps the selected date, hides prayer controls while typing, 
   await page.getByLabel('Email for our reply').fill('visitor@example.org');
   await page.getByLabel('How can we help?').fill('Please check the hall for a community meeting.');
   await expect(page.getByRole('navigation', { name: 'Quick navigation' })).toBeVisible();
-  await expect(page.locator('.jic-menu-word')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Open navigation menu', exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('service-enquiry.png') });
   await page.getByRole('button', { name: 'Review answers', exact: true }).click();
   await page.getByRole('button', { name: 'Send enquiry', exact: true }).click();

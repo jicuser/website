@@ -14,30 +14,50 @@ async function openPublic(page, theme, path) {
   await page.goto(path);
 }
 
-for (const theme of ['light', 'dark']) {
-  test(`${theme} giving and service controls share clear selected states`, async ({ page }) => {
-    await openPublic(page, theme, '/donate');
-    const material = (node) => {
-      const style = getComputedStyle(node);
-      return {
-        background: style.backgroundColor,
-        sheen: style.backgroundImage,
-        colour: style.color,
-      };
+async function expectReadableSelection(control) {
+  await expect(control).toHaveAttribute('aria-pressed', 'true');
+  const material = await control.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const rgb = (value) => value.match(/[\d.]+/g).map(Number);
+    const luminance = (values) =>
+      values
+        .slice(0, 3)
+        .map((value) => {
+          const channel = value / 255;
+          return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+        })
+        .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
+    const background = rgb(style.backgroundColor);
+    const levels = [luminance(rgb(style.color)), luminance(background)].sort((a, b) => b - a);
+    return {
+      contrast: (levels[0] + 0.05) / (levels[1] + 0.05),
+      opacity: background[3] ?? 1,
+      sheen: style.backgroundImage,
     };
+  });
+  expect(material.sheen).toBe('none');
+  expect(material.opacity).toBe(1);
+  expect(material.contrast).toBeGreaterThanOrEqual(4.5);
+}
+
+for (const theme of ['light', 'dark']) {
+  test(`${theme} giving and service controls keep readable selected states`, async ({ page }) => {
+    await openPublic(page, theme, '/donate');
     const action = page.getByRole('button', { name: 'One off', exact: true });
-    await expect(action).toBeVisible();
-    const navigation = await action.evaluate(material);
-    expect(navigation.sheen).toBe('none');
+    await expectReadableSelection(action);
+    const monthly = page.getByRole('button', { name: 'Monthly', exact: true });
+    await monthly.click();
+    await expect(action).toHaveAttribute('aria-pressed', 'false');
+    await expectReadableSelection(monthly);
     await page.goto('/services');
     await expect(page.getByRole('heading', { name: 'Community Hub' })).toBeVisible();
-    const choice = page
-      .getByRole('group', { name: 'Filter services' })
-      .getByRole('button', { name: 'Learning' });
+    const filters = page.getByRole('group', { name: 'Filter services' });
+    const allServices = filters.getByRole('button', { name: 'All services', exact: true });
+    await expectReadableSelection(allServices);
+    const choice = filters.getByRole('button', { name: 'Learning', exact: true });
     await choice.click();
-    expect((await choice.evaluate(material)).sheen).toBe('none');
-    await expect(choice).toHaveCSS('color', navigation.colour);
-    await expect(choice).toHaveCSS('background-color', navigation.background);
+    await expect(allServices).toHaveAttribute('aria-pressed', 'false');
+    await expectReadableSelection(choice);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
       false,
     );
@@ -84,7 +104,7 @@ test('saved home card photos retain their dark overlay and readable text', async
             {
               content_key: 'home_tiles',
               content_value: JSON.stringify([
-                { key: 'projects', image: '/optimized/jic-aerial-sunset.webp' },
+                { key: 'madrassah', image: '/optimized/jic-aerial-sunset.webp' },
               ]),
             },
           ])
@@ -92,7 +112,9 @@ test('saved home card photos retain their dark overlay and readable text', async
     }),
   );
   await page.goto('/');
-  const card = page.locator('.jic-home-destination.has-image');
+  const card = page
+    .getByRole('navigation', { name: 'Services and learning', exact: true })
+    .getByRole('link', { name: 'Madrassah', exact: true });
   await expect(card).toBeVisible();
   const material = await card.evaluate((node) => ({
     background: getComputedStyle(node).backgroundImage,

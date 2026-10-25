@@ -19,7 +19,9 @@ async function prepare(page, theme = 'light') {
   );
 }
 
-test('Hub groups direct services and worship with the compact six-section menu', async ({ page }) => {
+test('Hub groups direct services and worship with the compact six-section menu', async ({
+  page,
+}) => {
   await prepare(page);
   await page.goto('/services');
   await expect(page.getByRole('heading', { name: 'Community Hub', exact: true })).toBeVisible();
@@ -40,7 +42,9 @@ test('Hub groups direct services and worship with the compact six-section menu',
   await expect(page.locator('.guidance-panel')).toHaveCount(0);
   await directory.getByRole('link', { name: 'Worship & Adhkar', exact: true }).click();
   await expect(page.locator('.worship-compact-resources a[href="/worship/quran"]')).toBeVisible();
-  await expect(page.locator('.worship-compact-resources a[href="/worship/daily-duas"]')).toBeVisible();
+  await expect(
+    page.locator('.worship-compact-resources a[href="/worship/daily-duas"]'),
+  ).toBeVisible();
   await page.goto('/services');
   await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
   await expect(page.locator('#jic-site-menu .jic-drawer-row > a')).toHaveCount(6);
@@ -101,15 +105,13 @@ test('support answers cause no writes, storage or URL changes and clear on leavi
   );
 });
 
-test('every careers, support and family topic reaches its result without a form', async ({
-  page,
-}) => {
-  await prepare(page);
-  for (const [id, path] of [
-    ['careers', '/services/skills-careers'],
-    ['support', '/services/support'],
-    ['family', '/services/marriage-family'],
-  ]) {
+for (const [id, path] of [
+  ['careers', '/services/skills-careers'],
+  ['support', '/services/support'],
+  ['family', '/services/marriage-family'],
+]) {
+  test(`every ${id} topic reaches its result without a form`, async ({ page }) => {
+    await prepare(page);
     const journey = GUIDED_JOURNEYS[id];
     await page.goto(path);
     const guide = page.locator('.guidance-panel');
@@ -133,17 +135,28 @@ test('every careers, support and family topic reaches its result without a form'
         await page.reload();
       }
     }
-  }
-});
+  });
+}
 
 test('service questions and useful details share one page', async ({ page }) => {
   await prepare(page);
   for (const path of ['/services/nikah', '/get-involved/volunteer']) {
     await page.goto(path);
-    await expect(page.locator('.service-guided-heading a[href^="tel:"]')).toBeVisible();
+    if (path === '/services/nikah') {
+      await expect(page.locator('.service-questions')).toBeHidden();
+      await page.getByRole('button', { name: 'Book Nikah', exact: true }).click();
+      await expect(page.getByRole('region', { name: 'Your booking enquiry' })).toBeVisible();
+    } else {
+      await expect(page.locator('.service-guided-heading a[href^="tel:"]')).toBeVisible();
+    }
     await expect(page.locator('.service-questions')).toBeVisible();
-    await page.getByText('What to prepare', { exact: true }).click();
-    await expect(page.locator('#prepare')).toHaveAttribute('open', '');
+    const preparation = page.locator('.service-faq details').filter({
+      has: page.getByText('What to prepare', { exact: true }),
+    });
+    await preparation.locator('summary').click();
+    await expect(preparation).toHaveAttribute('open', '');
+    await expect(preparation.locator('li').first()).toBeVisible();
+    await expect(page).toHaveURL(path);
     await expect(page.getByRole('button', { name: 'Guide me', exact: true })).toHaveCount(0);
   }
 });

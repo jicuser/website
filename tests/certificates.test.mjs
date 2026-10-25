@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { formsDatabase, id } from './helpers/formsDatabase.mjs';
 import { certificateKind, isVerificationToken, verificationPath, certificateDate } from '../src/lib/certificates.js';
-import { hasPermission, validateAccess } from '../supabase/functions/_shared/access.js';
+import { PERMISSIONS, hasPermission, validateAccess } from '../supabase/functions/_shared/access.js';
 
 test('certificate links use exact opaque tokens and staff labels confer no issuing access', () => {
   for (const value of ['', '1234', 'a'.repeat(31), '../account', 'javascript:alert(1)', 'a'.repeat(32) + '?x=1']) {
@@ -15,6 +15,44 @@ test('certificate links use exact opaque tokens and staff labels confer no issui
   assert.equal(certificateDate('invalid'), 'Not recorded');
   assert.equal(hasPermission({ is_active: true, staff_kinds: ['imam'], permissions: [] }, 'certificates'), false);
   assert.deepEqual(validateAccess({ permissions: ['certificates'], staff_kinds: [] }).permissions, ['certificates']);
+});
+
+test('staged certificate activation preserves current operational staff permissions', async (t) => {
+  const { db } = await formsDatabase();
+  t.after(() => db.close());
+  const operations = await readFile(
+    new URL('../supabase/migrations/20261017225316_community_operations.sql', import.meta.url),
+    'utf8',
+  );
+  await db.exec(
+    operations.slice(
+      operations.indexOf('alter table public.profiles'),
+      operations.indexOf('create table if not exists public.account_access_requests'),
+    ),
+  );
+  const assigned = ['finance', 'fundraising', 'safeguarding'];
+  for (const [index, permission] of assigned.entries()) {
+    await db.query('update profiles set permissions=$1 where id=$2', [[permission], id(index + 3)]);
+  }
+
+  await db.exec(
+    await readFile(new URL('../supabase/features/certificates.sql', import.meta.url), 'utf8'),
+  );
+
+  for (const [index, permission] of assigned.entries()) {
+    assert.deepEqual(
+      (await db.query('select permissions from profiles where id=$1', [id(index + 3)])).rows[0]
+        .permissions,
+      [permission],
+    );
+  }
+  for (const [permission] of PERMISSIONS) {
+    await db.query('update profiles set permissions=$1 where id=$2', [[permission], id(2)]);
+  }
+  await assert.rejects(
+    db.query('update profiles set permissions=$1 where id=$2', [['unknown_permission'], id(2)]),
+    /permissions_allowed/,
+  );
 });
 
 test('certificate requests, immutable issuance and minimal public verification are enforced by SQL', async (t) => {

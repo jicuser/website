@@ -53,6 +53,7 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
     [todaysTimes, setToday] = useState(null),
     [tomorrowsTimes, setTomorrow] = useState(null),
     [jummahTimes, setJummah] = useState([]),
+    [jummahError, setJummahError] = useState(''),
     [isLoading, setLoading] = useState(true),
     [error, setError] = useState('');
   useEffect(() => {
@@ -70,30 +71,44 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
           controller.signal,
         );
         if (!alive) return;
-        const failed = daily.error || monthly.error || settings.error || fridayRow.error;
+        const failed = daily.error || monthly.error || fridayRow.error;
         setError(failed ? 'Timetable could not be loaded. Please contact the centre.' : '');
         const d = daily.error ? null : daily.data;
         setToday(formatDayRecord(d));
         setTomorrow(formatDayRecord(nextDay.error ? null : nextDay.data));
         setMonth(monthly.error ? [] : (monthly.data || []).map(formatMonthRecord));
-        const j = {
-          ...defaultJummah,
-          ...(settings.data ? JSON.parse(settings.data.content_value) : {}),
-        };
+        let j = {};
+        if (!settings.error) {
+          try {
+            const saved = settings.data ? JSON.parse(settings.data.content_value) : {};
+            if (saved && typeof saved === 'object' && !Array.isArray(saved))
+              j = { ...defaultJummah, ...saved };
+          } catch {
+            // Optional Jummah settings must not discard the dated timetable.
+          }
+        }
         for (const key of Object.keys(defaultJummah))
           if (fridayRow.data?.[key]) j[key] = fridayRow.data[key];
-        setJummah([
-          {
-            name: 'First Jummah',
-            khutbah: formatTime(j.jummah_1_start),
-            prayer: formatTime(j.jummah_1_jamah),
-          },
-          {
-            name: 'Second Jummah',
-            khutbah: formatTime(j.jummah_2_begins),
-            prayer: formatTime(j.jummah_2_jamah),
-          },
-        ]);
+        const sessions = fridayRow.error
+          ? []
+          : [
+              {
+                name: 'First Jummah',
+                khutbah: formatTime(j.jummah_1_start),
+                prayer: formatTime(j.jummah_1_jamah),
+              },
+              {
+                name: 'Second Jummah',
+                khutbah: formatTime(j.jummah_2_begins),
+                prayer: formatTime(j.jummah_2_jamah),
+              },
+            ].filter((session) => session.khutbah !== '—' && session.prayer !== '—');
+        setJummah(sessions.length === 2 ? sessions : []);
+        setJummahError(
+          sessions.length === 2
+            ? ''
+            : 'Jummah times could not be loaded. Please contact the centre.',
+        );
         setCurrentDate(new Date());
       } catch {
         if (alive) {
@@ -101,6 +116,8 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
           setToday(null);
           setTomorrow(null);
           setMonth([]);
+          setJummah([]);
+          setJummahError('Jummah times could not be loaded. Please contact the centre.');
         }
       } finally {
         inFlight = false;
@@ -140,6 +157,7 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
     todaysTimes,
     tomorrowsTimes,
     jummahTimes,
+    jummahError,
     ramadanTimes: monthlyPrayerTimes
       .filter((d) => d.is_ramadan)
       .map((d) => ({

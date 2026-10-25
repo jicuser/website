@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 for (const width of [390, 1280]) {
-  test(`content edges, section gaps and service cards stay balanced at ${width}px`, async ({
+  test(`content edges, section gaps and shortcut cards stay balanced at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -10,10 +10,11 @@ for (const width of [390, 1280]) {
       route.fulfill({ contentType: 'application/json', body: '[]' }),
     );
     await page.goto('/');
-    await expect(page.locator('.service-explorer-grid')).toBeVisible();
+    await expect(page.locator('.jic-home-shortcuts a')).toHaveCount(6);
+    await expect(page.locator('.community-programme-feed')).toBeVisible();
     const edges = await page
       .locator(
-        '.jic-hero-inner, .service-explorer--compact, .community-programme-feed, .jic-home-community-grid',
+        '.jic-hero-inner, .community-programme-feed, .jic-home-community-links, .jic-home-footer-strip',
       )
       .evaluateAll((nodes) =>
         nodes.map((node) => {
@@ -37,15 +38,17 @@ for (const width of [390, 1280]) {
             section.getBoundingClientRect().top - sections[index].getBoundingClientRect().bottom,
         );
     });
+    expect(gaps).toHaveLength(2);
+    const expectedGap = width < 768 ? 24 : 32;
     for (const gap of gaps) {
-      expect(gap).toBeGreaterThanOrEqual(31);
-      expect(gap).toBeLessThanOrEqual(33);
+      expect(gap).toBeGreaterThanOrEqual(expectedGap - 1);
+      expect(gap).toBeLessThanOrEqual(expectedGap + 1);
     }
     if (width > 1000) {
-      const cards = await page.locator('.service-explorer-card').evaluateAll((nodes) =>
+      const cards = await page.locator('.jic-home-shortcuts a').evaluateAll((nodes) =>
         nodes.slice(0, 3).map((node) => ({
           height: node.getBoundingClientRect().height,
-          action: node.querySelector('h3').getBoundingClientRect().bottom,
+          title: node.querySelector('strong').getBoundingClientRect().bottom,
         })),
       );
       expect(
@@ -53,8 +56,7 @@ for (const width of [390, 1280]) {
           Math.min(...cards.map((card) => card.height)),
       ).toBeLessThanOrEqual(1);
       expect(
-        Math.max(...cards.map((card) => card.action)) -
-          Math.min(...cards.map((card) => card.action)),
+        Math.max(...cards.map((card) => card.title)) - Math.min(...cards.map((card) => card.title)),
       ).toBeLessThanOrEqual(1);
       await expect(page.locator('.programme-feed-row > div').first()).toBeVisible();
     }

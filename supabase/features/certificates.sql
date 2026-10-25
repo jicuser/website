@@ -8,7 +8,8 @@ alter table public.profiles drop constraint if exists permissions_allowed;
 alter table public.profiles add constraint permissions_allowed check (
   permissions <@ array['content','media','events','announcements','prayer_times','team',
     'livestream','tv','broadcast','forms_contact','forms_madrassah','forms_itikaaf',
-    'forms_manage','forms_custom','users','audit','delete_content','certificates']::text[]
+    'forms_manage','forms_custom','certificates','finance','fundraising','safeguarding',
+    'users','audit','delete_content']::text[]
   and array_position(permissions, null) is null
 );
 

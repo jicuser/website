@@ -125,13 +125,23 @@ test('menu names and order save together and appear in public navigation', async
   expect(state.writes).toHaveLength(1);
   const saved = JSON.parse(state.content.site_navigation);
   expect(saved.labels['/services']).toBe('Community together');
-  expect(saved.order.indexOf('/services')).toBeLessThan(saved.order.indexOf('/worship'));
+  expect(saved.order).toEqual(['/', '/services', '/prayer-times', '/about', '/donate', '/contact']);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
   const menu = page.getByRole('dialog', { name: 'Navigation menu', exact: true });
   await expect(menu.getByRole('link', { name: 'Community together', exact: true })).toBeVisible();
-  const names = await menu.locator('.jic-unified-menu-row > a').allTextContents();
-  expect(names.indexOf('Community Hub')).toBeLessThan(names.indexOf('Worship'));
+  const links = menu.locator('.jic-drawer-row > a');
+  await expect(links).toHaveText([
+    'Home',
+    'Community together',
+    'Salah timetable',
+    'About',
+    'Donate',
+    'Contact Us',
+  ]);
+  expect(
+    await links.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href'))),
+  ).toEqual(saved.order);
   expect(state.errors).toEqual([]);
 });
 
@@ -147,11 +157,11 @@ for (const width of [320, 390]) {
       expect((await group.boundingBox()).height).toBeLessThan(65);
     }
     await expect(page.locator('.menu-editor__pages')).toHaveCount(0);
-    const handle = page.getByRole('button', { name: 'Reorder About JIC', exact: true });
+    const handle = page.getByRole('button', { name: 'Reorder About', exact: true });
     await handle.scrollIntoViewIfNeeded();
     const source = await handle.boundingBox();
     const target = await page
-      .getByRole('button', { name: 'Reorder Salah Times', exact: true })
+      .getByRole('button', { name: 'Reorder Salah timetable', exact: true })
       .boundingBox();
     const client = await page.context().newCDPSession(page);
     const x = source.x + source.width / 2;
@@ -168,13 +178,11 @@ for (const width of [320, 390]) {
     }
     await expect(page.locator('.menu-editor .drop-before')).toHaveCount(1);
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    await expect(groups.nth(1).getByLabel('About JIC section name')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Move About JIC up', exact: true })).toHaveCount(
-      0,
-    );
+    await expect(groups.nth(1).getByLabel('About section name')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Move About up', exact: true })).toHaveCount(0);
     expect(state.writes).toHaveLength(0);
 
-    await page.getByRole('button', { name: /^Pages in About JIC/ }).click();
+    await page.getByRole('button', { name: /^Pages in About ·/ }).click();
     const children = page.locator('[data-menu-parent="/about"]');
     const initialPages = await children.evaluateAll((nodes) =>
       nodes.map((node) => node.dataset.menuPath),
@@ -195,7 +203,7 @@ for (const width of [320, 390]) {
     expect(saved.order[1]).toBe('/about');
     expect(saved.children['/about']).toEqual(reorderedPages);
     await page.reload();
-    await expect(groups.nth(1).getByLabel('About JIC section name')).toBeVisible();
+    await expect(groups.nth(1).getByLabel('About section name')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );

@@ -63,7 +63,7 @@ export default function MobileContentEditor() {
       setBusy(false);
     }
   }, [brand, entries, busy, saveContent]);
-  useRegisterAdminSave(save, dirty && !busy, 'Publish app content');
+  useRegisterAdminSave(save, dirty, 'Publish app content', busy);
   return (
     <section className="admin-panel">
       <h2>App content & reading</h2>
