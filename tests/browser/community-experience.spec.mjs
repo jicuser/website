@@ -39,20 +39,24 @@ test('homepage leads with masjid activity and compact practical links', async ({
   ).toBeLessThan(3000);
 });
 
-test('the services page keeps the complete searchable directory in short rows', async ({
-  page,
-}) => {
+test('the Hub groups eight areas while keeping individual services searchable', async ({ page }) => {
   await publicSite(page);
   await page.goto('/services');
-  await expect(page.getByRole('heading', { name: 'Community Hub' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Community Hub', exact: true })).toBeVisible();
   await expect(page.locator('.jic-daily-reminder')).toHaveCount(0);
+  await expect(page.locator('.community-hub-card')).toHaveCount(8);
+  await expect(page.locator('.community-hub').getByRole('link', { name: 'TV & live controls' })).toHaveCount(0);
   await page.getByRole('searchbox', { name: 'Search services' }).fill('nikah');
-  await expect(page.locator('.service-explorer-card')).toHaveCount(2);
-  const result = page
-    .locator('.service-explorer-grid')
-    .getByRole('link', { name: 'Nikah', exact: true });
-  await expect(result).toHaveAttribute('href', '/services/nikah');
+  await expect(page.locator('.community-hub-results > a')).toHaveCount(2);
+  const result = page.locator('.community-hub-results a[href="/services/nikah"]');
+  await expect(result).toBeVisible();
+  await expect(result).toContainText('Nikah');
   expect((await result.boundingBox()).height).toBeLessThan(160);
+  await page.getByRole('button', { name: 'Clear service search' }).click();
+  await expect(page.locator('.community-hub-card')).toHaveCount(8);
+  await page.getByRole('button', { name: 'Life events', exact: true }).click();
+  await expect(page.locator('.community-hub-card')).toHaveCount(3);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });
 
 test('hidden services are absent from compact homepage links', async ({ page }) => {

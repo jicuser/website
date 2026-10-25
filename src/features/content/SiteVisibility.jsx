@@ -8,6 +8,7 @@ import { pageUrl } from '@/lib/pageContent';
 import { collectPages } from '@/lib/formDownloads';
 import { saveSiteVisibility } from '@/lib/siteVisibility';
 import SimpleToggle from '@/components/admin/SimpleToggle';
+import CommunityHubEditor from '@/features/services/CommunityHubEditor';
 import '@/styles/booking-calendars.css';
 
 export default function SiteVisibility() {
@@ -82,6 +83,7 @@ export default function SiteVisibility() {
   }
   return (
     <section className="booking-workspace">
+      <CommunityHubEditor />
       <header>
         <h2>Show or hide pages</h2>
         <p>Switch a page off without deleting it.</p>

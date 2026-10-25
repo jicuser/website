@@ -19,22 +19,29 @@ async function prepare(page, theme = 'light') {
   );
 }
 
-test('Hub gives direct services, worship and a five-section menu', async ({ page }) => {
+test('Hub groups direct services and worship without changing the five-section menu', async ({ page }) => {
   await prepare(page);
   await page.goto('/services');
   await expect(page.getByRole('heading', { name: 'Community Hub', exact: true })).toBeVisible();
-  const directory = page.locator('.service-explorer-grid');
+  const directory = page.locator('.community-hub-grid');
+  await expect(directory.getByRole('link')).toHaveCount(8);
   for (const href of [
     '/services/support',
     '/services/marriage-family',
     '/services/skills-careers',
     '/education',
     '/funerals',
-    '/worship/daily-duas',
-    '/worship/quran',
+    '/worship',
+    '/youth',
+    '/services/hall-booking',
   ]) {
     await expect(directory.locator(`a[href="${href}"]`)).toBeVisible();
   }
+  await expect(page.locator('.guidance-panel')).toBeVisible();
+  await directory.getByRole('link', { name: 'Worship & Adhkar', exact: true }).click();
+  await expect(page.locator('.worship-compact-resources a[href="/worship/quran"]')).toBeVisible();
+  await expect(page.locator('.worship-compact-resources a[href="/worship/daily-duas"]')).toBeVisible();
+  await page.goto('/services');
   await page.getByRole('button', { name: 'Menu', exact: true }).click();
   await expect(page.locator('#jic-site-menu .jic-unified-menu-row > a')).toHaveCount(5);
 });
@@ -86,7 +93,7 @@ test('support answers cause no writes, storage or URL changes and clear on leavi
   await expect(page).toHaveURL('/services/support');
   expect(requests.filter((request) => request.method !== 'GET')).toEqual([]);
   await page.locator('.guidance-back-link').click();
-  await page.locator('.service-explorer-grid a[href="/services/support"]').click();
+  await page.locator('.community-hub-grid a[href="/services/support"]').click();
   await expect(guide).toBeVisible();
   await expect(page.getByRole('button', { name: 'Wellbeing', exact: true })).toHaveAttribute(
     'aria-pressed',
