@@ -1,0 +1,131 @@
+--- a/src/styles/public-sections.css
++++ b/src/styles/public-sections.css
+@@ -351,7 +351,7 @@
+     border-color 150ms ease,
+     box-shadow 150ms ease;
+ }
+-.jic-page-choice.is-featured {
++html[data-theme] .jic-public-route .jic-page-choices .jic-page-choice.is-featured {
+   border-color: var(--jic-gold);
+   box-shadow: inset 0 1px color-mix(in srgb, var(--jic-gold) 20%, transparent);
+ }
+--- a/tests/browser/sitewide-experience.spec.mjs
++++ b/tests/browser/sitewide-experience.spec.mjs
+@@ -13,6 +13,8 @@
+     const state = await sitewideFixture(page);
+     for (const path of [
+       '/education',
++      '/contact',
++      '/team',
+       '/madrassah',
+       '/madrassah/classes-courses',
+       '/education/courses',
+@@ -22,13 +24,24 @@
+       '/education/programmes',
+       '/get-involved',
+       '/services',
++      '/services/support',
++      '/services/marriage-family',
++      '/services/skills-careers',
++      '/services/hall-booking',
+       '/about',
+       '/projects',
+       '/funerals',
+       '/services/nikah',
+       '/donate',
++      '/fundraise',
++      '/ramadan',
++      '/ramadan/iftar',
+       '/worship',
++      '/worship/daily-duas',
++      '/worship/prayer-guide',
++      '/worship/janazah-guide',
+       '/prayer-times',
++      '/prayer-times/monthly',
+       '/privacy',
+     ]) {
+       await page.goto(path);
+@@ -37,6 +50,19 @@
+         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+         path,
+       ).toBe(true);
++      for (const choice of await page.locator('.jic-page-choice.is-featured').all()) {
++        expect(
++          await choice.evaluate((node) => {
++            const sample = document.createElement('span');
++            sample.style.color = 'var(--jic-gold)';
++            node.append(sample);
++            const gold = getComputedStyle(sample).color;
++            sample.remove();
++            return getComputedStyle(node).borderTopColor === gold;
++          }),
++          `${path}: featured action keeps its gold border`,
++        ).toBe(true);
++      }
+       if (['/madrassah', '/madrassah/classes-courses', '/education', '/services'].includes(path)) {
+         await page.screenshot({
+           path: info.outputPath(`${path.replaceAll('/', '-')}.png`),
+@@ -60,7 +86,7 @@
+   const state = await sitewideFixture(page, {
+     signedIn: true,
+     owner: false,
+-    permissions: ['forms'],
++    permissions: ['forms_custom'],
+   });
+   await page.goto('/admin?section=forms');
+   const finder = page.locator('.admin-quick-find');
+--- a/tests/browser/sitewide-learning.spec.mjs
++++ b/tests/browser/sitewide-learning.spec.mjs
+@@ -20,8 +20,10 @@
+     const state = await sitewideFixture(page, { signedIn: true, tables });
+     await page.goto('/portal?tab=learning');
+     await expect(page.getByRole('heading', { name: 'My learning', exact: true })).toBeVisible();
+-    await page.getByLabel('Learning area', { exact: true }).selectOption('madrassah');
+-    await page.getByLabel('Course', { exact: true }).selectOption(courseId);
++    await page
++      .getByRole('combobox', { name: 'Learning area', exact: true })
++      .selectOption('madrassah');
++    await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption(courseId);
+     const progress = page.getByRole('tabpanel', { name: 'Progress & plans' });
+     await expect(progress).toBeVisible();
+     await expect(page.getByRole('tabpanel')).toHaveCount(1);
+@@ -39,8 +41,8 @@
+       true,
+     );
+     await page.screenshot({ path: info.outputPath('learning-progress.png'), fullPage: true });
+-    await page.getByLabel('Course', { exact: true }).selectOption('');
+-    await page.getByLabel('Course', { exact: true }).selectOption(courseId);
++    await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption('');
++    await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption(courseId);
+     await expect(progress.getByLabel('Title', { exact: true })).toHaveValue('');
+     expect(state.writes).toEqual([]);
+     expect(state.errors).toEqual([]);
+@@ -50,13 +52,17 @@
+ test('a parent never receives teacher editing controls in learning panels', async ({ page }) => {
+   const state = await sitewideFixture(page, { signedIn: true, owner: false, tables });
+   await page.goto('/portal?tab=learning');
+-  await page.getByLabel('Learning area', { exact: true }).selectOption('madrassah');
+-  await page.getByLabel('Course', { exact: true }).selectOption(courseId);
++  await page
++    .getByRole('combobox', { name: 'Learning area', exact: true })
++    .selectOption('madrassah');
++  await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption(courseId);
+   await expect(page.getByRole('heading', { name: 'Add a learning record' })).toHaveCount(0);
+   await page.getByRole('tab', { name: 'Attendance', exact: true }).click();
+   await expect(page.getByRole('heading', { name: 'Schedule a class' })).toHaveCount(0);
+   await page.getByRole('tab', { name: 'Meetings', exact: true }).click();
+-  await page.getByLabel('Student (optional filter)', { exact: true }).selectOption('student-1');
++  await page
++    .getByRole('combobox', { name: 'Student (optional filter)', exact: true })
++    .selectOption('student-1');
+   await expect(page.getByRole('heading', { name: 'Request a meeting' })).toBeVisible();
+   expect(state.errors).toEqual([]);
+ });
+--- a/docs/superpowers/plans/2026-10-25-sitewide-experience.md
++++ b/docs/superpowers/plans/2026-10-25-sitewide-experience.md
+@@ -34,3 +34,5 @@
+ - Full modified unit suite: 832 passed, 0 failed. ESLint and TypeScript passed.
+ - Production build: passed using test-only HTTPS configuration, with public preview network fetching disabled. Initial unset-environment build was correctly rejected by the existing build guard.
+ - Local Chromium blocks all URL navigation by managed policy (ERR_BLOCKED_BY_ADMINISTRATOR). No browser policy was changed. Full browser checks and visual evidence move to the GitHub runner.
++
++- Runner audit: the first workflow reported success because shell pipelines masked non-zero Playwright exits. Raw artifacts showed four public/owner tests passed, one restricted-staff fixture used the invalid permission forms (must be forms_custom), and four learning tests used an exact label locator that included select option text. Correct the fixtures/role locators and require pipefail plus JSON test-result gates before merge. No production permission rules are weakened.

@@ -1,0 +1,76 @@
+name: Verify sitewide design results
+on:
+  push:
+    branches: [design/sitewide-experience-20261025]
+    paths: ['.design-transfer/**', '.github/workflows/sitewide-design-final.yml']
+permissions:
+  contents: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Apply reviewed fixture and visual corrections
+        run: |
+          echo 'c04db363ebceaba86c2a46d5d59606d110b21345b253c4d0612a42a014427302  .design-transfer/corrections.patch' | sha256sum --check
+          git apply --check .design-transfer/corrections.patch
+          git apply .design-transfer/corrections.patch
+          mkdir -p /tmp/sitewide-evidence
+      - run: npm ci
+      - name: Validate production source
+        run: npm run validate > /tmp/sitewide-evidence/validate.log 2>&1
+        env:
+          VITE_SUPABASE_URL: https://ci-validation.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_ci_validation_only
+          JIC_PUBLIC_PREVIEWS: 'off'
+      - id: browsers
+        run: npx playwright install --with-deps chromium
+      - name: Verify 31 public routes and staff safeguards
+        if: ${{ !cancelled() && steps.browsers.outcome == 'success' }}
+        run: npx playwright test tests/browser/sitewide-experience.spec.mjs --reporter=json > /tmp/sitewide-evidence/public-results.json
+      - name: Verify learning drafts and roles
+        if: ${{ !cancelled() && steps.browsers.outcome == 'success' }}
+        run: npx playwright test --config playwright.forms.config.mjs tests/browser/sitewide-learning.spec.mjs --reporter=json > /tmp/sitewide-evidence/learning-results.json
+      - name: Require actual passing test-result counts
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          for name, count in [('public', 5), ('learning', 4)]:
+              data = json.loads(Path(f'/tmp/sitewide-evidence/{name}-results.json').read_text())
+              stats = data['stats']
+              print(name, stats)
+              assert not data.get('errors'), data.get('errors')
+              assert stats['expected'] == count and stats['unexpected'] == 0 and stats['skipped'] == 0 and stats['flaky'] == 0, stats
+          PY
+      - name: Commit only after successful checks
+        run: |
+          rm -rf .design-transfer
+          rm .github/workflows/sitewide-design-final.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          git diff --cached --check
+          git commit -m 'Verify staff permissions and learning flows; preserve featured gold actions'
+          git push origin HEAD:design/sitewide-experience-20261025
+          git rev-parse HEAD > /tmp/sitewide-evidence/tested-commit.txt
+      - name: Save actual test results and screenshots
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: sitewide-final-verification
+          path: |
+            test-results/
+            /tmp/sitewide-evidence/
+          if-no-files-found: warn
+          retention-days: 3
