@@ -207,7 +207,7 @@ test('compact menu sections own merged sections without claiming cross-linked pa
   assert.ok(about.sectionPaths.includes('/projects'));
   assert.ok(learning.sectionPaths.includes('/youth'));
   assert.ok(learning.sectionPaths.includes('/madrassah'));
-  assert.ok(groups.every((group) => !group.sectionPaths.includes('/donate')));
+  assert.ok(groups.filter((group) => group.path !== '/donate').every((group) => !group.sectionPaths.includes('/donate')));
 });
 
 test('section breadcrumbs keep one entry per section name and destination', () => {

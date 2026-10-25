@@ -19,7 +19,7 @@ async function prepare(page, theme = 'light') {
   );
 }
 
-test('Hub groups direct services and worship without changing the five-section menu', async ({ page }) => {
+test('Hub groups direct services and worship with the compact six-section menu', async ({ page }) => {
   await prepare(page);
   await page.goto('/services');
   await expect(page.getByRole('heading', { name: 'Community Hub', exact: true })).toBeVisible();
@@ -37,13 +37,13 @@ test('Hub groups direct services and worship without changing the five-section m
   ]) {
     await expect(directory.locator(`a[href="${href}"]`)).toBeVisible();
   }
-  await expect(page.locator('.guidance-panel')).toBeVisible();
+  await expect(page.locator('.guidance-panel')).toHaveCount(0);
   await directory.getByRole('link', { name: 'Worship & Adhkar', exact: true }).click();
   await expect(page.locator('.worship-compact-resources a[href="/worship/quran"]')).toBeVisible();
   await expect(page.locator('.worship-compact-resources a[href="/worship/daily-duas"]')).toBeVisible();
   await page.goto('/services');
-  await page.getByRole('button', { name: 'Menu', exact: true }).click();
-  await expect(page.locator('#jic-site-menu .jic-unified-menu-row > a')).toHaveCount(5);
+  await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
+  await expect(page.locator('#jic-site-menu .jic-drawer-row > a')).toHaveCount(6);
 });
 
 test('careers questions give a useful result, backtracking clears the branch, and restart resets', async ({

@@ -28,9 +28,9 @@ test('saved labels/order apply to the complete menu without changing destination
     'Learning together',
   );
   const about = groups.find((group) => group.path === '/about');
-  assert.equal(about.children[0].name, 'Contact the office');
-  assert.equal(about.children[0].path, '/contact');
-  assert.equal(about.children[1].name, 'About JIC');
+  assert.equal(groups.find(group => group.path === '/contact').name, 'Contact the office');
+  assert.ok(!about.children.some(child => child.path === '/contact'));
+  assert.equal(about.children[0].name, 'About JIC');
   assert.equal(
     PUBLIC_MENU_GROUPS.find((group) => group.path === '/about').children[0].path,
     '/about',

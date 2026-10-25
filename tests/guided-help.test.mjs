@@ -34,11 +34,11 @@ test('invalid and cyclic journeys fail validation', () => {
   );
 });
 
-test('public menu has five roots while existing section destinations remain accessible', () => {
+test('public menu has six roots while existing section destinations remain accessible', () => {
   const groups = compactMenuNavigation(PUBLIC_MENU_GROUPS);
   assert.deepEqual(
     groups.map(({ name }) => name),
-    ['Home', 'Salah Times', 'Worship', 'Community Hub', 'About JIC'],
+    ['Home', 'Salah timetable', 'Community Hub', 'About', 'Donate', 'Contact Us'],
   );
   const hub = groups.find(({ path }) => path === '/services');
   for (const path of [
