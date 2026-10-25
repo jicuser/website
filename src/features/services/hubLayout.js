@@ -16,7 +16,8 @@ const record = (value) => value && typeof value === 'object' && !Array.isArray(v
 
 /** No executable, mixed-content, credential-bearing or protocol-relative image URLs. */
 export function safeHubImage(value) {
-  if (typeof value !== 'string' || /[\u0000-\u0020\u007f\\]/u.test(value)) return '';
+  if (typeof value !== 'string') return '';
+  if ([...value].some((character) => character.charCodeAt(0) <= 32 || character.charCodeAt(0) === 127 || character === '\\')) return '';
   if (/^\/(?!\/)/.test(value)) return value;
   try {
     const url = new URL(value);
