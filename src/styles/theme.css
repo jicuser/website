@@ -6,6 +6,11 @@
   --jic-space-card: clamp(16px, 2vw, 24px);
   --jic-gap: clamp(12px, 2vw, 20px);
   --jic-reading-width: 800px;
+  --jic-display-font: Georgia, 'Times New Roman', serif;
+  --jic-radius-card: 18px;
+  --jic-radius-control: 12px;
+  --jic-display-title-size: clamp(2rem, 5vw, 2.25rem);
+  --jic-display-section-size: clamp(1.35rem, 3vw, 1.85rem);
   --jic-body-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --jic-title-size: clamp(1.65rem, 3.5vw, 2.1rem);
   --jic-section-title-size: clamp(1.125rem, 2.5vw, 1.35rem);

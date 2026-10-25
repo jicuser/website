@@ -31,7 +31,7 @@ const ways = [
 export default function GetInvolvedPage() {
   return (
     <div className="ops-page ops-involvement">
-      <PageHeading title="Get involved">
+      <PageHeading title="Get involved" eyebrow="Community Hub" icon={HeartHandshake}>
         Give your time, bring people together or fundraise for JIC.
       </PageHeading>
       <GuidancePanel journeyId="volunteer" />

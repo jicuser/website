@@ -6,7 +6,7 @@ import SpecialCoursesSection from '@/components/sections/madrassah/SpecialCourse
 export default function ClassesCoursesPage() {
   return (
     <div className="page-transition">
-      <PageHeading title="Madrassah Classes">
+      <PageHeading title="Madrassah Classes" eyebrow="Learning at JIC">
         Explore the learning topics below. The Madrassah can confirm current classes, times and
         places.
       </PageHeading>

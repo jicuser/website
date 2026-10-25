@@ -7,7 +7,7 @@ export default function EventsPage() {
   const { events, loading, stale } = useHomeLiveContent({ eventLimit: 100 });
   return (
     <div className="guidance-page-width">
-      <PageHeading title="Events & programmes">
+      <PageHeading title="Events & programmes" eyebrow="What’s on at JIC">
         Published activities, gatherings and notices.
       </PageHeading>
       {loading && <p role="status">Loading events…</p>}

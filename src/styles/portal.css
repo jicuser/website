@@ -10,7 +10,7 @@
   margin-bottom: 16px;
 }
 .jic-member-portal .workspace-header h1 {
-  font-family: var(--jic-heading-font);
+  font-family: var(--jic-display-font);
   font-weight: 500;
 }
 .jic-member-portal .workspace-kicker {
@@ -28,7 +28,7 @@
   padding: clamp(18px, 3vw, 24px);
 }
 .jic-member-portal .portal-signin h2 {
-  font-family: var(--jic-heading-font);
+  font-family: var(--jic-display-font);
   font-size: 28px;
   font-weight: 500;
   margin: 0 0 8px;
@@ -45,7 +45,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
   align-items: start;
-  gap: clamp(24px, 4vw, 48px);
+  gap: clamp(20px, 3vw, 36px);
   padding-block: 8px 24px;
 }
 .portal-entry-intro {
@@ -70,6 +70,10 @@
   list-style: none;
 }
 .portal-entry-intro li {
+  padding: 12px 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: var(--jic-radius-card);
+  background: var(--jic-surface);
   display: flex;
   align-items: flex-start;
   gap: 12px;

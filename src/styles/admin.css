@@ -339,13 +339,12 @@ html:not(.dark) .admin-login-secure {
   margin-bottom: 8px;
 }
 .admin-panel {
-  border: 1px solid rgba(128, 116, 85, 0.19);
-  background: rgba(255, 255, 255, 0.63);
+  border: 1px solid var(--jic-border);
+  background: var(--jic-surface);
   box-shadow: 0 8px 35px #25314405;
-  backdrop-filter: blur(24px);
-  border-radius: 22px;
-  padding: 24px;
-  margin: 0 0 24px;
+  border-radius: var(--jic-radius-card);
+  padding: clamp(16px, 2.5vw, 24px);
+  margin: 0 0 20px;
   min-width: 0;
 }
 .admin-panel p {
@@ -2312,4 +2311,113 @@ html.dark .admin-console .admin-field-error {
   max-width: 350px;
   gap: 8px;
   margin-bottom: 16px;
+}
+
+/* Staff quick navigation shares the existing permission catalogue and draft guard. */
+.admin-quick-find {
+  position: relative;
+}
+.admin-quick-find > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: var(--jic-radius-control);
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.8125rem;
+}
+.admin-quick-find > summary::-webkit-details-marker {
+  display: none;
+}
+.admin-quick-find-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 70;
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: var(--jic-radius-card);
+  background: var(--jic-surface);
+  box-shadow: 0 16px 45px #0003;
+}
+.admin-quick-find-panel label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+.admin-quick-find-panel input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--jic-border);
+  border-radius: 10px;
+}
+.admin-quick-find-panel .admin-quick-find-count {
+  font-size: 0.75rem;
+  margin: 10px 0;
+}
+.admin-quick-find-results {
+  max-height: min(55dvh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.admin-quick-find-results > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 12px 8px;
+  text-align: left;
+  border-radius: 8px;
+}
+.admin-quick-find-results > button > span {
+  flex: 1;
+  min-width: 0;
+}
+.admin-quick-find-results strong {
+  display: block;
+  font-size: 0.875rem;
+}
+.admin-quick-find-results small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--jic-text-secondary);
+}
+.admin-quick-find-results svg {
+  flex-shrink: 0;
+  color: var(--jic-gold-strong);
+}
+.admin-quick-find-results > button:hover,
+.admin-quick-find-results > button[aria-current] {
+  background: var(--jic-surface-soft);
+}
+.admin-quick-find :is(summary, button, input):focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .admin-quick-find > summary {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .admin-quick-find > summary > span {
+    display: none;
+  }
+  .admin-quick-find-panel {
+    position: fixed;
+    top: max(72px, calc(env(safe-area-inset-top) + 58px));
+    right: 16px;
+  }
 }

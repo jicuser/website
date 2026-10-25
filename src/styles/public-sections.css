@@ -3,18 +3,18 @@
   padding-top: 0;
 }
 .jic-public-main.jic-inner-page h1 {
-  font-family: var(--jic-heading-font);
-  font-size: var(--jic-title-size);
-  font-weight: 750;
+  font-family: var(--jic-display-font);
+  font-size: var(--jic-display-title-size);
+  font-weight: 600;
   letter-spacing: -0.035em;
   line-height: 1.2;
   margin: 0 0 8px;
   overflow-wrap: anywhere;
 }
 .jic-public-main.jic-inner-page h2 {
-  font-family: var(--jic-heading-font);
-  font-size: var(--jic-section-title-size);
-  font-weight: 700;
+  font-family: var(--jic-display-font);
+  font-size: var(--jic-display-section-size);
+  font-weight: 600;
   line-height: 1.35;
   letter-spacing: -0.02em;
 }
@@ -66,6 +66,7 @@
   padding-bottom: 0;
 }
 .jic-inner-page .jic-prayer-title h1 {
+  font-family: var(--jic-body-font);
   font-size: 1.5rem;
   margin: 0;
 }
@@ -283,98 +284,162 @@
   }
 }
 
-/* Section introductions and destination cards use the same hierarchy on every device. */
+/* Editorial public introductions and compact destinations share the approved Nikah hierarchy. */
 .jic-page-heading {
-  width: min(
-    var(--jic-content-width),
-    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
-  );
+  width: min(var(--jic-content-width), calc(100% - var(--jic-page-gutter) * 2));
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   margin-inline: auto;
-  padding: 24px 0 20px;
+  padding: clamp(20px, 3vw, 32px) 0 20px;
 }
-.jic-page-heading p {
+.jic-page-heading-copy {
+  min-width: 0;
+}
+.jic-page-heading .jic-page-eyebrow {
+  margin: 0 0 8px;
+  color: var(--jic-gold-strong);
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.jic-page-heading .jic-page-intro {
   max-width: 65ch;
-  margin: 0;
+  margin: 10px 0 0;
   color: var(--jic-text-secondary);
   font-size: 0.9375rem;
   line-height: 1.6;
 }
+.jic-page-symbol {
+  display: grid;
+  place-items: center;
+  flex: 0 0 82px;
+  height: 100px;
+  border: 1px solid color-mix(in srgb, var(--jic-gold) 32%, var(--jic-border));
+  border-radius: 48px 48px 14px 14px;
+  color: var(--jic-gold-strong);
+  background: radial-gradient(
+    ellipse at top,
+    color-mix(in srgb, var(--jic-gold) 12%, transparent),
+    transparent 75%
+  );
+}
 .jic-page-choices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  width: min(
-    var(--jic-content-width),
-    calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
-  );
+  gap: 10px;
+  width: min(var(--jic-content-width), calc(100% - var(--jic-page-gutter) * 2));
   margin-inline: auto;
-  padding: 0 0 20px;
+  padding: 0 0 22px;
 }
 .jic-page-choice {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
-  min-height: 80px;
-  padding: 12px;
+  min-height: 88px;
+  padding: 16px;
   border: 1px solid var(--jic-border);
-  border-radius: 12px;
+  border-radius: var(--jic-radius-card);
   background: var(--jic-surface);
   color: var(--jic-text);
+  text-decoration: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
-.jic-page-choice strong {
-  font-size: 0.9375rem;
-  line-height: 1.35;
+html[data-theme] .jic-public-route .jic-page-choices .jic-page-choice.is-featured {
+  border-color: var(--jic-gold);
+  box-shadow: inset 0 1px color-mix(in srgb, var(--jic-gold) 20%, transparent);
 }
-@media (max-width: 600px) {
-  .jic-page-choice {
-    display: grid;
-    grid-template-columns: 20px minmax(0, 1fr);
-    align-items: start;
-    gap: 8px;
-  }
-  .jic-page-choice > svg:first-child {
-    margin-top: 2px;
-    width: 20px;
-    height: 20px;
-  }
-  .jic-page-choice strong {
-    font-size: 0.875rem;
-  }
-  .jic-page-choice > svg:last-child {
-    display: none;
-  }
-}
-.jic-page-choice > svg {
-  flex-shrink: 0;
+.jic-page-choice-symbol {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  height: 42px;
+  border: 1px solid color-mix(in srgb, var(--jic-gold) 20%, var(--jic-border));
+  border-radius: 13px;
   color: var(--jic-gold-strong);
+  background: color-mix(in srgb, var(--jic-gold) 7%, transparent);
 }
-.jic-page-choice > span {
+.jic-page-choice-copy {
   flex: 1;
   min-width: 0;
 }
-.jic-page-choice strong,
-.jic-page-choice span > span {
+.jic-page-choice strong {
   display: block;
+  font-size: 1rem;
+  line-height: 1.35;
+  font-weight: 650;
 }
-.jic-page-choice span > span {
+.jic-page-choice-copy > span {
+  display: block;
   margin-top: 4px;
   color: var(--jic-text-secondary);
   font-size: 0.8125rem;
-  line-height: 1.5;
+  line-height: 1.45;
 }
-@media (max-width: 600px) {
-  .jic-page-choice span > span {
-    font-size: 0.75rem;
-    line-height: 1.4;
-  }
+.jic-page-choice-arrow {
+  flex-shrink: 0;
+  color: var(--jic-gold-strong);
 }
 .jic-page-choice:is(:hover, :focus-visible) {
   border-color: var(--jic-gold);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--jic-text) 6%, transparent);
 }
 .jic-page-choice:focus-visible {
   outline: 3px solid var(--jic-gold);
   outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .jic-page-heading {
+    gap: 12px;
+  }
+  .jic-page-symbol {
+    flex-basis: 52px;
+    height: 70px;
+  }
+  .jic-page-symbol svg {
+    width: 28px;
+    height: 28px;
+  }
+  .jic-page-choices {
+    gap: 8px;
+  }
+  .jic-page-choice {
+    flex-wrap: wrap;
+    align-content: start;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+  }
+  .jic-page-choice-symbol {
+    flex-basis: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+  .jic-page-choice-symbol svg {
+    width: 20px;
+    height: 20px;
+  }
+  .jic-page-choice-copy {
+    flex-basis: 100%;
+    order: 2;
+  }
+  .jic-page-choice strong {
+    font-size: 0.9rem;
+  }
+  .jic-page-choice-arrow {
+    margin-left: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jic-page-choice {
+    transition: none;
+  }
 }
 
 .jic-prayer-visit {
@@ -469,7 +534,10 @@
     calc(100% - var(--jic-page-gutter) - var(--jic-page-gutter))
   );
   margin: 0 auto 24px;
-  border-block: 1px solid var(--jic-border);
+  border: 1px solid var(--jic-border);
+  border-radius: var(--jic-radius-card);
+  background: var(--jic-surface);
+  padding-inline: 16px;
   color: var(--jic-text);
 }
 .jic-details-section > summary {
@@ -507,4 +575,97 @@
   font-size: 0.9375rem;
   font-weight: 650;
   margin-bottom: 4px;
+}
+
+/* Pupil learning: a compact tab panel rather than stock photographs and long course blocks. */
+.jic-learning-topics {
+  width: min(var(--jic-content-width), calc(100% - var(--jic-page-gutter) * 2));
+  margin: 0 auto 22px;
+}
+.jic-learning-section-intro {
+  margin-bottom: 16px;
+  max-width: 65ch;
+}
+.jic-learning-section-intro p {
+  color: var(--jic-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+.jic-learning-topic-tabs > [role='tablist'] {
+  display: inline-flex;
+  height: auto;
+  width: auto;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.jic-learning-topic-tabs [role='tab'] {
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+}
+.jic-learning-topic-tabs [role='tab'][data-state='active'] {
+  color: #112233;
+  background: var(--jic-action);
+  box-shadow: none;
+}
+.jic-learning-topic-card {
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid var(--jic-border);
+  border-radius: var(--jic-radius-card);
+  background: var(--jic-surface);
+  margin-block: 12px;
+}
+.jic-learning-topic-intro {
+  display: flex;
+  gap: 14px;
+  align-items: start;
+}
+.jic-learning-topic-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 50px;
+  height: 58px;
+  border: 1px solid var(--jic-border);
+  border-radius: 28px 28px 12px 12px;
+  color: var(--jic-gold-strong);
+}
+.jic-learning-topic-card h3 {
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+.jic-learning-topic-card p {
+  margin-top: 6px;
+  color: var(--jic-text-secondary);
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+.jic-learning-topic-card ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 24px;
+  padding: 16px 0 16px 20px;
+  list-style: disc;
+  font-size: 0.875rem;
+}
+.jic-learning-topic-card li::marker {
+  color: var(--jic-gold-strong);
+}
+.jic-learning-topic-card .jic-learning-note {
+  border-top: 1px solid var(--jic-border);
+  padding-top: 12px;
+  font-size: 0.8125rem;
+}
+.jic-learning-topics > .jic-page-choices {
+  width: 100%;
+  padding-bottom: 0;
+}
+@media (max-width: 600px) {
+  .jic-learning-topic-card ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

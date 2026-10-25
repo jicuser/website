@@ -34,6 +34,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import AdminOverview from '@/features/admin/AdminOverview';
+import AdminQuickFind from '@/features/admin/AdminQuickFind';
 import FormsManager from '@/features/forms/FormsManager';
 import StaffAccess from '@/components/admin/StaffAccess';
 import StreamSetup from '@/components/admin/StreamSetup';
@@ -1213,6 +1214,7 @@ export default function AdminPage() {
           <small>Centre management</small>
         </div>
         <div className="admin-toolbar-actions">
+          <AdminQuickFind onChoose={chooseSection} active={active} disabled={saving} />
           <button
             className="admin-button"
             aria-label="View website"

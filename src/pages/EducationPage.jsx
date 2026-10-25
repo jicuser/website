@@ -7,6 +7,7 @@ import PageChoices from '@/components/PageChoices';
 const choices = [
   {
     path: '/madrassah',
+    featured: true,
     description: 'Classes and parent information.',
     icon: GraduationCap,
   },
@@ -20,17 +21,25 @@ const choices = [
     description: 'Find where to register.',
     icon: UserPlus,
   },
+  {
+    path: '/education/programmes',
+    description: 'Published programmes and upcoming learning.',
+    icon: BookOpen,
+  },
 ];
 export default function EducationPage() {
   return (
     <div className="page-transition">
-      <PageHeading title="Education & Madrassah">
+      <PageHeading title="Education & Madrassah" eyebrow="Community Hub" icon={GraduationCap}>
         Find classes, course details and enrolment information.
       </PageHeading>
       <PageChoices items={choices} label="Education choices" />
-      <div className="guidance-page-width">
-        <GuidancePanel journeyId="education" />
-      </div>
+      <details className="jic-details-section">
+        <summary>Help choosing a class</summary>
+        <div>
+          <GuidancePanel journeyId="education" />
+        </div>
+      </details>
     </div>
   );
 }
