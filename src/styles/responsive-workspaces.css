@@ -1,0 +1,73 @@
+/* Production-only presentation: preserve live TV, donation, portal and auth behaviour. */
+.ops-page .ops-campaign-card, .ops-page.ops-giving .ops-donation-planner,
+.ops-page.ops-giving .ops-bank, .jic-member-portal .workspace-card {
+  min-width: 0;
+  border-radius: 18px;
+  border-color: var(--jic-border);
+  box-shadow: 0 10px 30px #0b293410;
+}
+.ops-page.ops-giving .ops-giving-hero {
+  padding: clamp(24px, 4vw, 44px);
+  border-radius: 20px;
+  background: radial-gradient(ellipse at 95% 10%, #2d6d64, transparent 65%), linear-gradient(120deg, #0a2030, #153e45);
+  color: #f8faf3;
+  overflow: hidden;
+}
+.ops-page.ops-giving .ops-giving-hero h1 { color: #f8faf3; font-family: Georgia, serif; line-height: 1.12; }
+.ops-page.ops-giving .ops-giving-hero p { color: #cfdfd6; max-width: 42rem; }
+.ops-page.ops-giving .ops-giving-hero .ops-eyebrow { color: #e6c68d; }
+.ops-page .ops-campaign-art { min-height: 120px; background: linear-gradient(135deg, #123c49, #438476); color: #fff0d0; }
+.ops-page .ops-campaign-art.ops-art-education { background: linear-gradient(135deg, #334762, #96aeb8); }
+.ops-page .ops-campaign-art.ops-art-ramadan { background: linear-gradient(135deg, #6a5740, #c1a46e); }
+.ops-page .ops-campaign-art.ops-art-community { background: linear-gradient(135deg, #465f58, #96b59f); }
+.ops-page .ops-campaign-copy { min-width: 0; }
+.ops-page .ops-campaign-copy h3 { line-height: 1.3; overflow-wrap: anywhere; }
+.ops-page .ops-progress { overflow: hidden; border-radius: 999px; }
+.ops-page .ops-progress > span { border-radius: inherit; background: linear-gradient(90deg, #2b7869, #d8b474); }
+.ops-page .ops-giving-links { gap: 10px; flex-wrap: wrap; }
+.ops-page .ops-toggle button, .ops-page .ops-amounts button { min-height: 44px; }
+.community-workspace.jic-member-portal .workspace-wrap { min-width: 0; }
+.jic-member-portal .workspace-header { gap: 16px; align-items: center; }
+.jic-member-portal .workspace-header h1 { font-family: Georgia, serif; letter-spacing: -.02em; }
+.jic-member-portal .portal-workspace-switch { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding: 7px 2px 10px; scroll-snap-type: x proximity; }
+.jic-member-portal .portal-workspace-switch a { flex-shrink: 0; min-height: 44px; display: inline-flex; align-items: center; padding: 10px 14px; border-radius: 10px; scroll-snap-align: start; }
+.jic-member-portal .portal-entry-intro { border-radius: 18px; }
+.jic-member-portal .portal-entry-intro li { min-width: 0; }
+.jic-member-portal .portal-entry-intro small { line-height: 1.6; }
+.admin-tv-editor .tv-screen-overview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; min-width: 0; }
+.admin-tv-editor .tv-screen-overview-card { min-width: 0; border: 1px solid var(--jic-border); border-radius: 16px; overflow: hidden; background: var(--jic-surface); box-shadow: 0 8px 24px #0b293411; }
+.admin-tv-editor .tv-screen-open { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; width: 100%; height: 100%; padding: 16px; text-align: left; background: transparent; color: var(--jic-text); }
+.admin-tv-editor .tv-screen-open > .tv-screen-miniature,
+.admin-tv-editor .tv-screen-open > .tv-screen-preview-unavailable { grid-column: 1 / -1; width: 100%; margin: 0; border-radius: 10px; overflow: hidden; }
+.admin-tv-editor .tv-screen-preview-unavailable { min-height: 100px; display: grid; place-items: center; background: linear-gradient(130deg, #0d2838, #20514f); color: #e2c18b; }
+.admin-tv-editor .tv-screen-overview-body { display: flex; flex-direction: column; min-width: 0; gap: 10px; }
+.admin-tv-editor .tv-screen-overview-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admin-tv-editor .tv-screen-overview-title strong { font-size: 16px; }
+.admin-tv-editor .tv-screen-overview-mode { display: flex; flex-wrap: wrap; gap: 7px; color: var(--jic-muted); font-size: 13px; }
+.admin-tv-editor .tv-screen-filters { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding: 5px 2px 12px; }
+.admin-tv-editor .tv-screen-filters button { flex-shrink: 0; min-height: 44px; padding: 10px 16px; border-radius: 10px; }
+.admin-tv-editor .stream-setup-heading { gap: 12px; flex-wrap: wrap; }
+.admin-tv-editor .tv-screen-open:focus-visible { outline: 3px solid #c79547; outline-offset: -4px; }
+@media (min-width: 1450px) { .admin-tv-editor .tv-screen-overview-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 680px) {
+  .ops-page.ops-giving .ops-give-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .ops-page.ops-giving .ops-giving-hero { padding: 24px 18px; border-radius: 16px; }
+  .ops-page .ops-toggle { display: flex; overflow-x: auto; flex-wrap: nowrap; gap: 5px; }
+  .ops-page .ops-toggle button { flex: 1 0 auto; padding-inline: 12px; }
+  .ops-page :is(input, select, textarea), .jic-member-portal :is(input, select, textarea) { font-size: 16px; max-width: 100%; }
+  .ops-page .ops-bank dl > div { min-width: 0; }
+  .ops-page .ops-bank dd { overflow-wrap: anywhere; }
+  .jic-member-portal .workspace-header { flex-wrap: wrap; }
+  .jic-member-portal .workspace-actions { flex-wrap: wrap; }
+  .jic-member-portal .workspace-actions :is(a, button) { min-height: 44px; }
+  .jic-member-portal .portal-entry-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .admin-tv-editor .tv-screen-overview-grid { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 84%); grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding: 5px 3px 16px; scroll-padding-inline: 3px; }
+  .admin-tv-editor .tv-screen-overview-card { scroll-snap-align: start; }
+  .admin-tv-editor .tv-screen-open { padding: 13px; gap: 10px; }
+  .admin-tv-editor .tv-screen-overview-title strong { font-size: 15px; }
+  .admin-tv-editor .stream-setup-heading h2 { font-size: 23px; }
+  .admin-tv-editor .admin-button { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-tv-editor .tv-screen-overview-grid, .jic-member-portal .portal-workspace-switch { scroll-behavior: auto; scroll-snap-type: none; }
+}
