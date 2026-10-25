@@ -27,6 +27,12 @@
   color: var(--tv-text);
   border-color: var(--tv-border);
 }
+/* Keep the footer logo on the same surface as the next-prayer and clock blocks. */
+:is(.jic-tv-shell, .scene-player)[data-tv-theme]
+  .scene-canvas:not(.is-prayer-board)
+  .scene-brand-block {
+  background: var(--tv-surface);
+}
 :is(.jic-tv-shell, .scene-player)[data-tv-theme]
   :is(
     .scene-clock-date,
