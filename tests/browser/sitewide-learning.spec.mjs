@@ -20,8 +20,10 @@ for (const width of [320, 390, 1280]) {
     const state = await sitewideFixture(page, { signedIn: true, tables });
     await page.goto('/portal?tab=learning');
     await expect(page.getByRole('heading', { name: 'My learning', exact: true })).toBeVisible();
-    await page.getByLabel('Learning area', { exact: true }).selectOption('madrassah');
-    await page.getByLabel('Course', { exact: true }).selectOption(courseId);
+    await page
+      .getByRole('combobox', { name: 'Learning area', exact: true })
+      .selectOption('madrassah');
+    await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption(courseId);
     const progress = page.getByRole('tabpanel', { name: 'Progress & plans' });
     await expect(progress).toBeVisible();
     await expect(page.getByRole('tabpanel')).toHaveCount(1);
@@ -39,8 +41,8 @@ for (const width of [320, 390, 1280]) {
       true,
     );
     await page.screenshot({ path: info.outputPath('learning-progress.png'), fullPage: true });
-    await page.getByLabel('Course', { exact: true }).selectOption('');
-    await page.getByLabel('Course', { exact: true }).selectOption(courseId);
+    await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption('');
+    await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption(courseId);
     await expect(progress.getByLabel('Title', { exact: true })).toHaveValue('');
     expect(state.writes).toEqual([]);
     expect(state.errors).toEqual([]);
@@ -50,13 +52,17 @@ for (const width of [320, 390, 1280]) {
 test('a parent never receives teacher editing controls in learning panels', async ({ page }) => {
   const state = await sitewideFixture(page, { signedIn: true, owner: false, tables });
   await page.goto('/portal?tab=learning');
-  await page.getByLabel('Learning area', { exact: true }).selectOption('madrassah');
-  await page.getByLabel('Course', { exact: true }).selectOption(courseId);
+  await page
+    .getByRole('combobox', { name: 'Learning area', exact: true })
+    .selectOption('madrassah');
+  await page.getByRole('combobox', { name: 'Course', exact: true }).selectOption(courseId);
   await expect(page.getByRole('heading', { name: 'Add a learning record' })).toHaveCount(0);
   await page.getByRole('tab', { name: 'Attendance', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Schedule a class' })).toHaveCount(0);
   await page.getByRole('tab', { name: 'Meetings', exact: true }).click();
-  await page.getByLabel('Student (optional filter)', { exact: true }).selectOption('student-1');
+  await page
+    .getByRole('combobox', { name: 'Student (optional filter)', exact: true })
+    .selectOption('student-1');
   await expect(page.getByRole('heading', { name: 'Request a meeting' })).toBeVisible();
   expect(state.errors).toEqual([]);
 });

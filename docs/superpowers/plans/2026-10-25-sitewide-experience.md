@@ -34,3 +34,5 @@ Preserve published content, routes, visibility, booking payloads, permissions, d
 - Full modified unit suite: 832 passed, 0 failed. ESLint and TypeScript passed.
 - Production build: passed using test-only HTTPS configuration, with public preview network fetching disabled. Initial unset-environment build was correctly rejected by the existing build guard.
 - Local Chromium blocks all URL navigation by managed policy (ERR_BLOCKED_BY_ADMINISTRATOR). No browser policy was changed. Full browser checks and visual evidence move to the GitHub runner.
+
+- Runner audit: the first workflow reported success because shell pipelines masked non-zero Playwright exits. Raw artifacts showed four public/owner tests passed, one restricted-staff fixture used the invalid permission forms (must be forms_custom), and four learning tests used an exact label locator that included select option text. Correct the fixtures/role locators and require pipefail plus JSON test-result gates before merge. No production permission rules are weakened.

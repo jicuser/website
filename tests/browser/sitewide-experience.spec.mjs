@@ -13,6 +13,8 @@ for (const [theme, width] of [
     const state = await sitewideFixture(page);
     for (const path of [
       '/education',
+      '/contact',
+      '/team',
       '/madrassah',
       '/madrassah/classes-courses',
       '/education/courses',
@@ -22,13 +24,24 @@ for (const [theme, width] of [
       '/education/programmes',
       '/get-involved',
       '/services',
+      '/services/support',
+      '/services/marriage-family',
+      '/services/skills-careers',
+      '/services/hall-booking',
       '/about',
       '/projects',
       '/funerals',
       '/services/nikah',
       '/donate',
+      '/fundraise',
+      '/ramadan',
+      '/ramadan/iftar',
       '/worship',
+      '/worship/daily-duas',
+      '/worship/prayer-guide',
+      '/worship/janazah-guide',
       '/prayer-times',
+      '/prayer-times/monthly',
       '/privacy',
     ]) {
       await page.goto(path);
@@ -37,6 +50,19 @@ for (const [theme, width] of [
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
         path,
       ).toBe(true);
+      for (const choice of await page.locator('.jic-page-choice.is-featured').all()) {
+        expect(
+          await choice.evaluate((node) => {
+            const sample = document.createElement('span');
+            sample.style.color = 'var(--jic-gold)';
+            node.append(sample);
+            const gold = getComputedStyle(sample).color;
+            sample.remove();
+            return getComputedStyle(node).borderTopColor === gold;
+          }),
+          `${path}: featured action keeps its gold border`,
+        ).toBe(true);
+      }
       if (['/madrassah', '/madrassah/classes-courses', '/education', '/services'].includes(path)) {
         await page.screenshot({
           path: info.outputPath(`${path.replaceAll('/', '-')}.png`),
@@ -60,7 +86,7 @@ test('staff finder respects permissions and fits small screens', async ({ page }
   const state = await sitewideFixture(page, {
     signedIn: true,
     owner: false,
-    permissions: ['forms'],
+    permissions: ['forms_custom'],
   });
   await page.goto('/admin?section=forms');
   const finder = page.locator('.admin-quick-find');
