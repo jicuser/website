@@ -48,6 +48,13 @@
 .admin-tv-editor .tv-screen-filters button { flex-shrink: 0; min-height: 44px; padding: 10px 16px; border-radius: 10px; }
 .admin-tv-editor .stream-setup-heading { gap: 12px; flex-wrap: wrap; }
 .admin-tv-editor .tv-screen-open:focus-visible { outline: 3px solid #c79547; outline-offset: -4px; }
+/* Let flex text shrink and wrap instead of forcing its grid track beyond the viewport. */
+.worship-page .worship-compact-resources > a,
+.worship-page .worship-compact-resources > a > span,
+.worship-page .guidance-choices > button,
+.worship-page .guidance-choices > button > span { min-width: 0; }
+.worship-page .worship-compact-resources > a > span,
+.worship-page .guidance-choices > button > span { overflow-wrap: anywhere; }
 @media (min-width: 1450px) { .admin-tv-editor .tv-screen-overview-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 680px) {
   .ops-page.ops-giving .ops-give-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
@@ -67,6 +74,9 @@
   .admin-tv-editor .tv-screen-overview-title strong { font-size: 15px; }
   .admin-tv-editor .stream-setup-heading h2 { font-size: 23px; }
   .admin-tv-editor .admin-button { min-height: 44px; }
+}
+@media (max-width: 359px) {
+  .worship-page .guidance-choices { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   .admin-tv-editor .tv-screen-overview-grid, .jic-member-portal .portal-workspace-switch { scroll-behavior: auto; scroll-snap-type: none; }
