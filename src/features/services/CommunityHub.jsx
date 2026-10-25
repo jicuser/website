@@ -12,7 +12,7 @@ const icons = { book: BookOpen, briefcase: Briefcase, building: Building2, gradu
 const categories = [['all', 'All services'], ['life-events', 'Life events'], ['learning', 'Learning'], ['prayer', 'Worship'], ['community', 'Community']];
 const utilityIds = ['community', 'ramadan', 'giving', 'portal', 'prayer'];
 
-/** A compact, real-data directory. Existing routes, access rules and services are retained. */
+/** Existing routes, access rules and services are retained in one compact directory. */
 export default function CommunityHub() {
   const { getContent } = useContent();
   const { can } = useAuth();
@@ -34,15 +34,13 @@ export default function CommunityHub() {
     ['nikah', 'Plan a Nikah', Heart],
     ['giving', 'Support your masjid', HeartHandshake],
   ].map(([key, title, Icon]) => ({ service: visible.find((service) => service.id === key), title, Icon })).filter((item) => item.service);
-
   function reset() { setQuery(''); setCategory('all'); search.current?.focus(); }
 
   return (
     <section className="community-hub" aria-labelledby={`${id}-title`}>
       <header className="community-hub-hero">
-        <span className="community-hub-kicker">Jamatia Islamic Centre</span>
         <h1 id={`${id}-title`}>Community Hub</h1>
-        <p>Services, learning and support — together in one place.</p>
+        <p>Services, learning and support.</p>
         <div className="community-hub-search">
           <Search size={20} aria-hidden="true" />
           <label className="sr-only" htmlFor={`${id}-search`}>Search services</label>
@@ -57,19 +55,19 @@ export default function CommunityHub() {
         </nav>
       )}
       <div className="community-hub-content">
-        <div className="community-hub-section-heading"><div><span className="community-hub-kicker">Explore JIC</span><h2>Find your place in the community</h2></div></div>
+        <h2 className="sr-only">Explore services</h2>
         <div className="community-hub-filters" role="group" aria-label="Filter services">
           {categories.filter(([key]) => key === 'all' || cards.some((card) => card.category === key)).map(([key, label]) => <button key={key} type="button" aria-pressed={activeCategory === key} onClick={() => setCategory(key)}>{label}</button>)}
         </div>
-        <p className="community-hub-count" role="status" aria-live="polite" aria-atomic="true">{searching ? `${results.length} ${results.length === 1 ? 'service' : 'services'} found` : `${shown.length} ${shown.length === 1 ? 'area' : 'areas'} to explore`}</p>
+        <p className={`community-hub-count${searching ? '' : ' sr-only'}`} role="status" aria-live="polite" aria-atomic="true">{searching ? `${results.length} ${results.length === 1 ? 'service' : 'services'} found` : `${shown.length} ${shown.length === 1 ? 'area' : 'areas'} to explore`}</p>
         <div id={`${id}-results`}>
           {searching ? (
             <div className="community-hub-results">{results.map((service) => <Link key={service.id} to={service.to}><span><strong>{service.title}</strong><small>{service.description}</small></span><ArrowRight size={18} aria-hidden="true" /></Link>)}</div>
           ) : (
             <div className="community-hub-grid">{shown.map((card) => {
               const Icon = icons[card.icon] || BookOpen;
-              return <Link key={card.id} to={card.to} className={`community-hub-card community-hub-tone-${card.tone}`} aria-label={card.title}>
-                <span className="community-hub-art" aria-hidden="true"><Icon className="community-hub-art-icon" strokeWidth={1.1} />{card.image && <img key={card.image} src={card.image} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.hidden = true; }} />}</span>
+              return <Link key={card.id} to={card.to} className={`community-hub-card community-hub-tone-${card.tone}${card.image ? ' has-image' : ''}`} aria-label={card.title}>
+                {card.image && <span className="community-hub-art" aria-hidden="true"><img key={card.image} src={card.image} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.parentElement.hidden = true; }} /></span>}
                 <span className="community-hub-card-body"><span className="community-hub-card-icon" aria-hidden="true"><Icon size={21} /></span><span className="community-hub-card-copy"><strong>{card.title}</strong><small>{card.description}</small></span><ChevronRight className="community-hub-card-arrow" size={17} aria-hidden="true" /></span>
               </Link>;
             })}</div>
@@ -77,7 +75,8 @@ export default function CommunityHub() {
           {(searching ? !results.length : !shown.length) && <div className="community-hub-empty"><h3>{searching ? 'No matching services' : 'No services are currently listed'}</h3><p>{searching ? 'Try a shorter search or another category.' : 'Please contact the centre for help.'}</p>{(searching || activeCategory !== 'all') && <button type="button" onClick={reset}>Clear search and filters</button>}</div>}
         </div>
         <nav className="community-hub-utilities" aria-label="More at JIC">
-          {utilities.map((service) => <Link key={service.id} to={service.to}>{service.id === 'community' ? 'Volunteer' : service.id === 'giving' ? 'Donate & fundraise' : service.id === 'portal' ? 'My Portal' : service.title}<ArrowRight size={15} aria-hidden="true" /></Link>)}
+          {utilities.map((service) => <Link key={service.id} to={service.to}>{service.id === 'community' ? 'Volunteer' : service.id === 'giving' ? 'Donate' : service.id === 'portal' ? 'My Portal' : service.title}<ArrowRight size={15} aria-hidden="true" /></Link>)}
+          {isPageVisible(getContent, '/fundraise') && <Link to="/fundraise">Fundraising <ArrowRight size={15} aria-hidden="true" /></Link>}
           {isPageVisible(getContent, '/radio') && <Link to="/radio"><Radio size={17} aria-hidden="true" /> JIC Radio</Link>}
           {isPageVisible(getContent, '/events') && <Link to="/events">What’s on <ArrowRight size={15} aria-hidden="true" /></Link>}
           {can('tv') && <Link to="/admin?section=tv"><Monitor size={17} aria-hidden="true" /> TV & live controls</Link>}
