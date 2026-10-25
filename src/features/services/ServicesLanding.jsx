@@ -4,12 +4,12 @@ import { Phone } from 'lucide-react';
 import { SITE } from '@/content/site';
 import CommunityProgrammeList from '@/features/home/CommunityProgrammeList';
 import PublishedPageLinks from '@/features/content/PublishedPageLinks';
-import ServiceExplorer from './ServiceExplorer';
+import CommunityHub from './CommunityHub';
 
 export default function ServicesLanding() {
   return (
     <>
-      <ServiceExplorer />
+      <CommunityHub />
       <div className="hub-contact-row">
         <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}>
           <Phone size={17} aria-hidden="true" /> {SITE.phone}
