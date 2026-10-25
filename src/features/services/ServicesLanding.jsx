@@ -4,6 +4,7 @@ import { Phone } from 'lucide-react';
 import { SITE } from '@/content/site';
 import CommunityProgrammeList from '@/features/home/CommunityProgrammeList';
 import PublishedPageLinks from '@/features/content/PublishedPageLinks';
+import GuidancePanel from '@/features/guidance/GuidancePanel';
 import CommunityHub from './CommunityHub';
 import '@/styles/services.css';
 
@@ -11,6 +12,9 @@ export default function ServicesLanding() {
   return (
     <>
       <CommunityHub />
+      <div className="hub-programmes">
+        <GuidancePanel journeyId="hub" />
+      </div>
       <div className="hub-contact-row">
         <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}>
           <Phone size={17} aria-hidden="true" /> {SITE.phone}
