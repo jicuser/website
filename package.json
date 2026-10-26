@@ -12,6 +12,8 @@
     "build:brand": "node scripts/build-brand.mjs && node scripts/build-icons.cjs",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "playwright test",
+    "test:account-requests:browser": "playwright test --config playwright.account-requests.config.mjs",
+    "test:edge": "npx --yes --package=deno@2.9.6 deno test --allow-env --deny-net --no-check tests/*-edge.test.ts",
     "typecheck": "tsc -p tsconfig.json",
     "check:account": "node scripts/account-readiness.mjs",
     "format": "prettier --write .",

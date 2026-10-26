@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import PageLoadBoundary from '@/components/PageLoadBoundary';
+import { ACCOUNT_REQUESTS_ENABLED } from '@/lib/accountRequests';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
@@ -72,6 +73,9 @@ const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
 const AccountSetupPage = lazy(() => import('@/pages/admin/AccountSetupPage'));
 const AccountRecoveryPage = lazy(() => import('@/pages/AccountRecoveryPage'));
 const AccountRequestPage = lazy(() => import('@/pages/AccountRequestPage'));
+const AccountRequestsUnavailable = lazy(
+  () => import('@/components/account/AccountRequestsUnavailable'),
+);
 const ShareDevicePage = lazy(() => import('@/pages/admin/ShareDevicePage'));
 const AdminPage = lazy(() => import('@/pages/admin/AdminPage'));
 const TileContentAdminPage = lazy(() => import('@/pages/admin/TileContentAdminPage'));
@@ -109,7 +113,12 @@ function AppRoutes() {
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin/setup" element={<AccountSetupPage />} />
           <Route path="/account/recovery" element={<AccountRecoveryPage />} />
-          <Route path="/account/request" element={<AccountRequestPage />} />
+          <Route
+            path="/account/request"
+            element={
+              ACCOUNT_REQUESTS_ENABLED ? <AccountRequestPage /> : <AccountRequestsUnavailable />
+            }
+          />
           <Route
             path="/admin/share/:screenId"
             element={

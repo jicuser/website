@@ -288,7 +288,9 @@ test('community operations enforce ownership, permissions, financial integrity a
       };
       await call('', 'submit_account_request', [body, 'b'.repeat(64)], 'service_role');
       await call('', 'submit_account_request', [body, 'b'.repeat(64)], 'service_role');
-      const result = await db.query('select * from account_access_requests');
+      const result = await db.query('select * from account_access_requests where email=$1', [
+        body.email,
+      ]);
       assert.equal(result.rows.length, 1);
       const id = result.rows[0].id;
       assert.equal(await call('', 'account_request_user', [id], 'service_role'), users.member);
@@ -308,6 +310,247 @@ test('community operations enforce ownership, permissions, financial integrity a
           [users.owner, id, users.member, ['finance'], [], true],
           'service_role',
         ),
+        /already been reviewed/,
+      );
+    },
+  );
+  await t.test(
+    'account request RPCs and tables reject anonymous and authenticated bypasses, including owners',
+    async () => {
+      for (const [user, role] of [
+        ['', 'anon'],
+        ['member', 'authenticated'],
+        ['owner', 'authenticated'],
+      ]) {
+        for (const sql of [
+          'select * from public.account_access_requests',
+          "insert into public.account_access_requests(display_name,email,requested_role) values('Bypass','bypass@example.test','teacher')",
+          "update public.account_access_requests set status='approved'",
+          'delete from public.account_access_requests',
+          'select * from private.community_request_limits',
+        ])
+          await assert.rejects(run(user, sql, [], role), /permission denied/);
+        await assert.rejects(
+          call(user, 'submit_account_request', [{}, 'c'.repeat(64)], role),
+          /permission denied/,
+        );
+        await assert.rejects(
+          call(user, 'account_request_user', [users.member], role),
+          /permission denied/,
+        );
+        await assert.rejects(
+          call(
+            user,
+            'resolve_account_request',
+            [users.owner, users.member, users.member, ['users'], [], true],
+            role,
+          ),
+          /permission denied/,
+        );
+      }
+    },
+  );
+  const requestBody = {
+    display_name: 'Another visitor',
+    email: 'other@example.test',
+    requested_role: 'teacher',
+    requested_features: ['teacher_tools', 'family_updates', 'staff'],
+    message: 'Please review.',
+  };
+  const submitRequest = (body = requestBody, source = 'c'.repeat(64)) =>
+    call('', 'submit_account_request', [body, source], 'service_role');
+  const requestRow = async (email = requestBody.email) =>
+    (await db.query('select * from public.account_access_requests where email=$1', [email]))
+      .rows[0];
+  const resolveRequest = (actor, id, target, permissions = [], kinds = [], approve = true) =>
+    call(
+      '',
+      'resolve_account_request',
+      [actor, id, target, permissions, kinds, approve],
+      'service_role',
+    );
+  await t.test(
+    'a submitted role, family request or forged privilege never changes an account',
+    async () => {
+      const beforeProfiles = (await db.query('select * from public.profiles order by id')).rows;
+      const beforeUsers = (await db.query('select * from auth.users order by id')).rows;
+      await submitRequest({
+        ...requestBody,
+        permissions: ['users'],
+        requested_permissions: ['users'],
+        is_owner: true,
+        staff_kinds: ['teacher'],
+        status: 'approved',
+        auth_user_id: users.other,
+        requested_features: [...requestBody.requested_features, 'users', 'staff'],
+      });
+      await submitRequest({
+        ...requestBody,
+        email: 'new-family@example.test',
+        requested_role: 'parent_guardian',
+      });
+      const row = await requestRow();
+      assert.equal(row.status, 'pending');
+      assert.deepEqual(row.requested_permissions, []);
+      assert.deepEqual(row.requested_features.sort(), requestBody.requested_features.toSorted());
+      assert.equal(row.reviewed_at, null);
+      assert.equal(row.reviewed_by, null);
+      assert.equal(row.auth_user_id, null);
+      assert.deepEqual(
+        (await db.query('select * from public.profiles order by id')).rows,
+        beforeProfiles,
+      );
+      assert.deepEqual((await db.query('select * from auth.users order by id')).rows, beforeUsers);
+    },
+  );
+  await t.test(
+    'SQL independently rejects invalid source keys, roles, names, emails and payload sizes',
+    async () => {
+      for (const source of [null, '', 'forged', 'c'.repeat(63), 'C'.repeat(64)])
+        await assert.rejects(submitRequest(requestBody, source), /invalid_request/);
+      for (const body of [
+        { ...requestBody, display_name: '' },
+        { ...requestBody, display_name: 'x'.repeat(121) },
+        { ...requestBody, email: 'invalid' },
+        { ...requestBody, email: `${'x'.repeat(250)}@example.test` },
+        { ...requestBody, requested_role: 'super_admin' },
+        { ...requestBody, requested_role: null },
+        { ...requestBody, message: 'x'.repeat(2001) },
+      ])
+        await assert.rejects(submitRequest(body, 'd'.repeat(64)), /invalid_request/);
+      await assert.rejects(
+        submitRequest({ ...requestBody, requested_features: 'staff' }, 'd'.repeat(64)),
+        /scalar/,
+      );
+      assert.equal(
+        (
+          await db.query(
+            'select count(*)::int n from private.community_request_limits where source_key=$1',
+            ['d'.repeat(64)],
+          )
+        ).rows[0].n,
+        0,
+      );
+    },
+  );
+  await t.test(
+    'duplicates preserve the pending request and count toward the five-per-hour limit',
+    async () => {
+      const source = 'e'.repeat(64);
+      const before = await requestRow();
+      for (let i = 0; i < 5; i++)
+        await submitRequest(
+          {
+            ...requestBody,
+            email: 'OTHER@EXAMPLE.TEST',
+            display_name: 'Do not overwrite',
+            requested_role: 'treasurer',
+          },
+          source,
+        );
+      assert.deepEqual(await requestRow(), before);
+      assert.equal(
+        (
+          await db.query(
+            'select count(*)::int n from account_access_requests where lower(email)=lower($1)',
+            [requestBody.email],
+          )
+        ).rows[0].n,
+        1,
+      );
+      await assert.rejects(
+        submitRequest({ ...requestBody, email: 'limited@example.test' }, source),
+        /request_rate_limit/,
+      );
+      await assert.rejects(submitRequest(requestBody, source), /request_rate_limit/);
+      assert.equal(await requestRow('limited@example.test'), undefined);
+      assert.equal(
+        (
+          await db.query('select count from private.community_request_limits where source_key=$1', [
+            source,
+          ])
+        ).rows[0].count,
+        5,
+      );
+      await db.query(
+        "update private.community_request_limits set window_at=now()-interval '61 minutes' where source_key=$1",
+        [source],
+      );
+      await submitRequest(requestBody, source);
+      assert.equal(
+        (
+          await db.query('select count from private.community_request_limits where source_key=$1', [
+            source,
+          ])
+        ).rows[0].count,
+        1,
+      );
+      assert.deepEqual(await requestRow(), before);
+    },
+  );
+  await t.test(
+    'approval rechecks actor activity, delegation, target email and replay protection transactionally',
+    async () => {
+      const id = (await requestRow()).id;
+      const before = await requestRow();
+      const profile = async () =>
+        (await db.query('select * from profiles where id=$1', [users.other])).rows[0];
+      const originalProfile = await profile();
+      for (const actor of [users.member, users.finance, null]) {
+        await assert.rejects(
+          resolveRequest(actor, id, users.other, ['users']),
+          /Staff management permission/,
+        );
+        await assert.rejects(
+          resolveRequest(actor, id, null, [], [], false),
+          /Staff management permission/,
+        );
+      }
+      await db.query('update profiles set is_active=false where id=$1', [users.owner]);
+      await assert.rejects(
+        resolveRequest(users.owner, id, users.other),
+        /Staff management permission/,
+      );
+      await db.query('update profiles set is_active=true where id=$1', [users.owner]);
+      await assert.rejects(resolveRequest(users.owner, id, users.member), /email does not match/);
+      await db.query("update profiles set permissions='{users,tv}' where id=$1", [users.reviewer]);
+      await assert.rejects(
+        resolveRequest(users.reviewer, id, users.other, ['finance']),
+        /permissions you hold/,
+      );
+      await assert.rejects(
+        resolveRequest(users.owner, id, users.other, ['root']),
+        /check constraint/,
+      );
+      assert.deepEqual(await requestRow(), before);
+      assert.deepEqual(await profile(), originalProfile);
+      await resolveRequest(users.reviewer, id, users.other, ['tv'], ['teacher']);
+      assert.deepEqual((await profile()).permissions, ['tv']);
+      assert.deepEqual((await profile()).staff_kinds, ['teacher']);
+      assert.equal((await profile()).is_owner, false);
+      const approved = await requestRow();
+      assert.equal(approved.status, 'approved');
+      assert.equal(approved.reviewed_by, users.reviewer);
+      assert.equal(approved.auth_user_id, users.other);
+      await assert.rejects(
+        resolveRequest(users.owner, id, users.other, ['users']),
+        /already been reviewed/,
+      );
+      assert.equal(
+        (
+          await db.query(
+            "select count(*)::int n from audit_log where table_name='account_access_requests' and record_id=$1 and action='APPROVE'",
+            [id],
+          )
+        ).rows[0].n,
+        1,
+      );
+      const family = await requestRow('new-family@example.test');
+      await resolveRequest(users.owner, family.id, null, [], [], false);
+      assert.equal((await requestRow('new-family@example.test')).status, 'rejected');
+      assert.equal((await requestRow('new-family@example.test')).auth_user_id, null);
+      await assert.rejects(
+        resolveRequest(users.owner, family.id, users.other),
         /already been reviewed/,
       );
     },
