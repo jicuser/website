@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import AccountRequestLink from '@/components/account/AccountRequestLink';
 import { ArrowRight, Award, Heart, Wallet } from 'lucide-react';
 
 const RECORDS = [
@@ -51,7 +52,7 @@ export default function PortalAccountHome({ auth, onSignOut }) {
         </nav>
       </section>
       <footer className="portal-home-help">
-        <Link to="/account/request">Need help with your account?</Link>
+        <AccountRequestLink>Need help with your account?</AccountRequestLink>
         <button type="button" onClick={onSignOut}>
           Sign out
         </button>

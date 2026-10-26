@@ -26,6 +26,8 @@ jobs:
       VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       VITE_ENABLE_WORKSPACE: ${{ inputs.workspace && 'true' || 'false' }}
       VITE_ENABLE_CERTIFICATES: ${{ inputs.certificates && 'true' || 'false' }}
+      # Intake stays closed until the database and deployed Edge checks are signed off.
+      VITE_ENABLE_ACCOUNT_REQUESTS: 'false'
       VITE_WONDERFUL_DONATE_URL: ${{ vars.VITE_WONDERFUL_DONATE_URL }}
       VITE_MEDIA_RELAY_URL: ${{ vars.VITE_MEDIA_RELAY_URL }}
       VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
@@ -39,6 +41,7 @@ jobs:
       - run: npm run check
       - run: npm run typecheck
       - run: npm test
+      - run: npm run test:edge
       - run: npm run build -- --manifest
       - run: npm run check:startup
       - name: Confirm Hostinger route fallback is included

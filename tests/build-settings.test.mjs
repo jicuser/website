@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateBuildSettings } from '../scripts/build-settings.mjs';
+import { ACCOUNT_REQUESTS_ENABLED } from '../src/lib/accountRequests.js';
 
 const jwt = (payload) => `e30.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.test`;
 const valid = {
@@ -14,6 +15,19 @@ test('release accepts a matching public key and both deliberate workspace states
   assert.doesNotThrow(() =>
     validateBuildSettings({ ...valid, VITE_SUPABASE_ANON_KEY: 'sb_publishable_public-test' }),
   );
+});
+
+test('account intake is default-off and release builds reject ambiguous flag values', () => {
+  assert.equal(ACCOUNT_REQUESTS_ENABLED, false);
+  for (const flag of [undefined, '', 'false', 'true'])
+    assert.doesNotThrow(() =>
+      validateBuildSettings({ ...valid, VITE_ENABLE_ACCOUNT_REQUESTS: flag }),
+    );
+  for (const flag of ['1', 'TRUE', 'yes', ' true ', true])
+    assert.throws(
+      () => validateBuildSettings({ ...valid, VITE_ENABLE_ACCOUNT_REQUESTS: flag }),
+      /VITE_ENABLE_ACCOUNT_REQUESTS must be true or false/,
+    );
 });
 
 test('release fails for missing, wrong-project and privileged browser keys without printing them', () => {

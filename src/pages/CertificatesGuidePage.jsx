@@ -125,8 +125,8 @@ export default function CertificatesGuidePage() {
           <details>
             <summary>What if I do not have an account?</summary>
             <p>
-              You can <Link to="/account/request">request a JIC account</Link> or ask the office
-              below. Access is checked before private records are available.
+              You can <Link to="/portal">create a JIC account with your email</Link> or ask the
+              office below. Access is checked before private records are available.
             </p>
           </details>
         </div>

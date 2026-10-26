@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { Award, ShieldCheck, Users, Wallet } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import AccountRequestLink from '@/components/account/AccountRequestLink';
 import { portalDestination } from '@/lib/portalDestination';
 import PortalSignIn from '@/features/portal/PortalSignIn';
 import PortalWorkspace from '@/features/portal/PortalWorkspace';
@@ -99,7 +100,7 @@ export default function CommunityPortalPage() {
               <button type="button" onClick={() => auth.refreshProfile().catch(() => {})}>
                 Check again
               </button>
-              <Link to="/account/request">Request access</Link>
+              <AccountRequestLink />
               <button type="button" onClick={signOut}>
                 Sign out
               </button>

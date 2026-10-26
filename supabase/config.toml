@@ -30,6 +30,8 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.request-access]
+# Public intake requires ACCOUNT_REQUESTS_ENABLED=true in the handler, form protection
+# and the service-only, rate-limited submit_account_request RPC. Never grants access.
 verify_jwt = false
 
 [functions.ramadan-request]
