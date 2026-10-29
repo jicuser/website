@@ -52,6 +52,7 @@ export default function UnifiedHeader() {
   const { pathname: routePath, key: routeKey } = useLocation();
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const isHome = pathname === '/';
+  const isCommunityHub = pathname === '/services';
   const taskRoute = prefersQuietPrayerDock(pathname);
   const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
@@ -109,7 +110,7 @@ export default function UnifiedHeader() {
   );
   const selected = navigation?.current?.path;
   const breadcrumbs = navigationBreadcrumbs(navigation);
-  const hasSectionPicker = subtabs.length > 0;
+  const hasSectionPicker = subtabs.length > 0 && !isCommunityHub;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   const status = radioError
@@ -156,7 +157,7 @@ export default function UnifiedHeader() {
     if (prayer) observer.observe(prayer);
     if (banner) observer.observe(banner);
     return () => observer.disconnect();
-  }, [isHome]);
+  }, [isHome, isCommunityHub]);
   useEffect(() => {
     const nav = subnavRef.current;
     if (!nav) return undefined;
@@ -277,7 +278,7 @@ export default function UnifiedHeader() {
               onOpen={(view) => { setMenuView(view); setMenuOpen(true); }}
             />
           </div>
-          {breadcrumbs.length > 0 && (
+          {!isCommunityHub && breadcrumbs.length > 0 && (
             <nav
               className={cn('jic-section-location', hasSectionPicker && 'has-section-picker')}
               aria-label="Current section"
@@ -391,7 +392,7 @@ export default function UnifiedHeader() {
               ))}
             </nav>
           )}
-          {taskRoute && (
+          {taskRoute && !isCommunityHub && (
             <button
               type="button"
               className="jic-task-prayer-toggle"
@@ -404,7 +405,7 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
-      {!isHome && (
+      {!isHome && !isCommunityHub && (
         <div className="jic-mobile-dock">
           <div
             id="jic-prayer-dock"
