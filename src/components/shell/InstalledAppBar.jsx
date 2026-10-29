@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Home, Menu, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Home, Menu, Users } from 'lucide-react';
 import { useNavigationHistory } from '@/context/NavigationContext';
 import '@/styles/installed-app-bar.css';
 
@@ -53,6 +53,14 @@ export default function InstalledAppBar({ open, view, onOpen }) {
         >
           <Home size={21} aria-hidden="true" />
           <span>Home</span>
+        </Link>
+        <Link
+          to="/prayer-times"
+          aria-label="Salah timetable"
+          aria-current={pathname === '/prayer-times' ? 'page' : pathname.startsWith('/prayer-times/') ? 'location' : undefined}
+        >
+          <Clock size={21} aria-hidden="true" />
+          <span>Salah</span>
         </Link>
         <Link
           to="/services"

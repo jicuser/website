@@ -69,7 +69,7 @@ html[data-installed-navigation='true'] .jic-site-notice:is(.bottom-left, .bottom
 
 .jic-app-destinations {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(44px, 1fr));
   gap: 2px;
 }
 .jic-installed-app-bar > button {
@@ -81,8 +81,14 @@ html[data-installed-navigation='true'] .jic-site-notice:is(.bottom-left, .bottom
 }
 @media (min-width: 600px) {
   .jic-installed-app-bar {
-    grid-template-columns: 48px minmax(0, 360px) 48px;
+    grid-template-columns: 48px minmax(0, 400px) 48px;
     justify-content: center;
     gap: 12px;
   }
+}
+
+@media (max-width: 374px) {
+  .jic-installed-app-bar { gap: 2px; padding-inline: 4px; }
+  .jic-app-destinations { grid-template-columns: 44px 44px minmax(68px, 1fr) 44px; }
+  .jic-app-destinations :is(a, button) { font-size: 10px; }
 }
