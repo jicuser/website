@@ -33,6 +33,16 @@ export default function InstalledAppBar({ open, view, onOpen }) {
   if (!installed) return null;
   return (
     <nav className="jic-installed-app-bar" aria-label="App navigation">
+      <button
+        type="button"
+        disabled={!canGoBack}
+        onClick={() => navigate(-1)}
+        aria-label="Go back"
+        title="Go back"
+      >
+        <ArrowLeft size={20} aria-hidden="true" />
+        <span>Back</span>
+      </button>
       <div className="jic-app-destinations">
         <Link
           to="/"
@@ -69,28 +79,16 @@ export default function InstalledAppBar({ open, view, onOpen }) {
           <span>Menu</span>
         </button>
       </div>
-      <div className="jic-app-history" role="group" aria-label="Page history">
-        <button
-          type="button"
-          disabled={!canGoBack}
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
-          title="Go back"
-        >
-          <ArrowLeft size={20} aria-hidden="true" />
-          <span>Back</span>
-        </button>
-        <button
-          type="button"
-          disabled={!canGoForward}
-          onClick={() => navigate(1)}
-          aria-label="Go forward"
-          title="Go forward"
-        >
-          <ArrowRight size={20} aria-hidden="true" />
-          <span>Forward</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        disabled={!canGoForward}
+        onClick={() => navigate(1)}
+        aria-label="Go forward"
+        title="Go forward"
+      >
+        <ArrowRight size={20} aria-hidden="true" />
+        <span>Forward</span>
+      </button>
     </nav>
   );
 }
