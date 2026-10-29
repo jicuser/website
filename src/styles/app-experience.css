@@ -265,3 +265,78 @@ html[data-surface='solid'] .jic-app-companion :is(button, a, .jic-app-salah) {
     backdrop-filter: none;
   }
 }
+
+/* Compact, recognisable headings without restoring the large app logo row. */
+.jic-app-brandline { display: none; }
+html[data-installed-navigation='true'] .jic-app-brandline {
+  display: block;
+  margin: 0 0 8px;
+  font: 600 10px/1.4 system-ui, sans-serif;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #e4eee8;
+}
+html[data-installed-navigation='true'] .community-hub-hero {
+  padding: 20px 20px 24px;
+  border-radius: 0 0 22px 22px;
+  background:
+    linear-gradient(100deg, #063e35f2, #104f42c4 65%, #104f4299),
+    url('/jic-aerial-sunset.jpg') center 48% / cover;
+}
+html[data-installed-navigation='true'] .community-hub-hero h1 {
+  margin: 0 0 8px;
+  font-size: clamp(28px, 7vw, 34px);
+  line-height: 1.12;
+  color: #fffefa;
+}
+html[data-installed-navigation='true'] .community-hub-hero > p:not(.jic-app-brandline) {
+  margin: 0;
+  color: #e4eee8;
+  line-height: 1.45;
+}
+html[data-installed-navigation='true'] .jic-hub-route {
+  background: var(--jic-bg, #f4f5f7);
+}
+html[data-installed-navigation='true'] .community-hub-quick {
+  background: transparent;
+  border: 0;
+}
+html[data-installed-navigation='true'] .jic-home-intro {
+  padding: 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(100deg, #063e35f2, #104f42c4 65%, #104f4299),
+    url('/jic-aerial-sunset.jpg') center 48% / cover;
+}
+html[data-installed-navigation='true'] .jic-premium-home .jic-home-welcome {
+  max-width: 22ch;
+  font-size: clamp(27px, 6vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: #fffefa;
+  text-wrap: balance;
+}
+html[data-installed-navigation='true'] .jic-premium-home .jic-hero-inner {
+  padding-top: 12px;
+  gap: 18px;
+}
+.jic-app-full-timetable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 8px 4px 0;
+  border-top: 1px solid var(--jic-border);
+  color: var(--jic-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .jic-home-route .jic-premium-home .jic-home-welcome {
+    font-size: clamp(27px, 6.5vw, 34px);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+}

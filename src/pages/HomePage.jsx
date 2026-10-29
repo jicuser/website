@@ -197,7 +197,10 @@ export default function HomePage() {
       <section className="jic-hero">
         <div className="jic-hero-inner">
           <div className="jic-hero-copy">
-            <h1 className="jic-home-welcome">Worship. Learn. Grow. Together.</h1>
+            <header className="jic-home-intro">
+              <p className="jic-app-brandline">Jamatia Islamic Centre</p>
+              <h1 className="jic-home-welcome">Worship. Learn. Grow. Together.</h1>
+            </header>
             <nav className="jic-home-shortcuts" aria-label="Services and learning">
               {shortcuts.map(({ key, ...card }) => (
                 <HomeDestination key={key} {...card} />

@@ -47,22 +47,25 @@ export default function SpiritualOverlays() {
 
   if (!open || editMode) return null;
   return (
-    <aside ref={note} className="jic-salawat-note" aria-label="Salawat">
-      <div>
-        <span className="jic-spiritual-kicker">Salawat</span>
-        <p className="jic-salawat-arabic" lang="ar" dir="rtl">
-          {SALAWAT.arabic}
-        </p>
-        <p className="jic-salawat-transliteration">{SALAWAT.transliteration}</p>
-      </div>
-      <button
-        type="button"
-        className="jic-spiritual-dismiss"
-        aria-label="Dismiss salawat"
-        onClick={() => setOpen(false)}
-      >
-        <X size={18} aria-hidden="true" />
-      </button>
-    </aside>
+    <>
+      <div className="jic-salawat-backdrop" aria-hidden="true" />
+      <aside ref={note} className="jic-salawat-note" aria-label="Salawat">
+        <div>
+          <span className="jic-spiritual-kicker">Salawat</span>
+          <p className="jic-salawat-arabic" lang="ar" dir="rtl">
+            {SALAWAT.arabic}
+          </p>
+          <p className="jic-salawat-transliteration">{SALAWAT.transliteration}</p>
+        </div>
+        <button
+          type="button"
+          className="jic-spiritual-dismiss"
+          aria-label="Dismiss salawat"
+          onClick={() => setOpen(false)}
+        >
+          <X size={18} aria-hidden="true" />
+        </button>
+      </aside>
+    </>
   );
 }

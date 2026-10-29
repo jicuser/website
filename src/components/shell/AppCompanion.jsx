@@ -1,11 +1,11 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import TodayPrayerSummary from '@/components/home/TodayPrayerSummary';
 import '@/styles/app-experience.css';
 
 export default function AppCompanion() {
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState(true);
   const panel = useRef(null);
   useLayoutEffect(() => {
     const update = () =>
@@ -43,6 +43,9 @@ export default function AppCompanion() {
       </div>
       <div id="jic-app-salah" className="jic-app-salah" hidden={hidden}>
         <TodayPrayerSummary showLink={false} />
+        <Link to="/prayer-times/monthly" className="jic-app-full-timetable">
+          View full timetable <ArrowRight size={16} aria-hidden="true" />
+        </Link>
       </div>
     </aside>
   );

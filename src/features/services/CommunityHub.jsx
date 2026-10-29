@@ -39,6 +39,7 @@ export default function CommunityHub() {
   return (
     <section className="community-hub" aria-labelledby={`${id}-title`}>
       <header className="community-hub-hero">
+        <p className="jic-app-brandline">Jamatia Islamic Centre</p>
         <h1 id={`${id}-title`}>Community Hub</h1>
         <p>Services, learning and support.</p>
         <div className="community-hub-search">
