@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import { ChevronDown, ChevronRight, Pause, Play, ExternalLink } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import AppInstall from '@/components/shell/AppInstall';
 import InstalledAppBar from '@/components/shell/InstalledAppBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { HeaderActions, NavigationDrawer } from '@/components/shell/SiteNavigation';
@@ -51,7 +52,6 @@ export default function UnifiedHeader() {
   const { pathname: routePath, key: routeKey } = useLocation();
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const isHome = pathname === '/';
-  const alertSetup = pathname === '/prayer-times/reminders';
   const taskRoute = prefersQuietPrayerDock(pathname);
   const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
@@ -109,7 +109,7 @@ export default function UnifiedHeader() {
   );
   const selected = navigation?.current?.path;
   const breadcrumbs = navigationBreadcrumbs(navigation);
-  const hasSectionPicker = subtabs.length > 0 && !alertSetup && pathname !== '/get-involved';
+  const hasSectionPicker = subtabs.length > 0;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   const status = radioError
@@ -222,6 +222,7 @@ export default function UnifiedHeader() {
 
   return (
     <>
+      <AppInstall />
       <audio
         ref={audioRef}
         src={streamUrl || undefined}
@@ -330,7 +331,7 @@ export default function UnifiedHeader() {
                       : navigation.current?.name || `Browse ${navigation.name}`}
                   </strong>
                 </span>
-                <ChevronDown size={16} aria-hidden="true" />
+                <span className="jic-section-view-all">View all <ChevronDown size={16} aria-hidden="true" /></span>
               </summary>
               <nav aria-label={`${navigation.name} pages`}>
                 {breadcrumbs

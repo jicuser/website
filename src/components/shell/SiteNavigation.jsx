@@ -5,6 +5,7 @@ import {
   HeartHandshake, Heart, Home, Info, Layers, LogIn, Menu, Moon,
   Phone, Search, Settings, Sun, User, Users, X,
 } from 'lucide-react';
+import { InstallAppButton } from '@/components/shell/AppInstall';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { useAppearance } from '@/context/AppearanceContext';
 import { activeDrawerPath } from '@/lib/drawerNavigation';
@@ -114,6 +115,7 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
               })}</ul>
             </nav>
             <button type="button" className="jic-drawer-appearance-link" onClick={() => onViewChange('appearance')}><Settings size={22} aria-hidden="true" /><span>Appearance</span><ChevronRight size={18} aria-hidden="true" /></button>
+            <InstallAppButton onClick={onClose} />
             <nav className="jic-drawer-account" aria-label="Account and giving">
               <Link to="/portal" aria-label={accountLabel}><User size={19} aria-hidden="true" /><span>{accountLabel}</span></Link>
               <Link to="/admin/login" aria-label="Staff login"><LogIn size={19} aria-hidden="true" /><span>Staff login</span></Link>
