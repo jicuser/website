@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import { ChevronDown, ChevronRight, Pause, Play, ExternalLink } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import InstalledAppBar from '@/components/shell/InstalledAppBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { HeaderActions, NavigationDrawer } from '@/components/shell/SiteNavigation';
 import { drawerNavigation } from '@/lib/drawerNavigation';
@@ -458,6 +459,7 @@ export default function UnifiedHeader() {
           />
         </Suspense>
       )}
+      <InstalledAppBar open={menuOpen} view={menuView} onOpen={(view) => { setMenuView(view); setMenuOpen(true); }} />
       <NavigationDrawer
         open={menuOpen}
         view={menuView}
