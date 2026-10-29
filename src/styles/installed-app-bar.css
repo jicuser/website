@@ -12,7 +12,8 @@ html[data-installed-navigation='true'] .jic-public-route {
   inset: auto 0 0;
   z-index: 60;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 8px;
   padding: 4px max(8px, env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom))
     max(8px, env(safe-area-inset-left));
   border-top: 1px solid var(--jic-glass-border);
@@ -28,6 +29,7 @@ html[data-installed-navigation='true'] .jic-public-route {
   justify-content: center;
   gap: 3px;
   min-height: 56px;
+  min-width: 0;
   border: 0;
   border-radius: 12px;
   background: transparent;
@@ -38,6 +40,8 @@ html[data-installed-navigation='true'] .jic-public-route {
 }
 .jic-installed-app-bar :is([aria-current], [aria-expanded='true']) {
   color: var(--jic-gold);
+  background: var(--jic-glass-control);
+  box-shadow: inset 0 0 0 1px var(--jic-glass-border);
 }
 .jic-installed-app-bar :disabled {
   opacity: 0.35;
@@ -60,5 +64,32 @@ html[data-installed-navigation='true'] .jic-site-notice:is(.bottom-left, .bottom
 @media (max-width: 767px) {
   html[data-installed-navigation='true'] .jic-mobile-dock {
     margin-bottom: var(--jic-app-bar-height);
+  }
+}
+
+.jic-app-destinations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+}
+.jic-app-history {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(44px, 1fr));
+  gap: 2px;
+  padding-left: 6px;
+  border-left: 1px solid var(--jic-glass-border);
+}
+.jic-app-history button {
+  font-size: 10px;
+  color: var(--jic-text-secondary);
+}
+.jic-installed-app-bar :is(a, button):not(:disabled):active {
+  background: var(--jic-glass-control);
+}
+@media (min-width: 600px) {
+  .jic-installed-app-bar {
+    grid-template-columns: 300px 104px;
+    justify-content: center;
+    gap: 20px;
   }
 }
