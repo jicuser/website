@@ -615,3 +615,18 @@ html[data-theme] .jic-floating-hint {
   color: var(--jic-text);
   box-shadow: var(--jic-shadow-soft);
 }
+
+/* Keep navigation readable over photos and the dark modal backdrop. */
+html[data-theme] .jic-public-route .jic-navigation-drawer {
+  background: var(--jic-surface);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-theme][data-surface='glass'] .jic-public-route .jic-navigation-drawer {
+    background: color-mix(in srgb, var(--jic-surface) 96%, transparent);
+  }
+}
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html[data-theme][data-surface] .jic-public-route .jic-navigation-drawer {
+    background: var(--jic-surface);
+  }
+}

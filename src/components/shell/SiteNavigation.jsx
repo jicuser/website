@@ -6,7 +6,6 @@ import {
   Phone, Search, Settings, Sun, User, Users, X,
 } from 'lucide-react';
 import { InstallAppButton } from '@/components/shell/AppInstall';
-import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { useAppearance } from '@/context/AppearanceContext';
 import { activeDrawerPath } from '@/lib/drawerNavigation';
 import '@/styles/site-navigation.css';
@@ -51,6 +50,8 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
   const closeRef = useRef(null);
   const [expanded, setExpanded] = useState({});
   const active = activeDrawerPath(groups, pathname);
+  const shortcuts = groups.flatMap((group) => [group, ...(group.children || [])])
+    .filter((item, index, items) => ['/worship', '/education'].includes(item.path) && items.findIndex((candidate) => candidate.path === item.path) === index);
   useLayoutEffect(() => {
     if (!open) return undefined;
     const dialog = dialogRef.current;
@@ -84,7 +85,7 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
       if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose();
     }}>
       <div className="jic-navigation-head">
-        <Link to="/" className="jic-drawer-brand" aria-label="Jamatia Islamic Centre home" onClick={onClose}><JamatiaLogo variant="wordmark" /></Link>
+        <div className="jic-menu-heading"><span>Jamatia Islamic Centre</span><h2>{view === 'appearance' ? 'Your preferences' : 'Explore JIC'}</h2></div>
         <button ref={closeRef} type="button" onClick={onClose} aria-label="Close navigation menu"><X size={23} aria-hidden="true" /></button>
       </div>
       <div className="jic-navigation-scroll" key={view}>
@@ -96,26 +97,30 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
           </section>
         ) : (
           <>
+            <Link to="/search" className="jic-menu-search" onClick={onClose}><Search size={20} aria-hidden="true" /><span>Search pages, services & classes</span><ChevronRight size={16} aria-hidden="true" /></Link>
+            {shortcuts.length > 0 && <nav className="jic-menu-shortcuts" aria-label="Worship and learning">{shortcuts.map(({ path, name }) => <NavLink key={path} to={path} onClick={onClose}><BookOpen size={18} aria-hidden="true" /><span>{name}</span><ChevronRight size={14} aria-hidden="true" /></NavLink>)}</nav>}
             <nav aria-label="All pages">
               <ul className="jic-drawer-list">{groups.map(({ name, path, children = [] }) => {
                 const Icon = destinationIcons[path] || Users;
                 const subpages = children.filter((child) => child.path !== path);
                 const childrenId = `jic-drawer-${encodeURIComponent(path)}-children`;
                 return (
-                  <li key={path}>
+                  <li key={path} className={expanded[path] ? 'is-expanded' : undefined}>
                     <div className="jic-drawer-row">
-                      <Link to={path} aria-current={active === path ? pathname === path ? 'page' : 'location' : undefined} onClick={() => { if (pathname === path) onClose(); }}>
+                      <Link to={path} aria-current={active === path ? pathname === path ? 'page' : 'location' : undefined} onClick={onClose}>
                         <Icon className="jic-drawer-destination-icon" size={22} aria-hidden="true" /><span>{name}</span>{!subpages.length && <ChevronRight className="jic-drawer-chevron" size={17} aria-hidden="true" />}
                       </Link>
-                      {subpages.length > 0 && <button type="button" className="jic-drawer-expand" aria-label={`${expanded[path] ? 'Collapse' : 'Expand'} ${name} subpages`} aria-expanded={Boolean(expanded[path])} aria-controls={childrenId} onClick={() => setExpanded((previous) => ({ [path]: !previous[path] }))}><ChevronDown size={19} aria-hidden="true" /></button>}
+                      {subpages.length > 0 && <button type="button" className="jic-drawer-expand" aria-label={`${expanded[path] ? 'Collapse' : 'Expand'} ${name} subpages`} aria-expanded={Boolean(expanded[path])} aria-controls={childrenId} onClick={() => setExpanded((previous) => ({ [path]: !previous[path] }))}><span>{expanded[path] ? 'Less' : 'More'}</span><ChevronDown size={16} aria-hidden="true" /></button>}
                     </div>
-                    {subpages.length > 0 && <ul id={childrenId} className="jic-drawer-children" hidden={!expanded[path]}>{subpages.map((child) => <li key={`${child.path}-${child.name}`}><NavLink end to={child.path} onClick={() => { if (pathname === child.path) onClose(); }}>{child.name}</NavLink></li>)}</ul>}
+                    {subpages.length > 0 && <ul id={childrenId} className="jic-drawer-children" hidden={!expanded[path]}>{subpages.map((child) => <li key={`${child.path}-${child.name}`}><NavLink end to={child.path} onClick={onClose}>{child.name}</NavLink></li>)}</ul>}
                   </li>
                 );
               })}</ul>
             </nav>
-            <button type="button" className="jic-drawer-appearance-link" onClick={() => onViewChange('appearance')}><Settings size={22} aria-hidden="true" /><span>Appearance</span><ChevronRight size={18} aria-hidden="true" /></button>
-            <InstallAppButton onClick={onClose} />
+            <div className="jic-menu-utilities">
+              <button type="button" className="jic-drawer-appearance-link" onClick={() => onViewChange('appearance')}><Settings size={18} aria-hidden="true" /><span>Appearance</span><ChevronRight size={15} aria-hidden="true" /></button>
+              <InstallAppButton onClick={onClose} />
+            </div>
             <nav className="jic-drawer-account" aria-label="Account and giving">
               <Link to="/portal" aria-label={accountLabel}><User size={19} aria-hidden="true" /><span>{accountLabel}</span></Link>
               <Link to="/admin/login" aria-label="Staff login"><LogIn size={19} aria-hidden="true" /><span>Staff login</span></Link>
