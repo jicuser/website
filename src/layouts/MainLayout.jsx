@@ -60,7 +60,7 @@ function PublicLayout() {
 
   return (
     <div
-      className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${preview ? 'is-admin-preview' : ''}`}
+      className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${pathname === '/services' ? 'jic-hub-route' : ''} ${preview ? 'is-admin-preview' : ''}`}
     >
       {isHome && <PublicBackdrop />}
       <a className="jic-skip-link" href="#main-content">

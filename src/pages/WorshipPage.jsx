@@ -52,9 +52,9 @@ export default function WorshipPage() {
                 </Link>
               ))}
             </nav>
-            <GuidancePanel journeyId="worship" />
+            <details className="jic-details-section"><summary>Help me choose</summary><GuidancePanel journeyId="worship" /></details>
             <Link className="guidance-back-link" to="/prayer-times/reminders">
-              Salah reminders <ArrowRight size={16} aria-hidden="true" />
+              Salah alerts <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
         </>

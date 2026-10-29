@@ -12,6 +12,8 @@ import React, {
 } from 'react';
 import { ChevronDown, ChevronRight, Pause, Play, ExternalLink } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import AppCompanion from '@/components/shell/AppCompanion';
+import useInstalledApp from '@/hooks/useInstalledApp';
 import AppInstall from '@/components/shell/AppInstall';
 import InstalledAppBar from '@/components/shell/InstalledAppBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
@@ -42,6 +44,7 @@ const RadioLiveNotice = lazy(() => import('./RadioLiveNotice'));
 const DesktopNavigation = lazy(() => import('./DesktopNavigation'));
 
 export default function UnifiedHeader() {
+  const installed = useInstalledApp();
   const { getContent } = useContent();
   const { user } = useAuth();
   const accountLabel = user ? 'My portal' : 'Portal login';
@@ -157,7 +160,7 @@ export default function UnifiedHeader() {
     if (prayer) observer.observe(prayer);
     if (banner) observer.observe(banner);
     return () => observer.disconnect();
-  }, [isHome, isCommunityHub]);
+  }, [isHome, isCommunityHub, installed]);
   useEffect(() => {
     const nav = subnavRef.current;
     if (!nav) return undefined;
@@ -224,6 +227,7 @@ export default function UnifiedHeader() {
   return (
     <>
       <AppInstall />
+      {installed && <AppCompanion />}
       <audio
         ref={audioRef}
         src={streamUrl || undefined}
@@ -248,7 +252,7 @@ export default function UnifiedHeader() {
         }}
         aria-hidden="true"
       />
-      <header className={cn('jic-unified-header jic-header-redesign', taskRoute && 'is-task-mode')}>
+      <header className={cn('jic-unified-header jic-header-redesign', taskRoute && 'is-task-mode', pathname.startsWith('/prayer-times') && 'is-prayer-section')}>
         <MobileInfoBanner
           ref={mobileBannerRef}
           collapsed={prayerDockHidden}
@@ -405,7 +409,7 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
-      {!isHome && !isCommunityHub && (
+      {!installed && !isHome && !isCommunityHub && (
         <div className="jic-mobile-dock">
           <div
             id="jic-prayer-dock"
