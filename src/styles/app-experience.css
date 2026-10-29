@@ -340,3 +340,41 @@ html[data-installed-navigation='true'] .jic-premium-home .jic-hero-inner {
     text-wrap: balance;
   }
 }
+
+/* The installed Hub starts with its directory, without a second hero or shortcuts. */
+html[data-installed-navigation='true'] .community-hub-hero {
+  display: contents;
+}
+html[data-installed-navigation='true'] .community-hub-hero > :not(h1),
+html[data-installed-navigation='true'] .community-hub-quick {
+  display: none;
+}
+html[data-installed-navigation='true'] .community-hub-hero h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+html[data-installed-navigation='true'] .community-hub-content {
+  padding-top: 14px;
+}
+html[data-installed-navigation='true'] .community-hub-filters {
+  margin-bottom: 16px;
+}
+html[data-surface='glass'] .jic-app-companion-tools :is(button, a) {
+  background: color-mix(in srgb, var(--jic-surface) 40%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 2px 10px #0000000a;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-surface='glass'] .jic-app-companion-tools :is(button, a) {
+    background: var(--jic-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
