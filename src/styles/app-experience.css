@@ -1,0 +1,617 @@
+/* Installed app only: shared public pages retain their browser layout. */
+html[data-installed-navigation='true'] {
+  --jic-mobile-visible-dock-height: 0px;
+  scroll-padding-top: max(12px, env(safe-area-inset-top));
+  scroll-padding-bottom: calc(
+    var(--jic-app-bar-height) + var(--jic-app-companion-height, 150px) + 24px
+  );
+}
+html[data-installed-navigation='true'] .jic-public-route {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: calc(var(--jic-app-bar-height) + var(--jic-app-companion-height, 150px) + 16px);
+}
+html[data-installed-navigation='true'] .jic-unified-header {
+  position: relative;
+  top: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+html[data-installed-navigation='true'] .jic-unified-inner {
+  padding: 0;
+}
+html[data-installed-navigation='true']
+  :is(
+    .jic-free-nav-row,
+    .jic-mobile-info-banner,
+    .jic-section-location,
+    .jic-section-picker,
+    .jic-task-prayer-toggle
+  ) {
+  display: none;
+}
+html[data-installed-navigation='true']
+  .jic-unified-header:not(.is-prayer-section)
+  .jic-unified-subnav {
+  display: none;
+}
+html[data-installed-navigation='true'] .jic-public-main {
+  padding-top: 0;
+}
+html[data-installed-navigation='true'] .jic-inner-page {
+  padding-top: 0;
+}
+html[data-installed-navigation='true'] :is(.jic-page-heading, .community-guidance-heading) {
+  padding-block: 16px 12px;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+html[data-installed-navigation='true'] :is(.jic-page-heading, .community-guidance-heading) h1 {
+  font-size: clamp(26px, 6vw, 34px);
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+html[data-installed-navigation='true'] :is(.jic-page-intro, .community-guidance-heading p) {
+  font-size: 14px;
+  line-height: 1.5;
+}
+html[data-installed-navigation='true'] .jic-page-symbol {
+  display: none;
+}
+html[data-installed-navigation='true']
+  :is(.community-guidance-page, .guidance-page-width, .worship-page, .jic-page-choices) {
+  margin-top: 0;
+}
+html[data-installed-navigation='true'] .community-guidance-workspace {
+  padding: 16px;
+  border-radius: 16px;
+}
+html[data-installed-navigation='true'] :is(.guidance-panel, .guidance-topic-detail) {
+  padding: 16px;
+}
+html[data-installed-navigation='true'] .guidance-panel h2 {
+  font-size: 23px;
+}
+html[data-installed-navigation='true'] .guidance-topic-choices {
+  gap: 8px;
+}
+html[data-installed-navigation='true'] .guidance-topic-choices button {
+  min-height: 48px;
+  padding: 10px;
+  font-size: 14px;
+}
+html[data-installed-navigation='true'] .jic-page-choice {
+  padding: 12px;
+  min-height: 100px;
+  gap: 8px;
+}
+html[data-installed-navigation='true'] .jic-page-choice-symbol {
+  width: 32px;
+  height: 32px;
+}
+html[data-installed-navigation='true'] .jic-page-choice-copy strong {
+  font-size: 16px;
+}
+html[data-installed-navigation='true'] .jic-page-choice-copy > span {
+  font-size: 13px;
+  line-height: 1.4;
+}
+html[data-installed-navigation='true'] .worship-compact-resources {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+html[data-installed-navigation='true'] .worship-compact-resources a {
+  min-height: 88px;
+  padding: 12px;
+  gap: 8px;
+}
+html[data-installed-navigation='true'] .worship-compact-resources strong {
+  font-size: 15px;
+}
+html[data-installed-navigation='true'] .worship-compact-resources small {
+  font-size: 12px;
+}
+html[data-installed-navigation='true'] .jic-rail-section {
+  padding-block: 16px;
+  margin-block: 12px;
+}
+html[data-installed-navigation='true'] .jic-rail-heading h2 {
+  font-size: 23px;
+}
+html[data-installed-navigation='true'] .jic-programme-copy {
+  padding: 12px;
+}
+html[data-installed-navigation='true'] .jic-footer-links {
+  display: none;
+}
+html[data-installed-navigation='true'] .jic-footer-inner {
+  padding-block: 12px;
+  gap: 8px;
+}
+html[data-installed-navigation='true'] .jic-footer-signature {
+  display: none;
+}
+html[data-installed-navigation='true'] .jic-footer-legal {
+  font-size: 11px;
+}
+html[data-installed-navigation='true'] .community-hub {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+html[data-installed-navigation='true'] .community-hub-hero {
+  padding: 24px 20px;
+  background:
+    linear-gradient(110deg, #073a32dc, #145a48b8),
+    url('/jic-aerial-sunset.jpg') center 45% / cover;
+}
+html[data-installed-navigation='true'] .jic-hub-route {
+  background: linear-gradient(#104c40 0 160px, var(--jic-bg, #f4f5f7) 300px);
+}
+html[data-installed-navigation='true'] .community-hub-search {
+  display: none;
+}
+html[data-installed-navigation='true'] .community-hub-hero h1 {
+  font-size: 30px;
+}
+html[data-installed-navigation='true'] .community-hub-hero p {
+  font-size: 14px;
+}
+html[data-installed-navigation='true'] .community-hub-content {
+  padding: 12px 16px 16px;
+}
+html[data-installed-navigation='true'] .community-hub-quick {
+  padding: 12px 16px;
+  gap: 8px;
+}
+html[data-installed-navigation='true'] .community-hub-card-body {
+  min-height: 96px;
+  padding: 12px;
+}
+.jic-app-companion {
+  position: fixed;
+  bottom: calc(var(--jic-app-bar-height, 64px) + 8px);
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  max-width: 520px;
+  margin-inline: auto;
+  z-index: 56;
+  pointer-events: none;
+}
+.jic-app-companion-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.jic-app-companion-tools :is(button, a),
+.jic-app-salah {
+  pointer-events: auto;
+  color: var(--jic-text);
+  border: 1px solid var(--jic-glass-border);
+  border-radius: 16px;
+  background: var(--jic-surface);
+  background: color-mix(in srgb, var(--jic-surface) 82%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 18px #0001;
+}
+.jic-app-companion-tools :is(button, a) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+.jic-app-salah {
+  padding: 8px 10px;
+}
+.jic-app-salah[hidden] {
+  display: none;
+}
+.jic-app-salah .jic-mobile-prayer-content {
+  display: flex;
+  width: 100%;
+}
+.jic-app-salah .jic-mobile-prayer-rows {
+  width: 100%;
+}
+.jic-app-salah .jic-mobile-prayer-times {
+  display: grid;
+  grid-template-columns: 0.8fr repeat(5, 1fr);
+  gap: 4px;
+}
+.jic-app-salah .jic-mini-prayer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+}
+.jic-app-salah .jic-mobile-prayer-heading {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+html[data-installed-navigation='true']
+  .jic-public-route
+  :is(
+    .jic-scroll-top,
+    .jic-admin-bar,
+    .jic-radio-live-notice,
+    .jic-site-notice.bottom-left,
+    .jic-site-notice.bottom-right
+  ) {
+  margin-bottom: calc(var(--jic-app-bar-height) + var(--jic-app-companion-height, 150px));
+}
+.jic-app-companion :is(button, a):focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: 2px;
+}
+html[data-surface='solid'] .jic-app-companion :is(button, a, .jic-app-salah) {
+  background: var(--jic-surface);
+  backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .jic-app-companion-tools :is(button, a),
+  .jic-app-salah {
+    background: var(--jic-surface);
+    backdrop-filter: none;
+  }
+}
+
+/* Compact, recognisable headings without restoring the large app logo row. */
+.jic-app-brandline {
+  display: none;
+}
+html[data-installed-navigation='true'] .jic-app-brandline {
+  display: block;
+  margin: 0 0 8px;
+  font:
+    600 10px/1.4 system-ui,
+    sans-serif;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #e4eee8;
+}
+html[data-installed-navigation='true'] .community-hub-hero {
+  padding: 20px 20px 24px;
+  border-radius: 0 0 22px 22px;
+  background:
+    linear-gradient(100deg, #063e35f2, #104f42c4 65%, #104f4299),
+    url('/jic-aerial-sunset.jpg') center 48% / cover;
+}
+html[data-installed-navigation='true'] .community-hub-hero h1 {
+  margin: 0 0 8px;
+  font-size: clamp(28px, 7vw, 34px);
+  line-height: 1.12;
+  color: #fffefa;
+}
+html[data-installed-navigation='true'] .community-hub-hero > p:not(.jic-app-brandline) {
+  margin: 0;
+  color: #e4eee8;
+  line-height: 1.45;
+}
+html[data-installed-navigation='true'] .jic-hub-route {
+  background: var(--jic-bg, #f4f5f7);
+}
+html[data-installed-navigation='true'] .community-hub-quick {
+  background: transparent;
+  border: 0;
+}
+html[data-installed-navigation='true'] .jic-home-intro {
+  padding: 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(100deg, #063e35f2, #104f42c4 65%, #104f4299),
+    url('/jic-aerial-sunset.jpg') center 48% / cover;
+}
+html[data-installed-navigation='true'] .jic-premium-home .jic-home-welcome {
+  max-width: 22ch;
+  font-size: clamp(27px, 6vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: #fffefa;
+  text-wrap: balance;
+}
+html[data-installed-navigation='true'] .jic-premium-home .jic-hero-inner {
+  padding-top: 12px;
+  gap: 18px;
+}
+.jic-app-full-timetable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 8px 4px 0;
+  border-top: 1px solid var(--jic-border);
+  color: var(--jic-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .jic-home-route .jic-premium-home .jic-home-welcome {
+    font-size: clamp(27px, 6.5vw, 34px);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+}
+
+/* The installed Hub starts with its directory, without a second hero or shortcuts. */
+html[data-installed-navigation='true'] .community-hub-hero {
+  display: contents;
+}
+html[data-installed-navigation='true'] .community-hub-hero > :not(h1),
+html[data-installed-navigation='true'] .community-hub-quick {
+  display: none;
+}
+html[data-installed-navigation='true'] .community-hub-hero h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+html[data-installed-navigation='true'] .community-hub-content {
+  padding-top: 14px;
+}
+html[data-installed-navigation='true'] .community-hub-filters {
+  margin-bottom: 16px;
+}
+html[data-surface='glass'] .jic-app-companion-tools :is(button, a) {
+  background: color-mix(in srgb, var(--jic-surface) 40%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 2px 10px #0000000a;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-surface='glass'] .jic-app-companion-tools :is(button, a) {
+    background: var(--jic-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* The installed home is a small daily dashboard; browser home retains its layout. */
+.jic-app-brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  max-width: 760px;
+  padding: 10px 16px 6px;
+  margin: auto;
+}
+.jic-app-brand-header .brand-lockup {
+  width: 130px;
+}
+.jic-app-brand-header nav {
+  display: flex;
+  gap: 4px;
+}
+.jic-app-brand-header nav :is(a, button) {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--jic-text);
+  border: 1px solid var(--jic-glass-border);
+  background: color-mix(in srgb, var(--jic-surface) 65%, transparent);
+}
+.jic-app-brand-header :focus-visible,
+.jic-app-radio button:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 2px;
+}
+html[data-installed-navigation='true'] .jic-premium-home.jic-app-home .jic-hero-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 4px 0 0;
+  width: calc(100% - 24px);
+  max-width: 736px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-hero {
+  padding: 0;
+  min-height: 0;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-content {
+  gap: 12px;
+  padding-block: 12px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-content > * {
+  margin-block: 0;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-prayer {
+  width: 100%;
+  margin: 0;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-prayer-browser-item {
+  padding-block: 6px;
+  gap: 3px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-community-links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-community-links a {
+  padding: 8px;
+  font-size: 12px;
+  min-height: 44px;
+}
+html[data-installed-navigation='true'] .jic-app-home .community-programme-feed {
+  max-width: 736px;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-row {
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 10px;
+  padding-bottom: 6px;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-thumb {
+  width: 48px;
+  min-height: 58px;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-thumb img {
+  width: 48px;
+  height: 64px;
+  object-fit: contain;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-row h3 {
+  font-size: 14px;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-row p {
+  font-size: 12px;
+}
+.jic-app-radio {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--jic-glass-border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--jic-surface) 70%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: var(--jic-text);
+}
+.jic-app-radio-art {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  color: var(--jic-gold);
+  background: color-mix(in srgb, var(--jic-gold) 12%, transparent);
+}
+.jic-app-radio h2 {
+  font:
+    700 15px/1.4 system-ui,
+    sans-serif;
+  margin: 0;
+}
+.jic-app-radio p {
+  font-size: 12px;
+  margin: 2px 0 0;
+  color: var(--jic-text-secondary);
+}
+.jic-app-radio button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--jic-text);
+  color: var(--jic-surface);
+}
+.jic-app-radio button:disabled {
+  opacity: 0.5;
+}
+.jic-app-companion-tools[hidden] {
+  display: none;
+}
+html[data-surface='solid']
+  :is(.jic-app-radio, .jic-app-brand-header nav a, .jic-app-brand-header nav button) {
+  background: var(--jic-surface);
+  backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .jic-app-radio,
+  .jic-app-brand-header nav :is(a, button) {
+    background: var(--jic-surface);
+    backdrop-filter: none;
+  }
+}
+@media (max-width: 374px) {
+  html[data-installed-navigation='true'] .jic-app-home .jic-prayer-start-label {
+    display: block;
+  }
+  html[data-installed-navigation='true'] .jic-app-home .jic-prayer-browser-item small {
+    font-size: 10px;
+    line-height: 1.3;
+  }
+}
+
+/* A quiet branded header, with section choices below the wordmark. */
+.jic-app-brand-header {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 16px 12px;
+}
+.jic-app-brand-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(45deg, transparent 0 18px, rgba(128, 104, 58, .09) 18px 19px, transparent 19px 36px), repeating-linear-gradient(-45deg, transparent 0 18px, rgba(128, 104, 58, .07) 18px 19px, transparent 19px 36px);
+  mask-image: linear-gradient(110deg, transparent 25%, #000 80%), linear-gradient(#000, transparent);
+  mask-composite: intersect;
+}
+.jic-app-brand-header nav.jic-app-section-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+.jic-app-brand-header nav.jic-app-section-links a {
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
+}
+.jic-app-brand-header nav.jic-app-section-links a[aria-current='page'] {
+  color: var(--jic-text);
+  border-color: currentColor;
+  box-shadow: inset 0 -2px 0 currentColor;
+}
+.jic-app-companion-tools.is-home { justify-content: flex-end; }
+html[data-installed-navigation='true'] .jic-prayer-title {
+  padding-top: 10px;
+  padding-bottom: 12px;
+}
+html[data-installed-navigation='true'] .jic-prayer-title h1 {
+  font-size: clamp(25px, 6vw, 32px);
+  line-height: 1.2;
+}
+html[data-installed-navigation='true'] .jic-prayer-location { display: none; }
+
+.jic-app-section-navigation { width: 100%; }
+.jic-app-section-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--jic-text);
+}
+.jic-app-section-caption a { text-underline-offset: 3px; padding-block: 8px; }
+.jic-app-brand-header nav.jic-app-section-links a[aria-current] {
+  border-color: var(--jic-gold);
+  background: color-mix(in srgb, var(--jic-gold) 15%, var(--jic-surface));
+  box-shadow: inset 0 -2px 0 var(--jic-gold);
+}

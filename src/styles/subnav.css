@@ -159,7 +159,8 @@
     display: none;
   }
   .jic-unified-subnav {
-    display: none;
+    display: flex;
+    padding-inline: 8px;
   }
 }
 
@@ -168,4 +169,13 @@
   .jic-task-prayer-toggle {
     display: none;
   }
+}
+
+.jic-section-picker summary .jic-section-view-all {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--jic-text-secondary);
 }

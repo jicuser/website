@@ -236,3 +236,44 @@
     display: none;
   }
 }
+.timetable-theme-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 0;
+}
+.timetable-theme-picker legend {
+  font-size: 13px;
+  font-weight: 650;
+}
+.timetable-theme-picker label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--jic-border, #a6b1bf);
+  border-radius: 10px;
+}
+.timetable-downloads > p,
+.timetable-wallpaper-help {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.timetable-wallpaper-help summary,
+.timetable-design-options summary {
+  padding-block: 12px;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 650;
+}
+.timetable-wallpaper-help ol {
+  padding-left: 22px;
+  list-style: decimal;
+}
+.timetable-wallpaper-help li {
+  margin-block: 8px;
+}
+.timetable-downloads-actions {
+  flex-wrap: wrap;
+}

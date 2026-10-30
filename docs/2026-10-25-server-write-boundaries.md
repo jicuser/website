@@ -8,8 +8,10 @@ check in `save_hall_calendar`.
 grants for insertion and editing. The existing RPC remains the create/edit API;
 public availability reads and the staff delete action retain their current
 permissions. No website or Edge Function deployment is needed for this change.
-Apply this new migration through the normal reviewed database release process;
-it has only been executed against isolated PGlite fixtures during this work.
+As of 30 October the candidate is in `supabase/staged/`, outside the automatic
+migration queue. It has only been executed against isolated PGlite fixtures.
+Do not deploy it to production until staging permissions and compatibility are
+verified; follow [the integration review](2026-10-30-pr37-integration.md).
 
 The existing edit contract still accepts the last submitted edit, so an older
 open editor can overwrite a newer edit. Preventing that requires adding an

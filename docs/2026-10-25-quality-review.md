@@ -28,8 +28,11 @@ Reviewed `jicuser/website` from main commit `a5c219c`. The separate
 
 ## Database release
 
-Apply only the new `20261025125656_hall_booking_rpc_writes.sql` migration through
-the normal database release process. It prevents direct booking creation/editing
+Update, 30 October: the candidate is held at
+`supabase/staged/20261025125656_hall_booking_rpc_writes.sql`, outside the automatic
+migration queue. Do not deploy it before the permissions and compatibility checks
+in [the integration review](2026-10-30-pr37-integration.md) pass on staging.
+It prevents direct booking creation/editing
 from bypassing the RPC overlap check. Public reads and staff deletion remain
 available. No Edge Function deployment is needed for that migration.
 

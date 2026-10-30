@@ -10,7 +10,7 @@ import '@/styles/community-hub.css';
 
 const icons = { book: BookOpen, briefcase: Briefcase, building: Building2, graduation: GraduationCap, heart: Heart, support: HeartHandshake, users: Users };
 const categories = [['all', 'All services'], ['life-events', 'Life events'], ['learning', 'Learning'], ['prayer', 'Worship'], ['community', 'Community']];
-const utilityIds = ['community', 'ramadan', 'giving', 'portal', 'prayer'];
+const utilityIds = ['prayer', 'community', 'giving', 'ramadan'];
 
 /** Existing routes, access rules and services are retained in one compact directory. */
 export default function CommunityHub() {
@@ -39,6 +39,7 @@ export default function CommunityHub() {
   return (
     <section className="community-hub" aria-labelledby={`${id}-title`}>
       <header className="community-hub-hero">
+        <p className="jic-app-brandline">Jamatia Islamic Centre</p>
         <h1 id={`${id}-title`}>Community Hub</h1>
         <p>Services, learning and support.</p>
         <div className="community-hub-search">
@@ -77,7 +78,7 @@ export default function CommunityHub() {
         <nav className="community-hub-utilities" aria-label="More at JIC">
           {utilities.map((service) => <Link key={service.id} to={service.to}>{service.id === 'community' ? 'Volunteer' : service.id === 'giving' ? 'Donate' : service.id === 'portal' ? 'My Portal' : service.title}<ArrowRight size={15} aria-hidden="true" /></Link>)}
           {isPageVisible(getContent, '/fundraise') && <Link to="/fundraise">Fundraising <ArrowRight size={15} aria-hidden="true" /></Link>}
-          {isPageVisible(getContent, '/radio') && <Link to="/radio"><Radio size={17} aria-hidden="true" /> JIC Radio</Link>}
+          {isPageVisible(getContent, '/radio') && <Link to="/radio"><span>JIC Radio</span><Radio size={17} aria-hidden="true" /></Link>}
           {isPageVisible(getContent, '/events') && <Link to="/events">What’s on <ArrowRight size={15} aria-hidden="true" /></Link>}
           {can('tv') && <Link to="/admin?section=tv"><Monitor size={17} aria-hidden="true" /> TV & live controls</Link>}
         </nav>

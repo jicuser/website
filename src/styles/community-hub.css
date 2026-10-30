@@ -142,3 +142,32 @@
   .hub-admin-save button { flex: 1; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) { .community-hub-card { transition: none; } .community-hub-card:hover { transform: none; } }
+
+/* Secondary destinations stay in an aligned grid instead of wrapping unevenly. */
+.community-hub .community-hub-utilities {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+.community-hub .community-hub-utilities a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.community-hub .community-hub-utilities a svg { flex-shrink: 0; }
+.community-hub .community-hub-utilities a:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.community-hub .community-hub-help {
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+}

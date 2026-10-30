@@ -1,3 +1,5 @@
+-- STAGED ONLY: not approved for production. See
+-- docs/2026-10-30-pr37-integration.md before moving into migrations/.
 begin;
 
 -- Creation and edits must use save_hall_calendar, which checks overlapping

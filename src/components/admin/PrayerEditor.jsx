@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Upload, Download, Save, Clock3, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { useRegisterAdminSave } from '@/context/AdminSaveContext';
+import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import {
   prayerFields,
   jummahFields,
@@ -11,12 +11,16 @@ import {
   displayTime,
 } from '@/lib/timetable';
 
+import MonthTimetableEditor from './MonthTimetableEditor';
+
 const CSV_TEMPLATE =
   'd_date,fajr_begins,fajr_jamah,sunrise,zuhr_begins,zuhr_jamah,asr_begins,asr_jamah,maghrib_begins,maghrib_jamah,isha_begins,isha_jamah,is_ramadan\r\n';
 const comparable = (value) => JSON.stringify(value || {});
 
 export default function PrayerEditor() {
-  const [view, setView] = useState('daily');
+  const { saving } = useAdminSave();
+  const [view, setView] = useState('month');
+  const [monthDirty, setMonthDirty] = useState(false);
   const [date, setDate] = useState(londonDate);
   const [form, setForm] = useState({});
   const [savedForm, setSavedForm] = useState({});
@@ -78,6 +82,8 @@ export default function PrayerEditor() {
   useEffect(() => {
     load(date);
   }, [date, load]);
+
+  const onMonthSaved = useCallback(() => load(date), [date, load]);
 
   const notifyUpdated = () => window.dispatchEvent(new Event('jic-content-updated'));
 
@@ -258,6 +264,7 @@ export default function PrayerEditor() {
       </p>
       <nav className="admin-actions prayer-task-views" aria-label="Timetable tasks">
         {[
+          ['month', 'Create / edit month'],
           ['daily', 'Daily times'],
           ['jummah', 'Jummah'],
           ['csv', 'CSV import'],
@@ -268,12 +275,29 @@ export default function PrayerEditor() {
             key={id}
             aria-pressed={view === id}
             aria-controls={`prayer-view-${id}`}
-            onClick={() => setView(id)}
+            disabled={saving || busy || loading}
+            onClick={() => {
+              if (id === view) return;
+              // Daily, weekly and CSV panels stay mounted and retain drafts.
+              // The month editor unmounts and can overlap those dated writes.
+              if (monthDirty || (id === 'month' && dirty)) {
+                setError('Save your changes before switching timetable tasks.');
+                return;
+              }
+              setView(id);
+            }}
           >
             {label}
           </button>
         ))}
       </nav>
+      {view === 'month' && weeklyLoaded.current && !loadFailed && (
+        <MonthTimetableEditor
+          onDirty={setMonthDirty}
+          onSaved={onMonthSaved}
+          weeklyJummah={jummah}
+        />
+      )}
       <section
         className="admin-panel"
         id="prayer-view-csv"

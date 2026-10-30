@@ -1,7 +1,7 @@
-import { buildMonthlyTimetable } from './monthlyTimetable.js';
+import { timetablePresentation } from './timetablePresentation.js';
 
 // Match the website's canonical navy and gold palette in theme.css.
-const colors = {
+const darkColors = {
   background: '#080f1d',
   heading: '#0c1930',
   surface: '#152238',
@@ -18,7 +18,7 @@ const drawText = (
   value,
   x,
   y,
-  { size = 28, weight = 500, color = colors.text, maxWidth } = {},
+  { size = 28, weight = 500, color = darkColors.text, maxWidth } = {},
 ) => {
   ctx.fillStyle = color;
   ctx.font = `${weight} ${size}px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
@@ -28,8 +28,8 @@ const drawText = (
   else ctx.fillText(String(value ?? ''), x, y);
 };
 
-function drawRule(ctx, x, y, x2, y2) {
-  ctx.strokeStyle = colors.border;
+function drawRule(ctx, x, y, x2, y2, palette = darkColors) {
+  ctx.strokeStyle = palette.border;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(x, y);
@@ -37,12 +37,26 @@ function drawRule(ctx, x, y, x2, y2) {
   ctx.stroke();
 }
 
-function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, phone) {
+function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, phone, options = {}) {
+  const colors =
+    phone && options.theme !== 'light'
+      ? { ...darkColors }
+      : {
+          background: '#ffffff',
+          heading: '#103c5b',
+          surface: '#ffffff',
+          alternate: '#eaf1f6',
+          gold: '#f8df67',
+          ink: '#0c1930',
+          text: '#0c1930',
+          muted: '#465568',
+          border: '#718397',
+        };
   if (!monthlyPrayerTimes?.length) return;
-  const timetable = buildMonthlyTimetable(monthlyPrayerTimes);
+  const timetable = timetablePresentation(monthlyPrayerTimes, options);
   const canvas = document.createElement('canvas');
   canvas.width = phone ? 1290 : 1800;
-  canvas.height = phone ? 2796 : 2220;
+  canvas.height = phone ? 2796 : 2546;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('This browser cannot create a timetable image.');
 
@@ -51,18 +65,39 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
   const middle = canvas.width / 2;
   const left = phone ? 42 : 60;
   const tableWidth = canvas.width - left * 2;
-  const brandY = phone ? 340 : 66;
-  drawText(ctx, 'JAMATIA ISLAMIC CENTRE', middle, brandY, {
-    size: phone ? 27 : 33,
-    weight: 700,
-    color: colors.gold,
-  });
-  drawText(ctx, `${currentMonth} Prayer Times`, middle, brandY + (phone ? 65 : 72), {
-    size: phone ? 49 : 60,
+  const brandY = phone ? 310 : 70;
+  if (options.logo)
+    ctx.drawImage(options.logo, left, phone ? 255 : 35, phone ? 340 : 650, phone ? 132 : 253);
+  if (!phone && options.photo) ctx.drawImage(options.photo, canvas.width - 620, 35, 560, 230);
+  if (!options.logo)
+    drawText(ctx, 'JAMATIA ISLAMIC CENTRE', middle, brandY, {
+      size: phone ? 27 : 33,
+      weight: 700,
+      color: phone ? colors.gold : colors.text,
+    });
+  if (!phone) {
+    drawText(ctx, '179–183 Woodlands Road · Sparkhill · Birmingham B11 4ER', middle, 305, {
+      size: 27,
+      color: colors.text,
+    });
+    drawText(ctx, 'Tel: 0121 778 6612  ·  jicmasjid.org', middle, 345, {
+      size: 25,
+      color: colors.text,
+    });
+  }
+  drawText(ctx, `${currentMonth} Prayer Times`, middle, phone ? 415 : 415, {
+    size: phone ? 42 : 46,
     weight: 700,
     maxWidth: tableWidth,
+    color: colors.text,
   });
-  const top = phone ? 470 : 190;
+  if (options.hijriHeading)
+    drawText(ctx, options.hijriHeading, middle, 455, {
+      size: phone ? 22 : 25,
+      color: colors.text,
+      maxWidth: tableWidth,
+    });
+  const top = phone ? 485 : 485;
   const groupHeight = phone ? 74 : 78;
   const labelHeight = phone ? 46 : 54;
   const body = top + groupHeight + labelHeight;
@@ -111,7 +146,14 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
         color: colors.gold,
       });
     if (!group.single) {
-      drawRule(ctx, positions[start], top + groupHeight, positions[after], top + groupHeight);
+      drawRule(
+        ctx,
+        positions[start],
+        top + groupHeight,
+        positions[after],
+        top + groupHeight,
+        colors,
+      );
       group.columns.forEach((column, offset) => {
         const index = start + offset;
         const columnWidth = positions[index + 1] - positions[index];
@@ -127,10 +169,11 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
             maxWidth: columnWidth - 8,
           },
         );
-        if (offset > 0) drawRule(ctx, positions[index], top + groupHeight, positions[index], end);
+        if (offset > 0)
+          drawRule(ctx, positions[index], top + groupHeight, positions[index], end, colors);
       });
     }
-    drawRule(ctx, positions[start], top, positions[start], end);
+    drawRule(ctx, positions[start], top, positions[start], end, colors);
     columnIndex = after;
   });
 
@@ -153,38 +196,69 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
         },
       );
     });
-    drawRule(ctx, left, y + rowHeight, left + tableWidth, y + rowHeight);
+    drawRule(ctx, left, y + rowHeight, left + tableWidth, y + rowHeight, colors);
   });
-  positions.forEach((x) => drawRule(ctx, x, body, x, end));
-  drawRule(ctx, left, top, left + tableWidth, top);
-  drawRule(ctx, left + tableWidth, top, left + tableWidth, end);
-  drawRule(ctx, left, body, left + tableWidth, body);
+  positions.forEach((x) => drawRule(ctx, x, body, x, end, colors));
+  drawRule(ctx, left, top, left + tableWidth, top, colors);
+  drawRule(ctx, left + tableWidth, top, left + tableWidth, end, colors);
+  drawRule(ctx, left, body, left + tableWidth, body, colors);
 
-  const footerY = end + 48;
+  if (options.notice) {
+    ctx.fillStyle = '#b91c1c';
+    ctx.fillRect(left, end + 8, tableWidth, 45);
+    drawText(ctx, options.notice, middle, end + 30, {
+      size: phone ? 22 : 28,
+      color: '#fff',
+      weight: 700,
+      maxWidth: tableWidth - 20,
+    });
+  }
+  const footerY = end + (options.notice ? 85 : 40);
+  const overrides = monthlyPrayerTimes.filter((row) => row.jummah_1_jamah || row.jummah_2_jamah);
+  const overrideText = overrides
+    .map(
+      (row) =>
+        `${(row.isoDate || row.d_date).slice(-2)}: ${row.jummah_1_jamah || 'weekly'} / ${row.jummah_2_jamah || 'weekly'}`,
+    )
+    .join(' · ');
   if (jummahTimes?.length) {
     drawText(
       ctx,
-      `Next Jummah · ${jummahTimes.map((time) => `${time.name}: ${time.prayer}`).join(' · ')}`,
+      `${options.jummahLabel || 'Next Jummah'} · ${jummahTimes.map((time) => `${time.name}: ${time.prayer}`).join(' · ')}`,
       middle,
       footerY,
       {
         size: phone ? 24 : 29,
         weight: 600,
-        color: colors.gold,
+        color: colors.text,
         maxWidth: tableWidth,
       },
     );
   }
-  drawText(ctx, 'jicmasjid.org', middle, footerY + 48, {
+  if (overrideText)
+    drawText(ctx, `Friday changes · ${overrideText}`, middle, footerY + 40, {
+      size: phone ? 19 : 24,
+      color: colors.text,
+      maxWidth: tableWidth,
+    });
+  if (options.hijriDay)
+    drawText(
+      ctx,
+      'Islamic dates are tentative, subject to confirmed moon sighting.',
+      middle,
+      footerY + 76,
+      { size: phone ? 18 : 23, color: colors.muted, maxWidth: tableWidth },
+    );
+  drawText(ctx, 'jicmasjid.org', middle, footerY + 115, {
     size: phone ? 24 : 28,
     weight: 700,
-    color: colors.gold,
+    color: colors.text,
   });
   return canvas;
 }
 
-export const createWallpaperCanvas = (rows, month, jummahTimes = []) =>
-  createTimetableCanvas(rows, month, jummahTimes, true);
+export const createWallpaperCanvas = (rows, month, jummahTimes = [], options = {}) =>
+  createTimetableCanvas(rows, month, jummahTimes, true, options);
 
-export const createMonthlyTimetableCanvas = (rows, month, jummahTimes = []) =>
-  createTimetableCanvas(rows, month, jummahTimes, false);
+export const createMonthlyTimetableCanvas = (rows, month, jummahTimes = [], options = {}) =>
+  createTimetableCanvas(rows, month, jummahTimes, false, options);

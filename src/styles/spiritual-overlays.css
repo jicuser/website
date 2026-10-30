@@ -67,3 +67,20 @@
   outline: 3px solid var(--jic-gold);
   outline-offset: 3px;
 }
+
+/* Soften the page only during the brief opening Salawat. */
+.jic-salawat-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 79;
+  background: rgb(5 20 25 / 15%);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .jic-salawat-backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgb(5 20 25 / 35%);
+  }
+}

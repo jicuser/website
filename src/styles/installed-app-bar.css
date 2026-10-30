@@ -1,0 +1,94 @@
+html[data-installed-navigation='true'] {
+  --jic-app-bar-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  scroll-padding-bottom: calc(
+    var(--jic-app-bar-height) + var(--jic-mobile-visible-dock-height, 0px) + 16px
+  );
+}
+html[data-installed-navigation='true'] .jic-public-route {
+  padding-bottom: var(--jic-app-bar-height);
+}
+.jic-installed-app-bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 4px;
+  padding: 4px max(8px, env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom))
+    max(8px, env(safe-area-inset-left));
+  border-top: 1px solid var(--jic-glass-border);
+  background: var(--jic-glass-panel-strong, var(--jic-surface));
+  color: var(--jic-text);
+  -webkit-backdrop-filter: var(--jic-glass-panel-filter, none);
+  backdrop-filter: var(--jic-glass-panel-filter, none);
+}
+.jic-installed-app-bar :is(a, button) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 56px;
+  min-width: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.jic-installed-app-bar :is([aria-current], [aria-expanded='true']) {
+  color: var(--jic-gold);
+  background: var(--jic-glass-control);
+  box-shadow: inset 0 0 0 1px var(--jic-glass-border);
+}
+.jic-installed-app-bar :disabled {
+  opacity: 0.35;
+}
+.jic-installed-app-bar :focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: -3px;
+}
+html[data-installed-navigation='true'] .jic-header-actions button {
+  display: none;
+}
+html[data-installed-navigation='true']
+  .jic-public-route
+  :is(.jic-scroll-top, .jic-admin-bar, .jic-radio-live-notice) {
+  margin-bottom: var(--jic-app-bar-height);
+}
+html[data-installed-navigation='true'] .jic-site-notice:is(.bottom-left, .bottom-right) {
+  margin-bottom: var(--jic-app-bar-height);
+}
+@media (max-width: 767px) {
+  html[data-installed-navigation='true'] .jic-mobile-dock {
+    margin-bottom: var(--jic-app-bar-height);
+  }
+}
+
+.jic-app-destinations {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(44px, 1fr));
+  gap: 2px;
+}
+.jic-installed-app-bar > button {
+  font-size: 10px;
+  color: var(--jic-text-secondary);
+}
+.jic-installed-app-bar :is(a, button):not(:disabled):active {
+  background: var(--jic-glass-control);
+}
+@media (min-width: 600px) {
+  .jic-installed-app-bar {
+    grid-template-columns: 48px minmax(0, 400px) 48px;
+    justify-content: center;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 374px) {
+  .jic-installed-app-bar { gap: 2px; padding-inline: 4px; }
+  .jic-app-destinations { grid-template-columns: 44px 44px minmax(68px, 1fr) 44px; }
+  .jic-app-destinations :is(a, button) { font-size: 10px; }
+}

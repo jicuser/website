@@ -366,12 +366,26 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
     calls.length = 0;
     assert.equal(createMonthlyTimetableCanvas(rows, 'October 2026'), canvas);
     assert.equal(canvas.width, 1800);
-    assert.equal(canvas.height, 2220);
+    assert.equal(canvas.height, 2546);
     assert.ok(calls.some(([text]) => text === '31'));
     assert.ok(
       calls.every(([text]) => !/12-hour|Gold rows|same time as above|Adhan time shown/.test(text)),
     );
-    assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1800 && y >= 0 && y < 2220));
+    assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1800 && y >= 0 && y < 2546));
+    // Clearing failed weekly settings must clear the exported summary as well,
+    // while published dated Friday overrides remain available in either format.
+    rows[15].isoDate = '2026-10-16';
+    rows[15].jummah_1_jamah = '1:10 PM';
+    rows[15].jummah_2_jamah = '2:10 PM';
+    for (const render of [createWallpaperCanvas, createMonthlyTimetableCanvas]) {
+      calls.length = 0;
+      render(rows, 'October 2026', [{ name: 'First Jummah', prayer: '1:10 PM' }]);
+      assert.ok(calls.some(([text]) => text.includes('Next Jummah')));
+      calls.length = 0;
+      render(rows, 'October 2026', []);
+      assert.ok(!calls.some(([text]) => text.includes('Next Jummah')));
+      assert.ok(calls.some(([text]) => text === 'Friday changes · 16: 1:10 PM / 2:10 PM'));
+    }
   } finally {
     if (previous === undefined) delete globalThis.document;
     else globalThis.document = previous;

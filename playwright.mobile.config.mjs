@@ -6,6 +6,7 @@ export default defineConfig({
     'accessible-appearance.spec.mjs',
     'home-compact.spec.mjs',
     'prayer-pill.spec.mjs',
+    'pr37-salah-integration.spec.mjs',
   ],
   outputDir: 'test-results/webkit',
   workers: 1,

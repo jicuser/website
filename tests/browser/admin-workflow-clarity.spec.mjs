@@ -83,7 +83,7 @@ async function openWorkspace(
         writes.push({ table, body });
         Object.assign(day, body);
         data = [{ d_date: day.d_date }];
-      } else data = url.searchParams.has('d_date') ? day : [day];
+      } else data = url.searchParams.get('d_date')?.startsWith('eq.') ? day : [day];
     } else if (request.method() !== 'GET' && !url.pathname.includes('/rpc/'))
       writes.push({ table, body: request.postDataJSON() });
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
@@ -95,6 +95,8 @@ async function openWorkspace(
   await expect(page.locator('.admin-toolbar')).toBeVisible();
   await page.goto(`/admin?section=${section}`);
   await expect(page.locator('.admin-toolbar')).toBeVisible();
+  if (section === 'prayer')
+    await page.getByRole('button', { name: 'Daily times', exact: true }).click();
   return writes;
 }
 
@@ -155,6 +157,9 @@ test('prayer task views retain drafts and save daily and weekly changes together
     'true',
   );
   await page.getByLabel('Fajr begins', { exact: true }).fill('05:45');
+  await page.getByRole('button', { name: 'Create / edit month', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Save your changes');
+  await expect(page.getByLabel('Fajr begins', { exact: true })).toHaveValue('05:45');
   await page.getByRole('button', { name: 'Jummah', exact: true }).click();
   await page.getByLabel('First khutbah', { exact: true }).first().fill('13:15');
   await page.getByRole('button', { name: 'CSV import', exact: true }).click();
@@ -244,11 +249,11 @@ test('a pending CSV cannot save after a later daily read fails and remains cance
   });
   await page.getByRole('button', { name: 'Daily times', exact: true }).click();
   await page.getByLabel('Date', { exact: true }).fill('2026-10-26');
-  await page.getByRole('button', { name: 'CSV import', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Save CSV', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'CSV import', exact: true })).toBeDisabled();
   expect(writes).toEqual([]);
   finishRead();
   await expect(page.getByRole('alert')).toContainText('Daily date could not be read.');
+  await page.getByRole('button', { name: 'CSV import', exact: true }).click();
   const saveCsv = page.getByRole('button', { name: 'Save CSV', exact: true });
   await expect(saveCsv).toBeDisabled();
   await page

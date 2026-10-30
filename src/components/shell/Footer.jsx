@@ -9,6 +9,7 @@ import { SOCIAL_ICONS } from '@/components/icons/SocialIcons';
 import { SITE } from '@/content/site';
 import { FOOTER_LINKS } from '@/content/nav';
 import useCommunityLink from '@/hooks/useCommunityLink';
+import { InstallAppButton } from '@/components/shell/AppInstall';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 
 export default function Footer() {
@@ -30,6 +31,7 @@ export default function Footer() {
           )}
         </nav>
         <div className="jic-footer-actions">
+          <InstallAppButton />
           <nav className="jic-footer-icons" aria-label="Social media and contact links">
             <a
               href={whatsapp}

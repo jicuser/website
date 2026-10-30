@@ -12,6 +12,10 @@ import React, {
 } from 'react';
 import { ChevronDown, ChevronRight, Pause, Play, ExternalLink } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import AppCompanion from '@/components/shell/AppCompanion';
+import useInstalledApp from '@/hooks/useInstalledApp';
+import AppInstall from '@/components/shell/AppInstall';
+import InstalledAppBar from '@/components/shell/InstalledAppBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { HeaderActions, NavigationDrawer } from '@/components/shell/SiteNavigation';
 import { drawerNavigation } from '@/lib/drawerNavigation';
@@ -40,6 +44,7 @@ const RadioLiveNotice = lazy(() => import('./RadioLiveNotice'));
 const DesktopNavigation = lazy(() => import('./DesktopNavigation'));
 
 export default function UnifiedHeader() {
+  const installed = useInstalledApp();
   const { getContent } = useContent();
   const { user } = useAuth();
   const accountLabel = user ? 'My portal' : 'Portal login';
@@ -50,7 +55,7 @@ export default function UnifiedHeader() {
   const { pathname: routePath, key: routeKey } = useLocation();
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const isHome = pathname === '/';
-  const alertSetup = pathname === '/prayer-times/reminders';
+  const isCommunityHub = pathname === '/services';
   const taskRoute = prefersQuietPrayerDock(pathname);
   const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
@@ -108,7 +113,7 @@ export default function UnifiedHeader() {
   );
   const selected = navigation?.current?.path;
   const breadcrumbs = navigationBreadcrumbs(navigation);
-  const hasSectionPicker = subtabs.length > 0 && !alertSetup && pathname !== '/get-involved';
+  const hasSectionPicker = subtabs.length > 0 && !isCommunityHub;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   const status = radioError
@@ -155,7 +160,7 @@ export default function UnifiedHeader() {
     if (prayer) observer.observe(prayer);
     if (banner) observer.observe(banner);
     return () => observer.disconnect();
-  }, [isHome]);
+  }, [isHome, isCommunityHub, installed]);
   useEffect(() => {
     const nav = subnavRef.current;
     if (!nav) return undefined;
@@ -221,6 +226,8 @@ export default function UnifiedHeader() {
 
   return (
     <>
+      <AppInstall />
+      {installed && <AppCompanion />}
       <audio
         ref={audioRef}
         src={streamUrl || undefined}
@@ -245,7 +252,7 @@ export default function UnifiedHeader() {
         }}
         aria-hidden="true"
       />
-      <header className={cn('jic-unified-header jic-header-redesign', taskRoute && 'is-task-mode')}>
+      <header className={cn('jic-unified-header jic-header-redesign', taskRoute && 'is-task-mode', pathname.startsWith('/prayer-times') && 'is-prayer-section')}>
         <MobileInfoBanner
           ref={mobileBannerRef}
           collapsed={prayerDockHidden}
@@ -275,7 +282,7 @@ export default function UnifiedHeader() {
               onOpen={(view) => { setMenuView(view); setMenuOpen(true); }}
             />
           </div>
-          {breadcrumbs.length > 0 && (
+          {!isCommunityHub && breadcrumbs.length > 0 && (
             <nav
               className={cn('jic-section-location', hasSectionPicker && 'has-section-picker')}
               aria-label="Current section"
@@ -329,7 +336,7 @@ export default function UnifiedHeader() {
                       : navigation.current?.name || `Browse ${navigation.name}`}
                   </strong>
                 </span>
-                <ChevronDown size={16} aria-hidden="true" />
+                <span className="jic-section-view-all">View all <ChevronDown size={16} aria-hidden="true" /></span>
               </summary>
               <nav aria-label={`${navigation.name} pages`}>
                 {breadcrumbs
@@ -365,7 +372,7 @@ export default function UnifiedHeader() {
               </nav>
             </details>
           )}
-          {hasSectionPicker && (
+          {hasSectionPicker && !installed && (
             <nav
               ref={subnavRef}
               className="jic-unified-subnav"
@@ -389,7 +396,7 @@ export default function UnifiedHeader() {
               ))}
             </nav>
           )}
-          {taskRoute && (
+          {taskRoute && !isCommunityHub && (
             <button
               type="button"
               className="jic-task-prayer-toggle"
@@ -402,7 +409,7 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
-      {!isHome && (
+      {!installed && !isHome && !isCommunityHub && (
         <div className="jic-mobile-dock">
           <div
             id="jic-prayer-dock"
@@ -458,6 +465,7 @@ export default function UnifiedHeader() {
           />
         </Suspense>
       )}
+      <InstalledAppBar open={menuOpen} view={menuView} onOpen={(view) => { setMenuView(view); setMenuOpen(true); }} />
       <NavigationDrawer
         open={menuOpen}
         view={menuView}

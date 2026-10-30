@@ -112,6 +112,7 @@ test('staff finder respects permissions and fits small screens', async ({ page }
 test('finder does not bypass the staff unsaved-change warning', async ({ page }, info) => {
   const state = await sitewideFixture(page, { signedIn: true });
   await page.goto('/admin?section=prayer');
+  await page.getByRole('button', { name: 'Daily times', exact: true }).click();
   await page.getByLabel('Asr Jama’ah', { exact: true }).fill('16:20');
   const finder = page.locator('.admin-quick-find');
   await finder.locator('summary').click();
