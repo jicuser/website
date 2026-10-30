@@ -34,16 +34,7 @@
 .jic-member-portal .portal-entry-intro { border-radius: 18px; }
 .jic-member-portal .portal-entry-intro li { min-width: 0; }
 .jic-member-portal .portal-entry-intro small { line-height: 1.6; }
-.admin-tv-editor .tv-screen-overview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; min-width: 0; }
-.admin-tv-editor .tv-screen-overview-card { min-width: 0; border: 1px solid var(--jic-border); border-radius: 16px; overflow: hidden; background: var(--jic-surface); box-shadow: 0 8px 24px #0b293411; }
-.admin-tv-editor .tv-screen-open { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; width: 100%; height: 100%; padding: 16px; text-align: left; background: transparent; color: var(--jic-text); }
-.admin-tv-editor .tv-screen-open > .tv-screen-miniature,
-.admin-tv-editor .tv-screen-open > .tv-screen-preview-unavailable { grid-column: 1 / -1; width: 100%; margin: 0; border-radius: 10px; overflow: hidden; }
-.admin-tv-editor .tv-screen-preview-unavailable { min-height: 100px; display: grid; place-items: center; background: linear-gradient(130deg, #0d2838, #20514f); color: #e2c18b; }
-.admin-tv-editor .tv-screen-overview-body { display: flex; flex-direction: column; min-width: 0; gap: 10px; }
-.admin-tv-editor .tv-screen-overview-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.admin-tv-editor .tv-screen-overview-title strong { font-size: 16px; }
-.admin-tv-editor .tv-screen-overview-mode { display: flex; flex-wrap: wrap; gap: 7px; color: var(--jic-muted); font-size: 13px; }
+/* TV screen card geometry belongs to tv-workspace.css. */
 .admin-tv-editor .tv-screen-filters { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding: 5px 2px 12px; }
 .admin-tv-editor .tv-screen-filters button { flex-shrink: 0; min-height: 44px; padding: 10px 16px; border-radius: 10px; }
 .admin-tv-editor .stream-setup-heading { gap: 12px; flex-wrap: wrap; }
@@ -55,7 +46,6 @@
 .worship-page .guidance-choices > button > span { min-width: 0; }
 .worship-page .worship-compact-resources > a > span,
 .worship-page .guidance-choices > button > span { overflow-wrap: anywhere; }
-@media (min-width: 1450px) { .admin-tv-editor .tv-screen-overview-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 680px) {
   .ops-page.ops-giving .ops-give-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .ops-page.ops-giving .ops-giving-hero { padding: 24px 18px; border-radius: 16px; }
@@ -68,10 +58,6 @@
   .jic-member-portal .workspace-actions { flex-wrap: wrap; }
   .jic-member-portal .workspace-actions :is(a, button) { min-height: 44px; }
   .jic-member-portal .portal-entry-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
-  .admin-tv-editor .tv-screen-overview-grid { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 84%); grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding: 5px 3px 16px; scroll-padding-inline: 3px; }
-  .admin-tv-editor .tv-screen-overview-card { scroll-snap-align: start; }
-  .admin-tv-editor .tv-screen-open { padding: 13px; gap: 10px; }
-  .admin-tv-editor .tv-screen-overview-title strong { font-size: 15px; }
   .admin-tv-editor .stream-setup-heading h2 { font-size: 23px; }
   .admin-tv-editor .admin-button { min-height: 44px; }
 }
@@ -79,5 +65,5 @@
   .worship-page .guidance-choices { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .admin-tv-editor .tv-screen-overview-grid, .jic-member-portal .portal-workspace-switch { scroll-behavior: auto; scroll-snap-type: none; }
+  .jic-member-portal .portal-workspace-switch { scroll-behavior: auto; scroll-snap-type: none; }
 }

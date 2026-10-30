@@ -42,20 +42,23 @@ for (const [width, theme] of [
     const state = await fixture(page, { theme });
     await page.goto('/funerals');
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Janazah & funeral support' }),
+      page.getByRole('heading', { level: 1, name: 'Funeral Services', exact: true }),
     ).toBeVisible();
     await expect(page.locator('.funeral-call')).toHaveAttribute('href', 'tel:01217786612');
     const links = page.getByRole('navigation', { name: 'Janazah information' });
     await expect(links.getByRole('link')).toHaveCount(3);
-    await expect(links.getByRole('link', { name: 'Prayer times', exact: true })).toHaveAttribute(
+    await expect(links.getByRole('link', { name: /^Prayer times/ })).toHaveAttribute(
       'href',
       '/prayer-times',
     );
-    await expect(links.getByRole('link', { name: 'Janazah prayer guide' })).toHaveAttribute(
+    await expect(links.getByRole('link', { name: /^Janazah guide/ })).toHaveAttribute(
       'href',
       '/worship/janazah-guide',
     );
-    await expect(page.locator('.funeral-facility')).toHaveCount(5);
+    await expect(page.locator('.funeral-facility')).toHaveCount(6);
+    await expect(
+      page.getByRole('heading', { name: 'Family & viewing room', exact: true }),
+    ).toBeVisible();
     await expect(page.locator('.guidance-panel, .smart-form')).toHaveCount(0);
     expect(state.reads).toEqual([]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
@@ -63,7 +66,7 @@ for (const [width, theme] of [
     );
     if (width === 390)
       await page.screenshot({ path: info.outputPath('janazah-mobile.png'), fullPage: true });
-    await page.getByRole('link', { name: 'Arrange a funeral', exact: true }).click();
+    await page.getByRole('link', { name: /^Arrange a funeral/ }).click();
     await expect(
       page.getByRole('heading', { name: 'What do you need help with?', exact: false }),
     ).toBeVisible();
@@ -144,7 +147,7 @@ test('published facility photos, visibility and closed booking state are respect
     ],
   });
   await page.goto('/funerals');
-  await expect(page.locator('.funeral-facility')).toHaveCount(4);
+  await expect(page.locator('.funeral-facility')).toHaveCount(5);
   await expect(page.getByRole('img', { name: 'Test facility photo' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Cold room', exact: true })).toHaveCount(0);
   await page.goto('/funerals/contact-support');

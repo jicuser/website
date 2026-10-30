@@ -772,6 +772,11 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
 html[data-theme='dark'] .jic-home-route {
   --jic-photo-veil: rgba(3, 9, 15, .7);
 }
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html[data-theme] .jic-home-route {
+    --jic-photo-veil: var(--jic-bg);
+  }
+}
 
 /* Compact, horizontally browsable timetable; the day strip is the only scroll area. */
 .jic-home-welcome { max-width: 26ch !important; font-size: clamp(24px, 4vw, 38px) !important; line-height: 1.2 !important; }

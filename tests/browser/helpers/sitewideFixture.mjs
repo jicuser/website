@@ -7,6 +7,7 @@ export async function sitewideFixture(
   page.on('pageerror', (error) => state.errors.push(error.message));
   await page.addInitScript(
     ({ signedIn, staffId }) => {
+      if (window.top !== window) return;
       sessionStorage.setItem('jic-salawat-shown', '1');
       if (signedIn)
         sessionStorage.setItem(

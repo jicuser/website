@@ -100,7 +100,7 @@ export default function StaffAccess() {
       ),
     [invoke, pending, run],
   );
-  useRegisterAdminSave(save, Object.keys(pending).length > 0, 'Save permissions');
+  useRegisterAdminSave(save, Object.keys(pending).length > 0, 'Save permissions', Boolean(busy));
   if (!allowed) return <p>You need people-management permission to open this section.</p>;
   const approveRequest = async (request) => {
     const draft = requestDrafts[request.id] || { permissions: [], staff_kinds: [] };

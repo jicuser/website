@@ -9,7 +9,10 @@ for (const [theme, width] of [
   test(`shared public design is readable and fits ${width}px ${theme}`, async ({ page }, info) => {
     test.setTimeout(90000);
     await page.setViewportSize({ width, height: 844 });
-    await page.addInitScript((theme) => localStorage.setItem('jic-theme', theme), theme);
+    await page.addInitScript((theme) => {
+      if (window.top !== window) return;
+      localStorage.setItem('jic-theme', theme);
+    }, theme);
     const state = await sitewideFixture(page);
     for (const path of [
       '/education',
@@ -109,6 +112,7 @@ test('staff finder respects permissions and fits small screens', async ({ page }
 test('finder does not bypass the staff unsaved-change warning', async ({ page }, info) => {
   const state = await sitewideFixture(page, { signedIn: true });
   await page.goto('/admin?section=prayer');
+  await page.getByRole('button', { name: 'Daily times', exact: true }).click();
   await page.getByLabel('Asr Jama’ah', { exact: true }).fill('16:20');
   const finder = page.locator('.admin-quick-find');
   await finder.locator('summary').click();

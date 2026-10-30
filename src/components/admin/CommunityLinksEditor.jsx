@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Save } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import { supabase } from '@/lib/supabaseClient';
@@ -9,30 +9,49 @@ const KEY = 'whatsapp_community_url';
 export default function CommunityLinksEditor() {
   const [url, setUrl] = useState('');
   const [savedUrl, setSavedUrl] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const loadRequest = useRef(null);
   const dirty = url !== savedUrl;
 
-  useEffect(() => {
-    let active = true;
-    supabase
-      .from('page_content')
-      .select('content_value')
-      .eq('content_key', KEY)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!active) return;
-        const value = data?.content_value || '';
-        setUrl(value);
-        setSavedUrl(value);
-      });
-    return () => {
-      active = false;
-    };
+  const load = useCallback(async () => {
+    loadRequest.current?.abort();
+    const controller = new AbortController();
+    loadRequest.current = controller;
+    setLoading(true);
+    setReady(false);
+    setLoadError('');
+    try {
+      const { data, error } = await supabase
+        .from('page_content')
+        .select('content_value')
+        .eq('content_key', KEY)
+        .maybeSingle()
+        .abortSignal(controller.signal);
+      if (controller.signal.aborted) return;
+      if (error) throw error;
+      const value = data?.content_value || '';
+      setUrl(value);
+      setSavedUrl(value);
+      setReady(true);
+    } catch {
+      if (!controller.signal.aborted)
+        setLoadError('The community link could not be loaded. Retry before making changes.');
+    } finally {
+      if (!controller.signal.aborted) setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    void load();
+    return () => loadRequest.current?.abort();
+  }, [load]);
+
   const save = useCallback(async () => {
-    if (!dirty || busy) return;
+    if (!ready || !dirty || busy) return false;
     setBusy(true);
     setMsg('');
     try {
@@ -47,17 +66,21 @@ export default function CommunityLinksEditor() {
           throw new Error('Use a valid WhatsApp invite link.');
         }
       }
-      const { error } = await supabase.from('page_content').upsert(
-        {
-          content_key: KEY,
-          content_value: clean,
-          content_type: 'text',
-          page: '/',
-        },
-        { onConflict: 'content_key' },
-      );
+      const { data, error } = await supabase
+        .from('page_content')
+        .upsert(
+          {
+            content_key: KEY,
+            content_value: clean,
+            content_type: 'text',
+            page: '/',
+          },
+          { onConflict: 'content_key' },
+        )
+        .select('content_key');
       if (error) throw error;
-      setUrl(clean);
+      if (data?.length !== 1) throw new Error('The community link was not saved.');
+      setUrl((current) => (current === url ? clean : current));
       setSavedUrl(clean);
       setMsg('Saved.');
       window.dispatchEvent(new Event('jic-content-updated'));
@@ -67,9 +90,9 @@ export default function CommunityLinksEditor() {
     } finally {
       setBusy(false);
     }
-  }, [url, dirty, busy]);
+  }, [url, dirty, busy, ready]);
 
-  useRegisterAdminSave(save, dirty && !busy, 'Save WhatsApp link');
+  useRegisterAdminSave(save, dirty && ready, 'Save WhatsApp link', busy);
 
   return (
     <section className="admin-panel">
@@ -79,10 +102,20 @@ export default function CommunityLinksEditor() {
         </div>
         <WhatsAppIcon />
       </div>
+      {loading && <p role="status">Loading community link…</p>}
+      {loadError && (
+        <div role="alert">
+          <p>{loadError}</p>
+          <button type="button" className="admin-button" onClick={load} disabled={loading}>
+            Retry link
+          </button>
+        </div>
+      )}
       <label>
         Community invite URL
         <input
           type="url"
+          disabled={!ready}
           value={url}
           onChange={(event) => {
             setUrl(event.target.value);
@@ -95,7 +128,7 @@ export default function CommunityLinksEditor() {
         <button
           type="button"
           onClick={() => save().catch(() => {})}
-          disabled={busy || !dirty}
+          disabled={!ready || busy || !dirty}
           className="admin-button primary"
         >
           <Save size={16} />

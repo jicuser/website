@@ -111,7 +111,7 @@ export default function TeamEditor({ uploadImage }) {
       setBusy(false);
     }
   }, [editorOpen, dirty, form, photoFile, editing, uploadImage, load]);
-  useRegisterAdminSave(save, dirty && !busy, 'Save team member');
+  useRegisterAdminSave(save, dirty, 'Save team member', busy);
 
   async function remove(member) {
     if (busy || !window.confirm(`Delete ${member.name} from the team?`)) return;

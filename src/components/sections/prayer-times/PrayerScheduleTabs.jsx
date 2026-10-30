@@ -4,7 +4,7 @@ export { default as MonthlyPrayerTable } from './MonthlyPrayerTable';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 
-export const JummahTimesCard = ({ jummahTimes }) => (
+export const JummahTimesCard = ({ jummahTimes = [], error = '' }) => (
   <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden max-w-2xl mx-auto">
     <div className="bg-primary text-white px-4 py-3 text-center">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-80">
@@ -13,6 +13,14 @@ export const JummahTimesCard = ({ jummahTimes }) => (
       <h3 className="text-lg sm:text-xl font-bold">Jummah Prayer Times</h3>
     </div>
     <div className="p-4 sm:p-6">
+      {error && (
+        <p role="alert" className="mb-4 text-center">
+          {error}
+        </p>
+      )}
+      {!error && jummahTimes.length === 0 && (
+        <p className="text-center">Jummah times are unavailable. Please contact the centre.</p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {jummahTimes.map((jummah, index) => (
           <Card key={index} className="border-t-4 border-t-primary">
@@ -32,11 +40,13 @@ export const JummahTimesCard = ({ jummahTimes }) => (
           </Card>
         ))}
       </div>
-      <div className="mt-5 p-3 bg-gray-50 dark:bg-gray-600 rounded-lg text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Please arrive early for the khutbah.
-        </p>
-      </div>
+      {jummahTimes.length > 0 && (
+        <div className="mt-5 p-3 bg-gray-50 dark:bg-gray-600 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Please arrive early for the khutbah.
+          </p>
+        </div>
+      )}
     </div>
   </div>
 );

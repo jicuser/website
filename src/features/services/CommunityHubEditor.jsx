@@ -45,7 +45,7 @@ export default function CommunityHubEditor() {
       return false;
     } finally { lock.current = false; setBusy(false); }
   }, [permitted, conflict, draft, saveContent]);
-  useRegisterAdminSave(save, permitted && dirty, 'Save Community Hub');
+  useRegisterAdminSave(save, permitted && dirty, 'Save Community Hub', busy);
 
   function change(updater) { setMessage(''); setError(''); setDraft(updater); }
   function discard() { setDraft(current); setBaseline(currentText); setError(''); setMessage('Draft discarded.'); }

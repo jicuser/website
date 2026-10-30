@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Upload, Download, Save, Clock3, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { useRegisterAdminSave } from '@/context/AdminSaveContext';
+import { useAdminSave, useRegisterAdminSave } from '@/context/AdminSaveContext';
 import {
   prayerFields,
   jummahFields,
@@ -18,6 +18,7 @@ const CSV_TEMPLATE =
 const comparable = (value) => JSON.stringify(value || {});
 
 export default function PrayerEditor() {
+  const { saving } = useAdminSave();
   const [view, setView] = useState('month');
   const [monthDirty, setMonthDirty] = useState(false);
   const [date, setDate] = useState(londonDate);
@@ -274,10 +275,12 @@ export default function PrayerEditor() {
             key={id}
             aria-pressed={view === id}
             aria-controls={`prayer-view-${id}`}
-            disabled={busy || loading}
+            disabled={saving || busy || loading}
             onClick={() => {
               if (id === view) return;
-              if (monthDirty || dirty) {
+              // Daily, weekly and CSV panels stay mounted and retain drafts.
+              // The month editor unmounts and can overlap those dated writes.
+              if (monthDirty || (id === 'month' && dirty)) {
                 setError('Save your changes before switching timetable tasks.');
                 return;
               }

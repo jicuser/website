@@ -158,7 +158,9 @@ test('livestream placement can be dragged, selected and saved with notification 
   page,
 }) => {
   const writes = await openCatalogue(page, 'livestream');
-  await page.getByLabel('Home page position', { exact: true }).selectOption('after-events');
+  await page
+    .getByRole('combobox', { name: 'Home page position', exact: true })
+    .selectOption('after-events');
   await page.getByLabel('Show a website notification', { exact: true }).check();
   const preview = page.getByLabel('Website placement preview', { exact: true });
   const card = preview.getByRole('button', { name: 'Drag notice to choose its position' });
@@ -169,7 +171,9 @@ test('livestream placement can be dragged, selected and saved with notification 
   await page.mouse.down();
   await page.mouse.move(area.x + 25, area.y + 25, { steps: 5 });
   await page.mouse.up();
-  await expect(page.getByLabel('Notification position', { exact: true })).toHaveValue('top-left');
+  await expect(
+    page.getByRole('combobox', { name: 'Notification position', exact: true }),
+  ).toHaveValue('top-left');
   await page.locator('form').getByRole('button', { name: 'Save livestream', exact: true }).click();
   await expect.poll(() => writes.length).toBe(1);
   expect(writes[0].payload.display_settings).toEqual({

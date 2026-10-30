@@ -9,6 +9,7 @@ import {
 import PrayerGuidelinesSection from '@/components/sections/prayer-times/PrayerGuidelinesSection';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { prayerQueryRange } from '@/lib/prayerSnapshot';
 
 export default function PrayerTimesPage({ initialTab = 'today' }) {
   const { hash, search } = useLocation();
@@ -19,6 +20,7 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
     monthlyPrayerTimes,
     todaysTimes,
     jummahTimes,
+    jummahError,
     isLoadingPrayerTimes,
   } = usePublicPrayerTimes();
 
@@ -35,11 +37,21 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
     );
   }
 
+  const friday = prayerQueryRange(
+    currentDate.toLocaleDateString('en-CA', { timeZone: 'Europe/London' }),
+  ).friday;
+  const formattedFriday = new Date(`${friday}T12:00:00Z`).toLocaleDateString('en-GB', {
+    timeZone: 'Europe/London',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
   const view =
     initialTab === 'daily'
       ? { title: 'Monthly Timetable', meta: currentMonth }
       : initialTab === 'jummah'
-        ? { title: 'Jummah Times', meta: `Friday prayer · ${formattedDate}` }
+        ? { title: 'Jummah Times', meta: `Friday prayer · ${formattedFriday}` }
         : { title: "Today's Prayer Times", meta: formattedDate };
 
   return (
@@ -69,7 +81,7 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
       {initialTab === 'jummah' && (
         <section className="bg-gray-50 py-4 dark:bg-gray-800 sm:py-6">
           <div className="container mx-auto max-w-4xl px-4">
-            <JummahTimesCard jummahTimes={jummahTimes} />
+            <JummahTimesCard jummahTimes={jummahTimes} error={jummahError} />
           </div>
         </section>
       )}

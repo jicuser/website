@@ -83,7 +83,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
       setBusy(false);
     }
   }, [rows, baseline, loaded, busy, dirty, onSaved]);
-  useRegisterAdminSave(save, dirty, 'Save month', busy || !loaded);
+  useRegisterAdminSave(save, loaded && dirty, 'Save month', busy);
   const row = rows[day];
   const edit = (key, value) => {
     setRows((current) => current.map((r, i) => (i === day ? { ...r, [key]: value } : r)));

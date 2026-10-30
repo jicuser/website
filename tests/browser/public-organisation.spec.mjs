@@ -98,17 +98,27 @@ test('portal access is in the menu, Worship keeps reading links, and volunteerin
   const writes = await prepare(page);
   await page.goto('/');
   await expect(page.locator('.jic-unified-header a[href="/portal"]')).toHaveCount(0);
-  await expect(page.locator('.jic-mobile-prayer-heading > span').first()).toHaveText(
-    'Today’s prayer times',
+  const prayer = page.getByRole('complementary', { name: 'Daily prayer timetable' });
+  await expect(prayer).toBeVisible();
+  await expect(prayer.locator('.jic-prayer-browser-heading strong')).toHaveText('Today');
+  await expect(prayer.getByRole('link', { name: 'Timetable', exact: true })).toBeVisible();
+  await expect(prayer.getByRole('link', { name: 'Timetable', exact: true })).toHaveAttribute(
+    'href',
+    '/prayer-times',
   );
-  await expect(
-    page.locator('.jic-home-prayer').getByRole('link', { name: 'Full timetable', exact: true }),
-  ).toBeVisible();
   await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
-  await expect(page.locator('.jic-mobile-prayer-heading small')).toHaveCount(0);
-  await page.locator('.jic-menu-word').click();
-  await expect(page.locator('.jic-menu-account')).toHaveAttribute('href', '/portal');
-  await page.locator('#jic-site-menu').getByRole('link', { name: 'Worship', exact: true }).click();
+  await expect(prayer).toHaveCSS('position', 'static');
+  await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
+  const menu = page.getByRole('dialog', { name: 'Navigation menu', exact: true });
+  await expect(menu.getByRole('link', { name: 'Portal login', exact: true })).toHaveAttribute(
+    'href',
+    '/portal',
+  );
+  await menu.getByRole('button', { name: 'Expand Community Hub subpages', exact: true }).click();
+  await menu
+    .getByRole('navigation', { name: 'All pages', exact: true })
+    .getByRole('link', { name: 'Worship', exact: true })
+    .click();
   await expect(page).toHaveURL('/worship');
   await expect(page.getByRole('heading', { name: 'Worship' })).toBeVisible();
   await expect(page.locator('.worship-compact-resources a[href="/worship/quran"]')).toBeVisible();
@@ -181,8 +191,19 @@ test('Salah alerts enable the default in one action and preserve custom settings
   await expect(enable).toBeEnabled();
   await expect(page.locator('#jic-prayer-dock')).toBeHidden();
   const buttonBox = await enable.boundingBox();
-  const navBox = await page.locator('.jic-mobile-dock').boundingBox();
-  expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(navBox.y);
+  expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(
+    await page.evaluate(() => innerHeight),
+  );
+  // The quiet dock has no visible footprint. Check the actual tap target rather
+  // than the hidden wrapper's reserved box.
+  expect(
+    await enable.evaluate((button) => {
+      const box = button.getBoundingClientRect();
+      return button.contains(
+        document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2),
+      );
+    }),
+  ).toBe(true);
   expect(writes).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('salah-alerts-default.png') });
   await enable.click();

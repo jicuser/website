@@ -19,7 +19,7 @@ async function openHome(page, theme, width = 390) {
 }
 
 for (const theme of ['dark', 'light']) {
-  test(`public photo covers the viewport and continues through the page in ${theme} mode`, async ({
+  test(`home photo fills the viewport and inner pages keep a reading canvas in ${theme} mode`, async ({
     page,
   }, testInfo) => {
     await openHome(page, theme, 320);
@@ -75,27 +75,32 @@ for (const theme of ['dark', 'light']) {
       path: testInfo.outputPath(`home-header-${theme}.png`),
       fullPage: false,
     });
-    await page.goto('/services');
-    await expect(page.locator('.jic-page-backdrop')).toHaveCount(1);
-    await expect(page.locator('.service-explorer-card').first()).not.toHaveCSS(
-      'backdrop-filter',
-      'none',
-    );
+    const homePrayer = page.getByRole('complementary', { name: 'Daily prayer timetable' });
+    await expect(homePrayer).not.toHaveCSS('backdrop-filter', 'none');
     await page.evaluate(() => {
       document.documentElement.dataset.surface = 'solid';
     });
-    await expect(page.locator('.service-explorer-card').first()).toHaveCSS(
-      'backdrop-filter',
-      'none',
-    );
+    await expect(homePrayer).toHaveCSS('backdrop-filter', 'none');
     await page.emulateMedia({ contrast: 'more' });
-    await expect(page.locator('.service-explorer-card').first()).toHaveCSS(
+    await expect(homePrayer).toHaveCSS(
       'background-color',
       theme === 'dark' ? 'rgb(17, 42, 67)' : 'rgb(255, 254, 250)',
     );
+    await page.goto('/services');
+    await expect(page.getByRole('region', { name: 'Community Hub', exact: true })).toBeVisible();
+    await expect(page.locator('.jic-page-backdrop')).toHaveCount(0);
+    await expect(page.locator('.jic-inner-route')).toHaveCSS(
+      'background-color',
+      theme === 'dark' ? 'rgb(13, 23, 36)' : 'rgb(244, 245, 247)',
+    );
+    await expect(page.locator('.community-hub-card').first()).toHaveCSS('backdrop-filter', 'none');
     await page.goto('/youth');
     await expect(page.locator('.jic-youth-page')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-    await expect(page.locator('.jic-page-backdrop')).toHaveCount(1);
+    await expect(page.locator('.jic-inner-route')).toHaveCSS(
+      'background-color',
+      theme === 'dark' ? 'rgb(13, 23, 36)' : 'rgb(244, 245, 247)',
+    );
+    await expect(page.locator('.jic-page-backdrop')).toHaveCount(0);
     await page.goto('/prayer-times');
     const guidance = page.locator('.jic-prayer-visit details');
     await expect(guidance).not.toHaveAttribute('open');
@@ -142,12 +147,15 @@ for (const width of [390, 1280]) {
     if (width < 768) {
       await page.evaluate(() => window.scrollTo(0, 410));
       await expect(prayer).toHaveCount(0);
-      await page.locator('.jic-mobile-prayer-content').click();
+      await page
+        .getByRole('complementary', { name: 'Daily prayer timetable' })
+        .getByRole('link', { name: 'Timetable', exact: true })
+        .click();
       await expect(page).toHaveURL('/prayer-times');
       await expect(page.locator('#jic-prayer-details')).toBeHidden();
     }
     await page.goto('/services');
-    await expect(prayer).toHaveAttribute('aria-hidden', 'true');
+    await expect(prayer).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 }

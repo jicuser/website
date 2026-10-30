@@ -132,7 +132,7 @@ export default function HeaderContentEditor() {
     }
   }, [dirty, loading, ticker, reminders]);
 
-  useRegisterAdminSave(save, dirty && !loading && !saving, 'Save header content');
+  useRegisterAdminSave(save, dirty && !loading, 'Save header content', saving);
 
   const changeTicker = (index, key, value) =>
     setTicker((items) =>

@@ -16,8 +16,6 @@ import ProgrammePosters from '@/components/ProgrammePosters';
 import PublishedPageLinks from '@/features/content/PublishedPageLinks';
 import { PublishedPagesProvider } from '@/context/PublishedPagesContext';
 import { ProgrammeJourneyProvider } from '@/context/ProgrammeJourneyContext';
-import DailyReminder from '@/components/shell/DailyReminder';
-import SpiritualOverlays from '@/components/shell/SpiritualOverlays';
 import Footer from '@/components/shell/Footer';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import { useAuth } from '@/context/AuthContext';
@@ -28,6 +26,8 @@ import AppBrandHeader from '@/components/shell/AppBrandHeader';
 import useInstalledApp from '@/hooks/useInstalledApp';
 
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
+const SpiritualOverlays = lazy(() => import('@/components/shell/SpiritualOverlays'));
+const DailyReminder = lazy(() => import('@/components/shell/DailyReminder'));
 
 export default function MainLayout() {
   return (
@@ -76,7 +76,11 @@ function PublicLayout() {
         className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}
       >
         {installed && <AppBrandHeader home={isHome} />}
-        {showReminder && !installed && <DailyReminder />}
+        {showReminder && !installed && (
+          <Suspense fallback={<div className="jic-daily-reminder" aria-hidden="true" />}>
+            <DailyReminder />
+          </Suspense>
+        )}
         {visible ? (
           <div>
             <Suspense
@@ -108,7 +112,11 @@ function PublicLayout() {
           </section>
         )}
       </main>
-      {!preview && isHome && <SpiritualOverlays />}
+      {!preview && isHome && (
+        <Suspense fallback={null}>
+          <SpiritualOverlays />
+        </Suspense>
+      )}
       {!preview &&
         !isTask &&
         (announcement && noticePlacement(announcement.display_settings).notification ? (

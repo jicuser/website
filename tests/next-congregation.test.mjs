@@ -40,6 +40,12 @@ test('Friday uses both published Jummah sessions, then Asr', () => {
   assert.equal(at('2026-10-16T11:00:00Z', times, [{ prayer: '—' }, sessions[1]]).name, 'Jummah 2');
 });
 
+test('unavailable Friday sessions never substitute an ordinary Dhuhr congregation', () => {
+  assert.equal(at('2026-10-16T11:00:00Z', times, []).name, 'Asr');
+  assert.equal(at('2026-10-16T11:00:00Z', times, [{ prayer: '—' }]).name, 'Asr');
+  assert.equal(at('2026-10-15T11:00:00Z', times, []).name, 'Dhuhr');
+});
+
 test('London daylight saving changes are respected independently of the browser timezone', () => {
   assert.equal(at('2026-10-24T12:50:00Z').name, 'Asr');
   assert.equal(at('2026-10-25T12:50:00Z').name, 'Dhuhr');

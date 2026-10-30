@@ -8,12 +8,20 @@ test('hall and Ramadan workspaces keep public calendars separate from private re
   try {
     for (const name of [
       '20260914152000_admin_schedule_and_service_forms.sql',
+      '20261015003000_service_enquiries.sql',
       '20261023085434_simple_calendar_workspaces.sql',
     ]) {
       await db.exec(
         await readFile(new URL(`../supabase/migrations/${name}`, import.meta.url), 'utf8'),
       );
     }
+    // Explicitly exercise the candidate without putting it in the deploy queue.
+    const hallWriteBoundary = await readFile(
+      new URL('../supabase/staged/20261025125656_hall_booking_rpc_writes.sql', import.meta.url),
+      'utf8',
+    );
+    await db.exec(hallWriteBoundary);
+    await db.exec(hallWriteBoundary); // Safe to re-run during staging verification.
     const operations = await readFile(
       new URL('../supabase/migrations/20261017225316_community_operations.sql', import.meta.url),
       'utf8',
@@ -103,6 +111,81 @@ test('hall and Ramadan workspaces keep public calendars separate from private re
             )
           ).rows.length,
           1,
+        );
+      },
+    );
+    await t.test(
+      'booking writes cannot bypass overlap checks through direct table mutations',
+      async () => {
+        await as(id(7), () =>
+          hall(['2027-03-15'], 'booked', '10:00', '12:00', {
+            contact_name: 'Retained contact',
+          }),
+        );
+        const booking = (
+          await db.query("select id from hall_bookings where booking_date='2027-03-15'")
+        ).rows[0].id;
+
+        for (const [user, role] of [
+          [null, 'anon'],
+          [id(5), 'authenticated'],
+          [id(7), 'authenticated'],
+          [id(1), 'authenticated'],
+        ]) {
+          await assert.rejects(
+            as(
+              user,
+              () =>
+                db.exec(
+                  "insert into hall_bookings(booking_date,start_time,end_time,status) values('2027-03-15','11:00','13:00','booked')",
+                ),
+              role,
+            ),
+            /permission denied/,
+          );
+          await assert.rejects(
+            as(
+              user,
+              () =>
+                db.query(
+                  "update hall_bookings set start_time='11:00',end_time='13:00' where id=$1",
+                  [booking],
+                ),
+              role,
+            ),
+            /permission denied/,
+          );
+        }
+        await assert.rejects(
+          as(id(7), () => hall(['2027-03-15'], 'booked', '11:00', '13:00')),
+          /already a booking/,
+        );
+        assert.equal(
+          await as(id(7), () => hall(['2027-03-15'], 'booked', '09:00', '11:00', null, booking)),
+          1,
+        );
+        assert.equal(
+          (
+            await as(id(7), () =>
+              db.query('select contact_name from hall_booking_details where booking_id=$1', [
+                booking,
+              ]),
+            )
+          ).rows[0].contact_name,
+          'Retained contact',
+        );
+        assert.equal(
+          (
+            await as(id(7), () =>
+              db.query('delete from hall_bookings where id=$1 returning id', [booking]),
+            )
+          ).rows[0].id,
+          booking,
+        );
+        assert.equal(
+          (await db.query('select * from hall_booking_details where booking_id=$1', [booking])).rows
+            .length,
+          0,
         );
       },
     );

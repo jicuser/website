@@ -42,7 +42,7 @@ export function nextCongregation(times, jummahTimes = [], date = new Date()) {
     .map((session, index) => ({ ...session, name: `Jummah ${index + 1}` }))
     .filter((session) => minutes(session.prayer) !== null);
   const candidates = prayers.flatMap(([name, key]) => {
-    if (key === 'dhuhr' && friday && fridaySessions.length) {
+    if (key === 'dhuhr' && friday) {
       return fridaySessions.map((session) => ({
         name: session.name,
         time: session.prayer,

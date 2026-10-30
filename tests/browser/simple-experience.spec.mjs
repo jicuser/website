@@ -39,11 +39,11 @@ async function fixture(page, { radio = false } = {}) {
     published: structuredClone(initialForm),
     season: { ...season },
     daySettings: [],
+    radioOnline: radio,
   };
   page.on('pageerror', (error) => state.errors.push(error.message));
-  await page.addInitScript((online) => {
+  await page.addInitScript(() => {
     sessionStorage.setItem('jic-salawat-shown', '1');
-    window.__radioOnline = online;
     window.__playCalls = 0;
     HTMLMediaElement.prototype.load = function () {
       if (this.muted && this.hasAttribute('src'))
@@ -57,20 +57,19 @@ async function fixture(page, { radio = false } = {}) {
     HTMLMediaElement.prototype.pause = function () {
       this.dispatchEvent(new Event('pause'));
     };
-  }, radio);
+  });
   await page.route('**/*', (route) =>
     ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname)
       ? route.continue()
       : route.abort(),
   );
   await page.route('**/status-json.xsl', async (route) => {
-    const online = await page.evaluate(() => window.__radioOnline);
     await route.fulfill({
       contentType: 'application/json',
       headers: { 'access-control-allow-origin': '*' },
       body: JSON.stringify({
         icestats: {
-          source: online
+          source: state.radioOnline
             ? {
                 listenurl: 'https://jicmosque.radioca.st/live',
                 server_type: 'audio/mpeg',
@@ -350,13 +349,13 @@ test('live radio notice follows availability, persists dismissal and starts audi
   const notice = page.getByRole('status', { name: 'Live radio', exact: true });
   await expect(notice).toBeVisible();
   expect(await page.evaluate(() => window.__playCalls)).toBe(0);
+  state.radioOnline = false;
   await page.evaluate(() => {
-    window.__radioOnline = false;
     window.dispatchEvent(new Event('online'));
   });
   await expect(notice).toHaveCount(0);
+  state.radioOnline = true;
   await page.evaluate(() => {
-    window.__radioOnline = true;
     window.dispatchEvent(new Event('online'));
   });
   await expect(notice).toBeVisible();

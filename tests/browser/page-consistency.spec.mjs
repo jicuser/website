@@ -84,10 +84,21 @@ for (const theme of ['light', 'dark']) {
         ).toBe(true);
         if (path !== '/') {
           await expect(page.locator('.jic-page-backdrop')).toHaveCount(0);
-          expect(
-            await heading.evaluate((node) => parseFloat(getComputedStyle(node).fontSize)),
-            path,
-          ).toBeLessThanOrEqual(36);
+          const title = await heading.evaluate((node) => ({
+            fontSize: parseFloat(getComputedStyle(node).fontSize),
+            fits: node.scrollWidth <= node.clientWidth + 1,
+          }));
+          // The venue and funeral heroes have their own bounded display typography.
+          const maximumTitleSize =
+            path === '/services/nikah'
+              ? width < 768
+                ? 40
+                : 64
+              : path === '/funerals' && width >= 768
+                ? 52
+                : 36;
+          expect(title.fontSize, path).toBeLessThanOrEqual(maximumTitleSize);
+          expect(title.fits, `${path}: heading fits its content column`).toBe(true);
         }
         if (path.startsWith('/worship/')) {
           await expect(page.locator('#jic-prayer-dock')).toBeHidden();
