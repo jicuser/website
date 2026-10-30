@@ -191,6 +191,10 @@ test('form and named page publish in one request with a chosen menu section', as
   await page.getByLabel('Website location').selectOption('new');
   await page.getByLabel('Page name', { exact: true }).fill('Volunteer with us');
   await page.getByRole('combobox', { name: 'Menu section', exact: true }).selectOption('/youth');
+  await page
+    .getByRole('tablist', { name: 'Form setup steps' })
+    .getByRole('tab', { name: 'Responses', exact: true })
+    .click();
   await page.locator('.custom-form-members-primary').getByLabel('Form colleague').check();
   await page.getByRole('button', { name: 'Save and publish', exact: true }).click();
   await expect.poll(() => state.writes.length).toBe(1);
@@ -215,9 +219,18 @@ test('an existing-page conflict preserves the new form and page selection for re
   await page.getByLabel('Form title', { exact: true }).fill('Community volunteers');
   await page.getByLabel('Website location').selectOption('existing');
   await page.getByRole('combobox', { name: 'Existing page', exact: true }).selectOption(id(20));
+  await page
+    .getByRole('tablist', { name: 'Form setup steps' })
+    .getByRole('tab', { name: 'Responses', exact: true })
+    .click();
   await page.locator('.custom-form-members-primary').getByLabel('Form colleague').check();
   await page.getByRole('button', { name: 'Save and publish', exact: true }).click();
   await expect(page.locator('.custom-form-notice')).toContainText('another session');
+  await page
+    .getByRole('tablist', { name: 'Form setup steps' })
+    .getByRole('tab', { name: 'Basics', exact: true })
+    .click();
+
   await expect(page.getByLabel('Form title', { exact: true })).toHaveValue('Community volunteers');
   await expect(page.getByRole('combobox', { name: 'Existing page', exact: true })).toHaveValue(
     id(20),
@@ -361,6 +374,24 @@ test('staff can start a guided enquiry and preview both branches without publish
   await preview.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(preview.getByLabel('How can we help?')).toBeVisible();
   await expect(preview.getByLabel('Your reference, if you have one')).toHaveCount(0);
+  expect(state.writes).toEqual([]);
+  expect(state.errors).toEqual([]);
+});
+
+test('guided form steps retain edits and support keyboard navigation without saving', async ({
+  page,
+}) => {
+  const state = await fixture(page);
+  await page.goto('/admin?section=forms');
+  await page.getByRole('button', { name: 'New form', exact: true }).click();
+  await page.getByLabel('Form title', { exact: true }).fill('A retained draft');
+  const steps = page.getByRole('tablist', { name: 'Form setup steps' });
+  await steps.getByRole('tab', { name: 'Questions', exact: true }).click();
+  await expect(page.getByLabel('Form title', { exact: true })).toBeHidden();
+  await steps.getByRole('tab', { name: 'Questions', exact: true }).press('End');
+  await expect(steps.getByRole('tab', { name: 'Responses', exact: true })).toBeFocused();
+  await steps.getByRole('tab', { name: 'Responses', exact: true }).press('Home');
+  await expect(page.getByLabel('Form title', { exact: true })).toHaveValue('A retained draft');
   expect(state.writes).toEqual([]);
   expect(state.errors).toEqual([]);
 });

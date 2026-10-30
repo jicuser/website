@@ -1,0 +1,105 @@
+/* Shared task choices across staff tools. Existing controls keep their behaviour. */
+.admin-console .workspace-task-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 8px;
+  margin-block: 16px;
+}
+.admin-console .workspace-task-choices button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 68px;
+  padding: 12px 14px;
+  border: 1px solid var(--jic-border);
+  border-radius: 14px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  text-align: left;
+}
+.admin-console .workspace-task-choices button small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--jic-text-secondary);
+}
+.admin-console .workspace-task-choices button[aria-pressed='true'] {
+  border-color: #568e80;
+  background: color-mix(in srgb, #568e80 14%, var(--jic-surface));
+  box-shadow: inset 3px 0 #568e80;
+}
+.admin-console .workspace-task-choices button:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+.admin-console
+  :is(
+    .forms-workspace-tabs,
+    .sponsorship-task-nav,
+    .prayer-task-views,
+    .page-editor-mobile-tabs,
+    .custom-form-view-toggle
+  ) {
+  scroll-margin-top: 90px;
+}
+.admin-console .admin-main {
+  min-width: 0;
+}
+.admin-console :is(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  scroll-margin-block: 110px;
+}
+@media (max-width: 600px) {
+  .admin-console .workspace-task-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-console .workspace-task-choices button {
+    padding: 10px;
+    min-height: 70px;
+  }
+  .admin-console .workspace-task-choices button:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .page-editor-mobile-tabs {
+    position: sticky;
+    top: 64px;
+    z-index: 5;
+    background: var(--jic-surface);
+    padding-block: 6px;
+  }
+}
+/* Compact Home Screen service access; prayer and radio remain first. */
+.jic-app-home .jic-app-service-shortcuts {
+  width: 100%;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.jic-app-home .jic-app-service-shortcuts .jic-home-destination {
+  min-height: 76px;
+  padding: 10px 6px;
+}
+.jic-app-home .jic-app-service-shortcuts .jic-home-destination-copy small {
+  display: none;
+}
+.jic-app-home .jic-app-service-shortcuts .jic-home-destination-copy strong {
+  font-size: 12px;
+}
+/* Keep app section choices in one scrollable row, with the selected link in view. */
+.jic-app-brand-header nav.jic-app-section-links {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-block: 3px 7px;
+  scrollbar-width: thin;
+  overscroll-behavior-inline: contain;
+}
+.jic-app-brand-header nav.jic-app-section-links a {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.jic-app-brand-header:has(.jic-app-section-navigation) {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  background: var(--jic-surface);
+}

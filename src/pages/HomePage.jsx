@@ -219,6 +219,16 @@ export default function HomePage() {
           )}
           <HomePrayerCard />
           {installed && <AppHomeRadio />}
+          {installed && (
+            <nav
+              className="jic-home-shortcuts jic-app-service-shortcuts"
+              aria-label="Services and learning"
+            >
+              {shortcuts.map(({ key, ...card }) => (
+                <HomeDestination key={key} {...card} />
+              ))}
+            </nav>
+          )}
         </div>
       </section>
 
