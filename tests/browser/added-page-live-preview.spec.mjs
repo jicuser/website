@@ -78,10 +78,26 @@ test('an unsaved added page updates the actual website preview without a write o
   });
   await page.getByLabel('Page title', { exact: true }).fill('Unsaved open evening');
   await page
+    .getByRole('tablist', { name: 'Programme page steps' })
+    .getByRole('tab', { name: 'Content', exact: true })
+    .click();
+  await page
     .getByLabel('Page details', { exact: true })
     .fill('A draft programme introduction before any save.');
+  await page
+    .getByRole('tablist', { name: 'Programme page steps' })
+    .getByRole('tab', { name: 'Details', exact: true })
+    .click();
   await page.getByLabel('When / schedule', { exact: true }).fill('Draft schedule information');
+  await page
+    .getByRole('tablist', { name: 'Programme page steps' })
+    .getByRole('tab', { name: 'Content', exact: true })
+    .click();
   await page.getByLabel('Page picture address', { exact: true }).fill('/jic-aerial-sunset.jpg');
+  await page
+    .getByRole('tablist', { name: 'Programme page steps' })
+    .getByRole('tab', { name: 'Registration', exact: true })
+    .click();
   await page.getByLabel('Registration', { exact: true }).selectOption('interest');
   await page.getByLabel('Linked form', { exact: true }).selectOption(formId);
   await expect(
@@ -110,6 +126,10 @@ test('an unsaved added page updates the actual website preview without a write o
   await expect.poll(() => frame.evaluate(() => innerWidth)).toBe(1200);
   await page.getByRole('button', { name: 'Mobile preview', exact: true }).click();
   await expect.poll(() => frame.evaluate(() => innerWidth)).toBeLessThanOrEqual(390);
+  await page
+    .getByRole('tablist', { name: 'Programme page steps' })
+    .getByRole('tab', { name: 'Details', exact: true })
+    .click();
   await page.getByLabel('Page title', { exact: true }).fill('Still an unsaved draft');
   await expect(
     preview.getByRole('heading', { name: 'Still an unsaved draft', exact: true }),

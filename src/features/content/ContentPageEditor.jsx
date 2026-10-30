@@ -1,3 +1,4 @@
+import GuidedEditor from '@/components/admin/GuidedEditor';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -291,202 +292,224 @@ export default function ContentPageEditor({ page, poster, initialPlacement, onSa
           </button>
         </nav>
         <fieldset className="page-editor-controls content-page-fields" disabled={busy}>
-          <section className="admin-panel">
-            <h4>Page title</h4>
-            <label>
-              Page title
-              <input
-                value={draft.title}
-                maxLength={160}
-                onChange={(event) =>
-                  patch({
-                    title: event.target.value,
-                    ...(!draft.updated_at && !slugEdited
-                      ? { slug: pageSlug(event.target.value) }
-                      : {}),
-                  })
-                }
-              />
-            </label>
-            <label>
-              When / schedule
-              <input
-                value={draft.schedule}
-                maxLength={400}
-                onChange={(event) => patch({ schedule: event.target.value })}
-              />
-            </label>
-          </section>
-          <section className="admin-panel">
-            <h4>Content</h4>
-            <label>
-              Page details
-              <textarea
-                rows={6}
-                value={draft.body}
-                maxLength={12000}
-                onChange={(event) => patch({ body: event.target.value })}
-              />
-            </label>
-            <label>
-              Page picture address
-              <input
-                value={draft.image_url}
-                maxLength={2000}
-                onChange={(event) => patch({ image_url: event.target.value })}
-              />
-            </label>
-            {can('media') && (
+          <GuidedEditor label="Programme page steps" disabled={busy}>
+            <section
+              className="admin-panel"
+              data-step="Details"
+              data-help="Give this course or programme a name and schedule."
+            >
+              <h4>Page title</h4>
               <label>
-                Upload / replace page picture
+                Page title
                 <input
-                  type="file"
-                  accept={IMAGE_ACCEPT}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    event.target.value = '';
-                    void upload(file);
-                  }}
-                />
-              </label>
-            )}
-          </section>
-          <section className="admin-panel">
-            <h4>Menu</h4>
-            <label>
-              Website section
-              <select
-                aria-label="Website section"
-                value={draft.placement}
-                aria-describedby="programme-page-placement-help"
-                onChange={(event) => patch({ placement: event.target.value })}
-              >
-                {PAGE_PLACEMENTS.map(([value, label]) => (
-                  <option value={value} key={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p id="programme-page-placement-help">
-              Moving sections keeps the same page address and linked form. Changes take effect when
-              you save.
-            </p>
-            <details>
-              <summary>Advanced page settings</summary>
-              <label>
-                Page address
-                <input
-                  value={draft.slug}
-                  readOnly={Boolean(draft.updated_at)}
-                  maxLength={80}
-                  onChange={(event) => {
-                    setSlugEdited(true);
-                    patch({ slug: pageSlug(event.target.value) });
-                  }}
+                  value={draft.title}
+                  maxLength={160}
+                  onChange={(event) =>
+                    patch({
+                      title: event.target.value,
+                      ...(!draft.updated_at && !slugEdited
+                        ? { slug: pageSlug(event.target.value) }
+                        : {}),
+                    })
+                  }
                 />
               </label>
               <label>
-                Page type
+                When / schedule
+                <input
+                  value={draft.schedule}
+                  maxLength={400}
+                  onChange={(event) => patch({ schedule: event.target.value })}
+                />
+              </label>
+            </section>
+            <section
+              className="admin-panel"
+              data-step="Content"
+              data-help="Add the details and picture visitors will see."
+            >
+              <h4>Content</h4>
+              <label>
+                Page details
+                <textarea
+                  rows={6}
+                  value={draft.body}
+                  maxLength={12000}
+                  onChange={(event) => patch({ body: event.target.value })}
+                />
+              </label>
+              <label>
+                Page picture address
+                <input
+                  value={draft.image_url}
+                  maxLength={2000}
+                  onChange={(event) => patch({ image_url: event.target.value })}
+                />
+              </label>
+              {can('media') && (
+                <label>
+                  Upload / replace page picture
+                  <input
+                    type="file"
+                    accept={IMAGE_ACCEPT}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = '';
+                      void upload(file);
+                    }}
+                  />
+                </label>
+              )}
+            </section>
+            <section
+              className="admin-panel"
+              data-step="Location"
+              data-help="Choose where people will find the page."
+            >
+              <h4>Menu</h4>
+              <label>
+                Website section
                 <select
-                  aria-label="Page type"
-                  value={draft.kind}
-                  onChange={(event) => patch({ kind: event.target.value })}
+                  aria-label="Website section"
+                  value={draft.placement}
+                  aria-describedby="programme-page-placement-help"
+                  onChange={(event) => patch({ placement: event.target.value })}
                 >
-                  {PAGE_KINDS.map(([value, label]) => (
+                  {PAGE_PLACEMENTS.map(([value, label]) => (
                     <option value={value} key={value}>
                       {label}
                     </option>
                   ))}
                 </select>
               </label>
-              <small>
-                The address stays {pageUrl(draft)} if you move the page to another section.
-              </small>
-            </details>
-          </section>
-          <section className="admin-panel content-registration-setup">
-            <h4>Registration</h4>
-            <p>
-              Link a form when people need to register or apply. Choosing no registration hides the
-              button without closing the form or deleting responses.
-            </p>
-            <label>
-              Registration
-              <select
-                aria-label="Registration"
-                value={draft.registration}
-                onChange={(event) => patch({ registration: event.target.value })}
-              >
-                {REGISTRATION_TYPES.map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {draft.registration !== 'none' && (
-              <>
+              <p id="programme-page-placement-help">
+                Moving sections keeps the same page address and linked form. Changes take effect
+                when you save.
+              </p>
+              <details>
+                <summary>Advanced page settings</summary>
                 <label>
-                  Linked form
+                  Page address
+                  <input
+                    value={draft.slug}
+                    readOnly={Boolean(draft.updated_at)}
+                    maxLength={80}
+                    onChange={(event) => {
+                      setSlugEdited(true);
+                      patch({ slug: pageSlug(event.target.value) });
+                    }}
+                  />
+                </label>
+                <label>
+                  Page type
                   <select
-                    aria-label="Linked form"
-                    value={draft.form_id || ''}
-                    onChange={(event) => patch({ form_id: event.target.value || null })}
+                    aria-label="Page type"
+                    value={draft.kind}
+                    onChange={(event) => patch({ kind: event.target.value })}
                   >
-                    <option value="">No online form linked yet</option>
-                    {draft.form_id && !forms.some((form) => form.id === draft.form_id) && (
-                      <option value={draft.form_id}>Current linked form</option>
-                    )}
-                    {forms.map((form) => (
-                      <option value={form.id} key={form.id}>
-                        {form.title}
-                        {form.published_version === null ? ' · Draft' : ''}
+                    {PAGE_KINDS.map(([value, label]) => (
+                      <option value={value} key={value}>
+                        {label}
                       </option>
                     ))}
                   </select>
                 </label>
-                {formsError && <p role="status">{formsError}</p>}
-                {can('forms_manage') && (
-                  <button
-                    type="button"
-                    className="admin-button"
-                    onClick={() => {
-                      setMessage('');
-                      setCreating(true);
-                    }}
-                  >
-                    + Create new form
-                  </button>
-                )}
                 <small>
-                  Manage responses and actions from Forms. Page visibility and form acceptance stay
-                  separate.
+                  The address stays {pageUrl(draft)} if you move the page to another section.
                 </small>
-              </>
-            )}
-          </section>
-          <section className="admin-panel content-page-toggle">
-            <h4>Visibility</h4>
-            <p>
-              {poster
-                ? 'Show the page alongside the poster. Hiding the page does not remove the poster.'
-                : 'Show or hide this page without deleting its content, linked form or responses.'}
-            </p>
-            <label className="admin-check">
-              <input
-                type="checkbox"
-                checked={draft.published}
-                onChange={(event) => patch({ published: event.target.checked })}
-              />
-              Show page on website
-            </label>
-            <p className="content-status">
-              {draft.published
-                ? 'After saving: visible on website'
-                : 'After saving: hidden from website'}
-            </p>
-          </section>
+              </details>
+            </section>
+            <section
+              className="admin-panel content-registration-setup"
+              data-step="Registration"
+              data-help="Choose whether visitors need to register."
+            >
+              <h4>Registration</h4>
+              <p>
+                Link a form when people need to register or apply. Choosing no registration hides
+                the button without closing the form or deleting responses.
+              </p>
+              <label>
+                Registration
+                <select
+                  aria-label="Registration"
+                  value={draft.registration}
+                  onChange={(event) => patch({ registration: event.target.value })}
+                >
+                  {REGISTRATION_TYPES.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {draft.registration !== 'none' && (
+                <>
+                  <label>
+                    Linked form
+                    <select
+                      aria-label="Linked form"
+                      value={draft.form_id || ''}
+                      onChange={(event) => patch({ form_id: event.target.value || null })}
+                    >
+                      <option value="">No online form linked yet</option>
+                      {draft.form_id && !forms.some((form) => form.id === draft.form_id) && (
+                        <option value={draft.form_id}>Current linked form</option>
+                      )}
+                      {forms.map((form) => (
+                        <option value={form.id} key={form.id}>
+                          {form.title}
+                          {form.published_version === null ? ' · Draft' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {formsError && <p role="status">{formsError}</p>}
+                  {can('forms_manage') && (
+                    <button
+                      type="button"
+                      className="admin-button"
+                      onClick={() => {
+                        setMessage('');
+                        setCreating(true);
+                      }}
+                    >
+                      + Create new form
+                    </button>
+                  )}
+                  <small>
+                    Manage responses and actions from Forms. Page visibility and form acceptance
+                    stay separate.
+                  </small>
+                </>
+              )}
+            </section>
+            <section
+              className="admin-panel content-page-toggle"
+              data-step="Review"
+              data-help="Check the preview, choose visibility, then save below."
+            >
+              <h4>Visibility</h4>
+              <p>
+                {poster
+                  ? 'Show the page alongside the poster. Hiding the page does not remove the poster.'
+                  : 'Show or hide this page without deleting its content, linked form or responses.'}
+              </p>
+              <label className="admin-check">
+                <input
+                  type="checkbox"
+                  checked={draft.published}
+                  onChange={(event) => patch({ published: event.target.checked })}
+                />
+                Show page on website
+              </label>
+              <p className="content-status">
+                {draft.published
+                  ? 'After saving: visible on website'
+                  : 'After saving: hidden from website'}
+              </p>
+            </section>
+          </GuidedEditor>
           <div className="admin-actions">
             <button
               className="admin-button primary"
