@@ -77,6 +77,11 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
     if (event.shiftKey && (document.activeElement === first || !event.currentTarget.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && (document.activeElement === last || !event.currentTarget.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
   }
+  // Keep the current page and menu available while a lazy destination loads.
+  // UnifiedHeader closes the drawer when the committed pathname changes.
+  function closeCurrentPage(event) {
+    if (new URL(event.currentTarget.href).pathname === pathname) onClose();
+  }
   if (!open) return null;
   return (
     <dialog id="jic-site-menu" ref={dialogRef} className="jic-unified-menu jic-navigation-drawer" aria-label={view === 'appearance' ? 'Appearance settings' : 'Navigation menu'} onKeyDown={containKeyboardFocus} onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => {
@@ -97,8 +102,8 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
           </section>
         ) : (
           <>
-            <Link to="/search" className="jic-menu-search" onClick={onClose}><Search size={20} aria-hidden="true" /><span>Search pages, services & classes</span><ChevronRight size={16} aria-hidden="true" /></Link>
-            {shortcuts.length > 0 && <nav className="jic-menu-shortcuts" aria-label="Worship and learning">{shortcuts.map(({ path, name }) => <NavLink key={path} to={path} onClick={onClose}><BookOpen size={18} aria-hidden="true" /><span>{name}</span><ChevronRight size={14} aria-hidden="true" /></NavLink>)}</nav>}
+            <Link to="/search" className="jic-menu-search" onClick={closeCurrentPage}><Search size={20} aria-hidden="true" /><span>Search pages, services & classes</span><ChevronRight size={16} aria-hidden="true" /></Link>
+            {shortcuts.length > 0 && <nav className="jic-menu-shortcuts" aria-label="Worship and learning">{shortcuts.map(({ path, name }) => <NavLink key={path} to={path} onClick={closeCurrentPage}><BookOpen size={18} aria-hidden="true" /><span>{name}</span><ChevronRight size={14} aria-hidden="true" /></NavLink>)}</nav>}
             <nav aria-label="All pages">
               <ul className="jic-drawer-list">{groups.map(({ name, path, children = [] }) => {
                 const Icon = destinationIcons[path] || Users;
@@ -107,12 +112,12 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
                 return (
                   <li key={path} className={expanded[path] ? 'is-expanded' : undefined}>
                     <div className="jic-drawer-row">
-                      <Link to={path} aria-current={active === path ? pathname === path ? 'page' : 'location' : undefined} onClick={onClose}>
+                      <Link to={path} aria-current={active === path ? pathname === path ? 'page' : 'location' : undefined} onClick={closeCurrentPage}>
                         <Icon className="jic-drawer-destination-icon" size={22} aria-hidden="true" /><span>{name}</span>{!subpages.length && <ChevronRight className="jic-drawer-chevron" size={17} aria-hidden="true" />}
                       </Link>
                       {subpages.length > 0 && <button type="button" className="jic-drawer-expand" aria-label={`${expanded[path] ? 'Collapse' : 'Expand'} ${name} subpages`} aria-expanded={Boolean(expanded[path])} aria-controls={childrenId} onClick={() => setExpanded((previous) => ({ [path]: !previous[path] }))}><span>{expanded[path] ? 'Less' : 'More'}</span><ChevronDown size={16} aria-hidden="true" /></button>}
                     </div>
-                    {subpages.length > 0 && <ul id={childrenId} className="jic-drawer-children" hidden={!expanded[path]}>{subpages.map((child) => <li key={`${child.path}-${child.name}`}><NavLink end to={child.path} onClick={onClose}>{child.name}</NavLink></li>)}</ul>}
+                    {subpages.length > 0 && <ul id={childrenId} className="jic-drawer-children" hidden={!expanded[path]}>{subpages.map((child) => <li key={`${child.path}-${child.name}`}><NavLink end to={child.path} onClick={closeCurrentPage}>{child.name}</NavLink></li>)}</ul>}
                   </li>
                 );
               })}</ul>

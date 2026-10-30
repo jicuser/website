@@ -82,7 +82,7 @@ test('monthly drafts and exports survive a failed save; pending saves block ever
   await editor.getByRole('button', { name: 'Preview & download →', exact: true }).click();
   await expect(editor).toContainText('Draft — downloads include your unsaved edits.');
   await expect(
-    editor.getByRole('link', { name: 'Download A4 timetable JPEG', exact: true }),
+    editor.getByRole('link', { name: 'Download a4 timetable JPEG', exact: true }),
   ).toHaveAttribute('href', /^blob:/);
   await expect(
     editor.getByRole('link', { name: 'Download phone wallpaper JPEG', exact: true }),
@@ -167,7 +167,7 @@ for (const installed of [false, true]) {
       0,
     );
     const file = page.waitForEvent('download');
-    await downloads.getByRole('link', { name: 'Download A4 timetable JPEG', exact: true }).click();
+    await downloads.getByRole('link', { name: 'Download a4 timetable JPEG', exact: true }).click();
     expect((await file).suggestedFilename()).toMatch(/monthly-timetable\.jpg$/);
     if (!installed) await picker.locator('summary').click();
     await picker.getByRole('link', { name: 'Jummah', exact: true }).click();

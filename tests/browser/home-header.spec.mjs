@@ -155,7 +155,7 @@ for (const width of [390, 1280]) {
       await expect(page.locator('#jic-prayer-details')).toBeHidden();
     }
     await page.goto('/services');
-    await expect(prayer).toHaveAttribute('aria-hidden', 'true');
+    await expect(prayer).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 }

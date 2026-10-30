@@ -54,7 +54,10 @@ for (const [theme, width] of [
     await expect(picker).toBeVisible();
     await expect(picker.locator('summary')).toContainText('Learning at JIC');
     await expect(page.getByRole('navigation', { name: 'Current section' })).toBeHidden();
-    await expect(page.locator('.jic-unified-subnav')).toBeHidden();
+    await expect(page.locator('.jic-unified-subnav')).toBeVisible();
+    await expect(page.locator('.jic-unified-subnav a[href="/education/courses"]')).toContainText(
+      'Adult courses',
+    );
     const choices = page.getByRole('navigation', { name: 'Education choices' });
     await expect(choices.locator('a[href="/madrassah"]')).toHaveCount(0);
     await expect(choices.locator('a[href="/education/courses"]')).toContainText('Adult courses');

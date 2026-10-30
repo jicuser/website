@@ -84,3 +84,24 @@ was absent and its download returned an invalid archive. This is an environment
 failure, not a passing test. No production data, database migration, Edge Function,
 secret or hosting setting has been changed. Builds use dummy public configuration
 and must not be deployed.
+
+### First combined browser run and corrections
+
+[Run 41127102856](https://github.com/jicuser/website/actions/runs/41127102856)
+passed 279/293 Chromium cases. Its 14 failures exposed stale control names
+(`monthly timetable` became `a4 timetable`), outdated menu-focus/subpage selectors,
+and expectations that mobile section tabs stayed hidden or the Hub still mounted
+an invisible prayer dock. Assertions now target the current controls and retain
+focus cycling, visibility, filter, preview geometry and real download checks.
+The Salah-alert button is checked with an actual hit test because a hidden dock's
+wrapper box no longer represents an obstruction.
+
+The slow-route case also exposed a real regression from main: destination links
+closed the menu immediately. The menu now closes on the committed route change,
+retaining the current view while a lazy route loads; selecting the current page
+still closes it directly. The slow-route assertion is unchanged.
+
+WebKit was cancelled at the existing 15-minute job limit and workspace tests were
+skipped. This is not browser sign-off. The separate workflow update needs to give
+all suites independent execution and artifact retention. No timeout or assertion
+was relaxed here. Fresh checks on the corrected revision remain mandatory.

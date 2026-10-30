@@ -115,7 +115,10 @@ test('portal access is in the menu, Worship keeps reading links, and volunteerin
     '/portal',
   );
   await menu.getByRole('button', { name: 'Expand Community Hub subpages', exact: true }).click();
-  await menu.getByRole('link', { name: 'Worship', exact: true }).click();
+  await menu
+    .getByRole('navigation', { name: 'All pages', exact: true })
+    .getByRole('link', { name: 'Worship', exact: true })
+    .click();
   await expect(page).toHaveURL('/worship');
   await expect(page.getByRole('heading', { name: 'Worship' })).toBeVisible();
   await expect(page.locator('.worship-compact-resources a[href="/worship/quran"]')).toBeVisible();
@@ -188,8 +191,19 @@ test('Salah alerts enable the default in one action and preserve custom settings
   await expect(enable).toBeEnabled();
   await expect(page.locator('#jic-prayer-dock')).toBeHidden();
   const buttonBox = await enable.boundingBox();
-  const navBox = await page.locator('.jic-mobile-dock').boundingBox();
-  expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(navBox.y);
+  expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(
+    await page.evaluate(() => innerHeight),
+  );
+  // The quiet dock has no visible footprint. Check the actual tap target rather
+  // than the hidden wrapper's reserved box.
+  expect(
+    await enable.evaluate((button) => {
+      const box = button.getBoundingClientRect();
+      return button.contains(
+        document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2),
+      );
+    }),
+  ).toBe(true);
   expect(writes).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('salah-alerts-default.png') });
   await enable.click();

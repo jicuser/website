@@ -118,7 +118,7 @@ for (const theme of ['light', 'dark']) {
     await expect(menu.locator('.jic-drawer-children a[href="/projects"]')).toBeVisible();
     await menu.getByRole('link', { name: 'Staff login', exact: true }).focus();
     await page.keyboard.press('Tab');
-    await expect(menu.getByRole('link', { name: 'Jamatia Islamic Centre home' })).toBeFocused();
+    await expect(menu.getByRole('button', { name: 'Close navigation menu' })).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await expect(menu.getByRole('link', { name: 'Staff login', exact: true })).toBeFocused();
     await menu.getByRole('button', { name: 'Expand Community Hub subpages' }).click();
