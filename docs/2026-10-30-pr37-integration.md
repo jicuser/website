@@ -105,3 +105,19 @@ WebKit was cancelled at the existing 15-minute job limit and workspace tests wer
 skipped. This is not browser sign-off. The separate workflow update needs to give
 all suites independent execution and artifact retention. No timeout or assertion
 was relaxed here. Fresh checks on the corrected revision remain mandatory.
+
+### Corrected Chromium run and remaining gate
+
+[Run 41129493924](https://github.com/jicuser/website/actions/runs/41129493924)
+passed all **293 Chromium tests**, plus lint, types, 858 Node/database tests and
+the production build. WebKit completed with 18 passes and three failures:
+two date assertions assumed Chromium's comma after the weekday, and one Home
+navigation check raced the legacy `/team` redirect. The follow-up accepts either
+locale punctuation while requiring the exact Friday date, and explicitly awaits
+the `/about#team` redirect before clicking Home. No date, layout or navigation
+behavioural assertion is removed.
+
+The workspace suite started but was cancelled at the job's 15-minute limit.
+The final test corrections still require a fresh complete browser run. Keep the
+PR draft and unmerged until the separate workflow work enables all three suites
+to finish and report independently, preserving their failure artifacts.

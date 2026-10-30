@@ -172,7 +172,8 @@ for (const installed of [false, true]) {
     if (!installed) await picker.locator('summary').click();
     await picker.getByRole('link', { name: 'Jummah', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'First Jummah', exact: true })).toBeVisible();
-    await expect(page.locator('main')).toContainText('Friday prayer · Friday, 16 October 2026');
+    // Intl punctuation differs between Chromium and WebKit; the Friday date must agree.
+    await expect(page.locator('main')).toContainText(/Friday prayer · Friday,? 16 October 2026/);
     await expect(page.locator('main').getByRole('alert')).toHaveCount(0);
     expect(evidence.errors).toEqual([]);
   });

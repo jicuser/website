@@ -126,6 +126,7 @@ for (const width of [320, 390]) {
       await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
       await page.screenshot({ path: testInfo.outputPath(`prayer-pill-${theme}-${width}.png`) });
       await page.goto('/team');
+      await expect(page).toHaveURL('/about#team');
       await home.click();
       await expect(page).toHaveURL('/');
     });
