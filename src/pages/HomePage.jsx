@@ -24,6 +24,9 @@ import { safeWebUrl, youtubeEmbedUrl } from '@/lib/video';
 import { isPageVisible } from '@/lib/pageVisibility';
 import { cn } from '@/lib/utils';
 
+import useInstalledApp from '@/hooks/useInstalledApp';
+import AppHomeRadio from '@/components/home/AppHomeRadio';
+
 const HomeRamadan = lazy(() => import('@/features/ramadan/HomeRamadan'));
 
 const DEFAULT_CARDS = [
@@ -111,6 +114,7 @@ function useHomeTiles() {
 }
 
 export default function HomePage() {
+  const installed = useInstalledApp();
   const { events, announcement, livestream } = useHomeLiveContent();
   const whatsapp = useCommunityLink();
   const cards = useHomeTiles();
@@ -193,24 +197,28 @@ export default function HomePage() {
   );
 
   return (
-    <div className="jic-premium-home">
+    <div className={`jic-premium-home ${installed ? 'jic-app-home' : ''}`}>
+      {installed && <h1 className="sr-only">Jamatia Islamic Centre — Home</h1>}
       <section className="jic-hero">
         <div className="jic-hero-inner">
-          <div className="jic-hero-copy">
-            <header className="jic-home-intro">
-              <p className="jic-app-brandline">Jamatia Islamic Centre</p>
-              <h1 className="jic-home-welcome">Worship. Learn. Grow. Together.</h1>
-            </header>
-            <nav className="jic-home-shortcuts" aria-label="Services and learning">
-              {shortcuts.map(({ key, ...card }) => (
-                <HomeDestination key={key} {...card} />
-              ))}
-            </nav>
-            <Link to="/contact#map" className="jic-home-visit">
-              Plan your visit <ArrowRight size={16} aria-hidden="true" />
-            </Link>
-          </div>
+          {!installed && (
+            <div className="jic-hero-copy">
+              <header className="jic-home-intro">
+                <p className="jic-app-brandline">Jamatia Islamic Centre</p>
+                <h1 className="jic-home-welcome">Worship. Learn. Grow. Together.</h1>
+              </header>
+              <nav className="jic-home-shortcuts" aria-label="Services and learning">
+                {shortcuts.map(({ key, ...card }) => (
+                  <HomeDestination key={key} {...card} />
+                ))}
+              </nav>
+              <Link to="/contact#map" className="jic-home-visit">
+                Plan your visit <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
+          )}
           <HomePrayerCard />
+          {installed && <AppHomeRadio />}
         </div>
       </section>
 

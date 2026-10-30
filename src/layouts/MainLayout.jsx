@@ -24,6 +24,8 @@ import { useAuth } from '@/context/AuthContext';
 import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
 import { isPublicTaskRoute, isPublicReadingRoute } from '@/lib/publicTaskRoute';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
+import AppBrandHeader from '@/components/shell/AppBrandHeader';
+import useInstalledApp from '@/hooks/useInstalledApp';
 
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
 
@@ -47,6 +49,7 @@ function PublicLayout() {
   const { getContent } = useContent();
   const visible = isPageVisible(getContent, pathname) || isAdmin;
   const preview = new URLSearchParams(search).get('preview') === '1';
+  const installed = useInstalledApp();
   const isHome = pathname === '/';
   const isAbout = ABOUT_PATHS.includes(pathname);
   const showReminder =
@@ -72,7 +75,8 @@ function PublicLayout() {
         tabIndex={-1}
         className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}
       >
-        {showReminder && <DailyReminder />}
+        {installed && <AppBrandHeader home={isHome} />}
+        {showReminder && !installed && <DailyReminder />}
         {visible ? (
           <div>
             <Suspense

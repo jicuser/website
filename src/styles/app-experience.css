@@ -267,11 +267,15 @@ html[data-surface='solid'] .jic-app-companion :is(button, a, .jic-app-salah) {
 }
 
 /* Compact, recognisable headings without restoring the large app logo row. */
-.jic-app-brandline { display: none; }
+.jic-app-brandline {
+  display: none;
+}
 html[data-installed-navigation='true'] .jic-app-brandline {
   display: block;
   margin: 0 0 8px;
-  font: 600 10px/1.4 system-ui, sans-serif;
+  font:
+    600 10px/1.4 system-ui,
+    sans-serif;
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: #e4eee8;
@@ -376,5 +380,167 @@ html[data-surface='glass'] .jic-app-companion-tools :is(button, a) {
     background: var(--jic-surface);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+}
+
+/* The installed home is a small daily dashboard; browser home retains its layout. */
+.jic-app-brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  max-width: 760px;
+  padding: 10px 16px 6px;
+  margin: auto;
+}
+.jic-app-brand-header .brand-lockup {
+  width: 130px;
+}
+.jic-app-brand-header nav {
+  display: flex;
+  gap: 4px;
+}
+.jic-app-brand-header nav :is(a, button) {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--jic-text);
+  border: 1px solid var(--jic-glass-border);
+  background: color-mix(in srgb, var(--jic-surface) 65%, transparent);
+}
+.jic-app-brand-header :focus-visible,
+.jic-app-radio button:focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 2px;
+}
+html[data-installed-navigation='true'] .jic-premium-home.jic-app-home .jic-hero-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 4px 0 0;
+  width: calc(100% - 24px);
+  max-width: 736px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-hero {
+  padding: 0;
+  min-height: 0;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-content {
+  gap: 12px;
+  padding-block: 12px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-content > * {
+  margin-block: 0;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-prayer {
+  width: 100%;
+  margin: 0;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-prayer-browser-item {
+  padding-block: 6px;
+  gap: 3px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-community-links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-community-links a {
+  padding: 8px;
+  font-size: 12px;
+  min-height: 44px;
+}
+html[data-installed-navigation='true'] .jic-app-home .community-programme-feed {
+  max-width: 736px;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-row {
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 10px;
+  padding-bottom: 6px;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-thumb {
+  width: 48px;
+  min-height: 58px;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-thumb img {
+  width: 48px;
+  height: 64px;
+  object-fit: contain;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-row h3 {
+  font-size: 14px;
+}
+html[data-installed-navigation='true'] .jic-app-home .programme-feed-row p {
+  font-size: 12px;
+}
+.jic-app-radio {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--jic-glass-border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--jic-surface) 70%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: var(--jic-text);
+}
+.jic-app-radio-art {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  color: var(--jic-gold);
+  background: color-mix(in srgb, var(--jic-gold) 12%, transparent);
+}
+.jic-app-radio h2 {
+  font:
+    700 15px/1.4 system-ui,
+    sans-serif;
+  margin: 0;
+}
+.jic-app-radio p {
+  font-size: 12px;
+  margin: 2px 0 0;
+  color: var(--jic-text-secondary);
+}
+.jic-app-radio button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--jic-text);
+  color: var(--jic-surface);
+}
+.jic-app-radio button:disabled {
+  opacity: 0.5;
+}
+.jic-app-companion-tools[hidden] {
+  display: none;
+}
+html[data-surface='solid']
+  :is(.jic-app-radio, .jic-app-brand-header nav a, .jic-app-brand-header nav button) {
+  background: var(--jic-surface);
+  backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .jic-app-radio,
+  .jic-app-brand-header nav :is(a, button) {
+    background: var(--jic-surface);
+    backdrop-filter: none;
+  }
+}
+@media (max-width: 374px) {
+  html[data-installed-navigation='true'] .jic-app-home .jic-prayer-start-label {
+    display: block;
+  }
+  html[data-installed-navigation='true'] .jic-app-home .jic-prayer-browser-item small {
+    font-size: 10px;
+    line-height: 1.3;
   }
 }

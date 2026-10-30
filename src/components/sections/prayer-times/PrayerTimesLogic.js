@@ -43,6 +43,8 @@ const formatMonthRecord = (pt) => {
     maghrib_jamah: formatTime(pt.maghrib_jamah),
     isha_begins: formatTime(pt.isha_begins),
     isha_jamah: formatTime(pt.isha_jamah),
+    jummah_1_jamah: pt.jummah_1_jamah ? formatTime(pt.jummah_1_jamah) : null,
+    jummah_2_jamah: pt.jummah_2_jamah ? formatTime(pt.jummah_2_jamah) : null,
     is_ramadan: pt.is_ramadan,
   };
 };

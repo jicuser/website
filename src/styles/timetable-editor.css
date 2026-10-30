@@ -1,0 +1,119 @@
+.jic-month-editor {
+  display: grid;
+  gap: 16px;
+}
+.jic-month-editor label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+.jic-month-editor input,
+.jic-month-editor select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid var(--jic-border, #b8c4d1);
+  border-radius: 8px;
+  background: var(--jic-surface, #fff);
+  color: var(--jic-text, #142739);
+}
+.jic-month-editor p {
+  margin-block: 12px;
+}
+.jic-month-editor summary {
+  min-height: 44px;
+  padding-block: 12px;
+  cursor: pointer;
+  font-weight: 650;
+}
+.jic-month-editor .admin-actions {
+  margin-top: 12px;
+}
+.jic-month-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-block: 16px;
+}
+.jic-month-days button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 1px solid var(--jic-border, #b8c4d1);
+  border-radius: 10px;
+}
+.jic-month-days button[aria-pressed='true'] {
+  background: #123d50;
+  color: white;
+}
+.jic-month-days span {
+  font-size: 10px;
+}
+.jic-month-editor td,
+.jic-month-editor th {
+  padding: 8px;
+  white-space: nowrap;
+}
+.jic-month-editor button:focus-visible {
+  outline: 3px solid #ae8435;
+  outline-offset: 2px;
+}
+.jic-month-editor .admin-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.jic-month-editor,
+.jic-month-editor > div {
+  min-width: 0;
+}
+.jic-month-editor .admin-table-scroll {
+  max-width: 100%;
+  max-height: 340px;
+  overflow: auto;
+}
+.jic-month-editor .timetable-theme-picker label {
+  display: flex;
+  flex-direction: row;
+}
+.jic-month-editor .timetable-theme-picker input {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  padding: 0;
+}
+.jic-month-prayer-labels,
+.jic-month-prayer-pair {
+  display: grid;
+  grid-template-columns: 64px repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  align-items: center;
+  margin-block: 8px;
+}
+.jic-month-prayer-labels {
+  font-size: 12px;
+  color: var(--jic-text-secondary);
+}
+.jic-month-prayer-pair strong {
+  font-size: 13px;
+}
+.jic-month-prayer-pair input {
+  width: 100%;
+  min-width: 0;
+  padding: 5px;
+  font-size: 14px;
+}
+@media (max-width: 380px) {
+  .jic-month-prayer-pair,
+  .jic-month-prayer-labels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .jic-month-prayer-pair strong {
+    grid-column: 1/-1;
+  }
+  .jic-month-prayer-labels span:first-child {
+    display: none;
+  }
+}

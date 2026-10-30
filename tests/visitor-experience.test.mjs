@@ -366,12 +366,12 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
     calls.length = 0;
     assert.equal(createMonthlyTimetableCanvas(rows, 'October 2026'), canvas);
     assert.equal(canvas.width, 1800);
-    assert.equal(canvas.height, 2220);
+    assert.equal(canvas.height, 2546);
     assert.ok(calls.some(([text]) => text === '31'));
     assert.ok(
       calls.every(([text]) => !/12-hour|Gold rows|same time as above|Adhan time shown/.test(text)),
     );
-    assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1800 && y >= 0 && y < 2220));
+    assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1800 && y >= 0 && y < 2546));
   } finally {
     if (previous === undefined) delete globalThis.document;
     else globalThis.document = previous;
