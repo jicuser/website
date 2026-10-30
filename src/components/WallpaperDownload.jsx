@@ -26,7 +26,7 @@ function printImage(file) {
 const formats = [
   {
     key: 'monthly-timetable',
-    label: 'Monthly timetable',
+    label: 'A4 timetable',
     Icon: FileImage,
     create: createMonthlyTimetableCanvas,
   },
@@ -163,7 +163,7 @@ export default function WallpaperDownload({
       tabIndex={-1}
       aria-label="Timetable downloads"
     >
-      <h4>Print & phone wallpaper</h4>
+      <h4>Download timetable</h4>
       <fieldset className="timetable-theme-picker">
         <legend>Wallpaper colour</legend>
         {['light', 'dark'].map((value) => (
@@ -239,7 +239,7 @@ export default function WallpaperDownload({
         </details>
       )}
       <p>
-        A4 print layout stays light. Phone wallpaper leaves room above the timetable for your clock.
+        The A4 timetable uses a clear, light layout. Phone wallpaper leaves room above the timetable for your clock.
       </p>
       <ul>
         {formats.map(({ key, label, Icon }) => {
@@ -265,7 +265,7 @@ export default function WallpaperDownload({
                         <Share2 size={16} /> Share / Save
                       </button>
                     )}
-                    {key === 'monthly-timetable' && (
+                    {editable && key === 'monthly-timetable' && (
                       <button
                         type="button"
                         onClick={() => {

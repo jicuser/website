@@ -10,7 +10,7 @@ export default function PrayerTimesHeroSection({ title = 'Prayer Times', meta = 
         </p>
       )}
       <h1>{title}</h1>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+      <p className="jic-prayer-location mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
         {PRAYER_LOCATION}
       </p>
     </section>

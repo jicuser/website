@@ -25,7 +25,7 @@ export default function AppCompanion() {
   }, []);
   return (
     <aside ref={panel} className="jic-app-companion" aria-label="Prayer times and search">
-      <div className="jic-app-companion-tools" hidden={home}>
+      <div className={`jic-app-companion-tools${home ? " is-home" : ""}`}>
         {!home && (
           <button
             type="button"

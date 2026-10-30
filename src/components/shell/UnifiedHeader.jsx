@@ -372,7 +372,7 @@ export default function UnifiedHeader() {
               </nav>
             </details>
           )}
-          {hasSectionPicker && (
+          {hasSectionPicker && !installed && (
             <nav
               ref={subnavRef}
               className="jic-unified-subnav"
