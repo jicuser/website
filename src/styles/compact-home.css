@@ -10,7 +10,7 @@
 .jic-compact-prayer .jic-prayer-browser-grid {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.3rem}
 .jic-compact-prayer .jic-prayer-browser-item {position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.15rem;border:2px solid transparent;border-radius:.7rem;padding:.65rem .15rem .45rem;min-width:0}
 .jic-compact-prayer .jic-prayer-browser-item > :is(small,span) {font-size:.72rem}
-.jic-compact-prayer .jic-prayer-browser-item > strong {font-size:.88rem}
+.jic-compact-prayer .jic-prayer-browser-item > strong {font-size:.78rem}
 .jic-compact-prayer .jic-prayer-browser-item > b {font-size:.9rem;white-space:nowrap}
 .jic-compact-prayer .is-current-prayer {border-color:#b29449;background:rgba(180,151,76,.18)}
 .jic-compact-prayer .is-current-prayer em {display:block;margin-top:.25rem;font-size:.63rem;font-style:normal;font-weight:700}
@@ -26,5 +26,8 @@
 .jic-app-home .jic-home-content {gap:.85rem}
 .jic-app-home .jic-hero {padding-block:.6rem}
 .jic-compact-prayer :is(a,button):focus-visible {outline:3px solid #b29449;outline-offset:3px}
-@media(max-width:380px){.jic-compact-prayer .jic-prayer-browser-grid{gap:.1rem}.jic-compact-prayer .jic-prayer-browser-item small{font-size:.64rem}.jic-compact-prayer .jic-prayer-browser-item b{font-size:.8rem}.jic-compact-prayer .jic-prayer-start-label{display:none}}
+@media(max-width:420px){.jic-compact-prayer .jic-prayer-start-label{display:none}}
+@media(max-width:380px){.jic-compact-prayer .jic-prayer-browser-item > strong{font-size:.71rem}.jic-compact-prayer .jic-prayer-browser-grid{gap:.1rem}.jic-compact-prayer .jic-prayer-browser-item small{font-size:.64rem}.jic-compact-prayer .jic-prayer-browser-item b{font-size:.8rem}.jic-compact-prayer .jic-prayer-start-label{display:none}}
 @media(prefers-reduced-motion:reduce){.jic-compact-prayer *{scroll-behavior:auto!important}}
+
+.jic-compact-prayer .jic-prayer-browser-item time{font-variant-numeric:tabular-nums;white-space:nowrap}

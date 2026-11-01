@@ -39,6 +39,15 @@ for (const width of [320,390]) for (const theme of ['light','dark']) {
     await expect(card).toContainText('21 Jumada al-Awwal 1448 AH');
     await expect(card.getByRole('button',{name:'Browse timetable dates'})).toHaveAttribute('aria-expanded','false');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth+1)).toBe(true);
+    const crowded = await card.locator('.jic-prayer-browser-item').evaluateAll(items => items.flatMap(item => {
+      const parent = item.getBoundingClientRect();
+      return [...item.querySelectorAll(':scope > strong, time')].filter(element => {
+        const range = document.createRange(); range.selectNodeContents(element);
+        const rect = range.getBoundingClientRect();
+        return rect.left < parent.left - 1 || rect.right > parent.right + 1;
+      }).map(element => element.textContent);
+    }));
+    expect(crowded, 'Prayer labels and times stay inside their own column').toEqual([]);
     await page.screenshot({path:testInfo.outputPath(`compact-home-${width}-${theme}.png`),fullPage:false});
     await card.getByRole('button',{name:'Browse timetable dates'}).click();
     await card.getByRole('button',{name:/Mon,? 2 Nov/}).click();
@@ -52,12 +61,14 @@ test('compact experience Friday next congregation is Jummah', async ({page}) => 
   await page.goto('/');
   await expect(page.locator('.jic-prayer-now')).toContainText('Jummah 1 · 12:35 PM');
 });
-test('compact experience installed home keeps direct community shortcuts', async ({page}) => {
+test('compact experience installed home keeps direct community shortcuts', async ({page}, testInfo) => {
+  await page.setViewportSize({width:390,height:844});
   await publicPage(page,{installed:true});
   await page.goto('/');
   const links = page.getByRole('navigation',{name:'JIC shortcuts'});
   await expect(links.getByRole('link',{name:'Community Hub'})).toHaveAttribute('href','/services');
   await expect(links.getByRole('link',{name:'Donate'})).toHaveAttribute('href','/donate');
+  await page.screenshot({path:testInfo.outputPath('compact-installed-home.png'),fullPage:false});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth+1)).toBe(true);
 });
 test('compact experience appeals expand lazily and separate verified past results', async ({page}, testInfo) => {
@@ -77,6 +88,7 @@ test('compact experience appeals expand lazily and separate verified past result
   expect(requests.length).toBeGreaterThan(before);
   await expect(section.getByText('Private draft',{exact:true})).toHaveCount(0);
   await section.getByRole('button',{name:'Past achievements',exact:true}).click();
+  await expect(section.getByRole('button',{name:'Past achievements',exact:true})).toHaveAttribute('aria-pressed','true');
   await expect(section.getByText('Facilities completed.',{exact:true})).toBeVisible();
   await expect(section.getByRole('heading',{name:'Current appeal',exact:true})).toHaveCount(0);
   await page.screenshot({path:testInfo.outputPath('compact-past-appeal.png'),fullPage:false});
@@ -93,7 +105,7 @@ test('compact experience owner previews and saves a template without changing ac
   await page.getByRole('button',{name:'Arrange dashboards',exact:true}).click();
   const designer = page.locator('.jic-layout-designer');
   await expect(designer.getByRole('heading',{name:'Arrange, preview, save'})).toBeVisible();
-  await designer.getByLabel('Audience',{exact:true}).selectOption('teacher');
+  await designer.getByRole('combobox',{name:'Audience',exact:true}).selectOption('teacher');
   await expect(designer.getByRole('button',{name:'Move Forms earlier',exact:true})).toBeEnabled();
   await designer.getByRole('button',{name:'Move Forms earlier',exact:true}).click();
   await designer.getByRole('button',{name:'Phone preview',exact:true}).click();
