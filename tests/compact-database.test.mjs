@@ -1,0 +1,38 @@
+import test, { after, before } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+const db=new PGlite();
+const owner='00000000-0000-0000-0000-000000000001', member='00000000-0000-0000-0000-000000000002', fundraiser='00000000-0000-0000-0000-000000000003', inactive='00000000-0000-0000-0000-000000000004', campaign='10000000-0000-0000-0000-000000000001';
+const layout={order:['prayer','forms'],hidden:[],density:'compact'};
+async function actor(id,role='authenticated'){await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id||'']);await db.exec(`set role ${role}`);}
+const saveLayout=(body,version)=>db.query('select public.save_dashboard_template($1,$2,$3,$4) as saved',['staff','teacher',JSON.stringify(body),version]);
+const savePresentation=(body,version)=>db.query('select public.save_campaign_presentation($1,$2,$3) as saved',[campaign,JSON.stringify(body),version]);
+before(async()=>{
+ await db.exec(`create role anon;create role authenticated;create schema auth;create schema private;
+ grant usage on schema public,auth,private to anon,authenticated;
+ create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ create table public.profiles(id uuid primary key,is_active boolean,is_owner boolean,permissions text[],display_name text);
+ grant select on public.profiles to authenticated;
+ alter table public.profiles enable row level security;
+ create policy profile_self on public.profiles for select to authenticated using(id=auth.uid());
+ create function private.has_permission(required text) returns boolean language sql stable security definer set search_path='' as $$select coalesce((select is_active and (is_owner or required=any(permissions)) from public.profiles where id=(select auth.uid())),false)$$;
+ create table public.test_audit(table_name text,record_id uuid,action text);
+ create function private.operations_audit(p_table text,p_id uuid,p_action text) returns void language sql security definer set search_path='' as $$insert into public.test_audit values(p_table,p_id,p_action)$$;
+ create table public.community_campaigns(id uuid primary key,slug text,reference text,title text,organiser text,story text,category text,target_pence integer,status text,created_at timestamptz default now());
+ create table public.community_payments(campaign_id uuid,amount_pence integer,private_donor_name text);
+ insert into public.profiles values('${owner}',true,true,'{}','Owner'),('${member}',true,false,'{}','Member'),('${fundraiser}',true,false,'{fundraising}','Fundraiser'),('${inactive}',false,true,'{}','Inactive');
+ insert into public.community_campaigns values('${campaign}','test-appeal','TEST','Published appeal','Centre','Verified public story','community',20000,'published',now()),('10000000-0000-0000-0000-000000000002','private-draft','PRIVATE','Draft','Private','Unpublished story','community',10000,'pending',now());
+ insert into public.community_payments values('${campaign}',12500,'MUST NOT APPEAR PUBLICLY');`);
+ await db.exec(await readFile(new URL('../supabase/staged/compact-experience.sql',import.meta.url),'utf8'));
+});
+after(async()=>{await db.close();});
+test('anonymous callers cannot read templates or invoke layout writes',async()=>{await actor(null,'anon');await assert.rejects(db.query('select * from public.dashboard_templates'),/permission denied/i);await assert.rejects(saveLayout(layout,0),/permission denied/i);});
+test('members and inactive owners cannot change role templates',async()=>{for(const id of [member,inactive]){await actor(id);await assert.rejects(saveLayout(layout,0),/permission required/i);}});
+test('authorised layout saves reject stale versions and direct writes',async()=>{await actor(owner);assert.equal((await saveLayout(layout,0)).rows[0].saved.version,1);await assert.rejects(saveLayout(layout,0),/changed in another window/i);await assert.rejects(db.query("update public.dashboard_templates set layout='{}'"),/permission denied/i);});
+test('server rejects arbitrary and duplicate widgets',async()=>{await actor(owner);for(const order of [['sql-editor'],['prayer','prayer']])await assert.rejects(saveLayout({...layout,order},1),/unknown or duplicate/i);});
+test('fundraising privilege cannot alter role layouts',async()=>{await actor(fundraiser);await assert.rejects(saveLayout(layout,1),/permission required/i);});
+test('appeal display writes cannot change the payment ledger',async()=>{await actor(fundraiser);assert.equal((await savePresentation({cover_image:'/posters/result.webp',image_alt:'Completed facilities',outcome:'Facilities opened.',completed_on:'2026-10-31',featured:true,raised_pence:99999999},0)).rows[0].saved.version,1);await assert.rejects(savePresentation({cover_image:'',featured:false},0),/changed/i);await assert.rejects(db.query("update public.campaign_presentations set outcome='bypass'"),/permission denied/i);});
+test('ordinary members cannot access appeal management metadata',async()=>{await actor(member);assert.equal((await db.query('select * from public.campaign_presentations')).rows.length,0);await assert.rejects(savePresentation({featured:false},1),/permission required/i);});
+test('server rejects executable image URLs and invalid dates',async()=>{await actor(fundraiser);for(const cover_image of ['javascript:alert(1)','//evil.example/a','https://user:pass@example.org/a','/a\\b'])await assert.rejects(savePresentation({cover_image,image_alt:'Invalid',featured:false},1),/secure image/i);await assert.rejects(savePresentation({completed_on:'2026-02-30',featured:false},1),/date|range/i);});
+test('public output excludes drafts and donor details and uses confirmed totals',async()=>{await actor(null,'anon');const appeals=(await db.query('select public.public_community_campaigns() as appeals')).rows[0].appeals;assert.equal(appeals.length,1);assert.equal(Number(appeals[0].raised_pence),12500);assert.equal(appeals[0].outcome,'Facilities opened.');assert.equal(JSON.stringify(appeals).includes('MUST NOT APPEAR'),false);assert.equal(JSON.stringify(appeals).includes('private-draft'),false);});

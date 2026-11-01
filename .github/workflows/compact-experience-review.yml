@@ -1,0 +1,37 @@
+name: Compact experience review
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: compact-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run validate
+        env:
+          VITE_SUPABASE_URL: https://ci-validation.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_ci_validation_only
+          JIC_PUBLIC_PREVIEWS: 'off'
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/browser/compact-experience.spec.mjs tests/browser/admin-reliability.spec.mjs --grep 'compact experience|admin overview searches|staff task groups|starts at staff home'
+      - name: Save compact review evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: compact-review-evidence
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 3

@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { timeMinutes, prayerStatus, londonClock, timetableHijriLabel } from '../src/lib/prayerStatus.js';
+const row={fajr_begins:'05:31',fajr_jamah:'06:15',sunrise:'07:04',zuhr_begins:'11:56',zuhr_jamah:'13:00',asr_begins:'14:48',asr_jamah:'15:30',maghrib_begins:'16:41',maghrib_jamah:'16:41',isha_begins:'18:27',isha_jamah:'19:30'};
+test('validates and converts 24-hour and display times',()=>{assert.equal(timeMinutes('13:30:00'),810);assert.equal(timeMinutes('1:30 PM'),810);assert.equal(timeMinutes('12:00 AM'),0);assert.equal(timeMinutes('24:00'),null);assert.equal(timeMinutes('05:60'),null);assert.equal(timeMinutes('00:10 AM'),null);});
+test('current period uses beginning time, not congregation time',()=>{assert.equal(prayerStatus(row,6*60).current,'Fajr');assert.equal(prayerStatus(row,12*60).current,'Dhuhr');assert.equal(prayerStatus(row,15*60).current,'Asr');});
+test('Fajr ends at sunrise; next is Dhuhr',()=>{const result=prayerStatus(row,7*60+4);assert.equal(result.current,null);assert.equal(result.nextJamaah.name,'Dhuhr');});
+test('exact Maghrib start switches from Asr',()=>{assert.equal(prayerStatus(row,16*60+40).current,'Asr');assert.equal(prayerStatus(row,16*60+41).current,'Maghrib');});
+test('after Isha uses tomorrow for the next congregation',()=>{const result=prayerStatus(row,20*60,{tomorrow:{fajr_jamah:'06:15'}});assert.equal(result.current,'Isha');assert.equal(result.nextJamaah.name,'Fajr');assert.equal(result.nextJamaah.minutesAway,615);assert.equal(result.nextJamaah.tomorrow,true);});
+test('before dawn does not guess yesterday from today',()=>{assert.equal(prayerStatus(row,2*60).current,null);assert.equal(prayerStatus(row,2*60,{previous:{isha_begins:'18:29'}}).current,'Isha');});
+test('missing data never yields a misleading current highlight',()=>{assert.equal(prayerStatus(null,900).current,null);assert.equal(prayerStatus({},900).current,null);assert.equal(prayerStatus({fajr_begins:'05:31'},360).current,null);});
+test('London clock handles summer time and day rollovers',()=>{assert.deepEqual(londonClock(new Date('2026-07-01T23:30:00Z')),{date:'2026-07-02',minutes:30});assert.deepEqual(londonClock(new Date('2026-11-01T17:00:00Z')),{date:'2026-11-01',minutes:1020});});
+test('Hijri dates follow supplied timetable rather than calculated calendar',()=>{const meta={year:1448,segments:[{from:'2026-11-01',to:'2026-11-10',day:21,month:'Jumada al-Awwal'},{from:'2026-11-11',to:'2026-11-30',day:1,month:'Jumada al-Thani'}]};assert.equal(timetableHijriLabel(meta,'2026-11-11'),'1 Jumada al-Thani 1448 AH');assert.equal(timetableHijriLabel(meta,'2026-11-30'),'20 Jumada al-Thani 1448 AH');assert.equal(timetableHijriLabel(meta,'2026-12-01'),'');});
+test('seconds outside the valid range are rejected',()=>{assert.equal(timeMinutes('05:31:99'),null);});
+test('Friday congregation uses Jummah rather than a weekday Dhuhr time',()=>{const result=prayerStatus(row,12*60,{friday:true,jummah:['12:35','13:30']});assert.equal(result.nextJamaah.name,'Jummah 1');assert.equal(result.nextJamaah.time,'12:35');});
