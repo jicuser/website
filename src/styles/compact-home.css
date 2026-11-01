@@ -1,0 +1,30 @@
+/* Public home only: do not change the TV canvas or unrelated editor controls. */
+.jic-compact-prayer { overflow: hidden; }
+.jic-compact-prayer .jic-prayer-browser-heading { display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding-bottom:.5rem; }
+.jic-compact-prayer .jic-prayer-browser-heading > div:first-child > :is(strong,span,small) {display:block}
+.jic-compact-prayer .jic-prayer-browser-heading span {font-size:.83rem}
+.jic-compact-prayer .jic-prayer-browser-heading small {font-size:.73rem;margin-top:.15rem}
+.jic-compact-date-actions {display:flex;align-items:center;gap:.25rem}
+.jic-compact-date-actions button {display:inline-flex;align-items:center;justify-content:center;gap:.3rem;min-height:44px;padding:.35rem .6rem;border-radius:.75rem;color:inherit;background:transparent;border:1px solid currentColor;font-size:.75rem}
+.jic-prayer-now {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.25rem .75rem;padding:.5rem .65rem;margin-bottom:.55rem;border-radius:.7rem;background:rgba(75,139,110,.14);font-size:.78rem}
+.jic-compact-prayer .jic-prayer-browser-grid {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.3rem}
+.jic-compact-prayer .jic-prayer-browser-item {position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.15rem;border:2px solid transparent;border-radius:.7rem;padding:.65rem .15rem .45rem;min-width:0}
+.jic-compact-prayer .jic-prayer-browser-item > :is(small,span) {font-size:.72rem}
+.jic-compact-prayer .jic-prayer-browser-item > strong {font-size:.88rem}
+.jic-compact-prayer .jic-prayer-browser-item > b {font-size:.9rem;white-space:nowrap}
+.jic-compact-prayer .is-current-prayer {border-color:#b29449;background:rgba(180,151,76,.18)}
+.jic-compact-prayer .is-current-prayer em {display:block;margin-top:.25rem;font-size:.63rem;font-style:normal;font-weight:700}
+.jic-compact-prayer .jic-prayer-browser-controls {display:flex;align-items:center;gap:.3rem;margin-block:.5rem}
+.jic-compact-prayer .jic-prayer-browser-controls button {min-height:44px;flex-shrink:0;background:transparent;color:inherit;border:1px solid rgba(127,127,127,.35);border-radius:.6rem;padding:.3rem .55rem}
+.jic-compact-prayer .jic-prayer-day-strip {display:flex;gap:.3rem;overflow-x:auto;flex:1;min-width:0}
+.jic-compact-prayer .jic-prayer-day-strip [aria-current="date"] {border-color:#b29449;font-weight:700}
+.jic-compact-prayer .jic-prayer-browser-jummah {display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem;font-size:.8rem;padding-block:.55rem}
+.jic-compact-prayer .jic-home-prayer-footer {display:flex;justify-content:space-between;gap:.4rem;flex-wrap:wrap}
+.jic-compact-prayer .jic-home-prayer-footer a {min-height:44px;display:inline-flex;align-items:center}
+.jic-app-primary-links {display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:.4rem;margin-top:.45rem}
+.jic-app-primary-links a {display:flex;align-items:center;justify-content:center;gap:.3rem;border-radius:.75rem;min-height:44px;padding:.5rem .35rem;font-size:.8rem;font-weight:700;background:rgba(75,139,110,.14);color:inherit;border:1px solid rgba(127,127,127,.3);text-decoration:none}
+.jic-app-home .jic-home-content {gap:.85rem}
+.jic-app-home .jic-hero {padding-block:.6rem}
+.jic-compact-prayer :is(a,button):focus-visible {outline:3px solid #b29449;outline-offset:3px}
+@media(max-width:380px){.jic-compact-prayer .jic-prayer-browser-grid{gap:.1rem}.jic-compact-prayer .jic-prayer-browser-item small{font-size:.64rem}.jic-compact-prayer .jic-prayer-browser-item b{font-size:.8rem}.jic-compact-prayer .jic-prayer-start-label{display:none}}
+@media(prefers-reduced-motion:reduce){.jic-compact-prayer *{scroll-behavior:auto!important}}
