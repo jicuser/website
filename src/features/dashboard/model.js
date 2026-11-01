@@ -33,3 +33,14 @@ export function validateLayout(raw, allowed) {
   }
   return normaliseLayout(raw);
 }
+
+/** Group only the authorised, ordered widgets supplied by the caller. */
+export function groupWidgets(items) {
+  const groups = new Map();
+  for (const item of items) {
+    const name = item.group || 'Other tools';
+    if (!groups.has(name)) groups.set(name, { name, items: [] });
+    groups.get(name).items.push(item);
+  }
+  return [...groups.values()];
+}
