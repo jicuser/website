@@ -1,0 +1,10 @@
+.compact-jummah { max-width: 720px; margin-inline: auto; color: var(--jic-text); }
+.compact-jummah__eyebrow { margin: 0 0 12px; color: var(--jic-gold-strong); font-size: .8rem; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+.compact-jummah__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.compact-jummah__session { min-width: 0; padding: 16px; background: var(--jic-surface); border: 1px solid var(--jic-border); border-radius: 16px; }
+.compact-jummah__session h3 { margin: 0 0 14px; font: inherit; font-weight: 650; }
+.compact-jummah__label { display: block; color: var(--jic-text-secondary); font-size: .8rem; }
+.compact-jummah__time { display: block; margin-top: 4px; color: var(--jic-gold-strong); font-size: clamp(1.3rem, 4.8vw, 2rem); line-height: 1.2; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.compact-jummah__khutbah { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--jic-border); font-size: .8rem; color: var(--jic-text-secondary); }
+.compact-jummah__note { margin: 14px 0 0; color: var(--jic-text-secondary); font-size: .875rem; }
+@media (max-width: 350px) { .compact-jummah__session { padding: 12px; } }
