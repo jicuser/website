@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import GoogleSignInButton from '@/components/account/GoogleSignInButton';
+import AccountRequestLink from '@/components/account/AccountRequestLink';
 import { magicLinkOptions } from './model';
 
 export default function PortalSignIn({ auth, returnTo = '' }) {
@@ -135,9 +136,9 @@ export default function PortalSignIn({ auth, returnTo = '' }) {
       <GoogleSignInButton returnTo={returnTo} disabled={busy || auth.loading} />
       <div className="portal-signin-help">
         {mode === 'password' && <Link to="/account/recovery">Forgot password?</Link>}
-        <Link to="/account/request" state={{ email }}>
+        <AccountRequestLink state={{ email }}>
           Need access? Contact the office
-        </Link>
+        </AccountRequestLink>
       </div>
       <div className="portal-signin-account">
         <span>{mode === 'create' ? 'Already have an account?' : 'New to the portal?'}</span>

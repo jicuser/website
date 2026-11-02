@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import AccountRequestLink from '@/components/account/AccountRequestLink';
 import { CERTIFICATES_ENABLED } from '@/lib/certificates';
 import { CertificateWorkspace } from '@/features/certificates/Certificates';
 import { portalLoginHref } from '@/lib/portalDestination';
@@ -56,7 +57,7 @@ export default function CertificatesPage() {
             <button type="button" onClick={auth.refreshProfile}>
               Check again
             </button>
-            <Link to="/account/request">Request access</Link>
+            <AccountRequestLink />
           </section>
         ) : (
           <CertificateWorkspace key={auth.user.id} />

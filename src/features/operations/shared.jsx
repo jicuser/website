@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
+import AccountRequestLink from '@/components/account/AccountRequestLink';
 import { portalLoginHref } from '@/lib/portalDestination';
 import '@/styles/operations.css';
 
@@ -112,7 +113,7 @@ export function PortalGate({ destination, children }) {
       <div className="ops-page">
         <h1>Account access</h1>
         <Notice error={auth.profileError || 'This account does not have active access.'} />
-        <Link to="/account/request">Request access</Link>
+        <AccountRequestLink />
       </div>
     );
   return children;

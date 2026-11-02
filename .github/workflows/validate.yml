@@ -22,6 +22,8 @@ jobs:
           node-version-file: .nvmrc
           package-manager-cache: false
       - run: npm ci
+      - name: Check Edge handlers with network access denied
+        run: npm run test:edge
       - run: npm run validate
         env:
           # Validation builds are never deployed and do not need production credentials.
@@ -31,6 +33,9 @@ jobs:
       - id: browsers
         run: npx playwright install --with-deps chromium webkit
       - run: npm run test:browser
+      - name: Check account intake in both release states
+        if: ${{ !cancelled() && steps.browsers.outcome == 'success' }}
+        run: npm run test:account-requests:browser
       - name: Check phone bars in WebKit
         if: ${{ !cancelled() && steps.browsers.outcome == 'success' }}
         run: npx playwright test --config playwright.mobile.config.mjs

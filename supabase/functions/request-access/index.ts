@@ -11,6 +11,10 @@ const json = (body, status = 200) => Response.json(body, { status, headers });
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers });
   if (req.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  // Fail closed before reading personal data, verifying CAPTCHA or contacting the database.
+  // The browser flag is only presentation; this server-only flag is the intake boundary.
+  if (Deno.env.get('ACCOUNT_REQUESTS_ENABLED') !== 'true')
+    return json({ error: 'Account requests are not open yet.', code: 'account_requests_disabled' }, 503);
   let body;
   try {
     body = await readJson(req);

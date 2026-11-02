@@ -3,7 +3,12 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/browser',
   // Workspace-only flows use their feature-enabled server in playwright.forms.config.mjs.
-  testIgnore: ['custom-forms.spec.mjs', 'certificates.spec.mjs', 'sitewide-learning.spec.mjs'],
+  testIgnore: [
+    'custom-forms.spec.mjs',
+    'certificates.spec.mjs',
+    'sitewide-learning.spec.mjs',
+    'account-requests.spec.mjs',
+  ],
   workers: 1,
   timeout: 20000,
   use: {
@@ -20,6 +25,7 @@ export default defineConfig({
     command: 'npm run dev -- --host 127.0.0.1 --port 4319',
     url: 'http://127.0.0.1:4319',
     env: {
+      VITE_ENABLE_ACCOUNT_REQUESTS: 'false',
       VITE_SUPABASE_URL: 'http://127.0.0.1:4319/preview-api',
       VITE_SUPABASE_ANON_KEY: 'local-browser-test',
     },

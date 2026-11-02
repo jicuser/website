@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import AccountRequestLink from '@/components/account/AccountRequestLink';
 import { ArrowRight, FileCheck2, Heart, ShieldCheck, UserCircle } from 'lucide-react';
 
 export default function AccountConnection() {
@@ -23,7 +24,7 @@ export default function AccountConnection() {
             Open my JIC account <ArrowRight size={18} aria-hidden="true" />
           </Link>
           <p className="jic-account-help">
-            New here? <Link to="/account/request">Ask the office about access</Link>
+            New here? <AccountRequestLink>Ask the office about access</AccountRequestLink>
           </p>
         </div>
         <div className="jic-account-steps">
