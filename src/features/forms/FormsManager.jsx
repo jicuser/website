@@ -13,9 +13,12 @@ import ScheduleManager from './ScheduleManager';
 import { formStatus, workflowChanged, pageUrl } from '@/lib/pageContent';
 import { serviceEnquiry } from '@/lib/serviceEnquiries';
 import { permittedBuiltInForms } from '@/lib/customForms';
+import { classInterestDraft } from '@/lib/formTemplates';
+import { FORM_GROUPS, filterFormLibrary, formGroups, matchesFormSearch, formStatusCounts, formUsageSummary } from '@/lib/formLibrary';
 import '@/styles/workspace.css';
 import '@/styles/custom-forms.css';
 import '@/styles/content-workflow.css';
+import '@/styles/connected-admin.css';
 
 function useFormSummaries() {
   const { user } = useAuth();
@@ -34,29 +37,13 @@ function useLegacyFormCounts(kindKey) {
       const pairs = await Promise.all(
         kinds.map(async (kind) => {
           const summary = await checked(
-            supabase
-              .rpc('search_form_submissions', {
-                p_search: '',
-                p_kind: kind,
-                p_form_id: null,
-                p_status: null,
-                p_from: null,
-                p_to: null,
-                p_offset: 0,
-                p_limit: 1,
-                p_oldest: false,
-                p_mine: false,
-              })
-              .abortSignal(signal),
+            supabase.rpc('search_form_submissions', {
+              p_search: '', p_kind: kind, p_form_id: null, p_status: null,
+              p_from: null, p_to: null, p_offset: 0, p_limit: 1,
+              p_oldest: false, p_mine: false,
+            }).abortSignal(signal),
           );
-          return [
-            kind,
-            {
-              total: summary?.total || 0,
-              new_count: summary?.new_count || 0,
-              done_count: summary?.done_count || 0,
-            },
-          ];
+          return [kind, { total: summary?.total || 0, new_count: summary?.new_count || 0, done_count: summary?.done_count || 0 }];
         }),
       );
       return Object.fromEntries(pairs);
@@ -71,9 +58,7 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
   const [params, setParams] = useSearchParams();
   const { data: forms, loading, error, reload } = useFormSummaries();
   const form = forms?.find((item) => item.id === formId);
-  const tab = ['overview', 'responses', 'actions'].includes(params.get('tab'))
-    ? params.get('tab')
-    : 'overview';
+  const tab = ['overview', 'responses', 'actions'].includes(params.get('tab')) ? params.get('tab') : 'overview';
   const [editor, setEditor] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -90,30 +75,19 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
     if (!requestedEdit || !form?.can_manage) return undefined;
     const controller = new AbortController();
     setBusy(true);
-    checked(
-      supabase
-        .from('custom_forms')
-        .select('*')
-        .eq('id', formId)
-        .single()
-        .abortSignal(controller.signal),
-    )
+    checked(supabase.from('custom_forms').select('*').eq('id', formId).single().abortSignal(controller.signal))
       .then((definition) => {
         if (controller.signal.aborted) return;
         setBusy(false);
         setEditor(definition);
-        setParams(
-          (current) => {
-            const updated = new URLSearchParams(current);
-            updated.delete('edit');
-            return updated;
-          },
-          { replace: true },
-        );
+        setParams((current) => {
+          const updated = new URLSearchParams(current);
+          updated.delete('edit');
+          return updated;
+        }, { replace: true });
       })
       .catch(() => {
-        if (!controller.signal.aborted)
-          setMessage('The editor could not be opened. Please try again.');
+        if (!controller.signal.aborted) setMessage('The editor could not be opened. Please try again.');
       })
       .finally(() => {
         if (!controller.signal.aborted) setBusy(false);
@@ -137,279 +111,111 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
     if (busy) return;
     setBusy(true);
     setMessage('');
-    try {
-      await work();
-    } catch (failure) {
-      setMessage(failure.message || 'Could not complete this change.');
-    } finally {
-      setBusy(false);
-    }
+    try { await work(); }
+    catch (failure) { setMessage(failure.message || 'Could not complete this change.'); }
+    finally { setBusy(false); }
   }
-  if (editor)
-    return (
-      <CustomFormsBuilder
-        definition={editor}
-        registerBack={registerBack}
-        onClose={closeEditor}
-        onSaved={() => {
-          closeEditor();
-          reload();
-        }}
-      />
-    );
-  if (!form)
-    return (
-      <section>
-        <p role={error ? 'alert' : 'status'}>
-          {error || (loading ? 'Loading form…' : 'This form is not available to your account.')}
-        </p>
-        <button className="admin-button" onClick={reload}>
-          Retry form
-        </button>
-        {onClose && (
-          <button className="admin-button" onClick={onClose}>
-            Back to forms
-          </button>
-        )}
-      </section>
-    );
+  if (editor) return (
+    <CustomFormsBuilder definition={editor} registerBack={registerBack} onClose={closeEditor}
+      onSaved={() => { closeEditor(); reload(); }} />
+  );
+  if (!form) return (
+    <section>
+      <p role={error ? 'alert' : 'status'}>{error || (loading ? 'Loading form…' : 'This form is not available to your account.')}</p>
+      <button className="admin-button" onClick={reload}>Retry form</button>
+      {onClose && <button className="admin-button" onClick={onClose}>Back to forms</button>}
+    </section>
+  );
   const assignments = form.people.map((person) => ({ ...person, form_id: form.id }));
   return (
-    <section
-      className="community-workspace custom-forms-admin"
-      aria-label={`${form.title} management`}
-    >
+    <section className="community-workspace custom-forms-admin" aria-label={`${form.title} management`}>
       <div className="admin-heading">
-        <div>
-          <h3>{form.title}</h3>
-          <span className="content-status">{formStatus(form)}</span>
-        </div>
-        {onClose && (
-          <button className="admin-button" onClick={onClose}>
-            All forms
-          </button>
-        )}
+        <div><h3>{form.title}</h3><span className="content-status">{formStatus(form)}</span></div>
+        {onClose && <button className="admin-button" onClick={onClose}>All forms</button>}
       </div>
       <nav className="admin-actions" aria-label="Form management">
         {form.can_manage && tab !== 'overview' && (
-          <button
-            className="admin-button primary"
-            disabled={busy}
-            onClick={() =>
-              act(async () =>
-                setEditor(
-                  await checked(
-                    supabase.from('custom_forms').select('*').eq('id', form.id).single(),
-                  ),
-                ),
-              )
-            }
-          >
-            Edit form
-          </button>
+          <button className="admin-button primary" disabled={busy} onClick={() => act(async () =>
+            setEditor(await checked(supabase.from('custom_forms').select('*').eq('id', form.id).single())),
+          )}>Edit form</button>
         )}
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'overview'}
-          onClick={() => chooseTab('overview')}
-        >
-          Form details
-        </button>
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'responses'}
-          onClick={() => chooseTab('responses')}
-        >
-          Responses ({form.new_count + form.done_count})
-        </button>
-        <button
-          className="admin-button"
-          aria-pressed={tab === 'actions'}
-          onClick={() => chooseTab('actions')}
-        >
-          Follow-ups ({form.open_actions})
-        </button>
+        <button className="admin-button" aria-pressed={tab === 'overview'} onClick={() => chooseTab('overview')}>Form details</button>
+        <button className="admin-button" aria-pressed={tab === 'responses'} onClick={() => chooseTab('responses')}>Responses ({form.new_count + form.done_count})</button>
+        <button className="admin-button" aria-pressed={tab === 'actions'} onClick={() => chooseTab('actions')}>Follow-ups ({form.open_actions})</button>
       </nav>
       {message && <p role="status">{message}</p>}
       {tab === 'overview' && (
         <>
           <p>{form.description}</p>
           <div className="content-summary-grid">
-            <div>
-              <strong>{form.new_count}</strong>
-              <span>Awaiting response</span>
-            </div>
-            <div>
-              <strong>{form.done_count}</strong>
-              <span>Completed responses</span>
-            </div>
-            <div>
-              <strong>{form.open_actions}</strong>
-              <span>Follow-ups waiting</span>
-            </div>
+            <div><strong>{form.new_count}</strong><span>Awaiting response</span></div>
+            <div><strong>{form.done_count}</strong><span>Completed responses</span></div>
+            <div><strong>{form.open_actions}</strong><span>Follow-ups waiting</span></div>
           </div>
           <h4>Responsible people & access</h4>
           {form.people.length ? (
             <dl className="content-people">
               {form.people.map((person) => (
                 <div key={`${person.user_id}-${person.role}`}>
-                  <dt>
-                    {
-                      { responsible: 'Responsible', manager: 'Form editor', watcher: 'Following' }[
-                        person.role
-                      ]
-                    }
-                  </dt>
-                  <dd>
-                    {person.display_name || 'Staff member'}
-                    {!person.active && ' · Access disabled'}
-                  </dd>
+                  <dt>{{ responsible: 'Responsible', manager: 'Form editor', watcher: 'Following' }[person.role]}</dt>
+                  <dd>{person.display_name || 'Staff member'}{!person.active && ' · Access disabled'}</dd>
                 </div>
               ))}
             </dl>
-          ) : (
-            <p>Choose a responsible person before publishing.</p>
-          )}
+          ) : <p>Choose a responsible person before publishing.</p>}
           <h4>Where this form is used</h4>
           {form.built_in_kind && (
-            <p>
-              <Link
-                to={
-                  {
-                    contact: '/contact',
-                    madrassah: '/madrassah/enrolment',
-                    itikaaf: '/youth/itikaf',
-                  }[form.built_in_kind]
-                }
-                target="_blank"
-                rel="noreferrer"
-              >
-                Existing website form
-              </Link>{' '}
-              · Includes all earlier responses
-            </p>
+            <p><Link to={{ contact: '/contact', madrassah: '/madrassah/enrolment', itikaaf: '/youth/itikaf' }[form.built_in_kind]}
+              target="_blank" rel="noreferrer">Existing website form</Link> · Includes all earlier responses</p>
           )}
           {serviceEnquiry(form.slug) && (
-            <p>
-              <Link to={serviceEnquiry(form.slug).page} target="_blank" rel="noreferrer">
-                {serviceEnquiry(form.slug).pageName}
-              </Link>{' '}
-              · Service enquiry button
-            </p>
+            <p><Link to={serviceEnquiry(form.slug).page} target="_blank" rel="noreferrer">{serviceEnquiry(form.slug).pageName}</Link> · Service enquiry button</p>
           )}
-          {form.pages?.length ? (
-            form.pages.map((page) => (
-              <p key={page.id}>
-                {page.published ? (
-                  <Link to={pageUrl(page)} target="_blank" rel="noreferrer">
-                    {page.title}
-                  </Link>
-                ) : (
-                  page.title
-                )}{' '}
-                · {page.placement} · {page.published ? 'Page live' : 'Page hidden'}
-              </p>
-            ))
-          ) : !serviceEnquiry(form.slug) && !form.built_in_kind ? (
+          {form.pages?.length ? form.pages.map((page) => (
+            <p key={page.id}>
+              {page.published ? <Link to={pageUrl(page)} target="_blank" rel="noreferrer">{page.title}</Link> : page.title}
+              {' '}· {page.placement} · {page.published ? 'Page live' : 'Page hidden'}
+            </p>
+          )) : !serviceEnquiry(form.slug) && !form.built_in_kind ? (
             <p>Standalone form. Link it from a poster or content page when needed.</p>
           ) : null}
-          <p>
-            Assignments apply to future responses. Reassign unfinished follow-ups in Follow-ups when
-            responsibility changes.
-          </p>
+          {(auth.isOwner || auth.can('content')) && (
+            <div className="connected-admin-help">
+              <p>To add this form to a page: open Website pages, edit the page, then choose this form under Registration.</p>
+              <Link className="admin-button" to="/admin?section=content">Choose a website page</Link>
+            </div>
+          )}
+          <p>Assignments apply to future responses. Reassign unfinished follow-ups in Follow-ups when responsibility changes.</p>
           <div className="admin-actions">
             {form.can_manage && (
-              <button
-                className="admin-button primary"
-                disabled={busy}
-                onClick={() =>
-                  act(async () =>
-                    setEditor(
-                      await checked(
-                        supabase.from('custom_forms').select('*').eq('id', form.id).single(),
-                      ),
-                    ),
-                  )
-                }
-              >
-                Edit form & assignments
-              </button>
+              <button className="admin-button primary" disabled={busy} onClick={() => act(async () =>
+                setEditor(await checked(supabase.from('custom_forms').select('*').eq('id', form.id).single())),
+              )}>Edit form & assignments</button>
             )}
             {form.published_version && (
               <>
-                <Link
-                  className="admin-button"
-                  to={`/forms/${form.slug}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View form
-                </Link>
-                <button
-                  className="admin-button"
-                  disabled={busy}
-                  onClick={() =>
-                    act(async () => {
-                      const url = new URL(`/forms/${form.slug}`, location.origin).href;
-                      try {
-                        await navigator.clipboard.writeText(url);
-                        setMessage('Form link copied.');
-                      } catch {
-                        setMessage(`Copy this form address: ${url}`);
-                      }
-                    })
-                  }
-                >
-                  Copy link
-                </button>
+                <Link className="admin-button" to={`/forms/${form.slug}`} target="_blank" rel="noreferrer">View form</Link>
+                <button className="admin-button" disabled={busy} onClick={() => act(async () => {
+                  const url = new URL(`/forms/${form.slug}`, location.origin).href;
+                  try { await navigator.clipboard.writeText(url); setMessage('Form link copied.'); }
+                  catch { setMessage(`Copy this form address: ${url}`); }
+                })}>Copy link</button>
                 {form.can_manage && (
-                  <button
-                    className="admin-button"
-                    disabled={busy}
-                    onClick={() =>
-                      act(async () => {
-                        if (
-                          form.enabled &&
-                          !window.confirm(
-                            'Close this form to new responses? Existing responses and actions are kept.',
-                          )
-                        )
-                          return;
-                        await checked(
-                          supabase.rpc('set_custom_form_open', {
-                            p_form_id: form.id,
-                            p_enabled: !form.enabled,
-                          }),
-                        );
-                        workflowChanged();
-                        await reload();
-                      })
-                    }
-                  >
-                    {form.enabled ? 'Close form' : 'Reopen form'}
-                  </button>
+                  <button className="admin-button" disabled={busy} onClick={() => act(async () => {
+                    if (form.enabled && !window.confirm('Close this form to new responses? Existing responses and actions are kept.')) return;
+                    await checked(supabase.rpc('set_custom_form_open', { p_form_id: form.id, p_enabled: !form.enabled }));
+                    workflowChanged();
+                    await reload();
+                  })}>{form.enabled ? 'Close form' : 'Reopen form'}</button>
                 )}
               </>
             )}
           </div>
+          <p className="workspace-meta">Closing a form stops new responses. It does not delete answers, remove the page or cancel any booking.</p>
         </>
       )}
-      {tab === 'responses' && (
-        <CustomFormsInbox
-          key={form.id}
-          auth={auth}
-          definitions={[form]}
-          assignments={assignments}
-          formId={form.id}
-        />
-      )}
-      {tab === 'actions' && (
-        <FormActions
-          key={form.id}
-          formId={form.id}
-          onViewResponses={() => chooseTab('responses')}
-        />
-      )}
+      {tab === 'responses' && <CustomFormsInbox key={form.id} auth={auth} definitions={[form]} assignments={assignments} formId={form.id} />}
+      {tab === 'actions' && <FormActions key={form.id} formId={form.id} onViewResponses={() => chooseTab('responses')} />}
     </section>
   );
 }
@@ -417,30 +223,10 @@ export function FormWorkspace({ formId, onClose, registerBack }) {
 function EntryTiles({ auth, loading, onChoose, onCreate }) {
   return (
     <div className="admin-task-grid forms-entry-tiles">
-      <button onClick={() => onChoose({ view: 'forms' })}>
-        <FileText />
-        <strong>All forms</strong>
-        <span>Registration and service forms, including drafts and closed forms.</span>
-      </button>
-      {(auth.isOwner || auth.can('forms_manage')) && (
-        <button onClick={onCreate}>
-          <Plus />
-          <strong>Create form</strong>
-          <span>Questions, responsible people and publishing.</span>
-        </button>
-      )}
-      <button onClick={() => onChoose({ view: 'responses' })}>
-        <ClipboardList />
-        <strong>Responses & follow-ups</strong>
-        <span>Submitted information and outstanding work.</span>
-      </button>
-      {(auth.isOwner || auth.can('events')) && (
-        <button onClick={() => onChoose({ view: 'schedule' })}>
-          <CalendarDays />
-          <strong>Schedule</strong>
-          <span>Hall availability and course/class times.</span>
-        </button>
-      )}
+      <button onClick={() => onChoose({ view: 'forms' })}><FileText /><strong>All forms</strong><span>Registration and service forms, including drafts and closed forms.</span></button>
+      {(auth.isOwner || auth.can('forms_manage')) && <button onClick={onCreate}><Plus /><strong>Create form</strong><span>Questions, responsible people and publishing.</span></button>}
+      <button onClick={() => onChoose({ view: 'responses' })}><ClipboardList /><strong>Responses & follow-ups</strong><span>Submitted information and outstanding work.</span></button>
+      {(auth.isOwner || auth.can('events')) && <button onClick={() => onChoose({ view: 'schedule' })}><CalendarDays /><strong>Schedule</strong><span>Hall availability and course/class times.</span></button>}
       {loading && <span className="sr-only">Loading forms</span>}
     </div>
   );
@@ -450,215 +236,115 @@ function BuiltInFormCards({ forms, onChoose, counts, loading, error }) {
   return forms.map(({ kind, title }) => {
     const summary = counts?.[kind];
     return (
-      <button
-        className="admin-panel content-form-card"
-        key={kind}
-        onClick={() => onChoose({ view: 'responses', kind })}
-      >
-        <span className="content-status">Live</span>
-        <strong>{title}</strong>
-        <span className="form-card-metrics">
-          <b>{summary ? summary.new_count : loading ? '…' : '—'}</b> waiting
-          <b>{summary ? summary.done_count : loading ? '…' : '—'}</b> completed
-        </span>
+      <button className="admin-panel content-form-card" key={kind} onClick={() => onChoose({ view: 'responses', kind })}>
+        <span className="content-status">Live</span><strong>{title}</strong>
+        <span className="form-card-metrics"><b>{summary ? summary.new_count : loading ? '…' : '—'}</b> waiting<b>{summary ? summary.done_count : loading ? '…' : '—'}</b> completed</span>
         <span className="workspace-meta">Review responses</span>
-        {error && (
-          <span className="workspace-meta">Counts unavailable · tap to open responses</span>
-        )}
+        {error && <span className="workspace-meta">Counts unavailable · tap to open responses</span>}
       </button>
     );
   });
 }
 
-function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
+function FormCatalogue({ view, responseKind, onChoose, onCreate, onCreateInterest }) {
   const auth = useAuth();
   const { data, loading, error, reload } = useFormSummaries();
   const forms = data || [];
-  const builtInForms = permittedBuiltInForms(auth).filter(
-    ({ kind }) => !forms.some((form) => form.built_in_kind === kind),
-  );
-  const {
-    data: legacyCounts,
-    loading: legacyLoading,
-    error: legacyError,
-  } = useLegacyFormCounts(builtInForms.map(({ kind }) => kind).join('|'));
+  const builtInForms = permittedBuiltInForms(auth).filter(({ kind }) => !forms.some((form) => form.built_in_kind === kind));
+  const { data: legacyCounts, loading: legacyLoading, error: legacyError } = useLegacyFormCounts(builtInForms.map(({ kind }) => kind).join('|'));
   const [status, setStatus] = useState('Live');
   const [category, setCategory] = useState('all');
-  const categoryForms = forms.filter(
-    (form) =>
-      category === 'all' ||
-      (category === 'services'
-        ? form.built_in_kind === 'contact' || !!serviceEnquiry(form.slug)
-        : form.built_in_kind !== 'contact' && !serviceEnquiry(form.slug)),
+  const [query, setQuery] = useState('');
+  const isService = (form) => Boolean(serviceEnquiry(form.slug));
+  const categoryForms = filterFormLibrary(forms, { group: category, search: query }, isService);
+  const categoryBuiltIn = builtInForms.filter((form) =>
+    (category === 'all' || formGroups(form).includes(category)) && matchesFormSearch(form, query),
   );
-  const categoryBuiltIn = builtInForms.filter(
-    (form) => category === 'all' || category === form.category,
-  );
-  const statusCounts = Object.fromEntries(
-    ['Live', 'Draft', 'Closed'].map((value) => [
-      value,
-      categoryForms.filter((form) => formStatus(form) === value).length +
-        (value === 'Live' ? categoryBuiltIn.length : 0),
-    ]),
-  );
-  const listed = categoryForms.filter((form) => formStatus(form) === status);
-  const listedBuiltIn = builtInForms.filter(
-    (form) =>
-      (status === 'all' || status === 'Live') && (category === 'all' || category === form.category),
-  );
-
+  const statusCounts = formStatusCounts(categoryForms, categoryBuiltIn);
+  const listed = categoryForms.filter((form) => status === 'all' || formStatus(form) === status);
+  const listedBuiltIn = status === 'all' || status === 'Live' ? categoryBuiltIn : [];
+  const resetFilters = () => { setStatus('all'); setCategory('all'); setQuery(''); };
   return (
     <section className="community-workspace custom-forms-admin">
       {['forms', 'schedule', 'home'].includes(view) && (
         <div className="admin-heading">
           <div>
             <h2>{view === 'schedule' ? 'Schedule' : 'Forms'}</h2>
-            <p>
-              {view === 'schedule'
-                ? 'Hall availability and class times.'
-                : 'Open a form to edit its questions, see where it appears and review every response.'}
-            </p>
+            <p>{view === 'schedule' ? 'Hall availability and class times.' : 'Create a form, choose where it appears, and manage its responses in one place.'}</p>
           </div>
           {view === 'forms' && (auth.isOwner || auth.can('forms_manage')) && (
-            <button className="admin-button primary" onClick={onCreate}>
-              <Plus size={16} /> New form
-            </button>
+            <div className="admin-actions">
+              <button className="admin-button primary" onClick={onCreate}><Plus size={16} /> New form</button>
+              <button className="admin-button" onClick={onCreateInterest}>New class interest form</button>
+            </div>
           )}
         </div>
       )}
       {view !== 'home' && (
         <nav className="forms-workspace-tabs" aria-label="Forms workspace">
           {[
-            ['forms', 'Forms'],
-            ['responses', 'Responses'],
-            ['actions', 'Follow-ups'],
+            ['forms', 'Forms'], ['responses', 'Responses'], ['actions', 'Follow-ups'],
             ...(auth.isOwner || auth.can('events') ? [['schedule', 'Schedule']] : []),
           ].map(([id, title]) => (
-            <button
-              type="button"
-              key={id}
-              className="admin-button"
-              aria-pressed={view === id}
-              onClick={() => onChoose({ view: id })}
-            >
-              {title}
-            </button>
+            <button type="button" key={id} className="admin-button" aria-pressed={view === id} onClick={() => onChoose({ view: id })}>{title}</button>
           ))}
         </nav>
       )}
-      {view === 'home' && (
-        <EntryTiles auth={auth} loading={loading} onChoose={onChoose} onCreate={onCreate} />
-      )}
-      {error && (
-        <p role="alert">
-          {error}{' '}
-          <button type="button" className="admin-button" disabled={loading} onClick={reload}>
-            Retry forms
-          </button>
-        </p>
-      )}
-
-      {view === 'home' ? (
-        <p className="mt-4">Choose an area above.</p>
-      ) : view === 'schedule' ? (
-        <ScheduleManager />
-      ) : view === 'forms' ? (
+      {view === 'home' && <EntryTiles auth={auth} loading={loading} onChoose={onChoose} onCreate={onCreate} />}
+      {error && <p role="alert">{error}{' '}<button type="button" className="admin-button" disabled={loading} onClick={reload}>Retry forms</button></p>}
+      {view === 'home' ? <p className="mt-4">Choose an area above.</p> : view === 'schedule' ? <ScheduleManager /> : view === 'forms' ? (
         <>
+          <div className="connected-form-filters">
+            <label>Find a form<input type="search" value={query} placeholder="Form name, address or linked page" onChange={(event) => setQuery(event.target.value)} /></label>
+            <label>Group forms<select value={category} onChange={(event) => setCategory(event.target.value)}>
+              {FORM_GROUPS.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+            </select></label>
+          </div>
           <nav className="forms-workspace-tabs" aria-label="Form status">
-            {['Live', 'Draft', 'Closed'].map((value) => (
-              <button
-                type="button"
-                key={value}
-                className="admin-button"
-                aria-pressed={status === value}
-                onClick={() => setStatus(value)}
-              >
-                {value} <span>{loading ? '…' : statusCounts[value]}</span>
+            {['all', 'Live', 'Draft', 'Closed'].map((value) => (
+              <button type="button" key={value} className="admin-button" aria-pressed={status === value} onClick={() => setStatus(value)}>
+                {value === 'all' ? 'All statuses' : value} <span>{loading ? '…' : statusCounts[value]}</span>
               </button>
             ))}
           </nav>
-          <details className="forms-catalogue-filters">
-            <summary>Group forms{category !== 'all' ? ' · Filtered' : ''}</summary>
-            <div className="content-field-grid">
-              <label>
-                Form type
-                <select value={category} onChange={(event) => setCategory(event.target.value)}>
-                  <option value="all">All forms</option>
-                  <option value="services">Contact & service enquiries</option>
-                  <option value="other">Registrations & other forms</option>
-                </select>
-              </label>
-            </div>
+          <p className="workspace-meta">Groups follow the pages a form is linked to. A reused form can appear in more than one group.</p>
+          <details className="connected-admin-help">
+            <summary>How forms, pages and responses work</summary>
+            <p><strong>Save draft</strong> keeps question changes private. <strong>Publish changes</strong> updates the questions visitors see.</p>
+            <p><strong>Close form</strong> stops new responses and keeps existing answers. Hiding a page is a separate action and does not close its form.</p>
+            <p>To add a form to a page, open Website pages, edit the page and choose a registration form. Removing the link does not delete the form.</p>
+            {(auth.isOwner || auth.can('content')) && <Link className="admin-button" to="/admin?section=content">Open website pages</Link>}
           </details>
           {loading && !data && <p role="status">Loading forms…</p>}
+          {!loading && !error && <p className="workspace-meta" role="status">{listed.length + listedBuiltIn.length} forms shown</p>}
           <div className="content-form-grid">
-            <BuiltInFormCards
-              forms={listedBuiltIn}
-              onChoose={onChoose}
-              counts={legacyCounts}
-              loading={legacyLoading}
-              error={legacyError}
-            />
+            <BuiltInFormCards forms={listedBuiltIn} onChoose={onChoose} counts={legacyCounts} loading={legacyLoading} error={legacyError} />
             {listed.map((form) => (
               <article className="admin-panel content-form-card" key={form.id}>
                 <span className="content-status">{formStatus(form)}</span>
-                <button
-                  type="button"
-                  className="content-form-title"
-                  aria-label={`${form.title} details`}
-                  onClick={() => onChoose({ form: form.id })}
-                >
-                  {form.title}
-                </button>
+                <button type="button" className="content-form-title" aria-label={`${form.title} details`} onClick={() => onChoose({ form: form.id })}>{form.title}</button>
+                <span className="connected-form-purpose">{formGroups(form, isService(form)).map((id) => FORM_GROUPS.find(([value]) => value === id)?.[1]).join(' · ')}</span>
+                <span className="workspace-meta">{serviceEnquiry(form.slug) ? serviceEnquiry(form.slug).pageName : formUsageSummary(form)}</span>
                 <span className="form-card-metrics">
-                  <b>{form.new_count}</b> waiting
-                  <b>{form.done_count}</b> completed
-                  {form.open_actions > 0 && (
-                    <>
-                      <b>{form.open_actions}</b> follow-ups
-                    </>
-                  )}
+                  <b>{form.new_count}</b> waiting <b>{form.done_count}</b> completed
+                  {form.open_actions > 0 && <><b>{form.open_actions}</b> follow-ups</>}
                 </span>
                 <div className="admin-actions">
-                  <button
-                    className={`admin-button${form.new_count > 0 ? ' primary' : ''}`}
-                    aria-label={`${form.title}: review responses`}
-                    onClick={() => onChoose({ form: form.id, tab: 'responses' })}
-                  >
-                    Review responses
-                  </button>
-                  {form.can_manage && (
-                    <button
-                      className={`admin-button${form.new_count > 0 ? '' : ' primary'}`}
-                      onClick={() => onChoose({ form: form.id, edit: '1' })}
-                    >
-                      Edit form
-                    </button>
-                  )}
+                  <button className={`admin-button${form.new_count > 0 ? ' primary' : ''}`} aria-label={`${form.title}: review responses`} onClick={() => onChoose({ form: form.id, tab: 'responses' })}>Review responses</button>
+                  {form.can_manage && <button className={`admin-button${form.new_count > 0 ? '' : ' primary'}`} onClick={() => onChoose({ form: form.id, edit: '1' })}>Edit form</button>}
                 </div>
               </article>
             ))}
           </div>
           {!loading && !listed.length && !error && !listedBuiltIn.length && (
-            <p>No forms match this view.</p>
+            <div className="connected-admin-help"><p>No forms match this view.</p><button type="button" className="admin-button" onClick={resetFilters}>Show all forms</button></div>
           )}
         </>
+      ) : view === 'actions' ? (
+        <FormActions onViewResponses={() => onChoose({ view: 'responses' })} />
       ) : (
-        <>
-          {view === 'actions' ? (
-            <FormActions onViewResponses={() => onChoose({ view: 'responses' })} />
-          ) : (
-            <CustomFormsInbox
-              key={responseKind}
-              auth={auth}
-              initialKind={responseKind}
-              definitions={forms}
-              assignments={forms.flatMap((form) =>
-                form.people.map((person) => ({ ...person, form_id: form.id })),
-              )}
-            />
-          )}
-        </>
+        <CustomFormsInbox key={responseKind} auth={auth} initialKind={responseKind} definitions={forms}
+          assignments={forms.flatMap((form) => form.people.map((person) => ({ ...person, form_id: form.id })))} />
       )}
     </section>
   );
@@ -667,53 +353,32 @@ function FormCatalogue({ view, responseKind, onChoose, onCreate }) {
 export default function FormsManager({ registerBack }) {
   const { dirty } = useAdminSave();
   const [params, setParams] = useSearchParams();
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(null);
   const select = params.get('form');
   const view = params.get('view') || 'forms';
-  const choose = useCallback(
-    (changes) => {
-      if (dirty && !window.confirm('Discard unsaved form changes?')) return;
-      setCreating(false);
-      setParams({ section: 'forms', ...changes });
-    },
-    [dirty, setParams],
-  );
-  const closeCreation = useCallback(() => setCreating(false), []);
+  const choose = useCallback((changes) => {
+    if (dirty && !window.confirm('Discard unsaved form changes?')) return;
+    setCreating(null);
+    setParams({ section: 'forms', ...changes });
+  }, [dirty, setParams]);
+  const closeCreation = useCallback(() => setCreating(null), []);
   const closeWorkspace = useCallback(() => choose({ view: 'forms' }), [choose]);
   useEffect(() => {
-    // Nested editors register their own Back action so their unsaved-change
-    // checks apply to the toolbar as well as their local Close button.
+    // Nested editors retain their existing unsaved-change checks.
     if (!registerBack || creating || select) return undefined;
     if (view !== 'forms') registerBack(() => choose({ view: 'forms' }));
     else registerBack(null);
     return () => registerBack(null);
   }, [registerBack, creating, select, view, choose]);
-  if (creating)
-    return (
-      <CustomFormsBuilder
-        registerBack={registerBack}
-        onClose={closeCreation}
-        onSaved={(saved) => {
-          setCreating(false);
-          setParams({ section: 'forms', form: saved.id });
-        }}
-      />
-    );
-  if (select)
-    return (
-      <FormWorkspace
-        key={select}
-        formId={select}
-        registerBack={registerBack}
-        onClose={closeWorkspace}
-      />
-    );
-  return (
-    <FormCatalogue
-      view={view}
-      responseKind={params.get('kind') || ''}
-      onChoose={choose}
-      onCreate={() => setCreating(true)}
-    />
+  if (creating) return (
+    <div className={creating.interest ? 'connected-interest-editor' : undefined}>
+      {creating.interest && <div className="connected-admin-help"><h2>New class interest form</h2><p>Collect interest before a class is confirmed. This does not enrol students, reserve places, create accounts or take payments. Give the form a specific title, such as Weekend Arabic interest.</p></div>}
+      <CustomFormsBuilder initialDraft={creating.initialDraft || {}} registerBack={registerBack} onClose={closeCreation} onSaved={(saved) => {
+        setCreating(null);
+        setParams({ section: 'forms', form: saved.id });
+      }} />
+    </div>
   );
+  if (select) return <FormWorkspace key={select} formId={select} registerBack={registerBack} onClose={closeWorkspace} />;
+  return <FormCatalogue view={view} responseKind={params.get('kind') || ''} onChoose={choose} onCreate={() => setCreating({})} onCreateInterest={() => setCreating({ interest: true, initialDraft: classInterestDraft() })} />;
 }

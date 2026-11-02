@@ -6,6 +6,7 @@ import { CERTIFICATES_ENABLED } from '@/lib/certificates';
 import { ADMIN_GROUPS, ADMIN_SECTIONS } from '@/content/adminNavigation';
 import { loadAdminOverview } from './overview';
 import { findAdminTasks } from './taskNavigation';
+import AdminQuickActions from './AdminQuickActions';
 import '@/styles/admin-overview.css';
 
 const GROUP_HELP = {
@@ -39,30 +40,16 @@ export default function AdminOverview({ onChoose, icons }) {
   const filtered = findAdminTasks(tasks, auth.can, search);
   const cards = [
     ...(auth.can('forms')
-      ? [
-          {
-            id: 'forms',
-            title: 'Form responses to review',
-            detail: 'Contact Us, registrations and applications you can access',
-            empty: 'No new responses to review.',
-            action: 'Open forms',
-            value: result.data.forms?.value?.waiting,
-            failed: result.data.forms?.error,
-          },
-        ]
+      ? [{ id: 'forms', title: 'Form responses to review',
+        detail: 'Contact Us, registrations and applications you can access',
+        empty: 'No new responses to review.', action: 'Open forms',
+        value: result.data.forms?.value?.waiting, failed: result.data.forms?.error }]
       : []),
     ...(CERTIFICATES_ENABLED && auth.can('certificates')
-      ? [
-          {
-            id: 'certificates',
-            title: 'Certificates to review',
-            detail: 'Requests awaiting a decision',
-            empty: 'No requests awaiting a decision.',
-            action: 'Open certificates',
-            value: result.data.certificates?.value,
-            failed: result.data.certificates?.error,
-          },
-        ]
+      ? [{ id: 'certificates', title: 'Certificates to review',
+        detail: 'Requests awaiting a decision', empty: 'No requests awaiting a decision.',
+        action: 'Open certificates', value: result.data.certificates?.value,
+        failed: result.data.certificates?.error }]
       : []),
   ];
   const summary = result.data.forms?.value;
@@ -70,34 +57,19 @@ export default function AdminOverview({ onChoose, icons }) {
   const unavailable = !result.busy && cards.some((card) => card.failed || card.value == null);
   const searching = Boolean(search.trim());
   const focused = tasks.length <= 3;
-  const areas = ADMIN_GROUPS.map((name) => ({
-    name,
-    tasks: tasks.filter((task) => task.group === name),
-  })).filter((item) => item.tasks.length);
-  const openedArea =
-    !searching && areas.find((item) => item.name === area && item.tasks.length > 1);
+  const areas = ADMIN_GROUPS.map((name) => ({ name, tasks: tasks.filter((task) => task.group === name) })).filter((item) => item.tasks.length);
+  const openedArea = !searching && areas.find((item) => item.name === area && item.tasks.length > 1);
   useEffect(() => {
     if (area) areaHeading.current?.focus({ preventScroll: true });
-    else if (previousArea.current)
-      document.getElementById(previousArea.current)?.focus({ preventScroll: true });
+    else if (previousArea.current) document.getElementById(previousArea.current)?.focus({ preventScroll: true });
   }, [area]);
   const renderTool = ({ id, name, description }) => {
     const Icon = icons[id];
     return (
-      <button
-        key={id}
-        className="admin-tool-tile"
-        type="button"
-        aria-label={name}
-        aria-describedby={`admin-tool-help-${id}`}
-        title={description}
-        onClick={() => onChoose(id)}
-      >
+      <button key={id} className="admin-tool-tile" type="button" aria-label={name}
+        aria-describedby={`admin-tool-help-${id}`} title={description} onClick={() => onChoose(id)}>
         <Icon size={22} aria-hidden="true" />
-        <span>
-          <strong>{name}</strong>
-          <small id={`admin-tool-help-${id}`}>{description}</small>
-        </span>
+        <span><strong>{name}</strong><small id={`admin-tool-help-${id}`}>{description}</small></span>
       </button>
     );
   };
@@ -107,159 +79,67 @@ export default function AdminOverview({ onChoose, icons }) {
         <div>
           <p className="admin-eyebrow">Staff home</p>
           <h1>Welcome{auth.profile?.display_name ? `, ${auth.profile.display_name}` : ''}</h1>
-          <p>
-            {auth.isOwner
-              ? 'Your centre’s work, people and updates in one place.'
-              : 'Your work and the tools available to your account.'}
-          </p>
+          <p>{auth.isOwner ? 'Your centre’s work, people and updates in one place.' : 'Your work and the tools available to your account.'}</p>
         </div>
         {!focused && (
           <label className="admin-tool-search">
-            <Search size={18} aria-hidden="true" />
-            <span className="sr-only">Find an admin task</span>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setArea(null);
-                previousArea.current = null;
-              }}
-              placeholder="Search your tools…"
-              aria-describedby={search.trim() ? 'admin-task-search-result' : undefined}
-            />
+            <Search size={18} aria-hidden="true" /><span className="sr-only">Find an admin task</span>
+            <input type="search" value={search} onChange={(event) => {
+              setSearch(event.target.value); setArea(null); previousArea.current = null;
+            }} placeholder="Search your tools…" aria-describedby={search.trim() ? 'admin-task-search-result' : undefined} />
           </label>
         )}
       </section>
       {cards.length > 0 && !searching && (
         <section className="admin-attention" aria-labelledby="admin-attention-title">
           <div className="admin-overview-section-heading">
-            <div>
-              <h2 id="admin-attention-title">Needs attention</h2>
-            </div>
-            <button
-              className="admin-overview-refresh"
-              type="button"
-              disabled={result.busy}
-              onClick={() => setRevision((value) => value + 1)}
-            >
-              <RefreshCw size={15} aria-hidden="true" />
-              {result.busy ? 'Refreshing…' : 'Refresh totals'}
+            <div><h2 id="admin-attention-title">Needs attention</h2></div>
+            <button className="admin-overview-refresh" type="button" disabled={result.busy} onClick={() => setRevision((value) => value + 1)}>
+              <RefreshCw size={15} aria-hidden="true" />{result.busy ? 'Refreshing…' : 'Refresh totals'}
             </button>
           </div>
           <div className="admin-attention-grid" aria-busy={result.busy}>
             {cards.map((card) => (
-              <button
-                key={card.id}
-                type="button"
-                onClick={() => onChoose(card.id)}
+              <button key={card.id} type="button" onClick={() => onChoose(card.id)}
                 aria-label={`${card.action}: ${result.busy ? 'checking total' : card.failed || card.value == null ? 'total unavailable' : `${card.value.toLocaleString('en-GB')} ${card.title.toLowerCase()}`}`}
-                data-state={
-                  unavailable && (card.failed || card.value == null) ? 'unavailable' : undefined
-                }
-              >
+                data-state={unavailable && (card.failed || card.value == null) ? 'unavailable' : undefined}>
                 <span>{card.title}</span>
-                <strong
-                  className={
-                    result.busy || card.failed || card.value == null
-                      ? 'admin-attention-word'
-                      : undefined
-                  }
-                >
-                  {result.busy
-                    ? 'Checking…'
-                    : card.failed || card.value == null
-                      ? 'Unable to load'
-                      : card.value.toLocaleString('en-GB')}
+                <strong className={result.busy || card.failed || card.value == null ? 'admin-attention-word' : undefined}>
+                  {result.busy ? 'Checking…' : card.failed || card.value == null ? 'Unable to load' : card.value.toLocaleString('en-GB')}
                 </strong>
-                <small>
-                  {result.busy
-                    ? 'Checking the latest total.'
-                    : card.failed || card.value == null
-                      ? 'You can still open this area, or refresh to try again.'
-                      : card.value === 0
-                        ? card.empty
-                        : card.detail}
-                </small>
-                <span className="admin-attention-link">
-                  {card.action} <ArrowRight size={16} aria-hidden="true" />
-                </span>
+                <small>{result.busy ? 'Checking the latest total.' : card.failed || card.value == null ? 'You can still open this area, or refresh to try again.' : card.value === 0 ? card.empty : card.detail}</small>
+                <span className="admin-attention-link">{card.action} <ArrowRight size={16} aria-hidden="true" /></span>
               </button>
             ))}
           </div>
-          {unavailable && (
-            <p className="admin-overview-note" role="status">
-              Some totals could not be loaded. Your other staff tools are still available below.
-            </p>
-          )}
+          {unavailable && <p className="admin-overview-note" role="status">Some totals could not be loaded. Your other staff tools are still available below.</p>}
         </section>
       )}
+      {!searching && !openedArea && !focused && <AdminQuickActions can={auth.can} />}
       {summary && !searching && (
         <details className="admin-work-summary">
-          <summary>
-            <span>Form response progress</span>
-            <ChevronDown size={16} aria-hidden="true" />
-          </summary>
+          <summary><span>Form response progress</span><ChevronDown size={16} aria-hidden="true" /></summary>
           <div className="admin-work-summary-content">
             <div>
-              <p>
-                {summary.complete} completed · {summary.waiting} awaiting review · {summary.actions}{' '}
-                open follow-ups
-              </p>
-              <small>
-                Across {summary.forms.toLocaleString('en-GB')}{' '}
-                {summary.forms === 1 ? 'form' : 'forms'} you can access
-                {summary.forms === 500 ? ' (showing up to 500 forms)' : ''}.
-              </small>
+              <p>{summary.complete} completed · {summary.waiting} awaiting review · {summary.actions} open follow-ups</p>
+              <small>Across {summary.forms.toLocaleString('en-GB')} {summary.forms === 1 ? 'form' : 'forms'} you can access{summary.forms === 500 ? ' (showing up to 500 forms)' : ''}.</small>
             </div>
             {total ? (
-              <div className="admin-progress">
-                <meter
-                  min={0}
-                  max={total}
-                  value={summary.complete}
-                  aria-label="Completed form responses"
-                />
-                <strong>{Math.round((summary.complete / total) * 100)}% completed</strong>
-              </div>
-            ) : (
-              <span className="admin-zero-state">
-                <CheckCircle2 size={18} aria-hidden="true" />
-                No responses recorded
-              </span>
-            )}
+              <div className="admin-progress"><meter min={0} max={total} value={summary.complete} aria-label="Completed form responses" /><strong>{Math.round((summary.complete / total) * 100)}% completed</strong></div>
+            ) : <span className="admin-zero-state"><CheckCircle2 size={18} aria-hidden="true" />No responses recorded</span>}
           </div>
         </details>
       )}
       <section className="admin-tools" aria-labelledby="admin-tools-title">
-        <div className="admin-heading">
-          <div>
-            <h2 id="admin-tools-title">Your tools</h2>
-            <p>Open an area to see its tasks.</p>
-          </div>
-        </div>
-        {search.trim() && (
-          <p className="admin-search-result" id="admin-task-search-result" role="status">
-            {filtered.length} {filtered.length === 1 ? 'task matches' : 'tasks match'} your search.
-          </p>
-        )}
+        <div className="admin-heading"><div><h2 id="admin-tools-title">Your tools</h2><p>Open an area to see its tasks.</p></div></div>
+        {search.trim() && <p className="admin-search-result" id="admin-task-search-result" role="status">{filtered.length} {filtered.length === 1 ? 'task matches' : 'tasks match'} your search.</p>}
         {openedArea && (
           <div className="admin-area-heading">
-            <button type="button" className="admin-button" onClick={() => setArea(null)}>
-              <ArrowLeft size={16} aria-hidden="true" />
-              All tools
-            </button>
-            <div>
-              <h3 ref={areaHeading} tabIndex={-1}>
-                {openedArea.name}
-              </h3>
-              <p>{GROUP_HELP[openedArea.name]}</p>
-            </div>
+            <button type="button" className="admin-button" onClick={() => setArea(null)}><ArrowLeft size={16} aria-hidden="true" />All tools</button>
+            <div><h3 ref={areaHeading} tabIndex={-1}>{openedArea.name}</h3><p>{GROUP_HELP[openedArea.name]}</p></div>
           </div>
         )}
-        {openedArea ? (
-          <div className="admin-tool-list">{openedArea.tasks.map(renderTool)}</div>
-        ) : focused || searching ? (
+        {openedArea ? <div className="admin-tool-list">{openedArea.tasks.map(renderTool)}</div> : focused || searching ? (
           <div className="admin-tool-list">{filtered.map(renderTool)}</div>
         ) : (
           <div className="admin-tool-list admin-area-tiles">
@@ -267,46 +147,16 @@ export default function AdminOverview({ onChoose, icons }) {
               if (item.tasks.length === 1) return renderTool(item.tasks[0]);
               const Icon = icons[item.tasks[0].id];
               const id = `admin-area-${item.tasks[0].id}`;
-              return (
-                <button
-                  key={item.name}
-                  id={id}
-                  type="button"
-                  className="admin-tool-tile"
-                  aria-label={item.name}
-                  onClick={() => {
-                    previousArea.current = id;
-                    setArea(item.name);
-                  }}
-                >
-                  <Icon size={22} aria-hidden="true" />
-                  <span>
-                    <strong>{item.name}</strong>
-                    <small>{GROUP_HELP[item.name] || `${item.tasks.length} tools`}</small>
-                  </span>
-                  <ArrowRight size={16} aria-hidden="true" />
-                </button>
-              );
+              return <button key={item.name} id={id} type="button" className="admin-tool-tile" aria-label={item.name} onClick={() => { previousArea.current = id; setArea(item.name); }}>
+                <Icon size={22} aria-hidden="true" /><span><strong>{item.name}</strong><small>{GROUP_HELP[item.name] || `${item.tasks.length} tools`}</small></span><ArrowRight size={16} aria-hidden="true" />
+              </button>;
             })}
           </div>
         )}
         {!filtered.length && (
           <div className="admin-task-empty">
             <Search size={24} aria-hidden="true" />
-            {tasks.length ? (
-              <>
-                <h3>No tasks found for “{search.trim()}”</h3>
-                <p>Try a shorter word, such as pages, forms or prayer.</p>
-                <button className="admin-button" type="button" onClick={() => setSearch('')}>
-                  Show all my tasks
-                </button>
-              </>
-            ) : (
-              <>
-                <h3>No staff tools are assigned to this account</h3>
-                <p>Your centre owner can help if you need access to another area.</p>
-              </>
-            )}
+            {tasks.length ? <><h3>No tasks found for “{search.trim()}”</h3><p>Try a shorter word, such as pages, forms or prayer.</p><button className="admin-button" type="button" onClick={() => setSearch('')}>Show all my tasks</button></> : <><h3>No staff tools are assigned to this account</h3><p>Your centre owner can help if you need access to another area.</p></>}
           </div>
         )}
       </section>
