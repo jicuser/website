@@ -15,6 +15,8 @@ export default defineConfig(({ command, mode }) => {
   if (command === 'build') validateBuildSettings(env);
   return {
     plugins: [react(), pagePreviews({ env })],
+    // Archived backup HTML files are not entry points for this application.
+    optimizeDeps: { entries: ['index.html'] },
     server: { allowedHosts: ['terminal.local', ...(codespaceHost ? [codespaceHost] : [])] },
     resolve: {
       extensions: ['.jsx', '.js', '.tsx', '.ts', '.json'],
