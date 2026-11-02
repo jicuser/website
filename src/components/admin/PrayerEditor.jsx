@@ -261,17 +261,21 @@ export default function PrayerEditor() {
           'Weekly Jummah unavailable.'
         )}
       </p>
-      <nav className="admin-actions prayer-task-views" aria-label="Timetable tasks">
+      <nav
+        className="admin-actions prayer-task-views workspace-task-choices"
+        aria-label="Timetable tasks"
+      >
         {[
-          ['month', 'Create / edit month'],
-          ['daily', 'Daily times'],
-          ['jummah', 'Jummah'],
-          ['csv', 'CSV import'],
-        ].map(([id, label]) => (
+          ['month', 'Create / edit month', 'Timetable & downloads'],
+          ['daily', 'Daily times', 'Update a single day'],
+          ['jummah', 'Jummah', 'Weekly congregation times'],
+          ['csv', 'CSV import', 'Upload an existing timetable'],
+        ].map(([id, label, help]) => (
           <button
             type="button"
             className="admin-button"
             key={id}
+            aria-label={label}
             aria-pressed={view === id}
             aria-controls={`prayer-view-${id}`}
             disabled={busy || loading}
@@ -284,7 +288,8 @@ export default function PrayerEditor() {
               setView(id);
             }}
           >
-            {label}
+            <strong>{label}</strong>
+            <small>{help}</small>
           </button>
         ))}
       </nav>

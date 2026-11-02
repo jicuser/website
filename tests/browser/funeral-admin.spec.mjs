@@ -50,6 +50,10 @@ test('facility editing previews photos and visibility before publishing through 
     return route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
   });
   await page.goto('/admin?section=content&page=%2Ffunerals');
+  await page
+    .getByRole('tablist', { name: 'Page editing steps' })
+    .getByRole('tab', { name: 'Facilities', exact: true })
+    .click();
   const editor = page.locator('.funeral-facilities-editor');
   await expect(
     editor.getByRole('heading', { name: 'Funeral facilities & transport' }),

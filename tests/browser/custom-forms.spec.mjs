@@ -174,6 +174,10 @@ test('owner builds a draft and publishes with responsible people and task routin
   await page.getByLabel('Form address', { exact: true }).fill('volunteer-registration');
   await page.getByRole('button', { name: 'Save and publish', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Choose at least one responsible person');
+  await page
+    .getByRole('tablist', { name: 'Form setup steps' })
+    .getByRole('tab', { name: 'Responses', exact: true })
+    .click();
   await page.locator('.custom-form-routing').getByLabel('Preview owner').check();
   await page.getByText('Access & automatic action', { exact: true }).click();
   await page.getByLabel('Automatic action').fill('Call back');

@@ -336,6 +336,10 @@ test('Ramadan staff table opens and closes a date range and accepts a 29-day end
   });
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   await page.getByLabel('Last UK date', { exact: true }).fill('2027-03-09');
+  await page
+    .getByRole('tablist', { name: 'Ramadan setup steps' })
+    .getByRole('tab', { name: 'Review', exact: true })
+    .click();
   await page.getByRole('button', { name: 'Save setup', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Sponsorship setup saved.');
   expect(state.writes.at(-1).p_body.day_count).toBe(29);

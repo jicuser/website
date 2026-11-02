@@ -1,3 +1,4 @@
+import GuidedEditor from '@/components/admin/GuidedEditor';
 import NoticePlacementEditor from '@/components/admin/NoticePlacementEditor';
 import { noticePlacement } from '@/lib/noticePlacement';
 import { IMAGE_ACCEPT } from '@/lib/images';
@@ -333,128 +334,152 @@ function EventsSection() {
             </button>
           </div>
           <fieldset disabled={busy}>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field title="Title">
-                <input
-                  className={input}
-                  required
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                />
-              </Field>
-              <Field title="Date">
-                <input
-                  type="date"
-                  className={input}
-                  required
-                  value={form.event_date}
-                  onChange={(e) => setForm({ ...form, event_date: e.target.value })}
-                />
-              </Field>
-              <Field title="Start time">
-                <input
-                  type="time"
-                  className={input}
-                  value={form.start_time}
-                  onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-                />
-              </Field>
-              <Field title="End time">
-                <input
-                  type="time"
-                  className={input}
-                  value={form.end_time}
-                  onChange={(e) => setForm({ ...form, end_time: e.target.value })}
-                />
-              </Field>
-              <Field title="Location">
-                <input
-                  className={input}
-                  value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
-                />
-              </Field>
-              <Field title="Speaker">
-                <input
-                  className={input}
-                  value={form.speaker}
-                  onChange={(e) => setForm({ ...form, speaker: e.target.value })}
-                />
-              </Field>
-              <Field title="Category">
-                <input
-                  className={input}
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                />
-              </Field>
-              <Field title="Poster">
-                <div className="flex gap-2">
+            <GuidedEditor label="Event editing steps" disabled={busy}>
+              <div
+                data-step="Details"
+                data-help="Add the event name, date, times and location."
+                className="grid gap-4 md:grid-cols-2"
+              >
+                <Field title="Title">
                   <input
                     className={input}
-                    value={posterFile ? '' : form.poster_url || ''}
-                    placeholder={posterFile ? posterFile.name : 'Image URL'}
-                    onChange={(e) => {
-                      setPosterFile(null);
-                      setForm({ ...form, poster_url: e.target.value });
-                    }}
+                    required
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
                   />
-                  <label className={`${ghost} cursor-pointer`}>
-                    <Upload size={15} />
+                </Field>
+                <Field title="Date">
+                  <input
+                    type="date"
+                    className={input}
+                    required
+                    value={form.event_date}
+                    onChange={(e) => setForm({ ...form, event_date: e.target.value })}
+                  />
+                </Field>
+                <Field title="Start time">
+                  <input
+                    type="time"
+                    className={input}
+                    value={form.start_time}
+                    onChange={(e) => setForm({ ...form, start_time: e.target.value })}
+                  />
+                </Field>
+                <Field title="End time">
+                  <input
+                    type="time"
+                    className={input}
+                    value={form.end_time}
+                    onChange={(e) => setForm({ ...form, end_time: e.target.value })}
+                  />
+                </Field>
+                <Field title="Location">
+                  <input
+                    className={input}
+                    value={form.location}
+                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                  />
+                </Field>
+                <Field title="Speaker">
+                  <input
+                    className={input}
+                    value={form.speaker}
+                    onChange={(e) => setForm({ ...form, speaker: e.target.value })}
+                  />
+                </Field>
+                <Field title="Category">
+                  <input
+                    className={input}
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <div
+                data-step="Content"
+                data-help="Add a poster, description and any registration or live links."
+                className="grid gap-4 md:grid-cols-2"
+              >
+                <Field title="Poster">
+                  <div className="flex gap-2">
                     <input
-                      type="file"
-                      accept={IMAGE_ACCEPT}
-                      className="hidden"
-                      onChange={(e) => setPosterFile(e.target.files?.[0] || null)}
+                      className={input}
+                      value={posterFile ? '' : form.poster_url || ''}
+                      placeholder={posterFile ? posterFile.name : 'Image URL'}
+                      onChange={(e) => {
+                        setPosterFile(null);
+                        setForm({ ...form, poster_url: e.target.value });
+                      }}
                     />
+                    <label className={`${ghost} cursor-pointer`}>
+                      <Upload size={15} />
+                      <input
+                        type="file"
+                        accept={IMAGE_ACCEPT}
+                        className="hidden"
+                        onChange={(e) => setPosterFile(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                  </div>
+                </Field>
+                <Field title="Registration URL">
+                  <input
+                    className={input}
+                    value={form.registration_url}
+                    onChange={(e) => setForm({ ...form, registration_url: e.target.value })}
+                  />
+                </Field>
+                <Field title="Livestream URL">
+                  <input
+                    className={input}
+                    value={form.livestream_url}
+                    onChange={(e) => setForm({ ...form, livestream_url: e.target.value })}
+                  />
+                </Field>
+                <Field title="Description" className="md:col-span-2">
+                  <textarea
+                    rows="3"
+                    className={input}
+                    value={form.description || ''}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <div
+                data-step="Review"
+                data-help="Check the event details and choose whether to publish it."
+              >
+                <h4>{form.title || 'Untitled event'}</h4>
+                <p>
+                  {form.event_date || 'No date selected'} ·{' '}
+                  {form.start_time || 'Time to be confirmed'}
+                </p>
+                <p>{form.location}</p>
+                <p>{form.description}</p>
+                <div className="mt-4 flex flex-wrap gap-5 text-sm">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={form.published}
+                      onChange={(e) => setForm({ ...form, published: e.target.checked })}
+                    />{' '}
+                    Published
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={form.featured}
+                      onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                    />{' '}
+                    Featured
                   </label>
                 </div>
-              </Field>
-              <Field title="Registration URL">
-                <input
-                  className={input}
-                  value={form.registration_url}
-                  onChange={(e) => setForm({ ...form, registration_url: e.target.value })}
-                />
-              </Field>
-              <Field title="Livestream URL">
-                <input
-                  className={input}
-                  value={form.livestream_url}
-                  onChange={(e) => setForm({ ...form, livestream_url: e.target.value })}
-                />
-              </Field>
-              <Field title="Description" className="md:col-span-2">
-                <textarea
-                  rows="3"
-                  className={input}
-                  value={form.description || ''}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
-              </Field>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-5 text-sm">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={form.published}
-                  onChange={(e) => setForm({ ...form, published: e.target.checked })}
-                />{' '}
-                Published
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={form.featured}
-                  onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-                />{' '}
-                Featured
-              </label>
-            </div>
-            <button disabled={busy || !dirty} className={`${primary} mt-4`}>
-              <Save size={15} />
-              {busy ? 'Saving…' : 'Save event'}
-            </button>
+                <button disabled={busy || !dirty} className={`${primary} mt-4`}>
+                  <Save size={15} />
+                  {busy ? 'Saving…' : 'Save event'}
+                </button>
+              </div>
+            </GuidedEditor>
           </fieldset>
         </form>
       ) : loading ? (

@@ -1,3 +1,4 @@
+import GuidedEditor from '@/components/admin/GuidedEditor';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ArrowDown, ArrowUp, ChevronDown, GripVertical, RotateCcw, Save } from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
@@ -155,97 +156,131 @@ export default function MenuEditor() {
       {pagesError && (
         <p role="status">Added pages could not be loaded. Their existing names will be kept.</p>
       )}
-      <div className="menu-editor__list" aria-label="Menu sections">
-        {groups.map((group, index) => (
-          <section
-            key={group.path}
-            className={`menu-editor__group ${rowState(groups, group)}`}
-            data-menu-path={group.path}
-            data-menu-parent=""
-          >
-            <div className="menu-editor__row">
-              {grip(groups, group)}
-              <label>
-                <span className="sr-only">Section name</span>
-                <input
-                  aria-label={`${group.name} section name`}
-                  maxLength={80}
-                  disabled={busy}
-                  value={draft.labels[group.path] ?? group.name}
-                  onChange={(event) => changeLabel(group.path, event.target.value)}
-                />
-              </label>
-              {group.children.length > 0 ? (
-                <button
-                  type="button"
-                  className="menu-editor__expand"
-                  aria-label={`Pages in ${group.name} · ${group.children.length}`}
-                  aria-expanded={expanded === group.path}
-                  disabled={busy || Boolean(drag)}
-                  onClick={() =>
-                    setExpanded((current) => (current === group.path ? null : group.path))
-                  }
-                >
-                  <small>{group.children.length}</small>
-                  <ChevronDown size={16} aria-hidden="true" />
-                </button>
-              ) : (
-                <span className="menu-editor__no-pages" />
-              )}
-            </div>
-            {moveOptions === keyFor(group.path) && arrows(groups, group, index)}
-            {expanded === group.path && (
-              <div className="menu-editor__pages" aria-label={`${group.name} pages`}>
-                {group.children.map((page, pageIndex) => (
-                  <div
-                    className={`menu-editor__page ${rowState(group.children, page, group.path)}`}
-                    key={page.path}
-                    data-menu-path={page.path}
-                    data-menu-parent={group.path}
-                  >
-                    <div className="menu-editor__row">
-                      {grip(group.children, page, group.path)}
-                      {page.path === group.path ? (
-                        <span className="menu-editor__overview">
-                          {page.name}
-                          <small>Section overview</small>
-                        </span>
-                      ) : (
-                        <label>
-                          <span className="sr-only">{page.name} link name</span>
-                          <input
-                            aria-label={`${page.name} link name`}
-                            maxLength={80}
-                            disabled={busy}
-                            value={draft.labels[page.path] ?? page.name}
-                            onChange={(event) => changeLabel(page.path, event.target.value)}
-                          />
-                        </label>
-                      )}
-                    </div>
-                    {moveOptions === keyFor(page.path, group.path) &&
-                      arrows(group.children, page, pageIndex, group.path)}
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        ))}
-      </div>
-      <div className="admin-actions">
-        <button
-          type="button"
-          className="admin-button"
-          disabled={busy}
-          onClick={() => {
-            if (window.confirm('Restore the original menu names and order? Save to publish.'))
-              setDraft(readNavigationConfiguration('{}'));
-          }}
+      <GuidedEditor label="Menu editing steps" disabled={busy || Boolean(drag)}>
+        <div
+          data-step="Arrange"
+          data-help="Rename sections, then open a section to arrange its pages."
         >
-          <RotateCcw size={16} />
-          Restore original menu
-        </button>
-      </div>
+          <div className="menu-editor__list" aria-label="Menu sections">
+            {groups.map((group, index) => (
+              <section
+                key={group.path}
+                className={`menu-editor__group ${rowState(groups, group)}`}
+                data-menu-path={group.path}
+                data-menu-parent=""
+              >
+                <div className="menu-editor__row">
+                  {grip(groups, group)}
+                  <label>
+                    <span className="sr-only">Section name</span>
+                    <input
+                      aria-label={`${group.name} section name`}
+                      maxLength={80}
+                      disabled={busy}
+                      value={draft.labels[group.path] ?? group.name}
+                      onChange={(event) => changeLabel(group.path, event.target.value)}
+                    />
+                  </label>
+                  {group.children.length > 0 ? (
+                    <button
+                      type="button"
+                      className="menu-editor__expand"
+                      aria-label={`Pages in ${group.name} · ${group.children.length}`}
+                      aria-expanded={expanded === group.path}
+                      disabled={busy || Boolean(drag)}
+                      onClick={() =>
+                        setExpanded((current) => (current === group.path ? null : group.path))
+                      }
+                    >
+                      <small>{group.children.length}</small>
+                      <ChevronDown size={16} aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <span className="menu-editor__no-pages" />
+                  )}
+                </div>
+                {moveOptions === keyFor(group.path) && arrows(groups, group, index)}
+                {expanded === group.path && (
+                  <div className="menu-editor__pages" aria-label={`${group.name} pages`}>
+                    {group.children.map((page, pageIndex) => (
+                      <div
+                        className={`menu-editor__page ${rowState(group.children, page, group.path)}`}
+                        key={page.path}
+                        data-menu-path={page.path}
+                        data-menu-parent={group.path}
+                      >
+                        <div className="menu-editor__row">
+                          {grip(group.children, page, group.path)}
+                          {page.path === group.path ? (
+                            <span className="menu-editor__overview">
+                              {page.name}
+                              <small>Section overview</small>
+                            </span>
+                          ) : (
+                            <label>
+                              <span className="sr-only">{page.name} link name</span>
+                              <input
+                                aria-label={`${page.name} link name`}
+                                maxLength={80}
+                                disabled={busy}
+                                value={draft.labels[page.path] ?? page.name}
+                                onChange={(event) => changeLabel(page.path, event.target.value)}
+                              />
+                            </label>
+                          )}
+                        </div>
+                        {moveOptions === keyFor(page.path, group.path) &&
+                          arrows(group.children, page, pageIndex, group.path)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
+          <div className="admin-actions">
+            <button
+              type="button"
+              className="admin-button"
+              disabled={busy}
+              onClick={() => {
+                if (window.confirm('Restore the original menu names and order? Save to publish.'))
+                  setDraft(readNavigationConfiguration('{}'));
+              }}
+            >
+              <RotateCcw size={16} />
+              Restore original menu
+            </button>
+          </div>
+        </div>
+        <section data-step="Review" data-help="Check the names and order before saving the menu.">
+          <h3>Menu preview</h3>
+          <p>Saved page visibility still controls which links visitors can see.</p>
+          <ol className="guided-menu-preview">
+            {groups.map((group) => (
+              <li key={group.path}>
+                <details>
+                  <summary>{group.name}</summary>
+                  <ul>
+                    {group.children.map((page) => (
+                      <li key={page.path}>{page.name}</li>
+                    ))}
+                  </ul>
+                </details>
+              </li>
+            ))}
+          </ol>
+          <button
+            type="button"
+            className="admin-button primary"
+            disabled={!dirty || busy || Boolean(drag)}
+            onClick={() => save().catch(() => {})}
+          >
+            <Save size={16} />
+            {busy ? 'Saving…' : 'Save menu'}
+          </button>
+        </section>
+      </GuidedEditor>
     </section>
   );
 }

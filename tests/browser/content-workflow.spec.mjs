@@ -260,7 +260,15 @@ test('Pages can be created and hidden without erasing a linked form or changing 
   await admin('content');
   await page.getByRole('button', { name: 'Manage added pages', exact: true }).click();
   await page.getByRole('button', { name: 'Edit Arabic course', exact: true }).click();
+  await page
+    .getByRole('tablist', { name: 'Programme page steps' })
+    .getByRole('tab', { name: 'Review', exact: true })
+    .click();
   await page.getByLabel('Show page on website', { exact: true }).uncheck();
+  await page
+    .getByRole('tablist', { name: 'Programme page steps' })
+    .getByRole('tab', { name: 'Location', exact: true })
+    .click();
   await page
     .getByRole('combobox', { name: 'Website section', exact: true })
     .selectOption('/education');

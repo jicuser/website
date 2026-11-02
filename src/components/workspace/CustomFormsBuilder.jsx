@@ -1,3 +1,4 @@
+import GuidedEditor from '@/components/admin/GuidedEditor';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { validateDraft } from '@/lib/customForms';
@@ -284,345 +285,357 @@ export default function CustomFormsBuilder({
         hidden={preview}
         disabled={busy || loading || loadFailed}
       >
-        {!draft.id && (
-          <section className="custom-form-starters" aria-label="Form templates">
-            <h3>Start with a template</h3>
-            <div className="custom-form-quick-add">
-              {[
-                ['enquiry', 'Enquiry'],
-                ['triage', 'Guided enquiry'],
-                ['registration', 'Registration'],
-                ['blank', 'Start blank'],
-              ].map(([id, label]) => (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={template === id}
-                  onClick={() => {
-                    setTemplate(id);
-                    setFields(starterQuestions(id));
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-        <h3>1. Basics</h3>
-        <Field label="Form title">
-          <input
-            value={draft.title}
-            maxLength={160}
-            onChange={(event) =>
-              patch({
-                title: event.target.value,
-                ...(!addressTouched ? { slug: formAddress(event.target.value) } : {}),
-              })
-            }
-          />
-        </Field>
-        {!definition?.id && (
-          <section className="custom-form-routing" aria-label="Where the form appears">
-            <h4>Where should people find this form?</h4>
-            <Field label="Website location">
-              <select
-                value={destination}
-                disabled={Boolean(savedPage)}
-                onChange={(event) => {
-                  setDestination(event.target.value);
-                  setDirty(true);
-                }}
-              >
-                <option value="direct">Direct form link</option>
-                {canAddPage && <option value="new">Create a page for this form</option>}
-                {canAddPage && <option value="existing">Add to an existing page</option>}
-              </select>
-            </Field>
-            {!canAddPage && (
-              <p className="workspace-meta">
-                A website editor can add this form to a page after it is saved.
-              </p>
+        <GuidedEditor label="Form setup steps" disabled={busy || loading || loadFailed}>
+          <div data-step="Basics" data-help="Name the form and choose where visitors will find it.">
+            {!draft.id && (
+              <section className="custom-form-starters" aria-label="Form templates">
+                <h3>Start with a template</h3>
+                <div className="custom-form-quick-add">
+                  {[
+                    ['enquiry', 'Enquiry'],
+                    ['triage', 'Guided enquiry'],
+                    ['registration', 'Registration'],
+                    ['blank', 'Start blank'],
+                  ].map(([id, label]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={template === id}
+                      onClick={() => {
+                        setTemplate(id);
+                        setFields(starterQuestions(id));
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </section>
             )}
-            {pageError && <p role="status">{pageError}</p>}
-            {destination === 'new' && (
-              <>
-                <Field label="Page name">
-                  <input
-                    value={pageTitle || draft.title}
-                    maxLength={160}
-                    onChange={(event) => {
-                      setPageTitle(event.target.value);
-                      setDirty(true);
-                    }}
-                  />
-                </Field>
-                <Field label="Menu section">
+            <h3>Form details</h3>
+            <Field label="Form title">
+              <input
+                value={draft.title}
+                maxLength={160}
+                onChange={(event) =>
+                  patch({
+                    title: event.target.value,
+                    ...(!addressTouched ? { slug: formAddress(event.target.value) } : {}),
+                  })
+                }
+              />
+            </Field>
+            {!definition?.id && (
+              <section className="custom-form-routing" aria-label="Where the form appears">
+                <h4>Where should people find this form?</h4>
+                <Field label="Website location">
                   <select
-                    value={pagePlacement}
+                    value={destination}
+                    disabled={Boolean(savedPage)}
                     onChange={(event) => {
-                      setPagePlacement(event.target.value);
+                      setDestination(event.target.value);
                       setDirty(true);
                     }}
                   >
-                    {PAGE_PLACEMENTS.map(([path, label]) => (
-                      <option key={path} value={path}>
-                        {navigationName(getContent, path, label)}
-                      </option>
-                    ))}
+                    <option value="direct">Direct form link</option>
+                    {canAddPage && <option value="new">Create a page for this form</option>}
+                    {canAddPage && <option value="existing">Add to an existing page</option>}
                   </select>
                 </Field>
-                <p className="workspace-meta">
-                  Save draft keeps the new page hidden. Save and publish opens the page and form
-                  together.
-                </p>
-              </>
+                {!canAddPage && (
+                  <p className="workspace-meta">
+                    A website editor can add this form to a page after it is saved.
+                  </p>
+                )}
+                {pageError && <p role="status">{pageError}</p>}
+                {destination === 'new' && (
+                  <>
+                    <Field label="Page name">
+                      <input
+                        value={pageTitle || draft.title}
+                        maxLength={160}
+                        onChange={(event) => {
+                          setPageTitle(event.target.value);
+                          setDirty(true);
+                        }}
+                      />
+                    </Field>
+                    <Field label="Menu section">
+                      <select
+                        value={pagePlacement}
+                        onChange={(event) => {
+                          setPagePlacement(event.target.value);
+                          setDirty(true);
+                        }}
+                      >
+                        {PAGE_PLACEMENTS.map(([path, label]) => (
+                          <option key={path} value={path}>
+                            {navigationName(getContent, path, label)}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <p className="workspace-meta">
+                      Save draft keeps the new page hidden. Save and publish opens the page and form
+                      together.
+                    </p>
+                  </>
+                )}
+                {destination === 'existing' && (
+                  <>
+                    <Field label="Existing page">
+                      <select
+                        value={selectedPage}
+                        disabled={Boolean(savedPage) || Boolean(pageError)}
+                        onChange={(event) => {
+                          setSelectedPage(event.target.value);
+                          setDirty(true);
+                        }}
+                      >
+                        <option value="">Choose a page…</option>
+                        {pages
+                          .filter((item) => !item.form_id || item.form_id === draft.id)
+                          .map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {item.title}
+                              {item.published ? ' · Live' : ' · Draft'}
+                            </option>
+                          ))}
+                      </select>
+                    </Field>
+                    <p className="workspace-meta">
+                      The page keeps its current visibility. Pages that already use another form can
+                      be changed in Website pages.
+                    </p>
+                  </>
+                )}
+              </section>
             )}
-            {destination === 'existing' && (
-              <>
-                <Field label="Existing page">
+            {definition?.id && canAddPage && pages.some((item) => !item.published) && (
+              <section className="custom-form-routing" aria-label="Linked draft page">
+                <h4>Linked draft page</h4>
+                <Field label="Page to publish">
                   <select
                     value={selectedPage}
-                    disabled={Boolean(savedPage) || Boolean(pageError)}
                     onChange={(event) => {
                       setSelectedPage(event.target.value);
                       setDirty(true);
                     }}
                   >
-                    <option value="">Choose a page…</option>
                     {pages
-                      .filter((item) => !item.form_id || item.form_id === draft.id)
+                      .filter((item) => !item.published)
                       .map((item) => (
                         <option key={item.id} value={item.id}>
                           {item.title}
-                          {item.published ? ' · Live' : ' · Draft'}
                         </option>
                       ))}
                   </select>
                 </Field>
+                <label className="custom-form-check workspace-field">
+                  <span>Publish linked page with this form</span>
+                  <input
+                    type="checkbox"
+                    checked={publishLinkedPage}
+                    onChange={(event) => {
+                      setPublishLinkedPage(event.target.checked);
+                      setDirty(true);
+                    }}
+                  />
+                </label>
                 <p className="workspace-meta">
-                  The page keeps its current visibility. Pages that already use another form can be
-                  changed in Website pages.
+                  Publish changes saves the form and this page together. Save draft keeps the page
+                  hidden.
                 </p>
-              </>
+              </section>
             )}
-          </section>
-        )}
-        {definition?.id && canAddPage && pages.some((item) => !item.published) && (
-          <section className="custom-form-routing" aria-label="Linked draft page">
-            <h4>Linked draft page</h4>
-            <Field label="Page to publish">
-              <select
-                value={selectedPage}
-                onChange={(event) => {
-                  setSelectedPage(event.target.value);
-                  setDirty(true);
-                }}
-              >
-                {pages
-                  .filter((item) => !item.published)
-                  .map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.title}
-                    </option>
-                  ))}
-              </select>
-            </Field>
-            <label className="custom-form-check workspace-field">
-              <span>Publish linked page with this form</span>
-              <input
-                type="checkbox"
-                checked={publishLinkedPage}
-                onChange={(event) => {
-                  setPublishLinkedPage(event.target.checked);
-                  setDirty(true);
-                }}
+            <Field label="Introduction">
+              <textarea
+                rows={3}
+                value={draft.description}
+                maxLength={4000}
+                onChange={(event) => patch({ description: event.target.value })}
               />
-            </label>
-            <p className="workspace-meta">
-              Publish changes saves the form and this page together. Save draft keeps the page
-              hidden.
-            </p>
-          </section>
-        )}
-        <Field label="Introduction">
-          <textarea
-            rows={3}
-            value={draft.description}
-            maxLength={4000}
-            onChange={(event) => patch({ description: event.target.value })}
-          />
-        </Field>
-        <details className="custom-form-advanced">
-          <summary>Form address & availability</summary>
-          <Field label="Form address">
-            <input
-              value={draft.slug}
-              readOnly={Boolean(draft.published_version)}
-              maxLength={80}
-              placeholder="volunteer-registration"
-              onChange={(event) => {
-                setAddressTouched(true);
-                patch({ slug: event.target.value.toLowerCase().replace(/\s+/g, '-') });
-              }}
-            />
-          </Field>
-          <p className="workspace-meta">
-            /forms/{draft.slug || 'your-form-address'}
-            {draft.published_version ? ' · Published addresses stay the same.' : ''}
-          </p>
-          <label className="custom-form-check workspace-field">
-            <span>Accept responses when published</span>
-            <input
-              type="checkbox"
-              checked={draft.enabled}
-              onChange={(event) => patch({ enabled: event.target.checked })}
-            />
-          </label>
-        </details>
-
-        <h3>2. Questions</h3>
-        <p className="workspace-meta">
-          Visitors answer short steps, then review before sending. Use branching rules to ask
-          follow-up questions only when needed. Contact details are grouped after the request.
-        </p>
-        {draft.schema.fields.map((field, index) => (
-          <CustomFormQuestion
-            key={field.id}
-            field={field}
-            index={index}
-            fields={draft.schema.fields}
-            onChange={(next) => setFields(updateQuestion(draft.schema.fields, index, next))}
-            onRemove={() =>
-              setFields(draft.schema.fields.filter((_, position) => position !== index))
-            }
-            onMove={(direction) => {
-              const next = [...draft.schema.fields];
-              [next[index], next[index + direction]] = [next[index + direction], next[index]];
-              setFields(next);
-            }}
-          />
-        ))}
-        <div className="custom-form-quick-add" role="group" aria-label="Add a question">
-          {QUESTION_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              disabled={draft.schema.fields.length >= 40}
-              onClick={() =>
-                setFields([...draft.schema.fields, newQuestion(draft.schema.fields, preset.id)])
-              }
-            >
-              + {preset.name}
-            </button>
-          ))}
-          <button
-            type="button"
-            disabled={draft.schema.fields.length >= 40}
-            onClick={() => setFields([...draft.schema.fields, newQuestion(draft.schema.fields)])}
-          >
-            Add question
-          </button>
-        </div>
-        <section className="custom-form-routing">
-          <div>
-            <h3>3. Responses</h3>
-            <p className="workspace-meta">
-              These people receive the automatic action when somebody submits this form.
-            </p>
-            {draft.built_in_kind && (
+            </Field>
+            <details className="custom-form-advanced">
+              <summary>Form address & availability</summary>
+              <Field label="Form address">
+                <input
+                  value={draft.slug}
+                  readOnly={Boolean(draft.published_version)}
+                  maxLength={80}
+                  placeholder="volunteer-registration"
+                  onChange={(event) => {
+                    setAddressTouched(true);
+                    patch({ slug: event.target.value.toLowerCase().replace(/\s+/g, '-') });
+                  }}
+                />
+              </Field>
               <p className="workspace-meta">
-                This built-in form keeps its existing response permission. Only people with that
-                permission can be assigned here.
+                /forms/{draft.slug || 'your-form-address'}
+                {draft.published_version ? ' · Published addresses stay the same.' : ''}
               </p>
-            )}
-          </div>
-          <div className="custom-form-members custom-form-members-primary">
-            {people.length === 0 && <p>No eligible accounts available.</p>}
-            {people.map((person) => (
-              <label key={person.id}>
+              <label className="custom-form-check workspace-field">
+                <span>Accept responses when published</span>
                 <input
                   type="checkbox"
-                  checked={draft.responsible_ids.includes(person.id)}
-                  onChange={(event) =>
-                    patch({
-                      responsible_ids: event.target.checked
-                        ? [...draft.responsible_ids, person.id]
-                        : draft.responsible_ids.filter((id) => id !== person.id),
-                    })
-                  }
+                  checked={draft.enabled}
+                  onChange={(event) => patch({ enabled: event.target.checked })}
                 />
-                {person.display_name || 'Unnamed account'}
               </label>
-            ))}
+            </details>
           </div>
-        </section>
+          <div
+            data-step="Questions"
+            data-help="Add short questions and only ask relevant follow-ups."
+          >
+            <h3>Questions</h3>
+            <p className="workspace-meta">
+              Visitors answer short steps, then review before sending. Use branching rules to ask
+              follow-up questions only when needed. Contact details are grouped after the request.
+            </p>
+            {draft.schema.fields.map((field, index) => (
+              <CustomFormQuestion
+                key={field.id}
+                field={field}
+                index={index}
+                fields={draft.schema.fields}
+                onChange={(next) => setFields(updateQuestion(draft.schema.fields, index, next))}
+                onRemove={() =>
+                  setFields(draft.schema.fields.filter((_, position) => position !== index))
+                }
+                onMove={(direction) => {
+                  const next = [...draft.schema.fields];
+                  [next[index], next[index + direction]] = [next[index + direction], next[index]];
+                  setFields(next);
+                }}
+              />
+            ))}
+            <div className="custom-form-quick-add" role="group" aria-label="Add a question">
+              {QUESTION_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  disabled={draft.schema.fields.length >= 40}
+                  onClick={() =>
+                    setFields([...draft.schema.fields, newQuestion(draft.schema.fields, preset.id)])
+                  }
+                >
+                  + {preset.name}
+                </button>
+              ))}
+              <button
+                type="button"
+                disabled={draft.schema.fields.length >= 40}
+                onClick={() =>
+                  setFields([...draft.schema.fields, newQuestion(draft.schema.fields)])
+                }
+              >
+                Add question
+              </button>
+            </div>
+          </div>
+          <div data-step="Responses" data-help="Choose who receives and manages new responses.">
+            <section className="custom-form-routing">
+              <div>
+                <h3>Responses</h3>
+                <p className="workspace-meta">
+                  These people receive the automatic action when somebody submits this form.
+                </p>
+                {draft.built_in_kind && (
+                  <p className="workspace-meta">
+                    This built-in form keeps its existing response permission. Only people with that
+                    permission can be assigned here.
+                  </p>
+                )}
+              </div>
+              <div className="custom-form-members custom-form-members-primary">
+                {people.length === 0 && <p>No eligible accounts available.</p>}
+                {people.map((person) => (
+                  <label key={person.id}>
+                    <input
+                      type="checkbox"
+                      checked={draft.responsible_ids.includes(person.id)}
+                      onChange={(event) =>
+                        patch({
+                          responsible_ids: event.target.checked
+                            ? [...draft.responsible_ids, person.id]
+                            : draft.responsible_ids.filter((id) => id !== person.id),
+                        })
+                      }
+                    />
+                    {person.display_name || 'Unnamed account'}
+                  </label>
+                ))}
+              </div>
+            </section>
 
-        <details className="custom-form-advanced">
-          <summary>Access & automatic action</summary>
-          <p className="workspace-meta">
-            Following staff can see new responses. Form managers can edit this form.
-          </p>
-          <div className="workspace-grid">
-            {[
-              ['watcher', 'Following staff'],
-              ['manager', 'Form managers'],
-            ].map(([role, label]) => (
-              <fieldset className="custom-form-field" key={role}>
-                <legend>{label}</legend>
-                <div className="custom-form-members">
-                  {people.length === 0 && <p>No eligible accounts available.</p>}
-                  {people.map((person) => (
-                    <label key={person.id}>
-                      <input
-                        type="checkbox"
-                        checked={draft[`${role}_ids`].includes(person.id)}
-                        onChange={(event) =>
-                          patch({
-                            [`${role}_ids`]: event.target.checked
-                              ? [...draft[`${role}_ids`], person.id]
-                              : draft[`${role}_ids`].filter((id) => id !== person.id),
-                          })
-                        }
-                      />
-                      {person.display_name || 'Unnamed account'}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            ))}
+            <details className="custom-form-advanced">
+              <summary>Access & automatic action</summary>
+              <p className="workspace-meta">
+                Following staff can see new responses. Form managers can edit this form.
+              </p>
+              <div className="workspace-grid">
+                {[
+                  ['watcher', 'Following staff'],
+                  ['manager', 'Form managers'],
+                ].map(([role, label]) => (
+                  <fieldset className="custom-form-field" key={role}>
+                    <legend>{label}</legend>
+                    <div className="custom-form-members">
+                      {people.length === 0 && <p>No eligible accounts available.</p>}
+                      {people.map((person) => (
+                        <label key={person.id}>
+                          <input
+                            type="checkbox"
+                            checked={draft[`${role}_ids`].includes(person.id)}
+                            onChange={(event) =>
+                              patch({
+                                [`${role}_ids`]: event.target.checked
+                                  ? [...draft[`${role}_ids`], person.id]
+                                  : draft[`${role}_ids`].filter((id) => id !== person.id),
+                              })
+                            }
+                          />
+                          {person.display_name || 'Unnamed account'}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                ))}
+              </div>
+              <div className="workspace-grid">
+                <Field label="Automatic action">
+                  <input
+                    value={draft.task_title}
+                    maxLength={160}
+                    list="custom-actions"
+                    onChange={(event) => patch({ task_title: event.target.value })}
+                  />
+                </Field>
+                <Field label="Due within (hours)">
+                  <input
+                    type="number"
+                    min={1}
+                    max={8760}
+                    value={draft.due_hours}
+                    onChange={(event) => patch({ due_hours: event.target.value })}
+                  />
+                </Field>
+              </div>
+              <datalist id="custom-actions">
+                {[
+                  'Reply to enquiry',
+                  'Call back',
+                  'Chase payment',
+                  'Confirm payment',
+                  'Request a photograph',
+                ].map((value) => (
+                  <option key={value}>{value}</option>
+                ))}
+              </datalist>
+            </details>
           </div>
-          <div className="workspace-grid">
-            <Field label="Automatic action">
-              <input
-                value={draft.task_title}
-                maxLength={160}
-                list="custom-actions"
-                onChange={(event) => patch({ task_title: event.target.value })}
-              />
-            </Field>
-            <Field label="Due within (hours)">
-              <input
-                type="number"
-                min={1}
-                max={8760}
-                value={draft.due_hours}
-                onChange={(event) => patch({ due_hours: event.target.value })}
-              />
-            </Field>
-          </div>
-          <datalist id="custom-actions">
-            {[
-              'Reply to enquiry',
-              'Call back',
-              'Chase payment',
-              'Confirm payment',
-              'Request a photograph',
-            ].map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </datalist>
-        </details>
+        </GuidedEditor>
       </fieldset>
       {preview && (
         <SmartForm

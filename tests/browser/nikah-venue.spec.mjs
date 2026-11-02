@@ -186,6 +186,10 @@ test('admin edits the venue, previews parking and saves only the venue content',
   const state = await fixture(page, { admin: true });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/admin?section=content&page=%2Fservices%2Fnikah');
+  await page
+    .getByRole('tablist', { name: 'Page editing steps' })
+    .getByRole('tab', { name: 'Venue', exact: true })
+    .click();
   const editor = page.locator('.nikah-venue-editor');
   await expect(editor).toBeVisible();
   await editor.locator('summary').filter({ hasText: 'Parking on the day' }).click();

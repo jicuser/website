@@ -341,20 +341,22 @@ export default function RamadanManager() {
             1–{days.length} Ramadan · {fullDate(season.start_date)} – {fullDate(days.at(-1).date)}
           </p>
         )}
-        <nav className="sponsorship-task-nav" aria-label="Ramadan tasks">
+        <nav className="sponsorship-task-nav workspace-task-choices" aria-label="Ramadan tasks">
           {[
-            ['bookings', 'Bookings'],
-            ['setup', 'Setup'],
-            ['visibility', 'Website & screens'],
-          ].map(([value, label]) => (
+            ['setup', 'Setup', 'Dates & daily amounts'],
+            ['bookings', 'Bookings', 'Choose a day & manage sponsors'],
+            ['visibility', 'Website & screens', 'Review what visitors see'],
+          ].map(([value, label, help]) => (
             <button
               type="button"
               key={value}
+              aria-label={label}
               aria-pressed={task === value}
               disabled={busy}
               onClick={() => setTask(value)}
             >
-              {label}
+              <strong>{label}</strong>
+              <small>{help}</small>
             </button>
           ))}
         </nav>

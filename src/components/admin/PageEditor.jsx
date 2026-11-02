@@ -1,3 +1,4 @@
+import GuidedEditor from '@/components/admin/GuidedEditor';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Save, Upload, Smartphone, Monitor, ArrowUpRight } from 'lucide-react';
@@ -300,106 +301,139 @@ export default function PageEditor({
             </button>
           </nav>
           <div className="page-editor-controls">
-            <section className="admin-panel">
-              <div className="admin-heading">
-                <div>
-                  {!workspace && <h3>{page.name}</h3>}
-                  <p>
-                    {additionalContent
-                      ? 'Add information below this page’s main content. Save to publish it on the website.'
-                      : 'Edit this page’s introduction. Save to publish your changes on the website.'}
-                  </p>
-                </div>
-                {!workspace && (
-                  <a href={selected} target="_blank" rel="noreferrer" className="admin-button">
-                    Open page <ExternalLink size={15} />
-                  </a>
-                )}
-              </div>
-              {error && (
-                <div role="alert" className="admin-error">
-                  {error}
-                </div>
-              )}
-              {message && (
-                <div role="status" className="admin-success">
-                  {message}
-                </div>
-              )}
-              <fieldset disabled={busy || loading}>
-                <label>
-                  {additionalContent ? 'Additional heading' : 'Page heading'}
-                  <textarea
-                    rows="2"
-                    value={draft.title || ''}
-                    onChange={(event) => change('title', event.target.value)}
-                  />
-                </label>
-                <label>
-                  {additionalContent ? 'Additional information' : 'Introduction'}
-                  <textarea
-                    rows="6"
-                    value={draft.body || ''}
-                    onChange={(event) => change('body', event.target.value)}
-                  />
-                </label>
-                <label>
-                  Picture URL
-                  <input
-                    type="url"
-                    value={pendingImage ? '' : draft.image || ''}
-                    placeholder={pendingImage ? 'Picture selected' : 'https://…'}
-                    onChange={(event) => change('image', event.target.value)}
-                  />
-                </label>
-                <div className="admin-actions">
-                  <label className="admin-button">
-                    <Upload size={16} />
-                    Choose picture
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      hidden
-                      onChange={upload}
-                    />
-                  </label>
-                  {shownImage && (
-                    <button type="button" className="admin-button" onClick={removePicture}>
-                      Remove picture
-                    </button>
+            <GuidedEditor
+              key={selected}
+              label="Page editing steps"
+              disabled={busy || workspaceSaving}
+            >
+              <section
+                className="admin-panel"
+                data-step="Introduction"
+                data-help="Edit the heading, introduction and main picture."
+              >
+                <div className="admin-heading">
+                  <div>
+                    {!workspace && <h3>{page.name}</h3>}
+                    <p>
+                      {additionalContent
+                        ? 'Add information below this page’s main content. Save to publish it on the website.'
+                        : 'Edit this page’s introduction. Save to publish your changes on the website.'}
+                    </p>
+                  </div>
+                  {!workspace && (
+                    <a href={selected} target="_blank" rel="noreferrer" className="admin-button">
+                      Open page <ExternalLink size={15} />
+                    </a>
                   )}
                 </div>
-              </fieldset>
-              <div className="admin-actions">
-                <button
-                  disabled={busy || loading || !dirty}
-                  className="admin-button primary"
-                  onClick={() => save().catch(() => {})}
-                >
-                  <Save size={16} />
-                  {busy ? 'Saving…' : 'Save page'}
-                </button>
-                <small>
-                  {loading
-                    ? 'Loading…'
-                    : error
-                      ? 'Check the error above'
-                      : dirty
-                        ? 'Unsaved changes'
-                        : 'Up to date'}
-                </small>
-              </div>
-            </section>
+                {error && (
+                  <div role="alert" className="admin-error">
+                    {error}
+                  </div>
+                )}
+                {message && (
+                  <div role="status" className="admin-success">
+                    {message}
+                  </div>
+                )}
+                <fieldset disabled={busy || loading}>
+                  <label>
+                    {additionalContent ? 'Additional heading' : 'Page heading'}
+                    <textarea
+                      rows="2"
+                      value={draft.title || ''}
+                      onChange={(event) => change('title', event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    {additionalContent ? 'Additional information' : 'Introduction'}
+                    <textarea
+                      rows="6"
+                      value={draft.body || ''}
+                      onChange={(event) => change('body', event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    Picture URL
+                    <input
+                      type="url"
+                      value={pendingImage ? '' : draft.image || ''}
+                      placeholder={pendingImage ? 'Picture selected' : 'https://…'}
+                      onChange={(event) => change('image', event.target.value)}
+                    />
+                  </label>
+                  <div className="admin-actions">
+                    <label className="admin-button">
+                      <Upload size={16} />
+                      Choose picture
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        hidden
+                        onChange={upload}
+                      />
+                    </label>
+                    {shownImage && (
+                      <button type="button" className="admin-button" onClick={removePicture}>
+                        Remove picture
+                      </button>
+                    )}
+                  </div>
+                </fieldset>
+                <div className="admin-actions">
+                  <button
+                    disabled={busy || loading || !dirty}
+                    className="admin-button primary"
+                    onClick={() => save().catch(() => {})}
+                  >
+                    <Save size={16} />
+                    {busy ? 'Saving…' : 'Save page'}
+                  </button>
+                  <small>
+                    {loading
+                      ? 'Loading…'
+                      : error
+                        ? 'Check the error above'
+                        : dirty
+                          ? 'Unsaved changes'
+                          : 'Up to date'}
+                  </small>
+                </div>
+              </section>
 
-            {selected === '/services/hall-booking' && <HallDetailsEditor onPreview={previewHall} />}
-            {selected === '/funerals' && <FuneralFacilitiesEditor onPreview={previewFuneral} />}
-            {selected === '/services/nikah' && <NikahVenueEditor onPreview={previewNikah} />}
-            <PageSectionsEditor
-              key={selected}
-              pagePath={selected}
-              onSaved={() => setRevision((current) => current + 1)}
-              onPreview={setSectionPreview}
-            />
+              {selected === '/services/hall-booking' && (
+                <div
+                  data-step="Facilities"
+                  data-help="Choose an area, then edit its photos and details."
+                >
+                  <HallDetailsEditor onPreview={previewHall} />
+                </div>
+              )}
+              {selected === '/funerals' && (
+                <div
+                  data-step="Facilities"
+                  data-help="Choose an area, then edit its photos and details."
+                >
+                  <FuneralFacilitiesEditor onPreview={previewFuneral} />
+                </div>
+              )}
+              {selected === '/services/nikah' && (
+                <div
+                  data-step="Venue"
+                  data-help="Choose an area, then edit its photos and details."
+                >
+                  <NikahVenueEditor onPreview={previewNikah} />
+                </div>
+              )}
+              <div data-step="Sections" data-help="Choose the page sections to edit and arrange.">
+                <PageSectionsEditor
+                  key={selected}
+                  pagePath={selected}
+                  onSaved={() => setRevision((current) => current + 1)}
+                  onPreview={setSectionPreview}
+                />
+              </div>
+            </GuidedEditor>
           </div>
           <aside className="page-editor-preview admin-panel" aria-label="Live website preview">
             <div className="admin-heading">
