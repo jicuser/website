@@ -91,47 +91,52 @@ test('parent account gets family records without management or receipt-confirmat
   await expect(page.getByRole('link', { name: 'Manage learning', exact: true })).toHaveCount(0);
   expect(state.errors).toEqual([]);
 });
-test('public extra times show a published interval and never infer missing sunset', async ({
-  page,
-}, info) => {
-  const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
-  await sitewideFixture(page, {
-    tables: {
-      prayer_times: [
-        {
+for (const [kind, end, expected] of [
+  ['time', null, '11:46 AM'],
+  ['interval', '12:02', '11:46 AM – 12:02 PM'],
+]) {
+  test(`public extra times show the published Zawal ${kind} and leave sunset unpublished`, async ({
+    page,
+  }, info) => {
+    const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
+    await sitewideFixture(page, {
+      tables: {
+        prayer_times: [
+          {
+            d_date: date,
+            fajr_begins: '05:30',
+            fajr_jamah: '06:00',
+            sunrise: '07:00',
+            zuhr_begins: '12:10',
+            zuhr_jamah: '13:00',
+            asr_begins: '14:30',
+            asr_jamah: '15:00',
+            maghrib_begins: '16:30',
+            maghrib_jamah: '16:35',
+            isha_begins: '18:00',
+            isha_jamah: '19:00',
+          },
+        ],
+        prayer_day_details: {
           d_date: date,
-          fajr_begins: '05:30',
-          fajr_jamah: '06:00',
-          sunrise: '07:00',
-          zuhr_begins: '12:10',
-          zuhr_jamah: '13:00',
-          asr_begins: '14:30',
-          asr_jamah: '15:00',
-          maghrib_begins: '16:30',
-          maghrib_jamah: '16:35',
-          isha_begins: '18:00',
-          isha_jamah: '19:00',
+          sunset: null,
+          zawwal_start: '11:46',
+          zawwal_end: end,
+          source: 'Approved November timetable',
+          published: true,
+          revision: 1,
         },
-      ],
-      prayer_day_details: {
-        d_date: date,
-        sunset: null,
-        zawwal_start: '11:48',
-        zawwal_end: '12:02',
-        source: 'Approved November timetable',
-        published: true,
-        revision: 1,
       },
-    },
+    });
+    await page.goto('/prayer-times');
+    const details = page.getByRole('region', { name: 'Additional times' });
+    await expect(details).toBeVisible();
+    await expect(details.getByText('Not published', { exact: true })).toBeVisible();
+    await expect(details.getByText(expected, { exact: true })).toBeVisible();
+    await expect(details.getByText('Approved November timetable')).toBeVisible();
+    await page.screenshot({ path: info.outputPath('additional-times.png'), fullPage: true });
   });
-  await page.goto('/prayer-times');
-  const details = page.getByRole('region', { name: 'Additional times' });
-  await expect(details).toBeVisible();
-  await expect(details.getByText('Not published', { exact: true })).toBeVisible();
-  await expect(details.getByText('Approved November timetable')).toBeVisible();
-  await page.screenshot({ path: info.outputPath('additional-times.png'), fullPage: true });
-});
-
+}
 test('extra-time editor publishes only a checked revision and retains a conflicting draft', async ({
   page,
 }, info) => {
@@ -167,7 +172,7 @@ test('extra-time editor publishes only a checked revision and retains a conflict
       });
   });
   await page.goto('/admin?section=prayer');
-  await page.getByRole('button', { name: 'Sunset & Zawwal', exact: true }).click();
+  await page.getByRole('button', { name: 'Sunset & Zawal', exact: true }).click();
   const editor = page.getByRole('region', { name: 'Additional prayer times editor' });
   await editor.getByLabel('Sunset', { exact: true }).fill('16:32');
   await editor.getByLabel('Source / approval reference').fill('Approved November timetable');

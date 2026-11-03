@@ -15,11 +15,8 @@ export function detailsPayload(date, draft) {
     throw new Error('Choose a valid timetable date.');
   for (const field of ['sunset', 'zawwal_start', 'zawwal_end'])
     if (draft[field] && !clock.test(draft[field])) throw new Error('Use a valid 24-hour time.');
-  if (
-    Boolean(draft.zawwal_start) !== Boolean(draft.zawwal_end) ||
-    (draft.zawwal_start && draft.zawwal_start >= draft.zawwal_end)
-  )
-    throw new Error('Enter both Zawwal times, with the end after the start.');
+  if (draft.zawwal_end && (!draft.zawwal_start || draft.zawwal_start >= draft.zawwal_end))
+    throw new Error('A Zawal interval needs a start and a later end.');
   const source = String(draft.source || '').trim();
   if (
     source.length > 250 ||

@@ -43,6 +43,12 @@ export function displayTime(value) {
   return `${hour % 12 || 12}:${match[2]} ${suffix}`;
 }
 
+export function displayZawal(record, format = displayTime) {
+  if (!record?.zawwal_start) return '—';
+  const start = format(record.zawwal_start);
+  return record.zawwal_end ? `${start} – ${format(record.zawwal_end)}` : start;
+}
+
 function cells(text) {
   const rows = [];
   let row = [],

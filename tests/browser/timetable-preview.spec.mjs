@@ -28,10 +28,17 @@ async function openTimetable(page) {
       ? dates.some((value) => value.startsWith('gte.'))
         ? Array.from({ length: 31 }, (_, i) => day(`${month}-${String(i + 1).padStart(2, '0')}`))
         : [day(dates[0]?.replace('eq.', '') || '2026-10-14')]
-      : [];
+      : url.pathname.endsWith('/prayer_day_details')
+        ? [{ d_date: `${month}-03`, zawwal_start: '11:46', zawwal_end: null, published: true }]
+        : [];
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
   });
   await page.goto('/prayer-times/monthly');
+  const grid = page.locator('.monthly-timetable-grid');
+  await expect(grid.getByRole('columnheader', { name: 'Zawal', exact: true })).toBeVisible();
+  await expect(grid.locator('td.monthly-timetable-column-zawal[title="11:46 AM"]')).toHaveText(
+    '11:4611:46 AM',
+  );
   await expect(
     page.getByRole('button', { name: 'Preview phone wallpaper', exact: true }),
   ).toBeVisible();
@@ -70,7 +77,7 @@ for (const width of [320, 390]) {
     await table.evaluate((node) => {
       node.scrollLeft = 240;
     });
-    for (const format of ['monthly timetable', 'phone wallpaper']) {
+    for (const format of ['a4 timetable', 'phone wallpaper']) {
       const trigger = page.getByRole('button', { name: `Preview ${format}`, exact: true });
       await trigger.scrollIntoViewIfNeeded();
       // A pointer click can scroll again to avoid the floating controls. Record

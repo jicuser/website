@@ -1,5 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import WallpaperDownload from '@/components/WallpaperDownload';
+import { useMonthlyZawal } from '@/features/prayer-details/usePublishedPrayerDetails';
 import { buildMonthlyTimetable } from '@/lib/monthlyTimetable';
 import '@/styles/monthly-timetable.css';
 
@@ -9,7 +10,8 @@ export default function MonthlyPrayerTable({
   currentDate,
   jummahTimes = [],
 }) {
-  const timetable = useMemo(() => buildMonthlyTimetable(monthlyPrayerTimes), [monthlyPrayerTimes]);
+  const { timetableRows, status, retry } = useMonthlyZawal(monthlyPrayerTimes);
+  const timetable = useMemo(() => buildMonthlyTimetable(timetableRows), [timetableRows]);
   const scrollArea = useRef(null);
   const today = currentDate.toLocaleDateString('en-CA', {
     timeZone: 'Europe/London',
@@ -172,7 +174,9 @@ export default function MonthlyPrayerTable({
         </>
       )}
       <WallpaperDownload
-        monthlyPrayerTimes={monthlyPrayerTimes}
+        monthlyPrayerTimes={timetableRows}
+        detailsStatus={status}
+        retryDetails={retry}
         currentMonth={`${currentMonth} ${year}`}
         jummahTimes={jummahTimes}
       />
