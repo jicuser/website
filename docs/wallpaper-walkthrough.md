@@ -1,10 +1,10 @@
 # Wallpaper download and timetable header fixes
 
-The footer linked to Today's timetable, but the wallpaper control was only on Monthly Timetable. The first download button also opened a preview instead of saving a file.
+On the website or its installed bookmark, open Home and choose **Download wallpaper** on the prayer card. This opens the current month's wallpaper controls. Choose Light or Dark, then **Download JPEG** under Phone wallpaper. Where the device supports sharing files, **Share / Save** also opens the system share sheet.
 
 | File                                                          | Change                                                                                              | Coding idea                                                                       |
 | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `src/components/shell/Footer.jsx`                             | Links to `/prayer-times/monthly#phone-wallpaper`.                                                   | A URL needs both the correct page and the correct section.                        |
+| `src/components/home/HomePrayerCard.jsx`                             | Links to `/prayer-times/monthly#phone-wallpaper`.                                                   | A URL needs both the correct page and the correct section.                        |
 | `src/pages/PrayerTimesPage.jsx`                               | Redirects old wallpaper links to Monthly.                                                           | Keep previously shared links working after changing navigation.                   |
 | `src/lib/scrollToAnchor.js`                                   | Waits for a delayed section to appear, then scrolls once and stops watching.                        | An observer responds to actual loading instead of guessing a delay.               |
 | `src/components/WallpaperDownload.jsx`                        | Prepares the JPEG from the monthly data, then supplies a normal download link. Preview is separate. | An anchor with `href` and `download` lets the browser save directly from the tap. |

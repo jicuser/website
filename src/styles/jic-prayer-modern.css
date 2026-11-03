@@ -58,6 +58,9 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
 .jic-prayer-card .jic-card-table tbody tr:last-child [data-current='true'] { color:var(--prayer-current-ink); border-radius:0 0 9px 9px; }
 .jic-prayer-card .jic-card-friday { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; padding:6px 10px 6px; font-size:11px; line-height:1.4; color:var(--prayer-muted); }
 .jic-prayer-card .jic-card-friday b { color:var(--prayer-ink); font-weight:600; }
+.jic-prayer-card .jic-card-utilities { display:flex; align-items:center; flex-wrap:wrap; justify-content:space-between; column-gap:4px; padding-inline:10px; }
+.jic-prayer-card .jic-card-utilities .jic-card-friday { padding-inline:0; }
+.jic-prayer-card .jic-card-wallpaper { display:inline-flex; align-items:center; gap:4px; min-height:44px; margin-inline-start:auto; color:var(--prayer-gold); font-size:12px; font-weight:600; }
 .jic-prayer-card .jic-card-links { display:flex; justify-content:space-between; flex-wrap:wrap; gap:0 8px; margin:0 14px; border-top:1px solid var(--prayer-line); }
 .jic-prayer-card .jic-card-links a { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:4px 0; color:var(--prayer-gold); font-size:12px; font-weight:550; text-decoration:none; }
 .jic-prayer-card .jic-card-empty { padding:12px 14px; font-size:13px; line-height:1.5; color:var(--prayer-muted); }

@@ -8,7 +8,7 @@ export default function PosterLocations({ poster, pages = [], onChange, disabled
   return (
     <fieldset className="poster-locations" disabled={disabled}>
       <legend>Website poster locations</legend>
-      <p>Choose where this poster appears. Publish posters to apply your selection.</p>
+      <p>Choose the website pages for this poster. Home also updates the installed bookmark. Each TV has its own selection.</p>
       <div className="poster-location-options">
         {POSTER_WEBSITE_LOCATIONS.map((path) => (
           <label className="admin-check" key={path}>

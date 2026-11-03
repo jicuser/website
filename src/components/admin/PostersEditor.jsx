@@ -67,7 +67,7 @@ export default function PostersEditor({ registerBack }) {
     try {
       await saveContent(POSTERS_KEY, JSON.stringify(items), 'json');
       setBaseline(items);
-      setMessage('Published. Selected posters update on website pages and TVs within 30 seconds.');
+      setMessage('Posters published. The website and installed bookmark share the same page choices.');
     } finally {
       pending.current = false;
       setBusy(false);

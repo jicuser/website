@@ -39,6 +39,15 @@ test('after the start the same countdown changes to Jamaat',()=>{
 test('native date picker replaces the overflowing month-long strip',()=>{
  const html=render();assert.match(html,/type="date"/);assert.match(html,/aria-label="Previous day"/);assert.match(html,/aria-label="Next day"/);assert.doesNotMatch(html,/jic-prayer-day-strip/);
 });
+test('Home links directly to the wallpaper picker with or without published Jummah sessions', () => {
+  for (const data of [{}, { todaysTimes: null, jummahTimes: [] }]) {
+    const html = render(data);
+    const wallpaper = html.match(/<a[^>]+href="\/prayer-times\/monthly#phone-wallpaper"[^>]*>[\s\S]*?<\/a>/g);
+    assert.equal(wallpaper?.length, 1);
+    assert.match(wallpaper[0], /Download wallpaper/);
+    assert.ok(html.indexOf(wallpaper[0]) < html.indexOf('class="jic-card-links"'));
+  }
+});
 test('no published row displays no fabricated times or live clock',()=>{
  const html=render({todaysTimes:null,jummahTimes:[]});assert.match(html,/No published timetable for today/);assert.doesNotMatch(html,/<table |role="timer"/);
 });
