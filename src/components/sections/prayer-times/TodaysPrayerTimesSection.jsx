@@ -1,5 +1,6 @@
 import React from 'react';
 
+import AdditionalPrayerTimes from '@/features/prayer-details/AdditionalPrayerTimes';
 import { currentPrayer } from '@/lib/currentPrayer';
 
 export default function TodaysPrayerTimesSection({ currentDate, todaysTimes }) {
@@ -49,6 +50,7 @@ export default function TodaysPrayerTimesSection({ currentDate, todaysTimes }) {
           </tbody>
         </table>
       </div>
+      <AdditionalPrayerTimes date={todaysTimes.d_date} />
     </section>
   );
 }

@@ -11,6 +11,7 @@ import {
   displayTime,
 } from '@/lib/timetable';
 
+import AdditionalTimesEditor from '@/features/prayer-details/AdditionalTimesEditor';
 import MonthTimetableEditor from './MonthTimetableEditor';
 
 const CSV_TEMPLATE =
@@ -19,6 +20,7 @@ const comparable = (value) => JSON.stringify(value || {});
 
 export default function PrayerEditor() {
   const [view, setView] = useState('month');
+  const [additionalDirty, setAdditionalDirty] = useState(false);
   const [monthDirty, setMonthDirty] = useState(false);
   const [date, setDate] = useState(londonDate);
   const [form, setForm] = useState({});
@@ -267,6 +269,7 @@ export default function PrayerEditor() {
           ['daily', 'Daily times'],
           ['jummah', 'Jummah'],
           ['csv', 'CSV import'],
+          ['additional', 'Sunset & Zawwal'],
         ].map(([id, label]) => (
           <button
             type="button"
@@ -277,7 +280,7 @@ export default function PrayerEditor() {
             disabled={busy || loading}
             onClick={() => {
               if (id === view) return;
-              if (monthDirty || dirty) {
+              if (monthDirty || dirty || additionalDirty) {
                 setError('Save your changes before switching timetable tasks.');
                 return;
               }
@@ -288,6 +291,7 @@ export default function PrayerEditor() {
           </button>
         ))}
       </nav>
+      {view === 'additional' && <AdditionalTimesEditor onDirty={setAdditionalDirty} />}
       {view === 'month' && weeklyLoaded.current && !loadFailed && (
         <MonthTimetableEditor
           onDirty={setMonthDirty}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { Award, ShieldCheck, Users, Wallet } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -6,6 +6,9 @@ import { portalDestination } from '@/lib/portalDestination';
 import PortalSignIn from '@/features/portal/PortalSignIn';
 import PortalWorkspace from '@/features/portal/PortalWorkspace';
 import PortalAccountHome from '@/features/portal/PortalAccountHome';
+import useLearningAccess from '@/features/learning/useLearningAccess';
+const LearningPortal = lazy(() => import('@/features/learning/LearningPortal'));
+const learningTabs = new Set(['learning', 'family', 'fees', 'manage', 'admissions']);
 import '@/styles/workspace.css';
 import '@/styles/portal.css';
 import '@/styles/operations.css';
@@ -15,6 +18,8 @@ export default function CommunityPortalPage() {
   const auth = useAuth();
   const [params] = useSearchParams();
   const [error, setError] = useState('');
+  const learning = useLearningAccess(auth);
+  const learningRequested = learningTabs.has(params.get('tab'));
   const next = portalDestination(params.get('next'));
   if (!auth.loading && auth.user && auth.profile?.is_active && next)
     return <Navigate to={next} replace />;
@@ -35,7 +40,7 @@ export default function CommunityPortalPage() {
         {auth.user && auth.profile?.is_active && (
           <nav className="portal-workspace-switch" aria-label="Account area">
             {!WORKSPACE_ENABLED && (
-              <Link to="/portal" aria-current="page">
+              <Link to="/portal" aria-current={!learningRequested ? 'page' : undefined}>
                 Portal home
               </Link>
             )}
@@ -106,7 +111,19 @@ export default function CommunityPortalPage() {
             </div>
           </section>
         ) : !WORKSPACE_ENABLED ? (
-          <PortalAccountHome auth={auth} onSignOut={signOut} />
+          learningRequested && learning.loading ? (
+            <p role="status">Checking learning access…</p>
+          ) : learningRequested && learning.enabled ? (
+            <Suspense fallback={<p role="status">Opening learning…</p>}>
+              <LearningPortal key={auth.user.id} auth={auth} />
+            </Suspense>
+          ) : (
+            <PortalAccountHome
+              auth={auth}
+              onSignOut={signOut}
+              learningAvailable={learning.enabled}
+            />
+          )
         ) : (
           <PortalWorkspace key={auth.user.id} auth={auth} />
         )}

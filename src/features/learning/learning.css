@@ -1,0 +1,48 @@
+.connected-learning {
+  min-width: 0;
+}
+.connected-learning .workspace-form fieldset {
+  min-width: 0;
+}
+.connected-learning .workspace-field input,
+.connected-learning .workspace-field select {
+  max-width: 100%;
+  min-width: 0;
+}
+.learning-admission-list {
+  display: grid;
+  gap: 0.75rem;
+}
+.learning-admission-list summary {
+  cursor: pointer;
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.learning-admission-list summary strong {
+  flex: 1 1 12rem;
+}
+.learning-admission-list .admission-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.learning-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin: 1rem 0;
+}
+.learning-flow span {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+.learning-admission-list input,
+.connected-learning textarea {
+  width: 100%;
+}
+.learning-admission-list p {
+  overflow-wrap: anywhere;
+}

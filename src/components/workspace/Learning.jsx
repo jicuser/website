@@ -349,7 +349,7 @@ export default function Learning({ data, auth, reload, onError }) {
                 key={`${studentId}-${course.id}`}
                 studentId={studentId}
                 courseId={course.id}
-                canManage={teacher}
+                canManage={auth.isOwner || auth.can?.('finance')}
               />
             )}
           </section>

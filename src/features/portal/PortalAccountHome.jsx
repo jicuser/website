@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Award, Heart, Wallet } from 'lucide-react';
+import { ArrowRight, Award, Heart, Wallet, BookOpen } from 'lucide-react';
 
 const RECORDS = [
   [Wallet, 'My invoices', 'Invoices and payments shared with you.', '/account/invoices'],
@@ -13,7 +13,7 @@ const RECORDS = [
   [Heart, 'My fundraising', 'Start or manage your fundraiser for JIC.', '/fundraise/new'],
 ];
 
-export default function PortalAccountHome({ auth, onSignOut }) {
+export default function PortalAccountHome({ auth, onSignOut, learningAvailable = false }) {
   return (
     <main className="portal-account-home" aria-label="Portal home">
       <section className="portal-welcome">
@@ -24,7 +24,18 @@ export default function PortalAccountHome({ auth, onSignOut }) {
       <section aria-labelledby="portal-records-title">
         <h3 id="portal-records-title">Your records</h3>
         <div className="portal-card-grid">
-          {RECORDS.map(([Icon, title, description, to]) => (
+          {(learningAvailable
+            ? [
+                [
+                  BookOpen,
+                  'Family & learning',
+                  'Your classes, student records, fees and teaching tools.',
+                  '/portal?tab=learning',
+                ],
+                ...RECORDS,
+              ]
+            : RECORDS
+          ).map(([Icon, title, description, to]) => (
             <Link className="portal-area-card" key={to} to={to}>
               <Icon size={22} aria-hidden="true" />
               <span>

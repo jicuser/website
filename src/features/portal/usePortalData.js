@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { emptyPortalData, loadPortalData } from './model';
 
-export default function usePortalData() {
+export default function usePortalData(learningOnly = false) {
   const [data, setData] = useState(emptyPortalData);
   const [failures, setFailures] = useState([]);
   const [busy, setBusy] = useState(true);
@@ -12,12 +12,12 @@ export default function usePortalData() {
     const controller = new AbortController();
     pending.current = controller;
     setBusy(true);
-    const result = await loadPortalData(supabase, controller.signal);
+    const result = await loadPortalData(supabase, controller.signal, { learningOnly });
     if (controller.signal.aborted || pending.current !== controller) return;
     setData(result.data);
     setFailures(result.failures);
     setBusy(false);
-  }, []);
+  }, [learningOnly]);
   useEffect(() => {
     reload();
     return () => pending.current?.abort();

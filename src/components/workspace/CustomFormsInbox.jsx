@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { formAction, formTitle, permittedBuiltInForms, safeDownloadUrl } from '@/lib/customForms';
 import { collectPages, downloadBlob, submissionsCsv } from '@/lib/formDownloads';
 import { checked, dateLabel, Field } from './shared';
+import useLearningAccess from '@/features/learning/useLearningAccess';
 import { workflowChanged } from '@/lib/pageContent';
 
 export default function CustomFormsInbox({
@@ -14,6 +15,7 @@ export default function CustomFormsInbox({
   initialKind = '',
   formId = null,
 }) {
+  const learning = useLearningAccess(auth);
   const [filters, setFilters] = useState({
     search: '',
     kind: formId ? '' : initialKind,
@@ -352,6 +354,7 @@ export default function CustomFormsInbox({
               : auth.can(`forms_${row.kind}`);
           return (
             <Response
+              learningAvailable={learning.enabled}
               key={row.id}
               row={row}
               auth={auth}
@@ -412,7 +415,15 @@ function queryArgs(filters, offset, limit) {
   };
 }
 
-function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
+function Response({
+  row,
+  auth,
+  canWork,
+  selected,
+  onSelect,
+  onChanged,
+  learningAvailable = false,
+}) {
   const [open, setOpen] = useState(false);
   const [replies, setReplies] = useState([]);
   const [files, setFiles] = useState([]);
@@ -541,6 +552,11 @@ function Response({ row, auth, canWork, selected, onSelect, onChanged }) {
         </dl>
         <p className="workspace-meta">
           Reference: {row.id}
+          {auth.isOwner && learningAvailable && (
+            <Link to={`/portal?tab=admissions&response=${encodeURIComponent(row.id)}`}>
+              Review class application →
+            </Link>
+          )}
           {row.form_version ? ` · Form version ${row.form_version}` : ''}
         </p>
         {canWork && (
