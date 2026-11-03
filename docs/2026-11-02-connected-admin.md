@@ -46,3 +46,9 @@ Still separate work: teacher allocation, live class registers, family/student re
 Local: 13 focused Node tests pass; all changed JavaScript/JSX files parse without syntax diagnostics. Isolated React rendering passed three Jummah scenarios. These are not a substitute for full application validation.
 
 Required before production: repository CI (`npm run validate` and browser suites). Direct repository cloning and package installation were unavailable in the editing environment, so full-project verification must be taken from the actual GitHub workflow result, not assumed from the focused tests.
+
+## Posters on the website, bookmark and TVs
+
+Open Admin → Posters, edit the poster, select **What’s on (homepage)** under **Website poster locations**, then **Publish posters**. The browser and the Home Screen bookmark use this same catalogue. TV operators choose posters per display. An event under Admin → Events has its own date and poster image. Publishing a course page alone does not create a poster.
+
+The Fundamentals of Arabic artwork supplied with the November handover is included at `/posters/fundamentals-of-arabic-2026.webp`. Once that file is deployed, select it on the programme poster and point its details link to the existing `/pages/fundamentals-of-arabic` page. The launch event was on 2 November, so the ongoing class belongs in the programme catalogue.

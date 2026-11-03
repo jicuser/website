@@ -70,7 +70,7 @@ for (const width of [320, 390]) {
     await table.evaluate((node) => {
       node.scrollLeft = 240;
     });
-    for (const format of ['monthly timetable', 'phone wallpaper']) {
+    for (const format of ['a4 timetable', 'phone wallpaper']) {
       const trigger = page.getByRole('button', { name: `Preview ${format}`, exact: true });
       await trigger.scrollIntoViewIfNeeded();
       // A pointer click can scroll again to avoid the floating controls. Record

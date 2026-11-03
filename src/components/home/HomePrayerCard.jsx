@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { displayTime } from '@/lib/timetable';
 import useDisplayClock from '@/hooks/useDisplayClock';
@@ -106,9 +106,14 @@ export default function HomePrayerCard() {
           </table>
         </div>
       ) : !isToday && <p className="jic-card-empty" role="status">No published times for this day.</p>}
-      {sessions.length > 0 && <div className="jic-card-friday"><span>Jummah</span>{sessions.map((session) => (
-        <span key={session.number}>{session.number === 1 ? '1st' : '2nd'} <b>{displayTime(session.prayer)}</b></span>
-      ))}</div>}
+      <div className="jic-card-utilities">
+        {sessions.length > 0 && <div className="jic-card-friday"><span>Jummah</span>{sessions.map((session) => (
+          <span key={session.number}>{session.number === 1 ? '1st' : '2nd'} <b>{displayTime(session.prayer)}</b></span>
+        ))}</div>}
+        <Link className="jic-card-wallpaper" to="/prayer-times/monthly#phone-wallpaper">
+          <Download size={14} aria-hidden="true" /> Download wallpaper
+        </Link>
+      </div>
       <nav className="jic-card-links" aria-label="Prayer links">
         <Link to="/prayer-times">Full timetable <ArrowRight size={14} aria-hidden="true" /></Link>
         <Link to="/prayer-times/reminders"><Bell size={14} aria-hidden="true" /> Salah alerts</Link>

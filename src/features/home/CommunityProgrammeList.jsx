@@ -21,7 +21,7 @@ export default function CommunityProgrammeList({
 }) {
   const rail = useRef(null);
   const [page, setPage] = useState(0);
-  const posters = usePosters();
+  const posters = usePosters({ refreshPublicFeed: true });
   const pages = usePublishedPages();
   const { getContent } = useContent();
   const [selected, setSelected] = useState(null);
