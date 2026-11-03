@@ -40,7 +40,7 @@ export default function AppHomeRadio() {
     }
   }
   return (
-    <section className="jic-app-radio" aria-label="JIC Radio">
+    <section className="jic-app-radio" aria-label="JIC Radio" data-playing={playing}>
       <span className="jic-app-radio-art">
         <Radio size={24} aria-hidden="true" />
       </span>
@@ -63,12 +63,16 @@ export default function AppHomeRadio() {
         type="button"
         onClick={toggle}
         disabled={!url}
+        aria-pressed={playing}
         aria-label={
           waiting ? 'Cancel radio connection' : playing ? 'Pause JIC Radio' : 'Play JIC Radio'
         }
       >
         {playing ? <Pause size={22} /> : <Play size={22} />}
       </button>
+      <svg className="jic-app-radio-wave" viewBox="0 0 108 28" fill="none" aria-hidden="true">
+        <path d="M2 12v4m6-8v12m6-15v18m6-12v6m6-16v26m6-19v12m6-10v8m6-13v18m6-21v24m6-17v10m6-7v4m6-9v14m6-18v22m6-15v8m6-11v14m6-19v24m6-16v8m6-6v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
       <audio
         ref={audio}
         src={url || undefined}

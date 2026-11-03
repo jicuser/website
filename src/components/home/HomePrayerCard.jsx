@@ -19,7 +19,7 @@ const islamicLabel = (iso) => {
   } catch { return ''; }
 };
 
-export default function HomePrayerCard() {
+export default function HomePrayerCard({ compact = false }) {
   const { monthlyPrayerTimes, todaysTimes, tomorrowsTimes, jummahTimes, isLoadingPrayerTimes } = usePublicPrayerTimes();
   const now = useDisplayClock();
   const today = londonDay(now);
@@ -41,13 +41,20 @@ export default function HomePrayerCard() {
     if (next) setSelected(next.isoDate);
   };
   const current = state?.current?.key;
+  const DateTitle = compact ? 'h2' : 'strong';
 
   return (
-    <aside className="jic-home-prayer jic-prayer-card" aria-label="Daily prayer timetable">
+    <aside className={`jic-home-prayer jic-prayer-card${compact ? ' is-compact' : ''}`} aria-label="Daily prayer timetable">
       <header className="jic-card-heading">
         <div className="jic-card-date">
-          <strong>{isToday ? 'Today' : 'Timetable'} <span>· {dateLabel(selected)}</span></strong>
-          <small>{islamicLabel(selected)}</small>
+          <DateTitle>
+            {isToday ? (compact ? 'Today’s Salah' : 'Today') : 'Timetable'}{' '}
+            {!compact && <span>· {dateLabel(selected)}</span>}
+          </DateTitle>
+          <small>
+            {compact && <>{dateLabel(selected)} · </>}
+            <span className="jic-card-islamic-date">{islamicLabel(selected)}</span>
+          </small>
         </div>
         <div className="jic-card-date-controls" role="group" aria-label="Choose timetable day">
           <button type="button" aria-label="Previous day" onClick={() => move(-1)} disabled={selectedIndex <= 0}>
@@ -71,6 +78,28 @@ export default function HomePrayerCard() {
           <span>Published timetable</span>
           <button type="button" onClick={() => setSelected(today)}>Back to today</button>
         </div>
+      ) : compact && (state?.current || target) && state.phase !== 'jamaat-now' ? (
+        <section className="jic-card-compact-status" aria-label="Current and next prayer, 24-hour clock">
+          {state.current && <span className="jic-card-current">Current · {state.current.name}</span>}
+          <div>
+            {target ? (
+              <>
+                <p>
+                  {target.kind === 'start' ? 'Next' : 'Next Jamaat'} ·{' '}
+                  <strong>
+                    {target.name}{target.tomorrow ? ' tomorrow' : ''}{' '}
+                    <time>{compactTime(target.time)}</time>
+                  </strong>
+                </p>
+                {target.kind === 'start' && target.congregationTime && (
+                  <small>Jamaat {compactTime(target.congregationTime)}</small>
+                )}
+              </>
+            ) : (
+              <p>Next prayer time is not yet published.</p>
+            )}
+          </div>
+        </section>
       ) : target ? (
         <section className="jic-card-status" aria-label="Next prayer">
           <div className="jic-card-next">

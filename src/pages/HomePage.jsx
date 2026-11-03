@@ -11,6 +11,8 @@ import {
   Megaphone,
   Heart,
   HeartHandshake,
+  MapPin,
+  ImageDown,
 } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
@@ -26,6 +28,8 @@ import { cn } from '@/lib/utils';
 
 import useInstalledApp from '@/hooks/useInstalledApp';
 import AppHomeRadio from '@/components/home/AppHomeRadio';
+import DailyReminder from '@/components/shell/DailyReminder';
+import '@/styles/bookmark-home.css';
 
 const HomeRamadan = lazy(() => import('@/features/ramadan/HomeRamadan'));
 
@@ -217,8 +221,33 @@ export default function HomePage() {
               </Link>
             </div>
           )}
-          <HomePrayerCard />
-          {installed && <AppHomeRadio />}
+          <HomePrayerCard compact={installed} />
+          {installed && (
+            <>
+              <AppHomeRadio />
+              <section className="jic-app-community" aria-labelledby="jic-app-community-title">
+                <h2 id="jic-app-community-title">
+                  <Link to="/services">
+                    Community Hub <ArrowRight size={18} aria-hidden="true" />
+                  </Link>
+                </h2>
+                <nav className="jic-home-shortcuts" aria-label="Services and learning">
+                  {shortcuts.map(({ key, ...card }) => (
+                    <HomeDestination key={key} {...card} />
+                  ))}
+                </nav>
+              </section>
+              <nav className="jic-app-home-tools" aria-label="Visit and downloads">
+                <Link to="/contact#map">
+                  <MapPin size={18} aria-hidden="true" /> Plan your visit
+                </Link>
+                <Link to="/prayer-times/monthly#phone-wallpaper">
+                  <ImageDown size={18} aria-hidden="true" /> Download wallpaper
+                </Link>
+              </nav>
+              <DailyReminder />
+            </>
+          )}
         </div>
       </section>
 

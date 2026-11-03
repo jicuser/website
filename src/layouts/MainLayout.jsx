@@ -75,7 +75,7 @@ function PublicLayout() {
         tabIndex={-1}
         className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}
       >
-        {installed && <AppBrandHeader home={isHome} />}
+        {installed && !isHome && <AppBrandHeader />}
         {showReminder && !installed && <DailyReminder />}
         {visible ? (
           <div>

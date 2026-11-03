@@ -13,6 +13,7 @@ import React, {
 import { ChevronDown, ChevronRight, Pause, Play, ExternalLink } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import AppCompanion from '@/components/shell/AppCompanion';
+import AppBrandHeader from '@/components/shell/AppBrandHeader';
 import useInstalledApp from '@/hooks/useInstalledApp';
 import AppInstall from '@/components/shell/AppInstall';
 import InstalledAppBar from '@/components/shell/InstalledAppBar';
@@ -253,6 +254,13 @@ export default function UnifiedHeader() {
         aria-hidden="true"
       />
       <header className={cn('jic-unified-header jic-header-redesign', taskRoute && 'is-task-mode', pathname.startsWith('/prayer-times') && 'is-prayer-section')}>
+        {installed && isHome && (
+          <AppBrandHeader
+            home
+            menuOpen={menuOpen && menuView === 'navigation'}
+            onMenu={() => { setMenuView('navigation'); setMenuOpen(true); }}
+          />
+        )}
         <MobileInfoBanner
           ref={mobileBannerRef}
           collapsed={prayerDockHidden}
