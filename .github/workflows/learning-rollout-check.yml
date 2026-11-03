@@ -1,0 +1,41 @@
+name: Learning production readiness
+on:
+  push:
+    branches: [ops/learning-live-2026-11-03]
+    paths: [.github/workflows/learning-rollout-check.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Export tracked source only
+        run: git archive --format=tar.gz HEAD > /tmp/jic-learning-source.tgz
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: jic-learning-rollout-source
+          path: /tmp/jic-learning-source.tgz
+          retention-days: 1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - run: npm run validate
+        env:
+          VITE_SUPABASE_URL: https://ci-validation.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_ci_validation_only
+          JIC_PUBLIC_PREVIEWS: 'off'
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright test tests/browser/connected-learning.spec.mjs --reporter=line --output=evidence/chromium
+      - run: npx playwright test tests/browser/connected-learning.spec.mjs --browser=webkit --reporter=line --output=evidence/webkit
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: learning-rollout-browser-evidence
+          path: evidence/
+          retention-days: 7
