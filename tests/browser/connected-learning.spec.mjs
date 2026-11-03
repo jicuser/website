@@ -51,8 +51,8 @@ for (const width of [390, 1280])
       page.getByRole('heading', { name: 'Admissions & places', exact: true }),
     ).toBeVisible();
     const review = page.getByRole('form', { name: 'Review an application' });
-    await review.getByLabel('Class', { exact: true }).selectOption(courseId);
-    await review.getByLabel('Student', { exact: true }).selectOption(studentId);
+    await review.getByRole('combobox', { name: 'Class', exact: true }).selectOption(courseId);
+    await review.getByRole('combobox', { name: 'Student', exact: true }).selectOption(studentId);
     await review.getByLabel('Admission fee (£)').fill('0');
     await review.getByLabel('Review note').fill('Walk-in registration and consent checked');
     await review.getByLabel('I have checked the student, class and any required consent.').check();
@@ -166,7 +166,7 @@ test('extra-time editor publishes only a checked revision and retains a conflict
         }),
       });
   });
-  await page.goto('/admin?tab=prayer');
+  await page.goto('/admin?section=prayer');
   await page.getByRole('button', { name: 'Sunset & Zawwal', exact: true }).click();
   const editor = page.getByRole('region', { name: 'Additional prayer times editor' });
   await editor.getByLabel('Sunset', { exact: true }).fill('16:32');
