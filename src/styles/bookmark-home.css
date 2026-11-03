@@ -1,0 +1,135 @@
+/* Bookmark home only. Compact geometry is independent of its glass/solid material.
+   Do not lock the page height: enlarged text, notices and expanded details may scroll. */
+html[data-installed-navigation='true'] .jic-public-route.jic-home-route {
+  --bookmark-paper: rgba(15, 32, 49, .58);
+  --bookmark-solid: #102237;
+  --bookmark-ink: #f4f7fb;
+  --bookmark-muted: #d0dce7;
+  --bookmark-line: rgba(210, 228, 241, .22);
+  --bookmark-sheen: linear-gradient(135deg, #ffffff0e, #ffffff00 65%);
+  --bookmark-filter: blur(16px) saturate(125%);
+  padding-bottom: calc(var(--jic-app-bar-height, 64px) + 8px);
+}
+html[data-installed-navigation='true'][data-theme='light'] .jic-public-route.jic-home-route {
+  --bookmark-paper: rgba(255, 253, 248, .72);
+  --bookmark-solid: #fffdf8;
+  --bookmark-ink: #142c42;
+  --bookmark-muted: #354d62;
+  --bookmark-line: rgba(255, 255, 255, .64);
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-page-backdrop {
+  position: fixed; inset: 0; height: auto; background: #0d1825;
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-page-backdrop img {
+  opacity: 1; object-fit: cover; object-position: 50% 45%;
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-page-backdrop::after {
+  background: linear-gradient(180deg, rgba(7, 19, 32, .27), rgba(7, 19, 32, .38) 55%, rgba(7, 19, 32, .66));
+}
+html[data-installed-navigation='true'][data-theme='light'] .jic-home-route .jic-page-backdrop::after {
+  background: linear-gradient(180deg, #f7f3eab3, #f7f3ea8c 55%, #f7f3eacc);
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-brand-header {
+  padding: 8px 16px 6px; gap: 0; min-height: 52px; justify-content: center;
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-brand-header .brand-lockup { width: 112px; }
+/* Search belongs beside the home logo, not over the last activity. */
+html[data-installed-navigation='true'] .jic-home-route .jic-app-companion {
+  position: absolute; top: 4px; bottom: auto; right: max(12px, env(safe-area-inset-right)); left: auto;
+  width: 44px; margin: 0; z-index: 56;
+}
+html[data-installed-navigation='true'] .jic-home-route .jic-app-companion-tools { margin: 0; }
+html[data-installed-navigation='true'] .jic-home-route .jic-app-companion-tools a { width: 44px; height: 44px; padding: 0; border-radius: 14px; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-home .jic-hero-inner {
+  width: calc(100% - 24px); max-width: 736px; padding: 0; gap: 8px;
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-home .jic-home-content {
+  row-gap: 8px; padding-block: 8px 0; border: 0;
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-home .jic-prayer-card {
+  --prayer-paper: var(--bookmark-paper);
+  --prayer-ink: var(--bookmark-ink);
+  --prayer-muted: var(--bookmark-muted);
+  --prayer-line: var(--bookmark-line);
+  background: var(--bookmark-sheen), var(--bookmark-paper);
+  border-radius: 18px; border-color: var(--bookmark-line);
+  -webkit-backdrop-filter: var(--bookmark-filter); backdrop-filter: var(--bookmark-filter);
+  box-shadow: 0 8px 26px #00000014, inset 0 1px #ffffff14;
+}
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-heading { padding: 0 6px 0 12px; }
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-status {
+  min-height: 58px; margin: 0 12px 4px; padding: 2px 0 6px; gap: 8px;
+}
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-eyebrow { margin-bottom: 2px; letter-spacing: .07em; }
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-countdown time { font-size: clamp(22px, 6vw, 27px); }
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-table :is(th, td) { padding-block: 3px; }
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-table thead th { padding-top: 5px; }
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-table tbody tr:last-child td { padding-bottom: 5px; }
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-friday { padding: 6px 10px 8px; }
+/* The full timetable is in the bottom Salah tab; both links also remain under More. */
+html[data-installed-navigation='true'] .jic-home-route .jic-prayer-card .jic-card-links { display: none; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route :is(.jic-app-radio, .is-bookmark-compact, .jic-bookmark-more, .jic-installed-app-bar, .jic-app-companion-tools a) {
+  background: var(--bookmark-sheen), var(--bookmark-paper); color: var(--bookmark-ink);
+  border: 1px solid var(--bookmark-line); box-shadow: inset 0 1px #ffffff0d;
+  -webkit-backdrop-filter: var(--bookmark-filter); backdrop-filter: var(--bookmark-filter);
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-radio { min-height: 52px; padding: 3px 10px; gap: 8px; border-radius: 16px; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-radio h2 { font-size: 13px; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-radio p { margin-top: 1px; color: var(--bookmark-muted); }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-app-radio > button { width: 44px; height: 44px; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .is-bookmark-compact {
+  width: calc(100% - 24px); padding: 0 10px 4px; border-radius: 18px; min-width: 0;
+}
+.is-bookmark-compact > header { margin-bottom: 0; gap: 4px; min-height: 44px; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .is-bookmark-compact > header h2 { font-size: 17px; margin: 0 auto 0 0; }
+.is-bookmark-compact > header > a { min-height: 44px; white-space: nowrap; gap: 3px; font-size: 12px; color: inherit; }
+.is-bookmark-compact > header > a svg { display: none; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .is-bookmark-compact .programme-feed-controls { margin: 0; gap: 0; }
+.is-bookmark-compact .programme-feed-controls span { min-width: 27px; text-align: center; font-size: 10px; color: var(--bookmark-muted); }
+.is-bookmark-compact .programme-feed-controls button { width: 44px; min-height: 44px; color: inherit; }
+.is-bookmark-compact .programme-feed-rows { row-gap: 0; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .is-bookmark-compact .programme-feed-row {
+  grid-template-columns: 44px minmax(0, 1fr); gap: 8px; padding: 5px 4px 5px 0;
+  align-items: center; border-color: var(--bookmark-line);
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .is-bookmark-compact .programme-feed-thumb {
+  width: 44px; min-height: 54px; border-radius: 6px; background: transparent;
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .is-bookmark-compact .programme-feed-thumb img { width: 44px; height: 54px; object-fit: contain; }
+.is-bookmark-compact .programme-compact-link { min-width: 0; min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 6px; color: inherit; text-decoration: none; }
+.is-bookmark-compact .programme-compact-link > svg { flex-shrink: 0; color: var(--jic-gold); }
+.is-bookmark-compact .programme-compact-copy { display: block; min-width: 0; }
+.is-bookmark-compact .programme-compact-copy strong { display: block; font-size: 13px; font-weight: 650; line-height: 1.35; }
+.is-bookmark-compact .programme-compact-copy > span { display: block; margin-top: 3px; font-size: 11px; line-height: 1.4; font-weight: 450; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--bookmark-muted); }
+.is-bookmark-compact .programme-compact-details { min-width: 0; }
+.is-bookmark-compact .programme-compact-details summary { min-height: 54px; padding-block: 4px; }
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-bookmark-more {
+  width: calc(100% - 24px); max-width: 736px; margin-inline: auto; border-radius: 14px; overflow: clip;
+}
+.jic-bookmark-more > summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 6px 12px; list-style: none; cursor: pointer; font-size: 12px; font-weight: 650; }
+.jic-bookmark-more > summary::-webkit-details-marker { display: none; }
+.jic-bookmark-more > summary small { display: inline; margin-left: 6px; font-size: 10px; font-weight: 450; color: var(--bookmark-muted); }
+.jic-bookmark-more[open] > summary > svg { transform: rotate(180deg); }
+.jic-bookmark-more > summary:focus-visible { outline: 2px solid var(--jic-gold); outline-offset: -3px; }
+.jic-bookmark-more-content { padding: 4px 12px 12px; display: grid; gap: 12px; }
+html[data-installed-navigation='true'] .jic-home-route .jic-bookmark-more-content > * { width: 100%; margin: 0; }
+.jic-bookmark-help { display: flex; flex-wrap: wrap; gap: 0 16px; }
+.jic-bookmark-help a { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; color: var(--jic-gold); }
+/* Footer contact/social links expand with More; privacy and contact have explicit links above. */
+@supports selector(:has(*)) {
+  html[data-installed-navigation='true'] .jic-home-route:has(.jic-bookmark-more:not([open])) .jic-site-footer { display: none; }
+}
+html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-installed-app-bar {
+  border-inline: 0; border-bottom: 0; color: var(--bookmark-ink);
+}
+/* Solid, reduced-transparency and high-contrast preferences override every home surface. */
+html[data-installed-navigation='true'][data-surface='solid'] .jic-public-route.jic-home-route {
+  --bookmark-paper: var(--bookmark-solid); --bookmark-sheen: none; --bookmark-filter: none;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-installed-navigation='true'] .jic-public-route.jic-home-route { --bookmark-paper: var(--bookmark-solid); --bookmark-filter: none; }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-installed-navigation='true'] .jic-public-route.jic-home-route { --bookmark-paper: var(--bookmark-solid); --bookmark-sheen: none; --bookmark-filter: none; --bookmark-line: currentColor; }
+  html[data-installed-navigation='true'][data-theme] .jic-home-route .jic-page-backdrop { display: none; }
+}
