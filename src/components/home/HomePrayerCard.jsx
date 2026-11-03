@@ -1,169 +1,117 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bell, Radio, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
-import { displayTime, londonDate } from '@/lib/timetable';
-import { currentPrayer } from '@/lib/currentPrayer';
-import { nextCongregation } from '@/lib/nextCongregation';
+import { displayTime } from '@/lib/timetable';
+import useDisplayClock from '@/hooks/useDisplayClock';
+import { countdownText, londonDay, prayerDisplayState } from '@/lib/prayerDisplayState';
+import { compactTime, prayerColumns, selectedPrayerRow } from '@/lib/homePrayerView';
 import '@/styles/jic-prayer-modern.css';
 
-const prayers = [
-  ['Fajr', 'fajr_begins', 'fajr_jamah'],
-  ['Dhuhr', 'zuhr_begins', 'zuhr_jamah'],
-  ['Asr', 'asr_begins', 'asr_jamah'],
-  ['Maghrib', 'maghrib_begins', 'maghrib_jamah'],
-  ['Isha', 'isha_begins', 'isha_jamah'],
-];
-const dateLabel = (iso) =>
-  new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+const dateLabel = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-GB', {
+  weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
+});
 const islamicLabel = (iso) => {
   try {
-    return (
-      new Intl.DateTimeFormat('en-GB-u-ca-islamic-umalqura', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        timeZone: 'UTC',
-      })
-        .format(new Date(iso + 'T12:00:00Z'))
-        .replace(/(?:\s*AH)+$/, '') + ' AH'
-    );
-  } catch {
-    return '';
-  }
+    return new Intl.DateTimeFormat('en-GB-u-ca-islamic-umalqura', {
+      day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
+    }).format(new Date(`${iso}T12:00:00Z`)).replace(/(?:\s*AH)+$/, '') + ' AH';
+  } catch { return ''; }
 };
 
 export default function HomePrayerCard() {
-  const { monthlyPrayerTimes, todaysTimes, jummahTimes, currentDate, isLoadingPrayerTimes } =
-    usePublicPrayerTimes();
-  const today = londonDate();
+  const { monthlyPrayerTimes, todaysTimes, tomorrowsTimes, jummahTimes, isLoadingPrayerTimes } = usePublicPrayerTimes();
+  const now = useDisplayClock();
+  const today = londonDay(now);
   const [selected, setSelected] = useState(today);
-  const scroller = useRef(null);
   const days = monthlyPrayerTimes || [];
-  const selectedIndex = days.findIndex((d) => d.isoDate === selected);
-  const row = days[selectedIndex];
-  const fallback =
-    selected === today
-      ? {
-          fajr_begins: todaysTimes?.fajr,
-          fajr_jamah: todaysTimes?.jamaah_fajr,
-          zuhr_begins: todaysTimes?.dhuhr,
-          zuhr_jamah: todaysTimes?.jamaah_dhuhr,
-          asr_begins: todaysTimes?.asr,
-          asr_jamah: todaysTimes?.jamaah_asr,
-          maghrib_begins: todaysTimes?.maghrib,
-          maghrib_jamah: todaysTimes?.jamaah_maghrib,
-          isha_begins: todaysTimes?.isha,
-          isha_jamah: todaysTimes?.jamaah_isha,
-        }
-      : null;
-  const times = row || fallback;
-  const active = selected === today ? currentPrayer(todaysTimes, currentDate) : null;
-  const nextJamaat = selected === today ? nextCongregation(todaysTimes, jummahTimes, currentDate) : null;
+  const selectedIndex = days.findIndex((day) => day.isoDate === selected);
+  const isToday = selected === today;
+  const row = selectedPrayerRow(days, todaysTimes, selected, today);
+  const state = isToday ? prayerDisplayState({ todaysTimes: row, tomorrowsTimes, jummahTimes }, now) : null;
+  const target = state?.target;
+  const columns = prayerColumns(row, selected, jummahTimes, isToday);
+  const sessions = (isToday ? jummahTimes || [] : [
+    { prayer: row?.jummah_1_jamah }, { prayer: row?.jummah_2_jamah },
+  ]).map((session, index) => ({ ...session, number: index + 1 }))
+    .filter((session) => compactTime(session.prayer) !== '—');
+  useEffect(() => { setSelected(today); }, [today]);
   const move = (direction) => {
     const next = days[selectedIndex + direction];
     if (next) setSelected(next.isoDate);
   };
-  useEffect(() => {
-    setSelected(today);
-  }, [today]);
-  useEffect(() => {
-    const active = scroller.current?.querySelector('[aria-current="date"]');
-    active?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-  }, [selected, days.length]);
+  const current = state?.current?.key;
+
   return (
-    <aside className="jic-home-prayer jic-prayer-browser" aria-label="Daily prayer timetable">
-      <div className="jic-prayer-browser-heading">
-        <div>
-          <strong>{selected === today ? 'Today' : 'Prayer times'}</strong>
-          <span>{dateLabel(selected)}</span>
+    <aside className="jic-home-prayer jic-prayer-card" aria-label="Daily prayer timetable">
+      <header className="jic-card-heading">
+        <div className="jic-card-date">
+          <strong>{isToday ? 'Today' : 'Timetable'} <span>· {dateLabel(selected)}</span></strong>
           <small>{islamicLabel(selected)}</small>
         </div>
-        {selected !== today && (
-          <button
-            type="button"
-            className="jic-prayer-today-button"
-            onClick={() => setSelected(today)}
-          >
-            Today
+        <div className="jic-card-date-controls" role="group" aria-label="Choose timetable day">
+          <button type="button" aria-label="Previous day" onClick={() => move(-1)} disabled={selectedIndex <= 0}>
+            <ChevronLeft size={18} aria-hidden="true" />
           </button>
-        )}
-      </div>
-      <div className="jic-prayer-browser-controls">
-        <button
-          type="button"
-          aria-label="Previous day"
-          onClick={() => move(-1)}
-          disabled={selectedIndex <= 0}
-        >
-          <ChevronLeft size={19} />
-        </button>
-        <div className="jic-prayer-day-strip" ref={scroller} aria-label="Select timetable day">
-          {days.map((day) => (
-            <button
-              key={day.isoDate}
-              type="button"
-              aria-current={selected === day.isoDate ? 'date' : undefined}
-              onClick={() => setSelected(day.isoDate)}
-            >
-              {day.isoDate === today ? 'Today' : dateLabel(day.isoDate).replace(/ \d{4}$/, '')}
-            </button>
-          ))}
-          {!days.length && <span>{dateLabel(today)}</span>}
+          <label className="jic-card-calendar">
+            <CalendarDays size={18} aria-hidden="true" />
+            <span className="sr-only">Choose timetable date</span>
+            <input type="date" value={selected} min={days[0]?.isoDate || today}
+              max={days.at(-1)?.isoDate || today} disabled={!days.length}
+              onChange={(event) => { if (days.some((day) => day.isoDate === event.target.value)) setSelected(event.target.value); }} />
+          </label>
+          <button type="button" aria-label="Next day" onClick={() => move(1)} disabled={selectedIndex < 0 || selectedIndex >= days.length - 1}>
+            <ChevronRight size={18} aria-hidden="true" />
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label="Next day"
-          onClick={() => move(1)}
-          disabled={selectedIndex < 0 || selectedIndex >= days.length - 1}
-        >
-          <ChevronRight size={19} />
-        </button>
-      </div>
-      {times ? (
-        <div className="jic-prayer-browser-grid">
-          {prayers.map(([name, startKey, jamKey]) => (
-            <div className={`jic-prayer-browser-item${active?.name === name ? ' is-current-salah' : ''}${nextJamaat?.name === name ? ' is-next-jamaat' : ''}`} key={name}>
-              <strong>{name}{active?.name === name && <span className="jic-current-salah-label">Current</span>}</strong>
-              <small>
-                <span className="jic-prayer-start-label">Start </span>
-                {displayTime(times[startKey])}
-              </small>
-              <span>Jama’ah</span>
-              <b>{displayTime(times[jamKey])}</b>
-            </div>
-          ))}
+      </header>
+
+      {!isToday ? (
+        <div className="jic-card-status jic-card-browsing">
+          <span>Published timetable</span>
+          <button type="button" onClick={() => setSelected(today)}>Back to today</button>
         </div>
+      ) : target ? (
+        <section className="jic-card-status" aria-label="Next prayer">
+          <div className="jic-card-next">
+            <span className="jic-card-eyebrow">{target.tomorrow ? 'Tomorrow' : target.kind === 'start' ? 'Next prayer' : 'Next Jamaat'}</span>
+            <strong>{target.name} <span>{displayTime(target.time)}</span></strong>
+            <small>{target.kind === 'start' && target.congregationTime ? `Jamaat ${displayTime(target.congregationTime)}` : 'Congregation at the masjid'}</small>
+          </div>
+          <div className="jic-card-countdown">
+            <span>{target.kind === 'start' ? 'Begins in' : 'Jamaat in'}</span>
+            <time role="timer" aria-live="off" aria-label={`Time until ${target.label}`}>{countdownText(target.seconds)}</time>
+            <small>{state.current ? `Current: ${state.current.name}` : 'London time'}</small>
+          </div>
+        </section>
+      ) : state?.phase === 'jamaat-now' ? (
+        <div className="jic-card-status jic-card-notice" role="status"><strong>{state.notice.name} Jamaat time</strong><span>Please silence your phone.</span></div>
       ) : (
-        <p className="jic-prayer-browser-empty" role="status">
-          {isLoadingPrayerTimes ? 'Loading timetable…' : 'No published times for this day.'}
-        </p>
+        <p className="jic-card-empty" role="status">{isLoadingPrayerTimes ? 'Loading prayer times…' : row ? 'Next prayer time is not yet published.' : 'No published timetable for today.'}</p>
       )}
-      {nextJamaat && <div className="jic-modern-next-jamaat" aria-live="off"><span>Next Jamaat</span><strong>{nextJamaat.name} · {displayTime(nextJamaat.time)}</strong></div>}
-      <div className="jic-prayer-browser-jummah">
-        <span>
-          Jummah 1 <strong>{displayTime(jummahTimes?.[0]?.prayer)}</strong>
-        </span>
-        <span>
-          Jummah 2 <strong>{displayTime(jummahTimes?.[1]?.prayer)}</strong>
-        </span>
-      </div>
-      <nav className="jic-home-prayer-footer" aria-label="Prayer links">
-        <Link to="/prayer-times">
-          Timetable <ArrowRight size={14} aria-hidden="true" />
-        </Link>
-        <Link to="/prayer-times/reminders">
-          <Bell size={14} aria-hidden="true" /> Salah alerts
-        </Link>
-        <Link to="/radio">
-          <Radio size={14} aria-hidden="true" /> JIC Radio
-        </Link>
+
+      {row ? (
+        <div className="jic-card-table-scroll" tabIndex={0} role="region" aria-label="Prayer times, 24-hour clock">
+          <table className="jic-card-table">
+            <caption className="sr-only">{dateLabel(selected)}: prayer begins and Jamaat times, 24-hour clock</caption>
+            <thead><tr><th scope="col"><span className="sr-only">Prayer</span><span aria-hidden="true">24h</span></th>
+              {columns.map((prayer) => <th scope="col" key={prayer.key} data-current={current === prayer.key || undefined} aria-current={current === prayer.key ? 'time' : undefined}>
+                {prayer.name}{current === prayer.key && <span className="sr-only">, current prayer</span>}
+              </th>)}
+            </tr></thead>
+            <tbody>
+              <tr><th scope="row">Begins</th>{columns.map((prayer) => <td key={prayer.key} data-current={current === prayer.key || undefined}>{compactTime(prayer.begins)}</td>)}</tr>
+              <tr><th scope="row">Jamaat</th>{columns.map((prayer) => <td key={prayer.key} data-current={current === prayer.key || undefined}>{compactTime(prayer.jamaat)}</td>)}</tr>
+            </tbody>
+          </table>
+        </div>
+      ) : !isToday && <p className="jic-card-empty" role="status">No published times for this day.</p>}
+      {sessions.length > 0 && <div className="jic-card-friday"><span>Jummah</span>{sessions.map((session) => (
+        <span key={session.number}>{session.number === 1 ? '1st' : '2nd'} <b>{displayTime(session.prayer)}</b></span>
+      ))}</div>}
+      <nav className="jic-card-links" aria-label="Prayer links">
+        <Link to="/prayer-times">Full timetable <ArrowRight size={14} aria-hidden="true" /></Link>
+        <Link to="/prayer-times/reminders"><Bell size={14} aria-hidden="true" /> Salah alerts</Link>
       </nav>
     </aside>
   );
