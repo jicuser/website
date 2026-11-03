@@ -37,4 +37,10 @@ Do not enable the old combined workspace: its task routing, talk processing and 
 
 ## Verification record
 
-Local lint/typecheck and production build passed. The full pre-final test run passed 888 tests; the added production-provider check brings the expected count to 889. Focused learning/prayer suites passed 20 tests. Browser testing is performed by GitHub Actions because local browser navigation is administratively restricted. Consult the latest workflow result for the exact committed tree; an earlier run does not establish deployment or production activation.
+On 3 November 2026, the complete local `npm run validate` passed lint, type-checking, 889 unit/database tests and the production build. The focused learning/prayer suites also passed 20 tests on a subsequent run.
+
+GitHub Actions run `41602421540` passed complete source validation and all six connected-flow browser tests in Chromium and again in WebKit for source revision `ed1e5c50bc8232bafe47ef090d7c72add8bd663f`. The browser tests cover phone/desktop application approval without activation, disabled release access, parent-only family controls, published/unpublished additional times and draft preservation after conflicting edits. Test accounts and API fixtures are synthetic; this does not establish a successful real payment or a production rollout.
+
+An earlier browser run exposed incorrect test dropdown selectors and the wrong admin query parameter. Those tests were corrected to use accessible combobox names and `/admin?section=prayer`, without removing the underlying assertions. Local browser navigation is administratively restricted, so browser verification runs on GitHub Actions.
+
+The existing full website browser workflow is separate from these focused checks. Consult its latest result before production release; do not represent the focused checks as a passing full-site browser suite. Production migrations, learning activation and live checkout have not been performed by this implementation.
