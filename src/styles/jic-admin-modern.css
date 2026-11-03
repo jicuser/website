@@ -1,0 +1,14 @@
+/* Scoped admin visual refresh; all existing permissions and actions remain intact. */
+.jic-admin-modern{--jic-admin-brass:#c5a46c;--jic-admin-ink:#102238;--jic-admin-radius:14px;letter-spacing:-.005em}
+.jic-admin-modern .admin-welcome{gap:12px;padding-block:12px 18px;margin-bottom:18px}
+.jic-admin-modern .admin-welcome h1{font-family:inherit;font-weight:720;font-size:clamp(1.65rem,2.6vw,2.15rem);letter-spacing:-.045em}
+.jic-admin-modern .admin-welcome .admin-eyebrow{font-weight:700;letter-spacing:.1em;margin-bottom:5px}
+.jic-admin-modern .admin-welcome p:last-child{margin-top:5px;font-size:.85rem}
+.jic-admin-modern .admin-tool-search{border-radius:12px}
+.jic-admin-modern .admin-attention-grid>button,.jic-admin-modern .admin-tool-tile,.jic-admin-modern .connected-action-card{border-radius:var(--jic-admin-radius);border:1px solid var(--jic-border);background:linear-gradient(145deg,color-mix(in srgb,var(--jic-surface) 96%,var(--jic-gold)),var(--jic-surface));box-shadow:0 5px 16px #0000000c}
+.jic-admin-modern .admin-attention-grid>button{border-top:2px solid var(--jic-admin-brass)}
+.jic-admin-modern :is(.admin-tool-tile,.connected-action-card,.admin-attention-grid>button):is(:hover,:focus-visible){border-color:var(--jic-gold-strong);box-shadow:0 9px 24px #00000018}
+.jic-admin-modern .admin-tool-tile svg{color:var(--jic-gold-strong)}
+.jic-admin-modern :is(.admin-tools,.admin-attention,.connected-quick-actions){margin-block:16px}
+@media(max-width:600px){.jic-admin-modern .admin-welcome{padding-block:6px 14px}.jic-admin-modern .admin-welcome h1{font-size:1.65rem}.jic-admin-modern .admin-attention-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.jic-admin-modern *{transition:none!important}}

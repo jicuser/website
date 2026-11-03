@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Bell, Radio, ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { displayTime, londonDate } from '@/lib/timetable';
+import { currentPrayer } from '@/lib/currentPrayer';
+import { nextCongregation } from '@/lib/nextCongregation';
+import '@/styles/jic-prayer-modern.css';
 
 const prayers = [
   ['Fajr', 'fajr_begins', 'fajr_jamah'],
@@ -37,7 +40,7 @@ const islamicLabel = (iso) => {
 };
 
 export default function HomePrayerCard() {
-  const { monthlyPrayerTimes, todaysTimes, jummahTimes, isLoadingPrayerTimes } =
+  const { monthlyPrayerTimes, todaysTimes, jummahTimes, currentDate, isLoadingPrayerTimes } =
     usePublicPrayerTimes();
   const today = londonDate();
   const [selected, setSelected] = useState(today);
@@ -61,6 +64,8 @@ export default function HomePrayerCard() {
         }
       : null;
   const times = row || fallback;
+  const active = selected === today ? currentPrayer(todaysTimes, currentDate) : null;
+  const nextJamaat = selected === today ? nextCongregation(todaysTimes, jummahTimes, currentDate) : null;
   const move = (direction) => {
     const next = days[selectedIndex + direction];
     if (next) setSelected(next.isoDate);
@@ -124,8 +129,8 @@ export default function HomePrayerCard() {
       {times ? (
         <div className="jic-prayer-browser-grid">
           {prayers.map(([name, startKey, jamKey]) => (
-            <div className="jic-prayer-browser-item" key={name}>
-              <strong>{name}</strong>
+            <div className={`jic-prayer-browser-item${active?.name === name ? ' is-current-salah' : ''}${nextJamaat?.name === name ? ' is-next-jamaat' : ''}`} key={name}>
+              <strong>{name}{active?.name === name && <span className="jic-current-salah-label">Current</span>}</strong>
               <small>
                 <span className="jic-prayer-start-label">Start </span>
                 {displayTime(times[startKey])}
@@ -140,6 +145,7 @@ export default function HomePrayerCard() {
           {isLoadingPrayerTimes ? 'Loading timetable…' : 'No published times for this day.'}
         </p>
       )}
+      {nextJamaat && <div className="jic-modern-next-jamaat" aria-live="off"><span>Next Jamaat</span><strong>{nextJamaat.name} · {displayTime(nextJamaat.time)}</strong></div>}
       <div className="jic-prayer-browser-jummah">
         <span>
           Jummah 1 <strong>{displayTime(jummahTimes?.[0]?.prayer)}</strong>

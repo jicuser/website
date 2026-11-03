@@ -1,0 +1,11 @@
+/* Contemporary Islamic surfaces, opt-in only. */
+.jic-modern{--jic-modern-ink:#0b1727;--jic-modern-slate:#20344b;--jic-modern-brass:#c5a46c;--jic-modern-ivory:#ede7da;--jic-modern-teal:#187c75;--jic-modern-border:rgba(231,224,205,.14);color:#f7f8fa;background:#0b1727}
+.jic-modern .jic-modern-panel{background:#132338;border:1px solid var(--jic-modern-border);border-radius:14px;box-shadow:0 10px 32px #0002}
+.jic-modern .jic-modern-glass{background:linear-gradient(145deg,rgba(35,56,80,.91),rgba(19,35,56,.95));border:1px solid rgba(237,231,218,.18);border-radius:14px;box-shadow:0 12px 32px #0003,inset 0 1px #ffffff12}
+@supports(backdrop-filter:blur(10px)){.jic-modern .jic-modern-glass{backdrop-filter:blur(12px)}}
+.jic-modern .jic-modern-accent{color:var(--jic-modern-brass)}
+.jic-modern .jic-modern-action{min-height:44px;border:0;border-radius:11px;padding:10px 16px;background:var(--jic-modern-brass);color:#121c2a;font-weight:700}
+.jic-modern .jic-modern-action:focus-visible{outline:3px solid var(--jic-modern-teal);outline-offset:3px}
+.jic-modern .jic-modern-muted{color:#bac8d8}
+.jic-modern .jic-modern-tv-data{font-variant-numeric:tabular-nums;font-weight:700}
+@media(prefers-reduced-motion:reduce){.jic-modern *,.jic-modern *::before,.jic-modern *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}

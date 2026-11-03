@@ -1,0 +1,9 @@
+/* Prayer-first homepage: opaque contrast before glass decoration. */
+.jic-prayer-browser .jic-prayer-browser-item.is-current-salah{background:linear-gradient(145deg,#d6b678,#f0d69c);color:#152237;border:1px solid #a88443;box-shadow:0 8px 24px #0002}
+.jic-prayer-browser .jic-prayer-browser-item.is-current-salah :is(strong,b,small,span){color:#152237}
+.jic-current-salah-label{display:inline-block;margin-inline-start:6px;padding:2px 5px;border-radius:4px;background:#152237;color:#fff!important;font:600 9px/1.2 system-ui,sans-serif;letter-spacing:.02em;text-transform:uppercase;vertical-align:middle}
+.jic-prayer-browser .jic-prayer-browser-item.is-next-jamaat:not(.is-current-salah){box-shadow:inset 0 -3px #c5a46c;background:color-mix(in srgb,var(--jic-gold) 12%,var(--jic-surface))}
+.jic-modern-next-jamaat{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 16px;margin:10px 0 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--jic-surface) 91%,#c5a46c);border:1px solid var(--jic-border);font-variant-numeric:tabular-nums}
+.jic-modern-next-jamaat span{font-size:.78rem;color:var(--jic-text-secondary)}
+.jic-modern-next-jamaat strong{font-size:1rem;color:var(--jic-gold-strong)}
+@media(prefers-contrast:more){.jic-prayer-browser .jic-prayer-browser-item.is-current-salah{outline:3px solid currentColor}}
