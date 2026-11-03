@@ -88,10 +88,10 @@ export default function AdditionalTimesEditor({ onDirty }) {
       id="prayer-view-additional"
       aria-label="Additional prayer times editor"
     >
-      <h3>Sunset &amp; Zawwal</h3>
+      <h3>Sunset &amp; Zawal</h3>
       <p>
-        Use the centre’s approved timetable. These times are not calculated from Dhuhr or Maghrib.
-        Sunrise is edited in Daily times.
+        Copy Zawal from the printed timetable. Add an end only when the sheet gives a range. Edit
+        Sunrise in Daily times.
       </p>
       <label className="admin-field">
         Date
@@ -127,8 +127,8 @@ export default function AdditionalTimesEditor({ onDirty }) {
           <div className="admin-form-grid">
             {[
               ['sunset', 'Sunset'],
-              ['zawwal_start', 'Zawwal starts'],
-              ['zawwal_end', 'Zawwal ends'],
+              ['zawwal_start', 'Zawal time'],
+              ['zawwal_end', 'Zawal end (optional)'],
             ].map(([key, label]) => (
               <label key={key} className="admin-field">
                 {label}

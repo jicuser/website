@@ -1,10 +1,10 @@
-import { displayTime } from './timetable.js';
+import { displayTime, displayZawal } from './timetable.js';
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const dateFields = new Set(['dayName', 'day']);
 const compactTime = (value) => value.replace(/\s[AP]M$/, '');
 
-function recordDate(record) {
+export function recordDate(record) {
   const value = String(record.isoDate || record.d_date || '');
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const date = new Date(`${value}T12:00:00Z`);
@@ -87,6 +87,16 @@ export function buildMonthlyTimetable(inputRows = []) {
       single: true,
       columns: [{ key: 'sunrise', label: 'Sunrise' }],
     },
+    ...(records.some(({ record }) => record.zawwal_start)
+      ? [
+          {
+            key: 'zawal',
+            label: 'Zawal',
+            single: true,
+            columns: [{ key: 'zawal', label: 'Zawal' }],
+          },
+        ]
+      : []),
     prayerGroup('zuhr', 'Dhuhr', 'ظهر'),
     prayerGroup('asr', 'Asr', 'عصر'),
     prayerGroup('maghrib', 'Maghrib', 'مغرب', combinedMaghrib),
@@ -111,6 +121,13 @@ export function buildMonthlyTimetable(inputRows = []) {
         const value = String(key === 'day' ? day : dayName);
         return { key, value, display: value, repeated: false };
       }
+      if (key === 'zawal')
+        return {
+          key,
+          value: displayZawal(record),
+          display: displayZawal(record, (time) => compactTime(displayTime(time))),
+          repeated: false,
+        };
       const value = displayTime(record[key]);
       const repeated =
         consecutive &&

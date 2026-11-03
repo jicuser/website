@@ -1,3 +1,4 @@
+import { buildMonthlyTimetable } from '../src/lib/monthlyTimetable.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -63,4 +64,27 @@ test('print-only Hijri and Zawal columns require explicit valid settings', () =>
   assert.ok(
     !timetablePresentation(rows, { zawalOffset: 'bad' }).columns.some((c) => c.key === 'zawal'),
   );
+});
+
+test('the monthly table and downloads use published Zawal, including single times and explicit ranges', () => {
+  const rows = [
+    { d_date: '2026-11-03', sunrise: '07:07', zawwal_start: '11:46', zuhr_begins: '11:56' },
+    { d_date: '2026-11-04', zawwal_start: '11:50', zawwal_end: '12:05', zuhr_begins: '12:10' },
+    { d_date: '2026-11-05', zuhr_begins: '11:57' },
+  ];
+  for (const table of [
+    buildMonthlyTimetable(rows),
+    timetablePresentation(rows),
+    timetablePresentation(rows, { zawalOffset: '30' }),
+  ]) {
+    assert.deepEqual(
+      table.groups.filter((g) => ['sunrise', 'zawal', 'zuhr'].includes(g.key)).map((g) => g.key),
+      ['sunrise', 'zawal', 'zuhr'],
+    );
+    assert.deepEqual(
+      table.rows.map((r) => r.cells.find((c) => c.key === 'zawal').value),
+      ['11:46 AM', '11:50 AM – 12:05 PM', '—'],
+    );
+    assert.equal(table.rows[0].cells.find((c) => c.key === 'sunrise').value, '7:07 AM');
+  }
 });

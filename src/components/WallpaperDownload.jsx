@@ -43,6 +43,8 @@ export default function WallpaperDownload({
   currentMonth,
   jummahTimes = [],
   editable = false,
+  detailsStatus = 'ready',
+  retryDetails,
 }) {
   const [theme, setTheme] = useState('light');
   const [design, setDesign] = useState({
@@ -57,7 +59,13 @@ export default function WallpaperDownload({
   const [error, setError] = useState(null);
   const [attempt, setAttempt] = useState(0);
   // Minute polling must not rebuild images when the actual values are unchanged.
-  const dataKey = JSON.stringify([currentMonth, monthlyPrayerTimes, jummahTimes, theme, design]);
+  const dataKey = JSON.stringify([
+    currentMonth,
+    detailsStatus === 'ready' ? monthlyPrayerTimes : [],
+    jummahTimes,
+    theme,
+    design,
+  ]);
   const ready = prepared?.key === dataKey ? prepared.files : null;
   const preview = ready?.find((file) => file.key === previewKey);
   const problem = error?.key === dataKey ? error.message : '';
@@ -164,6 +172,15 @@ export default function WallpaperDownload({
       aria-label="Timetable downloads"
     >
       <h4>Download timetable</h4>
+      {detailsStatus === 'loading' && <p role="status">Loading published times…</p>}
+      {detailsStatus === 'error' && (
+        <p role="alert">
+          The extra timetable times could not be loaded.{' '}
+          <button type="button" onClick={retryDetails}>
+            Retry
+          </button>
+        </p>
+      )}
       <fieldset className="timetable-theme-picker">
         <legend>Wallpaper colour</legend>
         {['light', 'dark'].map((value) => (
@@ -182,10 +199,7 @@ export default function WallpaperDownload({
       {editable && (
         <details className="timetable-design-options">
           <summary>Print details (optional)</summary>
-          <p>
-            These details apply to this download. Use the centre’s confirmed Hijri dates and Zawal
-            interval.
-          </p>
+          <p>Use the centre’s confirmed Hijri dates. Published Zawal times appear automatically.</p>
           <div className="admin-field-grid">
             <label>
               Hijri date on the 1st
@@ -217,11 +231,14 @@ export default function WallpaperDownload({
               />
             </label>
             <label>
-              Zawal: minutes before Dhuhr
+              Zawal offset for months without published times (minutes before Dhuhr)
               <input
                 type="number"
                 min="0"
                 max="60"
+                disabled={
+                  detailsStatus !== 'ready' || monthlyPrayerTimes.some((row) => row.zawwal_start)
+                }
                 value={design.zawalOffset}
                 onChange={(e) => setDesign({ ...design, zawalOffset: e.target.value })}
               />
@@ -239,7 +256,8 @@ export default function WallpaperDownload({
         </details>
       )}
       <p>
-        The A4 timetable uses a clear, light layout. Phone wallpaper leaves room above the timetable for your clock.
+        The A4 timetable uses a clear, light layout. Phone wallpaper leaves room above the timetable
+        for your clock.
       </p>
       <ul>
         {formats.map(({ key, label, Icon }) => {
@@ -297,9 +315,11 @@ export default function WallpaperDownload({
                   >
                     {problem
                       ? 'Retry download'
-                      : monthlyPrayerTimes.length
-                        ? 'Preparing image…'
-                        : 'Timetable unavailable'}
+                      : detailsStatus === 'error'
+                        ? 'Times unavailable'
+                        : monthlyPrayerTimes.length
+                          ? 'Preparing image…'
+                          : 'Timetable unavailable'}
                   </button>
                 )}
               </div>

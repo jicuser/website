@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { londonDate, prayerFields, jummahFields, displayTime } from '@/lib/timetable';
 import { monthDates, monthDraft, applyJamaahRange, validateMonth } from '@/lib/timetableEditor';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
+import { useMonthlyZawal } from '@/features/prayer-details/usePublishedPrayerDetails';
 import WallpaperDownload from '@/components/WallpaperDownload';
 import '@/styles/timetable-editor.css';
 
@@ -17,6 +18,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [range, setRange] = useState({ key: 'fajr_jamah', time: '', start: '', end: '' });
+  const { timetableRows, status, retry } = useMonthlyZawal(rows);
   const dirty = JSON.stringify(rows) !== baseline;
   useEffect(() => {
     onDirty(dirty);
@@ -370,7 +372,9 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
           {complete === rows.length ? (
             <WallpaperDownload
               editable
-              monthlyPrayerTimes={rows}
+              monthlyPrayerTimes={timetableRows}
+              detailsStatus={status}
+              retryDetails={retry}
               currentMonth={title}
               jummahTimes={[
                 { name: 'First Jummah', prayer: weeklyJummah.jummah_1_jamah },

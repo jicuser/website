@@ -269,7 +269,7 @@ export default function PrayerEditor() {
           ['daily', 'Daily times'],
           ['jummah', 'Jummah'],
           ['csv', 'CSV import'],
-          ['additional', 'Sunset & Zawwal'],
+          ['additional', 'Sunset & Zawal'],
         ].map(([id, label]) => (
           <button
             type="button"

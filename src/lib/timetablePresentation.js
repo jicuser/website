@@ -8,6 +8,7 @@ export function timetablePresentation(rows, options = {}) {
     Number.isInteger(start) && start >= 1 && start <= length && [29, 30].includes(length);
   const offset = Number(options.zawalOffset);
   const withZawal =
+    !table.columns.some(({ key }) => key === 'zawal') &&
     options.zawalOffset !== '' &&
     options.zawalOffset != null &&
     Number.isInteger(offset) &&
