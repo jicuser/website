@@ -8,6 +8,7 @@ import { loadAdminOverview } from './overview';
 import { findAdminTasks } from './taskNavigation';
 import AdminQuickActions from './AdminQuickActions';
 import '@/styles/admin-overview.css';
+import '@/styles/jic-admin-modern.css';
 
 const GROUP_HELP = {
   'Forms & requests': 'Contact Us, registrations and applications in one Forms area.',
@@ -74,7 +75,7 @@ export default function AdminOverview({ onChoose, icons }) {
     );
   };
   return (
-    <div className="admin-overview">
+    <div className="admin-overview jic-admin-modern">
       <section className="admin-welcome">
         <div>
           <p className="admin-eyebrow">Staff home</p>
@@ -86,7 +87,7 @@ export default function AdminOverview({ onChoose, icons }) {
             <Search size={18} aria-hidden="true" /><span className="sr-only">Find an admin task</span>
             <input type="search" value={search} onChange={(event) => {
               setSearch(event.target.value); setArea(null); previousArea.current = null;
-            }} placeholder="Search your tools…" aria-describedby={search.trim() ? 'admin-task-search-result' : undefined} />
+            }} placeholder="Try: change Asr Jamaat, create a form…" aria-describedby={search.trim() ? 'admin-task-search-result' : undefined} />
           </label>
         )}
       </section>
