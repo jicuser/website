@@ -1,0 +1,32 @@
+name: Learning verification workspace
+on:
+  push:
+    branches: [feat/learning-admissions-times-2026-11-03]
+    paths: [.github/workflows/learning-workspace-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Export tracked public source and locked test dependencies only
+        run: |
+          mkdir -p /tmp/jic-verification
+          git archive HEAD | tar -x -C /tmp/jic-verification
+          cp -a node_modules /tmp/jic-verification/node_modules
+          tar -czf /tmp/learning-verification.tgz -C /tmp/jic-verification .
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-verification-workspace
+          path: /tmp/learning-verification.tgz
+          retention-days: 1
+          compression-level: 0
