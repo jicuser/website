@@ -12,8 +12,6 @@ import { supplementalContentPaths } from '@/content/editablePages';
 import { ABOUT_PATHS } from '@/content/aboutSections';
 import UnifiedHeader from '@/components/shell/UnifiedHeader';
 import RelatedContent from '@/components/RelatedContent';
-import ProgrammePosters from '@/components/ProgrammePosters';
-import PublishedPageLinks from '@/features/content/PublishedPageLinks';
 import { PublishedPagesProvider } from '@/context/PublishedPagesContext';
 import { ProgrammeJourneyProvider } from '@/context/ProgrammeJourneyContext';
 import DailyReminder from '@/components/shell/DailyReminder';
@@ -27,6 +25,8 @@ import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import AppBrandHeader from '@/components/shell/AppBrandHeader';
 import useInstalledApp from '@/hooks/useInstalledApp';
 
+const ProgrammePosters = lazy(() => import('@/components/ProgrammePosters'));
+const PublishedPageLinks = lazy(() => import('@/features/content/PublishedPageLinks'));
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
 
 export default function MainLayout() {
@@ -96,8 +96,12 @@ function PublicLayout() {
             {!isAbout && pathname !== '/services/hall-booking' && (
               <ManagedPageSections key={pathname} />
             )}
-            {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
-            {!isHome && !isDiscovery && !isTask && <PublishedPageLinks />}
+            {!isHome && !isDiscovery && !isTask && (
+              <Suspense fallback={null}>
+                <ProgrammePosters />
+                <PublishedPageLinks />
+              </Suspense>
+            )}
             {!isHome && !isAbout && !isDiscovery && !isTask && <RelatedContent />}
           </div>
         ) : (
