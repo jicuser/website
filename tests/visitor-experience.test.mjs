@@ -372,6 +372,24 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
       calls.every(([text]) => !/12-hour|Gold rows|same time as above|Adhan time shown/.test(text)),
     );
     assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1800 && y >= 0 && y < 2546));
+    const scheduled = rows.map((row) => ({
+      ...row,
+      jummah_1_jamah: '12:35',
+      jummah_2_jamah: '13:30',
+    }));
+    const weekly = [
+      { name: 'First Jummah', prayer: '12:35 PM' },
+      { name: 'Second Jummah', prayer: '1:30 PM' },
+    ];
+    calls.length = 0;
+    createWallpaperCanvas(scheduled, 'October 2026', weekly);
+    assert.ok(!calls.some(([text]) => text.startsWith('Friday changes')));
+    scheduled[1].jummah_2_jamah = '14:00'; // Friday 2 October
+    calls.length = 0;
+    createWallpaperCanvas(scheduled, 'October 2026', weekly);
+    const changes = calls.find(([text]) => text.startsWith('Friday changes'))[0];
+    assert.match(changes, /02: 12:35 PM \/ 2:00 PM/);
+    assert.doesNotMatch(changes, /01: |03: /);
   } finally {
     if (previous === undefined) delete globalThis.document;
     else globalThis.document = previous;

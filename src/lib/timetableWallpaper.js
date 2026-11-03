@@ -1,3 +1,5 @@
+import { recordDate } from './monthlyTimetable.js';
+import { displayTime } from './timetable.js';
 import { timetablePresentation } from './timetablePresentation.js';
 
 // Match the website's canonical navy and gold palette in theme.css.
@@ -214,13 +216,27 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
     });
   }
   const footerY = end + (options.notice ? 85 : 40);
-  const overrides = monthlyPrayerTimes.filter((row) => row.jummah_1_jamah || row.jummah_2_jamah);
-  const overrideText = overrides
-    .map(
-      (row) =>
-        `${(row.isoDate || row.d_date).slice(-2)}: ${row.jummah_1_jamah || 'weekly'} / ${row.jummah_2_jamah || 'weekly'}`,
-    )
-    .join(' · ');
+  const fridayRows = monthlyPrayerTimes
+    .map((row) => ({ row, date: recordDate(row) }))
+    .filter(({ date }) => date && new Date(date + 'T12:00:00Z').getUTCDay() === 5);
+  const first = displayTime(jummahTimes?.[0]?.prayer);
+  const second = displayTime(jummahTimes?.[1]?.prayer);
+  const sameEveryFriday =
+    first !== '—' &&
+    second !== '—' &&
+    fridayRows.every(
+      ({ row }) =>
+        displayTime(row.jummah_1_jamah) === first && displayTime(row.jummah_2_jamah) === second,
+    );
+  const overrideText = sameEveryFriday
+    ? ''
+    : fridayRows
+        .filter(({ row }) => row.jummah_1_jamah || row.jummah_2_jamah)
+        .map(
+          ({ row, date }) =>
+            `${date.slice(-2)}: ${row.jummah_1_jamah ? displayTime(row.jummah_1_jamah) : 'weekly'} / ${row.jummah_2_jamah ? displayTime(row.jummah_2_jamah) : 'weekly'}`,
+        )
+        .join(' · ');
   if (jummahTimes?.length) {
     drawText(
       ctx,
