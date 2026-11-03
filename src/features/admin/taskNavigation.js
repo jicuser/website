@@ -6,11 +6,23 @@ const normalise = (value) =>
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
 
-/** Search only the tasks this staff member is permitted to open. */
+/** Common staff requests route to the existing permission-checked editor, not a write action. */
+const ACTION_INTENTS = [
+  { id: 'prayer', pattern: /\b(asr|fajr|dhuhr|zuhr|maghrib|isha|jamaat|jamaah|iqamah|adhan|azan|salah)\b/ },
+  { id: 'tv', pattern: /\b(tv|screen|display|scene|broadcast)\b/ },
+  { id: 'forms', pattern: /\b(form|forms|response|responses|questionnaire|application)\b/ },
+  { id: 'users', pattern: /\b(staff|teacher account|user|member|volunteer|permission|login)\b/ },
+];
+
+/** Search only tasks permitted to this account; action queries navigate, never mutate. */
 export function findAdminTasks(sections, can, search = '') {
-  const words = normalise(search).split(/\s+/).filter(Boolean);
+  const cleaned = normalise(search);
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  const isAction = /\b(add|create|make|change|edit|update|set|manage|remove|delete|show|publish|assign|open|find|new)\b/.test(cleaned);
+  const intent = isAction ? ACTION_INTENTS.find(({ pattern }) => pattern.test(cleaned)) : null;
   return sections.filter((item) => {
     if (item.id === 'dashboard' || !can(item.permission)) return false;
+    if (intent) return item.id === intent.id;
     const text = normalise(
       [item.name, item.description, item.group, ...(item.keywords || [])].join(' '),
     );
