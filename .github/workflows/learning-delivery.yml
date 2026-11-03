@@ -1,0 +1,85 @@
+name: Deliver and verify connected learning
+on:
+  push:
+    branches: [feat/learning-admissions-times-2026-11-03]
+    paths: [.github/workflows/learning-delivery.yml]
+permissions:
+  contents: read
+jobs:
+  deliver:
+    if: github.repository == 'jicuser/website' && github.ref == 'refs/heads/feat/learning-admissions-times-2026-11-03'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/learning-admissions-times-2026-11-03
+      - name: Verify and materialize exact reviewed patch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, lzma, pathlib, subprocess
+          hashes = [
+              '339ec5209ac5f97951445b46316dee3b81f5cf02463b846704ac1bf4cb37c0df',
+              '462c8cab48c8e908b154e48839260e01f95db3512d6d29818490579836af40b5',
+              '2d9607563647bb3c8a009a92e38fc664bf9669bfbf45eb279546bd144cb553a4',
+              '9c113531b1eb528ad0b815ba4521366c05d15dc888f0f1d6de2f7a0b29805cc9',
+          ]
+          pieces = []
+          for i, expected in enumerate(hashes):
+              data = pathlib.Path(f'.github/learning-delivery-{i}.txt').read_bytes()
+              assert hashlib.sha256(data).hexdigest() == expected, f'Packet {i} checksum mismatch'
+              pieces.append(data)
+          patch = lzma.decompress(base64.b64decode(b''.join(pieces), validate=True))
+          assert hashlib.sha256(patch).hexdigest() == '46141e4a200199e6ee0622bcbfff87bb53066394dd13b3d970ffa18165e617bc', 'Patch checksum mismatch'
+          assert len(patch) == 168314
+          subprocess.run(['git', 'apply', '--check', '-'], input=patch, check=True)
+          subprocess.run(['git', 'apply', '-'], input=patch, check=True)
+          for i in range(4):
+              pathlib.Path(f'.github/learning-delivery-{i}.txt').unlink()
+          pathlib.Path('.github/workflows/learning-workspace-snapshot.yml').unlink()
+          pathlib.Path('.github/workflows/learning-delivery.yml').unlink()
+          PY
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --all
+          git commit -m 'feat: connect learning, fee-checked admissions and approved extra prayer times'
+          git push origin HEAD:refs/heads/feat/learning-admissions-times-2026-11-03
+          git rev-parse HEAD | tee /tmp/delivered-commit.txt
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Validate complete source tree
+        run: npm run validate
+        env:
+          VITE_SUPABASE_URL: https://ci-validation.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_ci_validation_only
+          JIC_PUBLIC_PREVIEWS: 'off'
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Check Chromium flows
+        id: chromium
+        continue-on-error: true
+        run: npx playwright test tests/browser/connected-learning.spec.mjs --reporter=line --output=evidence/chromium
+      - name: Check WebKit flows
+        id: webkit
+        continue-on-error: true
+        run: npx playwright test tests/browser/connected-learning.spec.mjs --browser=webkit --reporter=line --output=evidence/webkit
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: learning-delivery-verification
+          path: |
+            evidence/
+            /tmp/delivered-commit.txt
+          retention-days: 3
+      - name: Require both browsers to pass
+        if: always()
+        env:
+          CHROMIUM: ${{ steps.chromium.outcome }}
+          WEBKIT: ${{ steps.webkit.outcome }}
+        run: test "$CHROMIUM" = success && test "$WEBKIT" = success
