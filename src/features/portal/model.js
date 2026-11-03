@@ -135,7 +135,7 @@ export function magicLinkOptions(email, origin, destination = '') {
 }
 
 /** Bounded, independent reads; failed areas never retain stale private records. */
-export async function loadPortalData(client, signal) {
+export async function loadPortalData(client, signal, { learningOnly = false } = {}) {
   const unordered = new Set([
     'learning_staff',
     'learning_guardians',
@@ -146,7 +146,9 @@ export async function loadPortalData(client, signal) {
   ]);
   const failures = [];
   const entries = await Promise.all(
-    PORTAL_TABLES.map(async (name) => {
+    PORTAL_TABLES.filter(
+      (name) => !learningOnly || name.startsWith('learning_') || name === 'student_contributions',
+    ).map(async (name) => {
       try {
         let query = client.from(name).select('*').limit(500);
         if (!unordered.has(name))
@@ -163,5 +165,5 @@ export async function loadPortalData(client, signal) {
       }
     }),
   );
-  return { data: Object.fromEntries(entries), failures };
+  return { data: { ...emptyPortalData(), ...Object.fromEntries(entries) }, failures };
 }

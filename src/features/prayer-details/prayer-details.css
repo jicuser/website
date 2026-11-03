@@ -1,0 +1,30 @@
+.additional-prayer-times {
+  margin-top: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid hsl(var(--border) / 0.6);
+  border-radius: 1rem;
+  background: hsl(var(--card) / 0.72);
+  color: inherit;
+}
+.additional-prayer-times dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+}
+.additional-prayer-times dl > div {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+}
+.additional-prayer-times dt {
+  font-size: 0.86rem;
+}
+.additional-prayer-times dd {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.additional-prayer-times p {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import ClassSettings from '@/features/learning/ClassSettings';
 import { supabase } from '@/lib/supabaseClient';
 import { ActionForm, Field, TextField, checked } from './shared';
 
@@ -14,7 +16,7 @@ function Options({ rows }) {
     </>
   );
 }
-export default function Manage({ data, reload, onError }) {
+export default function Manage({ data, reload, onError, connected = false }) {
   const [people, setPeople] = useState([]);
   useEffect(() => {
     let active = true;
@@ -60,6 +62,9 @@ export default function Manage({ data, reload, onError }) {
                   description: form.get('description'),
                   department: form.get('department'),
                   published: form.has('published'),
+                  ...(connected
+                    ? { capacity: form.get('capacity') ? Number(form.get('capacity')) : null }
+                    : {}),
                 })
                 .select('id')
                 .single(),
@@ -77,6 +82,16 @@ export default function Manage({ data, reload, onError }) {
           <Field label="Description">
             <textarea name="description" maxLength={5000} />
           </Field>
+          {connected && (
+            <TextField
+              label="Maximum class places (optional)"
+              name="capacity"
+              type="number"
+              min={1}
+              max={1000}
+              required={false}
+            />
+          )}
           <label>
             <input type="checkbox" name="published" /> Published course
           </label>
@@ -110,40 +125,51 @@ export default function Manage({ data, reload, onError }) {
             </select>
           </Field>
         </ActionForm>
-        <ActionForm
-          title="Enrol a student"
-          onSubmit={async (form) => {
-            await checked(
-              supabase
-                .from('learning_enrolments')
-                .upsert(
-                  {
-                    course_id: form.get('course'),
-                    student_id: form.get('student'),
-                    active: form.has('active'),
-                  },
-                  { onConflict: 'course_id,student_id' },
-                )
-                .select('student_id')
-                .single(),
-            );
-            await reload();
-          }}
-        >
-          <Field label="Course">
-            <select name="course" required>
-              <Options rows={data.learning_courses} />
-            </select>
-          </Field>
-          <Field label="Student">
-            <select name="student" required>
-              <Options rows={data.learning_students} />
-            </select>
-          </Field>
-          <label>
-            <input name="active" type="checkbox" defaultChecked /> Active enrolment
-          </label>
-        </ActionForm>
+        {connected ? (
+          <section className="workspace-card">
+            <h3>Enrol a student</h3>
+            <p>
+              Review the application and fee first. Activate the class place only after payment or
+              an approved no-fee place.
+            </p>
+            <Link to="/portal?tab=admissions">Admissions &amp; places →</Link>
+          </section>
+        ) : (
+          <ActionForm
+            title="Enrol a student"
+            onSubmit={async (form) => {
+              await checked(
+                supabase
+                  .from('learning_enrolments')
+                  .upsert(
+                    {
+                      course_id: form.get('course'),
+                      student_id: form.get('student'),
+                      active: form.has('active'),
+                    },
+                    { onConflict: 'course_id,student_id' },
+                  )
+                  .select('student_id')
+                  .single(),
+              );
+              await reload();
+            }}
+          >
+            <Field label="Course">
+              <select name="course" required>
+                <Options rows={data.learning_courses} />
+              </select>
+            </Field>
+            <Field label="Student">
+              <select name="student" required>
+                <Options rows={data.learning_students} />
+              </select>
+            </Field>
+            <label>
+              <input name="active" type="checkbox" defaultChecked /> Active enrolment
+            </label>
+          </ActionForm>
+        )}
         <ActionForm
           title="Assign a teacher"
           onSubmit={async (form) => {
@@ -182,6 +208,7 @@ export default function Manage({ data, reload, onError }) {
           </Field>
         </ActionForm>
       </div>
+      {connected && <ClassSettings data={data} reload={reload} />}
       <h2>Account links</h2>
       {data.learning_students.map((student) => (
         <details className="workspace-card" key={student.id}>
@@ -196,6 +223,7 @@ export default function Manage({ data, reload, onError }) {
                     display_name: form.get('name'),
                     user_id: form.get('user') || null,
                     guardian_id: form.get('guardian') || null,
+                    ...(connected ? { archived: form.has('archived') } : {}),
                   })
                   .eq('id', student.id)
                   .select('id')
@@ -205,6 +233,12 @@ export default function Manage({ data, reload, onError }) {
             }}
           >
             <TextField name="name" label="Student name" defaultValue={student.display_name} />
+            {connected && (
+              <label>
+                <input type="checkbox" name="archived" defaultChecked={student.archived} /> Archive
+                student (keep their history; stop family access and new places)
+              </label>
+            )}
             <Field label="Student account">
               <select name="user" defaultValue={student.user_id || ''}>
                 <Options rows={people} />
@@ -330,21 +364,25 @@ export default function Manage({ data, reload, onError }) {
           </button>
         </article>
       ))}
-      <h2>Automatic actions from forms</h2>
-      <p>
-        Choose who is responsible and how soon the action is due. They receive an alert when a
-        matching form arrives. Payment confirmation is a staff action; it does not verify a bank
-        payment.
-      </p>
-      {['contact', 'madrassah', 'itikaaf'].map((kind) => (
-        <FormRouting
-          key={kind}
-          kind={kind}
-          existing={data.form_workflows.find((row) => row.kind === kind)}
-          people={people}
-          reload={reload}
-        />
-      ))}
+      {!connected && (
+        <>
+          <h2>Automatic actions from forms</h2>
+          <p>
+            Choose who is responsible and how soon the action is due. They receive an alert when a
+            matching form arrives. Payment confirmation is a staff action; it does not verify a bank
+            payment.
+          </p>
+          {['contact', 'madrassah', 'itikaaf'].map((kind) => (
+            <FormRouting
+              key={kind}
+              kind={kind}
+              existing={data.form_workflows.find((row) => row.kind === kind)}
+              people={people}
+              reload={reload}
+            />
+          ))}
+        </>
+      )}
     </>
   );
 }
