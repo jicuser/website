@@ -24,11 +24,14 @@ import { useAuth } from '@/context/AuthContext';
 import { PublicPrayerTimesProvider } from '@/context/PrayerTimesContext';
 import { isPublicTaskRoute, isPublicReadingRoute } from '@/lib/publicTaskRoute';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
+import { IMAGES } from '@/content/images';
+import { OPTIMIZED_IMAGES } from '@/content/optimizedImages';
 import AppBrandHeader from '@/components/shell/AppBrandHeader';
 import useInstalledApp from '@/hooks/useInstalledApp';
 import { isSalahRoute } from '@/lib/salahRoute';
 import EidAnnouncement from '@/components/shell/EidAnnouncement';
 
+const homePhoto = OPTIMIZED_IMAGES[IMAGES.homeHero] || IMAGES.homeHero;
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
 
 export default function MainLayout() {
@@ -68,9 +71,10 @@ function PublicLayout() {
 
   return (
     <div
-      className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${pathname === '/services' ? 'jic-hub-route' : ''} ${preview ? 'is-admin-preview' : ''}`}
+      style={isHome ? { '--jic-home-photo': `url("${homePhoto}")` } : undefined}
+      className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route jic-pattern-edge jic-pattern-canvas'} ${pathname === '/services' ? 'jic-hub-route' : ''} ${preview ? 'is-admin-preview' : ''}`}
     >
-      {isHome && <PublicBackdrop />}
+      {isHome && <PublicBackdrop src={homePhoto} />}
       <a className="jic-skip-link" href="#main-content">
         Skip to content
       </a>

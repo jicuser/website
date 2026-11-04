@@ -19,7 +19,7 @@ export default function Footer() {
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${SITE.name}, ${SITE.address.full}`)}`;
   const phoneUrl = `tel:${SITE.phone.replace(/[^\d+]/g, '').replace(/^0/, '+44')}`;
   return (
-    <footer className="jic-site-footer">
+    <footer className="jic-site-footer jic-pattern-edge">
       <div className="jic-footer-inner">
         <nav className="jic-footer-links" aria-label="Footer links">
           {FOOTER_LINKS.filter((page) => isPageVisible(getContent, page.path)).map(

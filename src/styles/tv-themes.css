@@ -1,6 +1,8 @@
 /* TV-only semantic colours. Geometry stays in tv.css and prayer-board.css.
    No filters or colour overrides are applied to poster or uploaded artwork. */
 :is(.jic-tv-shell, .scene-player)[data-tv-theme] {
+  --jic-pattern-ink: var(--tv-accent);
+  --jic-pattern-opacity: 0.115;
   --tv-section-sheen: linear-gradient(
     110deg,
     color-mix(in srgb, var(--tv-accent) 11%, transparent),
@@ -253,4 +255,13 @@
     --tv-section-sheen: none;
     --tv-current-fill: var(--tv-highlight);
   }
+}
+
+/* Paint behind the board layers so posters, videos and the pairing code remain clear. */
+.scene-canvas.is-prayer-board.jic-pattern-edge::before {
+  height: 56%;
+}
+.scene-next.jic-pattern-edge::before,
+.jic-tv-next.jic-pattern-edge::before {
+  height: min(55%, 200px);
 }

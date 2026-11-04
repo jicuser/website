@@ -20,13 +20,13 @@ html[data-installed-navigation='true'][data-theme='light'] .jic-home-route {
   --bookmark-veil: rgba(248, 245, 236, 0.64);
 }
 html[data-installed-navigation='true'] .jic-home-route .jic-page-backdrop {
+  --jic-city-focus: 50% 38%;
   position: fixed;
   inset: 0;
   height: 100%;
 }
 html[data-installed-navigation='true'] .jic-home-route .jic-page-backdrop img {
   opacity: 1;
-  object-position: 50% 38%;
 }
 html[data-installed-navigation='true'] .jic-home-route .jic-page-backdrop::after {
   background: linear-gradient(
@@ -268,24 +268,6 @@ html[data-installed-navigation='true'][data-surface='solid']
 .jic-app-home .jic-app-home-tools {
   grid-template-columns: 1fr;
 }
-html[data-installed-navigation='true'] .jic-home-route .jic-site-footer {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  padding-top: 56px;
-  background: var(--jic-mobile-canvas, var(--jic-bg));
-}
-html[data-installed-navigation='true'] .jic-home-route .jic-site-footer::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(var(--bookmark-veil), var(--bookmark-veil)),
-    url('/jic-aerial-sunset.jpg') center 60% / cover;
-  mask-image: linear-gradient(transparent, #000 45%, #000 75%, transparent);
-}
-
 html[data-installed-navigation='true'] .jic-home-route .jic-home-prayer.is-compact {
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
@@ -412,20 +394,12 @@ html[data-installed-navigation='true']
 }
 html[data-installed-navigation='true'][data-surface='solid']
   .jic-home-route
-  .jic-page-backdrop::before {
-  display: none;
-}
-html[data-installed-navigation='true'][data-surface='solid']
-  .jic-home-route
   .jic-home-prayer.is-compact {
   background: var(--prayer-solid);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  html[data-installed-navigation='true'] .jic-home-route .jic-page-backdrop::before {
-    display: none;
-  }
   html[data-installed-navigation='true'] .jic-home-route .jic-home-prayer.is-compact {
     background: var(--prayer-solid);
     -webkit-backdrop-filter: none;

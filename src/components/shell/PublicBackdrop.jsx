@@ -1,12 +1,10 @@
-import { OPTIMIZED_IMAGES } from '@/content/optimizedImages';
 import React from 'react';
-import { IMAGES } from '@/content/images';
 
-export default function PublicBackdrop() {
+export default function PublicBackdrop({ src }) {
   return (
-    <div className="jic-page-backdrop" aria-hidden="true">
+    <div className="jic-page-backdrop jic-pattern-edge" aria-hidden="true">
       <img
-        src={OPTIMIZED_IMAGES[IMAGES.homeHero] || IMAGES.homeHero}
+        src={src}
         decoding="async"
         alt=""
         fetchpriority="high"

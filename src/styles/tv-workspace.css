@@ -13,6 +13,8 @@
   --jic-error-text: #ffb4aa;
   --jic-space-card: 16px;
   --jic-gap: 14px;
+  --jic-pattern-ink: var(--jic-gold);
+  --jic-pattern-opacity: 0.15;
   --tv-ws-glass: var(--jic-surface);
   --jic-wash-warm: rgb(233 184 94 / 13%);
   --jic-wash-cool: rgb(103 193 174 / 13%);
@@ -1155,4 +1157,8 @@
   .stream-setup.admin-tv-editor :is(.admin-panel, .tv-workspace-card, .tv-screen-card) {
     background: var(--jic-surface);
   }
+}
+
+.stream-setup.admin-tv-editor.jic-pattern-edge::before {
+  height: min(100%, 300px);
 }

@@ -343,12 +343,12 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   html[data-theme] .jic-home-route .jic-page-backdrop {
     position: absolute;
     inset: 0 0 auto;
-    height: 460px;
+    height: clamp(570px, 92vh, 850px);
+    --jic-city-focus: 50% 30%;
     background: var(--jic-mobile-canvas);
   }
   html[data-theme] .jic-home-route .jic-page-backdrop img {
     opacity: 0.7;
-    object-position: 50% 30%;
   }
   html[data-theme] .jic-home-route .jic-page-backdrop::after {
     background: linear-gradient(180deg, rgba(13, 24, 37, 0.15), var(--jic-mobile-canvas) 90%);

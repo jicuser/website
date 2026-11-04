@@ -33,7 +33,7 @@ export default function AppBrandHeader({ home = false }) {
       .sort((a, b) => b.path.length - a.path.length)[0]?.path || original?.current?.path;
   const Header = home ? 'div' : 'header';
   return (
-    <Header className={`jic-app-brand-header${home ? ' is-home' : ''}`}>
+    <Header className={`jic-app-brand-header${home ? ' is-home' : ' jic-pattern-edge'}`}>
       <Link to="/" aria-label="Jamatia Islamic Centre home">
         <JamatiaLogo variant="wordmark" />
       </Link>

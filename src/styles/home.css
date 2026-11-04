@@ -19,6 +19,7 @@ html[data-theme='dark'] {
   min-height: 100vh;
 }
 .jic-page-backdrop {
+  --jic-city-focus: 50% 55%;
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -30,7 +31,7 @@ html[data-theme='dark'] {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 55%;
+  object-position: var(--jic-city-focus);
 }
 .jic-page-backdrop::after {
   content: '';
@@ -308,8 +309,8 @@ html[data-theme] .jic-home-footer-strip {
   border-radius: 12px;
 }
 @media (max-width: 767px) {
-  .jic-page-backdrop img {
-    object-position: 55% 50%;
+  .jic-page-backdrop {
+    --jic-city-focus: 55% 50%;
   }
   html[data-theme] .jic-premium-home .jic-hero-inner {
     padding: 14px 0 20px;
@@ -936,23 +937,54 @@ html[data-theme='dark'] .jic-home-route {
   }
 }
 
-/* A sparse octagonal lattice fades into the veiled city beneath the masthead. */
-html[data-theme] .jic-home-route .jic-page-backdrop::before {
-  content: '';
-  position: absolute;
-  inset: 90px 0 0;
+/* The photo shows through the carved shapes while the centre stays calm for reading. */
+.jic-home-route {
+  --jic-home-reading: color-mix(in srgb, var(--jic-bg) 95%, transparent);
+  --jic-window-glaze: rgb(186 153 92 / 32%);
+  --jic-photo-window-opacity: 0.3;
+}
+html[data-theme='dark'] .jic-home-route {
+  --jic-window-glaze: rgb(220 187 128 / 27%);
+  --jic-photo-window-opacity: 0.44;
+}
+.jic-home-route :is(.jic-page-backdrop, .jic-home-content).jic-pattern-edge::before {
+  background:
+    linear-gradient(var(--jic-window-glaze), var(--jic-window-glaze)),
+    var(--jic-home-photo) var(--jic-city-focus, center 60%) / cover no-repeat;
+  opacity: var(--jic-photo-window-opacity);
+}
+.jic-home-route .jic-page-backdrop.jic-pattern-edge::before {
+  inset: 0;
+  height: auto;
   z-index: 1;
-  background: url('/bookmark-geometric.svg?v=octagonal-2') center / 144px 144px;
-  opacity: 0.13;
-  mask-image: linear-gradient(transparent, #000 28%, #000 70%, transparent);
-  pointer-events: none;
+  -webkit-mask-size: auto clamp(250px, 54vh, 480px);
+  mask-size: auto clamp(250px, 54vh, 480px);
+}
+html[data-theme] .jic-home-route .jic-home-content {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--jic-home-reading) 14%,
+    var(--jic-home-reading) 88%,
+    transparent
+  );
+}
+.jic-home-route .jic-home-content.jic-pattern-edge::before {
+  height: min(100%, clamp(230px, 44vh, 380px));
 }
 
-html[data-theme][data-surface='solid'] .jic-home-route .jic-page-backdrop::before {
-  display: none;
-}
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  html[data-theme] .jic-home-route .jic-page-backdrop::before {
-    display: none;
+/* Feather the last few pixels where the mobile panorama meets the reading canvas. */
+@supports (mask-composite: intersect) {
+  html:not([data-installed-navigation='true'])
+    .jic-home-route
+    .jic-page-backdrop.jic-pattern-edge::before {
+    mask-image:
+      var(--jic-pattern-mask), linear-gradient(to bottom, black calc(100% - 38px), transparent);
+    mask-size:
+      auto clamp(250px, 54vh, 480px),
+      100% 100%;
+    mask-position: center bottom;
+    mask-repeat: repeat-x, no-repeat;
+    mask-composite: intersect;
   }
 }

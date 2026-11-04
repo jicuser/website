@@ -76,7 +76,7 @@ export default function AdminOverview({ onChoose, icons }) {
   };
   return (
     <div className="admin-overview jic-admin-modern">
-      <section className="admin-welcome">
+      <section className="admin-welcome jic-pattern-edge">
         <div>
           <p className="admin-eyebrow">Staff home</p>
           <h1>Welcome{auth.profile?.display_name ? `, ${auth.profile.display_name}` : ''}</h1>

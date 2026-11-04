@@ -401,7 +401,7 @@ function ScreenDisplay({ screenId }) {
         </main>
         <footer className="jic-tv-status">
           {tv.settings.show_next !== false && (
-            <div className="jic-tv-next">
+            <div className="jic-tv-next jic-pattern-edge">
               <NextPrayerSummary todaysTimes={prayers.todaysTimes} currentDate={now} />
             </div>
           )}

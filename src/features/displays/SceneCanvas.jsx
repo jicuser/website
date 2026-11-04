@@ -87,7 +87,7 @@ export default function SceneCanvas({
   return (
     <main className="scene-player" data-tv-theme={theme} style={tvThemeStyle(theme)}>
       <div
-        className={`scene-canvas ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''} ${boardLayout ? 'is-prayer-board' : ''}`}
+        className={`scene-canvas ${tv.settings.display_orientation === 'portrait' ? 'is-portrait' : ''} ${boardLayout ? 'is-prayer-board jic-pattern-edge' : ''}`}
         data-board-layout={boardLayout || undefined}
         aria-label={scene.name}
       >

@@ -236,7 +236,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="jic-home-content">
+      <div className="jic-home-content jic-pattern-edge">
         {renderNotices('before-events')}
 
         {getContent('ramadan:home-enabled', 'false') === 'true' && (

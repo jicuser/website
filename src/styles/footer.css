@@ -152,3 +152,24 @@
     gap: 12px;
   }
 }
+
+/* The same city photograph returns at the foot of the regular and installed homepages. */
+html[data-theme] .jic-public-route.jic-home-route .jic-site-footer {
+  padding-top: clamp(12px, 2vw, 24px);
+  background: var(--jic-mobile-canvas, var(--jic-bg));
+}
+.jic-home-route .jic-site-footer::after {
+  content: var(--jic-pattern-content, none);
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      var(--bookmark-veil, var(--jic-photo-veil)),
+      var(--bookmark-veil, var(--jic-photo-veil))
+    ),
+    var(--jic-home-photo) center 60% / cover no-repeat;
+  -webkit-mask-image: linear-gradient(transparent, black 32%, black 78%, transparent);
+  mask-image: linear-gradient(transparent, black 32%, black 78%, transparent);
+}

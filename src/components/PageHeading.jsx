@@ -3,7 +3,7 @@ import React from 'react';
 /** A compact editorial introduction; actions and page content remain outside the heading. */
 export default function PageHeading({ title, children, eyebrow, icon: Icon }) {
   return (
-    <header className={`jic-page-heading${Icon ? ' has-symbol' : ''}`}>
+    <header className={`jic-page-heading jic-pattern-edge${Icon ? ' has-symbol' : ''}`}>
       <div className="jic-page-heading-copy">
         {eyebrow && <p className="jic-page-eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>

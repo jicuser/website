@@ -105,7 +105,7 @@ export default function PrayerWidget({
   const next = kind === 'next' || highlightNext ? tvNextCongregation(data, now) : null;
   if (kind === 'next') {
     return (
-      <div className="scene-next">
+      <div className="scene-next jic-pattern-edge">
         {next ? (
           <>
             <p className="scene-next-label">

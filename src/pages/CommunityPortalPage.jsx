@@ -26,7 +26,7 @@ export default function CommunityPortalPage() {
   const signOut = () =>
     auth.signOut().catch(() => setError('Sign out could not be confirmed. Please try again.'));
   return (
-    <div className="community-workspace jic-member-portal">
+    <div className="community-workspace jic-member-portal jic-pattern-edge jic-pattern-canvas">
       <div className="workspace-wrap">
         <header className="workspace-header">
           <div>
