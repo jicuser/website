@@ -8,6 +8,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import * as sunrise from '../src/lib/sunriseStatus.js';
 import * as view from '../src/lib/homePrayerView.js';
 import * as timetable from '../src/lib/timetable.js';
+import * as prayerState from '../src/lib/prayerDisplayState.js';
 
 const require = createRequire(import.meta.url);
 const source = readFileSync(
@@ -22,7 +23,7 @@ const compiled = ts.transpileModule(source, {
     esModuleInterop: true,
   },
 }).outputText;
-function render(clock, date = '2026-11-04', time = '07:09') {
+function render(clock, date = '2026-11-04', time = '07:09', detail) {
   const mod = { exports: {} };
   const deps = {
     react: React,
@@ -30,8 +31,12 @@ function render(clock, date = '2026-11-04', time = '07:09') {
     '@/lib/sunriseStatus': sunrise,
     '@/lib/homePrayerView': view,
     '@/lib/timetable': timetable,
+    '@/lib/prayerDisplayState': prayerState,
     '@/features/prayer-details/usePublishedPrayerDetails': {
-      usePublishedPrayerDetails: () => ({ rows: new Map(), status: 'ready' }),
+      usePublishedPrayerDetails: () => ({
+        rows: new Map(detail ? [[date, detail]] : []),
+        status: 'ready',
+      }),
     },
   };
   new Function('require', 'module', 'exports', compiled)(
@@ -77,5 +82,27 @@ test('browsing another date or missing sunrise never shows a live sunrise status
   assert.doesNotMatch(
     render('2026-11-04T07:15:00Z', undefined, null),
     /Prohibited time|Upcoming|Passed|07:29/,
+  );
+});
+
+test('Zawal highlights its published start minute and clears in the afternoon', () => {
+  const detail = { zawwal_start: '11:46' };
+  const at = (clock) => render(`2026-11-04T${clock}Z`, undefined, undefined, detail);
+  assert.doesNotMatch(at('11:45:59'), /aria-current/);
+  assert.match(at('11:46:00'), /class="jic-card-zawal" aria-current="time"/);
+  assert.match(at('11:46:59'), /class="jic-card-zawal" aria-current="time"/);
+  assert.doesNotMatch(at('11:47:00'), /aria-current/);
+  assert.doesNotMatch(at('13:47:00'), /aria-current/);
+});
+
+test('Zawal uses a published end when present and never highlights another timetable day', () => {
+  const detail = { zawwal_start: '11:46', zawwal_end: '11:56' };
+  const at = (clock, date) => render(`2026-11-04T${clock}Z`, date, undefined, detail);
+  assert.match(at('11:55:59'), /class="jic-card-zawal" aria-current="time"/);
+  assert.doesNotMatch(at('11:56:00'), /aria-current/);
+  assert.doesNotMatch(at('11:46:00', '2026-11-05'), /aria-current/);
+  assert.doesNotMatch(
+    render('2026-11-04T11:46:00Z', undefined, undefined, { zawwal_start: 'Not published' }),
+    /aria-current/,
   );
 });

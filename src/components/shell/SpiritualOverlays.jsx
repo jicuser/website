@@ -33,6 +33,7 @@ export default function SpiritualOverlays() {
     const timer = window.setTimeout(() => setOpen(false), 5500);
     const dialog = modal.current;
     dialog.showModal();
+    note.current?.focus({ preventScroll: true });
     const escape = (event) => {
       if (event.key === 'Escape') setOpen(false);
     };
@@ -47,14 +48,21 @@ export default function SpiritualOverlays() {
 
   if (!open || editMode) return null;
   return (
-    <dialog ref={modal} className="jic-salawat-layer" aria-label="Salawat welcome"
-      onCancel={(event) => { event.preventDefault(); setOpen(false); }}
+    <dialog
+      ref={modal}
+      className="jic-salawat-layer"
+      aria-label="Salawat welcome"
+      onCancel={(event) => {
+        event.preventDefault();
+        setOpen(false);
+      }}
       onClick={(event) => {
         event.stopPropagation();
         if (!note.current?.contains(event.target)) setOpen(false);
-      }}>
+      }}
+    >
       <div className="jic-salawat-backdrop" aria-hidden="true" />
-      <aside ref={note} className="jic-salawat-note" aria-label="Salawat">
+      <aside ref={note} className="jic-salawat-note" aria-label="Salawat" tabIndex={-1}>
         <div>
           <span className="jic-spiritual-kicker">Salawat</span>
           <p className="jic-salawat-arabic" lang="ar" dir="rtl">

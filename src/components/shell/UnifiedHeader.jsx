@@ -253,14 +253,14 @@ export default function UnifiedHeader() {
         }}
         aria-hidden="true"
       />
-      <header className={cn('jic-unified-header jic-header-redesign', taskRoute && 'is-task-mode', pathname.startsWith('/prayer-times') && 'is-prayer-section')}>
-        {installed && isHome && (
-          <AppBrandHeader
-            home
-            menuOpen={menuOpen && menuView === 'navigation'}
-            onMenu={() => { setMenuView('navigation'); setMenuOpen(true); }}
-          />
+      <header
+        className={cn(
+          'jic-unified-header jic-header-redesign',
+          taskRoute && 'is-task-mode',
+          pathname.startsWith('/prayer-times') && 'is-prayer-section',
         )}
+      >
+        {installed && isHome && <AppBrandHeader home />}
         <MobileInfoBanner
           ref={mobileBannerRef}
           collapsed={prayerDockHidden}
@@ -275,7 +275,9 @@ export default function UnifiedHeader() {
               to="/"
               className="jic-free-brand"
               aria-label="Jamatia Islamic Centre home"
-              onClick={() => { if (isHome) window.scrollTo({ top: 0, behavior: 'auto' }); }}
+              onClick={() => {
+                if (isHome) window.scrollTo({ top: 0, behavior: 'auto' });
+              }}
             >
               <JamatiaLogo variant="wordmark" />
             </Link>
@@ -287,7 +289,10 @@ export default function UnifiedHeader() {
             <HeaderActions
               open={menuOpen}
               view={menuView}
-              onOpen={(view) => { setMenuView(view); setMenuOpen(true); }}
+              onOpen={(view) => {
+                setMenuView(view);
+                setMenuOpen(true);
+              }}
             />
           </div>
           {!isCommunityHub && breadcrumbs.length > 0 && (
@@ -344,7 +349,9 @@ export default function UnifiedHeader() {
                       : navigation.current?.name || `Browse ${navigation.name}`}
                   </strong>
                 </span>
-                <span className="jic-section-view-all">View all <ChevronDown size={16} aria-hidden="true" /></span>
+                <span className="jic-section-view-all">
+                  View all <ChevronDown size={16} aria-hidden="true" />
+                </span>
               </summary>
               <nav aria-label={`${navigation.name} pages`}>
                 {breadcrumbs
@@ -473,7 +480,14 @@ export default function UnifiedHeader() {
           />
         </Suspense>
       )}
-      <InstalledAppBar open={menuOpen} view={menuView} onOpen={(view) => { setMenuView(view); setMenuOpen(true); }} />
+      <InstalledAppBar
+        open={menuOpen}
+        view={menuView}
+        onOpen={(view) => {
+          setMenuView(view);
+          setMenuOpen(true);
+        }}
+      />
       <NavigationDrawer
         open={menuOpen}
         view={menuView}
@@ -482,7 +496,10 @@ export default function UnifiedHeader() {
         accountLabel={accountLabel}
         onClose={() => setMenuOpen(false)}
         onViewChange={setMenuView}
-        onDonate={() => { setMenuOpen(false); setDonationOpen(true); }}
+        onDonate={() => {
+          setMenuOpen(false);
+          setDonationOpen(true);
+        }}
       />
       {donationOpen && (
         <Suspense

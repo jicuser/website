@@ -50,22 +50,6 @@ html[data-installed-navigation='true'] .jic-home-route .jic-app-brand-header.is-
 .jic-app-brand-header.is-home .brand-lockup {
   width: 154px;
 }
-.jic-app-brand-header.is-home nav {
-  gap: 8px;
-}
-html[data-installed-navigation='true'] .jic-app-brand-header.is-home nav :is(a, button) {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  border: 1px solid var(--bookmark-line);
-  background: var(--bookmark-panel);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-}
-html[data-installed-navigation='true'] .jic-app-brand-header.is-home nav button {
-  color: var(--jic-gold);
-  border-color: var(--jic-gold);
-}
 html[data-installed-navigation='true']
   .jic-home-route
   .jic-premium-home.jic-app-home
@@ -389,21 +373,6 @@ html[data-installed-navigation='true'] .jic-home-route .jic-home-prayer.is-compa
   color: var(--prayer-ink);
   white-space: nowrap;
 }
-.jic-prayer-card.is-compact .jic-card-table [data-current='true'] {
-  background: var(--bookmark-current-wash);
-  color: var(--prayer-ink);
-}
-.jic-prayer-card.is-compact .jic-card-table thead [data-current='true'] {
-  color: var(--prayer-gold);
-}
-.jic-prayer-card.is-compact .jic-card-table [data-next='true'],
-.jic-prayer-card.is-compact .jic-card-table [data-upcoming='true'] {
-  background: var(--bookmark-next-wash);
-  color: var(--bookmark-next);
-}
-.jic-prayer-card.is-compact .jic-card-table [data-next='true'] {
-  border-radius: 8px;
-}
 .jic-prayer-card.is-compact .jic-card-extra-times {
   gap: 4px;
   padding-top: 4px;
@@ -420,16 +389,6 @@ html[data-installed-navigation='true'] .jic-home-route .jic-home-prayer.is-compa
 .jic-prayer-card.is-compact .jic-card-extra-times svg {
   flex-shrink: 0;
   color: var(--prayer-gold);
-}
-.jic-prayer-card.is-compact .jic-card-extra-times > div {
-  background: color-mix(in srgb, var(--bookmark-panel) 55%, transparent);
-}
-.jic-prayer-card.is-compact .jic-card-extra-times .jic-card-ishraq {
-  border: 0;
-  background: var(--bookmark-current-wash);
-}
-.jic-prayer-card.is-compact .jic-card-extra-times .jic-card-ishraq[aria-current] {
-  background: var(--prayer-current);
 }
 html[data-installed-navigation='true'] .jic-home-route .jic-app-community .jic-home-destination {
   --shortcut-tint: rgba(230, 195, 134, 0.1);
@@ -477,46 +436,42 @@ html[data-installed-navigation='true'][data-surface='solid']
 /* Header playback and a short daily dashboard fit the installed phone shell. */
 html[data-installed-navigation='true'] .jic-home-route .jic-app-brand-header.is-home {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  min-height: 82px;
+  min-height: 64px;
 }
 .jic-app-brand-header.is-home .brand-lockup {
-  width: clamp(90px, 30vw, 130px);
+  width: clamp(130px, 42vw, 170px);
 }
-.jic-app-brand-header.is-home nav {
-  gap: 6px;
+.jic-app-radio-mini {
+  --radio-glow: var(--bookmark-current-wash);
+  background: radial-gradient(ellipse at center, var(--radio-glow), transparent 72%);
+}
+.jic-app-radio-mini[data-playing='true'] {
+  --radio-glow: var(--bookmark-next-wash);
 }
 .jic-app-radio-mini button {
   display: grid;
-  grid-template-columns: 24px 12px;
-  grid-template-rows: 24px auto;
+  grid-template-columns: 24px auto 12px;
   align-items: center;
   justify-content: center;
-  gap: 1px 3px;
-  width: 62px;
+  gap: 6px;
+  width: 106px;
   min-height: 52px;
-  padding: 5px;
-  border: 1px solid var(--bookmark-line);
-  border-radius: 14px;
+  padding: 8px 4px;
+  border: 0;
+  border-radius: 0;
   color: var(--jic-gold);
-  background: color-mix(in srgb, var(--bookmark-panel) 78%, transparent);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
 }
 .jic-app-radio-mini button > span {
-  grid-row: 2;
-  grid-column: 1 / -1;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
 }
-.jic-app-radio-mini button > svg:last-child {
-  grid-row: 1;
-  grid-column: 2;
-}
 .jic-app-radio-mini button[aria-pressed='true'] {
-  background: var(--bookmark-next-wash);
   color: var(--bookmark-next);
 }
 .jic-app-radio-mini button:disabled {
@@ -609,15 +564,14 @@ html[data-installed-navigation='true'] .jic-app-home .jic-app-posters .programme
 }
 html[data-installed-navigation='true'][data-surface='solid']
   .jic-home-route
-  :is(.jic-app-radio-mini button, .jic-app-posters .programme-feed-row) {
+  .jic-app-posters
+  .programme-feed-row {
   background: var(--bookmark-solid);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  html[data-installed-navigation='true']
-    .jic-home-route
-    :is(.jic-app-radio-mini button, .jic-app-posters .programme-feed-row) {
+  html[data-installed-navigation='true'] .jic-home-route .jic-app-posters .programme-feed-row {
     background: var(--bookmark-solid);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;

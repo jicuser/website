@@ -185,12 +185,26 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   margin: 0 10px;
 }
 .jic-prayer-card .jic-card-table {
+  --prayer-label-width: 40px;
+  --prayer-column-width: calc((100% - var(--prayer-label-width)) / 5);
   width: 100%;
   min-width: 260px;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-variant-numeric: tabular-nums;
+  background-image:
+    radial-gradient(ellipse at center, var(--prayer-current-wash), transparent 74%),
+    radial-gradient(ellipse at center, var(--prayer-next-wash), transparent 74%);
+  background-size: var(--prayer-column-width) 100%;
+  background-position:
+    calc(var(--prayer-label-width) + var(--prayer-column-width) * var(--prayer-current-column, -10))
+      0,
+    calc(
+        var(--prayer-label-width) + var(--prayer-column-width) * var(--prayer-upcoming-column, -10)
+      )
+      0;
+  background-repeat: no-repeat;
 }
 .jic-prayer-card .jic-card-table :is(th, td) {
   border: 0;
@@ -226,14 +240,12 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
 }
 .jic-prayer-card .jic-card-table [data-current='true'] {
   color: var(--prayer-ink);
-  background: var(--prayer-current-wash);
 }
 .jic-prayer-card .jic-card-table thead [data-current='true'] {
-  border-radius: 9px 9px 0 0;
+  color: var(--prayer-gold);
 }
-.jic-prayer-card .jic-card-table tbody tr:last-child [data-current='true'] {
-  color: var(--prayer-ink);
-  border-radius: 0 0 9px 9px;
+.jic-prayer-card .jic-card-table :is([data-upcoming='true'], [data-next='true']) {
+  color: var(--prayer-next);
 }
 .jic-prayer-card .jic-card-friday {
   display: flex;
@@ -523,15 +535,11 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   font-size: 9px;
   color: var(--prayer-muted);
 }
-.jic-card-extra-times .jic-card-ishraq {
-  border: 1px solid transparent;
-  background: linear-gradient(110deg, var(--prayer-current-wash), transparent 95%);
+.jic-card-extra-times > [aria-current='time'] {
+  background: radial-gradient(ellipse at center, var(--prayer-current-wash), transparent 74%);
 }
-.jic-card-extra-times .jic-card-ishraq[aria-current] {
-  background: var(--prayer-current);
-}
-.jic-card-extra-times .jic-card-ishraq[aria-current] :is(dt, dd, small) {
-  color: var(--prayer-current-ink);
+.jic-card-extra-times > [aria-current='time'] :is(dt, small) {
+  color: var(--prayer-gold);
 }
 .jic-prayer-card .jic-card-links {
   display: grid;
@@ -597,16 +605,6 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
 }
 .jic-prayer-card:not(.is-compact) .jic-card-next .jic-card-eyebrow {
   color: var(--prayer-next);
-}
-.jic-prayer-card:not(.is-compact) .jic-card-table thead [data-current='true'] {
-  color: var(--prayer-gold);
-}
-.jic-prayer-card:not(.is-compact) .jic-card-table :is([data-upcoming='true'], [data-next='true']) {
-  background: var(--prayer-next-wash);
-  color: var(--prayer-next);
-}
-.jic-prayer-card:not(.is-compact) .jic-card-table [data-next='true'] {
-  border-radius: 8px;
 }
 .jic-prayer-card:not(.is-compact) .jic-card-table tbody td {
   font-size: 13px;

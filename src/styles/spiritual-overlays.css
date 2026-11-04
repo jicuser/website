@@ -11,7 +11,7 @@
   max-height: calc(100dvh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   margin: 0;
-  padding: 24px 48px;
+  padding: 24px 28px;
   border: 1px solid var(--jic-glass-border);
   border-radius: 18px;
   color: var(--jic-text);
@@ -20,6 +20,10 @@
 .jic-salawat-note > div {
   flex: 1;
   min-width: 0;
+}
+/* Initial focus belongs to the message; Tab still reveals the close control's focus ring. */
+html[data-theme] .jic-salawat-note:focus {
+  outline: none;
 }
 .jic-spiritual-kicker {
   color: var(--jic-gold-strong);
@@ -33,7 +37,7 @@
 }
 .jic-salawat-note .jic-salawat-arabic {
   font:
-    1.6rem/1.8 Georgia,
+    clamp(1.2rem, 5.6vw, 1.6rem)/1.8 Georgia,
     'Times New Roman',
     serif;
 }
@@ -97,4 +101,6 @@
   border: 0;
   background: transparent;
 }
-.jic-salawat-layer::backdrop { background: transparent; }
+.jic-salawat-layer::backdrop {
+  background: transparent;
+}

@@ -86,6 +86,11 @@ export default function HomePrayerCard({ compact = false }) {
     target?.key === key &&
     target.kind === kind &&
     compactTime(target.time) === compactTime(time);
+  // Paint each glow once on the table so row boundaries never create separate tiles.
+  const currentColumn = columns.findIndex((prayer) => prayer.key === current);
+  const upcomingColumn = columns.findIndex(
+    (prayer) => !target?.tomorrow && target?.key === prayer.key && current !== prayer.key,
+  );
 
   return (
     <aside
@@ -271,7 +276,13 @@ export default function HomePrayerCard({ compact = false }) {
           role="region"
           aria-label="Prayer times, 24-hour clock"
         >
-          <table className="jic-card-table">
+          <table
+            className="jic-card-table"
+            style={{
+              '--prayer-current-column': currentColumn < 0 ? -10 : currentColumn,
+              '--prayer-upcoming-column': upcomingColumn < 0 ? -10 : upcomingColumn,
+            }}
+          >
             <caption className="sr-only">
               {dateLabel(selected)}: prayer begins and Jamaat times, 24-hour clock
             </caption>
