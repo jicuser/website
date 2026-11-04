@@ -194,8 +194,20 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   border-spacing: 0;
   font-variant-numeric: tabular-nums;
   background-image:
-    radial-gradient(ellipse at center, var(--prayer-current-wash), transparent 74%),
-    radial-gradient(ellipse at center, var(--prayer-next-wash), transparent 74%);
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--prayer-current-wash) 20%,
+      var(--prayer-current-wash) 80%,
+      transparent
+    ),
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--prayer-next-wash) 20%,
+      var(--prayer-next-wash) 80%,
+      transparent
+    );
   background-size: var(--prayer-column-width) 100%;
   background-position:
     calc(var(--prayer-label-width) + var(--prayer-column-width) * var(--prayer-current-column, -10))
@@ -521,6 +533,14 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   padding: 5px 2px;
   border-radius: 10px;
 }
+.jic-card-extra-times[data-has-sunset='true'] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 374px) {
+  .jic-card-extra-times[data-has-sunset='true'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 .jic-card-extra-times dt {
   color: var(--prayer-muted);
   font-size: 10px;
@@ -534,6 +554,20 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
 .jic-card-extra-times small {
   font-size: 9px;
   color: var(--prayer-muted);
+}
+.jic-extra-times-source {
+  margin: 0 14px 8px;
+  color: var(--prayer-muted);
+  font-size: 11px;
+}
+.jic-extra-times-source summary {
+  padding-block: 12px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.jic-extra-times-source p {
+  margin: 0 0 8px;
+  line-height: 1.5;
 }
 .jic-card-extra-times > [aria-current='time'] {
   background: radial-gradient(ellipse at center, var(--prayer-current-wash), transparent 74%);

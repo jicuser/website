@@ -38,6 +38,7 @@ import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
 import { prefersQuietPrayerDock } from '@/lib/publicTaskRoute';
 import { nextCongregation } from '@/lib/nextCongregation';
 import TodayPrayerSummary from '@/components/home/TodayPrayerSummary';
+import { isSalahRoute } from '@/lib/salahRoute';
 import { updateRadioMediaSession, clearRadioMediaSession } from '@/lib/radioMediaSession';
 
 const DonationDialog = lazy(() => import('@/components/donations/DonationDialog'));
@@ -57,6 +58,7 @@ export default function UnifiedHeader() {
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const isHome = pathname === '/';
   const isCommunityHub = pathname === '/services';
+  const isSalah = isSalahRoute(pathname);
   const taskRoute = prefersQuietPrayerDock(pathname);
   const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
   const prayerDockRef = useRef(null),
@@ -109,8 +111,8 @@ export default function UnifiedHeader() {
           ),
       }
     : originalNavigation;
-  const subtabs = (pathname === '/about' ? [] : navigation?.children || []).filter((page) =>
-    isPageVisible(getContent, page.path),
+  const subtabs = (pathname === '/about' || isSalah ? [] : navigation?.children || []).filter(
+    (page) => isPageVisible(getContent, page.path),
   );
   const selected = navigation?.current?.path;
   const breadcrumbs = navigationBreadcrumbs(navigation);
@@ -161,7 +163,7 @@ export default function UnifiedHeader() {
     if (prayer) observer.observe(prayer);
     if (banner) observer.observe(banner);
     return () => observer.disconnect();
-  }, [isHome, isCommunityHub, installed]);
+  }, [isHome, isCommunityHub, isSalah, installed]);
   useEffect(() => {
     const nav = subnavRef.current;
     if (!nav) return undefined;
@@ -228,7 +230,7 @@ export default function UnifiedHeader() {
   return (
     <>
       <AppInstall />
-      {installed && <AppCompanion />}
+      {installed && !isSalah && <AppCompanion />}
       <audio
         ref={audioRef}
         src={streamUrl || undefined}
@@ -261,14 +263,16 @@ export default function UnifiedHeader() {
         )}
       >
         {installed && isHome && <AppBrandHeader home />}
-        <MobileInfoBanner
-          ref={mobileBannerRef}
-          collapsed={prayerDockHidden}
-          next={next}
-          jummahTimes={jummahTimes}
-          notices={getContent('header_ticker_items', '[]')}
-          radio={radioButton}
-        />
+        {!isSalah && (
+          <MobileInfoBanner
+            ref={mobileBannerRef}
+            collapsed={prayerDockHidden}
+            next={next}
+            jummahTimes={jummahTimes}
+            notices={getContent('header_ticker_items', '[]')}
+            radio={radioButton}
+          />
+        )}
         <div className="jic-unified-inner">
           <div className="jic-free-nav-row">
             <Link
@@ -295,7 +299,7 @@ export default function UnifiedHeader() {
               }}
             />
           </div>
-          {!isCommunityHub && breadcrumbs.length > 0 && (
+          {!isCommunityHub && !isSalah && breadcrumbs.length > 0 && (
             <nav
               className={cn('jic-section-location', hasSectionPicker && 'has-section-picker')}
               aria-label="Current section"
@@ -411,7 +415,7 @@ export default function UnifiedHeader() {
               ))}
             </nav>
           )}
-          {taskRoute && !isCommunityHub && (
+          {taskRoute && !isCommunityHub && !isSalah && (
             <button
               type="button"
               className="jic-task-prayer-toggle"
@@ -424,7 +428,7 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
-      {!installed && !isHome && !isCommunityHub && (
+      {!installed && !isHome && !isCommunityHub && !isSalah && (
         <div className="jic-mobile-dock">
           <div
             id="jic-prayer-dock"

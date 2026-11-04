@@ -114,7 +114,8 @@ for (const width of [320, 390]) {
       expect(layout.pageFits).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`slim-home-${theme}-${width}.png`) });
       await friday.getByRole('link').nth(1).click();
-      await expect(page).toHaveURL('/prayer-times/jummah');
+      await expect(page).toHaveURL('/prayer-times#jummah-times');
+      await expect(page.getByRole('region', { name: 'Jummah prayer times' })).toBeVisible();
       if (width === 390 && theme === 'light') {
         await page.clock.setFixedTime(new Date('2026-10-16T12:30:00Z'));
         await page.goto('/');

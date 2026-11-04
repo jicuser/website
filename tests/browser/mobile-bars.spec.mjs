@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('mobile ticker, navigation and timetable panel fit the visible viewport', async ({
+test('mobile bars fit the viewport on other pages and yield to the Salah workspace', async ({
   page,
   browserName,
 }, testInfo) => {
@@ -8,7 +8,8 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   await page.route('**/preview-api/**', (route) =>
     route.fulfill({ contentType: 'application/json', body: '[]' }),
   );
-  await page.goto('/prayer-times');
+  await page.goto('/projects');
+  await page.getByRole('button', { name: 'Show prayer times', exact: true }).click();
   await expect(page.locator('.jic-mobile-prayer-summary')).toBeVisible();
   await expect(page.locator('.jic-mobile-prayer-summary')).toContainText('Today’s prayer times');
   await expect(page.locator('.jic-mobile-info-banner')).toBeVisible();
@@ -74,11 +75,14 @@ test('mobile ticker, navigation and timetable panel fit the visible viewport', a
   await page.screenshot({ path: testInfo.outputPath('mobile-ticker-timetable-pill.png') });
   await page.locator('.jic-mobile-prayer-content').click();
   await expect(page).toHaveURL('/prayer-times');
-  await expect(
-    page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
-  ).toBeVisible();
-  await expect(page.locator('#jic-prayer-details')).toBeHidden();
-  await expect(page.locator('.jic-mobile-prayer-summary button')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Salah times', exact: true })).toBeVisible();
+  await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
+  await expect(page.locator('.jic-mobile-info-banner')).toHaveCount(0);
+  await expect(page.locator('.jic-app-companion')).toHaveCount(0);
+  // Keep ticker motion and safe-area coverage on a page that still uses the shared bars.
+  await page.goto('/projects');
+  await page.getByRole('button', { name: 'Show prayer times', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause rolling updates' }).click();
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.locator('.jic-ticker-track')).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.jic-ticker-motion')).toBeHidden();

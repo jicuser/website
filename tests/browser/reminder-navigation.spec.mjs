@@ -84,9 +84,7 @@ test('home shortcuts fit small phones and the prayer card opens the timetable', 
   ).toBeLessThan(240);
   await page.locator('.jic-mobile-prayer-content').click();
   await expect(page).toHaveURL('/prayer-times');
-  await expect(
-    page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Salah times', exact: true })).toBeVisible();
   await expect(details).toBeHidden();
   await page
     .getByRole('navigation', { name: 'Quick navigation' })
@@ -303,9 +301,7 @@ test('header Menu stays open until a slow Prayer Times route is ready', async ({
   } finally {
     releaseChunk();
   }
-  await expect(
-    page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Salah times', exact: true })).toBeVisible();
   await expect(menu).toBeHidden();
 });
 
@@ -321,21 +317,33 @@ test('Prayer Times shows already loaded times without another loading flash', as
       .getByRole('link', { name: 'Salah Times', exact: true })
       .click();
     await expect(page).toHaveURL('/prayer-times');
+    await expect(page.getByRole('heading', { name: 'Salah times', exact: true })).toBeVisible({
+      timeout: 1000,
+    });
     await expect(
-      page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
-    ).toBeVisible({ timeout: 1000 });
-    await expect(
-      page.getByRole('table', { name: "Today's prayer start and congregation times" }),
-    ).toContainText('5:15');
+      page.getByRole('table', { name: /prayer starts and Jamaat times, 24-hour clock/ }),
+    ).toContainText('05:15');
     await page.screenshot({ path: testInfo.outputPath('prayer-times.png') });
-    await page.locator('.jic-section-picker > summary').click();
-    await page
-      .getByRole('navigation', { name: 'Salah Times pages' })
-      .getByRole('link', { name: 'Monthly Timetable', exact: true })
-      .click();
-    await expect(page.getByRole('heading', { name: 'Monthly Timetable', exact: true })).toBeVisible(
-      { timeout: 1000 },
+    const views = page.getByRole('navigation', { name: 'Salah timetable views' });
+    await expect(views.getByRole('link')).toHaveText(['Today', 'Month']);
+    await expect(views.getByRole('link', { name: 'Today', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
     );
+    await expect(page.locator('.jic-section-picker')).toHaveCount(0);
+    await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
+    await views.getByRole('link', { name: 'Month', exact: true }).click();
+    await expect(page).toHaveURL('/prayer-times/monthly');
+    await expect(views.getByRole('link', { name: 'Month', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await expect(page.getByRole('region', { name: 'Choose timetable day' })).toBeVisible({
+      timeout: 1000,
+    });
+    await expect(
+      page.getByRole('table', { name: /prayer starts and Jamaat times, 24-hour clock/ }),
+    ).toContainText('05:15');
   } finally {
     api.release();
   }
@@ -349,7 +357,7 @@ test('selecting the current page still closes the header Menu', async ({ page })
   await expect(menu).toBeHidden({ timeout: 500 });
 });
 
-test('the slim daily reminder follows Salah bar scrolling and restores on navigation', async ({
+test('the daily reminder follows home scrolling and yields to the Salah workspace', async ({
   page,
 }) => {
   await setup(page);
@@ -374,10 +382,13 @@ test('the slim daily reminder follows Salah bar scrolling and restores on naviga
     .locator('#jic-site-menu')
     .getByRole('link', { name: 'Salah Times', exact: true })
     .click();
-  await expect(
-    page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Salah times', exact: true })).toBeVisible();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await expect(reminder).toHaveCount(0);
+  await page
+    .getByRole('navigation', { name: 'Quick navigation' })
+    .getByRole('button', { name: 'Home', exact: true })
+    .click();
   await expect(reminder).toHaveCSS('opacity', '1', { timeout: 100 });
 });
 

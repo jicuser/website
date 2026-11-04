@@ -23,7 +23,7 @@ const compiled = ts.transpileModule(source, {
     esModuleInterop: true,
   },
 }).outputText;
-function render(clock, date = '2026-11-04', time = '07:09', detail) {
+function render(clock, date = '2026-11-04', time = '07:09', detail, props = {}) {
   const mod = { exports: {} };
   const deps = {
     react: React,
@@ -53,6 +53,7 @@ function render(clock, date = '2026-11-04', time = '07:09', detail) {
       date,
       sunrise: time,
       now: new Date(clock),
+      ...props,
     }),
   );
 }
@@ -104,5 +105,24 @@ test('Zawal uses a published end when present and never highlights another timet
   assert.doesNotMatch(
     render('2026-11-04T11:46:00Z', undefined, undefined, { zawwal_start: 'Not published' }),
     /aria-current/,
+  );
+});
+
+test('extra times include a published sunset without substituting an inferred value', () => {
+  const withSunset = render('2026-11-04T16:49:00Z', undefined, undefined, { sunset: '16:31' });
+  assert.match(withSunset, /data-has-sunset="true"/);
+  assert.match(withSunset, /Sunset/);
+  assert.match(withSunset, /16:31/);
+  assert.doesNotMatch(render('2026-11-04T16:49:00Z'), /jic-card-sunset|data-has-sunset/);
+});
+
+test('the Salah workspace can disclose the original published timetable source', () => {
+  const detail = { source: 'JIC printed November timetable' };
+  const html = render('2026-11-04T16:49:00Z', undefined, undefined, detail, { showSource: true });
+  assert.match(html, /<summary>Timetable source<\/summary>/);
+  assert.match(html, /JIC printed November timetable/);
+  assert.doesNotMatch(
+    render('2026-11-04T16:49:00Z', undefined, undefined, detail),
+    /Timetable source/,
   );
 });

@@ -428,8 +428,10 @@ test('Birmingham prayer metadata identifies the mosque after rendering and stays
   const { state } = await fixture(page);
   await page.goto('/prayer-times');
   await expect(page).toHaveTitle('Birmingham Prayer Times & Salah | JIC Woodlands Road Masjid');
-  await expect(page.locator('.jic-prayer-title')).toContainText(
-    'Woodlands Road Masjid, Sparkhill, Birmingham, West Midlands',
+  await expect(page.getByRole('heading', { name: 'Salah times', exact: true })).toBeVisible();
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    /Birmingham.*Woodlands Road Masjid.*Sparkhill/i,
   );
   await expect
     .poll(async () =>

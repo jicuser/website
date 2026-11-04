@@ -8,17 +8,20 @@ export default function MonthlyPrayerTable({
   monthlyPrayerTimes,
   currentMonth,
   currentDate,
+  todayDate,
   jummahTimes = [],
 }) {
   const { timetableRows, status, retry } = useMonthlyZawal(monthlyPrayerTimes);
   const timetable = useMemo(() => buildMonthlyTimetable(timetableRows), [timetableRows]);
   const scrollArea = useRef(null);
-  const today = currentDate.toLocaleDateString('en-CA', {
-    timeZone: 'Europe/London',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+  const today =
+    todayDate ||
+    currentDate.toLocaleDateString('en-CA', {
+      timeZone: 'Europe/London',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
   const year = currentDate.toLocaleDateString('en-GB', {
     timeZone: 'Europe/London',
     year: 'numeric',

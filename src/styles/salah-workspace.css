@@ -1,0 +1,616 @@
+/* One compact timetable workspace; shared headers and the installed bar stay outside it. */
+.salah-workspace {
+  --salah-panel: rgba(21, 39, 56, 0.8);
+  --salah-solid: #152738;
+  --salah-line: rgba(167, 194, 213, 0.2);
+  --salah-ink: #f0f4f8;
+  --salah-muted: #b7c6d4;
+  --salah-gold: #e8c589;
+  --salah-teal: #a4dece;
+  --salah-current: rgba(230, 193, 126, 0.24);
+  --salah-next: rgba(86, 183, 160, 0.27);
+  width: min(100% - 32px, 1000px);
+  margin: 8px auto 24px;
+  color: var(--salah-ink);
+}
+html[data-theme='light'] .salah-workspace {
+  --salah-panel: rgba(255, 253, 248, 0.88);
+  --salah-solid: #fffdf8;
+  --salah-line: rgba(35, 61, 78, 0.18);
+  --salah-ink: #172d41;
+  --salah-muted: #526575;
+  --salah-gold: #785218;
+  --salah-teal: #1b6555;
+  --salah-current: rgba(184, 135, 53, 0.22);
+  --salah-next: rgba(44, 146, 119, 0.19);
+}
+.salah-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+.salah-workspace .salah-heading h1 {
+  margin: 0 0 5px;
+  color: var(--salah-ink);
+  font:
+    500 clamp(24px, 3.5vw, 31px)/1.15 Georgia,
+    'Times New Roman',
+    serif;
+}
+.salah-heading p {
+  margin: 0;
+  color: var(--salah-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.salah-alert-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  color: var(--salah-gold);
+  font-size: 12px;
+  font-weight: 600;
+}
+.salah-alert-link svg {
+  flex-shrink: 0;
+}
+.salah-view-tabs {
+  display: flex;
+  gap: 4px;
+  max-width: 440px;
+  padding: 4px;
+  margin: 0 0 16px;
+  border: 1px solid var(--salah-line);
+  border-radius: 13px;
+  background: var(--salah-panel);
+}
+.salah-view-tabs a {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-height: 40px;
+  border-radius: 10px;
+  color: var(--salah-muted);
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.salah-view-tabs [aria-current] {
+  background: linear-gradient(105deg, var(--salah-current), transparent 100%);
+  color: var(--salah-ink);
+}
+.salah-today-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: start;
+  gap: 18px;
+}
+.salah-daily-card,
+.salah-calendar,
+.salah-jummah {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--salah-line);
+  border-radius: 17px;
+  background: var(--salah-panel);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.salah-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  padding: 9px 13px;
+  background: linear-gradient(100deg, var(--salah-current), transparent 100%);
+  font-size: 11px;
+}
+.salah-current > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.salah-current svg {
+  flex-shrink: 0;
+  color: var(--salah-gold);
+}
+.salah-current time {
+  color: var(--salah-muted);
+  margin-left: auto;
+}
+.salah-next {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  background: linear-gradient(100deg, var(--salah-next), transparent 100%);
+}
+.salah-next-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--salah-teal);
+  font-size: 11px;
+}
+.salah-workspace .salah-next h2 {
+  margin: 3px 0;
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1.25;
+  font-weight: 650;
+  color: var(--salah-ink);
+}
+.salah-next p {
+  margin: 5px 0 0;
+  color: var(--salah-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.salah-next p b {
+  color: var(--salah-ink);
+  font-weight: 600;
+}
+.salah-countdown {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.salah-countdown > span {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 10px;
+  color: var(--salah-muted);
+}
+.salah-countdown time {
+  font-size: clamp(16px, 3vw, 19px);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.salah-jamaat-notice {
+  margin: 0;
+  padding: 12px 13px;
+  font-size: 12px;
+  color: var(--salah-gold);
+}
+.salah-daily-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-variant-numeric: tabular-nums;
+}
+.salah-daily-table :is(th, td) {
+  padding: 10px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--salah-line);
+  background: transparent;
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--salah-ink);
+}
+.salah-daily-table tr > :first-child {
+  width: 39%;
+  text-align: left;
+}
+.salah-daily-table thead th {
+  padding-block: 8px;
+  color: var(--salah-muted);
+  font-size: 10px;
+  font-weight: 500;
+}
+.salah-daily-table tbody th {
+  font-weight: 600;
+}
+.salah-daily-table small {
+  display: block;
+  margin-top: 1px;
+  color: var(--salah-muted);
+  font-size: 9px;
+  font-weight: 400;
+}
+.salah-daily-table tr[data-current] {
+  background: linear-gradient(100deg, var(--salah-current), transparent 100%);
+}
+.salah-daily-table tr[data-current] small {
+  color: var(--salah-gold);
+}
+.salah-daily-table tr[data-upcoming] {
+  background: linear-gradient(100deg, var(--salah-next), transparent 100%);
+}
+.salah-daily-table tr[data-upcoming] small {
+  color: var(--salah-teal);
+}
+.salah-daily-table tr[data-current] [data-next-event] {
+  background: linear-gradient(100deg, transparent, var(--salah-next));
+}
+.salah-workspace .jic-card-extra-times {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 11px 9px;
+  border: 0;
+  text-align: center;
+}
+.salah-workspace .jic-card-extra-times[data-has-sunset] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.salah-workspace .jic-card-extra-times > div {
+  display: grid;
+  align-content: start;
+  grid-template-rows: minmax(29px, auto) auto auto;
+  min-width: 0;
+  padding: 5px 1px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+}
+.salah-workspace .jic-card-extra-times dt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  color: var(--salah-muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.salah-workspace .jic-card-extra-times dt > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.salah-workspace .jic-card-extra-times dt svg {
+  flex-shrink: 0;
+  color: var(--salah-gold);
+}
+.salah-workspace .jic-card-extra-times dd {
+  margin: 4px 0 0;
+  color: var(--salah-ink);
+  font-size: 13px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.salah-workspace .jic-card-extra-times small {
+  font-size: 9px;
+  line-height: 1.5;
+  color: var(--salah-muted);
+}
+.salah-workspace .jic-card-extra-times .jic-shuroq-status {
+  flex-basis: 100%;
+  color: var(--salah-muted);
+  font-weight: 550;
+}
+.salah-workspace .jic-card-extra-times > [aria-current='time'],
+.salah-workspace .jic-card-shuroq[data-sunrise-phase='active'] {
+  background: radial-gradient(ellipse at center, var(--salah-current), transparent 90%);
+}
+.salah-support {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.salah-jummah {
+  padding: 13px;
+  scroll-margin-top: 80px;
+}
+.salah-workspace .salah-jummah h2 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--salah-gold);
+}
+.salah-jummah dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.salah-jummah dt {
+  color: var(--salah-muted);
+  font-size: 10px;
+}
+.salah-jummah dd {
+  margin: 4px 0 0;
+  color: var(--salah-ink);
+  font-size: 16px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.salah-workspace :is(.salah-jummah details, .salah-information, .salah-guidance) {
+  font-size: 12px;
+  color: var(--salah-muted);
+}
+.salah-jummah details {
+  margin-top: 10px;
+  border-top: 1px solid var(--salah-line);
+}
+.salah-workspace :is(.salah-jummah, .salah-information, .salah-guidance) summary {
+  padding-block: 12px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.salah-workspace :is(.salah-jummah details, .salah-information) p {
+  margin: 0 0 10px;
+  line-height: 1.6;
+}
+.salah-jummah details a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--salah-gold);
+}
+.salah-download-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px 13px;
+  border: 1px solid var(--salah-line);
+  border-radius: 14px;
+  background: linear-gradient(105deg, var(--salah-current), transparent 100%);
+  color: var(--salah-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+.salah-download-link svg {
+  color: var(--salah-gold);
+  flex-shrink: 0;
+}
+.salah-download-link small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--salah-muted);
+}
+.salah-information {
+  border-top: 1px solid var(--salah-line);
+}
+.salah-guidance {
+  margin-top: 12px;
+  border-top: 1px solid var(--salah-line);
+}
+.salah-workspace .salah-guidance .jic-prayer-visit {
+  width: 100%;
+  margin: 0;
+  padding: 12px;
+}
+.salah-workspace .salah-guidance .jic-prayer-visit h2 {
+  font-size: 14px;
+  margin: 0;
+}
+.salah-workspace .salah-guidance .jic-prayer-visit header {
+  gap: 8px;
+  padding: 0;
+}
+.salah-workspace .salah-guidance .jic-prayer-visit header nav {
+  gap: 8px;
+}
+.salah-workspace .salah-guidance .jic-prayer-visit header nav a {
+  min-height: 44px;
+  padding: 6px 8px;
+  font-size: 11px;
+}
+.salah-workspace .jic-extra-times-source {
+  margin: 0 12px;
+  border-top: 1px solid var(--salah-line);
+  color: var(--salah-muted);
+  font-size: 11px;
+}
+.salah-workspace .jic-extra-times-source summary {
+  padding-block: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.salah-workspace .jic-extra-times-source p {
+  margin: 0 0 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.salah-month-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+.salah-calendar {
+  padding: 10px;
+}
+.salah-calendar header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+.salah-workspace .salah-calendar h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--salah-ink);
+}
+.salah-calendar header > div {
+  display: flex;
+  align-items: center;
+}
+.salah-calendar header button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--salah-muted);
+}
+.salah-calendar header .salah-calendar-today {
+  width: 45px;
+  font-size: 11px;
+  color: var(--salah-gold);
+}
+.salah-calendar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.salah-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+}
+.salah-calendar-grid .salah-weekday {
+  padding-bottom: 7px;
+  text-align: center;
+  color: var(--salah-muted);
+  font-size: 9px;
+}
+.salah-calendar-grid button {
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--salah-ink);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.salah-calendar-grid [aria-current] {
+  color: var(--salah-gold);
+}
+.salah-calendar-grid [aria-pressed='true'] {
+  border-color: var(--salah-gold);
+  background: linear-gradient(110deg, var(--salah-current), transparent 100%);
+  font-weight: 650;
+}
+.salah-workspace .salah-selected-day > h2 {
+  margin: 0 0 9px;
+  font-size: 15px;
+  color: var(--salah-ink);
+}
+.salah-month-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 14px 0;
+}
+.salah-month-actions :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--salah-gold);
+  font-size: 12px;
+}
+.salah-month-actions a {
+  padding: 8px 12px;
+  border-radius: 11px;
+  background: linear-gradient(110deg, var(--salah-current), transparent 100%);
+}
+.salah-workspace .salah-full-month[hidden] {
+  display: none;
+}
+.salah-full-month {
+  scroll-margin-top: 80px;
+}
+.salah-workspace .timetable-downloads {
+  scroll-margin-top: 80px;
+}
+.salah-empty {
+  margin: 0;
+  padding: 18px 14px;
+  color: var(--salah-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.salah-loading {
+  padding: 12px 0;
+}
+html[data-surface='solid'] .salah-workspace :is(.salah-daily-card, .salah-calendar, .salah-jummah) {
+  background: var(--salah-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@media (max-width: 700px) {
+  .salah-workspace {
+    width: calc(100% - 24px);
+    margin-top: 5px;
+  }
+  .salah-today-layout,
+  .salah-month-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .salah-alert-link span {
+    display: none;
+  }
+  .salah-view-tabs {
+    max-width: none;
+    margin-bottom: 12px;
+  }
+  .salah-support {
+    gap: 8px;
+  }
+  .salah-jummah {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 14px;
+    padding-block: 10px;
+  }
+  .salah-workspace .salah-jummah h2 {
+    align-self: center;
+    margin: 0;
+    font-size: 14px;
+  }
+  .salah-jummah details {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+  .salah-calendar-grid button {
+    min-height: 36px;
+  }
+}
+@media (max-width: 390px) {
+  .salah-workspace .jic-card-extra-times[data-has-sunset] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .salah-daily-table :is(th, td) {
+    padding-inline: 11px;
+  }
+  .salah-countdown time {
+    font-size: 16px;
+  }
+  .salah-jummah {
+    column-gap: 10px;
+  }
+  .salah-jummah dd {
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .salah-workspace :is(.salah-daily-card, .salah-calendar, .salah-jummah) {
+    background: var(--salah-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (forced-colors: active) {
+  .salah-daily-table tr[aria-current] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  .salah-calendar-grid [aria-pressed='true'] {
+    outline: 2px solid Highlight;
+  }
+}

@@ -4,7 +4,7 @@ import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl } from '@/lib/video';
 import { useContent } from '@/context/ContentContext';
 import { isPageVisible } from '@/lib/pageVisibility';
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useLayoutEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import ManagedPageContent from '@/components/ManagedPageContent';
 import ManagedPageSections from '@/components/ManagedPageSections';
@@ -26,6 +26,7 @@ import { isPublicTaskRoute, isPublicReadingRoute } from '@/lib/publicTaskRoute';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import AppBrandHeader from '@/components/shell/AppBrandHeader';
 import useInstalledApp from '@/hooks/useInstalledApp';
+import { isSalahRoute } from '@/lib/salahRoute';
 import EidAnnouncement from '@/components/shell/EidAnnouncement';
 
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
@@ -52,11 +53,14 @@ function PublicLayout() {
   const preview = new URLSearchParams(search).get('preview') === '1';
   const installed = useInstalledApp();
   const isHome = pathname === '/';
+  const isSalah = isSalahRoute(pathname);
+  useLayoutEffect(() => {
+    if (!isSalah) return undefined;
+    document.documentElement.dataset.salahWorkspace = 'true';
+    return () => delete document.documentElement.dataset.salahWorkspace;
+  }, [isSalah]);
   const isAbout = ABOUT_PATHS.includes(pathname);
-  const showReminder =
-    isHome ||
-    pathname === '/worship' ||
-    (pathname.startsWith('/prayer-times') && pathname !== '/prayer-times/reminders');
+  const showReminder = isHome || pathname === '/worship';
   const isDiscovery = ['/search', '/social-media', '/education/programmes', '/events'].includes(
     pathname,
   );
@@ -98,9 +102,9 @@ function PublicLayout() {
             {!isAbout && pathname !== '/services/hall-booking' && (
               <ManagedPageSections key={pathname} />
             )}
-            {!isHome && !isDiscovery && !isTask && <ProgrammePosters />}
-            {!isHome && !isDiscovery && !isTask && <PublishedPageLinks />}
-            {!isHome && !isAbout && !isDiscovery && !isTask && <RelatedContent />}
+            {!isHome && !isSalah && !isDiscovery && !isTask && <ProgrammePosters />}
+            {!isHome && !isSalah && !isDiscovery && !isTask && <PublishedPageLinks />}
+            {!isHome && !isSalah && !isAbout && !isDiscovery && !isTask && <RelatedContent />}
           </div>
         ) : (
           <section className="jic-page-loading">

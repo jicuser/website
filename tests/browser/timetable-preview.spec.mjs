@@ -34,6 +34,7 @@ async function openTimetable(page) {
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
   });
   await page.goto('/prayer-times/monthly');
+  await page.getByRole('button', { name: 'View full month', exact: true }).click();
   const grid = page.locator('.monthly-timetable-grid');
   await expect(grid.getByRole('columnheader', { name: 'Zawal', exact: true })).toBeVisible();
   await expect(grid.locator('td.monthly-timetable-column-zawal[title="11:46 AM"]')).toHaveText(

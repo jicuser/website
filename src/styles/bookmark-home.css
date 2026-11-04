@@ -436,30 +436,35 @@ html[data-installed-navigation='true'][data-surface='solid']
 /* Header playback and a short daily dashboard fit the installed phone shell. */
 html[data-installed-navigation='true'] .jic-home-route .jic-app-brand-header.is-home {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: clamp(112px, 34vw, 144px) minmax(0, 1fr);
   align-items: center;
   gap: 8px;
   min-height: 64px;
 }
 .jic-app-brand-header.is-home .brand-lockup {
-  width: clamp(130px, 42vw, 170px);
+  width: 100%;
 }
 .jic-app-radio-mini {
   --radio-glow: var(--bookmark-current-wash);
-  background: radial-gradient(ellipse at center, var(--radio-glow), transparent 72%);
+  --radio-hue: rgba(155, 130, 205, 0.2);
+  min-width: 0;
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at 72% 45%, var(--radio-hue), transparent 74%),
+    linear-gradient(90deg, transparent, var(--radio-glow) 18%, var(--radio-glow) 78%, transparent);
 }
 .jic-app-radio-mini[data-playing='true'] {
   --radio-glow: var(--bookmark-next-wash);
+  --radio-hue: rgba(99, 185, 165, 0.22);
 }
 .jic-app-radio-mini button {
   display: grid;
-  grid-template-columns: 24px auto 12px;
+  grid-template-columns: 24px minmax(0, 1fr) 14px;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 106px;
-  min-height: 52px;
-  padding: 8px 4px;
+  gap: 8px;
+  width: 100%;
+  min-height: 56px;
+  padding: 9px 12px;
   border: 0;
   border-radius: 0;
   color: var(--jic-gold);
@@ -467,9 +472,24 @@ html[data-installed-navigation='true'] .jic-home-route .jic-app-brand-header.is-
   box-shadow: none;
   cursor: pointer;
 }
-.jic-app-radio-mini button > span {
+.jic-app-radio-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+.jic-app-radio-copy strong {
   font-size: 12px;
+  font-weight: 650;
   line-height: 1.2;
+}
+.jic-app-radio-copy small {
+  overflow: hidden;
+  color: var(--jic-text-secondary);
+  font-size: 10px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .jic-app-radio-mini button[aria-pressed='true'] {
   color: var(--bookmark-next);
@@ -480,6 +500,14 @@ html[data-installed-navigation='true'] .jic-home-route .jic-app-brand-header.is-
 .jic-app-radio-mini button:focus-visible {
   outline: 2px solid var(--jic-gold);
   outline-offset: 2px;
+}
+html[data-installed-navigation='true'][data-surface='solid'] .jic-app-radio-mini {
+  background: var(--bookmark-solid);
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .jic-app-radio-mini {
+    background: var(--bookmark-solid);
+  }
 }
 html[data-installed-navigation='true'] .jic-home-route .jic-app-community .jic-home-destination {
   min-height: 54px;

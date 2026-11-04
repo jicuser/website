@@ -92,10 +92,10 @@ test('parent account gets family records without management or receipt-confirmat
   expect(state.errors).toEqual([]);
 });
 for (const [kind, end, expected] of [
-  ['time', null, '11:46 AM'],
-  ['interval', '12:02', '11:46 AM – 12:02 PM'],
+  ['time', null, '11:46'],
+  ['interval', '12:02', '11:46 – 12:02'],
 ]) {
-  test(`public extra times show the published Zawal ${kind} and leave sunset unpublished`, async ({
+  test(`public extra times retain sunrise, Ishraq and the published Zawal ${kind} without inferring sunset`, async ({
     page,
   }, info) => {
     const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
@@ -129,11 +129,18 @@ for (const [kind, end, expected] of [
       },
     });
     await page.goto('/prayer-times');
-    const details = page.getByRole('region', { name: 'Additional times' });
+    const details = page.locator('.salah-daily-card .jic-card-extra-times');
     await expect(details).toBeVisible();
-    await expect(details.getByText('Not published', { exact: true })).toBeVisible();
-    await expect(details.getByText(expected, { exact: true })).toBeVisible();
-    await expect(details.getByText('Approved November timetable')).toBeVisible();
+    await expect(details.locator('.jic-card-shuroq dd')).toHaveText('07:00');
+    await expect(details.locator('.jic-card-ishraq dd')).toHaveText('07:20');
+    await expect(details.locator('.jic-card-zawal dd')).toHaveText(expected);
+    await expect(details.locator('.jic-card-sunset')).toHaveCount(0);
+    const source = page.locator('.salah-daily-card .jic-extra-times-source');
+    await source.getByText('Timetable source', { exact: true }).click();
+    await expect(source).toContainText('Approved November timetable');
+    const information = page.locator('.salah-information');
+    await information.getByText('About these times', { exact: true }).click();
+    await expect(information).toContainText('20 minutes after sunrise');
     await page.screenshot({ path: info.outputPath('additional-times.png'), fullPage: true });
   });
 }

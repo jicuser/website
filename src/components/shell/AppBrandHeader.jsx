@@ -7,6 +7,7 @@ import { activeNavigation } from '@/lib/publicNavigation';
 import { visibleNavigation, isPageVisible, pageSectionKey } from '@/lib/pageVisibility';
 import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import AppHomeRadio from '@/components/home/AppHomeRadio';
+import { isSalahRoute } from '@/lib/salahRoute';
 
 export default function AppBrandHeader({ home = false }) {
   const { pathname } = useLocation();
@@ -19,7 +20,7 @@ export default function AppBrandHeader({ home = false }) {
     groups.find((group) => group.path === original?.path) ||
     original;
   const links =
-    pathname === '/' || pathname === '/services'
+    pathname === '/' || pathname === '/services' || isSalahRoute(pathname)
       ? []
       : (section?.children || []).filter((page) => isPageVisible(getContent, page.path));
   const selected =

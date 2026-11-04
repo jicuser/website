@@ -81,9 +81,7 @@ for (const width of [320, 390]) {
       await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
       await pill.click();
       await expect(page).toHaveURL('/prayer-times');
-      await expect(
-        page.getByRole('heading', { name: "Today's Prayer Times", exact: true }),
-      ).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Salah times', exact: true })).toBeVisible();
       await expect(page.locator('#jic-prayer-details')).toBeHidden();
       const home = nav.getByRole('button', { name: 'Home' });
       await home.click();
