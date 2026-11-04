@@ -201,6 +201,7 @@ test('Friday second Jamaat does not mark the first session’s timetable cell ne
   assert.match(text, /13:30/);
   assert.match(text, /12:35/);
   assert.doesNotMatch(html, /data-next="true"/);
+  assert.doesNotMatch(html, /data-wash="next"|, next up/);
 });
 
 test('installed card labels the sunrise buffer and clears the prohibition when it passes', () => {
@@ -236,6 +237,8 @@ test('browser card does not highlight today’s Fajr for tomorrow’s next event
   );
   assert.match(renderedText(html), /Currently Isha time/);
   assert.doesNotMatch(html, /data-next="true"|data-upcoming="true"/);
+  assert.match(renderedText(html), /Next prayer · Tomorrow/);
+  assert.doesNotMatch(html, /data-wash="next"/);
 });
 test('browser card shares active and passed Shuroq wording with the installed app', () => {
   assert.match(renderedText(render({}, '2026-11-03T07:10:00Z')), /Prohibited time · Shuroq/);

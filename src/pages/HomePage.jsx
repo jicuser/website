@@ -203,22 +203,19 @@ export default function HomePage() {
       <section className="jic-hero">
         <div className="jic-hero-inner">
           {!installed && (
-            <div className="jic-hero-copy">
-              <header className="jic-home-intro">
-                <p className="jic-app-brandline">Jamatia Islamic Centre</p>
-                <h1 className="jic-home-welcome">Worship. Learn. Grow. Together.</h1>
-              </header>
-              <nav className="jic-home-shortcuts" aria-label="Services and learning">
-                {shortcuts.map(({ key, ...card }) => (
-                  <HomeDestination key={key} {...card} />
-                ))}
-              </nav>
-              <Link to="/contact#map" className="jic-home-visit">
-                Plan your visit <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </div>
+            <header className="jic-home-intro">
+              <p className="jic-app-brandline">Jamatia Islamic Centre</p>
+              <h1 className="jic-home-welcome">Worship. Learn. Grow. Together.</h1>
+            </header>
           )}
           <HomePrayerCard compact={installed} />
+          {!installed && (
+            <nav className="jic-home-shortcuts" aria-label="Services and learning">
+              {shortcuts.map(({ key, ...card }) => (
+                <HomeDestination key={key} {...card} />
+              ))}
+            </nav>
+          )}
           {installed && (
             <>
               <DailyReminder />
@@ -255,7 +252,9 @@ export default function HomePage() {
           <Link to="/services">
             Community Hub <ArrowRight size={16} aria-hidden="true" />
           </Link>
-          {installed && <Link to="/contact#map">Plan your visit <ArrowRight size={16} aria-hidden="true" /></Link>}
+          <Link to="/contact#map">
+            Plan your visit <ArrowRight size={16} aria-hidden="true" />
+          </Link>
           {communityCards.map((card) => (
             <Link key={card.key} to={card.to}>
               {card.key === 'projects' ? 'Our projects' : 'Youth'}{' '}

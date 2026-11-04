@@ -79,6 +79,27 @@ html[data-theme] .jic-premium-home .jic-hero-inner {
   gap: clamp(24px, 5vw, 72px);
   min-height: 0;
 }
+/* On phones the timetable follows the welcome in reading and keyboard order. */
+.jic-premium-home:not(.jic-app-home) .jic-hero-inner > .jic-home-shortcuts {
+  margin-top: 0;
+}
+@media (min-width: 768px) {
+  html[data-theme] .jic-premium-home:not(.jic-app-home) .jic-hero-inner {
+    grid-template-areas: 'welcome salah' 'services salah';
+    row-gap: 14px;
+  }
+  .jic-premium-home:not(.jic-app-home) .jic-hero-inner > .jic-home-intro {
+    grid-area: welcome;
+    align-self: end;
+  }
+  .jic-premium-home:not(.jic-app-home) .jic-hero-inner > .jic-home-prayer {
+    grid-area: salah;
+  }
+  .jic-premium-home:not(.jic-app-home) .jic-hero-inner > .jic-home-shortcuts {
+    grid-area: services;
+    align-self: start;
+  }
+}
 html[data-theme] .jic-premium-home .jic-kicker {
   margin: 0 0 10px;
   color: var(--jic-gold);
@@ -372,22 +393,6 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
 .jic-home-route .jic-premium-home .jic-home-content > * {
   margin-block: 0;
   min-width: 0;
-}
-.jic-hero-copy {
-  min-width: 0;
-}
-.jic-home-visit {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  margin-top: 4px;
-  color: var(--jic-gold);
-  font-size: 14px;
-  font-weight: 600;
-}
-.jic-home-visit:hover {
-  text-decoration: underline;
 }
 .jic-home-prayer {
   min-width: 0;
@@ -733,11 +738,6 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
   .jic-home-shortcuts .jic-home-destination-copy strong {
     font-size: 12px;
     line-height: 1.2;
-  }
-  .jic-home-visit {
-    min-height: 44px;
-    margin-top: 4px;
-    font-size: 13px;
   }
   .jic-home-prayer {
     border-radius: 16px;

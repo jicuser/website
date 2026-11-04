@@ -71,7 +71,6 @@ export default function HomePrayerCard({ compact = false }) {
     if (next) setSelected(next.isoDate);
   };
   const current = state?.current?.key;
-  const DateTitle = compact ? 'h2' : 'strong';
   const shuroq = sunriseStatus(selected, row?.sunrise, now);
   const currentLabel = state?.current
     ? `Currently ${state.current.name} time`
@@ -86,11 +85,10 @@ export default function HomePrayerCard({ compact = false }) {
     target?.key === key &&
     target.kind === kind &&
     compactTime(target.time) === compactTime(time);
-  // Paint each glow once on the table so row boundaries never create separate tiles.
-  const currentColumn = columns.findIndex((prayer) => prayer.key === current);
-  const upcomingColumn = columns.findIndex(
-    (prayer) => !target?.tomorrow && target?.key === prayer.key && current !== prayer.key,
-  );
+  const nextColumn = columns.find(
+    (prayer) =>
+      nextCell(prayer.key, 'start', prayer.begins) || nextCell(prayer.key, 'jamaat', prayer.jamaat),
+  )?.key;
 
   return (
     <aside
@@ -99,12 +97,9 @@ export default function HomePrayerCard({ compact = false }) {
     >
       <header className="jic-card-heading">
         <div className="jic-card-date">
-          <DateTitle>
-            {isToday ? (compact ? 'Today’s Salah' : 'Today') : 'Timetable'}{' '}
-            {!compact && <span>· {dateLabel(selected)}</span>}
-          </DateTitle>
+          <h2>{isToday ? 'Today’s Salah' : 'Timetable'}</h2>
           <small>
-            {compact && <>{dateLabel(selected)} · </>}
+            {dateLabel(selected)} ·{' '}
             <span className="jic-card-islamic-date">{islamicLabel(selected)}</span>
           </small>
         </div>
@@ -231,18 +226,18 @@ export default function HomePrayerCard({ compact = false }) {
         <section className="jic-card-status" data-next-prayer="true" aria-label="Next prayer">
           <div className="jic-card-next">
             <span className="jic-card-eyebrow">
-              {target.tomorrow
-                ? 'Tomorrow'
-                : target.kind === 'start'
-                  ? 'Next prayer'
-                  : 'Next Jamaat'}
+              {target.kind === 'start' ? 'Next prayer' : 'Next Jamaat'}
+              {target.tomorrow && ' · Tomorrow'}
             </span>
             <strong>
-              {target.name} <span>{displayTime(target.time)}</span>
+              {target.name}{' '}
+              <span>
+                {target.kind === 'start' ? 'Starts' : 'Jamaat'} {compactTime(target.time)}
+              </span>
             </strong>
             <small>
               {target.kind === 'start' && target.congregationTime
-                ? `Jamaat ${displayTime(target.congregationTime)}`
+                ? `Jamaat ${compactTime(target.congregationTime)}`
                 : 'Congregation at the masjid'}
             </small>
           </div>
@@ -276,16 +271,19 @@ export default function HomePrayerCard({ compact = false }) {
           role="region"
           aria-label="Prayer times, 24-hour clock"
         >
-          <table
-            className="jic-card-table"
-            style={{
-              '--prayer-current-column': currentColumn < 0 ? -10 : currentColumn,
-              '--prayer-upcoming-column': upcomingColumn < 0 ? -10 : upcomingColumn,
-            }}
-          >
+          <table className="jic-card-table">
             <caption className="sr-only">
               {dateLabel(selected)}: prayer begins and Jamaat times, 24-hour clock
             </caption>
+            <colgroup>
+              <col className="jic-card-label-column" />
+              {columns.map(({ key }) => (
+                <col
+                  key={key}
+                  data-wash={key === current ? 'current' : key === nextColumn ? 'next' : undefined}
+                />
+              ))}
+            </colgroup>
             <thead>
               <tr>
                 <th scope="col">
@@ -297,15 +295,12 @@ export default function HomePrayerCard({ compact = false }) {
                     key={prayer.key}
                     data-current={current === prayer.key || undefined}
                     data-upcoming={
-                      (!target?.tomorrow && target?.key === prayer.key && current !== prayer.key) ||
-                      undefined
+                      (nextColumn === prayer.key && current !== prayer.key) || undefined
                     }
                     aria-current={current === prayer.key ? 'time' : undefined}
                   >
                     {prayer.name}
-                    {!target?.tomorrow && target?.key === prayer.key && (
-                      <span className="sr-only">, next up</span>
-                    )}
+                    {nextColumn === prayer.key && <span className="sr-only">, next up</span>}
                     {current === prayer.key && <span className="sr-only">, current prayer</span>}
                   </th>
                 ))}

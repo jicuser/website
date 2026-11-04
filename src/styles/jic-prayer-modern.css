@@ -48,15 +48,13 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
 .jic-prayer-card .jic-card-date {
   min-width: 0;
 }
-.jic-prayer-card .jic-card-date strong {
-  display: block;
-  font-size: 12px;
-  line-height: 1.4;
-  font-weight: 650;
-}
-.jic-prayer-card .jic-card-date strong > span {
-  font-weight: 450;
-  color: var(--prayer-muted);
+.jic-prayer-card .jic-card-date h2 {
+  margin: 0 0 3px;
+  color: var(--prayer-ink);
+  font:
+    500 clamp(18px, 1.6vw, 22px)/1.15 Georgia,
+    'Times New Roman',
+    serif;
 }
 .jic-prayer-card .jic-card-date small {
   display: block;
@@ -144,8 +142,9 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   line-height: 1.2;
 }
 .jic-prayer-card .jic-card-next > strong > span {
-  font-size: 12px;
-  color: var(--prayer-gold);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--prayer-next);
   letter-spacing: 0;
   font-weight: 600;
 }
@@ -185,38 +184,30 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   margin: 0 10px;
 }
 .jic-prayer-card .jic-card-table {
-  --prayer-label-width: 40px;
-  --prayer-column-width: calc((100% - var(--prayer-label-width)) / 5);
   width: 100%;
   min-width: 260px;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-variant-numeric: tabular-nums;
-  background-image:
-    linear-gradient(
-      90deg,
-      transparent,
-      var(--prayer-current-wash) 20%,
-      var(--prayer-current-wash) 80%,
-      transparent
-    ),
-    linear-gradient(
-      90deg,
-      transparent,
-      var(--prayer-next-wash) 20%,
-      var(--prayer-next-wash) 80%,
-      transparent
-    );
-  background-size: var(--prayer-column-width) 100%;
-  background-position:
-    calc(var(--prayer-label-width) + var(--prayer-column-width) * var(--prayer-current-column, -10))
-      0,
-    calc(
-        var(--prayer-label-width) + var(--prayer-column-width) * var(--prayer-upcoming-column, -10)
-      )
-      0;
-  background-repeat: no-repeat;
+}
+.jic-card-table .jic-card-label-column {
+  width: 40px;
+}
+/* A table column paints the wash across its rows at their actual rendered width. */
+.jic-card-table col[data-wash='current'] {
+  --prayer-column-wash: var(--prayer-current-wash);
+}
+.jic-card-table col[data-wash='next'] {
+  --prayer-column-wash: var(--prayer-next-wash);
+}
+.jic-card-table col[data-wash] {
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    var(--prayer-column-wash) 20% 80%,
+    transparent
+  );
 }
 .jic-prayer-card .jic-card-table :is(th, td) {
   border: 0;
@@ -228,7 +219,6 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   color: var(--prayer-ink);
 }
 .jic-prayer-card .jic-card-table tr > :first-child {
-  width: 40px;
   text-align: left;
   padding-left: 2px;
   font-size: 10px;
@@ -258,6 +248,15 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
 }
 .jic-prayer-card .jic-card-table :is([data-upcoming='true'], [data-next='true']) {
   color: var(--prayer-next);
+}
+/* Jamaat can be next while the same Salah is current. Mark that exact time in mint. */
+.jic-card-table td[data-current][data-next] {
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    var(--prayer-next-wash) 20% 80%,
+    transparent
+  );
 }
 .jic-prayer-card .jic-card-friday {
   display: flex;
