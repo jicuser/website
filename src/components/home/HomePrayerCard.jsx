@@ -73,8 +73,15 @@ export default function HomePrayerCard({ compact = false }) {
   const current = state?.current?.key;
   const DateTitle = compact ? 'h2' : 'strong';
   const shuroq = sunriseStatus(selected, row?.sunrise, now);
+  const currentLabel = state?.current
+    ? `Currently ${state.current.name} time`
+    : shuroq.phase === 'active'
+      ? 'Prohibited time · Shuroq'
+      : shuroq.phase === 'passed'
+        ? 'Shuroq period passed'
+        : 'Today’s timetable';
+  const CurrentIcon = state?.current || shuroq.phase === 'passed' ? CheckCircle2 : Clock3;
   const nextCell = (key, kind, time) =>
-    compact &&
     !target?.tomorrow &&
     target?.key === key &&
     target.kind === kind &&
@@ -131,16 +138,24 @@ export default function HomePrayerCard({ compact = false }) {
         </div>
       </header>
 
-      {isToday && !compact && (
-        <div className="jic-card-clock">
-          Current time{' '}
-          <time>
-            {now.toLocaleTimeString('en-GB', {
-              timeZone: 'Europe/London',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </time>
+      {isToday && !compact && state?.available && (
+        <div
+          className="jic-card-clock"
+          data-sunrise-active={shuroq.phase === 'active' || undefined}
+        >
+          <span>
+            <CurrentIcon size={13} aria-hidden="true" /> {currentLabel}
+          </span>
+          <span className="jic-card-clock-now">
+            Current time{' '}
+            <time>
+              {now.toLocaleTimeString('en-GB', {
+                timeZone: 'Europe/London',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </time>
+          </span>
         </div>
       )}
       {!isToday ? (
@@ -156,23 +171,9 @@ export default function HomePrayerCard({ compact = false }) {
             className="jic-card-app-current"
             data-sunrise-active={shuroq.phase === 'active' || undefined}
           >
-            {state.current ? (
-              <span>
-                <CheckCircle2 size={15} aria-hidden="true" /> Currently {state.current.name} time
-              </span>
-            ) : shuroq.phase === 'active' ? (
-              <span>
-                <Clock3 size={15} aria-hidden="true" /> Prohibited time · Shuroq
-              </span>
-            ) : shuroq.phase === 'passed' ? (
-              <span>
-                <CheckCircle2 size={15} aria-hidden="true" /> Shuroq period passed
-              </span>
-            ) : (
-              <span>
-                <Clock3 size={15} aria-hidden="true" /> Today’s timetable
-              </span>
-            )}
+            <span>
+              <CurrentIcon size={15} aria-hidden="true" /> {currentLabel}
+            </span>
             <span className="jic-card-app-clock">
               Now{' '}
               <time>
@@ -222,7 +223,7 @@ export default function HomePrayerCard({ compact = false }) {
           )}
         </section>
       ) : target ? (
-        <section className="jic-card-status" aria-label="Next prayer">
+        <section className="jic-card-status" data-next-prayer="true" aria-label="Next prayer">
           <div className="jic-card-next">
             <span className="jic-card-eyebrow">
               {target.tomorrow
@@ -245,7 +246,7 @@ export default function HomePrayerCard({ compact = false }) {
             <time role="timer" aria-live="off" aria-label={`Time until ${target.label}`}>
               {countdownText(target.seconds)}
             </time>
-            <small>{state.current ? `Current: ${state.current.name}` : 'London time'}</small>
+            <small>London time</small>
           </div>
         </section>
       ) : state?.phase === 'jamaat-now' ? (
@@ -285,16 +286,13 @@ export default function HomePrayerCard({ compact = false }) {
                     key={prayer.key}
                     data-current={current === prayer.key || undefined}
                     data-upcoming={
-                      (compact &&
-                        !target?.tomorrow &&
-                        target?.key === prayer.key &&
-                        current !== prayer.key) ||
+                      (!target?.tomorrow && target?.key === prayer.key && current !== prayer.key) ||
                       undefined
                     }
                     aria-current={current === prayer.key ? 'time' : undefined}
                   >
                     {prayer.name}
-                    {compact && !target?.tomorrow && target?.key === prayer.key && (
+                    {!target?.tomorrow && target?.key === prayer.key && (
                       <span className="sr-only">, next up</span>
                     )}
                     {current === prayer.key && <span className="sr-only">, current prayer</span>}

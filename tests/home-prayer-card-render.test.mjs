@@ -76,11 +76,11 @@ test('real component uses one semantic table, not five nested cards', () => {
   assert.equal((html.match(/scope="row"/g) || []).length, 2);
   assert.doesNotMatch(html, /jic-prayer-browser-item/);
 });
-test('current prayer is one full column, not competing current and next highlights', () => {
+test('browser card keeps the current column distinct from the next event cell', () => {
   const html = render();
   assert.equal((html.match(/aria-current="time"/g) || []).length, 1);
   assert.equal((html.match(/data-current="true"/g) || []).length, 3);
-  assert.match(html, /Current: Maghrib/);
+  assert.match(html, /Currently .*Maghrib.* time/);
   assert.doesNotMatch(html, /is-next-jamaat/);
 });
 test('starts countdown includes both next beginning and congregation without repeated radio link', () => {
@@ -95,7 +95,7 @@ test('after the start the same countdown changes to Jamaat', () => {
   const html = render({}, '2026-11-03T14:48:41Z');
   assert.match(html, /Jamaat in/);
   assert.match(html, /00:41:19/);
-  assert.match(html, /Current: Asr/);
+  assert.match(html, /Currently .*Asr.* time/);
 });
 test('native date picker replaces the overflowing month-long strip', () => {
   const html = render();
@@ -214,4 +214,30 @@ test('installed card labels the sunrise buffer and clears the prohibition when i
     renderedText(render({}, '2026-11-03T12:00:00Z', { compact: true })),
     /Currently Dhuhr time/,
   );
+});
+
+for (const [clock, time] of [
+  ['2026-11-03T17:13:00Z', '18:24'],
+  ['2026-11-03T18:45:00Z', '19:30'],
+]) {
+  test(`browser card matches next highlighting to the correct start or Jamaat at ${clock}`, () => {
+    const html = render({}, clock);
+    const cells = [...html.matchAll(/<td\b[^>]*data-next="true"[^>]*>([\s\S]*?)<\/td>/g)];
+    assert.equal(cells.length, 1);
+    assert.ok(renderedText(cells[0][1]).includes(time));
+    assert.equal((html.match(/aria-current="time"/g) || []).length, 1);
+    assert.match(html, /data-next-prayer="true"/);
+  });
+}
+test('browser card does not highlight today’s Fajr for tomorrow’s next event', () => {
+  const html = render(
+    { tomorrowsTimes: { ...today, d_date: '2026-11-04', fajr: '05:35' } },
+    '2026-11-03T21:00:00Z',
+  );
+  assert.match(renderedText(html), /Currently Isha time/);
+  assert.doesNotMatch(html, /data-next="true"|data-upcoming="true"/);
+});
+test('browser card shares active and passed Shuroq wording with the installed app', () => {
+  assert.match(renderedText(render({}, '2026-11-03T07:10:00Z')), /Prohibited time · Shuroq/);
+  assert.match(renderedText(render({}, '2026-11-03T07:25:00Z')), /Shuroq period passed/);
 });

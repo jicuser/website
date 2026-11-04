@@ -8,6 +8,9 @@
   --prayer-gold: #e6c386;
   --prayer-current: #e6c386;
   --prayer-current-ink: #152438;
+  --prayer-current-wash: rgba(230, 195, 134, 0.16);
+  --prayer-next: #9edacb;
+  --prayer-next-wash: rgba(86, 175, 158, 0.18);
 }
 html[data-theme='light'] .jic-prayer-card {
   --prayer-paper: rgba(255, 253, 248, 0.95);
@@ -17,6 +20,9 @@ html[data-theme='light'] .jic-prayer-card {
   --prayer-line: rgba(34, 52, 70, 0.14);
   --prayer-gold: #77531c;
   --prayer-current: #ead2a4;
+  --prayer-current-wash: rgba(169, 126, 56, 0.14);
+  --prayer-next: #1c6256;
+  --prayer-next-wash: rgba(48, 134, 113, 0.13);
 }
 html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   min-width: 0;
@@ -24,8 +30,7 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   overflow: hidden;
   border: 1px solid var(--prayer-line);
   border-radius: 20px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.035), transparent 65%), var(--prayer-paper);
+  background: linear-gradient(135deg, var(--jic-wash-warm), transparent 65%), var(--prayer-paper);
   color: var(--prayer-ink);
   box-shadow:
     0 12px 36px #0000001a,
@@ -220,14 +225,14 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   color: var(--prayer-ink);
 }
 .jic-prayer-card .jic-card-table [data-current='true'] {
-  color: var(--prayer-current-ink);
-  background: var(--prayer-current);
+  color: var(--prayer-ink);
+  background: var(--prayer-current-wash);
 }
 .jic-prayer-card .jic-card-table thead [data-current='true'] {
   border-radius: 9px 9px 0 0;
 }
 .jic-prayer-card .jic-card-table tbody tr:last-child [data-current='true'] {
-  color: var(--prayer-current-ink);
+  color: var(--prayer-ink);
   border-radius: 0 0 9px 9px;
 }
 .jic-prayer-card .jic-card-friday {
@@ -461,9 +466,14 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
 
 .jic-card-clock {
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 0 14px 5px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 2px 14px 6px;
+  padding: 7px 9px;
+  border-radius: 11px;
+  background: linear-gradient(105deg, var(--prayer-current-wash), transparent);
   color: var(--prayer-muted);
   font-size: 11px;
 }
@@ -514,7 +524,8 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   color: var(--prayer-muted);
 }
 .jic-card-extra-times .jic-card-ishraq {
-  border: 1px solid var(--prayer-gold);
+  border: 1px solid transparent;
+  background: linear-gradient(110deg, var(--prayer-current-wash), transparent 95%);
 }
 .jic-card-extra-times .jic-card-ishraq[aria-current] {
   background: var(--prayer-current);
@@ -563,4 +574,47 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   align-items: center;
   justify-content: center;
   gap: 3px;
+}
+
+/* Browser home shares the installed card's current/next colour cues and table. */
+.jic-card-clock > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.jic-card-clock svg {
+  color: var(--prayer-gold);
+  flex-shrink: 0;
+}
+.jic-card-clock .jic-card-clock-now {
+  margin-left: auto;
+}
+.jic-prayer-card:not(.is-compact) .jic-card-status[data-next-prayer] {
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 11px;
+  background: linear-gradient(105deg, var(--prayer-next-wash), transparent 94%);
+}
+.jic-prayer-card:not(.is-compact) .jic-card-next .jic-card-eyebrow {
+  color: var(--prayer-next);
+}
+.jic-prayer-card:not(.is-compact) .jic-card-table thead [data-current='true'] {
+  color: var(--prayer-gold);
+}
+.jic-prayer-card:not(.is-compact) .jic-card-table :is([data-upcoming='true'], [data-next='true']) {
+  background: var(--prayer-next-wash);
+  color: var(--prayer-next);
+}
+.jic-prayer-card:not(.is-compact) .jic-card-table [data-next='true'] {
+  border-radius: 8px;
+}
+.jic-prayer-card:not(.is-compact) .jic-card-table tbody td {
+  font-size: 13px;
+  font-weight: 650;
+}
+@media (forced-colors: active) {
+  .jic-prayer-card .jic-card-table [data-next='true'] {
+    outline: 2px dashed Highlight;
+    outline-offset: -3px;
+  }
 }

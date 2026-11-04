@@ -284,13 +284,13 @@ html[data-theme] :is(.jic-popup-panel, .jic-image-viewer) {
   backdrop-filter: var(--jic-glass-dense-filter);
 }
 
-/* A light tint keeps the daily reading over the shared photo without a dense card. */
+/* The daily quote stays unboxed; its text halo supplies the quiet highlight. */
 html[data-theme] .jic-public-route .jic-daily-reminder > button {
-  background: var(--jic-glass-control-sheen), var(--jic-glass-reminder);
-  border-color: var(--jic-glass-border);
+  background: transparent;
+  border-color: transparent;
   box-shadow: none;
-  -webkit-backdrop-filter: var(--jic-glass-control-filter);
-  backdrop-filter: var(--jic-glass-control-filter);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 /* Fields retain an opaque reading surface inside the shared glass. */
@@ -663,7 +663,6 @@ html[data-theme]
     .jic-learning-notebook,
     .jic-account-step,
     .jic-question-list details,
-    .jic-home-destination,
     .jic-programme-card
   ) {
   background:
@@ -722,4 +721,13 @@ html[data-theme]
   .jic-public-route .jic-daily-reminder p::before {
     display: none;
   }
+}
+
+/* Home choices use the same wash on every screen; uploaded artwork keeps its image. */
+html[data-theme]:not([data-installed-navigation='true'])
+  .jic-public-route.jic-home-route
+  .jic-home-destination:not(.has-image) {
+  background:
+    linear-gradient(110deg, var(--jic-section-wash, var(--jic-wash-warm)), transparent 72%),
+    var(--jic-glass-tile);
 }

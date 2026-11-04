@@ -302,17 +302,6 @@ html[data-installed-navigation='true'] .jic-home-route .jic-site-footer::before 
   mask-image: linear-gradient(transparent, #000 45%, #000 75%, transparent);
 }
 
-/* A sparse octagonal lattice fades into the veiled city beneath the masthead. */
-html[data-installed-navigation='true'] .jic-home-route .jic-page-backdrop::before {
-  content: '';
-  position: absolute;
-  inset: 90px 0 0;
-  z-index: 1;
-  background: url('/bookmark-geometric.svg?v=octagonal-2') center / 144px 144px;
-  opacity: 0.13;
-  mask-image: linear-gradient(transparent, #000 28%, #000 70%, transparent);
-  pointer-events: none;
-}
 html[data-installed-navigation='true'] .jic-home-route .jic-home-prayer.is-compact {
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
