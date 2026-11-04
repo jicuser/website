@@ -7,6 +7,7 @@ import useDisplayClock from '@/hooks/useDisplayClock';
 import { countdownText, londonDay, prayerDisplayState } from '@/lib/prayerDisplayState';
 import { compactTime, prayerColumns, selectedPrayerRow } from '@/lib/homePrayerView';
 import '@/styles/jic-prayer-modern.css';
+import HomePrayerExtras from './HomePrayerExtras';
 
 const dateLabel = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-GB', {
   weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
@@ -73,6 +74,7 @@ export default function HomePrayerCard({ compact = false }) {
         </div>
       </header>
 
+      {isToday && <div className="jic-card-clock">Current time <time>{now.toLocaleTimeString('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit' })}</time></div>}
       {!isToday ? (
         <div className="jic-card-status jic-card-browsing">
           <span>Published timetable</span>
@@ -99,6 +101,10 @@ export default function HomePrayerCard({ compact = false }) {
               <p>Next prayer time is not yet published.</p>
             )}
           </div>
+          {target && <div className="jic-card-remaining">
+            <span>{target.kind === 'start' ? 'Starts in' : 'Jamaat in'}</span>
+            <time role="timer" aria-live="off" aria-label={`Time until ${target.label}`}>{countdownText(target.seconds)}</time>
+          </div>}
         </section>
       ) : target ? (
         <section className="jic-card-status" aria-label="Next prayer">
@@ -123,7 +129,7 @@ export default function HomePrayerCard({ compact = false }) {
         <div className="jic-card-table-scroll" tabIndex={0} role="region" aria-label="Prayer times, 24-hour clock">
           <table className="jic-card-table">
             <caption className="sr-only">{dateLabel(selected)}: prayer begins and Jamaat times, 24-hour clock</caption>
-            <thead><tr><th scope="col"><span className="sr-only">Prayer</span><span aria-hidden="true">24h</span></th>
+            <thead><tr><th scope="col"><span className="sr-only">Prayer</span></th>
               {columns.map((prayer) => <th scope="col" key={prayer.key} data-current={current === prayer.key || undefined} aria-current={current === prayer.key ? 'time' : undefined}>
                 {prayer.name}{current === prayer.key && <span className="sr-only">, current prayer</span>}
               </th>)}
@@ -138,8 +144,10 @@ export default function HomePrayerCard({ compact = false }) {
       {sessions.length > 0 && <div className="jic-card-friday"><span>Jummah</span>{sessions.map((session) => (
         <span key={session.number}>{session.number === 1 ? '1st' : '2nd'} <b>{displayTime(session.prayer)}</b></span>
       ))}</div>}
+      {row && <HomePrayerExtras date={selected} sunrise={row.sunrise} now={now} />}
       <nav className="jic-card-links" aria-label="Prayer links">
         <Link to="/prayer-times">Full timetable <ArrowRight size={14} aria-hidden="true" /></Link>
+        <Link to="/prayer-times/monthly#phone-wallpaper">Download wallpaper <ArrowRight size={14} aria-hidden="true" /></Link>
         <Link to="/prayer-times/reminders"><Bell size={14} aria-hidden="true" /> Salah alerts</Link>
       </nav>
     </aside>

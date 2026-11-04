@@ -293,3 +293,27 @@ html[data-installed-navigation='true'][data-surface='solid'] .jic-home-route
     font-size: 11px;
   }
 }
+
+.jic-app-home .jic-app-home-tools { grid-template-columns:1fr; }
+html[data-installed-navigation='true'] .jic-home-route .jic-page-backdrop {
+  position:absolute;
+  height:440px;
+}
+html[data-installed-navigation='true'] .jic-home-route .jic-page-backdrop::after {
+  background:linear-gradient(var(--bookmark-veil),var(--jic-mobile-canvas, var(--jic-bg)) 100%);
+}
+html[data-installed-navigation='true'] .jic-home-route .jic-site-footer {
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  padding-top:56px;
+  background:var(--jic-mobile-canvas, var(--jic-bg));
+}
+html[data-installed-navigation='true'] .jic-home-route .jic-site-footer::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  background:linear-gradient(var(--bookmark-veil),var(--bookmark-veil)),url('/jic-aerial-sunset.jpg') center 60% / cover;
+  mask-image:linear-gradient(transparent,#000 45%,#000 75%,transparent);
+}

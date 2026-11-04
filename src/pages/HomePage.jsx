@@ -12,7 +12,6 @@ import {
   Heart,
   HeartHandshake,
   MapPin,
-  ImageDown,
 } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
@@ -240,9 +239,6 @@ export default function HomePage() {
               <nav className="jic-app-home-tools" aria-label="Visit and downloads">
                 <Link to="/contact#map">
                   <MapPin size={18} aria-hidden="true" /> Plan your visit
-                </Link>
-                <Link to="/prayer-times/monthly#phone-wallpaper">
-                  <ImageDown size={18} aria-hidden="true" /> Download wallpaper
                 </Link>
               </nav>
               <DailyReminder />

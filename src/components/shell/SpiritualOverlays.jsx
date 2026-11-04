@@ -14,6 +14,7 @@ const SALAWAT = {
 export default function SpiritualOverlays() {
   const { editMode } = useContent();
   const note = useRef(null);
+  const modal = useRef(null);
   const [open, setOpen] = useState(() => {
     try {
       return !shownInMemory && sessionStorage.getItem(SESSION_KEY) !== '1';
@@ -30,24 +31,28 @@ export default function SpiritualOverlays() {
       // Still show once for this page load when storage is unavailable.
     }
     const timer = window.setTimeout(() => setOpen(false), 5500);
-    const outside = (event) => {
-      if (!note.current?.contains(event.target)) setOpen(false);
-    };
+    const dialog = modal.current;
+    dialog.showModal();
     const escape = (event) => {
       if (event.key === 'Escape') setOpen(false);
     };
-    document.addEventListener('pointerdown', outside);
+
     document.addEventListener('keydown', escape);
     return () => {
       window.clearTimeout(timer);
-      document.removeEventListener('pointerdown', outside);
+      dialog.close();
       document.removeEventListener('keydown', escape);
     };
   }, [open, editMode]);
 
   if (!open || editMode) return null;
   return (
-    <>
+    <dialog ref={modal} className="jic-salawat-layer" aria-label="Salawat welcome"
+      onCancel={(event) => { event.preventDefault(); setOpen(false); }}
+      onClick={(event) => {
+        event.stopPropagation();
+        if (!note.current?.contains(event.target)) setOpen(false);
+      }}>
       <div className="jic-salawat-backdrop" aria-hidden="true" />
       <aside ref={note} className="jic-salawat-note" aria-label="Salawat">
         <div>
@@ -66,6 +71,6 @@ export default function SpiritualOverlays() {
           <X size={18} aria-hidden="true" />
         </button>
       </aside>
-    </>
+    </dialog>
   );
 }

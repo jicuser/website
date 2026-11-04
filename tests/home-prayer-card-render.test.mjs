@@ -14,6 +14,7 @@ const today={d_date:'2026-11-03',fajr:'05:34',sunrise:'07:05',dhuhr:'11:56',asr:
 function render(data={},clock='2026-11-03T17:13:00Z',props={}) {
  const mod={exports:{}};
  const dependencies={
+  './HomePrayerExtras':{__esModule:true,default:()=>null},
   react:React,'lucide-react':require('lucide-react'),
   'react-router-dom':{Link:({to,children,...props})=>React.createElement('a',{...props,href:to},children)},
   '@/context/PrayerTimesContext':{usePublicPrayerTimes:()=>({todaysTimes:today,monthlyPrayerTimes:[],jummahTimes:[{prayer:'12:35'},{prayer:'13:30'}],...data})},
@@ -50,7 +51,7 @@ test('same-time Maghrib displays the Jamaat notice instead of a negative timer',
 });
 test('installed card labels tomorrow Fajr separately from today’s timetable',()=>{
  const html=render({tomorrowsTimes:{...today,d_date:'2026-11-04',fajr:'05:35'}},'2026-11-03T21:00:00Z',{compact:true});
- assert.match(html,/Today’s Salah/);assert.match(html,/Current · Isha/);assert.match(html,/Fajr tomorrow/);assert.match(html,/<time>05:35<\/time>/);assert.match(html,/05:34/);assert.doesNotMatch(html,/role="timer"/);
+ assert.match(html,/Today’s Salah/);assert.match(html,/Current · Isha/);assert.match(html,/Fajr tomorrow/);assert.match(html,/<time>05:35<\/time>/);assert.match(html,/05:34/);assert.match(html,/Starts in/);
 });
 test('installed card keeps the next Jamaat clear and the exact-time notice visible',()=>{
  const html=render({},'2026-11-03T18:45:00Z',{compact:true});
@@ -59,6 +60,6 @@ test('installed card keeps the next Jamaat clear and the exact-time notice visib
 });
 test('installed card handles the daylight gap and missing publication without a current claim',()=>{
  const html=render({},'2026-11-03T10:00:00Z',{compact:true});
- assert.match(html,/Dhuhr/);assert.doesNotMatch(html,/Current ·|aria-current="time"|role="timer"/);
+ assert.match(html,/Dhuhr/);assert.doesNotMatch(html,/Current ·|aria-current="time"/);
  assert.doesNotMatch(render({todaysTimes:null,jummahTimes:[]},undefined,{compact:true}),/Current ·|<table |role="timer"/);
 });

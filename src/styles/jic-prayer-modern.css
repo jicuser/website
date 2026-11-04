@@ -109,3 +109,20 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card { 
 @media (forced-colors:active) {
   .jic-prayer-card .jic-card-table [data-current='true'] { outline:2px solid Highlight; outline-offset:-2px; }
 }
+
+.jic-card-clock { display:flex; justify-content:flex-end; gap:8px; padding:0 14px 5px; color:var(--prayer-muted); font-size:11px; }
+.jic-card-clock time { color:var(--prayer-ink); font-weight:650; font-variant-numeric:tabular-nums; }
+.jic-card-remaining { text-align:right; }
+.jic-card-remaining span { display:block; font-size:10px; color:var(--prayer-muted); }
+.jic-card-remaining time { display:block; font-size:18px; font-weight:650; color:var(--prayer-ink); }
+.jic-card-extra-times { display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:8px; margin:4px 14px 8px; padding-top:8px; border-top:1px solid var(--prayer-line); text-align:center; }
+.jic-card-extra-times > div { padding:5px 2px; border-radius:10px; }
+.jic-card-extra-times dt { color:var(--prayer-muted); font-size:10px; }
+.jic-card-extra-times dd { margin:3px 0 0; color:var(--prayer-ink); font-size:12px; font-weight:600; }
+.jic-card-extra-times small { font-size:9px; color:var(--prayer-muted); }
+.jic-card-extra-times .jic-card-ishraq { border:1px solid var(--prayer-gold); }
+.jic-card-extra-times .jic-card-ishraq[aria-current] { background:var(--prayer-current); }
+.jic-card-extra-times .jic-card-ishraq[aria-current] :is(dt,dd,small) { color:var(--prayer-current-ink); }
+.jic-prayer-card .jic-card-links { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+.jic-prayer-card .jic-card-links a { font-size:11px; text-align:center; }
+.jic-prayer-card .jic-card-links .lucide-arrow-right { display:none; }

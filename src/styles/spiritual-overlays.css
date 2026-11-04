@@ -84,3 +84,17 @@
     background: rgb(5 20 25 / 35%);
   }
 }
+
+.jic-salawat-layer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.jic-salawat-layer::backdrop { background: transparent; }

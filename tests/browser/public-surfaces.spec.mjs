@@ -272,3 +272,17 @@ for (const width of [667, 1024]) {
     expect(state.writes).toEqual([]);
   });
 }
+
+test('dismissing Salawat over a service link stays on home', async ({ page }) => {
+  await fixture(page);
+  await page.goto('/');
+  const overlay = page.getByRole('dialog', { name: 'Salawat welcome' });
+  await expect(overlay).toBeVisible();
+  const link = page.locator('.jic-home-shortcuts a').first();
+  const bounds = await link.boundingBox();
+  await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  await expect(overlay).toHaveCount(0);
+  await expect(page).toHaveURL('/');
+  await link.click();
+  await expect(page).toHaveURL('/funerals');
+});
