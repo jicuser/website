@@ -1,6 +1,16 @@
 /* TV-only semantic colours. Geometry stays in tv.css and prayer-board.css.
    No filters or colour overrides are applied to poster or uploaded artwork. */
 :is(.jic-tv-shell, .scene-player)[data-tv-theme] {
+  --tv-section-sheen: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--tv-accent) 11%, transparent),
+    transparent 75%
+  );
+  --tv-current-fill: linear-gradient(
+    105deg,
+    var(--tv-highlight),
+    color-mix(in srgb, var(--tv-highlight) 88%, var(--tv-surface))
+  );
   background: var(--tv-background);
   color: var(--tv-text);
 }
@@ -23,7 +33,7 @@
     .jic-tv-display .jic-unified-info,
     .jic-tv-next
   ) {
-  background: var(--tv-surface);
+  background: var(--tv-section-sheen), var(--tv-surface);
   color: var(--tv-text);
   border-color: var(--tv-border);
 }
@@ -83,7 +93,7 @@
     .scene-timetable-prayers > .is-current,
     .scene-jummah-row > .is-current
   ) {
-  background: var(--tv-highlight);
+  background: var(--tv-current-fill);
   color: var(--tv-highlightText);
   box-shadow: inset 0 -3px var(--tv-accent);
 }
@@ -234,5 +244,13 @@
     width: 100%;
     max-width: 176px;
     justify-self: center;
+  }
+}
+
+/* Preserve the display theme's exact contrast when extra contrast is requested. */
+@media (prefers-contrast: more) {
+  :is(.jic-tv-shell, .scene-player)[data-tv-theme] {
+    --tv-section-sheen: none;
+    --tv-current-fill: var(--tv-highlight);
   }
 }

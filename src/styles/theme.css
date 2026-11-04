@@ -304,3 +304,25 @@ html[data-theme] .hover\:text-primary:hover {
 }
 
 /* Glass opacity and on-glass text are owned by liquid-glass.css. */
+
+/* Quiet shared section colours, composited over each area's own reading surface. */
+:root {
+  --jic-wash-warm: rgba(181, 136, 57, 0.12);
+  --jic-wash-cool: rgba(48, 141, 119, 0.12);
+  --jic-wash-lilac: rgba(119, 110, 176, 0.11);
+  --jic-wash-rose: rgba(178, 106, 125, 0.11);
+}
+.dark {
+  --jic-wash-warm: rgba(230, 195, 134, 0.15);
+  --jic-wash-cool: rgba(103, 193, 174, 0.14);
+  --jic-wash-lilac: rgba(162, 153, 222, 0.13);
+  --jic-wash-rose: rgba(213, 153, 168, 0.12);
+}
+@media (prefers-contrast: more) {
+  html[data-theme] {
+    --jic-wash-warm: transparent;
+    --jic-wash-cool: transparent;
+    --jic-wash-lilac: transparent;
+    --jic-wash-rose: transparent;
+  }
+}

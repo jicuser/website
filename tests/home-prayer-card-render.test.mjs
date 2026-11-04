@@ -7,47 +7,116 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import * as state from '../src/lib/prayerDisplayState.js';
 import * as view from '../src/lib/homePrayerView.js';
+import * as sunrise from '../src/lib/sunriseStatus.js';
 const require = createRequire(import.meta.url);
-const source = readFileSync(new URL('../src/components/home/HomePrayerCard.jsx',import.meta.url),'utf8');
-const compiled = ts.transpileModule(source, {compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
-const today={d_date:'2026-11-03',fajr:'05:34',sunrise:'07:05',dhuhr:'11:56',asr:'14:44',maghrib:'16:37',isha:'18:24',jamaah_fajr:'06:15',jamaah_dhuhr:'13:00',jamaah_asr:'15:30',jamaah_maghrib:'16:37',jamaah_isha:'19:30'};
-function render(data={},clock='2026-11-03T17:13:00Z',props={}) {
- const mod={exports:{}};
- const dependencies={
-  './HomePrayerExtras':{__esModule:true,default:()=>null},
-  react:React,'lucide-react':require('lucide-react'),
-  'react-router-dom':{Link:({to,children,...props})=>React.createElement('a',{...props,href:to},children)},
-  '@/context/PrayerTimesContext':{usePublicPrayerTimes:()=>({todaysTimes:today,monthlyPrayerTimes:[],jummahTimes:[{prayer:'12:35'},{prayer:'13:30'}],...data})},
-  '@/hooks/useDisplayClock':{__esModule:true,default:()=>new Date(clock)},
-  '@/lib/timetable':{displayTime:value=>value||'—'},
-  '@/lib/prayerDisplayState':state,'@/lib/homePrayerView':view,'@/styles/jic-prayer-modern.css':{},
- };
- new Function('require','module','exports',compiled)((name)=>{assert.ok(name in dependencies,`Unresolved ${name}`);return dependencies[name];},mod,mod.exports);
- return renderToStaticMarkup(React.createElement(mod.exports.default,props));
+const source = readFileSync(
+  new URL('../src/components/home/HomePrayerCard.jsx', import.meta.url),
+  'utf8',
+);
+const compiled = ts.transpileModule(source, {
+  compilerOptions: {
+    jsx: ts.JsxEmit.React,
+    module: ts.ModuleKind.CommonJS,
+    target: ts.ScriptTarget.ES2022,
+    esModuleInterop: true,
+  },
+}).outputText;
+const today = {
+  d_date: '2026-11-03',
+  fajr: '05:34',
+  sunrise: '07:05',
+  dhuhr: '11:56',
+  asr: '14:44',
+  maghrib: '16:37',
+  isha: '18:24',
+  jamaah_fajr: '06:15',
+  jamaah_dhuhr: '13:00',
+  jamaah_asr: '15:30',
+  jamaah_maghrib: '16:37',
+  jamaah_isha: '19:30',
+};
+function render(data = {}, clock = '2026-11-03T17:13:00Z', props = {}) {
+  const mod = { exports: {} };
+  const dependencies = {
+    '@/lib/sunriseStatus': sunrise,
+    './HomePrayerExtras': { __esModule: true, default: () => null },
+    react: React,
+    'lucide-react': require('lucide-react'),
+    'react-router-dom': {
+      Link: ({ to, children, ...props }) =>
+        React.createElement('a', { ...props, href: to }, children),
+    },
+    '@/context/PrayerTimesContext': {
+      usePublicPrayerTimes: () => ({
+        todaysTimes: today,
+        monthlyPrayerTimes: [],
+        jummahTimes: [{ prayer: '12:35' }, { prayer: '13:30' }],
+        ...data,
+      }),
+    },
+    '@/hooks/useDisplayClock': { __esModule: true, default: () => new Date(clock) },
+    '@/lib/timetable': { displayTime: (value) => value || '—' },
+    '@/lib/prayerDisplayState': state,
+    '@/lib/homePrayerView': view,
+    '@/styles/jic-prayer-modern.css': {},
+  };
+  new Function('require', 'module', 'exports', compiled)(
+    (name) => {
+      assert.ok(name in dependencies, `Unresolved ${name}`);
+      return dependencies[name];
+    },
+    mod,
+    mod.exports,
+  );
+  return renderToStaticMarkup(React.createElement(mod.exports.default, props));
 }
-test('real component uses one semantic table, not five nested cards',()=>{
- const html=render();assert.equal((html.match(/<table /g)||[]).length,1);assert.equal((html.match(/scope="row"/g)||[]).length,2);assert.doesNotMatch(html,/jic-prayer-browser-item/);
+test('real component uses one semantic table, not five nested cards', () => {
+  const html = render();
+  assert.equal((html.match(/<table /g) || []).length, 1);
+  assert.equal((html.match(/scope="row"/g) || []).length, 2);
+  assert.doesNotMatch(html, /jic-prayer-browser-item/);
 });
-test('current prayer is one full column, not competing current and next highlights',()=>{
- const html=render();assert.equal((html.match(/aria-current="time"/g)||[]).length,1);assert.equal((html.match(/data-current="true"/g)||[]).length,3);assert.match(html,/Current: Maghrib/);assert.doesNotMatch(html,/is-next-jamaat/);
+test('current prayer is one full column, not competing current and next highlights', () => {
+  const html = render();
+  assert.equal((html.match(/aria-current="time"/g) || []).length, 1);
+  assert.equal((html.match(/data-current="true"/g) || []).length, 3);
+  assert.match(html, /Current: Maghrib/);
+  assert.doesNotMatch(html, /is-next-jamaat/);
 });
-test('starts countdown includes both next beginning and congregation without repeated radio link',()=>{
- const html=render();assert.match(html,/Begins in/);assert.match(html,/01:11:00/);assert.match(html,/Jamaat 19:30/);assert.doesNotMatch(html,/href="\/radio"/);assert.match(html,/href="\/prayer-times\/reminders"/);
+test('starts countdown includes both next beginning and congregation without repeated radio link', () => {
+  const html = render();
+  assert.match(html, /Begins in/);
+  assert.match(html, /01:11:00/);
+  assert.match(html, /Jamaat 19:30/);
+  assert.doesNotMatch(html, /href="\/radio"/);
+  assert.match(html, /href="\/prayer-times\/reminders"/);
 });
-test('after the start the same countdown changes to Jamaat',()=>{
- const html=render({},'2026-11-03T14:48:41Z');assert.match(html,/Jamaat in/);assert.match(html,/00:41:19/);assert.match(html,/Current: Asr/);
+test('after the start the same countdown changes to Jamaat', () => {
+  const html = render({}, '2026-11-03T14:48:41Z');
+  assert.match(html, /Jamaat in/);
+  assert.match(html, /00:41:19/);
+  assert.match(html, /Current: Asr/);
 });
-test('native date picker replaces the overflowing month-long strip',()=>{
- const html=render();assert.match(html,/type="date"/);assert.match(html,/aria-label="Previous day"/);assert.match(html,/aria-label="Next day"/);assert.doesNotMatch(html,/jic-prayer-day-strip/);
+test('native date picker replaces the overflowing month-long strip', () => {
+  const html = render();
+  assert.match(html, /type="date"/);
+  assert.match(html, /aria-label="Previous day"/);
+  assert.match(html, /aria-label="Next day"/);
+  assert.doesNotMatch(html, /jic-prayer-day-strip/);
 });
-test('no published row displays no fabricated times or live clock',()=>{
- const html=render({todaysTimes:null,jummahTimes:[]});assert.match(html,/No published timetable for today/);assert.doesNotMatch(html,/<table |role="timer"/);
+test('no published row displays no fabricated times or live clock', () => {
+  const html = render({ todaysTimes: null, jummahTimes: [] });
+  assert.match(html, /No published timetable for today/);
+  assert.doesNotMatch(html, /<table |role="timer"/);
 });
-test('stale times and zero-length data do not create a current-prayer claim',()=>{
- const html=render({todaysTimes:{...today,d_date:'2026-11-02'}});assert.doesNotMatch(html,/aria-current="time"|role="timer"/);
+test('stale times and zero-length data do not create a current-prayer claim', () => {
+  const html = render({ todaysTimes: { ...today, d_date: '2026-11-02' } });
+  assert.doesNotMatch(html, /aria-current="time"|role="timer"/);
 });
-test('same-time Maghrib displays the Jamaat notice instead of a negative timer',()=>{
- const html=render({},'2026-11-03T16:37:00Z');assert.match(html,/Maghrib Jamaat time/);assert.doesNotMatch(html,/role="timer"/);
+test('same-time Maghrib displays the Jamaat notice instead of a negative timer', () => {
+  const html = render({}, '2026-11-03T16:37:00Z');
+  assert.match(html, /Maghrib Jamaat time/);
+  assert.doesNotMatch(html, /role="timer"/);
 });
 function renderedText(html) {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
@@ -123,15 +192,26 @@ test('installed card with missing publication has no live prayer claim or timeta
 });
 
 test('Friday second Jamaat does not mark the first session’s timetable cell next', () => {
-  const html = render(
-    { todaysTimes: { ...today, d_date: '2026-11-06' } },
-    '2026-11-06T12:50:00Z',
-    { compact: true },
-  );
+  const html = render({ todaysTimes: { ...today, d_date: '2026-11-06' } }, '2026-11-06T12:50:00Z', {
+    compact: true,
+  });
   const text = renderedText(html);
   assert.match(text, /Next up/);
   assert.match(text, /Jummah 2 Jamaat/);
   assert.match(text, /13:30/);
   assert.match(text, /12:35/);
   assert.doesNotMatch(html, /data-next="true"/);
+});
+
+test('installed card labels the sunrise buffer and clears the prohibition when it passes', () => {
+  const active = renderedText(render({}, '2026-11-03T07:05:00Z', { compact: true }));
+  assert.match(active, /Prohibited time · Shuroq/);
+  assert.doesNotMatch(active, /Currently Fajr time/);
+  const passed = renderedText(render({}, '2026-11-03T07:25:00Z', { compact: true }));
+  assert.match(passed, /Shuroq period passed/);
+  assert.doesNotMatch(passed, /Prohibited time/);
+  assert.match(
+    renderedText(render({}, '2026-11-03T12:00:00Z', { compact: true })),
+    /Currently Dhuhr time/,
+  );
 });

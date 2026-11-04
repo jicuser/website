@@ -14,7 +14,12 @@
   --jic-space-card: 16px;
   --jic-gap: 14px;
   --tv-ws-glass: var(--jic-surface);
+  --jic-wash-warm: rgb(233 184 94 / 13%);
+  --jic-wash-cool: rgb(103 193 174 / 13%);
+  --jic-wash-lilac: rgb(162 153 222 / 12%);
   --tv-ws-filter: none;
+  --admin-section-base: var(--tv-ws-glass);
+  --admin-section-filter: var(--tv-ws-filter);
   color-scheme: dark;
   width: 100%;
   max-width: 1120px;
@@ -23,7 +28,9 @@
   padding: clamp(12px, 2vw, 24px);
   border: 1px solid var(--jic-border);
   border-radius: 20px;
-  background: var(--jic-bg);
+  background:
+    radial-gradient(ellipse at top left, var(--jic-wash-warm), transparent 50%),
+    radial-gradient(ellipse at bottom right, var(--jic-wash-cool), transparent 60%), var(--jic-bg);
   color: var(--jic-text);
 }
 .stream-setup.admin-tv-editor > * + * {
@@ -50,10 +57,10 @@
 .stream-setup.admin-tv-editor .admin-panel {
   margin-bottom: 0;
   border-color: var(--jic-border);
-  background: var(--jic-surface);
+  background: linear-gradient(110deg, var(--jic-wash-warm), transparent 72%), var(--tv-ws-glass);
   color: var(--jic-text);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  -webkit-backdrop-filter: var(--tv-ws-filter);
+  backdrop-filter: var(--tv-ws-filter);
 }
 .stream-setup.admin-tv-editor .admin-button {
   border-radius: 11px;
@@ -1135,5 +1142,17 @@
   html:not([data-surface='solid']) .stream-setup.admin-tv-editor {
     --tv-ws-glass: var(--jic-surface);
     --tv-ws-filter: none;
+  }
+}
+
+.stream-setup.admin-tv-editor :is(.tv-workspace-card, .tv-screen-card) {
+  background: linear-gradient(110deg, var(--jic-wash-cool), transparent 75%), var(--tv-ws-glass);
+}
+.stream-setup.admin-tv-editor .tv-workspace-tabs > button[aria-selected='true'] {
+  background: linear-gradient(105deg, var(--jic-wash-warm), transparent), var(--jic-surface);
+}
+@media (prefers-contrast: more) {
+  .stream-setup.admin-tv-editor :is(.admin-panel, .tv-workspace-card, .tv-screen-card) {
+    background: var(--jic-surface);
   }
 }

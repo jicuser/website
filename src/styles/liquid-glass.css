@@ -62,8 +62,8 @@ html[data-theme][data-surface='glass']
   --jic-gold: var(--jic-glass-accent);
 }
 
-/* Inner pages share an opaque canvas and three surface levels. Glass is reserved
- * for the photographic home page and transient overlays. */
+/* Inner pages retain an opaque reading canvas. Colour washes behind translucent
+ * cards carry the home material into discovery pages without a full-page photo. */
 html[data-theme] .jic-public-route.jic-inner-route {
   --jic-bg: #f4f5f7;
   --jic-bg-secondary: #edf0f4;
@@ -628,5 +628,98 @@ html[data-theme] .jic-public-route .jic-navigation-drawer {
 @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
   html[data-theme][data-surface] .jic-public-route .jic-navigation-drawer {
     background: var(--jic-surface);
+  }
+}
+
+/* Shared section colour dissolves into the surrounding canvas, without dividers. */
+html[data-theme] .jic-public-route.jic-inner-route {
+  --jic-section-base: var(--jic-surface);
+  --jic-section-filter: none;
+  background:
+    radial-gradient(ellipse at 8% 12%, var(--jic-wash-warm), transparent 48%),
+    radial-gradient(ellipse at 90% 58%, var(--jic-wash-cool), transparent 55%), var(--jic-bg);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-theme][data-surface='glass'] .jic-public-route.jic-inner-route {
+    --jic-section-base: color-mix(in srgb, var(--jic-surface) 90%, transparent);
+    --jic-section-filter: blur(8px);
+  }
+}
+html[data-theme]
+  .jic-public-route
+  :is(
+    .community-hub-card,
+    .service-explorer-card,
+    .guidance-panel,
+    .guidance-topic-choices button,
+    .jic-page-choice,
+    .worship-hub-grid > a,
+    .worship-guide-grid > article,
+    .jic-guide-resource,
+    .service-checklist,
+    .service-enquiry-form,
+    .service-directory > a,
+    .service-related > a,
+    .jic-learning-notebook,
+    .jic-account-step,
+    .jic-question-list details,
+    .jic-home-destination,
+    .jic-programme-card
+  ) {
+  background:
+    linear-gradient(110deg, var(--jic-section-wash, var(--jic-wash-warm)), transparent 72%),
+    var(--jic-section-base, var(--jic-glass-tile));
+  -webkit-backdrop-filter: var(--jic-section-filter, var(--jic-glass-panel-filter));
+  backdrop-filter: var(--jic-section-filter, var(--jic-glass-panel-filter));
+}
+.jic-public-route
+  :is(.service-explorer-card, .jic-page-choice, .jic-home-destination, .jic-account-step):nth-child(
+    3n + 2
+  ),
+.jic-public-route .community-hub-tone-teal {
+  --jic-section-wash: var(--jic-wash-cool);
+}
+.jic-public-route
+  :is(.service-explorer-card, .jic-page-choice, .jic-home-destination, .jic-account-step):nth-child(
+    3n
+  ),
+.jic-public-route .community-hub-tone-indigo {
+  --jic-section-wash: var(--jic-wash-lilac);
+}
+.jic-public-route .community-hub-tone-rose {
+  --jic-section-wash: var(--jic-wash-rose);
+}
+html[data-theme]
+  .jic-inner-route
+  :is(.guidance-topic-choices, .jic-choice-tabs, .service-explorer-categories)
+  button:is([aria-pressed='true'], [aria-selected='true']) {
+  background: linear-gradient(105deg, var(--jic-wash-cool), transparent), var(--jic-surface);
+  color: var(--jic-text);
+}
+/* A static halo under the words leaves the daily quote unboxed. */
+.jic-public-route .jic-daily-reminder p {
+  position: relative;
+  isolation: isolate;
+}
+.jic-public-route .jic-daily-reminder p::before {
+  content: '';
+  position: absolute;
+  inset: -6px -4px;
+  z-index: -1;
+  background: radial-gradient(ellipse, var(--jic-wash-warm), transparent 73%);
+  pointer-events: none;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-theme][data-surface] .jic-public-route.jic-inner-route {
+    --jic-section-base: var(--jic-surface);
+    --jic-section-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  html[data-theme][data-surface] .jic-public-route {
+    --jic-section-wash: transparent;
+  }
+  .jic-public-route .jic-daily-reminder p::before {
+    display: none;
   }
 }
