@@ -133,3 +133,5 @@ export function parseTimetable(text) {
     })
     .sort((a, b) => a.d_date.localeCompare(b.d_date));
 }
+
+export { cells as timetableCells };

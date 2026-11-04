@@ -32,7 +32,7 @@ const drawText = (
 
 function drawRule(ctx, x, y, x2, y2, palette = darkColors) {
   ctx.strokeStyle = palette.border;
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(x, y);
   ctx.lineTo(x2, y2);

@@ -117,3 +117,45 @@
     display: none;
   }
 }
+.timetable-import {
+  display: grid;
+  gap: 12px;
+  max-width: 900px;
+  margin-block: 16px;
+}
+.timetable-import textarea {
+  width: 100%;
+  padding: 12px;
+  font: 13px/1.5 monospace;
+}
+.timetable-reference {
+  display: block;
+  max-width: 100%;
+  max-height: 700px;
+  object-fit: contain;
+  margin-block: 12px;
+}
+.timetable-edit-grid {
+  max-height: 65vh;
+  margin-block: 16px;
+}
+.timetable-edit-grid input {
+  min-width: 110px;
+  min-height: 40px;
+}
+.timetable-edit-grid thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--jic-surface);
+}
+.timetable-edit-grid th:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--jic-surface);
+  z-index: 1;
+  min-width: 120px;
+}
+.timetable-edit-grid .is-friday td {
+  background: rgba(235, 194, 73, 0.17);
+}
