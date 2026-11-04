@@ -42,7 +42,7 @@ export default function AdminOverview({ onChoose, icons }) {
   const cards = [
     ...(auth.can('forms')
       ? [{ id: 'forms', title: 'Form responses to review',
-        detail: 'Contact Us, registrations and applications you can access',
+        detail: 'Enquiries, registrations and applications',
         empty: 'No new responses to review.', action: 'Open forms',
         value: result.data.forms?.value?.waiting, failed: result.data.forms?.error }]
       : []),
@@ -76,18 +76,18 @@ export default function AdminOverview({ onChoose, icons }) {
   };
   return (
     <div className="admin-overview jic-admin-modern">
-      <section className="admin-welcome jic-pattern-edge">
+      <section className="admin-welcome">
         <div>
           <p className="admin-eyebrow">Staff home</p>
           <h1>Welcome{auth.profile?.display_name ? `, ${auth.profile.display_name}` : ''}</h1>
-          <p>{auth.isOwner ? 'Your centre’s work, people and updates in one place.' : 'Your work and the tools available to your account.'}</p>
+          <p>{auth.isOwner ? 'Pages, people and centre updates.' : 'Your work and the tools available to your account.'}</p>
         </div>
         {!focused && (
           <label className="admin-tool-search">
             <Search size={18} aria-hidden="true" /><span className="sr-only">Find an admin task</span>
             <input type="search" value={search} onChange={(event) => {
               setSearch(event.target.value); setArea(null); previousArea.current = null;
-            }} placeholder="Try: change Asr Jamaat, create a form…" aria-describedby={search.trim() ? 'admin-task-search-result' : undefined} />
+            }} placeholder="Find a task, page or setting…" aria-describedby={search.trim() ? 'admin-task-search-result' : undefined} />
           </label>
         )}
       </section>

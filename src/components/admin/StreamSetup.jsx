@@ -63,7 +63,7 @@ export default function StreamSetup({ registerBack }) {
       />
     );
   return (
-    <section className="stream-setup admin-tv-editor tv-screen-picker jic-pattern-edge">
+    <section className="stream-setup admin-tv-editor tv-screen-picker">
       <TvScreenList onOpen={(screenId) => openWorkspace(screenId, false, true)} />
     </section>
   );
@@ -148,7 +148,7 @@ function HallWorkspace({
     'Update live layout',
   );
   return (
-    <div className="stream-setup admin-tv-editor jic-pattern-edge">
+    <div className="stream-setup admin-tv-editor">
       <div className={`stream-setup-heading ${!backgroundOnly && hall ? 'tv-live-heading' : ''}`}>
         <button
           type="button"

@@ -30,6 +30,10 @@
 @media (max-width: 850px) { .connected-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) {
   .connected-form-filters { grid-template-columns: minmax(0, 1fr); }
-  .connected-action-grid { grid-template-columns: minmax(0, 1fr); }
-  .connected-action-card { min-height: 76px; padding: 12px; }
+  .connected-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .connected-action-card { grid-template-columns: minmax(0, 1fr) 16px; gap: 8px; min-height: 118px; padding: 12px; }
+  .connected-action-card > span { grid-column: 1 / -1; grid-row: 2; }
+  .connected-action-card > svg:last-child { grid-column: 2; grid-row: 1; }
+  .connected-action-card strong { font-size: .875rem; }
+  .connected-action-card small { font-size: .75rem; line-height: 1.4; }
 }

@@ -73,10 +73,10 @@
 }
 .workspace-card {
   border: 1px solid hsl(var(--border, 210 20% 80%) / 0.7);
-  padding: 20px;
-  border-radius: 16px;
+  padding: var(--jic-space-card, 20px);
+  border-radius: var(--jic-radius-card, 16px);
   margin-bottom: 16px;
-  background: hsl(var(--card, 0 0% 100%) / 0.7);
+  background: linear-gradient(110deg, var(--jic-wash-cool), transparent 76%), var(--jic-surface);
   overflow-wrap: anywhere;
 }
 .workspace-card p {
@@ -394,8 +394,8 @@
   white-space: nowrap;
 }
 .community-workspace .learning-section-tabs button[aria-selected='true'] {
-  background: var(--jic-action);
-  color: #14273b;
+  background: linear-gradient(110deg, var(--jic-wash-warm), transparent), var(--jic-surface);
+  color: var(--jic-text);
   border-color: var(--jic-gold);
   font-weight: 650;
 }

@@ -101,7 +101,7 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
 
   return (
     <section className="salah-workspace page-transition" aria-labelledby="salah-title">
-      <header className="salah-heading jic-pattern-edge">
+      <header className="salah-heading">
         <div>
           <h1 id="salah-title">Salah times</h1>
           <p>

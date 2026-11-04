@@ -1,6 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="80" height="240" viewBox="0 0 80 240">
-  <title>Eight-point rosettes dissolving into small facets</title>
+  <title>Eight-point rosettes with softly fading edges</title>
   <defs>
+    <linearGradient id="edge-fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="white" stop-opacity="0"/>
+      <stop offset=".2" stop-color="white" stop-opacity=".7"/>
+      <stop offset=".88" stop-color="white"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="soft-edge"><rect width="80" height="240" fill="url(#edge-fade)"/></mask>
     <path id="star" d="M0,-10.3 2.64,-6.37 7.28,-7.28 6.37,-2.64 10.3,0 6.37,2.64 7.28,7.28 2.64,6.37 0,10.3 -2.64,6.37 -7.28,7.28 -6.37,2.64 -10.3,0 -6.37,-2.64 -7.28,-7.28 -2.64,-6.37Z"/>
     <path id="axis" d="M0,12.25 -4.57,8.29 -6.64,-7.31 0,-14.2 6.64,-7.31 4.57,8.29Z"/>
     <path id="corner" d="M-6.15,6.15 -6.58,0.11 0.31,-8.27 4.27,-4.27 8.27,-0.31 -0.11,6.58Z"/>
@@ -92,6 +99,7 @@
       <use xlink:href="#quarter-6" transform="rotate(270)"/>
     </g>
   </defs>
+  <g mask="url(#soft-edge)">
   <use xlink:href="#row-0" transform="translate(0 0)" opacity="0.3"/>
   <use xlink:href="#row-0" transform="translate(80 0)" opacity="0.3"/>
   <use xlink:href="#row-1" transform="translate(40 40)" opacity="0.45"/>
@@ -103,4 +111,5 @@
   <use xlink:href="#row-5" transform="translate(40 200)" opacity="0.98"/>
   <use xlink:href="#row-6" transform="translate(0 240)" opacity="1"/>
   <use xlink:href="#row-6" transform="translate(80 240)" opacity="1"/>
+  </g>
 </svg>

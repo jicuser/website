@@ -11,7 +11,7 @@
   gap: 24px;
   padding-block: 8px 24px;
   margin-bottom: 24px;
-  border-bottom: 1px solid var(--jic-border);
+  background: radial-gradient(ellipse at 0 20%, var(--jic-wash-warm), transparent 65%);
 }
 .admin-welcome > div {
   max-width: 600px;

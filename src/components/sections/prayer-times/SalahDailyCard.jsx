@@ -43,13 +43,16 @@ export default function SalahDailyCard({
             <span>
               <CurrentIcon size={14} aria-hidden="true" /> {currentText}
             </span>
-            <time>
-              {now.toLocaleTimeString('en-GB', {
-                timeZone: 'Europe/London',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </time>
+            <span className="salah-clock">
+              Now{' '}
+              <time dateTime={now.toISOString()}>
+                {now.toLocaleTimeString('en-GB', {
+                  timeZone: 'Europe/London',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </time>
+            </span>
           </div>
           {target ? (
             <div className="salah-next">

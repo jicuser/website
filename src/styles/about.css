@@ -508,7 +508,7 @@
 .about-section {
   padding-top: 16px;
   margin-top: 16px;
-  border-top: 1px solid var(--jic-border);
+  background: radial-gradient(ellipse at 0 0, var(--jic-section-wash, var(--jic-wash-rose)), transparent 70%);
   scroll-margin-top: calc(var(--jic-mobile-strip-height, 0px) + 16px);
   outline: none;
 }

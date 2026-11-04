@@ -294,6 +294,11 @@
   gap: 20px;
   margin-inline: auto;
   padding: clamp(20px, 3vw, 32px) 0 20px;
+  background: radial-gradient(
+    ellipse at 0 50%,
+    var(--jic-section-wash, var(--jic-wash-warm)),
+    transparent 70%
+  );
 }
 .jic-page-heading-copy {
   min-width: 0;

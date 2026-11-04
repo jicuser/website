@@ -1,10 +1,10 @@
 const QUICK_ACTIONS = [
-  { id: 'pages', permission: 'content', title: 'Create a website page', detail: 'Add information, photos and a form. Preview before publishing.', href: '/admin?section=content&view=add' },
-  { id: 'forms', permission: 'forms', title: 'Forms & responses', detail: 'Find a form, edit its questions or follow up a response.', href: '/admin?section=forms' },
-  { id: 'classes', permission: 'content', title: 'Course & class pages', detail: 'Publish class details and link an interest or registration form.', href: '/admin?section=content&view=pages' },
-  { id: 'people', permission: 'users', title: 'Staff & account access', detail: 'Invite people and choose what each person can access.', href: '/admin?section=users' },
-  { id: 'finance', permission: 'finance', title: 'Invoices & payments', detail: 'Create invoices and record payments received.', href: '/admin?section=finance' },
-  { id: 'prayer', permission: 'prayer_times', title: 'Update Salah times', detail: 'Edit the timetable and published Jummah times.', href: '/admin?section=prayer' },
+  { id: 'pages', permission: 'content', title: 'Create a page', detail: 'Add text, photos and forms.', href: '/admin?section=content&view=add' },
+  { id: 'forms', permission: 'forms', title: 'Forms & responses', detail: 'Edit questions. Review replies.', href: '/admin?section=forms' },
+  { id: 'classes', permission: 'content', title: 'Courses & classes', detail: 'Class details and registration.', href: '/admin?section=content&view=pages' },
+  { id: 'people', permission: 'users', title: 'Staff access', detail: 'Invite staff. Set permissions.', href: '/admin?section=users' },
+  { id: 'finance', permission: 'finance', title: 'Invoices & payments', detail: 'Invoices and payment records.', href: '/admin?section=finance' },
+  { id: 'prayer', permission: 'prayer_times', title: 'Salah times', detail: 'Timetable, Jummah and downloads.', href: '/admin?section=prayer' },
 ];
 
 export function availableQuickActions(can) {

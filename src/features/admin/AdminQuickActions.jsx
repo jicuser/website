@@ -12,8 +12,8 @@ export default function AdminQuickActions({ can }) {
   return (
     <section className="connected-quick-actions" aria-labelledby="connected-actions-title">
       <div className="admin-overview-section-heading"><div>
-        <h2 id="connected-actions-title">What would you like to do?</h2>
-        <p>Go straight to the right editor. Saving a draft does not publish it.</p>
+        <h2 id="connected-actions-title">Quick actions</h2>
+        <p>Choose a task. Preview changes before publishing.</p>
       </div></div>
       <div className="connected-action-grid">
         {actions.map((action) => {

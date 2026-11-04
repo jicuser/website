@@ -329,14 +329,14 @@ html[data-theme] .hover\:text-primary:hover {
 
 /* One alpha mask supplies the same tapering geometry in every theme. */
 :root {
-  --jic-pattern-mask: url('/bookmark-geometric.svg?v=rosette-fade-1');
+  --jic-pattern-mask: url('/bookmark-geometric.svg?v=rosette-fade-2');
   --jic-pattern-ink: #896b41;
-  --jic-pattern-opacity: 0.19;
+  --jic-pattern-opacity: 0.1;
   --jic-pattern-content: none;
 }
 html[data-theme='dark'] {
   --jic-pattern-ink: #dbbf8c;
-  --jic-pattern-opacity: 0.21;
+  --jic-pattern-opacity: 0.12;
 }
 @supports (
   (mask-image: linear-gradient(black, transparent)) or

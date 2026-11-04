@@ -1203,6 +1203,7 @@ export default function AdminPage() {
 
   return (
     <div
+      data-admin-area={active}
       className={`admin-console jic-pattern-edge jic-pattern-canvas min-h-screen ${active === 'content' && params.has('page') ? 'is-page-editing' : ''}`}
     >
       <a className="jic-skip-link" href="#staff-content">

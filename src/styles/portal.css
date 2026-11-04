@@ -1,7 +1,8 @@
 /* Portal geometry and materials are scoped; no public-header overrides. */
 .jic-member-portal {
   min-height: 100dvh;
-  background: var(--jic-bg);
+  background:
+    radial-gradient(ellipse at top left, var(--jic-wash-lilac), transparent 55%), var(--jic-bg);
   padding-top: max(24px, env(safe-area-inset-top));
 }
 .jic-member-portal .workspace-header {
@@ -22,7 +23,7 @@
 .portal-signin.workspace-card {
   max-width: 480px;
   margin: 0 auto;
-  background: var(--jic-surface);
+  background: linear-gradient(110deg, var(--jic-wash-warm), transparent 76%), var(--jic-surface);
   border: 1px solid var(--jic-border);
   border-radius: 18px;
   padding: clamp(18px, 3vw, 24px);
@@ -64,7 +65,7 @@
 }
 .portal-entry-intro ul {
   display: grid;
-  gap: 16px;
+  gap: 10px;
   margin-block: 16px 0;
   padding: 0;
   list-style: none;
@@ -73,7 +74,7 @@
   padding: 12px 14px;
   border: 1px solid var(--jic-border);
   border-radius: var(--jic-radius-card);
-  background: var(--jic-surface);
+  background: linear-gradient(110deg, var(--jic-wash-lilac), transparent 76%), var(--jic-surface);
   display: flex;
   align-items: flex-start;
   gap: 12px;

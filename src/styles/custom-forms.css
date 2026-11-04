@@ -24,7 +24,7 @@
   --smart-action: var(--jic-primary-bg, #183149);
   --smart-action-ink: var(--jic-primary-ink, #ffffff);
   color: var(--jic-text);
-  background: var(--jic-surface);
+  background: linear-gradient(120deg, var(--jic-wash-cool), transparent 55%), var(--jic-surface);
   border-color: var(--jic-border);
   min-width: 0;
 }

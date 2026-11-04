@@ -285,7 +285,7 @@ html:not(.dark) .admin-login-secure {
   color: var(--jic-text);
 }
 .admin-console h2 {
-  font-size: clamp(24px, 3vw, 32px);
+  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
   letter-spacing: -0.04em;
   font-weight: 650;
 }
@@ -2426,10 +2426,39 @@ html.dark .admin-console .admin-field-error {
   }
 }
 
+/* The selected workspace sets a quiet accent, including its editor and review panels. */
+.admin-console:is(
+  [data-admin-area='forms'],
+  [data-admin-area='finance'],
+  [data-admin-area='hall']
+) {
+  --admin-section-wash: var(--jic-wash-cool);
+}
+.admin-console:is(
+  [data-admin-area='learning'],
+  [data-admin-area='users'],
+  [data-admin-area='team']
+) {
+  --admin-section-wash: var(--jic-wash-lilac);
+}
 /* Staff panels share the quiet section washes; fields keep their opaque surface. */
 html[data-theme]
   .admin-console
-  :is(.admin-panel, .admin-tool-tile, .connected-action-card, .admin-attention-grid > button) {
+  :is(
+    .admin-panel,
+    .admin-tool-tile,
+    .connected-action-card,
+    .admin-attention-grid > button,
+    .workspace-card,
+    .learning-filters,
+    .ops-panel,
+    .ops-stat,
+    .ops-campaign-card,
+    .connected-admin-help,
+    .content-form-card,
+    .page-blocks,
+    .booking-panel
+  ) {
   background:
     linear-gradient(110deg, var(--admin-section-wash, var(--jic-wash-warm)), transparent 72%),
     var(--admin-section-base);
@@ -2467,7 +2496,21 @@ html[data-theme] .admin-console .admin-navigation nav button[aria-current] {
 @media (prefers-contrast: more) {
   html[data-theme]
     .admin-console
-    :is(.admin-panel, .admin-tool-tile, .connected-action-card, .admin-attention-grid > button) {
+    :is(
+      .admin-panel,
+      .admin-tool-tile,
+      .connected-action-card,
+      .admin-attention-grid > button,
+      .workspace-card,
+      .learning-filters,
+      .ops-panel,
+      .ops-stat,
+      .ops-campaign-card,
+      .connected-admin-help,
+      .content-form-card,
+      .page-blocks,
+      .booking-panel
+    ) {
     background: var(--jic-surface);
   }
 }
