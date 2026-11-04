@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Bell, CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, ArrowUpRight, Clock3 } from 'lucide-react';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { displayTime } from '@/lib/timetable';
 import useDisplayClock from '@/hooks/useDisplayClock';
@@ -43,6 +43,8 @@ export default function HomePrayerCard({ compact = false }) {
   };
   const current = state?.current?.key;
   const DateTitle = compact ? 'h2' : 'strong';
+  const nextCell = (key, kind, time) => compact && !target?.tomorrow &&
+    target?.key === key && target.kind === kind && compactTime(target.time) === compactTime(time);
 
   return (
     <aside className={`jic-home-prayer jic-prayer-card${compact ? ' is-compact' : ''}`} aria-label="Daily prayer timetable">
@@ -74,37 +76,37 @@ export default function HomePrayerCard({ compact = false }) {
         </div>
       </header>
 
-      {isToday && <div className="jic-card-clock">Current time <time>{now.toLocaleTimeString('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit' })}</time></div>}
+      {isToday && !compact && <div className="jic-card-clock">Current time <time>{now.toLocaleTimeString('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit' })}</time></div>}
       {!isToday ? (
         <div className="jic-card-status jic-card-browsing">
           <span>Published timetable</span>
           <button type="button" onClick={() => setSelected(today)}>Back to today</button>
         </div>
-      ) : compact && (state?.current || target) && state.phase !== 'jamaat-now' ? (
-        <section className="jic-card-compact-status" aria-label="Current and next prayer, 24-hour clock">
-          {state.current && <span className="jic-card-current">Current · {state.current.name}</span>}
-          <div>
-            {target ? (
-              <>
-                <p>
-                  {target.kind === 'start' ? 'Next' : 'Next Jamaat'} ·{' '}
-                  <strong>
-                    {target.name}{target.tomorrow ? ' tomorrow' : ''}{' '}
-                    <time>{compactTime(target.time)}</time>
-                  </strong>
-                </p>
-                {target.kind === 'start' && target.congregationTime && (
-                  <small>Jamaat {compactTime(target.congregationTime)}</small>
-                )}
-              </>
-            ) : (
-              <p>Next prayer time is not yet published.</p>
-            )}
+      ) : compact && state?.available ? (
+        <section className="jic-card-app-summary" aria-label="Current prayer and next event">
+          <div className="jic-card-app-current">
+            {state.current ? (
+              <span><CheckCircle2 size={15} aria-hidden="true" /> Currently {state.current.name} time</span>
+            ) : <span><Clock3 size={15} aria-hidden="true" /> Today’s timetable</span>}
+            <span className="jic-card-app-clock">Now <time>{now.toLocaleTimeString('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit' })}</time></span>
           </div>
-          {target && <div className="jic-card-remaining">
-            <span>{target.kind === 'start' ? 'Starts in' : 'Jamaat in'}</span>
-            <time role="timer" aria-live="off" aria-label={`Time until ${target.label}`}>{countdownText(target.seconds)}</time>
-          </div>}
+          {target ? (
+            <div className="jic-card-app-next">
+              <div>
+                <span className="jic-card-app-label"><ArrowUpRight size={14} aria-hidden="true" /> Next up</span>
+                <strong>{target.name}{target.kind === 'jamaat' ? ' Jamaat' : ''}{target.tomorrow ? ' · Tomorrow' : ''}</strong>
+                <p>{target.kind === 'start' ? 'Starts' : 'Jamaat'} <time>{compactTime(target.time)}</time>
+                  {target.kind === 'start' && target.congregationTime && <small> · Jamaat <time>{compactTime(target.congregationTime)}</time></small>}
+                </p>
+              </div>
+              <div className="jic-card-app-countdown">
+                <span>{target.kind === 'start' ? 'Starts in' : 'Jamaat in'}</span>
+                <time role="timer" aria-live="off" aria-label={`Time until ${target.label}`}>{countdownText(target.seconds)}</time>
+              </div>
+            </div>
+          ) : state.phase === 'jamaat-now' ? (
+            <p className="jic-card-app-notice" role="status">{state.notice.name} Jamaat time · Please silence your phone.</p>
+          ) : <p className="jic-card-app-notice">Next prayer time is not yet published.</p>}
         </section>
       ) : target ? (
         <section className="jic-card-status" aria-label="Next prayer">
@@ -130,13 +132,13 @@ export default function HomePrayerCard({ compact = false }) {
           <table className="jic-card-table">
             <caption className="sr-only">{dateLabel(selected)}: prayer begins and Jamaat times, 24-hour clock</caption>
             <thead><tr><th scope="col"><span className="sr-only">Prayer</span></th>
-              {columns.map((prayer) => <th scope="col" key={prayer.key} data-current={current === prayer.key || undefined} aria-current={current === prayer.key ? 'time' : undefined}>
-                {prayer.name}{current === prayer.key && <span className="sr-only">, current prayer</span>}
+              {columns.map((prayer) => <th scope="col" key={prayer.key} data-current={current === prayer.key || undefined} data-upcoming={compact && !target?.tomorrow && target?.key === prayer.key && current !== prayer.key || undefined} aria-current={current === prayer.key ? 'time' : undefined}>
+                {prayer.name}{compact && !target?.tomorrow && target?.key === prayer.key && <span className="sr-only">, next up</span>}{current === prayer.key && <span className="sr-only">, current prayer</span>}
               </th>)}
             </tr></thead>
             <tbody>
-              <tr><th scope="row">Begins</th>{columns.map((prayer) => <td key={prayer.key} data-current={current === prayer.key || undefined}>{compactTime(prayer.begins)}</td>)}</tr>
-              <tr><th scope="row">Jamaat</th>{columns.map((prayer) => <td key={prayer.key} data-current={current === prayer.key || undefined}>{compactTime(prayer.jamaat)}</td>)}</tr>
+              <tr><th scope="row">Begins</th>{columns.map((prayer) => <td key={prayer.key} data-current={current === prayer.key || undefined} data-next={nextCell(prayer.key, 'start', prayer.begins) || undefined}>{compactTime(prayer.begins)}{nextCell(prayer.key, 'start', prayer.begins) && <span className="sr-only">, next up</span>}</td>)}</tr>
+              <tr><th scope="row">Jamaat</th>{columns.map((prayer) => <td key={prayer.key} data-current={current === prayer.key || undefined} data-next={nextCell(prayer.key, 'jamaat', prayer.jamaat) || undefined}>{compactTime(prayer.jamaat)}{nextCell(prayer.key, 'jamaat', prayer.jamaat) && <span className="sr-only">, next up</span>}</td>)}</tr>
             </tbody>
           </table>
         </div>
@@ -144,7 +146,7 @@ export default function HomePrayerCard({ compact = false }) {
       {sessions.length > 0 && <div className="jic-card-friday"><span>Jummah</span>{sessions.map((session) => (
         <span key={session.number}>{session.number === 1 ? '1st' : '2nd'} <b>{displayTime(session.prayer)}</b></span>
       ))}</div>}
-      {row && <HomePrayerExtras date={selected} sunrise={row.sunrise} now={now} />}
+      {row && <HomePrayerExtras compact={compact} date={selected} sunrise={row.sunrise} now={now} />}
       <nav className="jic-card-links" aria-label="Prayer links">
         <Link to="/prayer-times">Full timetable <ArrowRight size={14} aria-hidden="true" /></Link>
         <Link to="/prayer-times/monthly#phone-wallpaper">Download wallpaper <ArrowRight size={14} aria-hidden="true" /></Link>

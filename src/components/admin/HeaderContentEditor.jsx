@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
+import EidAnnouncementEditor from '@/components/admin/EidAnnouncementEditor';
 
 const DEFAULT_TICKER = [];
 
@@ -152,6 +153,8 @@ export default function HeaderContentEditor() {
         </div>
       </div>
       {message && <div className="admin-success">{message}</div>}
+
+      <EidAnnouncementEditor />
 
       <h4 className="mb-3 font-semibold">Rolling banner extras</h4>
       <p className="mb-3 text-sm">

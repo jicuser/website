@@ -11,7 +11,6 @@ import {
   Megaphone,
   Heart,
   HeartHandshake,
-  MapPin,
 } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import MosqueIcon from '@/components/icons/MosqueIcon';
@@ -26,7 +25,6 @@ import { isPageVisible } from '@/lib/pageVisibility';
 import { cn } from '@/lib/utils';
 
 import useInstalledApp from '@/hooks/useInstalledApp';
-import AppHomeRadio from '@/components/home/AppHomeRadio';
 import DailyReminder from '@/components/shell/DailyReminder';
 import '@/styles/bookmark-home.css';
 
@@ -223,7 +221,7 @@ export default function HomePage() {
           <HomePrayerCard compact={installed} />
           {installed && (
             <>
-              <AppHomeRadio />
+              <DailyReminder />
               <section className="jic-app-community" aria-labelledby="jic-app-community-title">
                 <h2 id="jic-app-community-title">
                   <Link to="/services">
@@ -236,12 +234,6 @@ export default function HomePage() {
                   ))}
                 </nav>
               </section>
-              <nav className="jic-app-home-tools" aria-label="Visit and downloads">
-                <Link to="/contact#map">
-                  <MapPin size={18} aria-hidden="true" /> Plan your visit
-                </Link>
-              </nav>
-              <DailyReminder />
             </>
           )}
         </div>
@@ -256,13 +248,14 @@ export default function HomePage() {
           </Suspense>
         )}
 
-        <CommunityProgrammeList events={events} />
+        <CommunityProgrammeList events={events} compact={installed} />
         {renderNotices('after-events')}
 
         <nav className="jic-home-community-links" aria-label="More from JIC">
           <Link to="/services">
             Community Hub <ArrowRight size={16} aria-hidden="true" />
           </Link>
+          {installed && <Link to="/contact#map">Plan your visit <ArrowRight size={16} aria-hidden="true" /></Link>}
           {communityCards.map((card) => (
             <Link key={card.key} to={card.to}>
               {card.key === 'projects' ? 'Our projects' : 'Youth'}{' '}

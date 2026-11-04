@@ -49,17 +49,89 @@ test('stale times and zero-length data do not create a current-prayer claim',()=
 test('same-time Maghrib displays the Jamaat notice instead of a negative timer',()=>{
  const html=render({},'2026-11-03T16:37:00Z');assert.match(html,/Maghrib Jamaat time/);assert.doesNotMatch(html,/role="timer"/);
 });
-test('installed card labels tomorrow Fajr separately from today’s timetable',()=>{
- const html=render({tomorrowsTimes:{...today,d_date:'2026-11-04',fajr:'05:35'}},'2026-11-03T21:00:00Z',{compact:true});
- assert.match(html,/Today’s Salah/);assert.match(html,/Current · Isha/);assert.match(html,/Fajr tomorrow/);assert.match(html,/<time>05:35<\/time>/);assert.match(html,/05:34/);assert.match(html,/Starts in/);
+function renderedText(html) {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+}
+
+test('installed card separates current Isha from tomorrow Fajr without marking today’s Fajr next', () => {
+  const html = render(
+    { tomorrowsTimes: { ...today, d_date: '2026-11-04', fajr: '05:35' } },
+    '2026-11-03T21:00:00Z',
+    { compact: true },
+  );
+  const text = renderedText(html);
+  assert.match(text, /Today’s Salah/);
+  assert.match(text, /Currently Isha time/);
+  assert.match(text, /Next up/);
+  assert.match(text, /Fajr.*Tomorrow/);
+  assert.match(text, /05:35/);
+  assert.match(text, /05:34/);
+  assert.match(text, /Starts in/);
+  assert.equal((html.match(/data-current="true"/g) || []).length, 3);
+  assert.doesNotMatch(html, /data-next="true"/);
 });
-test('installed card keeps the next Jamaat clear and the exact-time notice visible',()=>{
- const html=render({},'2026-11-03T18:45:00Z',{compact:true});
- assert.match(html,/Next Jamaat/);assert.match(html,/<time>19:30<\/time>/);
- assert.match(render({},'2026-11-03T16:37:00Z',{compact:true}),/Maghrib Jamaat time/);
+
+test('installed card distinguishes the current prayer from its upcoming Jamaat', () => {
+  const html = render({}, '2026-11-03T18:45:00Z', { compact: true });
+  const text = renderedText(html);
+  assert.match(text, /Currently Isha time/);
+  assert.match(text, /Next up/);
+  assert.match(text, /Isha Jamaat/);
+  assert.match(text, /Jamaat in/);
+  assert.equal((html.match(/aria-current="time"/g) || []).length, 1);
+  assert.equal((html.match(/data-current="true"/g) || []).length, 3);
+  const nextCells = [...html.matchAll(/<td\b[^>]*data-next="true"[^>]*>([\s\S]*?)<\/td>/g)];
+  assert.equal(nextCells.length, 1);
+  assert.match(renderedText(nextCells[0][1]), /19:30/);
+  assert.match(render({}, '2026-11-03T16:37:00Z', { compact: true }), /Maghrib Jamaat time/);
 });
-test('installed card handles the daylight gap and missing publication without a current claim',()=>{
- const html=render({},'2026-11-03T10:00:00Z',{compact:true});
- assert.match(html,/Dhuhr/);assert.doesNotMatch(html,/Current ·|aria-current="time"/);
- assert.doesNotMatch(render({todaysTimes:null,jummahTimes:[]},undefined,{compact:true}),/Current ·|<table |role="timer"/);
+
+test('installed card highlights only the next start cell while keeping the current prayer column', () => {
+  const html = render({}, '2026-11-03T17:13:00Z', { compact: true });
+  const text = renderedText(html);
+  assert.match(text, /Currently Maghrib time/);
+  assert.match(text, /Next up/);
+  assert.match(text, /Isha/);
+  assert.match(text, /Starts in/);
+  assert.equal((html.match(/data-current="true"/g) || []).length, 3);
+  const nextCells = [...html.matchAll(/<td\b[^>]*data-next="true"[^>]*>([\s\S]*?)<\/td>/g)];
+  assert.equal(nextCells.length, 1);
+  assert.match(renderedText(nextCells[0][1]), /18:24/);
+});
+
+for (const [clock, name, begins] of [
+  ['2026-11-03T03:00:00Z', 'Fajr', '05:34'],
+  ['2026-11-03T07:05:00Z', 'Dhuhr', '11:56'],
+  ['2026-11-03T10:00:00Z', 'Dhuhr', '11:56'],
+]) {
+  test(`installed card has no current prayer claim at ${clock}`, () => {
+    const html = render({}, clock, { compact: true });
+    const text = renderedText(html);
+    assert.match(text, /Next up/);
+    assert.ok(text.includes(name));
+    assert.ok(text.includes(begins));
+    assert.doesNotMatch(text, /Currently .* time/);
+    assert.doesNotMatch(html, /aria-current="time"|data-current="true"/);
+    assert.equal((html.match(/data-next="true"/g) || []).length, 1);
+  });
+}
+
+test('installed card with missing publication has no live prayer claim or timetable', () => {
+  const html = render({ todaysTimes: null, jummahTimes: [] }, undefined, { compact: true });
+  assert.doesNotMatch(renderedText(html), /Currently .* time/);
+  assert.doesNotMatch(html, /<table |role="timer"|data-current="true"|data-next="true"/);
+});
+
+test('Friday second Jamaat does not mark the first session’s timetable cell next', () => {
+  const html = render(
+    { todaysTimes: { ...today, d_date: '2026-11-06' } },
+    '2026-11-06T12:50:00Z',
+    { compact: true },
+  );
+  const text = renderedText(html);
+  assert.match(text, /Next up/);
+  assert.match(text, /Jummah 2 Jamaat/);
+  assert.match(text, /13:30/);
+  assert.match(text, /12:35/);
+  assert.doesNotMatch(html, /data-next="true"/);
 });

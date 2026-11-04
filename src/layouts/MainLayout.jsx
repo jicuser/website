@@ -26,6 +26,7 @@ import { isPublicTaskRoute, isPublicReadingRoute } from '@/lib/publicTaskRoute';
 import PublicBackdrop from '@/components/shell/PublicBackdrop';
 import AppBrandHeader from '@/components/shell/AppBrandHeader';
 import useInstalledApp from '@/hooks/useInstalledApp';
+import EidAnnouncement from '@/components/shell/EidAnnouncement';
 
 const AdminBar = lazy(() => import('@/components/shell/AdminBar'));
 
@@ -76,6 +77,7 @@ function PublicLayout() {
         className={`flex-grow jic-public-main ${!isHome ? 'jic-inner-page' : ''}`}
       >
         {installed && !isHome && <AppBrandHeader />}
+        {visible && <EidAnnouncement />}
         {showReminder && !installed && <DailyReminder />}
         {visible ? (
           <div>

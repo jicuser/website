@@ -17,6 +17,7 @@ import './programme-feed.css';
 export default function CommunityProgrammeList({
   events = [],
   listing = false,
+  compact = false,
   placementPath = '/',
 }) {
   const rail = useRef(null);
@@ -37,18 +38,23 @@ export default function CommunityProgrammeList({
       return page ? { ...item, to: pageUrl(page) } : item;
     });
   const items = programmeFeed(events, published);
-  const pagesCount = Math.ceil(items.length / 3);
+  const compactRail = compact && !listing;
+  const pagesCount = Math.ceil(items.length / (compactRail ? 2 : 3));
   function move(direction) {
     const element = rail.current;
     if (!element) return;
-    element.scrollBy({
-      left: direction * element.clientWidth,
+    const step = element.clientWidth + (compactRail ? 10 : 0);
+    const destination = compactRail
+      ? Math.max(0, Math.min(pagesCount - 1, page + direction)) * step
+      : element.scrollLeft + direction * step;
+    element.scrollTo({
+      left: destination,
       behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
     });
   }
   if (!items.length && !listing) return null;
   return (
-    <section className="community-programme-feed" aria-labelledby="programme-feed-title">
+    <section className={`community-programme-feed${compactRail ? ' jic-app-posters' : ''}`} aria-labelledby="programme-feed-title">
       <header>
         <h2 id="programme-feed-title">What’s on</h2>
         {!listing && isPageVisible(getContent, '/events') && (
@@ -91,7 +97,7 @@ export default function CommunityProgrammeList({
         onScroll={
           listing
             ? undefined
-            : () => setPage(Math.round(rail.current.scrollLeft / rail.current.clientWidth))
+            : () => setPage(Math.round(rail.current.scrollLeft / (rail.current.clientWidth + (compactRail ? 10 : 0))))
         }
       >
         {items.slice(0, listing ? limit : undefined).map((item) => {

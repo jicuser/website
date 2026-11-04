@@ -7,6 +7,7 @@ import { activeNavigation } from '@/lib/publicNavigation';
 import { visibleNavigation, isPageVisible, pageSectionKey } from '@/lib/pageVisibility';
 import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { Menu, Search } from 'lucide-react';
+import AppHomeRadio from '@/components/home/AppHomeRadio';
 
 export default function AppBrandHeader({ home = false, menuOpen = false, onMenu }) {
   const { pathname } = useLocation();
@@ -28,6 +29,7 @@ export default function AppBrandHeader({ home = false, menuOpen = false, onMenu 
       <Link to="/" aria-label="Jamatia Islamic Centre home">
         <JamatiaLogo variant="wordmark" />
       </Link>
+      {home && <AppHomeRadio compact />}
       {home && (
         <nav className="jic-app-home-actions" aria-label="Home tools">
           <Link to="/search" aria-label="Search JIC">

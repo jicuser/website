@@ -1,0 +1,39 @@
+.jic-public-route .jic-eid-announcement {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(736px, calc(100% - 24px));
+  margin: 8px auto 12px;
+  padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--jic-gold) 35%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--jic-surface) 82%, transparent);
+  color: var(--jic-text);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+.jic-eid-announcement > svg {
+  flex-shrink: 0;
+  color: var(--jic-gold);
+}
+.jic-eid-announcement > div { min-width: 0; }
+.jic-eid-announcement strong { font-size: 13px; font-weight: 650; }
+.jic-eid-announcement p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+html[data-surface='solid'] .jic-public-route .jic-eid-announcement {
+  background: var(--jic-surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .jic-public-route .jic-eid-announcement {
+    background: var(--jic-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
