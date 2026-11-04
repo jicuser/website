@@ -53,6 +53,7 @@ export default function WallpaperDownload({
     hijriHeading: '',
     zawalOffset: '',
     notice: '',
+    noticeDate: '',
   });
   const [prepared, setPrepared] = useState(null);
   const [previewKey, setPreviewKey] = useState('');
@@ -86,10 +87,11 @@ export default function WallpaperDownload({
             image.onerror = () => resolve(null);
             image.src = url;
           });
-        const [lightLogo, darkLogo, photo] = await Promise.all([
+        const [lightLogo, darkLogo, photo, printLogo] = await Promise.all([
           loadImage('/brand/jic-wordmark-light.svg'),
           loadImage('/brand/jic-wordmark-dark.svg'),
           loadImage('/jic-aerial-sunset.jpg'),
+          loadImage('/brand/jic-horizontal-light.svg'),
         ]);
         if (!active) return;
         const files = [];
@@ -99,7 +101,11 @@ export default function WallpaperDownload({
             theme: selectedTheme,
             jummahLabel: editable ? 'Weekly Jummah' : 'Next Jummah',
             logo:
-              format.key === 'phone-wallpaper' && selectedTheme === 'dark' ? darkLogo : lightLogo,
+              format.key === 'monthly-timetable'
+                ? printLogo
+                : selectedTheme === 'dark'
+                  ? darkLogo
+                  : lightLogo,
             photo,
           });
           const blob = await new Promise((resolve, reject) =>
@@ -197,8 +203,8 @@ export default function WallpaperDownload({
         ))}
       </fieldset>
       {editable && (
-        <details className="timetable-design-options">
-          <summary>Print details (optional)</summary>
+        <details className="timetable-design-options" open>
+          <summary>Original-sheet layout &amp; notices</summary>
           <p>Use the centre’s confirmed Hijri dates. Published Zawal times appear automatically.</p>
           <div className="admin-field-grid">
             <label>
@@ -251,6 +257,18 @@ export default function WallpaperDownload({
                 onChange={(e) => setDesign({ ...design, notice: e.target.value })}
                 placeholder="Clock change or important timetable notice"
               />
+            </label>
+            <label>
+              Insert notice before this date
+              <input
+                type="date"
+                value={design.noticeDate}
+                onChange={(event) => setDesign({ ...design, noticeDate: event.target.value })}
+              />
+              <small>
+                For a clock change, choose its date. Leave blank to place the notice below the
+                table.
+              </small>
             </label>
           </div>
         </details>

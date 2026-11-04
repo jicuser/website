@@ -52,7 +52,7 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
           ink: '#0c1930',
           text: '#0c1930',
           muted: '#465568',
-          border: '#718397',
+          border: '#42566b',
         };
   if (!monthlyPrayerTimes?.length) return;
   const timetable = timetablePresentation(monthlyPrayerTimes, options);
@@ -69,8 +69,18 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
   const tableWidth = canvas.width - left * 2;
   const brandY = phone ? 310 : 70;
   if (options.logo)
-    ctx.drawImage(options.logo, left, phone ? 255 : 35, phone ? 340 : 650, phone ? 132 : 253);
-  if (!phone && options.photo) ctx.drawImage(options.photo, canvas.width - 620, 35, 560, 230);
+    ctx.drawImage(options.logo, left, phone ? 255 : 25, phone ? 340 : 560, phone ? 132 : 245);
+  if (!phone && options.photo) {
+    ctx.save();
+    ctx.globalAlpha = 0.65;
+    ctx.drawImage(options.photo, canvas.width - 720, 25, 660, 265);
+    ctx.restore();
+    const fade = ctx.createLinearGradient(canvas.width - 720, 0, canvas.width - 60, 0);
+    fade.addColorStop(0, '#ffffff');
+    fade.addColorStop(0.65, 'rgba(255,255,255,0)');
+    ctx.fillStyle = fade;
+    ctx.fillRect(canvas.width - 720, 25, 660, 265);
+  }
   if (!options.logo)
     drawText(ctx, 'JAMATIA ISLAMIC CENTRE', middle, brandY, {
       size: phone ? 27 : 33,
@@ -78,37 +88,54 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
       color: phone ? colors.gold : colors.text,
     });
   if (!phone) {
-    drawText(ctx, '179–183 Woodlands Road · Sparkhill · Birmingham B11 4ER', middle, 305, {
+    drawText(ctx, '179–183 Woodlands Road · Sparkhill · Birmingham B11 4ER', middle, 280, {
       size: 27,
       color: colors.text,
     });
-    drawText(ctx, 'Tel: 0121 778 6612  ·  jicmasjid.org', middle, 345, {
+    drawText(ctx, 'Tel: 0121 778 6612  ·  jicmasjid.org', middle, 320, {
       size: 25,
       color: colors.text,
     });
   }
-  drawText(ctx, `${currentMonth} Prayer Times`, middle, phone ? 415 : 415, {
-    size: phone ? 42 : 46,
-    weight: 700,
-    maxWidth: tableWidth,
-    color: colors.text,
-  });
-  if (options.hijriHeading)
+  if (!phone) {
+    ctx.fillStyle = colors.heading;
+    ctx.fillRect(left, 355, tableWidth, 60);
+  }
+  drawText(
+    ctx,
+    phone
+      ? `${currentMonth} Prayer Times`
+      : `${currentMonth.toUpperCase()}${options.hijriHeading ? `  |  ${options.hijriHeading.toUpperCase()}` : ''}`,
+    middle,
+    phone ? 415 : 385,
+    {
+      size: phone ? 42 : 46,
+      weight: 700,
+      maxWidth: tableWidth,
+      color: phone ? colors.text : '#ffffff',
+    },
+  );
+  if (phone && options.hijriHeading)
     drawText(ctx, options.hijriHeading, middle, 455, {
       size: phone ? 22 : 25,
       color: colors.text,
       maxWidth: tableWidth,
     });
-  const top = phone ? 485 : 485;
+  const top = phone ? 485 : 415;
   const groupHeight = phone ? 74 : 78;
   const labelHeight = phone ? 46 : 54;
   const body = top + groupHeight + labelHeight;
+  const noticeIndex =
+    options.notice && options.noticeDate
+      ? timetable.rows.findIndex((row) => row.isoDate === options.noticeDate)
+      : -1;
+  const inlineNoticeHeight = noticeIndex >= 0 ? 45 : 0;
   // Reserve room for Jummah and the website address even in a 31-day month.
   const rowHeight = Math.min(
     phone ? 60 : 52,
-    Math.floor((canvas.height - body - 225) / timetable.rows.length),
+    Math.floor((canvas.height - body - 340 - inlineNoticeHeight) / timetable.rows.length),
   );
-  const end = body + timetable.rows.length * rowHeight;
+  const end = body + timetable.rows.length * rowHeight + inlineNoticeHeight;
   const weights = timetable.columns.map(({ key }) =>
     key === 'dayName' ? 0.8 : key === 'day' ? 0.65 : key === 'sunrise' ? 1.05 : 1,
   );
@@ -180,7 +207,10 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
   });
 
   timetable.rows.forEach((row, index) => {
-    const y = body + index * rowHeight;
+    const y =
+      body +
+      index * rowHeight +
+      (noticeIndex >= 0 && index >= noticeIndex ? inlineNoticeHeight : 0);
     ctx.fillStyle = row.isFriday ? colors.gold : index % 2 ? colors.alternate : colors.surface;
     ctx.fillRect(left, y, tableWidth, rowHeight);
     row.cells.forEach((cell, column) => {
@@ -206,16 +236,17 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
   drawRule(ctx, left, body, left + tableWidth, body, colors);
 
   if (options.notice) {
+    const noticeY = noticeIndex >= 0 ? body + noticeIndex * rowHeight : end + 8;
     ctx.fillStyle = '#b91c1c';
-    ctx.fillRect(left, end + 8, tableWidth, 45);
-    drawText(ctx, options.notice, middle, end + 30, {
+    ctx.fillRect(left, noticeY, tableWidth, 45);
+    drawText(ctx, options.notice, middle, noticeY + 22, {
       size: phone ? 22 : 28,
       color: '#fff',
       weight: 700,
       maxWidth: tableWidth - 20,
     });
   }
-  const footerY = end + (options.notice ? 85 : 40);
+  const footerY = end + (options.notice && noticeIndex < 0 ? 85 : 40);
   const fridayRows = monthlyPrayerTimes
     .map((row) => ({ row, date: recordDate(row) }))
     .filter(({ date }) => date && new Date(date + 'T12:00:00Z').getUTCDay() === 5);
@@ -238,6 +269,10 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
         )
         .join(' · ');
   if (jummahTimes?.length) {
+    if (!phone) {
+      ctx.fillStyle = colors.heading;
+      ctx.fillRect(left, footerY - 26, tableWidth, 58);
+    }
     drawText(
       ctx,
       `${options.jummahLabel || 'Next Jummah'} · ${jummahTimes.map((time) => `${time.name}: ${time.prayer}`).join(' · ')}`,
@@ -246,26 +281,31 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
       {
         size: phone ? 24 : 29,
         weight: 600,
-        color: colors.text,
+        color: phone ? colors.text : '#ffffff',
         maxWidth: tableWidth,
       },
     );
   }
-  if (overrideText)
-    drawText(ctx, `Friday changes · ${overrideText}`, middle, footerY + 40, {
+  if (overrideText) {
+    if (!phone) {
+      ctx.fillStyle = '#f4e9db';
+      ctx.fillRect(left, footerY + 34, tableWidth, 48);
+    }
+    drawText(ctx, `Friday changes · ${overrideText}`, middle, footerY + 58, {
       size: phone ? 19 : 24,
       color: colors.text,
       maxWidth: tableWidth,
     });
+  }
   if (options.hijriDay)
     drawText(
       ctx,
       'Islamic dates are tentative, subject to confirmed moon sighting.',
       middle,
-      footerY + 76,
+      footerY + (overrideText ? 110 : 76),
       { size: phone ? 18 : 23, color: colors.muted, maxWidth: tableWidth },
     );
-  drawText(ctx, 'jicmasjid.org', middle, footerY + 115, {
+  drawText(ctx, 'jicmasjid.org', middle, footerY + (overrideText ? 150 : 115), {
     size: phone ? 24 : 28,
     weight: 700,
     color: colors.text,
