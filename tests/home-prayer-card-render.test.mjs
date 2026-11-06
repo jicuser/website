@@ -1,3 +1,5 @@
+import * as timetable from '../src/lib/timetable.js';
+import { PrayerClock } from './helpers/prayerClock.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -38,8 +40,12 @@ const today = {
 function render(data = {}, clock = '2026-11-03T17:13:00Z', props = {}) {
   const mod = { exports: {} };
   const dependencies = {
+    '@/components/PrayerClock': PrayerClock,
     '@/lib/sunriseStatus': sunrise,
-    './HomePrayerExtras': { __esModule: true, default: () => null },
+    './HomePrayerExtras': {
+      __esModule: true,
+      default: () => React.createElement('dl', { 'data-extras': true }),
+    },
     react: React,
     'lucide-react': require('lucide-react'),
     'react-router-dom': {
@@ -55,7 +61,7 @@ function render(data = {}, clock = '2026-11-03T17:13:00Z', props = {}) {
       }),
     },
     '@/hooks/useDisplayClock': { __esModule: true, default: () => new Date(clock) },
-    '@/lib/timetable': { displayTime: (value) => value || '—' },
+    '@/lib/timetable': timetable,
     '@/lib/prayerDisplayState': state,
     '@/lib/homePrayerView': view,
     '@/styles/jic-prayer-modern.css': {},
@@ -87,7 +93,7 @@ test('starts countdown includes both next beginning and congregation without rep
   const html = render();
   assert.match(html, /Begins in/);
   assert.match(html, /01:11:00/);
-  assert.match(html, /Jamaat 19:30/);
+  assert.match(renderedText(html), /Jamaat 7:30 PM/);
   assert.doesNotMatch(html, /href="\/radio"/);
   assert.match(html, /href="\/prayer-times\/reminders"/);
 });
@@ -133,8 +139,8 @@ test('installed card separates current Isha from tomorrow Fajr without marking t
   assert.match(text, /Currently Isha time/);
   assert.match(text, /Next up/);
   assert.match(text, /Fajr.*Tomorrow/);
-  assert.match(text, /05:35/);
-  assert.match(text, /05:34/);
+  assert.match(text, /5:35/);
+  assert.match(text, /5:34/);
   assert.match(text, /Starts in/);
   assert.equal((html.match(/data-current="true"/g) || []).length, 3);
   assert.doesNotMatch(html, /data-next="true"/);
@@ -151,7 +157,7 @@ test('installed card distinguishes the current prayer from its upcoming Jamaat',
   assert.equal((html.match(/data-current="true"/g) || []).length, 3);
   const nextCells = [...html.matchAll(/<td\b[^>]*data-next="true"[^>]*>([\s\S]*?)<\/td>/g)];
   assert.equal(nextCells.length, 1);
-  assert.match(renderedText(nextCells[0][1]), /19:30/);
+  assert.match(renderedText(nextCells[0][1]), /7:30/);
   assert.match(render({}, '2026-11-03T16:37:00Z', { compact: true }), /Maghrib Jamaat time/);
 });
 
@@ -165,11 +171,11 @@ test('installed card highlights only the next start cell while keeping the curre
   assert.equal((html.match(/data-current="true"/g) || []).length, 3);
   const nextCells = [...html.matchAll(/<td\b[^>]*data-next="true"[^>]*>([\s\S]*?)<\/td>/g)];
   assert.equal(nextCells.length, 1);
-  assert.match(renderedText(nextCells[0][1]), /18:24/);
+  assert.match(renderedText(nextCells[0][1]), /6:24/);
 });
 
 for (const [clock, name, begins] of [
-  ['2026-11-03T03:00:00Z', 'Fajr', '05:34'],
+  ['2026-11-03T03:00:00Z', 'Fajr', '5:34'],
   ['2026-11-03T07:05:00Z', 'Dhuhr', '11:56'],
   ['2026-11-03T10:00:00Z', 'Dhuhr', '11:56'],
 ]) {
@@ -198,7 +204,7 @@ test('Friday second Jamaat does not mark the first session’s timetable cell ne
   const text = renderedText(html);
   assert.match(text, /Next up/);
   assert.match(text, /Jummah 2 Jamaat/);
-  assert.match(text, /13:30/);
+  assert.match(text, /1:30/);
   assert.match(text, /12:35/);
   assert.doesNotMatch(html, /data-next="true"/);
   assert.doesNotMatch(html, /data-wash="next"|, next up/);
@@ -218,8 +224,8 @@ test('installed card labels the sunrise buffer and clears the prohibition when i
 });
 
 for (const [clock, time] of [
-  ['2026-11-03T17:13:00Z', '18:24'],
-  ['2026-11-03T18:45:00Z', '19:30'],
+  ['2026-11-03T17:13:00Z', '6:24'],
+  ['2026-11-03T18:45:00Z', '7:30'],
 ]) {
   test(`browser card matches next highlighting to the correct start or Jamaat at ${clock}`, () => {
     const html = render({}, clock);
@@ -243,4 +249,14 @@ test('browser card does not highlight today’s Fajr for tomorrow’s next event
 test('browser card shares active and passed Shuroq wording with the installed app', () => {
   assert.match(renderedText(render({}, '2026-11-03T07:10:00Z')), /Prohibited time · Shuroq/);
   assert.match(renderedText(render({}, '2026-11-03T07:25:00Z')), /Shuroq period passed/);
+});
+
+test('Jummah follows the additional times and clock displays include AM/PM', () => {
+  const html = render();
+  assert.ok(html.indexOf('data-extras') < html.indexOf('Friday Jummah times'));
+  assert.match(renderedText(html), /5:34 AM/);
+  assert.match(renderedText(html), /4:37 PM/);
+  assert.match(renderedText(html), /1st 12:35 PM/);
+  assert.match(renderedText(html), /2nd 1:30 PM/);
+  assert.doesNotMatch(renderedText(html), /24-hour|16:37|19:30/);
 });

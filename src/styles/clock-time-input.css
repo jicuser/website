@@ -1,0 +1,49 @@
+.clock-time-input {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  max-width: 240px;
+}
+.clock-time-input > input,
+.clock-time-input > select {
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px;
+  border: 1px solid var(--jic-border, #b8c4d1);
+  border-radius: 8px;
+  color: var(--jic-text, #142739);
+  background: var(--jic-surface, #fff);
+  font-size: 14px;
+}
+.clock-time-input > input {
+  width: 64px;
+  flex: 1 1 64px;
+  font-variant-numeric: tabular-nums;
+}
+.clock-time-input > select {
+  width: 58px;
+  flex: 0 0 58px;
+}
+.clock-time-input > [aria-invalid='true'] {
+  border-color: #b42318;
+}
+.admin-time-field {
+  display: grid;
+  gap: 6px;
+}
+.timetable-edit-grid .clock-time-input {
+  min-width: 128px;
+}
+.timetable-edit-grid .clock-time-input > input {
+  min-width: 0;
+}
+@media (max-width: 420px) {
+  .prayer-daily-fields .clock-time-input {
+    flex-direction: column;
+  }
+  .prayer-daily-fields .clock-time-input > :is(input, select) {
+    width: 100%;
+    flex: auto;
+  }
+}

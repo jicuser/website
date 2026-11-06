@@ -1,12 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { londonDate, prayerFields, jummahFields, displayTime } from '@/lib/timetable';
 import { monthDates, monthDraft, applyJamaahRange, validateMonth } from '@/lib/timetableEditor';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
-import { useMonthlyZawal } from '@/features/prayer-details/usePublishedPrayerDetails';
+import { detailsDraft } from '@/features/prayer-details/model';
+import { monthlyDetailWrites, saveMonthlyDetails } from '@/lib/saveTimetableMonth';
+import ClockTimeInput from './ClockTimeInput';
 import WallpaperDownload from '@/components/WallpaperDownload';
 import { parseTimetablePaste } from '@/lib/timetablePaste';
 import '@/styles/timetable-editor.css';
+
+const extraFields = [
+  ['zawwal_start', 'Zawal'],
+  ['zawwal_end', 'Zawal end'],
+  ['sunset', 'Sunset'],
+];
 
 export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah }) {
   const [month, setMonth] = useState(londonDate().slice(0, 7));
@@ -20,10 +28,15 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
   const [error, setError] = useState('');
   const [paste, setPaste] = useState('');
   const [detailDraft, setDetailDraft] = useState({});
+  const [detailBaseline, setDetailBaseline] = useState({});
+  const [detailSource, setDetailSource] = useState('');
+  const [publishDetails, setPublishDetails] = useState(true);
+  const [reload, setReload] = useState(0);
+  const saveLock = useRef(false);
   const [reference, setReference] = useState(null);
   const [allDays, setAllDays] = useState(true);
   const [range, setRange] = useState({ key: 'fajr_jamah', time: '', start: '', end: '' });
-  const { timetableRows, status, retry } = useMonthlyZawal(rows);
+  const status = loaded ? 'ready' : 'loading';
   const dirty = JSON.stringify(rows) !== baseline;
   const detailDirty = Object.keys(detailDraft).length > 0;
   useEffect(
@@ -45,21 +58,33 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
     setDay(0);
     setStep(1);
     setDetailDraft({});
+    setDetailBaseline({});
+    setDetailSource('');
     setPaste('');
     const dates = monthDates(month);
-    supabase
-      .from('prayer_times')
-      .select('*')
-      .gte('d_date', dates[0])
-      .lte('d_date', dates.at(-1))
-      .order('d_date')
-      .then(({ data, error }) => {
+    Promise.all([
+      supabase
+        .from('prayer_times')
+        .select('*')
+        .gte('d_date', dates[0])
+        .lte('d_date', dates.at(-1))
+        .order('d_date'),
+      supabase
+        .from('prayer_day_details')
+        .select('d_date,sunset,zawwal_start,zawwal_end,source,published,revision')
+        .gte('d_date', dates[0])
+        .lte('d_date', dates.at(-1)),
+    ])
+      .then(([prayers, details]) => {
         if (!active) return;
-        if (error) {
-          setError('Could not load the month. Reopen the editor to retry.');
+        if (prayers.error || details.error) {
+          setError('Could not load all monthly times. Reload before editing.');
           return;
         }
-        const draft = monthDraft(month, data);
+        const draft = monthDraft(month, prayers.data);
+        setDetailBaseline(
+          Object.fromEntries((details.data || []).map((item) => [item.d_date, detailsDraft(item)])),
+        );
         setRows(draft);
         setBaseline(JSON.stringify(draft));
         setLoaded(true);
@@ -71,35 +96,70 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
     return () => {
       active = false;
     };
-  }, [month]);
+  }, [month, reload]);
   const save = useCallback(async () => {
-    if (!loaded || busy || !dirty) return false;
+    if (!loaded || saveLock.current || (!dirty && !detailDirty)) return false;
+    saveLock.current = true;
     setError('');
     setMessage('');
+    setBusy(true);
+    let savedAny = false;
     try {
-      const valid = validateMonth(rows);
       const old = JSON.parse(baseline);
-      const changed = valid.filter((_, i) => JSON.stringify(rows[i]) !== JSON.stringify(old[i]));
-      setBusy(true);
-      const { data, error } = await supabase
-        .from('prayer_times')
-        .upsert(changed, { onConflict: 'd_date', defaultToNull: false })
-        .select('d_date');
-      if (error) throw error;
-      if (data?.length !== changed.length)
-        throw new Error('Could not verify every saved date. Please reload and check.');
-      setBaseline(JSON.stringify(rows));
-      setMessage('Month saved. Website prayer times updated.');
-      window.dispatchEvent(new Event('jic-content-updated'));
+      const changed = validateMonth(
+        rows.filter((r, i) => JSON.stringify(r) !== JSON.stringify(old[i])),
+      );
+      const writes = monthlyDetailWrites(detailBaseline, detailDraft, detailSource, publishDetails);
+      if (changed.length) {
+        const { data, error } = await supabase
+          .from('prayer_times')
+          .upsert(changed, { onConflict: 'd_date', defaultToNull: false })
+          .select('d_date');
+        if (error) throw error;
+        if (data?.length !== changed.length)
+          throw new Error('Could not verify every saved date. Please reload and check.');
+        setBaseline(JSON.stringify(rows));
+        savedAny = true;
+      }
+      await saveMonthlyDetails(supabase, writes, (date, detail) => {
+        savedAny = true;
+        setDetailBaseline((current) => ({ ...current, [date]: detail }));
+        setDetailDraft((current) => {
+          const remaining = { ...current };
+          delete remaining[date];
+          return remaining;
+        });
+      });
+      setMessage(
+        publishDetails || !writes.length
+          ? 'Month saved. Published times updated across the website.'
+          : 'Prayer times saved. Additional times saved as drafts.',
+      );
       onSaved();
+      return true;
     } catch (e) {
-      setError(e.message);
+      setError(
+        `${savedAny ? 'Some changes saved. Unsaved edits are still here. ' : ''}${e.message}`,
+      );
       throw e;
     } finally {
+      if (savedAny) window.dispatchEvent(new Event('jic-content-updated'));
+      saveLock.current = false;
       setBusy(false);
     }
-  }, [rows, baseline, loaded, busy, dirty, onSaved]);
-  useRegisterAdminSave(save, dirty, 'Save month', busy || !loaded);
+  }, [
+    rows,
+    baseline,
+    loaded,
+    dirty,
+    detailDirty,
+    detailBaseline,
+    detailDraft,
+    detailSource,
+    publishDetails,
+    onSaved,
+  ]);
+  useRegisterAdminSave(save, dirty || detailDirty, 'Save month', busy || !loaded);
   const row = rows[day];
   const edit = (key, value) => {
     setRows((current) => current.map((r, i) => (i === day ? { ...r, [key]: value } : r)));
@@ -131,7 +191,23 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
       setError(failure.message);
     }
   };
-  const downloadRows = timetableRows.map((row) => ({ ...row, ...detailDraft[row.d_date] }));
+  const downloadRows = rows.map((row) => ({
+    ...row,
+    ...detailBaseline[row.d_date],
+    ...detailDraft[row.d_date],
+  }));
+  const editDetail = (date, key, value) =>
+    setDetailDraft((current) => ({
+      ...current,
+      [date]: { ...current[date], [key]: value },
+    }));
+  const retry = () => {
+    if (
+      (!dirty && !detailDirty) ||
+      window.confirm('Discard this draft and reload all saved monthly times?')
+    )
+      setReload((value) => value + 1);
+  };
   return (
     <section
       id="prayer-view-month"
@@ -178,9 +254,40 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
           {message}
         </p>
       )}
+      {detailDirty && (
+        <section className="admin-panel" aria-label="Publish additional monthly times">
+          <h4>Additional times · {Object.keys(detailDraft).length} edited dates</h4>
+          <label>
+            Source for edited additional times
+            <input
+              value={detailSource}
+              disabled={busy}
+              maxLength={250}
+              placeholder="Use the existing source, or enter the approved timetable"
+              onChange={(event) => setDetailSource(event.target.value)}
+            />
+          </label>
+          <label className="admin-check">
+            <input
+              type="checkbox"
+              checked={publishDetails}
+              disabled={busy}
+              onChange={(event) => setPublishDetails(event.target.checked)}
+            />
+            Publish these additional times when saving the month
+          </label>
+          <p>
+            Sunset and Zawal edits save with the month. New records need a source; existing sources
+            are kept unless replaced.
+          </p>
+        </section>
+      )}
       {step === 1 && (
         <div>
           <h3>Choose your month</h3>
+          <button type="button" className="admin-button" disabled={busy} onClick={retry}>
+            Reload saved month
+          </button>
           <label>
             Month
             <input
@@ -206,8 +313,8 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
           <div className="timetable-import">
             <h4>Paste or upload your times</h4>
             <p>
-              Copy a table from Excel or Google Sheets, or upload CSV/TSV. Use 24-hour times.
-              Nothing is published until you save.
+              Copy a table from Excel or Google Sheets, or upload CSV/TSV. Use AM/PM times or
+              24-hour times. Nothing is published until you save.
             </p>
             <label>
               Paste times
@@ -337,26 +444,20 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
               )}
             </details>
           )}
-          {Object.keys(detailDraft).length > 0 && (
-            <p>
-              Zawal edits are included in draft downloads. Publish those separately in Extra times
-              if they should also change on the website.
-            </p>
-          )}
           {allDays ? (
             <div className="admin-table-scroll timetable-edit-grid">
               <table>
-                <caption>Editable monthly timetable · 24-hour clock</caption>
+                <caption>Editable monthly timetable · 12-hour clock, AM/PM</caption>
                 <thead>
                   <tr>
                     <th>Date</th>
-                    {[...prayerFields, ['zawwal_start', 'Zawal']].map(([key, label]) => (
+                    {[...prayerFields, ...extraFields].map(([key, label]) => (
                       <th key={key}>{label}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((item, index) => (
+                  {rows.map((item) => (
                     <tr
                       key={item.d_date}
                       className={
@@ -364,26 +465,21 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
                       }
                     >
                       <th scope="row">{item.d_date}</th>
-                      {[...prayerFields, ['zawwal_start', 'Zawal']].map(([key, label]) => (
+                      {[...prayerFields, ...extraFields].map(([key, label]) => (
                         <td key={key}>
-                          <input
-                            type="time"
+                          <ClockTimeInput
                             aria-label={`${item.d_date} ${label}`}
                             value={
-                              key === 'zawwal_start'
-                                ? (detailDraft[item.d_date]?.zawwal_start ??
-                                  timetableRows[index]?.zawwal_start?.slice(0, 5) ??
+                              extraFields.some(([field]) => field === key)
+                                ? (detailDraft[item.d_date]?.[key] ??
+                                  detailBaseline[item.d_date]?.[key] ??
                                   '')
                                 : item[key]
                             }
                             disabled={busy}
-                            onChange={(event) => {
-                              const value = event.target.value;
-                              if (key === 'zawwal_start')
-                                setDetailDraft((current) => ({
-                                  ...current,
-                                  [item.d_date]: { zawwal_start: value },
-                                }));
+                            onChange={(value) => {
+                              if (extraFields.some(([field]) => field === key))
+                                editDetail(item.d_date, key, value);
                               else
                                 setRows((current) =>
                                   current.map((r) =>
@@ -426,7 +522,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
                   timeZone: 'UTC',
                 })}
               </h4>
-              <p>Enter the centre’s confirmed times. Use 24-hour time: 1:00pm is 13:00.</p>
+              <p>Enter the centre’s confirmed times and choose AM or PM.</p>
               <div className="jic-month-prayers">
                 <div className="jic-month-prayer-labels">
                   <span>Prayer</span>
@@ -441,41 +537,60 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
                     {prayerFields
                       .filter(([key]) => key.startsWith(prayer + '_'))
                       .map(([key, label]) => (
-                        <input
+                        <ClockTimeInput
                           key={key}
                           aria-label={label}
-                          type="time"
+
                           disabled={busy}
                           value={row[key]}
-                          onInput={(e) => edit(key, e.target.value)}
+                          onChange={(value) => edit(key, value)}
                         />
                       ))}
                   </div>
                 ))}
               </div>
-              <label>
-                Sunrise
-                <input
-                  type="time"
+              <div className="admin-time-field">
+                <span>Sunrise</span>
+                <ClockTimeInput
+                  aria-label="Sunrise"
                   disabled={busy}
                   value={row.sunrise}
-                  onInput={(e) => edit('sunrise', e.target.value)}
+                  onChange={(value) => edit('sunrise', value)}
                 />
-              </label>
+              </div>
+              <div className="admin-field-grid">
+                {extraFields.map(([key, label]) => (
+                  <div className="admin-time-field" key={key}>
+                    <span>
+                      {label}
+                      {key === 'zawwal_end' ? ' (optional)' : ''}
+                    </span>
+                    <ClockTimeInput
+                      aria-label={label}
+                      disabled={busy}
+                      value={
+                        detailDraft[row.d_date]?.[key] ?? detailBaseline[row.d_date]?.[key] ?? ''
+                      }
+                      onChange={(value) => editDetail(row.d_date, key, value)}
+                    />
+                  </div>
+                ))}
+              </div>
+              <p>Ishraq is calculated from Sunrise + 20 minutes.</p>
               <details>
                 <summary>Jummah times for this date</summary>
                 <p>Leave blank to use the weekly Jummah settings.</p>
                 <div className="admin-field-grid">
                   {jummahFields.map(([key, label]) => (
-                    <label key={key}>
-                      {label}
-                      <input
-                        type="time"
+                    <div className="admin-time-field" key={key}>
+                      <span>{label}</span>
+                      <ClockTimeInput
+                        aria-label={label}
                         disabled={busy}
                         value={row[key]}
-                        onInput={(e) => edit(key, e.target.value)}
+                        onChange={(value) => edit(key, value)}
                       />
-                    </label>
+                    </div>
                   ))}
                 </div>
               </details>
@@ -507,15 +622,16 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
                         ))}
                     </select>
                   </label>
-                  <label>
-                    Time
-                    <input
+                  <div className="admin-time-field">
+                    <span>Time</span>
+                    <ClockTimeInput
+                      aria-label="Time for selected days"
                       disabled={busy}
-                      type="time"
+
                       value={range.time}
-                      onInput={(e) => setRange({ ...range, time: e.target.value })}
+                      onChange={(value) => setRange({ ...range, time: value })}
                     />
-                  </label>
+                  </div>
                   {['start', 'end'].map((key) => (
                     <label key={key}>
                       {key === 'start' ? 'From' : 'Through'}
@@ -579,7 +695,9 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
         <div>
           <h3>Check your month</h3>
           <p>
-            {dirty ? 'Draft — downloads include your unsaved edits.' : 'Saved timetable.'}{' '}
+            {dirty || detailDirty
+              ? 'Draft — downloads include your unsaved edits.'
+              : 'Saved timetable.'}{' '}
             {complete} of {rows.length} days complete.
           </p>
           <div className="admin-table-scroll">
@@ -587,16 +705,16 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
               <thead>
                 <tr>
                   <th>Date</th>
-                  {prayerFields.map(([key, label]) => (
+                  {[...prayerFields, ...extraFields].map(([key, label]) => (
                     <th key={key}>{label}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {downloadRows.map((r) => (
                   <tr key={r.d_date}>
                     <th>{r.d_date}</th>
-                    {prayerFields.map(([key]) => (
+                    {[...prayerFields, ...extraFields].map(([key]) => (
                       <td key={key}>{displayTime(r[key])}</td>
                     ))}
                   </tr>
@@ -621,7 +739,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
           )}
           <button
             className="admin-button primary"
-            disabled={busy || !dirty || complete !== rows.length}
+            disabled={busy || (!dirty && !detailDirty)}
             onClick={() => save().catch(() => {})}
           >
             {busy ? 'Saving…' : 'Save month to website'}

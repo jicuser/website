@@ -321,7 +321,7 @@ test('Prayer Times shows already loaded times without another loading flash', as
       timeout: 1000,
     });
     await expect(
-      page.getByRole('table', { name: /prayer starts and Jamaat times, 24-hour clock/ }),
+      page.getByRole('table', { name: /prayer starts and Jamaat times, 12-hour clock/ }),
     ).toContainText('05:15');
     await page.screenshot({ path: testInfo.outputPath('prayer-times.png') });
     const views = page.getByRole('navigation', { name: 'Salah timetable views' });
@@ -342,7 +342,7 @@ test('Prayer Times shows already loaded times without another loading flash', as
       timeout: 1000,
     });
     await expect(
-      page.getByRole('table', { name: /prayer starts and Jamaat times, 24-hour clock/ }),
+      page.getByRole('table', { name: /prayer starts and Jamaat times, 12-hour clock/ }),
     ).toContainText('05:15');
   } finally {
     api.release();

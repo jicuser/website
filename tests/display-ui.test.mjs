@@ -161,10 +161,13 @@ test('Jama’ah values carry prayer emphasis and Sunrise has no invented congreg
       showNext: false,
     }),
   );
-  assert.match(markup, /class="jic-prayer-start"><small>Start<\/small>6:14<\/span>/);
-  assert.match(markup, /<strong class="jic-prayer-jamaah"><small>Jama’ah<\/small>6:45<\/strong>/);
+  assert.match(markup, /class="jic-prayer-start"><small>Start<\/small>6:14 AM<\/span>/);
   assert.match(
     markup,
-    /Sunrise[\s\S]*?jic-prayer-start[\s\S]*?7:31<\/span><strong class="jic-prayer-jamaah"><small><\/small><\/strong>/,
+    /<strong class="jic-prayer-jamaah"><small>Jama’ah<\/small>6:45 AM<\/strong>/,
+  );
+  assert.match(
+    markup,
+    /Sunrise[\s\S]*?jic-prayer-start[\s\S]*?7:31 AM<\/span><strong class="jic-prayer-jamaah"><small><\/small><\/strong>/,
   );
 });

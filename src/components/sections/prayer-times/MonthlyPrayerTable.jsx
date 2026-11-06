@@ -150,7 +150,9 @@ export default function MonthlyPrayerTable({
                             <time dateTime={row.isoDate || undefined}>{cell.display}</time>
                           ) : (
                             <>
-                              <span aria-hidden="true">{cell.display}</span>
+                              <span aria-hidden="true">
+                                {cell.repeated ? cell.display : cell.value}
+                              </span>
                               <span className="sr-only">{cell.value}</span>
                             </>
                           )}

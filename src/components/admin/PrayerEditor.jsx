@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import ClockTimeInput from '@/components/admin/ClockTimeInput';
+import { normalizeClock } from '@/lib/clockTime';
 import { Upload, Download, Save, Clock3, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
@@ -96,7 +98,12 @@ export default function PrayerEditor() {
   const saveDay = useCallback(async () => {
     if (!dirtyDay) return;
     const payload = { d_date: date, is_ramadan: Boolean(form.is_ramadan) };
-    for (const [key] of [...prayerFields, ...jummahFields]) payload[key] = form[key] || null;
+    for (const [key, label] of [...prayerFields, ...jummahFields]) {
+      const required = prayerFields.some(([field]) => field === key);
+      const time = normalizeClock(form[key]);
+      if ((required || form[key]) && !time) throw new Error(`Enter ${label} and choose AM or PM.`);
+      payload[key] = time;
+    }
     const { data, error: saveError } = await supabase
       .from('prayer_times')
       .upsert(payload, { onConflict: 'd_date' })
@@ -111,6 +118,9 @@ export default function PrayerEditor() {
       if (!dirtyJummah) return;
       if (monthDirty || (dirtyDay && !dateEditsSaved))
         throw new Error('Save or discard the date edits before changing weekly Jummah times.');
+      for (const [key, label] of jummahFields)
+        if (jummah[key] && !normalizeClock(jummah[key]))
+          throw new Error(`Enter ${label} and choose AM or PM.`);
       const { data, error: saveError } = await supabase.rpc('save_jummah_settings', {
         p_settings: parseJummahSettings(jummah),
         p_expected: savedJummah,
@@ -405,16 +415,19 @@ export default function PrayerEditor() {
         </div>
         <div className="admin-field-grid">
           {jummahFields.map(([key, title]) => (
-            <label key={key}>
-              {title}
-              {key === 'jummah_1_start' || key === 'jummah_2_begins' ? ' (optional)' : ''}
-              <input
+            <div className="admin-time-field" key={key}>
+              <span>
+                {title}
+                {key === 'jummah_1_start' || key === 'jummah_2_begins' ? ' (optional)' : ''}
+              </span>
+              <ClockTimeInput
+                aria-label={title}
                 disabled={loading || busy || loadFailed}
-                type="time"
+
                 value={jummah[key] || ''}
-                onChange={(event) => setJummah({ ...jummah, [key]: event.target.value })}
+                onChange={(value) => setJummah({ ...jummah, [key]: value })}
               />
-            </label>
+            </div>
           ))}
         </div>
         <p className="admin-time-preview">
@@ -484,12 +497,12 @@ export default function PrayerEditor() {
                   .filter(([key]) => key.startsWith(`${prayer}_`))
                   .map(([key, title]) => (
                     <td key={key}>
-                      <input
+                      <ClockTimeInput
                         aria-label={title}
                         disabled={loading || busy || loadFailed}
-                        type="time"
-                        value={form[key]?.slice(0, 5) || ''}
-                        onChange={(event) => setForm({ ...form, [key]: event.target.value })}
+
+                        value={form[key] || ''}
+                        onChange={(value) => setForm({ ...form, [key]: value })}
                       />
                     </td>
                   ))}
@@ -497,15 +510,20 @@ export default function PrayerEditor() {
             ))}
           </tbody>
         </table>
-        <label className="prayer-sunrise">
-          Sunrise
-          <input
+        <div className="prayer-sunrise admin-time-field">
+          <span>Sunrise</span>
+          <ClockTimeInput
+            aria-label="Sunrise"
             disabled={loading || busy || loadFailed}
-            type="time"
-            value={form.sunrise?.slice(0, 5) || ''}
-            onChange={(event) => setForm({ ...form, sunrise: event.target.value })}
+
+            value={form.sunrise || ''}
+            onChange={(value) => setForm({ ...form, sunrise: value })}
           />
-        </label>
+        </div>
+        <p className="admin-time-preview">
+          Ishraq is calculated from Sunrise + 20 minutes. Edit Sunset and Zawal in their own tab or
+          in the month editor.
+        </p>
         <label className="admin-check">
           <input
             type="checkbox"
@@ -519,15 +537,16 @@ export default function PrayerEditor() {
           <summary>Jummah overrides</summary>
           <div className="admin-field-grid">
             {jummahFields.map(([key, title]) => (
-              <label key={key}>
-                {title}
-                <input
+              <div className="admin-time-field" key={key}>
+                <span>{title}</span>
+                <ClockTimeInput
+                  aria-label={title}
                   disabled={loading || busy || loadFailed}
-                  type="time"
-                  value={form[key]?.slice(0, 5) || ''}
-                  onChange={(event) => setForm({ ...form, [key]: event.target.value })}
+
+                  value={form[key] || ''}
+                  onChange={(value) => setForm({ ...form, [key]: value })}
                 />
-              </label>
+              </div>
             ))}
           </div>
         </details>

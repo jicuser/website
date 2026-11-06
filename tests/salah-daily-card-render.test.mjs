@@ -1,3 +1,5 @@
+import * as timetable from '../src/lib/timetable.js';
+import { PrayerClock } from './helpers/prayerClock.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -42,6 +44,8 @@ const day = {
 function render(clock, props = {}) {
   const mod = { exports: {} };
   const dependencies = {
+    '@/lib/timetable': timetable,
+    '@/components/PrayerClock': PrayerClock,
     react: React,
     'react-router-dom': router,
     'lucide-react': require('lucide-react'),
@@ -83,7 +87,7 @@ test('current and next prayers stay distinct and only the exact upcoming event c
   assert.equal((html.match(/data-upcoming="true"/g) || []).length, 1);
   const next = [...html.matchAll(/<td[^>]*data-next-event="true"[^>]*>([\s\S]*?)<\/td>/g)];
   assert.equal(next.length, 1);
-  assert.match(next[0][1], /18:22/);
+  assert.match(next[0][1], /6:22/);
 });
 
 test('a second Friday congregation never marks the first displayed congregation cell as next', () => {
@@ -96,7 +100,7 @@ test('a second Friday congregation never marks the first displayed congregation 
   assert.match(html, /Jummah 2 Jamaat/);
   assert.match(html, /00:25:00/);
   assert.match(html, /12:35/);
-  assert.match(html, /First Jummah khutbah <strong>12:20<\/strong>/);
+  assert.match(html, /First Jummah khutbah[\s\S]*?12:20[\s\S]*?PM/);
   assert.match(html, /href="\/contact"/);
   assert.doesNotMatch(html, /data-next-event="true"/);
 });
@@ -104,7 +108,7 @@ test('a second Friday congregation never marks the first displayed congregation 
 test('browsing another day never makes a live current or upcoming prayer claim', () => {
   const row = { ...day, d_date: '2026-11-05' };
   const html = render('2026-11-04T16:49:00Z', { row, date: row.d_date, summary: false });
-  assert.match(html, /18:22/);
+  assert.match(html, /6:22/);
   assert.doesNotMatch(
     html,
     /data-current="true"|data-upcoming="true"|data-next-event="true"|role="timer"/,

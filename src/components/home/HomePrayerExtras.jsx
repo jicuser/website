@@ -2,7 +2,8 @@ import React from 'react';
 import { Sunrise, Sunset, Sun, SunMedium } from 'lucide-react';
 import { usePublishedPrayerDetails } from '@/features/prayer-details/usePublishedPrayerDetails';
 import { compactTime } from '@/lib/homePrayerView';
-import { displayZawal } from '@/lib/timetable';
+import { displayLondonClock } from '@/lib/timetable';
+import PrayerClock from '@/components/PrayerClock';
 import { sunriseStatus } from '@/lib/sunriseStatus';
 import { londonDay, londonWallInstant } from '@/lib/prayerDisplayState';
 
@@ -33,13 +34,7 @@ export default function HomePrayerExtras({
   const unavailable =
     status === 'loading' ? 'Loading…' : status === 'error' ? 'Unavailable' : 'Not published';
   const ishraqTime =
-    shuroq.ishraqAt === null
-      ? 'Not published'
-      : new Date(shuroq.ishraqAt).toLocaleTimeString('en-GB', {
-          timeZone: 'Europe/London',
-          hour: '2-digit',
-          minute: '2-digit',
-        });
+    shuroq.ishraqAt === null ? null : displayLondonClock(new Date(shuroq.ishraqAt));
   return (
     <>
       <dl
@@ -48,37 +43,48 @@ export default function HomePrayerExtras({
         data-has-sunset={sunset !== '—' || undefined}
       >
         <div className="jic-card-shuroq" data-sunrise-phase={shuroq.phase}>
-          <dt>
-            {compact && <Sunrise size={13} aria-hidden="true" />} Sunrise
-          </dt>
-          <dd>{compactTime(sunrise)}</dd>
+          <dt>{compact && <Sunrise size={13} aria-hidden="true" />} Sunrise</dt>
+          <dd>
+            <PrayerClock value={sunrise} />
+          </dd>
         </div>
         <div className="jic-card-ishraq" aria-current={shuroq.startingIshraq ? 'time' : undefined}>
-          <dt>{compact && <Sun size={13} aria-hidden="true" />} Ishraq ≈</dt>
-          <dd data-unavailable={shuroq.ishraqAt === null || undefined}>{ishraqTime}</dd>
+          <dt title="Approximately 20 minutes after sunrise">
+            {compact && <Sun size={13} aria-hidden="true" />} Ishraq ≈
+          </dt>
+          <dd data-unavailable={shuroq.ishraqAt === null || undefined}>
+            <PrayerClock value={ishraqTime} />
+            <span className="sr-only"> · Estimated from sunrise + 20 min</span>
+          </dd>
         </div>
         <div className="jic-card-zawal" aria-current={zawalActive ? 'time' : undefined}>
           <dt>{compact && <SunMedium size={13} aria-hidden="true" />} Zawal</dt>
-          <dd data-unavailable={!detail?.zawwal_start || undefined} aria-label={!detail?.zawwal_start ? unavailable : undefined}>
-            {detail?.zawwal_start
-              ? displayZawal(detail, compactTime)
-              : '—'}
+          <dd
+            data-unavailable={!detail?.zawwal_start || undefined}
+            aria-label={!detail?.zawwal_start ? unavailable : undefined}
+          >
+            <PrayerClock value={detail?.zawwal_start} />
+            {detail?.zawwal_start && detail?.zawwal_end && (
+              <>
+                {' '}
+                – <PrayerClock value={detail.zawwal_end} />
+              </>
+            )}
           </dd>
         </div>
         <div className="jic-card-sunset">
           <dt>{compact && <Sunset size={13} aria-hidden="true" />} Sunset</dt>
-          <dd data-unavailable={sunset === '—' || undefined} aria-label={sunset === '—' ? unavailable : undefined}>
-            {sunset}
+          <dd
+            data-unavailable={sunset === '—' || undefined}
+            aria-label={sunset === '—' ? unavailable : undefined}
+          >
+            <PrayerClock value={sunset} />
           </dd>
         </div>
       </dl>
-      <p className="jic-extra-times-note" data-sunrise-active={shuroq.phase === 'active' || undefined}>
-        {shuroq.phase === 'active'
-          ? `Shuruq · Prohibited time until ≈ ${ishraqTime}. `
-          : ''}
-        Ishraq ≈ sunrise + 20 min
-        {(sunset === '—' || !detail?.zawwal_start) && ` · — ${unavailable}`}
-      </p>
+      {shuroq.phase === 'active' && (
+        <span className="sr-only">Shuruq · Prohibited time until ≈ {ishraqTime}.</span>
+      )}
       {showSource && detail?.source && (
         <details className="jic-extra-times-source">
           <summary>Timetable source</summary>

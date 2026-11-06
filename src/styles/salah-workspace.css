@@ -81,10 +81,18 @@ html[data-theme='light'] .salah-workspace {
   font-weight: 650;
   text-decoration: none;
 }
-.salah-view-tabs a:first-child { --jic-fade-x: 0%; }
-.salah-view-tabs a:last-child { --jic-fade-x: 100%; }
+.salah-view-tabs a:first-child {
+  --jic-fade-x: 0%;
+}
+.salah-view-tabs a:last-child {
+  --jic-fade-x: 100%;
+}
 .salah-view-tabs [aria-current] {
-  background: radial-gradient(ellipse at var(--jic-fade-x) 50%, var(--salah-current), transparent 85%);
+  background: radial-gradient(
+    ellipse at var(--jic-fade-x) 50%,
+    var(--salah-current),
+    transparent 85%
+  );
   color: var(--salah-ink);
 }
 .salah-today-layout {
@@ -261,13 +269,6 @@ html[data-theme='light'] .salah-workspace {
   color: var(--salah-muted);
   font-size: 10px;
   font-weight: 400;
-}
-.salah-workspace .jic-extra-times-note {
-  margin-bottom: 10px;
-  color: var(--salah-muted);
-}
-.salah-workspace .jic-extra-times-note[data-sunrise-active] {
-  color: var(--salah-gold);
 }
 .salah-workspace .jic-card-extra-times > [aria-current='time'],
 .salah-workspace .jic-card-shuroq[data-sunrise-phase='active'] {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { displayTime } from '@/lib/timetable';
 import { hasPublishedTime } from '@/lib/publishedTime';
 import '@/styles/jummah-card.css';
 
@@ -14,15 +15,19 @@ export default function CompactJummah({ jummahTimes }) {
               <h3>{session.name || `Jummah ${index + 1}`}</h3>
               <span className="compact-jummah__label">Jama’ah</span>
               <strong className="compact-jummah__time">
-                {hasPublishedTime(session.prayer) ? session.prayer.trim() : 'Not published'}
+                {hasPublishedTime(session.prayer) ? displayTime(session.prayer) : 'Not published'}
               </strong>
               {hasPublishedTime(session.khutbah) && (
-                <p className="compact-jummah__khutbah">Khutbah <strong>{session.khutbah.trim()}</strong></p>
+                <p className="compact-jummah__khutbah">
+                  Khutbah <strong>{displayTime(session.khutbah)}</strong>
+                </p>
               )}
             </article>
           ))}
         </div>
-      ) : <p>Jummah times have not been published. Please contact the centre.</p>}
+      ) : (
+        <p>Jummah times have not been published. Please contact the centre.</p>
+      )}
       <p className="compact-jummah__note">Please arrive early for the khutbah.</p>
     </section>
   );

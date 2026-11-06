@@ -11,7 +11,8 @@ import {
   Clock3,
 } from 'lucide-react';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
-import { displayTime } from '@/lib/timetable';
+import { displayLondonClock } from '@/lib/timetable';
+import PrayerClock from '@/components/PrayerClock';
 import useDisplayClock from '@/hooks/useDisplayClock';
 import { countdownText, londonDay, prayerDisplayState } from '@/lib/prayerDisplayState';
 import { compactTime, prayerColumns, selectedPrayerRow } from '@/lib/homePrayerView';
@@ -153,14 +154,7 @@ export default function HomePrayerCard({ compact = false }) {
             <CurrentIcon size={13} aria-hidden="true" /> {currentLabel}
           </span>
           <span className="jic-card-clock-now">
-            Current time{' '}
-            <time>
-              {now.toLocaleTimeString('en-GB', {
-                timeZone: 'Europe/London',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </time>
+            Current time <time>{displayLondonClock(now)}</time>
           </span>
         </div>
       )}
@@ -181,14 +175,7 @@ export default function HomePrayerCard({ compact = false }) {
               <CurrentIcon size={15} aria-hidden="true" /> {currentLabel}
             </span>
             <span className="jic-card-app-clock">
-              Now{' '}
-              <time>
-                {now.toLocaleTimeString('en-GB', {
-                  timeZone: 'Europe/London',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </time>
+              Now <time>{displayLondonClock(now)}</time>
             </span>
           </div>
           {target ? (
@@ -204,11 +191,16 @@ export default function HomePrayerCard({ compact = false }) {
                 </strong>
                 <p>
                   {target.kind === 'start' ? 'Starts' : 'Jamaat'}{' '}
-                  <time>{compactTime(target.time)}</time>
+                  <time>
+                    <PrayerClock value={target.time} />
+                  </time>
                   {target.kind === 'start' && target.congregationTime && (
                     <small>
                       {' '}
-                      · Jamaat <time>{compactTime(target.congregationTime)}</time>
+                      · Jamaat{' '}
+                      <time>
+                        <PrayerClock value={target.congregationTime} />
+                      </time>
                     </small>
                   )}
                 </p>
@@ -238,13 +230,17 @@ export default function HomePrayerCard({ compact = false }) {
             <strong>
               {target.name}{' '}
               <span>
-                {target.kind === 'start' ? 'Starts' : 'Jamaat'} {compactTime(target.time)}
+                {target.kind === 'start' ? 'Starts' : 'Jamaat'} <PrayerClock value={target.time} />
               </span>
             </strong>
             <small>
-              {target.kind === 'start' && target.congregationTime
-                ? `Jamaat ${compactTime(target.congregationTime)}`
-                : 'Congregation at the masjid'}
+              {target.kind === 'start' && target.congregationTime ? (
+                <>
+                  Jamaat <PrayerClock value={target.congregationTime} />
+                </>
+              ) : (
+                'Congregation at the masjid'
+              )}
             </small>
           </div>
           <div className="jic-card-countdown">
@@ -275,11 +271,11 @@ export default function HomePrayerCard({ compact = false }) {
           className="jic-card-table-scroll"
           tabIndex={0}
           role="region"
-          aria-label="Prayer times, 24-hour clock"
+          aria-label="Prayer times, 12-hour clock, AM/PM"
         >
           <table className="jic-card-table">
             <caption className="sr-only">
-              {dateLabel(selected)}: prayer begins and Jamaat times, 24-hour clock
+              {dateLabel(selected)}: prayer begins and Jamaat times, 12-hour clock, AM/PM
             </caption>
             <colgroup>
               <col className="jic-card-label-column" />
@@ -321,7 +317,7 @@ export default function HomePrayerCard({ compact = false }) {
                     data-current={current === prayer.key || undefined}
                     data-next={nextCell(prayer.key, 'start', prayer.begins) || undefined}
                   >
-                    {compactTime(prayer.begins)}
+                    <PrayerClock value={prayer.begins} />
                     {nextCell(prayer.key, 'start', prayer.begins) && (
                       <span className="sr-only">, next up</span>
                     )}
@@ -337,9 +333,11 @@ export default function HomePrayerCard({ compact = false }) {
                     data-next={nextCell(prayer.key, 'jamaat', prayer.jamaat) || undefined}
                   >
                     {prayer.friday ? (
-                      <span className="jic-friday-reference">See below</span>
+                      <span className="jic-friday-reference" aria-label="Two Jummah sessions below">
+                        Jummah
+                      </span>
                     ) : (
-                      compactTime(prayer.jamaat)
+                      <PrayerClock value={prayer.jamaat} />
                     )}
                     {nextCell(prayer.key, 'jamaat', prayer.jamaat) && (
                       <span className="sr-only">, next up</span>
@@ -357,6 +355,9 @@ export default function HomePrayerCard({ compact = false }) {
           </p>
         )
       )}
+      {row && (
+        <HomePrayerExtras compact={compact} date={selected} sunrise={row.sunrise} now={now} />
+      )}
       {sessions.length > 0 && (
         <div className="jic-card-friday" role="group" aria-label="Friday Jummah times">
           <span>
@@ -370,13 +371,13 @@ export default function HomePrayerCard({ compact = false }) {
               key={session.number}
               data-upcoming={target?.name === `Jummah ${session.number}` || undefined}
             >
-              {session.number === 1 ? '1st' : '2nd'} <b>{displayTime(session.prayer)}</b>
+              {session.number === 1 ? '1st' : '2nd'}{' '}
+              <b>
+                <PrayerClock value={session.prayer} />
+              </b>
             </span>
           ))}
         </div>
-      )}
-      {row && (
-        <HomePrayerExtras compact={compact} date={selected} sunrise={row.sunrise} now={now} />
       )}
       <nav className="jic-card-links" aria-label="Prayer links">
         <Link to="/prayer-times">

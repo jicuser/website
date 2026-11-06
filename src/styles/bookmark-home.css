@@ -246,6 +246,11 @@ html[data-installed-navigation='true'][data-surface='solid']
   }
 }
 @media (max-width: 360px) {
+  .jic-prayer-card .jic-card-table .prayer-clock {
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
   .jic-prayer-card.is-compact .jic-card-table thead th {
     font-size: 10px;
   }

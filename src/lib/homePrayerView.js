@@ -1,3 +1,6 @@
+import { displayTime } from './timetable.js';
+import { normalizeClock } from './clockTime.js';
+
 const PRAYERS = [
   ['fajr', 'Fajr', 'fajr_begins', 'fajr_jamah'],
   ['dhuhr', 'Dhuhr', 'zuhr_begins', 'zuhr_jamah'],
@@ -6,15 +9,9 @@ const PRAYERS = [
   ['isha', 'Isha', 'isha_begins', 'isha_jamah'],
 ];
 
-/** A consistent 24-hour clock fits five columns without shrinking the type. */
+/** Public clock times consistently include AM/PM; storage and comparisons remain unambiguous. */
 export function compactTime(value) {
-  const match =
-    typeof value === 'string' && value.trim().match(/^(\d{1,2}):(\d{2})(?::00)?\s*(AM|PM)?$/i);
-  if (!match) return '—';
-  let hour = Number(match[1]);
-  if (hour > 23 || Number(match[2]) > 59 || (match[3] && (hour < 1 || hour > 12))) return '—';
-  if (match[3]) hour = (hour % 12) + (match[3].toUpperCase() === 'PM' ? 12 : 0);
-  return `${String(hour).padStart(2, '0')}:${match[2]}`;
+  return displayTime(normalizeClock(value));
 }
 
 /** The displayed row and live status must refer to the same dated publication. */

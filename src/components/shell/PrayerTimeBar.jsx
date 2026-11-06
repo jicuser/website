@@ -16,12 +16,7 @@ const PRAYERS = [
   ['Maghrib', 'maghrib', 'jamaah_maghrib'],
   ['Isha', 'isha', 'jamaah_isha'],
 ];
-const shortTime = (value) =>
-  value && value !== 'N/A'
-    ? String(value)
-        .replace(/^0/, '')
-        .replace(/\s?[AP]M$/i, '')
-    : '—';
+const shortTime = displayTime;
 
 export function NextPrayerSummary({ todaysTimes, currentDate, interactive = false }) {
   const next = nextPrayer(todaysTimes, currentDate);

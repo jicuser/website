@@ -1,0 +1,14 @@
+.prayer-clock {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.14em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.prayer-clock > .prayer-clock-period {
+  display: inline;
+  color: inherit;
+  font: inherit;
+  font-size: max(9px, 0.7em);
+  line-height: 1;
+}

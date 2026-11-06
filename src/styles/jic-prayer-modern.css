@@ -519,7 +519,7 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   font-weight: 650;
   color: var(--prayer-ink);
 }
-/* Four aligned facts, in daily order; explanations sit below the row. */
+/* Four aligned facts, in daily order, followed by the Friday sessions. */
 .jic-card-extra-times {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -560,16 +560,6 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   color: var(--prayer-muted);
   font-size: 10px;
   font-weight: 400;
-}
-.jic-extra-times-note {
-  margin: 1px 14px 8px;
-  color: var(--prayer-muted);
-  font-size: 10px;
-  line-height: 1.4;
-  text-align: center;
-}
-.jic-extra-times-note[data-sunrise-active] {
-  color: var(--prayer-gold);
 }
 .jic-extra-times-source {
   margin: 0 14px 8px;

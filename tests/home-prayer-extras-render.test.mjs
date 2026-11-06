@@ -1,3 +1,4 @@
+import { PrayerClock } from './helpers/prayerClock.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -26,6 +27,7 @@ const compiled = ts.transpileModule(source, {
 function render(clock, date = '2026-11-04', time = '07:09', detail, props = {}) {
   const mod = { exports: {} };
   const deps = {
+    '@/components/PrayerClock': PrayerClock,
     react: React,
     'lucide-react': require('lucide-react'),
     '@/lib/sunriseStatus': sunrise,
@@ -62,8 +64,8 @@ test('sunrise tile describes the prohibition, preserves the published time and l
   const html = render('2026-11-04T07:15:00Z');
   assert.match(html, /Prohibited time/);
   assert.match(html, /Shuruq/);
-  assert.match(html, /07:09/);
-  assert.match(html, /until ≈ 07:29/);
+  assert.match(html, /7:09/);
+  assert.match(html, /until ≈ 7:29 AM/);
   assert.match(html, /Ishraq ≈/);
   assert.match(html, /sunrise \+ 20 min/);
   assert.match(html, /Not published/);
@@ -112,30 +114,37 @@ test('extra times include a published sunset without substituting an inferred va
   const withSunset = render('2026-11-04T16:49:00Z', undefined, undefined, { sunset: '16:31' });
   assert.match(withSunset, /data-has-sunset="true"/);
   assert.match(withSunset, /Sunset/);
-  assert.match(withSunset, /16:31/);
+  assert.match(withSunset, /4:31/);
   const missing = render('2026-11-04T16:49:00Z');
-  assert.match(missing, /jic-card-sunset[\s\S]*aria-label="Not published">—/);
-  assert.doesNotMatch(missing, /data-has-sunset|16:31/);
+  assert.match(missing, /jic-card-sunset[\s\S]*aria-label="Not published">[\s\S]*?—/);
+  assert.doesNotMatch(missing, /data-has-sunset|4:31/);
 });
 
-test('the four sun times stay in daily order with one shared estimate note', () => {
+test('the four sun times stay in daily order without a visible explanatory line', () => {
   const html = render('2026-11-04T16:49:00Z', undefined, undefined, {
-    sunset: '16:31', zawwal_start: '11:46', zawwal_end: '11:56',
+    sunset: '16:31',
+    zawwal_start: '11:46',
+    zawwal_end: '11:56',
   });
-  const labels = [...html.matchAll(/<dt>(.*?)<\/dt>/g)].map((match) =>
+  const labels = [...html.matchAll(/<dt(?: [^>]*)?>(.*?)<\/dt>/g)].map((match) =>
     match[1].replace(/<svg[\s\S]*?<\/svg>/g, '').trim(),
   );
   assert.deepEqual(labels, ['Sunrise', 'Ishraq ≈', 'Zawal', 'Sunset']);
-  assert.match(html, /11:46\s*–\s*11:56/);
+  assert.match(html, /11:46[\s\S]*?AM[\s\S]*?–[\s\S]*?11:56[\s\S]*?AM/);
   assert.equal((html.match(/sunrise \+ 20 min/g) || []).length, 1);
+  assert.doesNotMatch(html, /jic-extra-times-note|<p(?: |>)/);
+  assert.match(html, /class="sr-only"> · Estimated/);
 });
 
 test('loading or failed sunset data is distinguished from an unpublished time', () => {
-  for (const [detailStatus, label] of [['loading', 'Loading…'], ['error', 'Unavailable']]) {
+  for (const [detailStatus, label] of [
+    ['loading', 'Loading…'],
+    ['error', 'Unavailable'],
+  ]) {
     const html = render('2026-11-04T16:49:00Z', undefined, undefined, undefined, { detailStatus });
     const sunset = html.slice(html.indexOf('class="jic-card-sunset"'), html.indexOf('</dl>'));
     assert.ok(sunset.includes(label));
-    assert.doesNotMatch(sunset, /Not published|16:31/);
+    assert.doesNotMatch(sunset, /Not published|4:31/);
   }
 });
 

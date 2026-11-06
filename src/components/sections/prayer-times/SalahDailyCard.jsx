@@ -1,4 +1,6 @@
 import React from 'react';
+import PrayerClock from '@/components/PrayerClock';
+import { displayLondonClock } from '@/lib/timetable';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, CheckCircle2, Clock3 } from 'lucide-react';
 import HomePrayerExtras from '@/components/home/HomePrayerExtras';
@@ -46,14 +48,7 @@ export default function SalahDailyCard({
               <CurrentIcon size={14} aria-hidden="true" /> {currentText}
             </span>
             <span className="salah-clock">
-              Now{' '}
-              <time dateTime={now.toISOString()}>
-                {now.toLocaleTimeString('en-GB', {
-                  timeZone: 'Europe/London',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </time>
+              Now <time dateTime={now.toISOString()}>{displayLondonClock(now)}</time>
             </span>
           </div>
           {target ? (
@@ -68,11 +63,17 @@ export default function SalahDailyCard({
                   {target.kind === 'jamaat' ? ' Jamaat' : ''}
                 </h2>
                 <p>
-                  {target.kind === 'start' ? 'Starts' : 'Jamaat'} <b>{compactTime(target.time)}</b>
+                  {target.kind === 'start' ? 'Starts' : 'Jamaat'}{' '}
+                  <b>
+                    <PrayerClock value={target.time} />
+                  </b>
                   {target.kind === 'start' && target.congregationTime && (
                     <>
                       {' '}
-                      · Jamaat <b>{compactTime(target.congregationTime)}</b>
+                      · Jamaat{' '}
+                      <b>
+                        <PrayerClock value={target.congregationTime} />
+                      </b>
                     </>
                   )}
                 </p>
@@ -95,7 +96,7 @@ export default function SalahDailyCard({
       )}
       <table className="salah-daily-table">
         <caption className="sr-only">
-          {salahDateLabel(date)}: prayer starts and Jamaat times, 24-hour clock
+          {salahDateLabel(date)}: prayer starts and Jamaat times, 12-hour clock, AM/PM
         </caption>
         <thead>
           <tr>
@@ -131,7 +132,7 @@ export default function SalahDailyCard({
                     undefined
                   }
                 >
-                  {compactTime(prayer.begins)}
+                  <PrayerClock value={prayer.begins} />
                 </td>
                 <td
                   data-next-event={
@@ -145,7 +146,7 @@ export default function SalahDailyCard({
                     {prayer.friday ? (
                       <span className="salah-friday-reference">Jummah below</span>
                     ) : (
-                      compactTime(prayer.jamaat)
+                      <PrayerClock value={prayer.jamaat} />
                     )}
                   </strong>
                 </td>
@@ -164,7 +165,9 @@ export default function SalahDailyCard({
               return (
                 <div key={number} data-upcoming={target?.name === `Jummah ${number}` || undefined}>
                   <dt>{number === 1 ? '1st' : '2nd'} Jamaat</dt>
-                  <dd>{compactTime(time)}</dd>
+                  <dd>
+                    <PrayerClock value={time} />
+                  </dd>
                 </div>
               );
             })}
@@ -175,7 +178,10 @@ export default function SalahDailyCard({
               .filter((session) => session.khutbah)
               .map((session) => (
                 <p key={session.number}>
-                  {session.name} khutbah <strong>{compactTime(session.khutbah)}</strong>
+                  {session.name} khutbah{' '}
+                  <strong>
+                    <PrayerClock value={session.khutbah} />
+                  </strong>
                 </p>
               ))}
             <p>Please arrive early for the khutbah and silence your phone.</p>

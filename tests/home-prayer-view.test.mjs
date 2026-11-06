@@ -15,11 +15,11 @@ const today = {
   jamaah_maghrib: '4:37 PM',
   jamaah_isha: '7:30 PM',
 };
-test('compact clocks preserve afternoon and midnight without cramped AM/PM labels', () => {
-  assert.equal(compactTime('4:37 PM'), '16:37');
-  assert.equal(compactTime('12:05 AM'), '00:05');
-  assert.equal(compactTime('12:05 PM'), '12:05');
-  assert.equal(compactTime('06:15:00'), '06:15');
+test('public clocks preserve morning, afternoon, noon and midnight with AM/PM', () => {
+  assert.equal(compactTime('4:37 PM'), '4:37 PM');
+  assert.equal(compactTime('12:05 AM'), '12:05 AM');
+  assert.equal(compactTime('12:05 PM'), '12:05 PM');
+  assert.equal(compactTime('06:15:00'), '6:15 AM');
 });
 test('invalid and missing times are never shown as valid', () => {
   for (const value of [null, undefined, '', 'TBC', '24:30', '13:00 PM', '0:15 AM', '6:99'])

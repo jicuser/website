@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import ClockTimeInput from '@/components/admin/ClockTimeInput';
 import { supabase } from '@/lib/supabaseClient';
 import { londonDate } from '@/lib/timetable';
 import { useRegisterAdminSave } from '@/context/AdminSaveContext';
@@ -130,14 +131,14 @@ export default function AdditionalTimesEditor({ onDirty }) {
               ['zawwal_start', 'Zawal time'],
               ['zawwal_end', 'Zawal end (optional)'],
             ].map(([key, label]) => (
-              <label key={key} className="admin-field">
-                {label}
-                <input
-                  type="time"
+              <div key={key} className="admin-field">
+                <span>{label}</span>
+                <ClockTimeInput
+                  aria-label={label}
                   value={draft[key]}
-                  onChange={(e) => patch(key, e.target.value)}
+                  onChange={(value) => patch(key, value)}
                 />
-              </label>
+              </div>
             ))}
           </div>
           <label className="admin-field">

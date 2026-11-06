@@ -34,6 +34,6 @@ test('timetable rejects missing columns and invalid prayer times', () => {
   assert.throws(() => parseTimetable('date,fajr_begins\n2026-09-10,04:00'), /Missing columns/);
   assert.throws(
     () => parseTimetable(header + '\n' + row('2026-09-10').replace('13:30', '25:00')),
-    /24-hour time/,
+    /valid time/,
   );
 });

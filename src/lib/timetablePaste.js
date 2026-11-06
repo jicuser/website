@@ -1,4 +1,5 @@
 import { parseTimetable, timetableCells } from './timetable.js';
+import { normalizeClock } from './clockTime.js';
 
 const printedColumns = [
   'd_date',
@@ -62,12 +63,17 @@ export function parseTimetablePaste(text, month) {
     if (/^\d{1,2}$/.test(row.d_date || '')) row.d_date = `${month}-${row.d_date.padStart(2, '0')}`;
     if (!row.d_date?.startsWith(`${month}-`))
       throw new Error(`Row ${index + 1}: choose dates inside ${month}.`);
-    if (row.zawwal_start) {
-      if (!/^(?:[01]?\d|2[0-3]):[0-5]\d$/.test(row.zawwal_start))
-        throw new Error(`Row ${index + 1}: Zawal must use 24-hour time.`);
-      details[row.d_date] = { zawwal_start: row.zawwal_start.padStart(5, '0') };
+    for (const key of ['zawwal_start', 'zawwal_end', 'sunset']) {
+      if (key in row) {
+        const time = row[key] ? normalizeClock(row[key]) : '';
+        if (time === null)
+          throw new Error(
+            `Row ${index + 1}: ${key} needs a valid time with AM/PM or 24-hour time.`,
+          );
+        details[row.d_date] = { ...details[row.d_date], [key]: time };
+      }
+      delete row[key];
     }
-    delete row.zawwal_start;
     row.maghrib_jamah ||= row.maghrib_begins;
     return row;
   });

@@ -1,3 +1,5 @@
+import { normalizeClock } from './clockTime.js';
+
 export const prayerFields = [
   ['fajr_begins', 'Fajr begins'],
   ['fajr_jamah', 'Fajr Jama’ah'],
@@ -47,6 +49,17 @@ export function displayZawal(record, format = displayTime) {
   if (!record?.zawwal_start) return '—';
   const start = format(record.zawwal_start);
   return record.zawwal_end ? `${start} – ${format(record.zawwal_end)}` : start;
+}
+
+export function displayLondonClock(date) {
+  return displayTime(
+    date.toLocaleTimeString('en-GB', {
+      timeZone: 'Europe/London',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }),
+  );
 }
 
 function cells(text) {
@@ -117,13 +130,9 @@ export function parseTimetable(text) {
           row[k] = null;
           continue;
         }
-        if (!/^(?:[01]?\d|2[0-3]):[0-5]\d(?::00)?$/.test(row[k]))
-          throw new Error(`Row ${i + 2}: ${k} must use 24-hour time, e.g. 13:30.`);
-        row[k] = row[k]
-          .split(':')
-          .slice(0, 2)
-          .map((s) => s.padStart(2, '0'))
-          .join(':');
+        const time = normalizeClock(row[k]);
+        if (!time) throw new Error(`Row ${i + 2}: ${k} needs a valid time, e.g. 1:30 PM or 13:30.`);
+        row[k] = time;
       }
       const ramadan = String(row.is_ramadan || 'false').toLowerCase();
       if (!['true', 'false', '1', '0', 'yes', 'no'].includes(ramadan))
