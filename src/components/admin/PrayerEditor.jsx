@@ -106,19 +106,22 @@ export default function PrayerEditor() {
     setSavedForm({ ...form });
   }, [date, form, dirtyDay]);
 
-  const saveJummah = useCallback(async () => {
-    if (!dirtyJummah) return;
-    if (monthDirty || dirtyDay)
-      throw new Error('Save or discard the date edits before changing weekly Jummah times.');
-    const { data, error: saveError } = await supabase.rpc('save_jummah_settings', {
-      p_settings: parseJummahSettings(jummah),
-      p_expected: savedJummah,
-    });
-    if (saveError) throw saveError;
-    setJummah(data);
-    setSavedJummah(data);
-    await load(date);
-  }, [jummah, dirtyJummah, savedJummah, monthDirty, dirtyDay, load, date]);
+  const saveJummah = useCallback(
+    async ({ dateEditsSaved = false } = {}) => {
+      if (!dirtyJummah) return;
+      if (monthDirty || (dirtyDay && !dateEditsSaved))
+        throw new Error('Save or discard the date edits before changing weekly Jummah times.');
+      const { data, error: saveError } = await supabase.rpc('save_jummah_settings', {
+        p_settings: parseJummahSettings(jummah),
+        p_expected: savedJummah,
+      });
+      if (saveError) throw saveError;
+      setJummah(data);
+      setSavedJummah(data);
+      await load(date);
+    },
+    [jummah, dirtyJummah, savedJummah, monthDirty, dirtyDay, load, date],
+  );
 
   const publishCsv = useCallback(async () => {
     if (!pending) return;
@@ -145,9 +148,13 @@ export default function PrayerEditor() {
     setError('');
     setMessage('');
     try {
-      if (pending) await publishCsv();
-      if (dirtyJummah) await saveJummah();
+      if (dirtyJummah && monthDirty)
+        throw new Error('Save or discard the month edits before changing weekly Jummah times.');
+      // Save dated edits first. The weekly transaction can then update matching
+      // imported copies without a later date save bringing stale values back.
       if (dirtyDay) await saveDay();
+      if (pending) await publishCsv();
+      if (dirtyJummah) await saveJummah({ dateEditsSaved: true });
       notifyUpdated();
       setMessage('Timetable saved.');
     } catch (saveError) {
@@ -164,6 +171,7 @@ export default function PrayerEditor() {
     pending,
     publishCsv,
     dirtyJummah,
+    monthDirty,
     saveJummah,
     dirtyDay,
     saveDay,

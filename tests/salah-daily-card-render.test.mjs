@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import React from 'react';
+import * as router from 'react-router-dom';
 import { renderToStaticMarkup } from 'react-dom/server';
 import ts from 'typescript';
 import * as state from '../src/lib/prayerDisplayState.js';
 import * as view from '../src/lib/homePrayerView.js';
 import * as sunrise from '../src/lib/sunriseStatus.js';
 import * as workspace from '../src/lib/salahWorkspace.js';
+import * as jummah from '../src/lib/jummahSchedule.js';
 
 const require = createRequire(import.meta.url);
 const source = readFileSync(
@@ -41,6 +43,7 @@ function render(clock, props = {}) {
   const mod = { exports: {} };
   const dependencies = {
     react: React,
+    'react-router-dom': router,
     'lucide-react': require('lucide-react'),
     '@/components/home/HomePrayerExtras': () =>
       React.createElement('dl', { 'aria-label': 'Additional times' }),
@@ -48,6 +51,7 @@ function render(clock, props = {}) {
     '@/lib/prayerDisplayState': state,
     '@/lib/sunriseStatus': sunrise,
     '@/lib/salahWorkspace': workspace,
+    '@/lib/jummahSchedule': jummah,
   };
   new Function('require', 'module', 'exports', compiled)(
     (name) => {
@@ -58,12 +62,16 @@ function render(clock, props = {}) {
     mod.exports,
   );
   return renderToStaticMarkup(
-    React.createElement(mod.exports.default, {
-      row: day,
-      date: day.d_date,
-      now: new Date(clock),
-      ...props,
-    }),
+    React.createElement(
+      router.StaticRouter,
+      { location: '/prayer-times' },
+      React.createElement(mod.exports.default, {
+        row: day,
+        date: day.d_date,
+        now: new Date(clock),
+        ...props,
+      }),
+    ),
   );
 }
 
@@ -79,7 +87,7 @@ test('current and next prayers stay distinct and only the exact upcoming event c
 });
 
 test('a second Friday congregation never marks the first displayed congregation cell as next', () => {
-  const row = { ...day, d_date: '2026-11-06', jummah_1_jamah: '12:35' };
+  const row = { ...day, d_date: '2026-11-06', jummah_1_start: '12:20', jummah_1_jamah: '12:35' };
   const html = render('2026-11-06T13:05:00Z', {
     row,
     date: row.d_date,
@@ -88,6 +96,8 @@ test('a second Friday congregation never marks the first displayed congregation 
   assert.match(html, /Jummah 2 Jamaat/);
   assert.match(html, /00:25:00/);
   assert.match(html, /12:35/);
+  assert.match(html, /First Jummah khutbah <strong>12:20<\/strong>/);
+  assert.match(html, /href="\/contact"/);
   assert.doesNotMatch(html, /data-next-event="true"/);
 });
 
