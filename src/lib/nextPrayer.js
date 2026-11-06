@@ -23,7 +23,12 @@ export function nextPrayer(times, date = new Date()) {
       return {
         name,
         time: times[key],
-        jamaah: times[`jamaah_${key}`],
+        jamaah:
+          key === 'dhuhr' &&
+          date.toLocaleDateString('en-GB', { timeZone: 'Europe/London', weekday: 'short' }) ===
+            'Fri'
+            ? null
+            : times[`jamaah_${key}`],
         minutesLeft: h * 60 + Number(match[2]) - now,
       };
   }

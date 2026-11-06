@@ -31,9 +31,9 @@ export default function TodayPrayerSummary({ showLink = true }) {
   const todayCongregations = [
     { name: 'Fajr', start: todaysTimes?.fajr, time: todaysTimes?.jamaah_fajr },
     {
-      name: isFriday ? 'Jummah' : 'Dhuhr',
+      name: 'Dhuhr',
       start: todaysTimes?.dhuhr,
-      time: isFriday ? jummahTimes?.[0]?.prayer : todaysTimes?.jamaah_dhuhr,
+      time: isFriday ? null : todaysTimes?.jamaah_dhuhr,
     },
     { name: 'Asr', start: todaysTimes?.asr, time: todaysTimes?.jamaah_asr },
     { name: 'Maghrib', start: todaysTimes?.maghrib, time: todaysTimes?.jamaah_maghrib },
@@ -43,9 +43,12 @@ export default function TodayPrayerSummary({ showLink = true }) {
     ? todayCongregations
         .map(
           ({ name, start, time }) =>
-            `${name}: start ${displayTime(start)}, jama’ah ${displayTime(time)}`,
+            `${name}: start ${displayTime(start)}${name === 'Dhuhr' && isFriday ? ', Jummah sessions below' : `, jama’ah ${displayTime(time)}`}`,
         )
-        .join(', ')
+        .join(', ') +
+      (isFriday
+        ? jummahTimes.map((s, i) => `, Jummah ${i + 1}: ${displayTime(s.prayer)}`).join('')
+        : '')
     : isLoadingPrayerTimes
       ? 'Loading times'
       : 'Times unavailable';
@@ -94,6 +97,15 @@ export default function TodayPrayerSummary({ showLink = true }) {
         ) : (
           <span className="jic-mobile-prayer-empty" role="status">
             {isLoadingPrayerTimes ? 'Loading today’s times…' : 'Today’s timetable is unavailable'}
+          </span>
+        )}
+        {isFriday && todaysTimes && (
+          <span className="jic-mini-friday">
+            {jummahTimes.map((session, index) => (
+              <span key={index} data-upcoming={next?.name === `Jummah ${index + 1}` || undefined}>
+                {index === 0 ? '1st' : '2nd'} Jummah <b>{displayTime(session.prayer)}</b>
+              </span>
+            ))}
           </span>
         )}
       </span>

@@ -5,6 +5,7 @@ import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import useDisplayClock from '@/hooks/useDisplayClock';
 import { londonDay } from '@/lib/prayerDisplayState';
 import { compactTime, selectedPrayerRow } from '@/lib/homePrayerView';
+import { isFriday } from '@/lib/jummahSchedule';
 import { displayTime } from '@/lib/timetable';
 import {
   publishedSalahDates,
@@ -19,10 +20,10 @@ import PrayerGuidelinesSection from '@/components/sections/prayer-times/PrayerGu
 import { Skeleton } from '@/components/ui/skeleton';
 import '@/styles/salah-workspace.css';
 
-function JummahStrip({ sessions = [] }) {
+function JummahStrip({ sessions = [], date }) {
   return (
     <section className="salah-jummah" id="jummah-times" aria-label="Jummah prayer times">
-      <h2>Jummah</h2>
+      <h2>Jummah{date && <small> · {salahDateLabel(date)}</small>}</h2>
       <dl>
         {sessions.map((session, index) => (
           <div key={session.name || index}>
@@ -56,6 +57,8 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
     todaysTimes,
     tomorrowsTimes,
     jummahTimes = [],
+    weeklyJummahTimes = [],
+    jummahDate,
     isLoadingPrayerTimes,
   } = usePublicPrayerTimes();
   const now = useDisplayClock();
@@ -176,7 +179,7 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
                 currentMonth={currentMonth}
                 currentDate={monthDate}
                 todayDate={today}
-                jummahTimes={jummahTimes}
+                jummahTimes={weeklyJummahTimes}
               />
             )}
           </section>
@@ -191,7 +194,7 @@ export default function PrayerTimesPage({ initialTab = 'today' }) {
             jummahTimes={jummahTimes}
           />
           <aside className="salah-support" aria-label="Friday times and timetable tools">
-            <JummahStrip sessions={jummahTimes} />
+            {!isFriday(today) && <JummahStrip sessions={jummahTimes} date={jummahDate} />}
             <Link
               className="salah-download-link"
               to={`/prayer-times/monthly${search}#phone-wallpaper`}

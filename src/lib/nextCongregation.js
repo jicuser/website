@@ -39,10 +39,10 @@ export function nextCongregation(times, jummahTimes = [], date = new Date()) {
       weekday: 'short',
     }) === 'Fri';
   const fridaySessions = jummahTimes
-    .map((session, index) => ({ ...session, name: `Jummah ${index + 1}` }))
+    .map((session, index) => ({ ...session, name: `Jummah ${session.number || index + 1}` }))
     .filter((session) => minutes(session.prayer) !== null);
   const candidates = prayers.flatMap(([name, key]) => {
-    if (key === 'dhuhr' && friday && fridaySessions.length) {
+    if (key === 'dhuhr' && friday) {
       return fridaySessions.map((session) => ({
         name: session.name,
         time: session.prayer,

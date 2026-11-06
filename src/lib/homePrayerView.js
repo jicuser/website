@@ -8,11 +8,12 @@ const PRAYERS = [
 
 /** A consistent 24-hour clock fits five columns without shrinking the type. */
 export function compactTime(value) {
-  const match = typeof value === 'string' && value.trim().match(/^(\d{1,2}):(\d{2})(?::00)?\s*(AM|PM)?$/i);
+  const match =
+    typeof value === 'string' && value.trim().match(/^(\d{1,2}):(\d{2})(?::00)?\s*(AM|PM)?$/i);
   if (!match) return '—';
   let hour = Number(match[1]);
   if (hour > 23 || Number(match[2]) > 59 || (match[3] && (hour < 1 || hour > 12))) return '—';
-  if (match[3]) hour = hour % 12 + (match[3].toUpperCase() === 'PM' ? 12 : 0);
+  if (match[3]) hour = (hour % 12) + (match[3].toUpperCase() === 'PM' ? 12 : 0);
   return `${String(hour).padStart(2, '0')}:${match[2]}`;
 }
 
@@ -20,8 +21,12 @@ export function compactTime(value) {
 export function selectedPrayerRow(monthly, today, selected, todayDate) {
   const row = (Array.isArray(monthly) ? monthly : []).find((day) => day.isoDate === selected);
   if (row) {
-    const result = { d_date: selected, sunrise: row.sunrise,
-      jummah_1_jamah: row.jummah_1_jamah, jummah_2_jamah: row.jummah_2_jamah };
+    const result = {
+      d_date: selected,
+      sunrise: row.sunrise,
+      jummah_1_jamah: row.jummah_1_jamah,
+      jummah_2_jamah: row.jummah_2_jamah,
+    };
     for (const [key, , startKey, jamaatKey] of PRAYERS) {
       result[key] = row[startKey];
       result[`jamaah_${key}`] = row[jamaatKey];
@@ -31,13 +36,13 @@ export function selectedPrayerRow(monthly, today, selected, todayDate) {
   return selected === todayDate && today?.d_date === todayDate ? today : null;
 }
 
-export function prayerColumns(row, selected, sessions = [], isToday = false) {
+export function prayerColumns(row, selected) {
   const friday = new Date(`${selected}T12:00:00Z`).getUTCDay() === 5;
   return PRAYERS.map(([key, name]) => ({
-    key, name: key === 'dhuhr' && friday ? 'Jummah' : name,
+    key,
+    name,
     begins: row?.[key],
-    jamaat: key === 'dhuhr' && friday
-      ? row?.jummah_1_jamah || (isToday ? sessions?.[0]?.prayer : null)
-      : row?.[`jamaah_${key}`],
+    friday: key === 'dhuhr' && friday,
+    jamaat: key === 'dhuhr' && friday ? null : row?.[`jamaah_${key}`],
   }));
 }

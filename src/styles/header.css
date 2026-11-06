@@ -1213,3 +1213,16 @@ html[data-prayer-dock-hidden='true'] .jic-public-route .jic-admin-bar:not(:focus
   visibility: hidden;
   pointer-events: none;
 }
+
+.jic-mini-friday {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 16px;
+  padding-top: 7px;
+  font-size: 11px;
+}
+.jic-mini-friday [data-upcoming] {
+  background: linear-gradient(100deg, rgba(82, 165, 151, 0.24), transparent);
+  border-radius: 6px;
+}

@@ -21,7 +21,7 @@ export function notificationGroups(jobs) {
   return [...groups.values()];
 }
 export function reminderNotification(job, now = new Date()) {
-  const name = { fajr:'Fajr', dhuhr:'Dhuhr', asr:'Asr', maghrib:'Maghrib', isha:'Isha' }[job.prayer];
+  const name = { fajr:'Fajr', dhuhr:'Dhuhr', asr:'Asr', maghrib:'Maghrib', isha:'Isha', jummah_1:'1st Jummah', jummah_2:'2nd Jummah' }[job.prayer];
   if (!name) throw new Error('Invalid prayer.');
   const time = new Date(job.event_at);
   const minutes = Math.max(0, Math.ceil((time.getTime() - now.getTime()) / 60000));

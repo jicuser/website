@@ -13,6 +13,8 @@ const prayers = [
 ];
 
 function jamaah(data, key) {
+  if (key === 'dhuhr' && new Date(`${data.todaysTimes?.d_date}T12:00:00Z`).getUTCDay() === 5)
+    return '—';
   return key === 'sunrise' ? '—' : displayTime(data.todaysTimes?.[`jamaah_${key}`]);
 }
 

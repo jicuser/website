@@ -18,10 +18,10 @@ export const jummahFields = [
   ['jummah_2_jamah', 'Second Jama’ah'],
 ];
 export const defaultJummah = {
-  jummah_1_start: '13:30',
-  jummah_1_jamah: '13:30',
-  jummah_2_begins: '14:30',
-  jummah_2_jamah: '14:30',
+  jummah_1_start: null,
+  jummah_1_jamah: null,
+  jummah_2_begins: null,
+  jummah_2_jamah: null,
 };
 export const londonDate = () =>
   new Intl.DateTimeFormat('en-CA', {

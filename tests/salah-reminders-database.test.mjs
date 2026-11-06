@@ -28,6 +28,29 @@ test('Salah device privacy, ownership, timing and delivery leases', async (t) =>
     )
   ).replace(/^create extension if not exists (pg_cron|pg_net);$/gm, '');
   await db.exec(sql);
+  await db.exec(`
+    create function private.has_permission(value text) returns boolean language sql as $$select coalesce(current_setting('test.prayer_permission',true),'')='yes'$$;
+    grant usage on schema private to authenticated;
+    create table public.page_content(content_key text primary key,content_value text,content_type text,page text);
+    alter table public.page_content enable row level security;
+    create policy content_read on public.page_content for select using(true);
+    grant select on public.page_content to service_role,authenticated;
+    grant insert,update on public.page_content to authenticated;
+    grant update on public.prayer_times to authenticated;
+    alter table public.prayer_times add jummah_1_start time, add jummah_1_jamah time, add jummah_2_begins time, add jummah_2_jamah time;
+    grant select on public.prayer_times to authenticated;
+    insert into page_content values('jummah_settings','{"jummah_1_start":null,"jummah_1_jamah":"12:35","jummah_2_begins":null,"jummah_2_jamah":"13:30"}','json','prayer-times');
+    insert into prayer_times(d_date,zuhr_begins,zuhr_jamah,jummah_1_jamah,jummah_2_jamah) values('2026-11-06','11:56','13:00','12:35','13:30');
+  `);
+  await db.exec(
+    await readFile(
+      new URL(
+        '../supabase/migrations/20261106090854_connect_friday_jummah_times.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  );
   const call = async (name, args = [], role = 'service_role') => {
     await db.exec(`set role ${role}`);
     try {
@@ -152,6 +175,87 @@ test('Salah device privacy, ownership, timing and delivery leases', async (t) =>
     assert.equal(jobs.length, 2);
     assert.equal((await call('salah_reminder_claim', ['2026-10-14T17:20:01Z'])).length, 0);
   });
+  await t.test(
+    'Friday alerts use two Jummah sessions and never the ordinary Dhuhr congregation',
+    async () => {
+      saved = await call('salah_reminder_device', [
+        'save',
+        id,
+        proof,
+        sub,
+        { ...prefs, prayers: ['dhuhr'] },
+        saved.updated_at,
+      ]);
+      await db.exec('delete from private.salah_reminder_deliveries');
+      const first = await call('salah_reminder_claim', ['2026-11-06T12:25:00Z']);
+      assert.equal(first.length, 1);
+      assert.equal(first[0].prayer, 'jummah_1');
+      await call('salah_reminder_finish', [
+        first.map(({ id, lease }) => ({ id, lease })),
+        'sent',
+        null,
+      ]);
+      assert.equal((await call('salah_reminder_claim', ['2026-11-06T12:50:00Z'])).length, 0);
+      const second = await call('salah_reminder_claim', ['2026-11-06T13:20:00Z']);
+      assert.equal(second.length, 1);
+      assert.equal(second[0].prayer, 'jummah_2');
+    },
+  );
+  await t.test('a date override or edited weekly time invalidates pending old alerts', async () => {
+    await db.exec(
+      "update private.salah_reminder_deliveries set status='pending'; update prayer_times set jummah_2_jamah='13:45' where d_date='2026-11-06'",
+    );
+    assert.equal((await call('salah_reminder_claim', ['2026-11-06T13:20:30Z'])).length, 0);
+    const updated = await call('salah_reminder_claim', ['2026-11-06T13:35:00Z']);
+    assert.equal(updated.length, 1);
+    assert.equal(Date.parse(updated[0].event_at), Date.parse('2026-11-06T13:45:00Z'));
+  });
+  await t.test(
+    'weekly save is permission checked, atomic and preserves distinct exceptions and history',
+    async () => {
+      const old = {
+        jummah_1_start: null,
+        jummah_1_jamah: '12:35',
+        jummah_2_begins: null,
+        jummah_2_jamah: '13:30',
+      };
+      const next = { ...old, jummah_1_jamah: '12:45', jummah_2_jamah: '13:45' };
+      await assert.rejects(call('save_jummah_settings', [next, old], 'anon'), /permission denied/);
+      await assert.rejects(
+        call('save_jummah_settings', [next, old], 'authenticated'),
+        /permission required/,
+      );
+      await db.exec(
+        "set test.prayer_permission='yes'; insert into prayer_times(d_date,zuhr_begins,zuhr_jamah,jummah_1_jamah,jummah_2_jamah) values('2099-01-02','11:56','13:00','12:35','13:30'),('2099-01-09','11:56','13:00','12:50','14:00'),('2020-01-03','11:56','13:00','12:35','13:30')",
+      );
+      assert.deepEqual(await call('save_jummah_settings', [next, old], 'authenticated'), next);
+      const records = (
+        await db.query(
+          "select d_date::text,jummah_1_jamah::text from prayer_times where d_date in ('2099-01-02','2099-01-09','2020-01-03') order by d_date",
+        )
+      ).rows;
+      assert.equal(records[0].jummah_1_jamah, '12:35:00');
+      assert.equal(records[1].jummah_1_jamah, null);
+      assert.equal(records[2].jummah_1_jamah, '12:50:00');
+      const events = (
+        await db.query(
+          "select prayer,event_at::text from private.salah_reminder_events('2099-01-02') where kind='jamaah'",
+        )
+      ).rows;
+      assert.equal(events.length, 2);
+      assert.match(events[0].event_at, /12:45/);
+      assert.match(events[1].event_at, /13:45/);
+      await assert.rejects(
+        call('save_jummah_settings', [old, old], 'authenticated'),
+        /changed in another editor/,
+      );
+      await assert.rejects(
+        call('save_jummah_settings', [{ ...next, jummah_2_jamah: '12:00' }, next], 'authenticated'),
+        /second after the first/,
+      );
+      await db.exec("set test.prayer_permission='no'");
+    },
+  );
   await t.test('turn-off deletes preferences and delivery receipts together', async () => {
     await call('salah_reminder_device', ['remove', id, proof]);
     assert.equal(

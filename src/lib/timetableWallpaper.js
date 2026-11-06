@@ -275,7 +275,7 @@ function createTimetableCanvas(monthlyPrayerTimes, currentMonth, jummahTimes, ph
     }
     drawText(
       ctx,
-      `${options.jummahLabel || 'Next Jummah'} · ${jummahTimes.map((time) => `${time.name}: ${time.prayer}`).join(' · ')}`,
+      `${options.jummahLabel || 'Weekly Jummah'} · ${jummahTimes.map((time) => `${time.name}: ${time.prayer}`).join(' · ')}`,
       middle,
       footerY,
       {

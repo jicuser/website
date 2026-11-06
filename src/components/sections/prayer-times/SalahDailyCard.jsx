@@ -1,10 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowUpRight, CheckCircle2, Clock3 } from 'lucide-react';
 import HomePrayerExtras from '@/components/home/HomePrayerExtras';
 import { compactTime, prayerColumns } from '@/lib/homePrayerView';
 import { prayerDisplayState, londonDay, countdownText } from '@/lib/prayerDisplayState';
 import { sunriseStatus } from '@/lib/sunriseStatus';
 import { salahDateLabel } from '@/lib/salahWorkspace';
+import { resolveJummah } from '@/lib/jummahSchedule';
 
 export default function SalahDailyCard({
   row,
@@ -105,7 +107,7 @@ export default function SalahDailyCard({
         <tbody>
           {columns.map((prayer) => {
             const current = state?.current?.key === prayer.key;
-            const upcoming = !target?.tomorrow && target?.key === prayer.key;
+            const upcoming = !prayer.friday && !target?.tomorrow && target?.key === prayer.key;
             return (
               <tr
                 key={prayer.key}
@@ -139,13 +141,48 @@ export default function SalahDailyCard({
                     undefined
                   }
                 >
-                  <strong>{compactTime(prayer.jamaat)}</strong>
+                  <strong>
+                    {prayer.friday ? (
+                      <span className="salah-friday-reference">Jummah below</span>
+                    ) : (
+                      compactTime(prayer.jamaat)
+                    )}
+                  </strong>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      {columns.some((prayer) => prayer.friday) && (
+        <section className="salah-jummah" id="jummah-times" aria-label="Jummah prayer times">
+          <h2>Jummah</h2>
+          <dl>
+            {[1, 2].map((number) => {
+              const time =
+                row[`jummah_${number}_jamah`] || (isToday ? jummahTimes[number - 1]?.prayer : null);
+              return (
+                <div key={number} data-upcoming={target?.name === `Jummah ${number}` || undefined}>
+                  <dt>{number === 1 ? '1st' : '2nd'} Jamaat</dt>
+                  <dd>{compactTime(time)}</dd>
+                </div>
+              );
+            })}
+          </dl>
+          <details>
+            <summary>Khutbah &amp; visiting</summary>
+            {resolveJummah(row)
+              .filter((session) => session.khutbah)
+              .map((session) => (
+                <p key={session.number}>
+                  {session.name} khutbah <strong>{compactTime(session.khutbah)}</strong>
+                </p>
+              ))}
+            <p>Please arrive early for the khutbah and silence your phone.</p>
+            <Link to="/contact">Plan your visit</Link>
+          </details>
+        </section>
+      )}
       <HomePrayerExtras compact showSource date={date} sunrise={row.sunrise} now={now} />
     </section>
   );

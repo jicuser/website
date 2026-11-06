@@ -649,3 +649,14 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
     outline-offset: -3px;
   }
 }
+
+.jic-prayer-card .jic-friday-reference {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--prayer-muted);
+}
+.jic-prayer-card .jic-card-friday > [data-upcoming] {
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: linear-gradient(105deg, var(--prayer-next-wash), transparent);
+}

@@ -56,8 +56,8 @@ test('sorts ISO and legacy dates and derives Friday independently of supplied la
 
 test('ditto marks retain the full time and only condense the approved repeated fields', () => {
   const { rows } = buildMonthlyTimetable([
-    day('2026-09-03', { maghrib_jamah: '19:40' }),
-    day('2026-09-04', { maghrib_jamah: '19:40' }),
+    day('2026-09-01', { maghrib_jamah: '19:40' }),
+    day('2026-09-02', { maghrib_jamah: '19:40' }),
   ]);
   for (const key of [
     'fajr_jamah',
@@ -136,7 +136,7 @@ test('the first day of a new month restates the time even after a matching previ
   for (const key of ['fajr_jamah', 'zuhr_begins', 'zuhr_jamah']) {
     assert.deepEqual(
       rows.map((row) => cell(row, key).repeated),
-      [false, false, true],
+      key === 'zuhr_jamah' ? [false, false, false] : [false, false, true],
     );
   }
 });

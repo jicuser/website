@@ -163,9 +163,22 @@ export default function MonthlyPrayerTable({
             </table>
           </div>
           <div className="monthly-timetable-notes">
+            {timetable.rows
+              .filter((row) => row.isFriday)
+              .map((row) => (
+                <p key={row.isoDate}>
+                  <strong>Friday {row.day}</strong>
+                  <span>
+                    1st Jummah: <strong>{row.jummah[0]}</strong>
+                  </span>
+                  <span>
+                    2nd Jummah: <strong>{row.jummah[1]}</strong>
+                  </span>
+                </p>
+              ))}
             {jummahTimes.length > 0 && (
               <p>
-                <strong>Next Jummah</strong>
+                <strong>Weekly Jummah</strong>
                 {jummahTimes.map((jummah) => (
                   <span key={jummah.name}>
                     {jummah.name}: <strong>{jummah.prayer}</strong>

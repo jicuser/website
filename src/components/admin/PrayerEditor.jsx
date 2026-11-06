@@ -13,6 +13,7 @@ import {
 
 import AdditionalTimesEditor from '@/features/prayer-details/AdditionalTimesEditor';
 import MonthTimetableEditor from './MonthTimetableEditor';
+import { parseJummahSettings, isFriday, resolveJummah } from '@/lib/jummahSchedule';
 
 const CSV_TEMPLATE =
   'd_date,fajr_begins,fajr_jamah,sunrise,zuhr_begins,zuhr_jamah,asr_begins,asr_jamah,maghrib_begins,maghrib_jamah,isha_begins,isha_jamah,is_ramadan\r\n';
@@ -54,7 +55,11 @@ export default function PrayerEditor() {
               .select('content_value')
               .eq('content_key', 'jummah_settings')
               .maybeSingle(),
-        supabase.from('prayer_times').select('d_date').order('d_date').limit(1000),
+        supabase
+          .from('prayer_times')
+          .select('d_date,jummah_1_start,jummah_1_jamah,jummah_2_begins,jummah_2_jamah')
+          .order('d_date')
+          .limit(1000),
       ]);
       const failure = dayResult.error || jummahResult.error || listResult.error;
       if (failure) throw failure;
@@ -65,7 +70,7 @@ export default function PrayerEditor() {
       // replace an unsaved weekly draft when staff switch between tasks.
       if (!weeklyLoaded.current) {
         const weekly = jummahResult.data
-          ? { ...defaultJummah, ...JSON.parse(jummahResult.data.content_value) }
+          ? parseJummahSettings(jummahResult.data.content_value)
           : defaultJummah;
         setJummah(weekly);
         setSavedJummah(weekly);
@@ -103,20 +108,17 @@ export default function PrayerEditor() {
 
   const saveJummah = useCallback(async () => {
     if (!dirtyJummah) return;
-    if (jummahFields.some(([key]) => !jummah[key]))
-      throw new Error('Complete all weekly Jummah times first.');
-    const { error: saveError } = await supabase.from('page_content').upsert(
-      {
-        content_key: 'jummah_settings',
-        content_value: JSON.stringify(jummah),
-        content_type: 'json',
-        page: 'prayer-times',
-      },
-      { onConflict: 'content_key' },
-    );
+    if (monthDirty || dirtyDay)
+      throw new Error('Save or discard the date edits before changing weekly Jummah times.');
+    const { data, error: saveError } = await supabase.rpc('save_jummah_settings', {
+      p_settings: parseJummahSettings(jummah),
+      p_expected: savedJummah,
+    });
     if (saveError) throw saveError;
-    setSavedJummah({ ...jummah });
-  }, [jummah, dirtyJummah]);
+    setJummah(data);
+    setSavedJummah(data);
+    await load(date);
+  }, [jummah, dirtyJummah, savedJummah, monthDirty, dirtyDay, load, date]);
 
   const publishCsv = useCallback(async () => {
     if (!pending) return;
@@ -296,7 +298,8 @@ export default function PrayerEditor() {
         <MonthTimetableEditor
           onDirty={setMonthDirty}
           onSaved={onMonthSaved}
-          weeklyJummah={jummah}
+          key={JSON.stringify(savedJummah)}
+          weeklyJummah={savedJummah}
         />
       )}
       <section
@@ -386,12 +389,17 @@ export default function PrayerEditor() {
           <Clock3 />
           <div>
             <h3>Weekly Jummah</h3>
+            <p>
+              Used across the website, app, TV and Salah alerts. Matching future Fridays follow
+              these times; different date-specific exceptions stay as entered.
+            </p>
           </div>
         </div>
         <div className="admin-field-grid">
           {jummahFields.map(([key, title]) => (
             <label key={key}>
               {title}
+              {key === 'jummah_1_start' || key === 'jummah_2_begins' ? ' (optional)' : ''}
               <input
                 disabled={loading || busy || loadFailed}
                 type="time"
@@ -405,6 +413,28 @@ export default function PrayerEditor() {
           1st Jama’ah {displayTime(jummah.jummah_1_jamah)} · 2nd Jama’ah{' '}
           {displayTime(jummah.jummah_2_jamah)}
         </p>
+        <details>
+          <summary>Upcoming Friday exceptions</summary>
+          <p>
+            These dates keep their own times. Edit the date in the month timetable to change or
+            clear an exception.
+          </p>
+          {dates
+            .filter(
+              (row) =>
+                row.d_date >= londonDate() &&
+                isFriday(row.d_date) &&
+                jummahFields.some(([key]) => row[key] && row[key].slice(0, 5) !== savedJummah[key]),
+            )
+            .map((row) => (
+              <p key={row.d_date}>
+                <strong>{row.d_date}</strong> ·{' '}
+                {resolveJummah(row, savedJummah)
+                  .map((session) => `${session.name}: ${displayTime(session.prayer)}`)
+                  .join(' · ')}
+              </p>
+            ))}
+        </details>
         <button
           disabled={busy || loading || loadFailed || !dirtyJummah}
           onClick={() => saveOne(saveJummah)}

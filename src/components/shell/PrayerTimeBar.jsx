@@ -34,7 +34,8 @@ export function NextPrayerSummary({ todaysTimes, currentDate, interactive = fals
           <>
             <strong>Next: {next.name}</strong>
             <span>
-              Start {shortTime(next.time)} · Jama’ah {shortTime(next.jamaah)}
+              Start {shortTime(next.time)}
+              {next.jamaah && <> · Jama’ah {shortTime(next.jamaah)}</>}
             </span>
           </>
         ) : (
@@ -64,6 +65,9 @@ export default function PrayerTimeBar({
   showNext = true,
   highlightNext = false,
 }) {
+  const friday =
+    currentDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London', weekday: 'short' }) ===
+    'Fri';
   const current = currentPrayer(todaysTimes, currentDate);
   const upcoming = highlightNext ? nextCongregation(todaysTimes, jummahTimes, currentDate) : null;
   const upcomingName = upcoming?.name.startsWith('Jummah') ? 'Dhuhr' : upcoming?.name;
@@ -128,7 +132,7 @@ export default function PrayerTimeBar({
                     upcomingName === label && 'is-next',
                   )}
                   aria-current={current?.key === key ? 'time' : undefined}
-                  aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}
+                  aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${key === 'dhuhr' && friday ? ', two Jummah sessions below' : jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}
                 >
                   <span>{label}</span>
                   <div>
@@ -138,7 +142,11 @@ export default function PrayerTimeBar({
                     </span>
                     <strong className="jic-prayer-jamaah">
                       <small>{jamaah ? 'Jama’ah' : ''}</small>
-                      {jamaah ? shortTime(todaysTimes?.[jamaah]) : ''}
+                      {key === 'dhuhr' && friday
+                        ? 'Jummah below'
+                        : jamaah
+                          ? shortTime(todaysTimes?.[jamaah])
+                          : ''}
                     </strong>
                   </div>
                 </Item>

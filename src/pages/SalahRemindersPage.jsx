@@ -282,6 +282,10 @@ export default function SalahRemindersPage() {
                   )}
                 </div>
               ))}
+              <p>
+                On Fridays, Jamaat alerts use the two published Jummah sessions. Start alerts still
+                refer to the start of Dhuhr time.
+              </p>
               <details className="salah-reminders__prayers">
                 <summary>Choose prayers · {settings.prayers.length} selected</summary>
                 <div>
@@ -299,7 +303,9 @@ export default function SalahRemindersPage() {
                           }))
                         }
                       />
-                      {prayer === 'dhuhr' ? 'Dhuhr' : prayer[0].toUpperCase() + prayer.slice(1)}
+                      {prayer === 'dhuhr'
+                        ? 'Dhuhr / Jummah'
+                        : prayer[0].toUpperCase() + prayer.slice(1)}
                     </label>
                   ))}
                 </div>

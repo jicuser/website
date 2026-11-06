@@ -44,8 +44,14 @@ const islamicLabel = (iso) => {
 };
 
 export default function HomePrayerCard({ compact = false }) {
-  const { monthlyPrayerTimes, todaysTimes, tomorrowsTimes, jummahTimes, isLoadingPrayerTimes } =
-    usePublicPrayerTimes();
+  const {
+    monthlyPrayerTimes,
+    todaysTimes,
+    tomorrowsTimes,
+    jummahTimes,
+    jummahDate,
+    isLoadingPrayerTimes,
+  } = usePublicPrayerTimes();
   const now = useDisplayClock();
   const today = londonDay(now);
   const [selected, setSelected] = useState(today);
@@ -330,7 +336,11 @@ export default function HomePrayerCard({ compact = false }) {
                     data-current={current === prayer.key || undefined}
                     data-next={nextCell(prayer.key, 'jamaat', prayer.jamaat) || undefined}
                   >
-                    {compactTime(prayer.jamaat)}
+                    {prayer.friday ? (
+                      <span className="jic-friday-reference">See below</span>
+                    ) : (
+                      compactTime(prayer.jamaat)
+                    )}
                     {nextCell(prayer.key, 'jamaat', prayer.jamaat) && (
                       <span className="sr-only">, next up</span>
                     )}
@@ -348,10 +358,18 @@ export default function HomePrayerCard({ compact = false }) {
         )
       )}
       {sessions.length > 0 && (
-        <div className="jic-card-friday">
-          <span>Jummah</span>
+        <div className="jic-card-friday" role="group" aria-label="Friday Jummah times">
+          <span>
+            Jummah
+            {isToday && jummahDate && jummahDate !== today ? (
+              <small> · {dateLabel(jummahDate)}</small>
+            ) : null}
+          </span>
           {sessions.map((session) => (
-            <span key={session.number}>
+            <span
+              key={session.number}
+              data-upcoming={target?.name === `Jummah ${session.number}` || undefined}
+            >
               {session.number === 1 ? '1st' : '2nd'} <b>{displayTime(session.prayer)}</b>
             </span>
           ))}

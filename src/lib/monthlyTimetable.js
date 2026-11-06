@@ -128,9 +128,17 @@ export function buildMonthlyTimetable(inputRows = []) {
           display: displayZawal(record, (time) => compactTime(displayTime(time))),
           repeated: false,
         };
+      if (key === 'zuhr_jamah' && dayName === 'Fri')
+        return {
+          key,
+          value: 'Jummah: see Friday sessions below',
+          display: 'Jummah',
+          repeated: false,
+        };
       const value = displayTime(record[key]);
       const repeated =
         consecutive &&
+        !(key === 'zuhr_jamah' && new Date(`${previous?.isoDate}T12:00:00Z`).getUTCDay() === 5) &&
         value !== '—' &&
         (key.endsWith('_jamah') || key === 'zuhr_begins') &&
         value === displayTime(previous.record[key]);
@@ -142,6 +150,7 @@ export function buildMonthlyTimetable(inputRows = []) {
       dayName,
       isFriday: date ? date.getUTCDay() === 5 : dayName === 'Fri',
       cells,
+      jummah: [displayTime(record.jummah_1_jamah), displayTime(record.jummah_2_jamah)],
     };
   });
   return { groups, columns, rows, combinedMaghrib };

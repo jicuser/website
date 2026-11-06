@@ -99,7 +99,7 @@ export default function WallpaperDownload({
           const canvas = format.create(rows, month, jummah, {
             ...settings,
             theme: selectedTheme,
-            jummahLabel: editable ? 'Weekly Jummah' : 'Next Jummah',
+            jummahLabel: 'Weekly Jummah',
             logo:
               format.key === 'monthly-timetable'
                 ? printLogo

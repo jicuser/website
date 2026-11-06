@@ -618,3 +618,27 @@ html[data-surface='solid'] .salah-workspace :is(.salah-daily-card, .salah-calend
     outline: 2px solid Highlight;
   }
 }
+
+.salah-friday-reference {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--salah-muted);
+}
+.salah-daily-card .salah-jummah {
+  margin: 2px 12px 8px;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.salah-jummah [data-upcoming] {
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: linear-gradient(105deg, var(--salah-next), transparent);
+}
+.salah-jummah h2 small {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--salah-muted);
+}
