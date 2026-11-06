@@ -519,40 +519,57 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   font-weight: 650;
   color: var(--prayer-ink);
 }
+/* Four aligned facts, in daily order; explanations sit below the row. */
 .jic-card-extra-times {
   display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr;
-  gap: 8px;
-  margin: 4px 14px 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--prayer-line);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: 4px 14px 0;
+  padding-top: 4px;
+  border: 0;
   text-align: center;
 }
 .jic-card-extra-times > div {
-  padding: 5px 2px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  padding: 4px 1px;
   border-radius: 10px;
 }
-.jic-card-extra-times[data-has-sunset='true'] {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-@media (max-width: 374px) {
-  .jic-card-extra-times[data-has-sunset='true'] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 .jic-card-extra-times dt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
   color: var(--prayer-muted);
   font-size: 10px;
+  line-height: 1.4;
+  white-space: nowrap;
 }
 .jic-card-extra-times dd {
+  align-self: center;
   margin: 3px 0 0;
   color: var(--prayer-ink);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
 }
-.jic-card-extra-times small {
-  font-size: 9px;
+.jic-prayer-card .jic-card-extra-times dd[data-unavailable],
+.jic-prayer-card.is-compact .jic-card-extra-times dd[data-unavailable] {
   color: var(--prayer-muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+.jic-extra-times-note {
+  margin: 1px 14px 8px;
+  color: var(--prayer-muted);
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: center;
+}
+.jic-extra-times-note[data-sunrise-active] {
+  color: var(--prayer-gold);
 }
 .jic-extra-times-source {
   margin: 0 14px 8px;
@@ -587,34 +604,8 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   display: none;
 }
 
-.jic-card-extra-times .jic-shuroq-status {
-  display: block;
-  margin-bottom: 2px;
-  font-weight: 650;
-  color: var(--prayer-muted);
-}
 .jic-prayer-card .jic-card-extra-times .jic-card-shuroq[data-sunrise-phase='active'] {
-  background: linear-gradient(105deg, var(--jic-wash-warm), transparent 95%);
-}
-.jic-card-shuroq[data-sunrise-phase='active'] .jic-shuroq-status {
-  color: var(--prayer-gold);
-}
-
-.jic-card-extra-times > div {
-  display: grid;
-  grid-template-rows: minmax(27px, 1fr) auto 13px;
-}
-.jic-card-extra-times dt {
-  align-self: center;
-}
-.jic-prayer-card.is-compact .jic-card-extra-times .jic-card-shuroq dt {
-  display: block;
-}
-.jic-card-shuroq dt > span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
+  background: radial-gradient(ellipse at center, var(--prayer-current-wash), transparent 85%);
 }
 
 /* Browser home shares the installed card's current/next colour cues and table. */

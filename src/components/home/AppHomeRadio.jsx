@@ -78,7 +78,7 @@ export default function AppHomeRadio({ compact = false }) {
               ? 'Off air'
               : 'Listen live';
     return (
-      <section className="jic-app-radio-mini jic-pattern-edge" data-fade="right" aria-label="JIC Radio" data-playing={playing}>
+      <section className="jic-app-radio-mini" data-fade="right" aria-label="JIC Radio" data-playing={playing}>
         <button
           type="button"
           onClick={toggle}

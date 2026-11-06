@@ -73,8 +73,7 @@ function PublicLayout() {
   return (
     <div
       data-section={activeNavigation(pathname)?.primaryPath?.slice(1) || 'home'}
-      style={isHome ? { '--jic-home-photo': `url("${homePhoto}")` } : undefined}
-      className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route jic-pattern-edge jic-pattern-canvas'} ${pathname === '/services' ? 'jic-hub-route' : ''} ${preview ? 'is-admin-preview' : ''}`}
+      className={`jic-public-route flex flex-col min-h-screen ${isHome ? 'jic-home-route' : 'jic-inner-route'} ${pathname === '/services' ? 'jic-hub-route' : ''} ${preview ? 'is-admin-preview' : ''}`}
     >
       {isHome && <PublicBackdrop src={homePhoto} />}
       <a className="jic-skip-link" href="#main-content">

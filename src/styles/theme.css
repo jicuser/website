@@ -307,12 +307,14 @@ html[data-theme] .hover\:text-primary:hover {
 
 /* Quiet shared section colours, composited over each area's own reading surface. */
 :root {
-  --jic-wash-warm: rgba(181, 136, 57, 0.12);
-  --jic-wash-cool: rgba(48, 141, 119, 0.12);
-  --jic-wash-lilac: rgba(119, 110, 176, 0.11);
-  --jic-wash-rose: rgba(178, 106, 125, 0.11);
+  --jic-neutral-wash: rgba(24, 40, 56, 0.045);
+  --jic-wash-warm: var(--jic-neutral-wash);
+  --jic-wash-cool: var(--jic-neutral-wash);
+  --jic-wash-lilac: var(--jic-neutral-wash);
+  --jic-wash-rose: var(--jic-neutral-wash);
 }
 .dark {
+  --jic-neutral-wash: rgba(2, 9, 18, 0.38);
   --jic-wash-warm: rgba(230, 195, 134, 0.15);
   --jic-wash-cool: rgba(103, 193, 174, 0.14);
   --jic-wash-lilac: rgba(162, 153, 222, 0.13);

@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function PublicBackdrop({ src }) {
   return (
-    <div className="jic-page-backdrop jic-pattern-edge" aria-hidden="true">
+    <div className="jic-page-backdrop" aria-hidden="true">
       <img
         src={src}
         decoding="async"

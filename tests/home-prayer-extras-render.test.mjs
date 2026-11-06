@@ -35,7 +35,7 @@ function render(clock, date = '2026-11-04', time = '07:09', detail, props = {}) 
     '@/features/prayer-details/usePublishedPrayerDetails': {
       usePublishedPrayerDetails: () => ({
         rows: new Map(detail ? [[date, detail]] : []),
-        status: 'ready',
+        status: props.detailStatus || 'ready',
       }),
     },
   };
@@ -61,18 +61,18 @@ function render(clock, date = '2026-11-04', time = '07:09', detail, props = {}) 
 test('sunrise tile describes the prohibition, preserves the published time and labels the estimate', () => {
   const html = render('2026-11-04T07:15:00Z');
   assert.match(html, /Prohibited time/);
-  assert.match(html, /Shuroq time/);
+  assert.match(html, /Shuruq/);
   assert.match(html, /07:09/);
-  assert.match(html, /Until ≈ 07:29/);
-  assert.match(html, /Ishraq starts ≈/);
-  assert.match(html, /Sunrise \+ 20 min/);
+  assert.match(html, /until ≈ 07:29/);
+  assert.match(html, /Ishraq ≈/);
+  assert.match(html, /sunrise \+ 20 min/);
   assert.match(html, /Not published/);
 });
 test('passed sunrise clears the prohibition and only marks Ishraq at its approximate start', () => {
   const start = render('2026-11-04T07:29:00Z');
-  assert.match(start, /Passed/);
+  assert.doesNotMatch(start, /Passed|Upcoming/);
   assert.match(start, /aria-current="time"/);
-  assert.doesNotMatch(start, /Prohibited time|Shuroq time|Until ≈/);
+  assert.doesNotMatch(start, /Prohibited time|Shuruq|until ≈/);
   assert.doesNotMatch(render('2026-11-04T07:31:00Z'), /aria-current="time"/);
 });
 test('browsing another date or missing sunrise never shows a live sunrise status', () => {
@@ -113,7 +113,30 @@ test('extra times include a published sunset without substituting an inferred va
   assert.match(withSunset, /data-has-sunset="true"/);
   assert.match(withSunset, /Sunset/);
   assert.match(withSunset, /16:31/);
-  assert.doesNotMatch(render('2026-11-04T16:49:00Z'), /jic-card-sunset|data-has-sunset/);
+  const missing = render('2026-11-04T16:49:00Z');
+  assert.match(missing, /jic-card-sunset[\s\S]*aria-label="Not published">—/);
+  assert.doesNotMatch(missing, /data-has-sunset|16:31/);
+});
+
+test('the four sun times stay in daily order with one shared estimate note', () => {
+  const html = render('2026-11-04T16:49:00Z', undefined, undefined, {
+    sunset: '16:31', zawwal_start: '11:46', zawwal_end: '11:56',
+  });
+  const labels = [...html.matchAll(/<dt>(.*?)<\/dt>/g)].map((match) =>
+    match[1].replace(/<svg[\s\S]*?<\/svg>/g, '').trim(),
+  );
+  assert.deepEqual(labels, ['Sunrise', 'Ishraq ≈', 'Zawal', 'Sunset']);
+  assert.match(html, /11:46\s*–\s*11:56/);
+  assert.equal((html.match(/sunrise \+ 20 min/g) || []).length, 1);
+});
+
+test('loading or failed sunset data is distinguished from an unpublished time', () => {
+  for (const [detailStatus, label] of [['loading', 'Loading…'], ['error', 'Unavailable']]) {
+    const html = render('2026-11-04T16:49:00Z', undefined, undefined, undefined, { detailStatus });
+    const sunset = html.slice(html.indexOf('class="jic-card-sunset"'), html.indexOf('</dl>'));
+    assert.ok(sunset.includes(label));
+    assert.doesNotMatch(sunset, /Not published|16:31/);
+  }
 });
 
 test('the Salah workspace can disclose the original published timetable source', () => {

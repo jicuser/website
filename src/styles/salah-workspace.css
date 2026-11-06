@@ -237,64 +237,37 @@ html[data-theme='light'] .salah-workspace {
   background: linear-gradient(100deg, transparent, var(--salah-next));
 }
 .salah-workspace .jic-card-extra-times {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-  margin: 0;
-  padding: 11px 9px;
-  border: 0;
-  text-align: center;
-}
-.salah-workspace .jic-card-extra-times[data-has-sunset] {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 6px 9px 0;
+  border: 0;
 }
 .salah-workspace .jic-card-extra-times > div {
-  display: grid;
-  align-content: start;
-  grid-template-rows: minmax(29px, auto) auto auto;
-  min-width: 0;
-  padding: 5px 1px;
-  border: 0;
-  border-radius: 9px;
+  padding: 4px 1px;
   background: transparent;
 }
 .salah-workspace .jic-card-extra-times dt {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 3px;
   color: var(--salah-muted);
-  font-size: 10px;
-  line-height: 1.4;
-}
-.salah-workspace .jic-card-extra-times dt > span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
 }
 .salah-workspace .jic-card-extra-times dt svg {
   flex-shrink: 0;
   color: var(--salah-gold);
 }
 .salah-workspace .jic-card-extra-times dd {
-  margin: 4px 0 0;
   color: var(--salah-ink);
-  font-size: 13px;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
-.salah-workspace .jic-card-extra-times small {
-  font-size: 9px;
-  line-height: 1.5;
+.salah-workspace .jic-card-extra-times dd[data-unavailable] {
+  color: var(--salah-muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+.salah-workspace .jic-extra-times-note {
+  margin-bottom: 10px;
   color: var(--salah-muted);
 }
-.salah-workspace .jic-card-extra-times .jic-shuroq-status {
-  flex-basis: 100%;
-  color: var(--salah-muted);
-  font-weight: 550;
+.salah-workspace .jic-extra-times-note[data-sunrise-active] {
+  color: var(--salah-gold);
 }
 .salah-workspace .jic-card-extra-times > [aria-current='time'],
 .salah-workspace .jic-card-shuroq[data-sunrise-phase='active'] {
@@ -589,9 +562,6 @@ html[data-surface='solid'] .salah-workspace :is(.salah-daily-card, .salah-calend
   }
 }
 @media (max-width: 390px) {
-  .salah-workspace .jic-card-extra-times[data-has-sunset] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .salah-daily-table :is(th, td) {
     padding-inline: 11px;
   }

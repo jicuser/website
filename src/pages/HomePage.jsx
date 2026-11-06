@@ -73,8 +73,7 @@ function HomeDestination({ title, text, to, icon: Icon, img, onClick }) {
   return (
     <Tag
       {...(to ? { to } : { type: 'button', onClick })}
-      className={cn('jic-home-destination', img ? 'has-image' : 'jic-pattern-edge')}
-      data-fade=""
+      className={cn('jic-home-destination', img && 'has-image')}
       style={img ? { '--card-image': `url("${img}")` } : undefined}
     >
       <span className="jic-home-destination-icon">
@@ -237,7 +236,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="jic-home-content jic-pattern-edge">
+      <div className="jic-home-content">
         {renderNotices('before-events')}
 
         {getContent('ramadan:home-enabled', 'false') === 'true' && (
