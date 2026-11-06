@@ -328,6 +328,10 @@ html[data-theme] .hover\:text-primary:hover {
 }
 
 /* One alpha mask supplies the same tapering geometry in every theme. */
+/* Anchor decoration to the control's placement, never the foreground content. */
+:where([data-fade='left']) { --jic-fade-x: 0%; }
+:where([data-fade='centre']) { --jic-fade-x: 50%; }
+:where([data-fade='right']) { --jic-fade-x: 100%; }
 :root {
   --jic-pattern-mask: url('/bookmark-geometric.svg?v=rosette-fade-2');
   --jic-pattern-ink: #896b41;

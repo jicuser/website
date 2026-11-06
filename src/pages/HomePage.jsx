@@ -73,7 +73,8 @@ function HomeDestination({ title, text, to, icon: Icon, img, onClick }) {
   return (
     <Tag
       {...(to ? { to } : { type: 'button', onClick })}
-      className={cn('jic-home-destination', img && 'has-image')}
+      className={cn('jic-home-destination', img ? 'has-image' : 'jic-pattern-edge')}
+      data-fade=""
       style={img ? { '--card-image': `url("${img}")` } : undefined}
     >
       <span className="jic-home-destination-icon">

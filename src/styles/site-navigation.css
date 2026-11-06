@@ -12,6 +12,7 @@
   max-width: 190px;
 }
 .jic-header-actions {
+  --jic-fade-x: 100%;
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -26,9 +27,9 @@
   height: 44px;
   flex: 0 0 44px;
   padding: 0;
-  border: 1px solid var(--jic-glass-border, #77889966);
+  border: 1px solid transparent;
   border-radius: 50%;
-  background: var(--jic-glass-control, #182738);
+  background: radial-gradient(ellipse at var(--jic-fade-x, 100%) 50%, var(--jic-wash-warm), transparent 82%);
   color: var(--jic-text, #f3f6fa);
   text-decoration: none;
 }
@@ -37,13 +38,13 @@
   backdrop-filter: var(--jic-glass-control-filter, none);
 }
 .jic-header-actions .jic-header-menu-button {
-  border-color: var(--jic-gold, #e6bf74);
+  border-color: transparent;
   border-radius: 14px;
   color: var(--jic-gold, #e6bf74);
 }
 .jic-header-actions :is(a, button):hover,
 .jic-navigation-drawer button:hover {
-  background: linear-gradient(100deg, var(--jic-wash-warm), transparent 90%), var(--jic-glass-control);
+  background: radial-gradient(ellipse at var(--jic-fade-x, 50%) 50%, var(--jic-wash-warm), transparent 85%), var(--jic-glass-control);
 }
 .jic-header-actions :is(a, button):focus-visible,
 .jic-navigation-drawer :is(a, button, summary):focus-visible {
@@ -51,6 +52,8 @@
   outline-offset: 3px;
 }
 .jic-unified-menu.jic-navigation-drawer {
+  --jic-fade-x: 100%;
+  --jic-pattern-size: 120px 360px;
   position: fixed;
   inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) auto auto;
   width: min(390px, calc(100vw - 24px));
@@ -89,7 +92,7 @@
 .jic-menu-heading { min-width: 0; }
 .jic-menu-heading > span { display: block; color: var(--jic-text-secondary); font-size: 0.6875rem; letter-spacing: 0.04em; }
 .jic-menu-heading h2 { margin: 3px 0 0; color: inherit; font-family: inherit; font-size: 1.25rem; font-weight: 700; line-height: 1.25; }
-.jic-navigation-head > button { border-radius: 14px; }
+.jic-navigation-head > button { --jic-fade-x: 100%; border-radius: 14px; }
 .jic-menu-search { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 12px; border: 1px solid var(--jic-border); border-radius: 14px; color: var(--jic-text-secondary); background: var(--jic-glass-control); font-size: 0.8125rem; line-height: 1.4; text-decoration: none; }
 .jic-menu-search span { flex: 1; }
 .jic-menu-search svg { flex-shrink: 0; }
@@ -111,6 +114,7 @@
 .jic-drawer-list > li { border-bottom: 1px solid var(--jic-border, #77889933); }
 .jic-drawer-row { display: flex; align-items: center; gap: 4px; }
 .jic-drawer-row > a {
+  --jic-fade-x: 0%;
   display: flex;
   flex: 1;
   align-items: center;
@@ -130,9 +134,10 @@
 .jic-drawer-chevron { color: var(--jic-text-secondary, #bdc9d6); margin-right: 8px; }
 .jic-drawer-row > a[aria-current] {
   font-weight: 700;
-  background: linear-gradient(100deg, var(--jic-wash-warm), transparent 90%), var(--jic-glass-control);
+  background: radial-gradient(ellipse at var(--jic-fade-x) 50%, var(--jic-wash-warm), transparent 85%), var(--jic-glass-control);
 }
 .jic-drawer-expand {
+  --jic-fade-x: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -193,7 +198,7 @@
   color: inherit;
   font-size: 0.875rem;
 }
-.jic-theme-options button[aria-pressed='true'] { border-color: var(--jic-gold); color: var(--jic-gold); background: linear-gradient(100deg, var(--jic-wash-warm), transparent 90%), var(--jic-glass-control); }
+.jic-theme-options button[aria-pressed='true'] { border-color: var(--jic-gold); color: var(--jic-gold); background: radial-gradient(ellipse at var(--jic-fade-x, 50%) 50%, var(--jic-wash-warm), transparent 85%), var(--jic-glass-control); }
 .jic-transparency-switch {
   display: flex;
   align-items: center;
@@ -219,6 +224,25 @@
 .jic-menu-utilities { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .jic-navigation-drawer .jic-menu-utilities > button { display: flex; align-items: center; justify-content: center; flex: 1 1 130px; gap: 8px; width: auto; min-height: 44px; padding: 8px 10px; border: 1px solid var(--jic-border); border-radius: 12px; background: var(--jic-glass-control); color: var(--jic-text); font-size: 0.8125rem; font-weight: 500; }
 html[data-app-installed='true'] .jic-navigation-drawer .jic-menu-utilities > .jic-install-button { display: none; }
+/* Pairs dissolve toward each other; full-width controls fade toward both ends. */
+.jic-navigation-drawer :is(.jic-menu-search, .jic-transparency-switch) { --jic-fade-x: 50%; }
+.jic-menu-shortcuts > a:nth-child(odd),
+.jic-drawer-children > li:nth-child(odd) > a,
+.jic-theme-options button:first-child,
+.jic-menu-utilities > :first-child { --jic-fade-x: 0%; }
+.jic-menu-shortcuts > a:nth-child(even),
+.jic-drawer-children > li:nth-child(even) > a,
+.jic-theme-options button:last-child,
+.jic-menu-utilities > :last-child { --jic-fade-x: 100%; }
+.jic-menu-shortcuts > a:only-child,
+.jic-menu-utilities > :only-child,
+html[data-app-installed='true'] .jic-menu-utilities > .jic-drawer-appearance-link { --jic-fade-x: 50%; }
+.jic-navigation-drawer :is(.jic-menu-search, .jic-menu-shortcuts > a, .jic-transparency-switch, .jic-menu-utilities > button) {
+  background: radial-gradient(ellipse at var(--jic-fade-x, 50%) 50%, var(--jic-wash-warm), transparent 82%), var(--jic-glass-control);
+}
+.jic-drawer-children a:is([aria-current], :hover, :focus-visible) {
+  background: radial-gradient(ellipse at var(--jic-fade-x, 50%) 50%, var(--jic-wash-warm), transparent 82%);
+}
 .jic-drawer-account { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; padding-top: 4px; }
 .jic-drawer-account :is(a, button) { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 4px; border: 0; background: transparent; color: var(--jic-text-secondary); font-size: 0.8125rem; }
 .jic-appearance-page { padding-top: 8px; }
@@ -231,6 +255,7 @@ html[data-app-installed='true'] .jic-navigation-drawer .jic-menu-utilities > .ji
   .jic-header-redesign .jic-free-brand { flex-basis: clamp(124px, 39vw, 180px); max-width: 180px; }
 }
 @media (max-width: 600px) {
+  .jic-unified-menu.jic-navigation-drawer { --jic-fade-x: 50%; }
   .jic-unified-menu.jic-navigation-drawer { inset: auto max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); width: auto; max-width: none; max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom))); border-radius: 24px; }
   .jic-unified-menu.jic-navigation-drawer[open] { animation-name: jic-menu-rise; }
 }

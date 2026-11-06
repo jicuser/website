@@ -375,7 +375,7 @@ html[data-installed-navigation='true'] .jic-home-route .jic-home-prayer.is-compa
 html[data-installed-navigation='true'] .jic-home-route .jic-app-community .jic-home-destination {
   --shortcut-tint: rgba(230, 195, 134, 0.1);
   background:
-    radial-gradient(ellipse at top left, var(--shortcut-tint), transparent 80%),
+    radial-gradient(ellipse at var(--jic-fade-x, 50%) 50%, var(--shortcut-tint), transparent 80%),
     var(--bookmark-panel);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
@@ -419,13 +419,15 @@ html[data-installed-navigation='true'] .jic-home-route .jic-app-brand-header.is-
   width: 100%;
 }
 .jic-app-radio-mini {
+  --jic-pattern-height: 100%;
+  --jic-pattern-size: 80px 240px;
   --radio-glow: var(--bookmark-current-wash);
   --radio-hue: rgba(155, 130, 205, 0.2);
   min-width: 0;
   border-radius: 16px;
   background:
-    radial-gradient(ellipse at 72% 45%, var(--radio-hue), transparent 74%),
-    linear-gradient(90deg, transparent, var(--radio-glow) 18%, var(--radio-glow) 78%, transparent);
+    radial-gradient(ellipse at var(--jic-fade-x, 100%) 45%, var(--radio-hue), transparent 78%),
+    radial-gradient(ellipse at var(--jic-fade-x, 100%) 65%, var(--radio-glow), transparent 90%);
 }
 .jic-app-radio-mini[data-playing='true'] {
   --radio-glow: var(--bookmark-next-wash);

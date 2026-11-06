@@ -543,6 +543,9 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
   margin-top: 16px;
 }
 .jic-home-shortcuts .jic-home-destination {
+  --jic-fade-x: 50%;
+  --jic-pattern-height: 100%;
+  --jic-pattern-size: 80px 240px;
   color: var(--jic-text);
   flex-direction: column;
   justify-content: center;
@@ -552,6 +555,8 @@ html[data-theme='light'] .jic-home-route :is(.jic-rail-heading h2, .jic-upcoming
   gap: 4px;
   border-radius: 10px;
 }
+.jic-home-shortcuts .jic-home-destination:nth-child(3n + 1) { --jic-fade-x: 0%; }
+.jic-home-shortcuts .jic-home-destination:nth-child(3n) { --jic-fade-x: 100%; }
 .jic-home-shortcuts .jic-home-destination-arrow {
   display: none;
 }

@@ -70,6 +70,7 @@ html[data-theme='light'] .salah-workspace {
   background: var(--salah-panel);
 }
 .salah-view-tabs a {
+  --jic-fade-x: 50%;
   display: grid;
   place-items: center;
   flex: 1;
@@ -80,8 +81,10 @@ html[data-theme='light'] .salah-workspace {
   font-weight: 650;
   text-decoration: none;
 }
+.salah-view-tabs a:first-child { --jic-fade-x: 0%; }
+.salah-view-tabs a:last-child { --jic-fade-x: 100%; }
 .salah-view-tabs [aria-current] {
-  background: linear-gradient(105deg, var(--salah-current), transparent 100%);
+  background: radial-gradient(ellipse at var(--jic-fade-x) 50%, var(--salah-current), transparent 85%);
   color: var(--salah-ink);
 }
 .salah-today-layout {

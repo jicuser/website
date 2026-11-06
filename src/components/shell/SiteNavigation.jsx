@@ -79,7 +79,7 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
   }
   if (!open) return null;
   return (
-    <dialog id="jic-site-menu" ref={dialogRef} className="jic-unified-menu jic-navigation-drawer" aria-label={view === 'appearance' ? 'Appearance settings' : 'Navigation menu'} onKeyDown={containKeyboardFocus} onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => {
+    <dialog id="jic-site-menu" ref={dialogRef} className="jic-unified-menu jic-navigation-drawer jic-pattern-edge" data-fade="" aria-label={view === 'appearance' ? 'Appearance settings' : 'Navigation menu'} onKeyDown={containKeyboardFocus} onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => {
       if (event.target !== event.currentTarget) return;
       const bounds = event.currentTarget.getBoundingClientRect();
       if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose();

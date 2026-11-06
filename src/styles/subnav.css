@@ -122,6 +122,7 @@
   padding: 5px 0 7px;
 }
 .jic-unified-subnav-link {
+  --jic-fade-x: 50%;
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
@@ -138,6 +139,9 @@
   text-decoration: none;
   color: var(--jic-text-secondary);
 }
+.jic-unified-subnav-link:first-child { --jic-fade-x: 0%; }
+.jic-unified-subnav-link:last-child { --jic-fade-x: 100%; }
+.jic-unified-subnav-link:only-child { --jic-fade-x: 50%; }
 .jic-unified-subnav-link:is(:hover, .is-current) {
   color: var(--jic-text);
   border-color: var(--jic-gold);

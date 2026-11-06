@@ -18,6 +18,7 @@ Status must come from real published data. “Details not published” does not 
 - Keep the user's chosen full public photograph visible behind home and inner pages, with one fixed decorative layer and shared translucent materials. Theme veils and opaque contrast/transparency fallbacks preserve readable text and visible controls.
 - Keep prayer start/Jama'ah distinctions and published Jummah times. The Salah dock must respect active tasks, keyboard focus, safe areas and its scroll hide/reveal controls.
 - Spiritual reminders should remain readable, dismissible and passive. A first visit should never require waiting for a blurred page to clear.
+- Fades follow placement: left controls taper to the right, right controls taper inward to the left, and centred controls soften on both sides. Component layouts set `--jic-fade-x`; `data-fade="left|centre|right"` is available for explicitly placed controls. Keep the wash and rosette pattern behind the text. The right desktop drawer uses the right anchor, while the centred phone sheet uses the centre anchor. Preserve opaque reading surfaces, focus indicators and high-contrast selected states.
 
 ## Staff workflows
 
