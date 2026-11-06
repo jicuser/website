@@ -7,6 +7,7 @@ import { nextPrayer } from '@/lib/nextPrayer';
 import { nextCongregation } from '@/lib/nextCongregation';
 import { displayTime } from '@/lib/timetable';
 import { cn } from '@/lib/utils';
+import JummahJamaat from '@/components/JummahJamaat';
 
 const PRAYERS = [
   ['Fajr', 'fajr', 'jamaah_fajr'],
@@ -120,14 +121,16 @@ export default function PrayerTimeBar({
               {PRAYERS.map(([label, key, jamaah]) => (
                 <Item
                   key={key}
-                  {...destination('/prayer-times')}
+                  {...destination(
+                    key === 'dhuhr' && friday ? '/prayer-times/jummah' : '/prayer-times',
+                  )}
                   className={cn(
                     'jic-today-prayer',
                     !highlightNext && current?.key === key && 'is-current',
                     upcomingName === label && 'is-next',
                   )}
                   aria-current={current?.key === key ? 'time' : undefined}
-                  aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${key === 'dhuhr' && friday ? ', two Jummah sessions below' : jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}
+                  aria-label={`${label}: begins ${shortTime(todaysTimes?.[key])}${key === 'dhuhr' && friday ? `, Jummah Jamaat: 1st ${shortTime(jummahTimes?.[0]?.prayer)}, 2nd ${shortTime(jummahTimes?.[1]?.prayer)}` : jamaah ? `, Jama‘ah ${shortTime(todaysTimes?.[jamaah])}` : ''}`}
                 >
                   <span>{label}</span>
                   <div>
@@ -137,11 +140,17 @@ export default function PrayerTimeBar({
                     </span>
                     <strong className="jic-prayer-jamaah">
                       <small>{jamaah ? 'Jama’ah' : ''}</small>
-                      {key === 'dhuhr' && friday
-                        ? 'Jummah below'
-                        : jamaah
-                          ? shortTime(todaysTimes?.[jamaah])
-                          : ''}
+                      {key === 'dhuhr' && friday ? (
+                        <JummahJamaat
+                          sessions={jummahTimes}
+                          upcomingName={upcoming?.name}
+                          linked={false}
+                        />
+                      ) : jamaah ? (
+                        shortTime(todaysTimes?.[jamaah])
+                      ) : (
+                        ''
+                      )}
                     </strong>
                   </div>
                 </Item>

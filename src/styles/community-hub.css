@@ -202,3 +202,50 @@
 html[data-theme] .jic-public-route .community-hub .community-hub-search input[type='search'] {
   background: transparent; box-shadow: none; color: #183a3c; border: 0; border-radius: 0;
 }
+
+/* Light edges and local colour fades keep destinations distinct without heavy boxes. */
+html[data-theme] .jic-public-route .community-hub .community-hub-card {
+  --hub-fade-edge: 0%;
+  border: 0;
+  box-shadow: none;
+  background:
+    radial-gradient(ellipse at var(--hub-fade-edge) 50%, var(--jic-section-wash, var(--jic-wash-warm)), transparent 82%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html[data-theme] .jic-public-route .community-hub .community-hub-card:nth-child(even) {
+  --hub-fade-edge: 100%;
+}
+.community-hub .community-hub-card-icon {
+  background: radial-gradient(ellipse, var(--jic-section-wash, var(--jic-wash-warm)), transparent 75%);
+  color: var(--jic-gold-strong);
+  border-radius: 50%;
+}
+.community-hub .community-hub-utilities {
+  border: 0;
+  padding-top: 6px;
+  margin-top: 8px;
+  gap: 2px 12px;
+}
+.community-hub .community-hub-utilities a {
+  --hub-fade-edge: 0%;
+  min-height: 44px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: none;
+  color: var(--jic-text);
+  background: radial-gradient(ellipse at var(--hub-fade-edge) 50%, var(--jic-neutral-wash), transparent 82%);
+}
+.community-hub .community-hub-utilities a:nth-child(even) { --hub-fade-edge: 100%; }
+.community-hub .community-hub-utilities a svg { color: var(--jic-gold-strong); }
+@media (hover: hover) {
+  html[data-theme] .jic-public-route .community-hub .community-hub-card:hover,
+  .community-hub .community-hub-utilities a:hover {
+    background-color: var(--jic-neutral-wash);
+  }
+}
+@media (forced-colors: active) {
+  html[data-theme] .jic-public-route .community-hub .community-hub-card,
+  .community-hub .community-hub-utilities a { border: 1px solid ButtonText; }
+}

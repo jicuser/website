@@ -227,17 +227,6 @@ html[data-installed-navigation='true'] .community-hub-card-body {
 .jic-app-salah .jic-mobile-prayer-rows {
   width: 100%;
 }
-.jic-app-salah .jic-mobile-prayer-times {
-  display: grid;
-  grid-template-columns: 0.8fr repeat(5, 1fr);
-  gap: 4px;
-}
-.jic-app-salah .jic-mini-prayer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 12px;
-}
 .jic-app-salah .jic-mobile-prayer-heading {
   display: block;
   font-size: 11px;

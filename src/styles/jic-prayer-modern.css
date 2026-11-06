@@ -192,7 +192,10 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   font-variant-numeric: tabular-nums;
 }
 .jic-card-table .jic-card-label-column {
-  width: 40px;
+  width: 34px;
+}
+.jic-card-table col[data-friday] {
+  width: 68px;
 }
 /* A table column paints the wash across its rows at their actual rendered width. */
 .jic-card-table col[data-wash='current'] {
@@ -258,49 +261,6 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
     transparent
   );
 }
-.jic-prayer-card .jic-card-friday {
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 3px;
-  min-width: 0;
-  padding: 4px 0;
-  font-size: 11px;
-  line-height: 1.3;
-  color: var(--prayer-muted);
-}
-.jic-card-friday-title {
-  color: var(--prayer-ink);
-  font-weight: 600;
-  text-align: center;
-}
-.jic-card-friday-title small {
-  display: block;
-  font-size: 9px;
-  color: var(--prayer-muted);
-  font-weight: 400;
-}
-.jic-card-friday-times {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  font-size: clamp(10px, 2.5vw, 11px);
-}
-.jic-card-friday-times > span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-}
-.jic-card-friday-times small {
-  font-size: 9px;
-}
-.jic-prayer-card .jic-card-friday b {
-  color: var(--prayer-ink);
-  font-weight: 600;
-}
 .jic-prayer-card .jic-card-links {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -308,18 +268,20 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   gap: 4px;
   margin: 6px 14px 0;
   padding-block: 3px;
-  border-top: 1px solid var(--prayer-line);
+  border-top: 0;
+  position: relative;
+}
+.jic-card-links::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--prayer-line), transparent);
 }
 .jic-prayer-card .jic-card-links[data-has-jummah] {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: .9fr 1.12fr 1.55fr .8fr;
 }
-.jic-card-links[data-has-jummah] .jic-card-friday {
-  grid-column: 3 / 5;
-}
-.jic-card-links[data-has-jummah] .jic-card-link-alerts {
-  grid-column: 5 / 7;
-}
-.jic-prayer-card .jic-card-links a {
+.jic-prayer-card .jic-card-links > a:not(.jic-card-friday) {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -335,18 +297,11 @@ html[data-theme] .jic-public-route .jic-home-prayer.jic-prayer-card {
   text-align: center;
   text-decoration: none;
 }
-@media (max-width: 374px) {
-  .jic-prayer-card .jic-card-links[data-has-jummah] {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    row-gap: 0;
-  }
-  .jic-card-links[data-has-jummah] .jic-card-friday {
-    grid-column: 1 / -1;
-    grid-row: 1;
-  }
-  .jic-card-links[data-has-jummah] .jic-card-link-alerts {
-    grid-column: 3;
-  }
+.jic-prayer-card .jic-card-links .jic-card-friday {
+  min-height: 44px;
+  padding-block: 6px;
+  font-size: 11px;
+  color: var(--prayer-ink);
 }
 .jic-prayer-card .jic-card-empty {
   padding: 12px 14px;
@@ -674,22 +629,12 @@ html[data-surface='solid'] .jic-public-route .jic-home-prayer.jic-prayer-card {
   }
 }
 
-.jic-friday-sessions {
-  display: grid;
-  justify-items: center;
-  gap: 3px;
+.jic-prayer-card .jic-friday-sessions {
   font-size: 11px;
-  line-height: 1.2;
+  color: var(--prayer-ink);
 }
 .jic-prayer-card .jic-card-table .jic-friday-sessions .prayer-clock {
   flex-direction: row;
   align-items: baseline;
   gap: 1px;
-}
-.jic-prayer-card :is(.jic-card-friday-times, .jic-friday-sessions) > [data-upcoming] {
-  color: var(--prayer-next);
-  background: radial-gradient(ellipse at center, var(--prayer-next-wash), transparent 85%);
-}
-.jic-prayer-card .jic-card-friday-times > [data-upcoming] b {
-  color: inherit;
 }

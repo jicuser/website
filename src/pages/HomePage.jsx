@@ -219,12 +219,7 @@ export default function HomePage() {
           {installed && (
             <>
               <DailyReminder />
-              <section className="jic-app-community" aria-labelledby="jic-app-community-title">
-                <h2 id="jic-app-community-title">
-                  <Link to="/services">
-                    Community Hub <ArrowRight size={18} aria-hidden="true" />
-                  </Link>
-                </h2>
+              <section className="jic-app-community" aria-label="Community services">
                 <nav className="jic-home-shortcuts" aria-label="Services and learning">
                   {shortcuts.map(({ key, ...card }) => (
                     <HomeDestination key={key} {...card} />

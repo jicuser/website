@@ -580,3 +580,15 @@ html[data-installed-navigation='true'][data-surface='solid']
 .jic-prayer-card.is-compact .jic-card-app-current[data-sunrise-active='true'] {
   background: linear-gradient(100deg, var(--bookmark-current-wash), transparent 95%);
 }
+
+/* Keep the daily reminder and service shortcuts together without a second heading. */
+html[data-installed-navigation='true'] .jic-home-route .jic-premium-home.jic-app-home .jic-hero-inner {
+  row-gap: 6px;
+  padding-bottom: 6px;
+}
+html[data-installed-navigation='true'] .jic-app-home .jic-home-content {
+  padding-top: 4px;
+  gap: 10px;
+}
+.jic-prayer-card.is-compact .jic-card-table :is(th, td) { padding-block: 4px; }
+.jic-prayer-card.is-compact .jic-card-table tbody tr:last-child td { padding-bottom: 4px; }

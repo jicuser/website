@@ -16,6 +16,7 @@ async function component(path) {
     format: 'cjs',
     packages: 'external',
     write: false,
+    loader: { '.css': 'empty' },
     plugins: [
       {
         name: 'project-alias',

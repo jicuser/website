@@ -11,6 +11,7 @@ import {
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
 import { displayLondonClock } from '@/lib/timetable';
 import PrayerClock from '@/components/PrayerClock';
+import JummahJamaat from '@/components/JummahJamaat';
 import useDisplayClock from '@/hooks/useDisplayClock';
 import { countdownText, londonDay, prayerDisplayState } from '@/lib/prayerDisplayState';
 import { compactTime, prayerColumns, selectedPrayerRow } from '@/lib/homePrayerView';
@@ -277,9 +278,10 @@ export default function HomePrayerCard({ compact = false }) {
             </caption>
             <colgroup>
               <col className="jic-card-label-column" />
-              {columns.map(({ key }) => (
+              {columns.map(({ key, friday }) => (
                 <col
                   key={key}
+                  data-friday={friday || undefined}
                   data-wash={key === current ? 'current' : key === nextColumn ? 'next' : undefined}
                 />
               ))}
@@ -331,24 +333,11 @@ export default function HomePrayerCard({ compact = false }) {
                     data-next={nextCell(prayer.key, 'jamaat', prayer.jamaat) || undefined}
                   >
                     {prayer.friday ? (
-                      <span
+                      <JummahJamaat
+                        sessions={sessions}
+                        upcomingName={target?.name}
                         className="jic-friday-sessions"
-                        role="group"
-                        aria-label="Jummah Jamaat times"
-                      >
-                        {[1, 2].map((number) => {
-                          const session = sessions.find((item) => item.number === number);
-                          return (
-                            <span
-                              key={number}
-                              aria-label={`${number === 1 ? '1st' : '2nd'} Jummah: ${compactTime(session?.prayer)}`}
-                              data-upcoming={target?.name === `Jummah ${number}` || undefined}
-                            >
-                              <PrayerClock value={session?.prayer} />
-                            </span>
-                          );
-                        })}
-                      </span>
+                      />
                     ) : (
                       <PrayerClock value={prayer.jamaat} />
                     )}
@@ -395,27 +384,15 @@ export default function HomePrayerCard({ compact = false }) {
           <span>timetable</span>
         </Link>
         {sessions.length > 0 && (
-          <div className="jic-card-friday" role="group" aria-label="Friday Jummah times">
-            <span className="jic-card-friday-title">
-              Jummah
-              {isToday && jummahDate && jummahDate !== today ? (
-                <small> · {dateLabel(jummahDate)}</small>
-              ) : null}
-            </span>
-            <div className="jic-card-friday-times">
-              {sessions.map((session) => (
-                <span
-                  key={session.number}
-                  data-upcoming={target?.name === `Jummah ${session.number}` || undefined}
-                >
-                  <small>{session.number === 1 ? '1st' : '2nd'}</small>{' '}
-                  <b>
-                    <PrayerClock value={session.prayer} />
-                  </b>
-                </span>
-              ))}
-            </div>
-          </div>
+          <JummahJamaat
+            sessions={sessions}
+            upcomingName={target?.name}
+            showHeading
+            dateLabel={
+              isToday && jummahDate && jummahDate !== today ? dateLabel(jummahDate) : undefined
+            }
+            className="jic-card-friday"
+          />
         )}
         <Link
           to="/prayer-times/reminders"

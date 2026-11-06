@@ -1,5 +1,6 @@
 import * as timetable from '../src/lib/timetable.js';
 import { PrayerClock } from './helpers/prayerClock.mjs';
+import { JummahJamaat } from './helpers/jummahJamaat.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -41,6 +42,7 @@ function render(data = {}, clock = '2026-11-03T17:13:00Z', props = {}) {
   const mod = { exports: {} };
   const dependencies = {
     '@/components/PrayerClock': PrayerClock,
+    '@/components/JummahJamaat': JummahJamaat,
     '@/lib/sunriseStatus': sunrise,
     './HomePrayerExtras': {
       __esModule: true,
@@ -209,9 +211,9 @@ test('Friday second Jamaat does not mark the first session’s timetable cell ne
   assert.doesNotMatch(html, /data-next="true"/);
   assert.doesNotMatch(html, /data-wash="next"|, next up/);
   const table = html.slice(html.indexOf('<table'), html.indexOf('</table>'));
-  assert.match(table, /aria-label="1st Jummah: 12:35 PM"/);
-  assert.match(table, /aria-label="2nd Jummah: 1:30 PM" data-upcoming="true"/);
-  assert.match(renderedText(table), /12:35 PM 1:30 PM/);
+  assert.match(table, /href="\/prayer-times\/jummah"/);
+  assert.match(table, /data-upcoming="true"><small class="jic-jummah-ordinal">2nd/);
+  assert.match(renderedText(table), /1st 12:35 PM 2nd 1:30 PM/);
 });
 
 test('installed card labels the sunrise buffer and clears the prohibition when it passes', () => {
@@ -257,7 +259,7 @@ test('browser card shares active and passed Shuroq wording with the installed ap
 
 test('Jummah follows the additional times and clock displays include AM/PM', () => {
   const html = render();
-  assert.ok(html.indexOf('data-extras') < html.indexOf('Friday Jummah times'));
+  assert.ok(html.indexOf('data-extras') < html.indexOf('jic-card-friday'));
   assert.match(renderedText(html), /5:34 AM/);
   assert.match(renderedText(html), /4:37 PM/);
   assert.match(renderedText(html), /1st 12:35 PM/);
