@@ -92,7 +92,8 @@ export default function AdditionalTimesEditor({ onDirty }) {
       <h3>Sunset &amp; Zawal</h3>
       <p>
         Copy Zawal from the printed timetable. Add an end only when the sheet gives a range. Edit
-        Sunrise in Daily times.
+        Sunrise in Daily times. Sunset follows Maghrib’s start. The optional Sunset field is only
+        used when Maghrib is not published.
       </p>
       <label className="admin-field">
         Date
@@ -127,7 +128,7 @@ export default function AdditionalTimesEditor({ onDirty }) {
         <fieldset disabled={busy || loading || saved === null}>
           <div className="admin-form-grid">
             {[
-              ['sunset', 'Sunset'],
+              ['sunset', 'Sunset fallback (optional)'],
               ['zawwal_start', 'Zawal time'],
               ['zawwal_end', 'Zawal end (optional)'],
             ].map(([key, label]) => (

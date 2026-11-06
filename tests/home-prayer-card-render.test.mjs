@@ -208,6 +208,10 @@ test('Friday second Jamaat does not mark the first session’s timetable cell ne
   assert.match(text, /12:35/);
   assert.doesNotMatch(html, /data-next="true"/);
   assert.doesNotMatch(html, /data-wash="next"|, next up/);
+  const table = html.slice(html.indexOf('<table'), html.indexOf('</table>'));
+  assert.match(table, /aria-label="1st Jummah: 12:35 PM"/);
+  assert.match(table, /aria-label="2nd Jummah: 1:30 PM" data-upcoming="true"/);
+  assert.match(renderedText(table), /12:35 PM 1:30 PM/);
 });
 
 test('installed card labels the sunrise buffer and clears the prohibition when it passes', () => {

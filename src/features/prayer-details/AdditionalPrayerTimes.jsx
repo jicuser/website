@@ -2,10 +2,11 @@ import React from 'react';
 import { usePublishedPrayerDetails } from './usePublishedPrayerDetails';
 import { displayTime, displayZawal } from '@/lib/timetable';
 import './prayer-details.css';
-export default function AdditionalPrayerTimes({ date }) {
+export default function AdditionalPrayerTimes({ date, maghrib }) {
   const { rows, status } = usePublishedPrayerDetails(date);
   if (!date) return null;
   const row = rows?.get(date);
+  const maghribClock = displayTime(maghrib);
   const unknown =
     status === 'loading' ? 'Loading…' : status === 'error' ? 'Unavailable' : 'Not published';
   return (
@@ -13,7 +14,9 @@ export default function AdditionalPrayerTimes({ date }) {
       <dl>
         <div>
           <dt>Sunset</dt>
-          <dd>{row?.sunset ? displayTime(row.sunset) : unknown}</dd>
+          <dd>
+            {maghribClock !== '—' ? maghribClock : row?.sunset ? displayTime(row.sunset) : unknown}
+          </dd>
         </div>
         <div>
           <dt>Zawal</dt>

@@ -13,7 +13,7 @@ import '@/styles/timetable-editor.css';
 const extraFields = [
   ['zawwal_start', 'Zawal'],
   ['zawwal_end', 'Zawal end'],
-  ['sunset', 'Sunset'],
+  ['sunset', 'Sunset fallback'],
 ];
 
 export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah }) {
@@ -576,7 +576,10 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
                   </div>
                 ))}
               </div>
-              <p>Ishraq is calculated from Sunrise + 20 minutes.</p>
+              <p>
+                Ishraq is calculated from Sunrise + 20 minutes. Sunset follows Maghrib’s start; the
+                fallback is used only when Maghrib is not published.
+              </p>
               <details>
                 <summary>Jummah times for this date</summary>
                 <p>Leave blank to use the weekly Jummah settings.</p>

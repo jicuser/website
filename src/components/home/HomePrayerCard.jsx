@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight,
-  Bell,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -333,8 +331,23 @@ export default function HomePrayerCard({ compact = false }) {
                     data-next={nextCell(prayer.key, 'jamaat', prayer.jamaat) || undefined}
                   >
                     {prayer.friday ? (
-                      <span className="jic-friday-reference" aria-label="Two Jummah sessions below">
-                        Jummah
+                      <span
+                        className="jic-friday-sessions"
+                        role="group"
+                        aria-label="Jummah Jamaat times"
+                      >
+                        {[1, 2].map((number) => {
+                          const session = sessions.find((item) => item.number === number);
+                          return (
+                            <span
+                              key={number}
+                              aria-label={`${number === 1 ? '1st' : '2nd'} Jummah: ${compactTime(session?.prayer)}`}
+                              data-upcoming={target?.name === `Jummah ${number}` || undefined}
+                            >
+                              <PrayerClock value={session?.prayer} />
+                            </span>
+                          );
+                        })}
                       </span>
                     ) : (
                       <PrayerClock value={prayer.jamaat} />
@@ -356,38 +369,61 @@ export default function HomePrayerCard({ compact = false }) {
         )
       )}
       {row && (
-        <HomePrayerExtras compact={compact} date={selected} sunrise={row.sunrise} now={now} />
+        <HomePrayerExtras
+          compact={compact}
+          date={selected}
+          sunrise={row.sunrise}
+          maghrib={row.maghrib}
+          now={now}
+        />
       )}
-      {sessions.length > 0 && (
-        <div className="jic-card-friday" role="group" aria-label="Friday Jummah times">
-          <span>
-            Jummah
-            {isToday && jummahDate && jummahDate !== today ? (
-              <small> · {dateLabel(jummahDate)}</small>
-            ) : null}
-          </span>
-          {sessions.map((session) => (
-            <span
-              key={session.number}
-              data-upcoming={target?.name === `Jummah ${session.number}` || undefined}
-            >
-              {session.number === 1 ? '1st' : '2nd'}{' '}
-              <b>
-                <PrayerClock value={session.prayer} />
-              </b>
+      <nav
+        className="jic-card-links"
+        aria-label="Prayer links"
+        data-has-jummah={sessions.length > 0 || undefined}
+      >
+        <Link to="/prayer-times" className="jic-card-link-full" aria-label="Full timetable">
+          <span>Full</span>
+          <span>timetable</span>
+        </Link>
+        <Link
+          to="/prayer-times/monthly#phone-wallpaper"
+          className="jic-card-link-download"
+          aria-label="Download timetable"
+        >
+          <span>Download</span>
+          <span>timetable</span>
+        </Link>
+        {sessions.length > 0 && (
+          <div className="jic-card-friday" role="group" aria-label="Friday Jummah times">
+            <span className="jic-card-friday-title">
+              Jummah
+              {isToday && jummahDate && jummahDate !== today ? (
+                <small> · {dateLabel(jummahDate)}</small>
+              ) : null}
             </span>
-          ))}
-        </div>
-      )}
-      <nav className="jic-card-links" aria-label="Prayer links">
-        <Link to="/prayer-times">
-          Full timetable <ArrowRight size={14} aria-hidden="true" />
-        </Link>
-        <Link to="/prayer-times/monthly#phone-wallpaper">
-          Download wallpaper <ArrowRight size={14} aria-hidden="true" />
-        </Link>
-        <Link to="/prayer-times/reminders">
-          <Bell size={14} aria-hidden="true" /> Salah alerts
+            <div className="jic-card-friday-times">
+              {sessions.map((session) => (
+                <span
+                  key={session.number}
+                  data-upcoming={target?.name === `Jummah ${session.number}` || undefined}
+                >
+                  <small>{session.number === 1 ? '1st' : '2nd'}</small>{' '}
+                  <b>
+                    <PrayerClock value={session.prayer} />
+                  </b>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        <Link
+          to="/prayer-times/reminders"
+          className="jic-card-link-alerts"
+          aria-label="Salah alerts"
+        >
+          <span>Salah</span>
+          <span>alerts</span>
         </Link>
       </nav>
     </aside>

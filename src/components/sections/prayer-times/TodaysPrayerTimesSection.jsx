@@ -50,7 +50,7 @@ export default function TodaysPrayerTimesSection({ currentDate, todaysTimes }) {
           </tbody>
         </table>
       </div>
-      <AdditionalPrayerTimes date={todaysTimes.d_date} />
+      <AdditionalPrayerTimes date={todaysTimes.d_date} maghrib={todaysTimes.maghrib} />
     </section>
   );
 }

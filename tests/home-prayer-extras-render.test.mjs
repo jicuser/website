@@ -120,6 +120,28 @@ test('extra times include a published sunset without substituting an inferred va
   assert.doesNotMatch(missing, /data-has-sunset|4:31/);
 });
 
+test('Sunset follows the selected day’s Maghrib start even when extra-time data is absent or different', () => {
+  for (const detailStatus of ['ready', 'loading', 'error']) {
+    const html = render(
+      '2026-11-04T16:49:00Z',
+      undefined,
+      undefined,
+      { sunset: '16:31' },
+      {
+        maghrib: '16:35',
+        detailStatus,
+      },
+    );
+    const sunset = html.slice(html.indexOf('class="jic-card-sunset"'), html.indexOf('</dl>'));
+    assert.match(sunset, /4:35[\s\S]*?PM/);
+    assert.doesNotMatch(sunset, /4:31|data-unavailable|Unavailable|Loading/);
+  }
+  const nextDay = render('2026-11-04T16:49:00Z', '2026-11-05', undefined, undefined, {
+    maghrib: '16:34',
+  });
+  assert.match(nextDay, /jic-card-sunset[\s\S]*4:34[\s\S]*PM/);
+});
+
 test('the four sun times stay in daily order without a visible explanatory line', () => {
   const html = render('2026-11-04T16:49:00Z', undefined, undefined, {
     sunset: '16:31',

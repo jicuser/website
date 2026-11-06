@@ -10,13 +10,15 @@ import { londonDay, londonWallInstant } from '@/lib/prayerDisplayState';
 export default function HomePrayerExtras({
   date,
   sunrise,
+  maghrib,
   now = new Date(),
   compact = false,
   showSource = false,
 }) {
   const { rows, status } = usePublishedPrayerDetails(date);
   const detail = rows?.get(date);
-  const sunset = compactTime(detail?.sunset);
+  const maghribStart = compactTime(maghrib);
+  const sunset = maghribStart !== '—' ? maghribStart : compactTime(detail?.sunset);
   const shuroq = sunriseStatus(date, sunrise, now);
   const zawalAt = londonWallInstant(date, detail?.zawwal_start);
   // Without a published end, highlight the start minute rather than inventing a window.

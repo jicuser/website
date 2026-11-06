@@ -181,14 +181,17 @@ test('extra-time editor publishes only a checked revision and retains a conflict
   await page.goto('/admin?section=prayer');
   await page.getByRole('button', { name: 'Sunset & Zawal', exact: true }).click();
   const editor = page.getByRole('region', { name: 'Additional prayer times editor' });
-  await editor.getByLabel('Sunset', { exact: true }).fill('16:32');
+  await editor.getByLabel('Sunset fallback (optional)', { exact: true }).fill('4:32 PM');
   await editor.getByLabel('Source / approval reference').fill('Approved November timetable');
   await editor.getByLabel('Show these confirmed times on the website').check();
   await editor.getByRole('button', { name: 'Save extra times', exact: true }).click();
   await expect(editor.getByText('Extra times published.', { exact: true })).toBeVisible();
-  await editor.getByLabel('Sunset', { exact: true }).fill('16:33');
+  await editor.getByLabel('Sunset fallback (optional)', { exact: true }).fill('4:33 PM');
   await editor.getByRole('button', { name: 'Save extra times', exact: true }).click();
   await expect(editor.getByRole('alert')).toContainText('changed in another editor');
-  await expect(editor.getByLabel('Sunset', { exact: true })).toHaveValue('16:33');
+  await expect(editor.getByLabel('Sunset fallback (optional)', { exact: true })).toHaveValue(
+    '4:33',
+  );
+  await expect(editor.getByLabel('Sunset fallback (optional) AM or PM')).toHaveValue('PM');
   await page.screenshot({ path: info.outputPath('extra-time-editor.png'), fullPage: true });
 });

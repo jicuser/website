@@ -189,7 +189,14 @@ export default function SalahDailyCard({
           </details>
         </section>
       )}
-      <HomePrayerExtras compact showSource date={date} sunrise={row.sunrise} now={now} />
+      <HomePrayerExtras
+        compact
+        showSource
+        date={date}
+        sunrise={row.sunrise}
+        maghrib={row.maghrib}
+        now={now}
+      />
     </section>
   );
 }
