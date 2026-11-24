@@ -39,6 +39,8 @@ test('menu has six primary destinations and one compact Appearance action', asyn
   await page.getByRole('button', { name: 'Open navigation menu', exact: true }).tap();
   const menu = page.getByRole('dialog', { name: 'Navigation menu' });
   await expect(menu.locator('.jic-drawer-row > a')).toHaveText(['Home', 'Salah timetable', 'Community Hub', 'About', 'Donate', 'Contact Us']);
+  await expect(menu.locator('.jic-menu-shortcuts a strong')).toHaveText(['Read & Learn', 'Education']);
+  await expect(menu.locator('.jic-menu-shortcuts a small')).toHaveText(['Use online', 'Classes at JIC']);
   await menu.getByRole('button', { name: 'Appearance', exact: true }).tap();
   await expect(page.getByRole('dialog', { name: 'Appearance settings' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Light', exact: true })).toBeVisible();

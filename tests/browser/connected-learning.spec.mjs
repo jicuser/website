@@ -92,10 +92,10 @@ test('parent account gets family records without management or receipt-confirmat
   expect(state.errors).toEqual([]);
 });
 for (const [kind, end, expected] of [
-  ['time', null, '11:46'],
-  ['interval', '12:02', '11:46 – 12:02'],
+  ['time', null, '11:46 AM'],
+  ['interval', '12:02', '11:46 AM – 12:02 PM'],
 ]) {
-  test(`public extra times retain sunrise, Ishraq and the published Zawal ${kind} without inferring sunset`, async ({
+  test(`public extra times retain sunrise, Ishraq and the published Zawal ${kind} with Sunset linked to Maghrib`, async ({
     page,
   }, info) => {
     const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
@@ -131,10 +131,10 @@ for (const [kind, end, expected] of [
     await page.goto('/prayer-times');
     const details = page.locator('.salah-daily-card .jic-card-extra-times');
     await expect(details).toBeVisible();
-    await expect(details.locator('.jic-card-shuroq dd')).toHaveText('07:00');
-    await expect(details.locator('.jic-card-ishraq dd')).toHaveText('07:20');
+    await expect(details.locator('.jic-card-shuroq dd')).toHaveText('7:00 AM');
+    await expect(details.locator('.jic-card-ishraq .prayer-clock')).toHaveText('7:20 AM');
     await expect(details.locator('.jic-card-zawal dd')).toHaveText(expected);
-    await expect(details.locator('.jic-card-sunset')).toHaveCount(0);
+    await expect(details.locator('.jic-card-sunset dd')).toHaveText('4:30 PM');
     const source = page.locator('.salah-daily-card .jic-extra-times-source');
     await source.getByText('Timetable source', { exact: true }).click();
     await expect(source).toContainText('Approved November timetable');

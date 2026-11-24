@@ -14,7 +14,7 @@ export default function JanazahGuide() {
   return (
     <section className="worship-reading" style={{ '--worship-arabic-size': `${fontSize}px` }}>
       <header className="jic-guide-heading">
-        <Link to="/worship" className="worship-back-link">All reading resources</Link>
+        <Link to="/worship" className="worship-back-link">Read &amp; Learn</Link>
         <h1>Janazah prayer guide</h1>
         <p>This refresher follows the Hanafi method in the linked Dawat-e-Islami guide. Follow the Imam when praying with the congregation; ask the Imam about your circumstances.</p>
       </header>

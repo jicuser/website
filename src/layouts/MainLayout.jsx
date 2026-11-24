@@ -1,6 +1,8 @@
 import { activeNavigation } from '@/lib/publicNavigation';
 import { noticePlacement } from '@/lib/noticePlacement';
 import SiteNotice from '@/components/shell/SiteNotice';
+import ReadLearnNotice from '@/components/shell/ReadLearnNotice';
+import { getVisibleReadLearnResources } from '@/content/readLearn';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl } from '@/lib/video';
 import { useContent } from '@/context/ContentContext';
@@ -52,7 +54,7 @@ function PublicLayout() {
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const { isAdmin } = useAuth();
   const { announcement, livestream } = useHomeLiveContent({ eventLimit: 1 });
-  const { getContent } = useContent();
+  const { getContent, editMode } = useContent();
   const visible = isPageVisible(getContent, pathname) || isAdmin;
   const preview = new URLSearchParams(search).get('preview') === '1';
   const installed = useInstalledApp();
@@ -64,11 +66,14 @@ function PublicLayout() {
     return () => delete document.documentElement.dataset.salahWorkspace;
   }, [isSalah]);
   const isAbout = ABOUT_PATHS.includes(pathname);
-  const showReminder = isHome || pathname === '/worship';
+  const showReminder = isHome;
   const isDiscovery = ['/search', '/social-media', '/education/programmes', '/events'].includes(
     pathname,
   );
   const isTask = isPublicTaskRoute(pathname) || isPublicReadingRoute(pathname);
+  const readLearnResources = getVisibleReadLearnResources(getContent);
+  const readingPath = readLearnResources.find((resource) => resource.category === 'read')?.to;
+  const learningPath = readLearnResources.find((resource) => resource.category === 'learn')?.to;
 
   return (
     <div
@@ -120,6 +125,13 @@ function PublicLayout() {
         )}
       </main>
       {!preview && isHome && <SpiritualOverlays />}
+      {visible &&
+        !preview &&
+        !editMode &&
+        isHome &&
+        (readingPath || learningPath) && (
+          <ReadLearnNotice readTo={readingPath} learnTo={learningPath} />
+        )}
       {!preview &&
         !isTask &&
         (announcement && noticePlacement(announcement.display_settings).notification ? (

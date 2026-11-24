@@ -17,7 +17,7 @@ export default function AdhkarReader() {
   return (
     <section className="worship-reading" style={{ '--worship-arabic-size': `${fontSize}px` }}>
       <header className="jic-guide-heading">
-        <Link to="/worship" className="worship-back-link">All reading resources</Link>
+        <Link to="/worship" className="worship-back-link">Read &amp; Learn</Link>
         <h1>Daily adhkar</h1>
         <p>A short selection for morning, evening and after Salah. Read at your own pace; each remembrance includes its reference.</p>
       </header>

@@ -12,7 +12,7 @@ const sections = buildPageNavigator(EDITABLE_PAGES);
 const expectedSections = [
   'Home',
   'Salah Times',
-  'Worship',
+  'Read & Learn',
   'Community Hub',
   'About JIC',
   'Ramadan',

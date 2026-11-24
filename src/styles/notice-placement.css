@@ -138,3 +138,117 @@
   bottom: calc(var(--jic-mobile-visible-dock-height, 0px) + 20px);
   right: 12px;
 }
+
+/* A quiet invitation; existing notices and open dialogs always take priority. */
+.jic-read-learn-notice {
+  --jic-read-learn-notice-bottom: calc(
+    var(--jic-mobile-visible-dock-height, 0px) + var(--jic-app-bar-height, 0px) +
+      var(--jic-app-companion-height, 0px) + max(16px, env(safe-area-inset-bottom))
+  );
+  position: fixed;
+  z-index: 45;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: var(--jic-read-learn-notice-bottom);
+  width: min(330px, calc(100vw - 32px));
+  max-height: max(
+    0px,
+    calc(100dvh - var(--jic-read-learn-notice-bottom) - max(12px, env(safe-area-inset-top)))
+  );
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid var(--jic-border);
+  border-radius: 20px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+  box-shadow: 0 8px 32px #0003;
+}
+.jic-read-learn-notice-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-right: 32px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.jic-read-learn-notice-heading svg {
+  flex-shrink: 0;
+  color: var(--jic-gold);
+}
+.jic-read-learn-notice p {
+  margin: 6px 0 12px;
+  color: var(--jic-text-secondary);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.jic-read-learn-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.jic-read-learn-notice-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 15px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--jic-action);
+  color: #081222;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.jic-read-learn-notice-action.is-reading {
+  border-color: var(--jic-border);
+  background: var(--jic-bg-secondary);
+  color: var(--jic-text);
+}
+.jic-read-learn-notice-action:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.jic-read-learn-notice-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--jic-text-secondary);
+  cursor: pointer;
+}
+.jic-read-learn-notice-close:hover {
+  background: var(--jic-bg-secondary);
+  color: var(--jic-text);
+}
+.jic-read-learn-notice :is(a, button):focus-visible {
+  outline: 3px solid var(--jic-gold);
+  outline-offset: 3px;
+}
+body:has(dialog[open], [role='dialog'][aria-modal='true']) .jic-read-learn-notice,
+.jic-public-route:has(.jic-site-notice, .jic-radio-live-notice) .jic-read-learn-notice {
+  visibility: hidden;
+  pointer-events: none;
+}
+@media (prefers-contrast: more), (forced-colors: active) {
+  .jic-read-learn-notice,
+  .jic-read-learn-notice-action {
+    border: 2px solid currentColor;
+  }
+}
+@media print {
+  .jic-read-learn-notice {
+    display: none;
+  }
+}
+@media (max-height: 360px) {
+  .jic-read-learn-notice {
+    display: none;
+  }
+}

@@ -127,11 +127,13 @@ test('menu names and order save together and appear in public navigation', async
   expect(saved.labels['/services']).toBe('Community together');
   expect(saved.order.indexOf('/services')).toBeLessThan(saved.order.indexOf('/worship'));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
   const menu = page.getByRole('dialog', { name: 'Navigation menu', exact: true });
   await expect(menu.getByRole('link', { name: 'Community together', exact: true })).toBeVisible();
-  const names = await menu.locator('.jic-unified-menu-row > a').allTextContents();
-  expect(names.indexOf('Community Hub')).toBeLessThan(names.indexOf('Worship'));
+  await expect(menu.locator('.jic-drawer-row > a')).toHaveText([
+    'Home', 'Salah timetable', 'Community together', 'About', 'Donate', 'Contact Us',
+  ]);
+  await expect(menu.locator('.jic-menu-shortcuts a strong')).toHaveText(['Read & Learn', 'Education']);
   expect(state.errors).toEqual([]);
 });
 

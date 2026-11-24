@@ -4,13 +4,20 @@ export function isPublicTaskRoute(pathname) {
   return (
     ['/forms', '/ramadan', '/fundraise', '/get-involved', '/services', '/funerals'].some(
       (root) => path === root || path.startsWith(`${root}/`),
-    ) || ['/donate', '/contact', '/prayer-times/reminders', '/services/hall-booking'].includes(path)
+    ) ||
+    [
+      '/donate',
+      '/contact',
+      '/prayer-times/reminders',
+      '/services/hall-booking',
+      '/learning/arabic',
+    ].includes(path)
   );
 }
 
 export function isPublicReadingRoute(pathname) {
   const path = pathname.replace(/\/+$/, '') || '/';
-  return path.startsWith('/worship/');
+  return path === '/worship' || path.startsWith('/worship/');
 }
 
 export function prefersQuietPrayerDock(pathname) {

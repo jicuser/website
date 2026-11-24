@@ -19,28 +19,35 @@ async function prepare(page, theme = 'light') {
   );
 }
 
-test('Hub groups direct services and worship with the compact six-section menu', async ({ page }) => {
+test('Hub groups mosque services and links online reading separately with the compact menu', async ({
+  page,
+}) => {
   await prepare(page);
   await page.goto('/services');
   await expect(page.getByRole('heading', { name: 'Community Hub', exact: true })).toBeVisible();
   const directory = page.locator('.community-hub-grid');
-  await expect(directory.getByRole('link')).toHaveCount(8);
+  await expect(directory.getByRole('link')).toHaveCount(7);
   for (const href of [
     '/services/support',
     '/services/marriage-family',
     '/services/skills-careers',
     '/education',
     '/funerals',
-    '/worship',
     '/youth',
     '/services/hall-booking',
   ]) {
     await expect(directory.locator(`a[href="${href}"]`)).toBeVisible();
   }
+  await expect(directory.locator('a[href="/worship"]')).toHaveCount(0);
   await expect(page.locator('.guidance-panel')).toHaveCount(0);
-  await directory.getByRole('link', { name: 'Worship & Adhkar', exact: true }).click();
+  await page
+    .getByRole('complementary', { name: 'Website resources' })
+    .getByRole('link', { name: /Read & Learn/ })
+    .click();
   await expect(page.locator('.worship-compact-resources a[href="/worship/quran"]')).toBeVisible();
-  await expect(page.locator('.worship-compact-resources a[href="/worship/daily-duas"]')).toBeVisible();
+  await expect(
+    page.locator('.worship-compact-resources a[href="/worship/daily-duas"]'),
+  ).toBeVisible();
   await page.goto('/services');
   await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
   await expect(page.locator('#jic-site-menu .jic-drawer-row > a')).toHaveCount(6);

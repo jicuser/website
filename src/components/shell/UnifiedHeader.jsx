@@ -19,7 +19,7 @@ import AppInstall from '@/components/shell/AppInstall';
 import InstalledAppBar from '@/components/shell/InstalledAppBar';
 import JamatiaLogo from '@/components/shell/JamatiaLogo';
 import { HeaderActions, NavigationDrawer } from '@/components/shell/SiteNavigation';
-import { drawerNavigation } from '@/lib/drawerNavigation';
+import { drawerNavigation, drawerShortcuts } from '@/lib/drawerNavigation';
 import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { SITE } from '@/content/site';
 import { usePublicPrayerTimes } from '@/context/PrayerTimesContext';
@@ -32,6 +32,7 @@ import {
   activeNavigation,
   navigationBreadcrumbs,
   compactMenuNavigation,
+  desktopMenuNavigation,
 } from '@/lib/publicNavigation';
 import { useRadioAvailability } from '@/hooks/useRadioAvailability';
 import { usePrayerDockVisibility } from '@/hooks/usePrayerDockVisibility';
@@ -53,7 +54,9 @@ export default function UnifiedHeader() {
   const addedPages = usePublishedPages();
   const menuGroups = visibleNavigation(PUBLIC_MENU_GROUPS, getContent, addedPages);
   const directoryGroups = compactMenuNavigation(menuGroups);
-  const drawerGroups = drawerNavigation(directoryGroups, menuGroups);
+  const drawerGroups = drawerNavigation(directoryGroups);
+  const shortcuts = drawerShortcuts(menuGroups);
+  const desktopGroups = desktopMenuNavigation(menuGroups);
   const { pathname: routePath, key: routeKey } = useLocation();
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const isHome = pathname === '/';
@@ -287,7 +290,7 @@ export default function UnifiedHeader() {
             </Link>
             {desktop && (
               <Suspense fallback={null}>
-                <DesktopNavigation navigation={navigation} groups={directoryGroups} />
+                <DesktopNavigation navigation={navigation} groups={desktopGroups} />
               </Suspense>
             )}
             <HeaderActions
@@ -496,6 +499,7 @@ export default function UnifiedHeader() {
         open={menuOpen}
         view={menuView}
         groups={drawerGroups}
+        shortcuts={shortcuts}
         pathname={pathname}
         accountLabel={accountLabel}
         onClose={() => setMenuOpen(false)}

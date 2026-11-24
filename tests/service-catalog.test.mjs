@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as catalog from '../src/features/services/catalog.js';
+import { READ_LEARN_RESOURCES, getVisibleReadLearnResources } from '../src/content/readLearn.js';
 
 function findServices(options) {
   assert.equal(typeof catalog.filterServices, 'function', 'The service filter must be available');
@@ -24,18 +25,7 @@ test('the catalogue connects each JIC service to its existing destination', () =
     portal: '/portal',
   };
   for (const [id, to] of Object.entries(existing)) assert.equal(destinations[id], to);
-  for (const id of [
-    'support',
-    'family',
-    'careers',
-    'adhkar',
-    'quran',
-    'salah-guide',
-    'janazah-guide',
-    'dalail',
-    'ramadan',
-  ])
-    assert.ok(destinations[id]);
+  for (const id of ['support', 'family', 'careers', 'ramadan']) assert.ok(destinations[id]);
 });
 
 test('an empty search includes the catalogue in its editorial order', () => {
@@ -49,7 +39,7 @@ test('search finds everyday language as well as service names', () => {
   );
   assert.deepEqual(
     findServices({ query: 'SaLaH' }).map(({ id }) => id),
-    ['prayer', 'salah-guide'],
+    ['prayer'],
   );
   assert.deepEqual(
     findServices({ query: 'preferred date' }).map(({ id }) => id),
@@ -160,4 +150,48 @@ test('filtering never reorders or changes the shared catalogue', () => {
   const results = findServices({ category: 'learning', query: 'class' });
   assert.notEqual(results, catalog.SERVICE_CATALOG);
   assert.deepEqual(catalog.SERVICE_CATALOG, original);
+});
+
+test('website readers and Arabic learning are discovered separately from mosque services', () => {
+  const tools = READ_LEARN_RESOURCES.map(({ to }) => to);
+  assert.deepEqual(
+    READ_LEARN_RESOURCES.filter(({ category }) => category === 'read').map(({ to }) => to),
+    ['/worship/quran', '/worship/daily-duas'],
+  );
+  assert.deepEqual(
+    READ_LEARN_RESOURCES.filter(({ category }) => category === 'learn').map(({ to }) => to),
+    ['/learning/arabic'],
+  );
+  assert.equal(new Set(tools).size, tools.length);
+  assert(catalog.SERVICE_CATALOG.every(({ to }) => !tools.includes(to)));
+  assert.equal(tools.includes('/prayer-times'), false);
+  assert.deepEqual(findServices({ query: 'adhkar' }), []);
+});
+
+test('Dala’il remains accurate programme information rather than an advertised text reader', () => {
+  const programme = READ_LEARN_RESOURCES.find(({ id }) => id === 'dalail');
+  assert.equal(programme.to, '/worship/dalail-al-khayrat');
+  assert.equal(programme.category, 'guide');
+  assert.equal(programme.kind, 'programme');
+  assert.match(programme.title, /programme/);
+  assert.match(programme.description, /sessions.*contact/i);
+});
+
+test('Read & Learn visibility hides the section and checks individual destinations on each call', () => {
+  const content = new Map();
+  const getContent = (key, fallback) => content.get(key) ?? fallback;
+  const original = structuredClone(READ_LEARN_RESOURCES);
+  assert.equal(getVisibleReadLearnResources(getContent).length, 6);
+  content.set('page-visibility:/worship/quran', 'false');
+  content.set('page-visibility:/learning/arabic', 'false');
+  assert.deepEqual(
+    getVisibleReadLearnResources(getContent).map(({ id }) => id),
+    ['adhkar', 'salah-guide', 'janazah-guide', 'dalail'],
+  );
+  content.set('page-visibility:/worship', 'false');
+  assert.deepEqual(getVisibleReadLearnResources(getContent), []);
+  content.set('page-visibility:/worship', 'true');
+  content.set('page-visibility:/worship/quran', 'true');
+  assert.equal(getVisibleReadLearnResources(getContent)[0].id, 'quran');
+  assert.deepEqual(READ_LEARN_RESOURCES, original);
 });

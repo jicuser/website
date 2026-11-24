@@ -92,7 +92,7 @@ for (const theme of ['dark', 'light']) {
   });
 }
 
-test('portal access is in the menu, Worship keeps reading links, and volunteering accepts an enquiry', async ({
+test('portal access is in the menu, Read & Learn keeps reading links, and volunteering accepts an enquiry', async ({
   page,
 }) => {
   const writes = await prepare(page);
@@ -106,11 +106,11 @@ test('portal access is in the menu, Worship keeps reading links, and volunteerin
   ).toBeVisible();
   await expect(page.locator('#jic-prayer-dock')).toHaveCount(0);
   await expect(page.locator('.jic-mobile-prayer-heading small')).toHaveCount(0);
-  await page.locator('.jic-menu-word').click();
-  await expect(page.locator('.jic-menu-account')).toHaveAttribute('href', '/portal');
-  await page.locator('#jic-site-menu').getByRole('link', { name: 'Worship', exact: true }).click();
+  await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
+  await expect(page.locator('#jic-site-menu').getByRole('link', { name: 'Portal login', exact: true })).toHaveAttribute('href', '/portal');
+  await page.locator('#jic-site-menu .jic-menu-shortcuts a[href="/worship"]').click();
   await expect(page).toHaveURL('/worship');
-  await expect(page.getByRole('heading', { name: 'Worship' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Read & Learn', exact: true })).toBeVisible();
   await expect(page.locator('.worship-compact-resources a[href="/worship/quran"]')).toBeVisible();
   await page.goto('/get-involved/volunteer#enquire');
   await expect(

@@ -59,8 +59,11 @@ test('readers expose real adhkar, Janazah recitations and the canonical prayer-t
 }) => {
   await publicSite(page);
   await page.goto('/worship');
-  await expect(page.locator('.worship-compact-resources > a')).toHaveCount(6);
-  await expect(page.locator('.worship-compact-resources > a')).toHaveCount(6);
+  await expect(page.getByRole('heading', { name: 'Read & Learn', exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Read online' }).getByRole('link')).toHaveCount(
+    2,
+  );
+  await expect(page.locator('.read-learn-open')).toHaveAttribute('href', '/learning/arabic');
   await page.locator('.worship-compact-resources a[href="/worship/daily-duas"]').click();
   await expect(page.getByRole('heading', { name: 'Morning adhkar', exact: true })).toBeVisible();
   await expect(page.locator('.worship-recitation-arabic')).toHaveCount(3);
@@ -97,7 +100,8 @@ test('Arabic and reading choices fit narrow phones in both themes', async ({ pag
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/worship');
-    await expect(page.locator('.worship-compact-resources > a')).toHaveCount(6);
+    await expect(page.locator('.worship-compact-resources > a')).toHaveCount(2);
+    await expect(page.locator('.read-learn-open')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
@@ -122,6 +126,32 @@ test('Arabic and reading choices fit narrow phones in both themes', async ({ pag
   }
 });
 
+test('Read & Learn respects hidden tools and keeps programme information secondary', async ({
+  page,
+}) => {
+  await page.addInitScript(() => sessionStorage.setItem('jic-salawat-shown', '1'));
+  await page.route('**/preview-api/**', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: route.request().url().includes('/page_content')
+        ? JSON.stringify([
+            { content_key: 'page-visibility:/worship/quran', content_value: 'false' },
+            { content_key: 'page-visibility:/learning/arabic', content_value: 'false' },
+          ])
+        : '[]',
+    }),
+  );
+  await page.goto('/worship');
+  const resources = page.getByRole('navigation', { name: 'Read online' });
+  await expect(resources.getByRole('link')).toHaveCount(1);
+  await expect(resources.locator('a[href="/worship/daily-duas"]')).toBeVisible();
+  await expect(page.locator('.read-learn-open')).toHaveCount(0);
+  await page.getByText('Prayer guides & programme information', { exact: true }).click();
+  const guides = page.getByRole('navigation', { name: 'Prayer guides and programmes' });
+  await expect(guides.locator('a[href="/worship/dalail-al-khayrat"]')).toContainText('programme');
+  await expect(resources.locator('a[href="/worship/dalail-al-khayrat"]')).toHaveCount(0);
+});
+
 test('Qur’an search, reading controls and saved verse survive a reload', async ({ page }) => {
   await publicSite(page);
   await mockQuran(page);
@@ -139,7 +169,10 @@ test('Qur’an search, reading controls and saved verse survive a reload', async
   await page.reload();
   await expect(page.getByLabel('Surah', { exact: true })).toHaveValue('114');
   await expect(page.getByLabel('Arabic text size', { exact: true })).toHaveValue('40');
-  await expect(page.getByLabel('Show English translation', { exact: true })).toHaveAttribute('aria-checked', 'false');
+  await expect(page.getByLabel('Show English translation', { exact: true })).toHaveAttribute(
+    'aria-checked',
+    'false',
+  );
   await page.getByRole('button', { name: /Continue reading/ }).click();
   await expect(page.locator('#quran-ayah-114-3')).toBeFocused();
   await expect(page.locator('#quran-ayah-114-3 .worship-recitation-arabic')).toHaveCSS(

@@ -12,7 +12,7 @@ export const PROGRAMMES = [
     detail: 'Join our open Qur’an circle on Fridays at Jamatia Islamic Centre.',
     image: '/posters/open-quran-circle.png',
     alt: 'Open Qur’an Circle at Woodlands Road Masjid, Jamatia Islamic Centre. Fridays at 6:30pm. All are welcome.',
-    to: '/worship',
+    to: '/education/programmes',
     groups: ['home', 'education', 'worship'],
   },
   {
@@ -55,7 +55,7 @@ export const PROGRAMMES = [
     detail: 'Gatherings after Maghrib at Jamatia Islamic Centre.',
     image: '/posters/after-maghrib.jpg',
     alt: 'After Maghrib with Shaykh Muhammad Yaseen: Monday Sirah, Wednesday Aqida, Friday Majlis of Dhikr, at Jamatia Islamic Centre, 179–183 Woodlands Road, Birmingham B11 4ER.',
-    to: '/worship',
+    to: '/education/programmes',
     groups: ['home', 'education', 'worship'],
   },
   {
@@ -68,7 +68,7 @@ export const PROGRAMMES = [
     detail: 'Learn to deliver the Adhan and Iqamah with correct tajwid, rulings and etiquette.',
     image: '/posters/adhan-iqamah-course.jpg',
     alt: 'Jamatia Islamic Centre Adhan and Iqamah six-week course, starting Sunday 9 August 2026 after Dhuhr.',
-    to: '/worship',
+    to: '/education/programmes',
     groups: [],
   },
 ];

@@ -49,7 +49,7 @@ test('public sections retain their own identity on overview pages', () => {
     ['/', 'Home'],
     ['/about', 'About JIC'],
     ['/prayer-times', 'Salah Times'],
-    ['/worship', 'Worship'],
+    ['/worship', 'Read & Learn'],
     ['/services', 'Community Hub'],
     ['/projects', 'Our Masjid Project'],
     ['/education', 'Education'],
@@ -86,6 +86,16 @@ test('About child routes outside /about keep the About parent context', () => {
     assert.equal(section.name, 'About JIC', path);
     assert.equal(section.primaryPath, '/about', path);
     assert.equal(section.current.path, path, path);
+  }
+});
+
+test('Arabic learning and its legacy education alias belong to Read & Learn', () => {
+  for (const path of ['/learning/arabic', '/education/arabic']) {
+    const section = activeNavigation(path);
+    assert.equal(section.primaryPath, '/worship', path);
+    assert.equal(section.primaryName, 'Read & Learn', path);
+    assert.equal(section.current.path, '/learning/arabic', path);
+    assert.equal(section.current.name, 'Learn Arabic', path);
   }
 });
 
@@ -207,7 +217,13 @@ test('compact menu sections own merged sections without claiming cross-linked pa
   assert.ok(about.sectionPaths.includes('/projects'));
   assert.ok(learning.sectionPaths.includes('/youth'));
   assert.ok(learning.sectionPaths.includes('/madrassah'));
-  assert.ok(groups.filter((group) => group.path !== '/donate').every((group) => !group.sectionPaths.includes('/donate')));
+  assert.ok(!learning.sectionPaths.includes('/worship'));
+  assert.ok(!learning.children.some((page) => page.path === '/worship'));
+  assert.ok(
+    groups
+      .filter((group) => group.path !== '/donate')
+      .every((group) => !group.sectionPaths.includes('/donate')),
+  );
 });
 
 test('section breadcrumbs keep one entry per section name and destination', () => {

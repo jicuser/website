@@ -1,5 +1,6 @@
 import { PUBLIC_PAGES } from '../content/pageDirectory.js';
 import { SERVICE_CATALOG } from '../features/services/catalog.js';
+import { READ_LEARN_RESOURCES } from '../content/readLearn.js';
 import { SOCIAL_CHANNELS } from '../content/socials.js';
 
 const aliases = {
@@ -7,6 +8,9 @@ const aliases = {
     'salah namaz salat jamaat jamaah timetable today birmingham west midlands woodlands road masjid jic',
   '/prayer-times/jummah': 'juma jumma friday khutbah sermon',
   '/madrassah': 'madrasah madrasa school children education',
+  '/worship': 'read learn online reading tools resources quran koran duas adhkar arabic practice',
+  '/learning/arabic':
+    'learn arabic fusha classical grammar word sentence builder playground vocabulary pronouns ownership vowels endings prefixes roots practice practise العربية تعلم الفصحى',
   '/youth/itikaf': 'itikaf itikaaf itikaph ramadan',
   '/contact': 'address map directions visit phone email parking',
   '/projects/how-to-support': 'donate donation sadaqah charity building appeal',
@@ -38,7 +42,7 @@ for (const channel of SOCIAL_CHANNELS)
     section: 'Social Media',
     description: channel.description,
   });
-for (const service of SERVICE_CATALOG) {
+for (const service of [...SERVICE_CATALOG, ...READ_LEARN_RESOURCES]) {
   const existing = pages.get(service.to);
   pages.set(service.to, {
     ...existing,
