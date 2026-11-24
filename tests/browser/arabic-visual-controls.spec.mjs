@@ -15,9 +15,19 @@ async function openPlayground(page, width) {
   });
   await page.goto('/learning/arabic');
   await expect(page.getByRole('heading', { level: 1, name: /Learn Arabic/ })).toBeVisible();
-  const builder = page.locator('.arabic-builder');
-  await expect(builder.locator('.arabic-translation')).toHaveText('This is our house');
-  return { state, builder, result: builder.locator('.arabic-result') };
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Arabic learning tools' })
+      .getByRole('button', { name: 'Words', exact: true }),
+  ).toHaveAttribute('aria-current', 'page');
+  // Words is the workspace's direct builder child. SentenceBuilder also stays
+  // mounted inside a hidden tab wrapper, so an unscoped builder is ambiguous.
+  const builder = page.locator('#arabic-workspace > .arabic-builder');
+  await expect(builder).toHaveCount(1);
+  await expect(builder).toBeVisible();
+  const result = builder.locator(':scope > .arabic-result');
+  await expect(result.locator('.arabic-translation')).toHaveText('This is our house');
+  return { state, builder, result };
 }
 
 async function expectSentence(result, arabic, latin, english) {
@@ -231,10 +241,21 @@ for (const width of [390, 320]) {
       .getByRole('navigation', { name: 'Arabic learning tools' })
       .getByRole('button', { name: 'Sentences', exact: true })
       .click();
-    await expect(page.getByRole('heading', { name: 'Make a sentence', exact: true })).toBeVisible();
-    const studio = page.locator('.arabic-sentence-studio');
-    const builder = studio.locator('.arabic-builder');
-    const result = builder.locator('.arabic-result');
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Arabic learning tools' })
+        .getByRole('button', { name: 'Sentences', exact: true }),
+    ).toHaveAttribute('aria-current', 'page');
+    // The sentence studio is kept mounted between tabs. Select its active
+    // workspace wrapper, then keep every result/comparison query inside it.
+    const studio = page.locator('#arabic-workspace > :not([hidden]) > .arabic-sentence-studio');
+    await expect(studio).toHaveCount(1);
+    await expect(
+      studio.getByRole('heading', { name: 'Make a sentence', exact: true }),
+    ).toBeVisible();
+    const builder = studio.locator(':scope > .arabic-builder');
+    await expect(builder).toHaveCount(1);
+    const result = builder.locator(':scope > .arabic-result');
     await expectSentence(
       result,
       'كِتَابُنَا فِي بَيْتِهِ',
