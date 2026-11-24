@@ -17,7 +17,7 @@ export function isPublicTaskRoute(pathname) {
 
 export function isPublicReadingRoute(pathname) {
   const path = pathname.replace(/\/+$/, '') || '/';
-  return path.startsWith('/worship/');
+  return path === '/worship' || path.startsWith('/worship/');
 }
 
 export function prefersQuietPrayerDock(pathname) {

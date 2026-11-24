@@ -29,19 +29,19 @@ export const MADRASSAH_TABS = [
 ];
 export const EDUCATION_TABS = [
   { name: 'Learning at JIC', path: '/education' },
-  { name: 'Learn Arabic', path: '/learning/arabic' },
   { name: 'All programmes', path: '/education/programmes' },
   { name: 'Adult Classes', path: '/education/courses' },
   { name: 'Enrolment', path: '/education/enrolment' },
   { name: 'Madrassah', path: '/madrassah' },
 ];
 export const WORSHIP_TABS = [
-  { name: 'Reading & guides', path: '/worship' },
+  { name: 'Read & Learn', path: '/worship' },
   { name: 'Read Qur’an', path: '/worship/quran' },
-  { name: 'Dala’il al-Khayrat', path: '/worship/dalail-al-khayrat' },
   { name: 'Adhkar & Du‘as', path: '/worship/daily-duas' },
+  { name: 'Learn Arabic', path: '/learning/arabic' },
   { name: 'Prayer Guide', path: '/worship/prayer-guide' },
   { name: 'Janazah Guide', path: '/worship/janazah-guide' },
+  { name: 'Dala’il programme information', path: '/worship/dalail-al-khayrat' },
 ];
 const SECTION_GROUPS = [
   { name: 'Home', path: '/', children: [] },
@@ -67,7 +67,7 @@ const SECTION_GROUPS = [
       { name: 'Salah Alerts', path: '/prayer-times/reminders' },
     ],
   },
-  { name: 'Worship', path: '/worship', children: WORSHIP_TABS },
+  { name: 'Read & Learn', path: '/worship', children: WORSHIP_TABS },
   {
     name: 'Ramadan',
     path: '/ramadan',

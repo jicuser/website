@@ -45,13 +45,11 @@ export function AppearanceControls() {
   );
 }
 
-export function NavigationDrawer({ open, view, groups, pathname, accountLabel, onClose, onViewChange, onDonate }) {
+export function NavigationDrawer({ open, view, groups, shortcuts = [], pathname, accountLabel, onClose, onViewChange, onDonate }) {
   const dialogRef = useRef(null);
   const closeRef = useRef(null);
   const [expanded, setExpanded] = useState({});
-  const active = activeDrawerPath(groups, pathname);
-  const shortcuts = groups.flatMap((group) => [group, ...(group.children || [])])
-    .filter((item, index, items) => ['/worship', '/education'].includes(item.path) && items.findIndex((candidate) => candidate.path === item.path) === index);
+  const active = activeDrawerPath([...shortcuts, ...groups], pathname);
   useLayoutEffect(() => {
     if (!open) return undefined;
     const dialog = dialogRef.current;
@@ -98,7 +96,7 @@ export function NavigationDrawer({ open, view, groups, pathname, accountLabel, o
         ) : (
           <>
             <Link to="/search" className="jic-menu-search" onClick={onClose}><Search size={20} aria-hidden="true" /><span>Search pages, services & classes</span><ChevronRight size={16} aria-hidden="true" /></Link>
-            {shortcuts.length > 0 && <nav className="jic-menu-shortcuts" aria-label="Worship and learning">{shortcuts.map(({ path, name }) => <NavLink key={path} to={path} onClick={onClose}><BookOpen size={18} aria-hidden="true" /><span>{name}</span><ChevronRight size={14} aria-hidden="true" /></NavLink>)}</nav>}
+            {shortcuts.length > 0 && <nav className="jic-menu-shortcuts" aria-label="Reading and classes">{shortcuts.map(({ path, name, hint }) => <Link key={path} to={path} aria-current={active === path ? pathname === path ? 'page' : 'location' : undefined} onClick={onClose}><BookOpen size={18} aria-hidden="true" /><span><strong>{name}</strong><small>{hint}</small></span><ChevronRight size={14} aria-hidden="true" /></Link>)}</nav>}
             <nav aria-label="All pages">
               <ul className="jic-drawer-list">{groups.map(({ name, path, children = [] }) => {
                 const Icon = destinationIcons[path] || Users;

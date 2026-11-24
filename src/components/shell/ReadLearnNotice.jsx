@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, X } from 'lucide-react';
 
+// Retain earlier dismissals when broadening the invitation to reading as well.
 const DISMISSED_KEY = 'jic-arabic-invitation-dismissed:v1';
 let dismissedInMemory = false;
 
@@ -13,7 +14,7 @@ function wasDismissed() {
   }
 }
 
-export default function ArabicLearningNotice() {
+export default function ReadLearnNotice({ readTo, learnTo }) {
   const [dismissed, setDismissed] = useState(wasDismissed);
   const [ready, setReady] = useState(false);
 
@@ -34,28 +35,45 @@ export default function ArabicLearningNotice() {
     }
   }
 
-  if (dismissed || !ready) return null;
+  if (dismissed || !ready || (!readTo && !learnTo)) return null;
 
   return (
     <aside
-      className="jic-arabic-notice"
-      aria-labelledby="jic-arabic-notice-title"
+      className="jic-read-learn-notice"
+      aria-labelledby="jic-read-learn-notice-title"
       onKeyDown={(event) => {
         if (event.key === 'Escape') dismiss();
       }}
     >
-      <div className="jic-arabic-notice-heading">
+      <div className="jic-read-learn-notice-heading">
         <BookOpen size={20} aria-hidden="true" />
-        <strong id="jic-arabic-notice-title">Learn Arabic</strong>
+        <strong id="jic-read-learn-notice-title">
+          {readTo && learnTo ? 'Read & Learn' : readTo ? 'Read online' : 'Learn Arabic'}
+        </strong>
       </div>
-      <p>Build words and sentences, one coloured piece at a time.</p>
-      <Link className="jic-arabic-notice-action" to="/learning/arabic" onClick={dismiss}>
-        Learn now
-      </Link>
+      <p>
+        {readTo && learnTo
+          ? 'Read online or build Arabic words and sentences.'
+          : readTo
+            ? 'Open your reading tools.'
+            : 'Build words and sentences, one coloured piece at a time.'}
+      </p>
+      <div className="jic-read-learn-notice-actions">
+        {readTo && (
+          <Link className="jic-read-learn-notice-action is-reading" to={readTo} onClick={dismiss}>
+            Read now
+          </Link>
+        )}
+        {learnTo && (
+          <Link className="jic-read-learn-notice-action" to={learnTo} onClick={dismiss}>
+            Learn Arabic
+          </Link>
+        )}
+      </div>
       <button
         type="button"
-        className="jic-arabic-notice-close"
-        aria-label="Dismiss Arabic learning invitation"
+        className="jic-read-learn-notice-close"
+        aria-label="Dismiss reading and learning invitation"
         onClick={dismiss}
       >
         <X size={18} aria-hidden="true" />

@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Check, Layers, Network, RotateCcw, Search, Sparkles, Type } from 'lucide-react';
+import { useContent } from '@/context/ContentContext';
+import { PUBLIC_MENU_GROUPS } from '@/content/nav';
+import { visibleNavigation } from '@/lib/pageVisibility';
 import {
   NOUNS,
   OWNERS,
@@ -335,6 +338,10 @@ function VerbPicker({ verb, selector, onChange, onClose }) {
 }
 
 export default function ArabicPlayground() {
+  const { getContent } = useContent();
+  const learningSection = visibleNavigation(PUBLIC_MENU_GROUPS, getContent).find((group) =>
+    group.children.some((page) => page.path === '/learning/arabic'),
+  );
   const [initial] = useState(loadChoices);
   const [tab, setTab] = useState('build');
   const [mode, setMode] = useState('noun');
@@ -409,9 +416,11 @@ export default function ArabicPlayground() {
     <section className="arabic-app page-transition" aria-labelledby="arabic-page-title">
       <header className="arabic-page-header">
         <div>
-          <Link to="/education" className="arabic-eyebrow">
-            Learning at JIC
-          </Link>
+          {learningSection && (
+            <Link to={learningSection.path} className="arabic-eyebrow">
+              {learningSection.name}
+            </Link>
+          )}
           <h1 id="arabic-page-title">
             Learn Arabic{' '}
             <span lang="ar" dir="rtl">

@@ -45,7 +45,7 @@ export function compactMenuNavigation(groups) {
   const order = ['/', '/prayer-times', '/services', '/about', '/donate', '/contact'];
   const labels = { '/': 'Home', '/prayer-times': 'Salah timetable', '/services': 'Community Hub', '/about': 'About', '/donate': 'Donate', '/contact': 'Contact Us' };
   const parents = new Map([
-    ['/worship', '/services'], ['/education', '/services'], ['/madrassah', '/services'],
+    ['/education', '/services'], ['/madrassah', '/services'],
     ['/youth', '/services'], ['/get-involved', '/services'], ['/ramadan', '/services'],
     ['/projects', '/about'], ['/social-media', '/about'],
   ]);
@@ -69,4 +69,15 @@ export function compactMenuNavigation(groups) {
       sectionPaths: [path, ...sections.map((section) => section.path)],
     };
   });
+}
+
+/** Reading and online learning have their own visible desktop destination. */
+export function desktopMenuNavigation(groups) {
+  const compact = compactMenuNavigation(groups);
+  const reading = groups.find((group) => group.path === '/worship');
+  if (!reading) return compact;
+  return orderedNavigation(
+    [...compact, { ...reading, children: [...(reading.children || [])], sectionPaths: [reading.path] }],
+    groups.map((group) => group.path),
+  );
 }

@@ -1,12 +1,13 @@
 import React, { lazy, Suspense } from 'react';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { BookOpen, Languages, Loader2 } from 'lucide-react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import GuideResource from '@/components/GuideResource';
 import PageHeading from '@/components/PageHeading';
 import '@/styles/services.css';
 import GuidancePanel from '@/features/guidance/GuidancePanel';
 import { useContent } from '@/context/ContentContext';
-import { getVisibleServices } from '@/features/services/catalog';
+import { isPageVisible } from '@/lib/pageVisibility';
+import { getVisibleReadLearnResources } from '@/content/readLearn';
 
 // Reading text and the surah directory load only when their reader is opened.
 const AdhkarReader = lazy(() => import('@/components/worship/AdhkarReader'));
@@ -26,36 +27,94 @@ const salahSteps = [
 ];
 
 export default function WorshipPage() {
-  const { pathname } = useLocation();
+  const { pathname: routePath } = useLocation();
+  const pathname = routePath.replace(/\/+$/, '') || '/';
   const { getContent } = useContent();
-  const resources = getVisibleServices(getContent).filter(
-    (service) => service.category === 'prayer',
-  );
+  const resources = getVisibleReadLearnResources(getContent);
+  const readings = resources.filter((resource) => resource.category === 'read');
+  const learning = resources.filter((resource) => resource.category === 'learn');
+  const guides = resources.filter((resource) => resource.category === 'guide');
   if (pathname === '/worship/daily-salah') return <Navigate to="/prayer-times" replace />;
 
   return (
     <div className="worship-page">
       {pathname === '/worship' && (
         <>
-          <PageHeading title="Worship">
-            Adhkar, Qur’an and prayer guides, ready when you need them.
+          <PageHeading title="Read & Learn" eyebrow="Use online" icon={BookOpen}>
+            Read Qur’an and du’as, or build Arabic one piece at a time.
           </PageHeading>
-          <div className="guidance-page-width">
-            <nav className="worship-compact-resources" aria-label="Worship resources">
-              {resources.map((resource) => (
-                <Link key={resource.id} to={resource.to}>
-                  <span>
-                    <strong>{resource.title}</strong>
-                    <small>{resource.description}</small>
-                  </span>
-                  <ArrowRight size={18} aria-hidden="true" />
-                </Link>
-              ))}
-            </nav>
-            <details className="jic-details-section"><summary>Help me choose</summary><GuidancePanel journeyId="worship" /></details>
-            <Link className="guidance-back-link" to="/prayer-times/reminders">
-              Salah alerts <ArrowRight size={16} aria-hidden="true" />
-            </Link>
+          <div className="read-learn-home">
+            <div className="read-learn-primary">
+              {readings.length > 0 && (
+                <section className="read-learn-section" aria-labelledby="read-learn-reading-title">
+                  <div className="read-learn-section-heading">
+                    <BookOpen size={22} aria-hidden="true" />
+                    <h2 id="read-learn-reading-title">Read</h2>
+                  </div>
+                  <p>Open a reader and continue at your own pace.</p>
+                  <nav
+                    className="worship-compact-resources read-learn-readers"
+                    aria-label="Read online"
+                  >
+                    {readings.map((resource) => (
+                      <Link key={resource.id} to={resource.to}>
+                        <strong>{resource.title}</strong>
+                        <span>{resource.description}</span>
+                      </Link>
+                    ))}
+                  </nav>
+                </section>
+              )}
+              {learning.length > 0 && (
+                <section
+                  className="read-learn-section read-learn-study"
+                  aria-labelledby="read-learn-arabic-title"
+                >
+                  <div className="read-learn-section-heading">
+                    <Languages size={22} aria-hidden="true" />
+                    <h2 id="read-learn-arabic-title">Learn Arabic</h2>
+                  </div>
+                  <p>Choose a word. Change a piece. Understand what it does.</p>
+                  <div className="read-learn-example">
+                    <span lang="ar" dir="rtl">
+                      بَيْتُنَا
+                    </span>
+                    <span>bayt · u · nā</span>
+                    <strong>our house</strong>
+                  </div>
+                  {learning.map((resource) => (
+                    <Link className="read-learn-open" key={resource.id} to={resource.to}>
+                      Open the Arabic playground
+                    </Link>
+                  ))}
+                </section>
+              )}
+            </div>
+            {guides.length > 0 && (
+              <details className="read-learn-guides">
+                <summary>Prayer guides & programme information</summary>
+                <nav aria-label="Prayer guides and programmes">
+                  {guides.map((resource) => (
+                    <Link key={resource.id} to={resource.to}>
+                      <strong>{resource.title}</strong>
+                      <span>{resource.description}</span>
+                    </Link>
+                  ))}
+                </nav>
+              </details>
+            )}
+            {!resources.length && <p>Online resources are not currently listed.</p>}
+            {readings.length > 0 && (
+              <details className="read-learn-guides">
+                <summary>Help choosing a reading</summary>
+                <GuidancePanel journeyId="worship" />
+              </details>
+            )}
+            {isPageVisible(getContent, '/education') && (
+              <p className="read-learn-classes">
+                Looking for classes at JIC? <Link to="/education">Education & Madrassah</Link>
+              </p>
+            )}
           </div>
         </>
       )}

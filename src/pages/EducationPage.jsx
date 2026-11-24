@@ -1,15 +1,10 @@
 import React from 'react';
-import { BookOpen, GraduationCap, Languages, UserPlus } from 'lucide-react';
+import { BookOpen, GraduationCap, UserPlus } from 'lucide-react';
 import PageHeading from '@/components/PageHeading';
 import GuidancePanel from '@/features/guidance/GuidancePanel';
 import PageChoices from '@/components/PageChoices';
 
 const choices = [
-  {
-    path: '/learning/arabic',
-    description: 'Build words and sentences. Tap a coloured part to see what changes.',
-    icon: Languages,
-  },
   {
     path: '/madrassah',
     featured: true,
@@ -36,7 +31,7 @@ export default function EducationPage() {
   return (
     <div className="page-transition">
       <PageHeading title="Education & Madrassah" eyebrow="Community Hub" icon={GraduationCap}>
-        Learn Arabic, find classes and explore enrolment information.
+        Find classes, course details and enrolment information.
       </PageHeading>
       <PageChoices items={choices} label="Education choices" />
       <details className="jic-details-section">

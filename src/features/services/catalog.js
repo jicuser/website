@@ -1,6 +1,6 @@
 import { isPageVisible } from '../../lib/pageVisibility.js';
 
-/** Shared public destinations for the homepage and services directory. */
+/** Mosque services and participation. Website tools live in content/readLearn.js. */
 export const SERVICE_CATEGORIES = [
   { id: 'all', label: 'All services' },
   { id: 'prayer', label: 'Worship' },
@@ -175,51 +175,6 @@ export const SERVICE_CATALOG = [
       'request',
       'parent',
     ],
-  },
-  {
-    id: 'adhkar',
-    title: 'Adhkar & Du’as',
-    description: 'Daily reading, meaning and transliteration.',
-    category: 'prayer',
-    to: '/worship/daily-duas',
-    icon: 'book',
-    keywords: ['adhkar', 'adkar', 'dhikr', 'dua', 'morning', 'evening', 'azkar'],
-  },
-  {
-    id: 'quran',
-    title: 'Read Qur’an',
-    description: 'Choose a surah and continue reading.',
-    category: 'prayer',
-    to: '/worship/quran',
-    icon: 'book',
-    keywords: ['quran', 'koran', 'surah', 'reading'],
-  },
-  {
-    id: 'salah-guide',
-    title: 'Salah Guide',
-    description: 'Prayer method and a short refresher.',
-    category: 'prayer',
-    to: '/worship/prayer-guide',
-    icon: 'mosque',
-    keywords: ['wudu', 'salah', 'namaz', 'prayer', 'learn'],
-  },
-  {
-    id: 'janazah-guide',
-    title: 'Janazah Prayer Guide',
-    description: 'Prepare to attend the prayer.',
-    category: 'prayer',
-    to: '/worship/janazah-guide',
-    icon: 'book',
-    keywords: ['funeral', 'janazah', 'janaza', 'recitations', 'urdu'],
-  },
-  {
-    id: 'dalail',
-    title: 'Dala’il al-Khayrat',
-    description: 'Reading programme information.',
-    category: 'prayer',
-    to: '/worship/dalail-al-khayrat',
-    icon: 'book',
-    keywords: ['dalail', 'salawat', 'durood', 'reading'],
   },
   {
     id: 'ramadan',

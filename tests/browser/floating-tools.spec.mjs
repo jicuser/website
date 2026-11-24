@@ -75,20 +75,22 @@ for (const theme of ['light', 'dark']) {
     await openHome(page, theme);
     await page.getByRole('button', { name: 'Open navigation menu' }).click();
     const menu = page.getByRole('dialog', { name: 'Navigation menu' });
-    for (const path of ['/', '/prayer-times', '/funerals', '/services/nikah', '/worship', '/education', '/services', '/projects', '/donate', '/about', '/contact']) {
+    for (const path of ['/', '/prayer-times', '/services', '/donate', '/about', '/contact']) {
       await expect(menu.locator(`.jic-drawer-row > a[href="${path}"]`)).toHaveCount(1);
     }
+    await expect(menu.locator('.jic-menu-shortcuts a strong')).toHaveText(['Read & Learn', 'Education']);
     await menu.getByRole('button', { name: 'Expand Community Hub subpages' }).click();
     await expect(menu.getByRole('link', { name: 'Youth', exact: true })).toBeVisible();
-    await menu.getByRole('button', { name: 'Expand About JIC subpages' }).click();
+    await menu.getByRole('button', { name: 'Expand About subpages' }).click();
     await expect(menu.getByRole('link', { name: 'Youth', exact: true })).toBeHidden();
     await expect(menu.getByRole('link', { name: 'Social Media', exact: true })).toBeVisible();
     await menu.getByRole('link', { name: 'Staff login', exact: true }).focus();
     await page.keyboard.press('Tab');
-    await expect(menu.getByRole('link', { name: 'Jamatia Islamic Centre home' })).toBeFocused();
+    await expect(menu.getByRole('button', { name: 'Close navigation menu' })).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await expect(menu.getByRole('link', { name: 'Staff login', exact: true })).toBeFocused();
-    await menu.locator('.jic-drawer-row > a[href="/services/nikah"]').click();
+    await menu.getByRole('button', { name: 'Expand Community Hub subpages' }).click();
+    await menu.locator('.jic-drawer-children a[href="/services/nikah"]').click();
     await expect(page).toHaveURL('/services/nikah');
     await expect(menu).toHaveCount(0);
     expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');

@@ -1,8 +1,16 @@
 # Learn Arabic playground
 
-The public learning tool lives at `/learning/arabic`. It is linked from Education and the Quran reader. `/education/arabic` redirects to the canonical address. The route loads lazily and uses the existing website theme, navigation, page metadata and focused-task layout.
+The public learning tool lives at `/learning/arabic`. It belongs to **Read & Learn**, the online-resource home at `/worship`, and is also linked from the Quran reader. `/education/arabic` redirects to the canonical address. Education remains the place for mosque classes, courses, Madrassah and enrolment. The tool loads lazily and uses the existing website theme, navigation, page metadata and focused-task layout.
 
-A small rounded **Learn Arabic** invitation appears on the homepage and Education overview after eight seconds, with a **Learn now** link and an × close button. Either action remembers dismissal on the current device. The invitation is nonmodal, does not move keyboard focus, and stays clear of the installed-app controls. Existing notices and open dialogs take priority. It is absent from reading, learning, forms, staff and account pages, CMS previews and editing mode, and when the Arabic page is disabled. If browser storage is blocked, dismissal still lasts for the current visit.
+A small rounded **Read & Learn** invitation appears on the homepage after eight seconds and offers separate **Read now** and **Learn Arabic** actions, plus an × close button. Read now opens the first visible reader, normally the Qur’an; Learn Arabic opens the playground. Actions respect their destination’s visibility and the overview’s visibility, and either action remembers dismissal on the current device. The invitation keeps the earlier dismissal preference, is nonmodal, does not move keyboard focus, and stays clear of the installed-app controls. Existing notices and open dialogs take priority. It is absent from Education, reading and learning pages, CMS previews and editing mode. If browser storage is blocked, dismissal still lasts for the current visit.
+
+## Reading, learning and mosque services
+
+The Read & Learn home has two primary choices: **Read**, containing the Qur’an and Adhkar readers, and **Learn Arabic**, opening the playground. Prayer guides and Dala’il al-Khayrat programme information are secondary. The Dala’il page remains information about reading sessions and contacting the centre; it is not advertised as an online text reader. All original reader addresses and functionality are retained.
+
+`src/content/readLearn.js` owns `READ_LEARN_RESOURCES` and `getVisibleReadLearnResources(getContent)`. Its categories are `read`, `learn` and `guide`; Dala’il carries the additional `kind: 'programme'` label. Visibility is evaluated for the overview and each destination at render time. These resources are separate from `SERVICE_CATALOG`, which describes mosque services, classes, participation and account access. Community Hub keeps seven service groups and offers a smaller Read & Learn website-resource link outside that service grid.
+
+The menu keeps its six ordinary rows. Above them, **Read & Learn — Use online** and **Education — Classes at JIC** distinguish tools from classes. Read & Learn also has a direct desktop menu. These navigation shortcuts respect configured names, order, page placement and visibility. The Arabic page’s own section link follows its visible configured parent. Existing fallback programme links open the programme directory instead of the online-resource home.
 
 ## Learning experience
 

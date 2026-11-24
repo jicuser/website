@@ -93,7 +93,7 @@ export default function QuranReader() {
     >
       <header className="jic-guide-heading">
         <Link to="/worship" className="worship-back-link">
-          All reading resources
+          Read &amp; Learn
         </Link>
         <h1>Read Qur’an</h1>
         <p>Arabic with Sahih International’s English translation. Choose a surah to begin.</p>

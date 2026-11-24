@@ -289,7 +289,7 @@ export const GUIDED_JOURNEYS = {
         'Worship & prayer',
         'Open a reading, guide or the current timetable.',
         [],
-        [link('Worship resources', '/worship'), link('Salah times', '/prayer-times')],
+        [link('Read & Learn', '/worship'), link('Salah times', '/prayer-times')],
       ),
       learning: educationNodes.explore,
       family: result(

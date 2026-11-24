@@ -4,7 +4,8 @@ import { createRequire } from 'node:module';
 import { runInNewContext } from 'node:vm';
 import { build } from 'esbuild';
 import React from 'react';
-import { activeNavigation } from '../src/lib/publicNavigation.js';
+import { activeNavigation, desktopMenuNavigation } from '../src/lib/publicNavigation.js';
+import { PUBLIC_MENU_GROUPS } from '../src/content/nav.js';
 
 const bundled = await build({
   entryPoints: [new URL('../src/components/shell/DesktopNavigation.jsx', import.meta.url).pathname],
@@ -23,7 +24,7 @@ function nodes(tree) {
 }
 
 // Exercise disclosure and focus handlers without a browser or network services.
-function navigationFixture(pathname = '/') {
+function navigationFixture(pathname = '/', groups) {
   const slots = [];
   const listeners = new Map();
   const mediaListeners = new Set();
@@ -123,7 +124,7 @@ function navigationFixture(pathname = '/') {
       dirty = false;
       cursor = 0;
       effects = [];
-      tree = Navigation({ navigation: activeNavigation(location.pathname) });
+      tree = Navigation({ navigation: activeNavigation(location.pathname), groups });
       tree.ref.current = root;
       for (const group of tree.props.children) {
         const dom = element(`group:${group.key}`);
@@ -199,6 +200,21 @@ function navigationFixture(pathname = '/') {
     },
   };
 }
+
+test('Read & Learn owns the current desktop section for its readers and Arabic playground', () => {
+  const groups = desktopMenuNavigation(PUBLIC_MENU_GROUPS);
+  const fixture = navigationFixture('/learning/arabic', groups);
+  fixture.render();
+  assert.equal(fixture.trigger('/worship').props.children[0], 'Read & Learn');
+  for (const path of ['/learning/arabic', '/worship/quran', '/worship/daily-duas']) {
+    fixture.navigate({ pathname: path });
+    assert.equal(fixture.trigger('/worship').props['aria-current'], 'location', path);
+    assert.equal(fixture.link('/worship', path).props['aria-current'], 'page', path);
+    assert.equal(fixture.trigger('/services').props['aria-current'], undefined, path);
+  }
+  assert.equal(fixture.link('/services', '/worship'), undefined);
+  assert.ok(fixture.link('/worship', '/worship'), 'the Read & Learn overview remains reachable');
+});
 
 test('desktop sections disclose their own links while Home remains a direct destination', () => {
   const fixture = navigationFixture();
