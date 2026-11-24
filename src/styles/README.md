@@ -26,6 +26,7 @@
 | `arabic-playground.css`  | Arabic word and sentence builders, explanations, grammar map and practice          |
 | `tv.css`                 | Dedicated mosque-screen scale and layout                                             |
 | `spiritual-overlays.css` | Welcome salawat and occasional reflection overlays                                   |
+| `notice-placement.css`   | Announcement placement and the dismissible Arabic learning invitation               |
 
 ## Rules
 

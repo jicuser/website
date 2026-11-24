@@ -2,6 +2,8 @@
 
 The public learning tool lives at `/learning/arabic`. It is linked from Education and the Quran reader. `/education/arabic` redirects to the canonical address. The route loads lazily and uses the existing website theme, navigation, page metadata and focused-task layout.
 
+A small rounded **Learn Arabic** invitation appears on the homepage and Education overview after eight seconds, with a **Learn now** link and an × close button. Either action remembers dismissal on the current device. The invitation is nonmodal, does not move keyboard focus, and stays clear of the installed-app controls. Existing notices and open dialogs take priority. It is absent from reading, learning, forms, staff and account pages, CMS previews and editing mode, and when the Arabic page is disabled. If browser storage is blocked, dismissal still lasts for the current visit.
+
 ## Learning experience
 
 - **Words:** choose a thing or an action. Tap the joined Arabic or the larger pronunciation pieces below it to open the relevant options. English meaning uses the same colour roles. A change highlights all affected pieces, including the two changes in `baytuhu → fī baytihi`.

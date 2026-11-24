@@ -1,6 +1,7 @@
 import { activeNavigation } from '@/lib/publicNavigation';
 import { noticePlacement } from '@/lib/noticePlacement';
 import SiteNotice from '@/components/shell/SiteNotice';
+import ArabicLearningNotice from '@/components/shell/ArabicLearningNotice';
 import useHomeLiveContent from '@/hooks/useHomeLiveContent';
 import { safeWebUrl } from '@/lib/video';
 import { useContent } from '@/context/ContentContext';
@@ -52,7 +53,7 @@ function PublicLayout() {
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const { isAdmin } = useAuth();
   const { announcement, livestream } = useHomeLiveContent({ eventLimit: 1 });
-  const { getContent } = useContent();
+  const { getContent, editMode } = useContent();
   const visible = isPageVisible(getContent, pathname) || isAdmin;
   const preview = new URLSearchParams(search).get('preview') === '1';
   const installed = useInstalledApp();
@@ -120,6 +121,11 @@ function PublicLayout() {
         )}
       </main>
       {!preview && isHome && <SpiritualOverlays />}
+      {visible &&
+        !preview &&
+        !editMode &&
+        (isHome || pathname === '/education') &&
+        isPageVisible(getContent, '/learning/arabic') && <ArabicLearningNotice />}
       {!preview &&
         !isTask &&
         (announcement && noticePlacement(announcement.display_settings).notification ? (
