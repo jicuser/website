@@ -4,7 +4,8 @@ import { createRequire } from 'node:module';
 import { runInNewContext } from 'node:vm';
 import { build } from 'esbuild';
 import React from 'react';
-import { NOUNS } from '../src/features/arabic/grammar.mjs';
+import { NOUNS, PERSONS, TENSES } from '../src/features/arabic/grammar.mjs';
+import { buildSentence, INITIAL_SENTENCE } from '../src/features/arabic/sentences.mjs';
 
 const require = createRequire(import.meta.url);
 const bundles = Object.fromEntries(
@@ -145,6 +146,18 @@ const click = (ui, node) => {
 const current = (ui) => ui.child('ArabicResult').props;
 const currentPartExists = (ui) =>
   current(ui).result.segments.some((part) => part.id === current(ui).selectedPart);
+const tapMeaning = (ui, meaningId) => {
+  const props = current(ui);
+  assert.ok(
+    props.result.englishParts.some((part) => part.id === meaningId),
+    `the English meaning ${meaningId} is visible`,
+  );
+  const target = props.meaningTargets[meaningId];
+  const targetIds = typeof target === 'string' ? [target] : target;
+  assert.ok(targetIds?.length, 'the meaning connects to an actual Arabic part');
+  props.onPartClick(targetIds[0], { meaningId, targetIds });
+  ui.render();
+};
 
 test('number choices highlight the visible stem, count ending, or joined count + my', () => {
   const ui = fixture();
@@ -156,7 +169,7 @@ test('number choices highlight the visible stem, count ending, or joined count +
   assert.equal(current(ui).selectedPart, 'subject:number');
   click(ui, ui.option('Several'));
   assert.equal(current(ui).selectedPart, 'subject:stem');
-  click(ui, ui.picker('Whose?'));
+  tapMeaning(ui, 'subject:owner');
   click(ui, ui.option('My'));
   click(ui, ui.picker('How many?'));
   click(ui, ui.option('Two'));
@@ -174,7 +187,20 @@ test('removing an owner moves its active highlight to the actual article', () =>
   assert.equal(current(ui).result.translation, 'The book is in his house.');
   assert.equal(current(ui).selectedPart, 'subject:article');
   assert.ok(currentPartExists(ui));
-  assert.equal(ui.picker('Whose?').props.expanded, true);
+  assert.equal(current(ui).controlLabels['subject:article'], 'Change thing owner: No owner');
+  assert.equal(current(ui).choiceControlsId, ui.child('InlineChoices').props.id);
+  const addOwner = nodes(ui.tree).find(
+    (node) => node.props?.['aria-label'] === 'Add an owner to the thing',
+  );
+  assert.equal(addOwner.props['aria-expanded'], true);
+  ui.child('InlineChoices').props.onClose();
+  ui.render();
+  click(
+    ui,
+    nodes(ui.tree).find((node) => node.props?.['aria-label'] === 'Add an owner to the thing'),
+  );
+  click(ui, ui.option('My'));
+  assert.equal(current(ui).result.translation, 'My book is in his house.');
 });
 
 test('action time and person controls select existing corresponding parts after changes', () => {
@@ -185,9 +211,14 @@ test('action time and person controls select existing corresponding parts after 
   assert.ok(currentPartExists(ui), 'past tense has no separate context prefix');
   click(ui, ui.option('Now / usually'));
   assert.equal(current(ui).selectedPart, 'action:case');
+  assert.equal(current(ui).controlLabels['action:case'], 'Change action ending sound');
+  assert.notEqual(
+    current(ui).controlLabels['action:case'],
+    current(ui).controlLabels['action:context'],
+  );
   click(ui, ui.option('Will happen'));
   assert.equal(current(ui).selectedPart, 'action:context');
-  click(ui, ui.picker('Who?'));
+  tapMeaning(ui, 'action:prefix');
   click(ui, ui.option('You · one woman'));
   ui.child('InlineChoices').props.onClose();
   ui.render();
@@ -203,7 +234,7 @@ test('the full vocabulary remains searchable and unsupported plurals reset safel
   ui.render();
   click(ui, ui.picker('How many?'));
   click(ui, ui.option('Several'));
-  click(ui, ui.picker('Word'));
+  tapMeaning(ui, 'subject:stem');
   assert.equal(ui.all('OptionButton').length, 8);
   click(ui, ui.button(`All ${NOUNS.length} words`));
   assert.equal(ui.all('OptionButton').length, NOUNS.length);
@@ -217,21 +248,28 @@ test('the full vocabulary remains searchable and unsupported plurals reset safel
   assert.ok(ui.child('InlineChoices'), 'choice remains open after updating');
 });
 
-test('each sentence field opens its own identified inline panel and keeps live options', () => {
+test('each sentence meaning opens its own identified inline panel and keeps live options', () => {
   const ui = fixture();
   ui.render();
   const before = current(ui).result.arabic;
-  click(ui, ui.picker('Whose?'));
+  tapMeaning(ui, 'subject:owner');
   const first = ui.child('InlineChoices');
-  assert.equal(ui.picker('Whose?').props.controlsId, first.props.id);
-  assert.equal(ui.picker('Whose?').props.expanded, true);
+  assert.equal(current(ui).choiceControlsId, first.props.id);
+  assert.equal(current(ui).controlLabels['subject:owner'], 'Change thing owner: Our');
+  assert.equal(current(ui).selectedPart, 'subject:owner');
   click(ui, ui.option('My'));
   assert.notEqual(current(ui).result.arabic, before);
   assert.equal(ui.child('InlineChoices').key, first.key);
-  click(ui, ui.picker('Whose?', 1));
+  tapMeaning(ui, 'place:owner');
   assert.notEqual(ui.child('InlineChoices').key, first.key, 'new field captures its own opener');
-  assert.equal(ui.picker('Whose?').props.expanded, false);
-  assert.equal(ui.picker('Whose?', 1).props.expanded, true);
+  assert.equal(current(ui).selectedPart, 'place:owner');
+  assert.equal(current(ui).controlLabels['place:owner'], 'Change place owner: His');
+  assert.equal(current(ui).controlLabels['place:case'], 'Change place ending sound');
+  assert.notEqual(
+    current(ui).controlLabels['place:case'],
+    current(ui).controlLabels['place:context'],
+  );
+  assert.equal(current(ui).choiceControlsId, ui.child('InlineChoices').props.id);
   assert.equal(ui.option('His').props.latin, 'hi');
 });
 
@@ -245,10 +283,10 @@ test('question constraints, place normalization, and exact copy survive inline c
   assert.equal(current(ui).result.grammar.question, false);
   assert.equal(ui.button('Ask a question').props.disabled, true);
   click(ui, ui.option('Happened'));
-  click(ui, ui.picker('Action'));
+  tapMeaning(ui, 'action:stem');
   click(ui, ui.option('Go out'));
   assert.match(current(ui).result.translation, /went out from/);
-  click(ui, ui.picker('Where?'));
+  tapMeaning(ui, 'place:context');
   assert.deepEqual(
     ui.all('OptionButton').map((node) => node.props.label),
     ['From…', 'To…'],
@@ -269,28 +307,180 @@ test('internal stem marks explain the sound while keeping only grammatical word 
     'This sound belongs to the word. Choose another word to compare.',
   );
   assert.ok(ui.option('House'));
-  assert.equal(ui.picker('Word').props.expanded, true);
+  assert.equal(current(ui).choiceControlsId, ui.child('InlineChoices').props.id);
+  assert.equal(current(ui).controlLabels['subject:stem'], 'Change thing: Book');
   assert.equal(current(ui).selectedPart, 'subject:stem');
+});
+
+test('a joined two + my meaning opens number choices and follows the changed count', () => {
+  const ui = fixture();
+  ui.render();
+  tapMeaning(ui, 'subject:owner');
+  click(ui, ui.option('My'));
+  click(ui, ui.picker('How many?'));
+  click(ui, ui.option('Two'));
+  ui.child('InlineChoices').props.onClose();
+  ui.render();
+  assert.equal(current(ui).meaningTargets['subject:number'], 'subject:owner');
+  assert.equal(current(ui).controlLabels['subject:number'], 'Change how many things: Two');
+  tapMeaning(ui, 'subject:number');
+  assert.equal(ui.child('InlineChoices').props.title, 'How many?');
+  assert.equal(current(ui).selectedPart, 'subject:owner');
+  const before = current(ui).result;
+  click(ui, ui.option('Several'));
+  assert.equal(current(ui).selectedPart, 'subject:stem');
+  assert.match(current(ui).result.translation, /^My books /u);
+  assert.equal(current(ui).previous, before);
+  assert.equal(ui.child('ArabicChangeStory').props.previous, before);
+  assert.equal(ui.child('ArabicChangeStory').props.result, current(ui).result);
+});
+
+test('question meaning chips still open the correct word, owner and action choices', () => {
+  const ui = fixture();
+  ui.render();
+  click(ui, ui.button('This is…'));
+  click(ui, ui.button('Ask a question'));
+  assert.equal(current(ui).result.translation, 'Is this our book?');
+  tapMeaning(ui, 'subject:owner');
+  assert.equal(ui.child('InlineChoices').props.title, 'Whose thing?');
+  click(ui, ui.option('My'));
+  tapMeaning(ui, 'subject:stem');
+  click(ui, ui.option('House'));
+  assert.equal(current(ui).result.translation, 'Is this my house?');
+  click(ui, ui.button('An action'));
+  tapMeaning(ui, 'action:person');
+  assert.equal(ui.child('InlineChoices').props.title, 'Who does it?');
+  click(ui, ui.option('I'));
+  tapMeaning(ui, 'action:stem');
+  assert.equal(ui.child('InlineChoices').props.title, 'Choose an action');
+  click(ui, ui.option('Drink'));
+  assert.equal(current(ui).result.translation, 'Did I drink in his house?');
+});
+
+test('tapping a case vowel again keeps its choice tray available for comparison', () => {
+  const ui = fixture();
+  ui.render();
+  current(ui).onPartClick('place:case', { character: 'ِ', mark: 'kasra' });
+  ui.render();
+  assert.equal(ui.child('InlineChoices').props.title, 'In, from or to?');
+  current(ui).onPartClick('place:case', { character: 'ِ', mark: 'kasra' });
+  ui.render();
+  assert.ok(ui.child('InlineChoices'));
+  assert.equal(current(ui).selectedPart, 'place:case');
+});
+
+test('place chips, extra number choices, add-place and reset preserve the sentence state', () => {
+  const ui = fixture();
+  ui.render();
+  tapMeaning(ui, 'place:stem');
+  click(ui, ui.option('Mosque'));
+  tapMeaning(ui, 'place:owner');
+  click(ui, ui.option('Her'));
+  click(ui, ui.picker('How many?', 1));
+  click(ui, ui.option('Two'));
+  click(ui, ui.button('An action'));
+  assert.equal(current(ui).result.translation, 'We wrote in her two mosques.');
+  tapMeaning(ui, 'place:stem');
+  click(ui, ui.button('Remove place'));
+  assert.equal(current(ui).result.translation, 'We wrote.');
+  assert.equal(ui.child('InlineChoices'), undefined);
+  assert.equal(
+    current(ui).result.englishParts.some((part) => part.id.startsWith('place:')),
+    false,
+  );
+  click(ui, ui.button('Add a place'));
+  assert.equal(current(ui).result.translation, 'We wrote in her two mosques.');
+  click(ui, ui.button('Reset'));
+  assert.equal(current(ui).result.translation, buildSentence(INITIAL_SENTENCE).translation);
+  assert.equal(current(ui).previous, null);
+  assert.equal(current(ui).selectedPart, null);
+  assert.equal(ui.child('InlineChoices'), undefined);
+});
+
+test('connected sentence text stays exact, with no invented Arabic target for English auxiliaries', () => {
+  const states = [];
+  for (const template of ['identify', 'where']) {
+    for (const number of ['singular', 'dual', 'plural']) {
+      for (const ownerId of ['our', 'my', 'none']) {
+        for (const question of [false, true]) {
+          states.push({
+            ...INITIAL_SENTENCE,
+            template,
+            question,
+            subject: { ...INITIAL_SENTENCE.subject, number, ownerId },
+            place: { ...INITIAL_SENTENCE.place, number, ownerId },
+          });
+        }
+      }
+    }
+  }
+  for (const person of PERSONS) {
+    for (const tense of TENSES) {
+      for (const question of [false, true]) {
+        states.push({
+          ...INITIAL_SENTENCE,
+          template: 'action',
+          question,
+          action: { ...INITIAL_SENTENCE.action, personId: person.id, tenseId: tense.id },
+        });
+      }
+    }
+  }
+  for (const state of states) {
+    const output = fixture('SentenceBuilder', 'connectedSentence', state).render();
+    const expected = buildSentence(state);
+    const message = `${state.template}, ${state.subject.number}, ${state.subject.ownerId}, ${state.action.personId}, ${state.action.tenseId}, question ${state.question}`;
+    assert.equal(
+      output.result.englishParts.map((part) => part.text).join(''),
+      expected.translation,
+      message,
+    );
+    assert.equal(output.result.arabic, expected.arabic, message);
+    assert.equal(output.result.latin, expected.latin, message);
+    assert.equal(
+      new Set(output.result.englishParts.map((part) => part.id)).size,
+      output.result.englishParts.length,
+      message,
+    );
+    for (const [id, target] of Object.entries(output.meaningTargets)) {
+      if (id.startsWith('link:')) {
+        assert.equal(target, null, message);
+        continue;
+      }
+      assert.ok(target, `a content meaning has a target: ${id}, ${message}`);
+      const targets = typeof target === 'string' ? [target] : target;
+      assert.ok(targets.length, message);
+      for (const segmentId of targets)
+        assert.ok(
+          output.result.segments.some((part) => part.id === segmentId),
+          `${segmentId}, ${message}`,
+        );
+    }
+  }
 });
 
 function focusFixture({ fromGlyph = false, expandedPicker = true } = {}) {
   const document = { activeElement: null };
   class Element {
-    constructor(button = true) {
+    constructor(button = true, expanded = false) {
       this.isConnected = true;
       this.button = button;
+      this.expanded = expanded;
       this.focused = 0;
     }
     matches(selector) {
-      return selector === 'button' && this.button;
+      return (
+        this.button &&
+        (selector === 'button' || (selector === 'button[aria-expanded="true"]' && this.expanded))
+      );
     }
     focus() {
       document.activeElement = this;
       this.focused++;
     }
   }
-  const opener = new Element(),
-    picker = new Element(),
+  const opener = new Element(true, true),
+    picker = new Element(true, true),
     option = new Element(),
     piece = new Element();
   const outside = new Element(false);
@@ -335,6 +525,7 @@ function focusFixture({ fromGlyph = false, expandedPicker = true } = {}) {
     picker,
     option,
     piece,
+    builder,
     document,
     listeners,
     render,
@@ -374,6 +565,57 @@ test('live choices preserve their focus and Done returns to the original opener'
   assert.equal(view.closes, 1);
 });
 
+test('closing choices after collapsing their opener disclosure restores its visible summary', () => {
+  for (const closeWith of ['Done', 'Escape']) {
+    const view = focusFixture();
+    const summary = new view.opener.constructor(false);
+    const disclosure = {
+      open: true,
+      querySelector: (selector) => (selector === ':scope > summary' ? summary : null),
+    };
+    const closestDisclosure = (selector) =>
+      selector === 'details:not([open])' && !disclosure.open ? disclosure : null;
+    view.opener.closest = closestDisclosure;
+    view.opener.getClientRects = () => (disclosure.open ? [{}] : []);
+    summary.closest = closestDisclosure;
+    summary.contains = (element) => element === summary;
+    summary.getClientRects = () => [{}];
+    disclosure.open = false;
+    view.document.activeElement = view.option;
+
+    if (closeWith === 'Escape')
+      view.listeners.get('keydown')({ key: 'Escape', stopPropagation() {} });
+    else view.ui.button('Done').props.onClick();
+
+    assert.equal(view.document.activeElement, summary, closeWith);
+    assert.equal(summary.focused, 1, closeWith);
+    assert.equal(view.opener.focused, 0, 'the hidden control cannot receive focus');
+    assert.equal(view.closes, 1, closeWith);
+  }
+});
+
+test('focus recovery skips hidden expanded controls for the visible equivalent', () => {
+  for (const hiddenBy of ['hidden attribute', 'no layout rectangles']) {
+    const view = focusFixture();
+    view.opener.isConnected = false;
+    view.picker.closest = (selector) =>
+      hiddenBy === 'hidden attribute' && selector === '[hidden]' ? view.picker : null;
+    view.picker.getClientRects = () => (hiddenBy === 'no layout rectangles' ? [] : [{}]);
+    view.piece.expanded = true;
+    view.piece.getClientRects = () => [{}];
+    view.builder.querySelectorAll = (selector) =>
+      selector.includes('aria-expanded') ? [view.picker, view.piece] : [view.piece];
+    view.document.activeElement = view.option;
+
+    view.ui.button('Done').props.onClick();
+
+    assert.equal(view.document.activeElement, view.piece, hiddenBy);
+    assert.equal(view.piece.focused, 1, hiddenBy);
+    assert.equal(view.picker.focused, 0, 'the first matching hidden control is skipped');
+    assert.equal(view.closes, 1, hiddenBy);
+  }
+});
+
 test('a removed result piece returns focus to the stable expanded picker', () => {
   const view = focusFixture();
   view.opener.isConnected = false;
@@ -394,6 +636,11 @@ test('pattern changes retain a visible focus fallback without an expanded slot p
   const ui = fixture();
   ui.render();
   click(ui, ui.button('This is…'));
+  assert.equal(current(ui).controlLabels['subject:case'], 'Change thing ending sound');
+  assert.notEqual(
+    current(ui).controlLabels['subject:case'],
+    current(ui).controlLabels['subject:context'],
+  );
   current(ui).onPartClick('subject:context');
   ui.render();
   click(ui, ui.option('Where it is'));

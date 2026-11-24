@@ -9,6 +9,7 @@ on:
       - 'src/components/shell/**'
       - 'src/styles/**'
       - 'tests/browser/arabic-visual-controls.spec.mjs'
+      - 'tests/browser/arabic-connected-learning.spec.mjs'
       - 'tests/browser/tv-editor-workflow.spec.mjs'
       - 'tests/browser/tv-everyday-scenes.spec.mjs'
       - 'tests/browser/tv-screen-layout.spec.mjs'
@@ -21,6 +22,7 @@ on:
       - 'src/components/shell/**'
       - 'src/styles/**'
       - 'tests/browser/arabic-visual-controls.spec.mjs'
+      - 'tests/browser/arabic-connected-learning.spec.mjs'
       - 'tests/browser/tv-editor-workflow.spec.mjs'
       - 'tests/browser/tv-everyday-scenes.spec.mjs'
       - 'tests/browser/tv-screen-layout.spec.mjs'
@@ -51,6 +53,7 @@ jobs:
         run: >-
           npx playwright test
           tests/browser/arabic-visual-controls.spec.mjs
+          tests/browser/arabic-connected-learning.spec.mjs
           tests/browser/tv-editor-workflow.spec.mjs
           tests/browser/tv-everyday-scenes.spec.mjs
           tests/browser/tv-screen-layout.spec.mjs

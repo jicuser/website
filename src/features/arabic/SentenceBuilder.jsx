@@ -26,6 +26,7 @@ import {
   sentencePlaceContexts,
   normaliseSentence,
 } from './sentences.mjs';
+import ArabicChangeStory from './ArabicChangeStory';
 import './sentence-builder.css';
 
 const labelOf = (options, id) => options.find((item) => item.id === id)?.label || id;
@@ -62,6 +63,63 @@ const shortToken = (part) => ({
   latin: (part?.latin || '').trim(),
 });
 
+// The sentence engine owns the words and their order. This display adapter only
+// reconnects English pieces that a question rearranges, without changing its text.
+export function connectedSentence(state) {
+  const sentence = buildSentence(state);
+  const segmentIds = new Set(sentence.segments.map((part) => part.id));
+  const personParts = ['action:prefix', 'action:ending'].filter((id) => segmentIds.has(id));
+  let parts = sentence.englishParts;
+
+  if (state.template === 'identify' && sentence.grammar.question) {
+    const statement = buildSentence({ ...state, question: false });
+    const beginning = statement.englishParts[0];
+    const questionBeginning = beginning.text
+      .replace(/^This is\b/u, 'Is this')
+      .replace(/^These are\b/u, 'Are these')
+      .replace(/^These two are\b/u, 'Are these two');
+    const match = questionBeginning.match(/^(Is|Are) (.*)$/u);
+    if (match) {
+      parts = [
+        { id: 'question:auxiliary', text: `${match[1]} ` },
+        { ...beginning, text: match[2] },
+        ...statement.englishParts.slice(1, -1),
+        { id: 'context', text: '?' },
+      ];
+    }
+  }
+
+  const meaningTargets = {};
+  const englishParts = parts.map((part, index) => {
+    let id = part.id;
+    let targets;
+    if (id === 'context' || id === 'question:auxiliary') {
+      // English linking words, auxiliary verbs and punctuation do not each have
+      // a separate Arabic counterpart. Keep them readable and unconnected.
+      id = `link:${index}`;
+      targets = null;
+    } else if (id === 'owner' && state.template === 'action') {
+      id = 'action:person';
+      targets = personParts;
+    } else if (id === 'stem' && state.template === 'action') {
+      id = 'action:stem';
+      targets = id;
+    } else if (id === 'action:prefix' || id === 'action:ending') {
+      targets = personParts;
+    } else if (id.endsWith(':number') && !segmentIds.has(id)) {
+      const slot = id.split(':')[0];
+      // With "my", the dual count can join the owner ending in one piece.
+      targets = segmentIds.has(`${slot}:owner`) ? `${slot}:owner` : `${slot}:stem`;
+    } else {
+      targets = segmentIds.has(id) ? id : null;
+    }
+    meaningTargets[id] = targets;
+    return { ...part, id };
+  });
+
+  return { result: { ...sentence, englishParts }, meaningTargets };
+}
+
 export default function SentenceBuilder() {
   const [state, setState] = useState(INITIAL_SENTENCE);
   const [selector, setSelector] = useState(null);
@@ -72,7 +130,7 @@ export default function SentenceBuilder() {
   const choiceId = useId();
   const searchId = useId();
   const negativeNoteId = useId();
-  const result = useMemo(() => buildSentence(state), [state]);
+  const { result, meaningTargets } = useMemo(() => connectedSentence(state), [state]);
 
   const change = (patch) => {
     setPrevious(result);
@@ -86,8 +144,8 @@ export default function SentenceBuilder() {
     });
   };
   const isChoosing = (slot, key) => selector?.slot === slot && selector?.key === key;
-  const openChoice = (slot, key, partId, hint) => {
-    setSelector(!hint && isChoosing(slot, key) ? null : { slot, key, partId, hint });
+  const openChoice = (slot, key, partId, hint, forceOpen = false) => {
+    setSelector(!forceOpen && !hint && isChoosing(slot, key) ? null : { slot, key, partId, hint });
     setSearch('');
     setShowAll(false);
   };
@@ -101,7 +159,9 @@ export default function SentenceBuilder() {
     setSelector(null);
   };
   const pickPart = (id, detail = {}) => {
-    const [slot, part] = id.split(':');
+    // One Arabic ending can carry both a count and an owner. The tapped English
+    // meaning chooses the control; the actual Arabic target chooses the ring.
+    const [slot, part] = (detail.meaningId || id).split(':');
     if (slot === 'question' || id === 'punctuation') {
       change({ question: !state.question });
       return;
@@ -126,7 +186,7 @@ export default function SentenceBuilder() {
       part === 'stem' && detail.mark
         ? 'This sound belongs to the word. Choose another word to compare.'
         : undefined;
-    openChoice(slot, key, id, hint);
+    openChoice(slot, key, key === 'number' ? undefined : id, hint, Boolean(detail.mark));
   };
   const copy = async () => {
     try {
@@ -276,21 +336,39 @@ export default function SentenceBuilder() {
   // Choices can remove or merge a piece: keep the highlight on something visible.
   const selectedPart =
     partCandidates.find((id) => result.segments.some((part) => part.id === id)) || null;
+  const controlLabels = {
+    'subject:stem': `Change thing: ${labelOf(NOUNS, state.subject.nounId)}`,
+    'subject:owner': `Change thing owner: ${labelOf(OWNERS, state.subject.ownerId)}`,
+    'subject:article': `Change thing owner: ${labelOf(OWNERS, state.subject.ownerId)}`,
+    'subject:number': `Change how many things: ${NUMBER_LABELS[state.subject.number]}`,
+    'subject:context': `Change sentence pattern: ${PATTERN_LABELS[state.template]}`,
+    'subject:case': 'Change thing ending sound',
+    'place:stem': `Change place: ${labelOf(NOUNS, state.place.nounId)}`,
+    'place:owner': `Change place owner: ${labelOf(OWNERS, state.place.ownerId)}`,
+    'place:article': `Change place owner: ${labelOf(OWNERS, state.place.ownerId)}`,
+    'place:number': `Change how many places: ${NUMBER_LABELS[state.place.number]}`,
+    'place:context': `Change place beginning: ${labelOf(CONTEXTS, state.place.contextId)}`,
+    'place:case': 'Change place ending sound',
+    'action:stem': `Change action: ${labelOf(SENTENCE_VERBS, state.action.verbId)}`,
+    'action:person': `Change who: ${labelOf(PERSONS, state.action.personId)}`,
+    'action:prefix': `Change who: ${labelOf(PERSONS, state.action.personId)}`,
+    'action:ending': `Change who: ${labelOf(PERSONS, state.action.personId)}`,
+    'action:context': `Change when: ${TIME_LABELS[state.action.tenseId]}`,
+    'action:case': 'Change action ending sound',
+    'question:context': 'Make this a statement',
+  };
 
   return (
     <div className="arabic-sentence-studio">
       <div className="arabic-section-intro">
         <h2>Make a sentence</h2>
-        <p>Tap a coloured part. Try a choice. See what changes.</p>
+        <p>Start with a pattern. Then tap the meaning you want to change.</p>
       </div>
       <div className={`arabic-panel arabic-builder ${selector ? 'has-choices' : ''}`}>
-        <ArabicResult
-          result={result}
-          previous={previous}
-          onPartClick={pickPart}
-          selectedPart={selectedPart}
-          compact
-        />
+        <div className="arabic-sentence-step">
+          <span aria-hidden="true">1</span>
+          <h3>Choose a pattern</h3>
+        </div>
         <div className="arabic-sentence-patterns" role="group" aria-label="Sentence pattern">
           {SENTENCE_TEMPLATES.map((template) => (
             <button
@@ -304,86 +382,101 @@ export default function SentenceBuilder() {
             </button>
           ))}
         </div>
-        <div className="arabic-sentence-fields">
-          <div
-            className="arabic-sentence-slot"
-            role="group"
-            aria-label={hasSubject ? 'The thing' : 'The action'}
-          >
-            {hasSubject ? (
-              <>
-                <PickerButton
-                  label="Word"
-                  value={labelOf(NOUNS, state.subject.nounId)}
-                  {...pickerProps('subject', 'nounId')}
-                />
-                <PickerButton
-                  label="Whose?"
-                  colour="owner"
-                  value={labelOf(OWNERS, state.subject.ownerId)}
-                  {...pickerProps('subject', 'ownerId')}
-                />
+        <div className="arabic-sentence-step">
+          <span aria-hidden="true">2</span>
+          <h3>Tap an English meaning</h3>
+        </div>
+        <ArabicResult
+          result={result}
+          previous={previous}
+          onPartClick={pickPart}
+          selectedPart={selectedPart}
+          selectedMeaningId={
+            selector
+              ? `${selector.slot}:${{ nounId: 'stem', ownerId: 'owner', number: 'number', verbId: 'stem', personId: 'person', tenseId: 'context', contextId: 'context', role: 'context' }[selector.key]}`
+              : undefined
+          }
+          controlLabels={controlLabels}
+          choiceControlsId={choiceId}
+          meaningTargets={meaningTargets}
+          compact
+        />
+        <details className="arabic-sentence-options">
+          <summary>More sentence options</summary>
+          <div className="arabic-sentence-fields">
+            <div
+              className="arabic-sentence-slot"
+              role="group"
+              aria-label={hasSubject ? 'The thing' : 'The action'}
+            >
+              <span className="arabic-sentence-slot-label">
+                {hasSubject ? 'The thing' : 'The action'}
+              </span>
+              {hasSubject ? (
                 <PickerButton
                   label="How many?"
                   colour="number"
                   value={NUMBER_LABELS[state.subject.number]}
                   {...pickerProps('subject', 'number')}
                 />
-              </>
-            ) : (
-              <>
-                <PickerButton
-                  label="Action"
-                  value={labelOf(SENTENCE_VERBS, state.action.verbId)}
-                  {...pickerProps('action', 'verbId')}
-                />
-                <PickerButton
-                  label="Who?"
-                  colour="owner"
-                  value={labelOf(PERSONS, state.action.personId)}
-                  {...pickerProps('action', 'personId')}
-                />
+              ) : (
                 <PickerButton
                   label="When?"
                   colour="context"
                   value={TIME_LABELS[state.action.tenseId]}
                   {...pickerProps('action', 'tenseId')}
                 />
-              </>
+              )}
+              {hasSubject && state.subject.ownerId === 'none' && (
+                <button
+                  type="button"
+                  className="arabic-quiet arabic-colour-owner"
+                  aria-label="Add an owner to the thing"
+                  aria-expanded={isChoosing('subject', 'ownerId')}
+                  aria-controls={isChoosing('subject', 'ownerId') ? choiceId : undefined}
+                  onClick={() => openChoice('subject', 'ownerId')}
+                >
+                  <Plus size={15} aria-hidden="true" />
+                  Add owner
+                </button>
+              )}
+            </div>
+            {hasPlace && (
+              <div
+                className="arabic-sentence-slot arabic-sentence-place"
+                role="group"
+                aria-label="The place"
+              >
+                <span className="arabic-sentence-slot-label">The place</span>
+                <PickerButton
+                  label="How many?"
+                  colour="number"
+                  value={NUMBER_LABELS[state.place.number]}
+                  {...pickerProps('place', 'number')}
+                />
+                {state.place.ownerId === 'none' && (
+                  <button
+                    type="button"
+                    className="arabic-quiet arabic-colour-owner"
+                    aria-label="Add an owner to the place"
+                    aria-expanded={isChoosing('place', 'ownerId')}
+                    aria-controls={isChoosing('place', 'ownerId') ? choiceId : undefined}
+                    onClick={() => openChoice('place', 'ownerId')}
+                  >
+                    <Plus size={15} aria-hidden="true" />
+                    Add owner
+                  </button>
+                )}
+              </div>
             )}
           </div>
-          {hasPlace && (
-            <div
-              className="arabic-sentence-slot arabic-sentence-place"
-              role="group"
-              aria-label="The place"
-            >
-              <PickerButton
-                label="Where?"
-                colour="context"
-                value={labelOf(CONTEXTS, state.place.contextId)}
-                {...pickerProps('place', 'contextId')}
-              />
-              <PickerButton
-                label="Place"
-                value={labelOf(NOUNS, state.place.nounId)}
-                {...pickerProps('place', 'nounId')}
-              />
-              <PickerButton
-                label="Whose?"
-                colour="owner"
-                value={labelOf(OWNERS, state.place.ownerId)}
-                {...pickerProps('place', 'ownerId')}
-              />
-              <PickerButton
-                label="How many?"
-                colour="number"
-                value={NUMBER_LABELS[state.place.number]}
-                {...pickerProps('place', 'number')}
-              />
-            </div>
-          )}
-        </div>
+        </details>
+        {selector && (
+          <div className="arabic-sentence-step">
+            <span aria-hidden="true">3</span>
+            <h3>Try another choice</h3>
+          </div>
+        )}
         {selector && (
           <InlineChoices
             key={`${selector.slot}-${selector.key}`}
@@ -455,6 +548,7 @@ export default function SentenceBuilder() {
             )}
           </InlineChoices>
         )}
+        <ArabicChangeStory previous={previous} result={result} />
         <div className="arabic-extra-controls arabic-sentence-actions">
           <button
             type="button"
@@ -520,7 +614,7 @@ export default function SentenceBuilder() {
           Choose a positive action to ask a question with hal.
         </p>
       )}
-      <Explanation result={result} previous={previous} />
+      <Explanation result={result} />
       <ColourLegend />
       <p className="arabic-helper">
         Guided practice sentences. Choose words that make sense together.

@@ -1,0 +1,279 @@
+/* One visible relationship at a time; measured lines never receive pointer input. */
+.arabic-connected-display {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+}
+.arabic-connected-display > .arabic-script,
+.arabic-connected-display > .arabic-pronunciation,
+.arabic-connected-display > .arabic-translation,
+.arabic-connected-display > .arabic-unmatched-parts,
+.arabic-connected-display > .arabic-vowel-focus {
+  position: relative;
+  z-index: 1;
+}
+.arabic-connection-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+.arabic-connection-line,
+.arabic-connection-ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+.arabic-connection-line {
+  opacity: 0.5;
+}
+.arabic-connection-ring {
+  opacity: 0.86;
+}
+.arabic-connected-display > .arabic-pronunciation {
+  display: table;
+  max-width: 100%;
+  margin: 4px auto 0;
+  padding: 0 7px;
+  background: var(--jic-surface);
+}
+.arabic-connected-display > .arabic-translation {
+  margin: 20px 0 0 !important;
+  line-height: 2.6;
+  font-size: 1.125rem;
+  font-weight: 600;
+  overflow-wrap: normal;
+}
+.arabic-result .arabic-meaning-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 5px 11px;
+  margin: 2px 0;
+  border: 1px solid color-mix(in srgb, var(--part-colour) 26%, transparent);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--part-colour) 5%, var(--jic-surface));
+  font-size: inherit;
+  font-weight: 650;
+  line-height: 1.35;
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.arabic-result .arabic-meaning-chip[aria-pressed='true'] {
+  border-color: var(--part-colour);
+  background: color-mix(in srgb, var(--part-colour) 11%, var(--jic-surface));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--part-colour) 16%, transparent);
+}
+.arabic-unmatched-parts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+.arabic-result .arabic-part-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--part-colour) 20%, transparent);
+  border-radius: 10px;
+  background: var(--jic-surface);
+  font-size: 0.875rem !important;
+  line-height: 1.35;
+}
+.arabic-result .arabic-part-control[aria-pressed='true'] {
+  border-color: var(--part-colour);
+  background: color-mix(in srgb, var(--part-colour) 7%, var(--jic-surface));
+}
+.arabic-result .arabic-part-control strong {
+  font-size: 1rem;
+}
+.arabic-result .arabic-meaning-chip:focus-visible,
+.arabic-result .arabic-part-control:focus-visible,
+.arabic-change-replay:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.arabic-glyph-ink.is-mark-selected .arabic-glyph-path {
+  filter: drop-shadow(0 0 16px currentColor);
+}
+.arabic-vowel-focus {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 12px auto 0;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--part-colour) 22%, transparent);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  text-align: left;
+}
+.arabic-vowel-focus figcaption {
+  min-width: 0;
+}
+.arabic-vowel-focus strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.arabic-vowel-focus p {
+  margin: 3px 0 0;
+  color: var(--jic-text-secondary);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.arabic-glyph-closeup {
+  display: block;
+  flex: 0 0 auto;
+  width: 4.25rem;
+  height: 4.25rem;
+  overflow: hidden;
+}
+.arabic-closeup-ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.72;
+}
+.arabic-glyph-change-ring {
+  fill: color-mix(in srgb, currentColor 5%, transparent);
+  stroke: currentColor;
+  stroke-width: 1.3;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.arabic-change-story {
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 15px;
+  background: var(--jic-surface);
+  color: var(--jic-text);
+}
+.arabic-change-story > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.arabic-change-story h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 650;
+}
+.arabic-change-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--arabic-soft);
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem !important;
+}
+.arabic-change-examples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.arabic-change-example {
+  min-width: 0;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 11px;
+  text-align: center;
+}
+.arabic-change-example > figcaption {
+  text-align: left;
+  font-size: 0.875rem;
+  color: var(--jic-muted);
+  font-weight: 600;
+}
+.arabic-change-script {
+  font-size: clamp(1.85rem, 4.6vw, 2.6rem);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+.arabic-change-latin {
+  margin: 3px 0 0;
+  font-size: 1rem;
+  color: var(--jic-text-secondary);
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+.arabic-change-meaning {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.arabic-change-meaning .is-changed {
+  border-radius: 3px;
+  box-shadow: 0 2px 0 color-mix(in srgb, currentColor 55%, transparent);
+}
+.arabic-change-caption {
+  margin: 10px 0 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--jic-muted);
+}
+.arabic-change-examples .arabic-glyph-change-ring {
+  animation: arabic-change-ring-replay 1.25s ease-out both;
+}
+@keyframes arabic-change-ring-replay {
+  from {
+    opacity: 0.15;
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.85;
+  }
+}
+@media (max-width: 479px) {
+  .arabic-change-examples {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .arabic-change-example {
+    padding: 8px;
+  }
+  .arabic-connected-display > .arabic-translation {
+    font-size: 1rem;
+  }
+  .arabic-result .arabic-meaning-chip {
+    padding-inline: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arabic-change-examples .arabic-glyph-change-ring {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .arabic-result .arabic-meaning-chip,
+  .arabic-result .arabic-part-control {
+    border-color: ButtonText;
+  }
+  .arabic-result .arabic-meaning-chip[aria-pressed='true'],
+  .arabic-result .arabic-part-control[aria-pressed='true'] {
+    outline: 2px solid Highlight;
+  }
+}

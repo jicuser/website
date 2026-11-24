@@ -2,12 +2,37 @@
 .arabic-sentence-studio .arabic-section-intro {
   margin-bottom: 12px;
 }
+.arabic-sentence-studio .arabic-sentence-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 4px;
+}
+.arabic-sentence-studio .arabic-sentence-step > span {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 50%;
+  background: var(--arabic-soft);
+  color: var(--jic-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+.arabic-sentence-studio .arabic-sentence-step h3 {
+  margin: 0;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
 .arabic-sentence-studio .arabic-sentence-patterns {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 5px;
-  padding: 5px 12px;
-  border-top: 1px solid var(--arabic-line);
+  padding: 5px 12px 10px;
   border-bottom: 1px solid var(--arabic-line);
 }
 .arabic-sentence-studio .arabic-sentence-patterns button {
@@ -36,6 +61,29 @@
 .arabic-sentence-studio .arabic-sentence-patterns svg {
   flex-shrink: 0;
 }
+.arabic-sentence-studio .arabic-sentence-patterns button:focus-visible,
+.arabic-sentence-studio .arabic-sentence-options > summary:focus-visible {
+  outline: 2px solid var(--jic-gold);
+  outline-offset: -2px;
+}
+.arabic-sentence-studio .arabic-sentence-options {
+  border-top: 1px solid var(--arabic-line);
+  border-bottom: 1px solid var(--arabic-line);
+}
+.arabic-sentence-studio .arabic-sentence-options > summary {
+  min-height: 44px;
+  padding: 12px 14px;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.arabic-sentence-studio .arabic-sentence-options > summary:hover {
+  background: var(--arabic-soft);
+}
+.arabic-sentence-studio .arabic-sentence-options[open] > summary {
+  border-bottom: 1px solid var(--arabic-line);
+}
 .arabic-sentence-studio .arabic-sentence-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -44,21 +92,30 @@
   grid-template-columns: minmax(0, 1fr);
 }
 .arabic-sentence-studio .arabic-sentence-slot {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
   min-width: 0;
-  padding: 8px 10px;
+  padding: 10px 14px;
 }
 .arabic-sentence-studio .arabic-sentence-place {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   border-left: 1px solid var(--arabic-line);
 }
+.arabic-sentence-studio .arabic-sentence-slot-label {
+  flex-basis: 100%;
+  color: var(--jic-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
 .arabic-sentence-studio .arabic-sentence-slot .arabic-picker {
+  flex: 1 1 130px;
+  min-width: 0;
   min-height: 48px;
-  padding: 5px 5px;
-  gap: 3px;
+  padding: 6px 8px;
+  gap: 6px;
   border-radius: 6px;
+  border: 1px solid var(--arabic-line);
 }
 .arabic-sentence-studio .arabic-sentence-slot .arabic-picker small {
   font-size: 0.875rem;
@@ -135,7 +192,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .arabic-sentence-studio .arabic-sentence-slot {
-    padding: 6px 10px;
+    padding: 8px 14px;
   }
   .arabic-sentence-studio .arabic-sentence-place {
     border-left: 0;
