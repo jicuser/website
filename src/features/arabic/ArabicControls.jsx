@@ -1,6 +1,17 @@
-import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Volume2, X } from 'lucide-react';
-import ArabicGlyphs from './ArabicGlyphs';
+import ArabicGlyphs, { ArabicGlyphCloseup } from './ArabicGlyphs';
+import ArabicConnectionLayer from './ArabicConnectionLayer';
+import {
+  meaningConnections,
+  selectedMeaningConnection,
+  unmatchedArabicParts,
+  resolveMarkFocus,
+  segmentRanges,
+} from './arabicConnectionModel.mjs';
+import './arabic-connections.css';
+
+export { ArabicGlyphCloseup } from './ArabicGlyphs';
 
 export const PART_COLOURS = {
   context: 'context',
@@ -52,6 +63,25 @@ export function vowelColour(arabic = '') {
   return 'case';
 }
 
+function isVisibleFocusTarget(target) {
+  if (!(target instanceof HTMLElement) || !target.isConnected || target.closest?.('[hidden]'))
+    return false;
+  const closed = target.closest?.('details:not([open])');
+  const summary = closed?.querySelector(':scope > summary');
+  if (closed && summary !== target && !summary?.contains(target)) return false;
+  return typeof target.getClientRects !== 'function' || target.getClientRects().length > 0;
+}
+
+function visibleControl(builder, selector, excludeChoices = false) {
+  const candidates = builder?.querySelectorAll
+    ? [...builder.querySelectorAll(selector)]
+    : [builder?.querySelector(selector)];
+  return candidates.find(
+    (target) =>
+      isVisibleFocusTarget(target) && (!excludeChoices || !target.closest?.('.arabic-choice-tray')),
+  );
+}
+
 /** Choices stay beside the result: no backdrop, focus trap or full-screen sheet. */
 export function InlineChoices({
   title,
@@ -70,9 +100,18 @@ export function InlineChoices({
   const close = useCallback(() => {
     const builder = tray.current?.closest('.arabic-builder');
     const fallback =
-      builder?.querySelector('button[aria-expanded="true"][aria-controls]') ||
-      builder?.querySelector('.arabic-piece[aria-pressed="true"]');
-    const target = openingControl.current?.isConnected ? openingControl.current : fallback;
+      visibleControl(builder, 'button[aria-expanded="true"][aria-controls]') ||
+      visibleControl(
+        builder,
+        '.arabic-meaning-chip[aria-pressed="true"], .arabic-part-control[aria-pressed="true"], .arabic-piece[aria-pressed="true"]',
+      );
+    const disclosure = openingControl.current?.closest?.('details:not([open])');
+    const summary = disclosure?.querySelector(':scope > summary');
+    const target = isVisibleFocusTarget(openingControl.current)
+      ? openingControl.current
+      : isVisibleFocusTarget(summary)
+        ? summary
+        : fallback || visibleControl(builder, 'button, summary', true);
     onCloseRef.current();
     if (target instanceof HTMLElement) target.focus({ preventScroll: true });
   }, []);
@@ -80,9 +119,11 @@ export function InlineChoices({
     const builder = tray.current?.closest('.arabic-builder');
     const active = document.activeElement;
     openingControl.current =
-      active instanceof HTMLElement && builder?.contains(active) && active.matches('button')
+      active instanceof HTMLElement &&
+      builder?.contains(active) &&
+      active.matches('button[aria-expanded="true"]')
         ? active
-        : builder?.querySelector('button[aria-expanded="true"][aria-controls]');
+        : visibleControl(builder, 'button[aria-expanded="true"][aria-controls]');
     const onKeyDown = (event) => {
       if (event.key !== 'Escape') return;
       event.stopPropagation();
@@ -244,88 +285,254 @@ export function SpeakButton({ arabic }) {
   );
 }
 
-export function ArabicResult({ result, previous, onPartClick, compact = false, selectedPart }) {
-  const oldSegments = new Map(
-    (previous?.segments || []).map((segment) => [segment.id, segment.arabic]),
+const tailPart = (id) => id.split(':').at(-1);
+const shortPartLabel = (segment) =>
+  ({
+    case: segment.label === 'Present ending' ? 'Ending' : 'Vowel',
+    number: 'Number',
+    context: 'Beginning',
+    article: 'The',
+    stem: 'Word',
+    owner: 'Whose?',
+    prefix: 'Who?',
+    ending: 'Ending',
+  })[tailPart(segment.id)] || segment.label;
+
+export function ArabicResult({
+  result,
+  previous,
+  onPartClick,
+  compact = false,
+  selectedPart,
+  selectedMeaningId,
+  controlLabels = {},
+  choiceControlsId,
+  meaningTargets = {},
+  showPieces = false,
+}) {
+  const containerRef = useRef(null);
+  const [intent, setIntent] = useState(null);
+  const connections = useMemo(
+    () => meaningConnections(result, meaningTargets),
+    [result, meaningTargets],
   );
-  const changed = (segment) => previous && oldSegments.get(segment.id) !== segment.arabic;
+  const unmatched = useMemo(() => unmatchedArabicParts(result, connections), [result, connections]);
+  const ranges = useMemo(() => segmentRanges(result), [result]);
+  useEffect(() => {
+    if (!selectedPart) setIntent(null);
+  }, [selectedPart]);
   const segmentColour = (segment) =>
-    segment.id.split(':').at(-1) === 'case' ? vowelColour(segment.arabic) : colourFor(segment.id);
+    tailPart(segment.id) === 'case' ? vowelColour(segment.arabic) : colourFor(segment.id);
+  const selectedConnection = selectedMeaningConnection(connections, {
+    selectedPart,
+    selectedMeaningId,
+    rememberedKey: intent?.kind === 'meaning' ? intent.key : undefined,
+  });
+  const rememberedFocus =
+    intent?.kind === 'mark' &&
+    (intent.partId === selectedPart ||
+      (selectedConnection?.id === intent.meaningId &&
+        selectedConnection.targetIds.includes(intent.partId))) &&
+    (!selectedMeaningId || intent.meaningId === selectedMeaningId)
+      ? resolveMarkFocus(result, intent)
+      : null;
+  const focus =
+    rememberedFocus ||
+    (tailPart(selectedPart || '') === 'case'
+      ? resolveMarkFocus(result, { partId: selectedPart })
+      : null);
+  const activeMeaning = focus ? null : selectedConnection;
+  const activeFallback = unmatched.find((part) => part.id === selectedPart);
+  const targetIds = focus
+    ? [focus.partId]
+    : activeMeaning?.targetIds || (activeFallback ? [activeFallback.id] : []);
+  const controlKey = focus
+    ? activeFallback
+      ? `part-${activeFallback.id}`
+      : 'vowel-focus'
+    : activeMeaning?.key || (activeFallback ? `part-${activeFallback.id}` : null);
+  const connectionColour = focus?.mark.colour || colourFor(targetIds[0] || selectedPart || 'stem');
+
+  const pickGlyph = (id, detail = {}) => {
+    const range = ranges.find((part) => part.id === id);
+    setIntent(
+      detail.mark && range
+        ? {
+            kind: 'mark',
+            partId: id,
+            localOffset: detail.sourceIndex - range.start,
+            meaningId:
+              connections.find((part) => part.id === id)?.id ||
+              connections.find((part) => part.targetIds.includes(id))?.id ||
+              id,
+          }
+        : null,
+    );
+    onPartClick?.(id, detail);
+  };
+  const pickMeaning = (part) => {
+    setIntent({ kind: 'meaning', key: part.key });
+    onPartClick?.(part.actionId, { meaningId: part.id, targetIds: part.targetIds });
+  };
+  const pickFallback = (part) => {
+    const mark =
+      tailPart(part.id) === 'case' ? resolveMarkFocus(result, { partId: part.id }) : null;
+    setIntent(
+      mark
+        ? { kind: 'mark', partId: part.id, localOffset: mark.localOffset, meaningId: part.id }
+        : null,
+    );
+    onPartClick?.(
+      part.id,
+      mark
+        ? { mark: mark.mark.id, character: mark.character, sourceIndex: mark.sourceIndex }
+        : undefined,
+    );
+  };
+  const labelFor = (part, targetId) =>
+    controlLabels[part.id] || controlLabels[targetId] || `Change ${part.text.trim()}`;
+  const selectedAttributes = (selected, expanded = selected) => ({
+    'aria-pressed': Boolean(selected),
+    'aria-expanded': choiceControlsId ? Boolean(expanded) : undefined,
+    'aria-controls': expanded && choiceControlsId ? choiceControlsId : undefined,
+  });
+  const meaning = (part) => {
+    const interactive = Boolean(onPartClick && part.actionId);
+    if (!interactive)
+      return (
+        <span
+          key={part.key}
+          className={
+            part.actionId ? `arabic-colour-${colourFor(part.actionId)}` : 'arabic-unlinked-meaning'
+          }
+        >
+          {part.text}
+        </span>
+      );
+    const [, leading, text, trailing] = /^(\s*)([\s\S]*?)(\s*)$/.exec(part.text);
+    const selected = activeMeaning?.key === part.key;
+    return (
+      <React.Fragment key={part.key}>
+        {leading}
+        <button
+          type="button"
+          className={`arabic-meaning-chip arabic-colour-${colourFor(part.actionId)}`}
+          data-meaning-id={part.id}
+          data-connection-control={part.key}
+          aria-label={labelFor(part, part.actionId)}
+          {...selectedAttributes(
+            selected,
+            selected || (focus && part.targetIds.includes(selectedPart)),
+          )}
+          onClick={() => pickMeaning(part)}
+        >
+          {text}
+        </button>
+        {trailing}
+      </React.Fragment>
+    );
+  };
+  const soundNote = focus
+    ? tailPart(focus.partId) === 'case'
+      ? result.grammar?.verbId || focus.partId.startsWith('action:')
+        ? 'A sound in the verb’s ending.'
+        : 'This sound helps the word fit its sentence.'
+      : ['owner', 'prefix', 'ending'].includes(tailPart(focus.partId))
+        ? 'A sound inside the person ending or beginning.'
+        : 'This sound belongs to the word.'
+    : '';
+
   return (
     <div className={`arabic-result ${compact ? 'is-compact' : ''}`}>
       <div className="arabic-result-heading">
-        <span>{onPartClick ? 'Tap a piece. Watch it change.' : 'Your sentence'}</span>
+        <span>{onPartClick ? 'Tap the meaning or the Arabic.' : 'Your sentence'}</span>
         <SpeakButton arabic={result.arabic} />
       </div>
-      <div className="arabic-script" lang="ar" dir="rtl">
-        <ArabicGlyphs
-          result={result}
-          onPartClick={onPartClick}
-          selectedPart={selectedPart}
-          colourFor={colourFor}
-        />
-      </div>
-      <p className="arabic-pronunciation" dir="ltr" aria-label={result.latin}>
-        {result.segments?.length
-          ? result.segments.map((segment, index) => (
-              <span
-                key={`${segment.id}-${index}`}
-                className={`arabic-colour-${segmentColour(segment)}`}
-              >
-                {segment.latin}
-              </span>
-            ))
-          : result.latin}
-      </p>
-      <p className="arabic-translation">
-        {result.englishParts?.length
-          ? result.englishParts.map((part, index) => (
-              <span key={index} className={`arabic-colour-${colourFor(part.id)}`}>
-                {part.text}
-              </span>
-            ))
-          : result.translation}
-      </p>
-      {onPartClick && (
-        <div className="arabic-parts" aria-label="The pieces of your Arabic">
-          {(result.segments || [])
-            .filter(
-              (segment) =>
-                segment.id !== 'punctuation' && (segment.arabic.trim() || segment.latin.trim()),
-            )
-            .map((segment, index) => (
-              <button
-                type="button"
-                key={`${segment.id}-${index}`}
-                className={`arabic-piece arabic-colour-${segmentColour(segment)} ${changed(segment) ? 'is-changed' : ''} ${selectedPart === segment.id ? 'is-selected' : ''}`}
-                onClick={() => onPartClick(segment.id)}
-                aria-label={`${segment.label}: ${segment.latin.trim() || segment.meaning}. Change this piece`}
-                aria-pressed={selectedPart === segment.id}
-              >
-                <span className="arabic-piece-value">
-                  {segment.id.split(':').at(-1) === 'case' &&
-                    /[\u064b-\u0652]/u.test(segment.arabic) && (
-                      <span className="arabic-piece-mark" lang="ar" aria-hidden="true">
-                        ـ{segment.arabic.replace(/[^\u064b-\u0652]/gu, '')}
-                      </span>
-                    )}
-                  <strong dir="ltr">{segment.latin.trim() || '—'}</strong>
-                </span>
-                <span className="arabic-piece-label">
-                  {segment.id.split(':').at(-1) === 'case' &&
-                  /[\u064b-\u0652]/u.test(segment.arabic)
-                    ? 'Vowel'
-                    : segment.label}
-                </span>
-              </button>
-            ))}
+      <div ref={containerRef} className="arabic-connected-display">
+        <div className="arabic-script" lang="ar" dir="rtl">
+          <ArabicGlyphs
+            result={result}
+            onPartClick={onPartClick ? pickGlyph : undefined}
+            selectedPart={focus ? undefined : activeMeaning ? undefined : selectedPart}
+            selectedParts={focus ? [] : activeMeaning?.targetIds || []}
+            selectedSourceIndex={focus?.sourceIndex}
+            colourFor={colourFor}
+          />
         </div>
-      )}
-      {previous && previous.arabic !== result.arabic && (
-        <span className="sr-only" role="status">
-          {result.latin}. {result.translation}
-        </span>
-      )}
+        <p className="arabic-pronunciation" dir="ltr" aria-label={result.latin}>
+          {result.segments?.length
+            ? result.segments.map((segment, index) => (
+                <span
+                  key={`${segment.id}-${index}`}
+                  className={`arabic-colour-${segmentColour(segment)}`}
+                >
+                  {segment.latin}
+                </span>
+              ))
+            : result.latin}
+        </p>
+        <p className="arabic-translation">{connections.map(meaning)}</p>
+        {onPartClick &&
+          (showPieces ? result.segments || [] : unmatched).filter(
+            (part) => part.id !== 'punctuation' && part.arabic.trim(),
+          ).length > 0 && (
+            <div
+              className={showPieces ? 'arabic-parts' : 'arabic-unmatched-parts'}
+              aria-label="Arabic sounds and other parts"
+            >
+              {(showPieces ? result.segments || [] : unmatched)
+                .filter((part) => part.id !== 'punctuation' && part.arabic.trim())
+                .map((part) => (
+                  <button
+                    type="button"
+                    key={part.id}
+                    className={`${showPieces ? 'arabic-piece' : 'arabic-part-control'} arabic-colour-${segmentColour(part)}`}
+                    data-connection-control={`part-${part.id}`}
+                    aria-label={
+                      controlLabels[part.id] ||
+                      `${part.label}: ${part.latin.trim() || part.meaning}. Change this piece`
+                    }
+                    {...selectedAttributes(selectedPart === part.id)}
+                    onClick={() => pickFallback(part)}
+                  >
+                    <span>{shortPartLabel(part)}</span>
+                    <strong dir="ltr">{part.latin.trim() || '—'}</strong>
+                  </button>
+                ))}
+            </div>
+          )}
+        {focus && onPartClick && (
+          <figure
+            className={`arabic-vowel-focus arabic-colour-${focus.mark.colour}`}
+            data-connection-control="vowel-focus"
+            aria-label={`${focus.mark.name} on ${focus.letter}`}
+          >
+            <ArabicGlyphCloseup result={result} sourceIndex={focus.sourceIndex} />
+            <figcaption>
+              <strong>
+                {focus.mark.name} · {focus.mark.sound}
+              </strong>
+              <p>{soundNote}</p>
+            </figcaption>
+          </figure>
+        )}
+        {onPartClick && (
+          <ArabicConnectionLayer
+            containerRef={containerRef}
+            controlKey={controlKey}
+            partIds={targetIds}
+            sourceIndex={focus?.sourceIndex}
+            colour={connectionColour}
+            measureKey={`${result.arabic}|${result.translation}|${showPieces}`}
+          />
+        )}
+      </div>
+      {previous &&
+        (previous.arabic !== result.arabic || previous.translation !== result.translation) && (
+          <span className="sr-only" role="status">
+            {result.latin}. {result.translation}
+          </span>
+        )}
     </div>
   );
 }

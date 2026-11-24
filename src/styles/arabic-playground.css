@@ -228,6 +228,112 @@
 .arabic-builder {
   box-shadow: 0 6px 28px #00000007;
 }
+.arabic-build-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60px;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--arabic-line);
+}
+.arabic-view-switch {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 99px;
+  background: var(--arabic-soft);
+}
+.arabic-view-switch button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 86px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 99px;
+  background: transparent;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+.arabic-view-switch button[aria-pressed='true'] {
+  background: var(--jic-text);
+  color: var(--jic-bg);
+}
+.arabic-build-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: min(100%, 500px);
+  padding: 14px 14px 8px;
+  margin-inline: auto;
+}
+.arabic-build-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--part-colour);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+.arabic-build-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: -14px;
+  top: 19px;
+  width: 12px;
+  border-top: 1px solid var(--arabic-line);
+  pointer-events: none;
+}
+.arabic-step-number {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.arabic-build-step[aria-expanded='true'] {
+  background: color-mix(in srgb, var(--part-colour) 9%, transparent);
+  border-color: color-mix(in srgb, var(--part-colour) 30%, transparent);
+}
+.arabic-build-step[aria-expanded='true'] .arabic-step-number {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--part-colour) 12%, transparent);
+}
+.arabic-more-ways {
+  padding: 0 14px 8px;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+}
+.arabic-more-ways summary {
+  width: fit-content;
+  margin-inline: auto;
+  min-height: 44px;
+  padding: 10px;
+  cursor: pointer;
+}
+.arabic-more-ways .arabic-extra-controls {
+  padding: 4px 0;
+}
+.arabic-vowel-word {
+  font-family: var(--arabic-font);
+  font-size: 1.8rem;
+  line-height: 1.6;
+}
 .arabic-picker-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

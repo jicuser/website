@@ -1,6 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Check, Layers, Network, RotateCcw, Search, Sparkles, Type } from 'lucide-react';
+import {
+  ArrowLeft,
+  BookOpen,
+  Check,
+  Layers,
+  Network,
+  RotateCcw,
+  Search,
+  Sparkles,
+  Type,
+  Undo2,
+} from 'lucide-react';
 import { useContent } from '@/context/ContentContext';
 import { PUBLIC_MENU_GROUPS } from '@/content/nav';
 import { visibleNavigation } from '@/lib/pageVisibility';
@@ -19,13 +30,15 @@ import {
 } from './grammar.mjs';
 import {
   ArabicResult,
+  ArabicGlyphCloseup,
   InlineChoices,
   VOWEL_CHOICES,
   ColourLegend,
   Explanation,
   OptionButton,
-  PickerButton,
 } from './ArabicControls';
+import ArabicWordMap from './ArabicWordMap';
+import ArabicChangeStory from './ArabicChangeStory';
 import GrammarExplorer from './GrammarExplorer';
 import PracticePanel from './PracticePanel';
 import SentenceBuilder from './SentenceBuilder';
@@ -76,7 +89,7 @@ function loadChoices() {
   }
 }
 
-const COMMON_OWNERS = ['my', 'our', 'your_m', 'your_f', 'his', 'her'];
+const COMMON_OWNERS = ['my', 'our', 'his', 'her'];
 const COMMON_PEOPLE = ['i', 'we', 'you_m', 'you_f', 'he', 'she'];
 const shortOwner = (option) =>
   ({ your_m: 'Your · man', your_f: 'Your · woman' })[option.id] || option.label;
@@ -139,23 +152,36 @@ function NounPicker({ noun, selector, onChange, onClose, hint }) {
       {selector === 'case' ? (
         <>
           <div className="arabic-vowel-options" role="group" aria-label="Compare vowel positions">
-            {VOWEL_CHOICES.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                className={`arabic-vowel-option arabic-colour-${option.colour}`}
-                aria-pressed={current.grammar.caseKey === option.id}
-                onClick={() => onChange({ contextId: option.contextId })}
-              >
-                <span className="arabic-vowel-symbol" lang="ar" aria-hidden="true">
-                  ـ{option.mark}
-                </span>
-                <strong>
-                  {option.sound} <span>{option.name}</span>
-                </strong>
-                <span>{option.label}</span>
-              </button>
-            ))}
+            {VOWEL_CHOICES.map((option) => {
+              const example = buildNoun({ ...noun, contextId: option.contextId });
+              const hasCaseMark = example.segments.some((part) => part.id === 'case');
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`arabic-vowel-option arabic-colour-${option.colour}`}
+                  aria-pressed={current.grammar.caseKey === option.id}
+                  onClick={() => onChange({ contextId: option.contextId })}
+                >
+                  {hasCaseMark ? (
+                    <span className="arabic-vowel-symbol" aria-hidden="true">
+                      <ArabicGlyphCloseup result={example} partId="case" />
+                    </span>
+                  ) : (
+                    <span className="arabic-vowel-word" lang="ar" dir="rtl">
+                      {example.segments
+                        .filter((part) => part.id !== 'context')
+                        .map((part) => part.arabic)
+                        .join('')}
+                    </span>
+                  )}
+                  <strong>
+                    {option.sound} <span>{option.name}</span>
+                  </strong>
+                  <span>{option.label}</span>
+                </button>
+              );
+            })}
           </div>
           <p className="arabic-choice-hint">
             {noun.ownerId === 'my'
@@ -325,12 +351,15 @@ export default function ArabicPlayground() {
   const [initial] = useState(loadChoices);
   const [tab, setTab] = useState('build');
   const [mode, setMode] = useState('noun');
+  const [wordView, setWordView] = useState('build');
   const [noun, setNoun] = useState(initial.noun);
   const [verb, setVerb] = useState(initial.verb);
   const [selector, setSelector] = useState('owner');
   const [partHint, setPartHint] = useState('');
   const builderRef = useRef(null);
+  const viewButtons = useRef({});
   const [previous, setPrevious] = useState(null);
+  const [undoChoice, setUndoChoice] = useState(null);
   const [saved, setSaved] = useState(false);
   const result = useMemo(
     () => (mode === 'noun' ? buildNoun(noun) : buildVerb(verb)),
@@ -339,18 +368,23 @@ export default function ArabicPlayground() {
   const availableParts = result.segments
     .filter((part) => part.arabic.trim() || part.latin.trim())
     .map((part) => part.id);
+  const countJoinsMy =
+    noun.ownerId === 'my' &&
+    (noun.number === 'dual' ||
+      (noun.number === 'plural' &&
+        NOUNS.find((item) => item.id === noun.nounId)?.plural?.type === 'sound_m'));
   const selectedPart = selector
     ? (
         {
           person: ['prefix', 'ending', 'stem'],
-          tense: ['context', 'case', 'ending', 'stem'],
-          owner: ['owner', 'article', 'stem'],
-          number: ['number', 'owner', 'stem'],
-          article: ['article', 'stem'],
-          case: ['case', 'number', 'owner', 'stem'],
-          context: ['context', 'case', 'stem'],
+          tense: ['context', 'case', 'stem'],
+          owner: ['owner'],
+          number: ['number', ...(countJoinsMy ? ['owner'] : []), 'stem'],
+          article: ['article'],
+          case: ['case'],
+          context: ['context'],
         }[selector] || [selector]
-      ).find((part) => availableParts.includes(part))
+      ).find((part) => availableParts.includes(part)) || selector
     : undefined;
   useEffect(() => {
     try {
@@ -361,37 +395,41 @@ export default function ArabicPlayground() {
     }
   }, [noun, verb]);
   const changeNoun = (patch) => {
+    if (Object.entries(patch).every(([key, value]) => noun[key] === value)) return;
+    setUndoChoice({ mode: 'noun', choices: noun });
     setPrevious(result);
     setNoun((current) => ({ ...current, ...patch }));
   };
   const changeVerb = (patch) => {
+    if (Object.entries(patch).every(([key, value]) => verb[key] === value)) return;
+    setUndoChoice({ mode: 'verb', choices: verb });
     setPrevious(result);
     setVerb((current) => ({ ...current, ...patch }));
   };
-  const choosePart = (next, hint = '') => {
+  const choosePart = (next, hint = '', forceOpen = false) => {
     setPartHint(hint);
-    setSelector((current) => (current === next && !hint ? null : next));
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    builderRef.current?.scrollIntoView({
-      block: 'start',
-      behavior: reduceMotion ? 'auto' : 'smooth',
-    });
+    setSelector((current) => (current === next && !hint && !forceOpen ? null : next));
   };
   const changeMode = (next) => {
     setMode(next);
     setPrevious(null);
+    setUndoChoice(null);
     setPartHint('');
     setSelector(next === 'noun' ? 'owner' : 'person');
   };
   const openPart = (part, detail) => {
+    const meaningPart = detail?.meaningId || part;
     const hint =
       detail?.mark && ['stem', 'root'].includes(part)
         ? 'This sound belongs to the word. Choose another word to compare.'
         : '';
     if (mode === 'noun')
       choosePart(
-        ['stem', 'owner', 'case', 'article', 'number', 'context'].includes(part) ? part : 'stem',
+        ['stem', 'owner', 'case', 'article', 'number', 'context'].includes(meaningPart)
+          ? meaningPart
+          : 'stem',
         hint,
+        Boolean(detail?.mark),
       );
     else
       choosePart(
@@ -401,6 +439,7 @@ export default function ArabicPlayground() {
             ? 'person'
             : 'tense',
         hint,
+        Boolean(detail?.mark),
       );
   };
   const tryExample = (example) => {
@@ -412,7 +451,9 @@ export default function ArabicPlayground() {
       setMode('noun');
     }
     setTab('build');
+    setWordView('build');
     setPrevious(null);
+    setUndoChoice(null);
     setSelector(null);
     document
       .getElementById('arabic-workspace')
@@ -422,8 +463,72 @@ export default function ArabicPlayground() {
     setNoun(INITIAL_NOUN);
     setVerb(INITIAL_VERB);
     setPrevious(null);
+    setUndoChoice(null);
     setMode('noun');
+    setWordView('build');
+    setSelector('owner');
+    setPartHint('');
   };
+  const undo = () => {
+    if (!undoChoice) return;
+    setPrevious(result);
+    if (undoChoice.mode === 'noun') setNoun(undoChoice.choices);
+    else setVerb(undoChoice.choices);
+    setMode(undoChoice.mode);
+    setUndoChoice(null);
+    viewButtons.current[wordView]?.focus();
+  };
+  const steps =
+    mode === 'noun'
+      ? [
+          { id: 'stem', label: 'Word', colour: 'stem', action: 'choose a word' },
+          { id: 'owner', label: 'Whose?', colour: 'owner', action: 'choose whose' },
+          { id: 'context', label: 'Phrase', colour: 'context', action: 'choose a phrase' },
+        ]
+      : [
+          { id: 'stem', label: 'Action', colour: 'stem', action: 'choose an action' },
+          { id: 'person', label: 'Who?', colour: 'owner', action: 'choose who' },
+          { id: 'tense', label: 'When?', colour: 'context', action: 'choose when' },
+        ];
+  const controlLabels =
+    mode === 'noun'
+      ? {
+          stem: `Change word: ${labelOf(NOUNS, noun.nounId)}`,
+          owner: `Change whose?: ${labelOf(OWNERS, noun.ownerId)}`,
+          context: `Change beginning: ${labelOf(CONTEXTS, noun.contextId)}`,
+          case: 'Change ending sound',
+          number: `Change how many?: ${labelOf(NUMBERS, noun.number)}`,
+          article: 'Change a, the or my',
+        }
+      : {
+          stem: `Change action: ${labelOf(VERBS, verb.verbId)}`,
+          person: `Change who?: ${labelOf(PERSONS, verb.personId)}`,
+          prefix: `Change who?: ${labelOf(PERSONS, verb.personId)}`,
+          ending: `Change who?: ${labelOf(PERSONS, verb.personId)}`,
+          context: `Change when?: ${labelOf(TENSES, verb.tenseId)}`,
+          case: 'Change verb ending sound',
+        };
+  const choiceTray =
+    selector &&
+    (mode === 'noun' ? (
+      <NounPicker
+        key={`noun-${selector}`}
+        noun={noun}
+        selector={selector}
+        hint={partHint}
+        onChange={changeNoun}
+        onClose={() => setSelector(null)}
+      />
+    ) : (
+      <VerbPicker
+        key={`verb-${selector}`}
+        verb={verb}
+        selector={selector}
+        hint={partHint}
+        onChange={changeVerb}
+        onClose={() => setSelector(null)}
+      />
+    ));
   return (
     <section className="arabic-app page-transition" aria-labelledby="arabic-page-title">
       <header className="arabic-page-header">
@@ -498,121 +603,139 @@ export default function ArabicPlayground() {
               ref={builderRef}
               className={`arabic-panel arabic-builder ${selector ? 'has-choices' : ''}`}
             >
-              <ArabicResult
-                result={result}
-                previous={previous}
-                onPartClick={openPart}
-                selectedPart={selectedPart}
-              />
-              <div className="arabic-picker-row">
-                {mode === 'noun' ? (
-                  <>
-                    <PickerButton
-                      label="Word"
-                      value={labelOf(NOUNS, noun.nounId)}
-                      onClick={() => choosePart('stem')}
-                      expanded={selector === 'stem'}
-                      controlsId="arabic-word-choices"
-                    />
-                    <PickerButton
-                      label="Whose?"
-                      value={labelOf(OWNERS, noun.ownerId)}
-                      colour="owner"
-                      onClick={() => choosePart('owner')}
-                      expanded={selector === 'owner'}
-                      controlsId="arabic-word-choices"
-                    />
-                    <PickerButton
-                      label="Beginning"
-                      value={labelOf(CONTEXTS, noun.contextId)}
-                      colour="context"
-                      onClick={() => choosePart('context')}
-                      expanded={selector === 'context'}
-                      controlsId="arabic-word-choices"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <PickerButton
-                      label="Action"
-                      value={labelOf(VERBS, verb.verbId)}
-                      onClick={() => choosePart('stem')}
-                      expanded={selector === 'stem'}
-                      controlsId="arabic-word-choices"
-                    />
-                    <PickerButton
-                      label="Who?"
-                      value={labelOf(PERSONS, verb.personId)}
-                      colour="owner"
-                      onClick={() => choosePart('person')}
-                      expanded={selector === 'person'}
-                      controlsId="arabic-word-choices"
-                    />
-                    <PickerButton
-                      label="When?"
-                      value={labelOf(TENSES, verb.tenseId)}
-                      colour="context"
-                      onClick={() => choosePart('tense')}
-                      expanded={selector === 'tense'}
-                      controlsId="arabic-word-choices"
-                    />
-                  </>
-                )}
-              </div>
-              {mode === 'noun' && (
-                <div className="arabic-extra-controls">
+              <div className="arabic-build-toolbar">
+                <div className="arabic-view-switch" role="group" aria-label="Word view">
                   <button
                     type="button"
-                    onClick={() => choosePart('case')}
-                    className="arabic-quiet arabic-colour-case"
-                    aria-expanded={selector === 'case'}
-                    aria-controls={selector === 'case' ? 'arabic-word-choices' : undefined}
+                    ref={(element) => {
+                      viewButtons.current.build = element;
+                    }}
+                    aria-pressed={wordView === 'build'}
+                    onClick={() => setWordView('build')}
                   >
-                    <span className="arabic-vowel-mini" lang="ar">
-                      ـُ ـَ ـِ
-                    </span>{' '}
-                    Vowels
+                    <Type size={16} aria-hidden="true" /> Build
                   </button>
                   <button
                     type="button"
-                    onClick={() => choosePart('number')}
-                    className="arabic-quiet arabic-colour-number"
-                    aria-expanded={selector === 'number'}
-                    aria-controls={selector === 'number' ? 'arabic-word-choices' : undefined}
+                    ref={(element) => {
+                      viewButtons.current.map = element;
+                    }}
+                    aria-pressed={wordView === 'map'}
+                    onClick={() => setWordView('map')}
                   >
-                    {labelOf(NUMBERS, noun.number)}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => choosePart('article')}
-                    className="arabic-quiet"
-                    aria-expanded={selector === 'article'}
-                    aria-controls={selector === 'article' ? 'arabic-word-choices' : undefined}
-                  >
-                    A / the / my
+                    <Network size={16} aria-hidden="true" /> Map
                   </button>
                 </div>
+                {undoChoice && (
+                  <button type="button" className="arabic-quiet" onClick={undo}>
+                    <Undo2 size={16} aria-hidden="true" /> Undo
+                  </button>
+                )}
+              </div>
+              {wordView === 'build' ? (
+                <>
+                  <div
+                    className="arabic-build-steps"
+                    role="group"
+                    aria-label="Steps to build a phrase"
+                  >
+                    {steps.map((step, index) => (
+                      <button
+                        type="button"
+                        key={step.id}
+                        className={`arabic-build-step arabic-colour-${step.colour}`}
+                        aria-label={`Step ${index + 1}: ${step.action}`}
+                        aria-expanded={selector === step.id}
+                        aria-controls={selector === step.id ? 'arabic-word-choices' : undefined}
+                        onClick={() => choosePart(step.id)}
+                      >
+                        <span className="arabic-step-number" aria-hidden="true">
+                          {index + 1}
+                        </span>
+                        <span>{step.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <ArabicResult
+                    result={result}
+                    previous={previous}
+                    onPartClick={openPart}
+                    selectedPart={selectedPart}
+                    selectedMeaningId={
+                      mode === 'noun'
+                        ? selector
+                        : selector === 'person'
+                          ? result.englishParts.find((part) =>
+                              ['prefix', 'ending'].includes(part.id),
+                            )?.id
+                          : selector === 'stem'
+                            ? 'stem'
+                            : 'context'
+                    }
+                    controlLabels={controlLabels}
+                    choiceControlsId="arabic-word-choices"
+                    meaningTargets={
+                      mode === 'noun' && noun.number === 'dual' && noun.ownerId === 'my'
+                        ? { number: 'owner' }
+                        : undefined
+                    }
+                  />
+                  {mode === 'noun' && (
+                    <details className="arabic-more-ways">
+                      <summary>More ways</summary>
+                      <div className="arabic-extra-controls">
+                        <button
+                          type="button"
+                          onClick={() => choosePart('number')}
+                          className="arabic-quiet arabic-colour-number"
+                          aria-label={`Change how many: ${labelOf(NUMBERS, noun.number)}`}
+                          aria-expanded={selector === 'number'}
+                          aria-controls={selector === 'number' ? 'arabic-word-choices' : undefined}
+                        >
+                          How many? · {labelOf(NUMBERS, noun.number)}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => choosePart('article')}
+                          className="arabic-quiet"
+                          aria-expanded={selector === 'article'}
+                          aria-controls={selector === 'article' ? 'arabic-word-choices' : undefined}
+                        >
+                          A / the / my
+                        </button>
+                        {!availableParts.includes('case') && (
+                          <button
+                            type="button"
+                            onClick={() => choosePart('case')}
+                            className="arabic-quiet arabic-colour-case"
+                            aria-expanded={selector === 'case'}
+                            aria-controls={selector === 'case' ? 'arabic-word-choices' : undefined}
+                          >
+                            Compare ending sounds
+                          </button>
+                        )}
+                      </div>
+                    </details>
+                  )}
+                  {choiceTray}
+                </>
+              ) : (
+                <ArabicWordMap
+                  mode={mode}
+                  noun={noun}
+                  verb={verb}
+                  result={result}
+                  selector={selector}
+                  onSelect={choosePart}
+                  onBack={() => {
+                    setWordView('build');
+                    viewButtons.current.build?.focus();
+                  }}
+                >
+                  {choiceTray}
+                </ArabicWordMap>
               )}
-              {selector &&
-                (mode === 'noun' ? (
-                  <NounPicker
-                    key={`noun-${selector}`}
-                    noun={noun}
-                    selector={selector}
-                    hint={partHint}
-                    onChange={changeNoun}
-                    onClose={() => setSelector(null)}
-                  />
-                ) : (
-                  <VerbPicker
-                    key={`verb-${selector}`}
-                    verb={verb}
-                    selector={selector}
-                    hint={partHint}
-                    onChange={changeVerb}
-                    onClose={() => setSelector(null)}
-                  />
-                ))}
+              <ArabicChangeStory previous={previous} result={result} />
             </div>
             <ColourLegend />
             <Explanation result={result} previous={previous} />
@@ -658,6 +781,10 @@ export default function ArabicPlayground() {
             ? 'Your word choices stay on this device.'
             : 'Your choices work for this visit. Device saving is unavailable.'}
         </p>
+        <Link to="/" className="arabic-back-home">
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back to JIC
+        </Link>
         <Link to="/worship/quran">
           <BookOpen size={16} aria-hidden="true" />
           Read the Qur’an

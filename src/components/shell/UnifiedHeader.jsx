@@ -168,7 +168,7 @@ export default function UnifiedHeader() {
     if (prayer) observer.observe(prayer);
     if (banner) observer.observe(banner);
     return () => observer.disconnect();
-  }, [isHome, isCommunityHub, isSalah, installed]);
+  }, [isHome, isCommunityHub, isSalah, isArabicPlayground, installed]);
   useEffect(() => {
     const nav = subnavRef.current;
     if (!nav) return undefined;
@@ -235,7 +235,7 @@ export default function UnifiedHeader() {
   return (
     <>
       <AppInstall />
-      {installed && !isSalah && <AppCompanion />}
+      {installed && !isSalah && !isArabicPlayground && <AppCompanion />}
       <audio
         ref={audioRef}
         src={streamUrl || undefined}
@@ -433,7 +433,7 @@ export default function UnifiedHeader() {
           )}
         </div>
       </header>
-      {!installed && !isHome && !isCommunityHub && !isSalah && (
+      {!installed && !isHome && !isCommunityHub && !isSalah && !isArabicPlayground && (
         <div className="jic-mobile-dock">
           <div
             id="jic-prayer-dock"
@@ -489,14 +489,16 @@ export default function UnifiedHeader() {
           />
         </Suspense>
       )}
-      <InstalledAppBar
-        open={menuOpen}
-        view={menuView}
-        onOpen={(view) => {
-          setMenuView(view);
-          setMenuOpen(true);
-        }}
-      />
+      {!isArabicPlayground && (
+        <InstalledAppBar
+          open={menuOpen}
+          view={menuView}
+          onOpen={(view) => {
+            setMenuView(view);
+            setMenuOpen(true);
+          }}
+        />
+      )}
       <NavigationDrawer
         open={menuOpen}
         view={menuView}

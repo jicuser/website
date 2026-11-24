@@ -81,6 +81,46 @@ async function expectInlineChoices(page, builder, title) {
   return choices;
 }
 
+async function expectMarkConnection(result, part, mark) {
+  const layer = result.locator('.arabic-connection-layer');
+  const ink = result.locator(
+    `.arabic-script .arabic-glyph-ink[data-part="${part}"][data-mark="${mark}"]`,
+  );
+  await expect(layer).toHaveAttribute('data-connection-part', part);
+  await expect(layer).toHaveAttribute(
+    'data-connection-source-index',
+    await ink.getAttribute('data-source-index'),
+  );
+  await expect(result.locator('.arabic-vowel-focus .arabic-glyph-closeup')).toBeVisible();
+  // Result text commits before the measured SVG overlay settles. Read both
+  // rectangles in the same frame and wait for the real ink to be enclosed.
+  await expect
+    .poll(
+      () =>
+        result.evaluate(
+          (element, { part, mark }) => {
+            const glyph = element.querySelector(
+              `.arabic-script .arabic-glyph-ink[data-part="${part}"][data-mark="${mark}"]`,
+            );
+            const circle = element.querySelector('.arabic-connection-ring');
+            if (!glyph || !circle) return false;
+            const inkBox = glyph.getBoundingClientRect();
+            const ringBox = circle.getBoundingClientRect();
+            return (
+              ringBox.left < inkBox.left &&
+              ringBox.top < inkBox.top &&
+              ringBox.right > inkBox.right &&
+              ringBox.bottom > inkBox.bottom
+            );
+          },
+          { part, mark },
+        ),
+      { message: 'The settled ring must enclose the selected vowel ink' },
+    )
+    .toBe(true);
+  expect(await layer.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe('none');
+}
+
 const markPath = (result, part, mark) =>
   result.locator(`.arabic-script [data-part="${part}"][data-mark="${mark}"] path`).first();
 
@@ -154,12 +194,14 @@ for (const width of [390, 320]) {
 
     await tapVisibleInk(page, dammaPath);
     const choices = await expectInlineChoices(page, builder, 'Try a vowel');
+    await expectMarkConnection(result, 'case', 'damma');
     await choices.getByRole('button', { name: /Fatḥa/ }).click();
     await expectSentence(result, 'رَأَيْتُ بَيْتَنَا', 'raʾaytu baytanā', 'I saw our house');
     const fatha = await inkInfo(markPath(result, 'case', 'fatha'));
     expect(fatha.fill).not.toBe(damma.fill);
     expect(fatha.fill).not.toBe(stemFill);
     expect(fatha.outlineLength).toBeGreaterThan(0);
+    await expectMarkConnection(result, 'case', 'fatha');
 
     await choices.getByRole('button', { name: /Kasra/ }).click();
     await expectSentence(result, 'فِي بَيْتِنَا', 'fī baytinā', 'In our house');
@@ -176,6 +218,7 @@ for (const width of [390, 320]) {
       'true',
     );
     await expectInlineChoices(page, builder, 'Try a vowel');
+    await expectMarkConnection(result, 'case', 'kasra');
     expect(state.errors).toEqual([]);
     await page.screenshot({ path: info.outputPath('vowel-choices.png'), fullPage: true });
   });
@@ -263,10 +306,7 @@ for (const width of [390, 320]) {
       'Our book is in his house.',
     );
 
-    await builder
-      .getByRole('group', { name: 'The place', exact: true })
-      .getByRole('button', { name: /^Change whose\?:/ })
-      .click();
+    await result.getByRole('button', { name: 'Change place owner: His', exact: true }).click();
     const owners = await expectInlineChoices(page, builder, 'Whose place?');
     await owners.getByRole('button', { name: /^Her\b/ }).click();
     await expectSentence(
@@ -275,10 +315,12 @@ for (const width of [390, 320]) {
       'kitābunā fī baytihā',
       'Our book is in her house.',
     );
-    await studio.getByText('Why did it change?', { exact: true }).click();
-    const comparison = studio.locator('.arabic-change');
+    const comparison = studio.getByRole('region', { name: 'See what changed', exact: true });
     await expect(comparison).toBeVisible();
-    await expect(comparison).toHaveText('kitābunā fī baytihi became kitābunā fī baytihā');
+    await expect(comparison.locator('.arabic-change-latin')).toHaveText([
+      'kitābunā fī baytihi',
+      'kitābunā fī baytihā',
+    ]);
 
     await tapVisibleInk(page, markPath(result, 'place:case', 'kasra'));
     const beginnings = await expectInlineChoices(page, builder, 'In, from or to?');
@@ -291,9 +333,43 @@ for (const width of [390, 320]) {
     );
     await expect(markPath(result, 'subject:case', 'damma')).toBeVisible();
     await expect(markPath(result, 'place:case', 'kasra')).toBeVisible();
-    await expect(comparison).toHaveText('kitābunā fī baytihā became kitābunā min baytihā');
+    await expect(comparison.locator('.arabic-change-latin')).toHaveText([
+      'kitābunā fī baytihā',
+      'kitābunā min baytihā',
+    ]);
     await expectPhoneFit(page);
     expect(state.errors).toEqual([]);
     await page.screenshot({ path: info.outputPath('sentence-comparison.png'), fullPage: true });
   });
 }
+
+test('a tapped verb ending keeps its own vowel focus when the person also has a prefix', async ({
+  page,
+}) => {
+  const { builder, result, state } = await openPlayground(page, 390);
+  await page
+    .getByRole('group', { name: 'Build a thing or an action', exact: true })
+    .getByRole('button', { name: 'An action', exact: true })
+    .click();
+  await builder.getByRole('button', { name: 'Step 3: choose when', exact: true }).click();
+  await builder
+    .getByRole('region', { name: 'When?', exact: true })
+    .getByRole('button', { name: /^Now \/ usually/ })
+    .click();
+  await builder.getByRole('button', { name: 'Step 2: choose who', exact: true }).click();
+  const people = builder.getByRole('region', { name: 'Who?', exact: true });
+  await people.getByRole('button', { name: /^You · one woman/ }).click();
+  await expectSentence(result, 'تَكْتُبِينَ', 'taktubīna', 'You write');
+  const ending = markPath(result, 'ending', 'kasra');
+  await tapVisibleInk(page, ending);
+  await expect(people).toBeVisible();
+  await expectMarkConnection(result, 'ending', 'kasra');
+  await tapVisibleInk(page, ending);
+  await expect(people).toBeVisible();
+  await expectMarkConnection(result, 'ending', 'kasra');
+  await people.getByRole('button', { name: /^He\b/ }).click();
+  await expectSentence(result, 'يَكْتُبُ', 'yaktubu', 'He writes');
+  await expect(result.locator('.arabic-vowel-focus')).toHaveCount(0);
+  await expectPhoneFit(page);
+  expect(state.errors).toEqual([]);
+});
