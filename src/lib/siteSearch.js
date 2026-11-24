@@ -7,6 +7,8 @@ const aliases = {
     'salah namaz salat jamaat jamaah timetable today birmingham west midlands woodlands road masjid jic',
   '/prayer-times/jummah': 'juma jumma friday khutbah sermon',
   '/madrassah': 'madrasah madrasa school children education',
+  '/learning/arabic':
+    'learn arabic fusha classical grammar word sentence builder playground vocabulary pronouns ownership vowels endings prefixes roots practice practise العربية تعلم الفصحى',
   '/youth/itikaf': 'itikaf itikaaf itikaph ramadan',
   '/contact': 'address map directions visit phone email parking',
   '/projects/how-to-support': 'donate donation sadaqah charity building appeal',

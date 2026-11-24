@@ -89,6 +89,15 @@ test('About child routes outside /about keep the About parent context', () => {
   }
 });
 
+test('Arabic learning and its education alias retain the Education parent context', () => {
+  for (const path of ['/learning/arabic', '/education/arabic']) {
+    const section = activeNavigation(path);
+    assert.equal(section.primaryPath, '/education', path);
+    assert.equal(section.current.path, '/learning/arabic', path);
+    assert.equal(section.current.name, 'Learn Arabic', path);
+  }
+});
+
 test('funeral details retain Services and the Funeral Services subsection', () => {
   for (const path of ['/funerals', '/funerals/what-to-do', '/funerals/contact-support']) {
     const section = activeNavigation(path);
@@ -207,7 +216,11 @@ test('compact menu sections own merged sections without claiming cross-linked pa
   assert.ok(about.sectionPaths.includes('/projects'));
   assert.ok(learning.sectionPaths.includes('/youth'));
   assert.ok(learning.sectionPaths.includes('/madrassah'));
-  assert.ok(groups.filter((group) => group.path !== '/donate').every((group) => !group.sectionPaths.includes('/donate')));
+  assert.ok(
+    groups
+      .filter((group) => group.path !== '/donate')
+      .every((group) => !group.sectionPaths.includes('/donate')),
+  );
 });
 
 test('section breadcrumbs keep one entry per section name and destination', () => {

@@ -14,6 +14,7 @@ const searchTitles = {
   '/prayer-times': 'Birmingham Prayer Times & Salah | JIC Woodlands Road Masjid',
   '/prayer-times/monthly': 'Birmingham Monthly Prayer Timetable | JIC Woodlands Road',
   '/prayer-times/jummah': 'Jummah Times in Birmingham | JIC Woodlands Road Masjid',
+  '/learning/arabic': 'Learn Arabic | Interactive Word & Sentence Builder | JIC',
 };
 
 const descriptions = {
@@ -60,6 +61,8 @@ const descriptions = {
     'Choose the Ramadan days you would like to support through Daily Giving at Jamatia Islamic Centre.',
   '/education':
     'Discover adult classes, Qur’an learning, Madrassah and educational programmes at Jamatia Islamic Centre in Birmingham.',
+  '/learning/arabic':
+    'Learn Arabic by building words and sentences. Tap coloured beginnings, vowels and endings, explore their meaning, and practise with simple explanations.',
   '/education/courses':
     'Explore adult classes and courses at Jamatia Islamic Centre and find programme details and registration information.',
   '/madrassah':

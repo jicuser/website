@@ -6,6 +6,12 @@ test('public search finds local terms, multiword pages and social channels', () 
   assert.ok(searchPages('salah').some((item) => item.path === '/prayer-times'));
   assert.ok(searchPages('friday khutbah').some((item) => item.path === '/prayer-times/jummah'));
   assert.ok(searchPages('instagram').some((item) => item.path === '/social-media#instagram'));
+  for (const query of ['Arabic', 'sentence builder', 'fusha', 'تعلم العربية']) {
+    assert.ok(
+      searchPages(query).some((item) => item.path === '/learning/arabic'),
+      query,
+    );
+  }
   assert.deepEqual(searchPages('  '), []);
   assert.equal(new Set(SEARCH_PAGES.map((item) => item.path)).size, SEARCH_PAGES.length);
   assert.ok(SEARCH_PAGES.every((item) => !/^\/(admin|tv)/.test(item.path)));

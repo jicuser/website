@@ -29,6 +29,7 @@ const ContentPage = lazy(() => import('@/pages/ContentPage'));
 const AdultCoursesPage = lazy(() => import('@/pages/AdultCoursesPage'));
 const EventsPage = lazy(() => import('@/pages/EventsPage'));
 const EducationPage = lazy(() => import('@/pages/EducationPage'));
+const ArabicPlayground = lazy(() => import('@/features/arabic/ArabicPlayground'));
 const ProgrammesPage = lazy(() => import('@/pages/ProgrammesPage'));
 const EducationEnrolmentPage = lazy(() => import('@/pages/EducationEnrolmentPage'));
 const ClassesCoursesPage = lazy(() => import('@/pages/ClassesCoursesPage'));
@@ -202,6 +203,7 @@ function AppRoutes() {
             ))}
 
             <Route path="education" element={<EducationPage />} />
+            <Route path="learning/arabic" element={<ArabicPlayground />} />
             <Route path="education/programmes" element={<ProgrammesPage />} />
             <Route path="education/courses" element={<AdultCoursesPage />} />
             <Route path="education/enrolment" element={<EducationEnrolmentPage />} />

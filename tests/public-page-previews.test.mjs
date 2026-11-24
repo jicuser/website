@@ -277,6 +277,9 @@ test('offline validation explicitly disables public fetching and records the omi
   assert.deepEqual(manifest.pages, []);
   assert.ok(warnings.some((message) => /disabled/.test(message)));
   assert.ok(files.has('education/index.html'));
+  assert.match(files.get('learning/arabic/index.html'), /Learn Arabic/);
+  assert.ok(files.get('sitemap.xml').includes('https://www.jicmasjid.org/learning/arabic</loc>'));
+  assert.ok(!files.get('sitemap.xml').includes('/education/arabic'));
 });
 
 test('the offline switch cannot silently accept a typo', async () => {

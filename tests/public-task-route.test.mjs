@@ -12,6 +12,7 @@ test('public task policy accepts trailing slashes without matching similarly nam
     '/prayer-times/reminders',
     '/contact',
     '/ramadan/sponsor',
+    '/learning/arabic',
   ]) {
     assert.equal(isPublicTaskRoute(path), true, path);
     assert.equal(isPublicTaskRoute(`${path}/`), true, `${path}/`);
@@ -22,6 +23,7 @@ test('public task policy accepts trailing slashes without matching similarly nam
     '/education/courses',
     '/contact-details',
     '/ramadan-guide',
+    '/learning/arabic-history',
   ])
     assert.equal(isPublicTaskRoute(path), false, path);
 });

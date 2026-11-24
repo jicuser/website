@@ -29,6 +29,7 @@ export const MADRASSAH_TABS = [
 ];
 export const EDUCATION_TABS = [
   { name: 'Learning at JIC', path: '/education' },
+  { name: 'Learn Arabic', path: '/learning/arabic' },
   { name: 'All programmes', path: '/education/programmes' },
   { name: 'Adult Classes', path: '/education/courses' },
   { name: 'Enrolment', path: '/education/enrolment' },

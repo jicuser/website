@@ -250,6 +250,7 @@ export default function QuranReader() {
         )}
       </div>
       <div className="worship-external-links worship-reader-sources">
+        <Link to="/learning/arabic">Explore Arabic words</Link>
         <a href={`${QURAN_FALLBACK}/${surah}`} target="_blank" rel="noopener noreferrer">
           <ExternalLink size={16} aria-hidden="true" />
           Quran.com
