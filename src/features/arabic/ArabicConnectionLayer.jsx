@@ -20,6 +20,7 @@ export default function ArabicConnectionLayer({
     }
     const ids = new Set(partsKey.split('|'));
     let frame = 0;
+    let afterPaintFrame = 0;
     let disposed = false;
     const measure = () => {
       if (disposed) return;
@@ -78,12 +79,28 @@ export default function ArabicConnectionLayer({
     };
     const schedule = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(measure);
+      cancelAnimationFrame(afterPaintFrame);
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        if (disposed) return;
+        measure();
+        afterPaintFrame = requestAnimationFrame(() => {
+          afterPaintFrame = 0;
+          measure();
+        });
+      });
     };
     measure();
+    // A longer prefix recentres the inline SVG words without resizing the
+    // full-width Arabic row. Recheck across the first paint after each commit;
+    // its first synchronous SVG bounds can still reflect the previous layout.
+    // These two frames are bounded, rather than a continuous measurement loop.
+    schedule();
     const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
     observer?.observe(container);
-    for (const element of container.querySelectorAll('.arabic-script, [data-connection-control]'))
+    for (const element of container.querySelectorAll(
+      '.arabic-script, .arabic-script .arabic-glyph-run, .arabic-script .arabic-glyph-word, [data-connection-control]',
+    ))
       observer?.observe(element);
     window.addEventListener('resize', schedule, { passive: true });
     document.fonts?.addEventListener?.('loadingdone', schedule);
@@ -93,6 +110,7 @@ export default function ArabicConnectionLayer({
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(afterPaintFrame);
       observer?.disconnect();
       window.removeEventListener('resize', schedule);
       document.fonts?.removeEventListener?.('loadingdone', schedule);
