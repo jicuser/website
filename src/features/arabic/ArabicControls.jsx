@@ -323,9 +323,16 @@ export function ArabicResult({
   }, [selectedPart]);
   const segmentColour = (segment) =>
     tailPart(segment.id) === 'case' ? vowelColour(segment.arabic) : colourFor(segment.id);
+  const selectedConnection = selectedMeaningConnection(connections, {
+    selectedPart,
+    selectedMeaningId,
+    rememberedKey: intent?.kind === 'meaning' ? intent.key : undefined,
+  });
   const rememberedFocus =
     intent?.kind === 'mark' &&
-    intent.partId === selectedPart &&
+    (intent.partId === selectedPart ||
+      (selectedConnection?.id === intent.meaningId &&
+        selectedConnection.targetIds.includes(intent.partId))) &&
     (!selectedMeaningId || intent.meaningId === selectedMeaningId)
       ? resolveMarkFocus(result, intent)
       : null;
@@ -334,13 +341,7 @@ export function ArabicResult({
     (tailPart(selectedPart || '') === 'case'
       ? resolveMarkFocus(result, { partId: selectedPart })
       : null);
-  const activeMeaning = focus
-    ? null
-    : selectedMeaningConnection(connections, {
-        selectedPart,
-        selectedMeaningId,
-        rememberedKey: intent?.kind === 'meaning' ? intent.key : undefined,
-      });
+  const activeMeaning = focus ? null : selectedConnection;
   const activeFallback = unmatched.find((part) => part.id === selectedPart);
   const targetIds = focus
     ? [focus.partId]

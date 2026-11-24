@@ -4,8 +4,9 @@ import { createRequire } from 'node:module';
 import { runInNewContext } from 'node:vm';
 import { build } from 'esbuild';
 import React from 'react';
-import { NOUNS, PERSONS, TENSES } from '../src/features/arabic/grammar.mjs';
+import { NOUNS, PERSONS, TENSES, buildVerb } from '../src/features/arabic/grammar.mjs';
 import { buildSentence, INITIAL_SENTENCE } from '../src/features/arabic/sentences.mjs';
+import { segmentRanges } from '../src/features/arabic/arabicConnectionModel.mjs';
 
 const require = createRequire(import.meta.url);
 const bundles = Object.fromEntries(
@@ -227,6 +228,83 @@ test('action time and person controls select existing corresponding parts after 
   click(ui, ui.option('He'));
   assert.equal(current(ui).selectedPart, 'action:prefix');
   assert.ok(currentPartExists(ui));
+});
+
+test('a direct verb ending mark keeps its exact close-up while the person prefix is selected', () => {
+  for (const selectedMeaningId of ['prefix', undefined]) {
+    const result = buildVerb({ tenseId: 'present', personId: 'you_f' });
+    const ending = segmentRanges(result).find((part) => part.id === 'ending');
+    const props = { result, selectedPart: 'prefix', selectedMeaningId, onPartClick() {} };
+    const ui = fixture('ArabicControls', 'ArabicResult', props);
+    ui.render();
+    ui.child('ArabicGlyphs').props.onPartClick('ending', {
+      character: 'ِ',
+      mark: 'kasra',
+      sourceIndex: ending.start,
+    });
+    ui.render();
+    assert.equal(ui.child('ArabicGlyphs').props.selectedSourceIndex, ending.start);
+    assert.equal(ui.child('ArabicGlyphCloseup').props.sourceIndex, ending.start);
+    assert.deepEqual([...ui.child('ArabicConnectionLayer').props.partIds], ['ending']);
+    assert.equal(ui.child('ArabicConnectionLayer').props.sourceIndex, ending.start);
+    ui.render();
+    assert.equal(
+      ui.child('ArabicGlyphCloseup').props.sourceIndex,
+      ending.start,
+      'live tray rerenders retain the tapped ending',
+    );
+
+    props.result = buildVerb({ tenseId: 'present', personId: 'he' });
+    ui.render();
+    assert.equal(
+      ui.child('ArabicGlyphCloseup'),
+      undefined,
+      'a removed person ending is not replaced with the ordinary final u',
+    );
+    assert.equal(ui.child('ArabicGlyphs').props.selectedSourceIndex, undefined);
+  }
+});
+
+test('sentence person mark selection uses the actual English prefix, ending or question-person ID', () => {
+  const ui = fixture();
+  ui.render();
+  click(ui, ui.button('An action'));
+  current(ui).onPartClick('action:ending', { character: 'ْ', mark: 'sukun' });
+  ui.render();
+  assert.equal(current(ui).selectedPart, 'action:ending');
+  assert.equal(current(ui).selectedMeaningId, 'action:ending');
+
+  click(ui, ui.picker('When?'));
+  click(ui, ui.option('Now / usually'));
+  tapMeaning(ui, 'action:prefix');
+  click(ui, ui.option('You · one woman'));
+  const ending = segmentRanges(current(ui).result).find((part) => part.id === 'action:ending');
+  current(ui).onPartClick('action:ending', {
+    character: 'ِ',
+    mark: 'kasra',
+    sourceIndex: ending.start,
+  });
+  ui.render();
+  assert.equal(current(ui).selectedPart, 'action:ending');
+  assert.equal(current(ui).selectedMeaningId, 'action:prefix');
+
+  const resultView = fixture('ArabicControls', 'ArabicResult', current(ui));
+  resultView.render();
+  resultView.child('ArabicGlyphs').props.onPartClick('action:ending', {
+    character: 'ِ',
+    mark: 'kasra',
+    sourceIndex: ending.start,
+  });
+  resultView.render();
+  assert.equal(resultView.child('ArabicGlyphCloseup').props.sourceIndex, ending.start);
+
+  click(ui, ui.button('Ask a question'));
+  current(ui).onPartClick('action:ending', { character: 'ِ', mark: 'kasra' });
+  ui.render();
+  assert.equal(current(ui).selectedMeaningId, 'action:person');
+  assert.ok(
+    current(ui).result.englishParts.some((part) => part.id === current(ui).selectedMeaningId),
+  );
 });
 
 test('the full vocabulary remains searchable and unsupported plurals reset safely', () => {

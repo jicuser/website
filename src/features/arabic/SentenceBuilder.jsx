@@ -393,7 +393,11 @@ export default function SentenceBuilder() {
           selectedPart={selectedPart}
           selectedMeaningId={
             selector
-              ? `${selector.slot}:${{ nounId: 'stem', ownerId: 'owner', number: 'number', verbId: 'stem', personId: 'person', tenseId: 'context', contextId: 'context', role: 'context' }[selector.key]}`
+              ? selector.key === 'personId'
+                ? result.englishParts.find((part) =>
+                    ['action:person', 'action:prefix', 'action:ending'].includes(part.id),
+                  )?.id
+                : `${selector.slot}:${{ nounId: 'stem', ownerId: 'owner', number: 'number', verbId: 'stem', tenseId: 'context', contextId: 'context', role: 'context' }[selector.key]}`
               : undefined
           }
           controlLabels={controlLabels}
