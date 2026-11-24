@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Check, RotateCcw } from 'lucide-react';
+import ArabicGlyphs from './ArabicGlyphs';
 import {
   createPracticeRound,
   PRACTICE_QUESTIONS,
@@ -156,7 +157,7 @@ export default function PracticePanel() {
           {question.promptArabic && (
             <div className="arabic-question-word">
               <p className="arabic-text" lang="ar" dir="rtl">
-                {question.promptArabic}
+                <ArabicGlyphs result={{ arabic: question.promptArabic }} />
               </p>
               <p className="arabic-latin" dir="ltr">
                 {question.promptLatin}
@@ -176,7 +177,7 @@ export default function PracticePanel() {
                 {option.ar ? (
                   <>
                     <span className="arabic-text" lang="ar" dir="rtl">
-                      {option.ar}
+                      <ArabicGlyphs result={{ arabic: option.ar }} />
                     </span>
                     <span className="arabic-latin" dir="ltr">
                       {option.latin}

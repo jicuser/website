@@ -21,7 +21,10 @@ export default function AppBrandHeader({ home = false }) {
     groups.find((group) => group.path === original?.path) ||
     original;
   const links =
-    pathname === '/' || pathname === '/services' || isSalahRoute(pathname)
+    pathname === '/' ||
+    pathname === '/services' ||
+    pathname.replace(/\/+$/, '') === '/learning/arabic' ||
+    isSalahRoute(pathname)
       ? []
       : (section?.children || []).filter((page) => isPageVisible(getContent, page.path));
   const selected =

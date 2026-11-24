@@ -61,6 +61,7 @@ export default function UnifiedHeader() {
   const pathname = routePath.replace(/\/+$/, '') || '/';
   const isHome = pathname === '/';
   const isCommunityHub = pathname === '/services';
+  const isArabicPlayground = pathname === '/learning/arabic';
   const isSalah = isSalahRoute(pathname);
   const taskRoute = prefersQuietPrayerDock(pathname);
   const { todaysTimes, jummahTimes, currentDate } = usePublicPrayerTimes();
@@ -119,7 +120,8 @@ export default function UnifiedHeader() {
   );
   const selected = navigation?.current?.path;
   const breadcrumbs = navigationBreadcrumbs(navigation);
-  const hasSectionPicker = subtabs.length > 0 && !isCommunityHub;
+  // The playground has its own compact tool controls and a visible section link.
+  const hasSectionPicker = subtabs.length > 0 && !isCommunityHub && !isArabicPlayground;
   const streamUrl = import.meta.env.VITE_RADIO_STREAM_URL || SITE.radio?.streamUrl || '';
   const availability = useRadioAvailability(streamUrl);
   const status = radioError
@@ -302,7 +304,7 @@ export default function UnifiedHeader() {
               }}
             />
           </div>
-          {!isCommunityHub && !isSalah && breadcrumbs.length > 0 && (
+          {!isCommunityHub && !isSalah && !isArabicPlayground && breadcrumbs.length > 0 && (
             <nav
               className={cn('jic-section-location', hasSectionPicker && 'has-section-picker')}
               aria-label="Current section"
@@ -418,7 +420,7 @@ export default function UnifiedHeader() {
               ))}
             </nav>
           )}
-          {taskRoute && !isCommunityHub && !isSalah && (
+          {taskRoute && !isCommunityHub && !isSalah && !isArabicPlayground && (
             <button
               type="button"
               className="jic-task-prayer-toggle"

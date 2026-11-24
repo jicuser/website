@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ARABIC_REFERENCES, GRAMMAR_TOPICS } from './learningContent.mjs';
+import ArabicGlyphs from './ArabicGlyphs';
 
 const icons = {
   pieces: Puzzle,
@@ -84,7 +85,7 @@ export default function GrammarExplorer({ onTryExample }) {
             {selected.examples.map((example) => (
               <div className="arabic-example" key={example.ar}>
                 <p className="arabic-text" lang="ar" dir="rtl">
-                  {example.ar}
+                  <ArabicGlyphs result={{ arabic: example.ar }} />
                 </p>
                 <p className="arabic-latin" dir="ltr">
                   {example.latin}

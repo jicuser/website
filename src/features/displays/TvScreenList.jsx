@@ -23,23 +23,40 @@ export default function TvScreenList({ onOpen }) {
     const controller = new AbortController();
     request.current = controller;
     setLoading(true);
-    const results = await Promise.allSettled(
-      TV_SCREENS.map((screen) =>
-        tvRequest('admin', screen.id, {}, { staff: true, signal: controller.signal }),
-      ),
-    );
-    if (controller.signal.aborted) return;
-    setStates(
+    setStates((previous) =>
       Object.fromEntries(
-        results.map((result, index) => [
-          TV_SCREENS[index].id,
-          result.status === 'fulfilled'
-            ? { data: result.value }
-            : { error: result.reason?.message || 'Screen settings could not be loaded.' },
+        TV_SCREENS.map((screen) => [
+          screen.id,
+          { ...previous[screen.id], loading: true, error: '' },
         ]),
       ),
     );
-    setLoading(false);
+    await Promise.all(
+      TV_SCREENS.map(async (screen) => {
+        let next;
+        try {
+          const data = await tvRequest(
+            'admin',
+            screen.id,
+            {},
+            {
+              staff: true,
+              signal: controller.signal,
+            },
+          );
+          next = { data, loading: false };
+        } catch (error) {
+          next = {
+            error: error?.message || 'Screen settings could not be loaded.',
+            loading: false,
+          };
+        }
+        if (!controller.signal.aborted) {
+          setStates((previous) => ({ ...previous, [screen.id]: next }));
+        }
+      }),
+    );
+    if (!controller.signal.aborted) setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -89,15 +106,44 @@ export default function TvScreenList({ onOpen }) {
           </button>
         ))}
       </div>
+      {filter !== 'all' && (
+        <div className="tv-screen-catalogue">
+          <div className="tv-screen-catalogue-heading">
+            <span>Open any screen</span>
+            <button type="button" className="admin-button" onClick={() => setFilter('all')}>
+              Show all screens
+            </button>
+          </div>
+          <div
+            className="tv-screen-catalogue-links"
+            role="group"
+            aria-label="All TV screen controls"
+          >
+            {TV_SCREENS.map((screen) => (
+              <button
+                key={screen.id}
+                type="button"
+                className="admin-button"
+                aria-label={`Open controls for ${screen.label}`}
+                onClick={() => onOpen(screen.id)}
+              >
+                {screen.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {hasErrors && (
         <p className="stream-feedback" role="status">
-          Some settings could not be checked. Open a screen to retry.
+          Some screen statuses could not be checked. Every screen can still be opened. Refresh to
+          retry.
         </p>
       )}
       <div className="tv-screen-overview-grid">
         {screens.map((screen) => {
           const state = states[screen.id];
           const data = state?.data;
+          const checking = state?.loading ?? loading;
           const presenting = Boolean(data?.presentation);
           const settings = data ? normaliseTvSettings(data.settings) : null;
           const content = !settings
@@ -135,12 +181,12 @@ export default function TvScreenList({ onOpen }) {
                   <span className="tv-screen-overview-title">
                     <strong>{screen.label}</strong>
                     <span className={`tv-screen-mode ${presenting ? 'is-live' : ''}`}>
-                      {data
-                        ? presenting
-                          ? 'Live presentation'
-                          : 'Automatic display'
-                        : loading
-                          ? 'Checking…'
+                      {checking
+                        ? 'Checking…'
+                        : data
+                          ? presenting
+                            ? 'Live presentation'
+                            : 'Automatic display'
                           : 'Status unavailable'}
                     </span>
                   </span>
@@ -163,7 +209,11 @@ export default function TvScreenList({ onOpen }) {
       </div>
       {!screens.length && (
         <p className="tv-screen-picker-note" role="status">
-          {loading ? 'Checking screens…' : 'No screens in this view.'}
+          {loading
+            ? 'Checking screen statuses… All screen controls remain available above.'
+            : filter === 'live'
+              ? 'No live presentations found. Open a screen above or show all screens.'
+              : 'No automatic displays found. Open a screen above or show all screens.'}
         </p>
       )}
       <p className="tv-screen-picker-note">
