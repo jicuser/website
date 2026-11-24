@@ -6,6 +6,10 @@ Each hall has one permanent `/tv179/<hall>` webpage. The address stays the same 
 
 Open **Admin → TV screens** and select one of the four screen rows. The list uses saved layout miniatures and reports **Automatic display**, **Live presentation**, or **Status unavailable**. These are programme states; they do not claim that a physical television is online. The filters show all destinations, automatic displays, or active presentations.
 
+**All** always includes **Men’s Main Hall**, **Men’s Upstairs Hall**, **Ladies’ Upstairs Hall**, and **Shoe Area**, including while status checks are loading or have failed. Automatic and Live filter only the previews; a compact **Open any screen** row keeps all four control destinations available, and **Show all screens** resets the filter. Each status appears when its own check finishes, so one slow screen does not delay the others. **Refresh** retries failed checks. Opening a hall is read-only until staff explicitly publish or start a presentation.
+
+The permanent Men’s Main Hall screen ID is `mens-main`. Both `/tv179` and `/tv179/mens-main` use that same screen and device identity. A missing preview under a filter is not a reason to create a second screen record, replace settings, or reset pairing.
+
 Each screen opens its own **Display**, **Schedule**, and **Settings** workspace:
 
 - **Display** shows the real renderer using published settings or the current draft, at the selected landscape or portrait aspect ratio. Fullscreen opens a larger preview. It is a layout preview rather than a camera feed of a physical TV.

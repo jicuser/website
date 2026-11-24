@@ -1,5 +1,6 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown, Volume2, X } from 'lucide-react';
+import ArabicGlyphs from './ArabicGlyphs';
 
 export const PART_COLOURS = {
   context: 'context',
@@ -22,48 +23,112 @@ export function colourFor(id) {
   return PART_COLOURS[id.split(':').at(-1)] || 'stem';
 }
 
-export function ChoiceDialog({ title, description, onClose, children }) {
-  const ref = useRef(null);
+export const VOWEL_CHOICES = [
+  {
+    id: 'u',
+    mark: 'ُ',
+    name: 'Ḍamma',
+    sound: 'u',
+    contextId: 'this',
+    label: 'This is…',
+    colour: 'damma',
+  },
+  {
+    id: 'a',
+    mark: 'َ',
+    name: 'Fatḥa',
+    sound: 'a',
+    contextId: 'saw',
+    label: 'I saw…',
+    colour: 'fatha',
+  },
+  { id: 'i', mark: 'ِ', name: 'Kasra', sound: 'i', contextId: 'in', label: 'In…', colour: 'kasra' },
+];
+
+export function vowelColour(arabic = '') {
+  if (/[ٍِ]/u.test(arabic)) return 'kasra';
+  if (/[ٌُ]/u.test(arabic)) return 'damma';
+  if (/[ًَ]/u.test(arabic)) return 'fatha';
+  return 'case';
+}
+
+/** Choices stay beside the result: no backdrop, focus trap or full-screen sheet. */
+export function InlineChoices({
+  title,
+  description,
+  onClose,
+  children,
+  id,
+  className = '',
+  colour = 'stem',
+}) {
   const titleId = useId();
-  const descriptionId = useId();
-  useEffect(() => {
-    const dialog = ref.current;
-    const previousFocus = document.activeElement;
-    dialog.showModal();
-    return () => {
-      dialog.close();
-      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
-    };
+  const tray = useRef(null);
+  const openingControl = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const close = useCallback(() => {
+    const builder = tray.current?.closest('.arabic-builder');
+    const fallback =
+      builder?.querySelector('button[aria-expanded="true"][aria-controls]') ||
+      builder?.querySelector('.arabic-piece[aria-pressed="true"]');
+    const target = openingControl.current?.isConnected ? openingControl.current : fallback;
+    onCloseRef.current();
+    if (target instanceof HTMLElement) target.focus({ preventScroll: true });
   }, []);
+  useEffect(() => {
+    const builder = tray.current?.closest('.arabic-builder');
+    const active = document.activeElement;
+    openingControl.current =
+      active instanceof HTMLElement && builder?.contains(active) && active.matches('button')
+        ? active
+        : builder?.querySelector('button[aria-expanded="true"][aria-controls]');
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.stopPropagation();
+      close();
+    };
+    builder?.addEventListener('keydown', onKeyDown);
+    return () => builder?.removeEventListener('keydown', onKeyDown);
+  }, [close]);
   return (
-    <dialog
-      ref={ref}
-      className="arabic-dialog"
+    <section
+      ref={tray}
+      id={id}
+      className={`arabic-choice-tray arabic-colour-${colour} ${className}`}
       aria-labelledby={titleId}
-      aria-describedby={description ? descriptionId : undefined}
-      onCancel={onClose}
       onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (!event.target.closest('.arabic-option, .arabic-vowel-option')) return;
+        const builder = tray.current?.closest('.arabic-builder');
+        window.requestAnimationFrame(() => {
+          const result = builder?.querySelector('.arabic-result');
+          if (!result || result.getBoundingClientRect().top >= 0) return;
+          builder.scrollIntoView({
+            block: 'start',
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ? 'auto'
+              : 'smooth',
+          });
+        });
       }}
     >
-      <div className="arabic-dialog-inner">
-        <header className="arabic-dialog-header">
-          <div>
-            <h2 id={titleId}>{title}</h2>
-            {description && <p id={descriptionId}>{description}</p>}
-          </div>
-          <button
-            className="arabic-icon-button"
-            type="button"
-            onClick={onClose}
-            aria-label="Close choices"
-          >
-            <X size={21} />
-          </button>
-        </header>
-        {children}
-      </div>
-    </dialog>
+      <header className="arabic-choice-heading">
+        <div>
+          <h3 id={titleId}>{title}</h3>
+          {description && <p>{description}</p>}
+        </div>
+        <button
+          className="arabic-choice-done"
+          type="button"
+          onClick={close}
+          aria-label="Close choices"
+        >
+          <X size={17} aria-hidden="true" />
+          <span>Done</span>
+        </button>
+      </header>
+      <div className="arabic-choice-body">{children}</div>
+    </section>
   );
 }
 
@@ -83,39 +148,40 @@ export function OptionButton({
       aria-pressed={selected}
       onClick={onClick}
     >
-      <span className="arabic-option-top">
+      <span className="arabic-option-copy">
         <strong>{label}</strong>
-        {selected && <Check size={18} aria-hidden="true" />}
+        {latin && (
+          <span className="arabic-option-latin" dir="ltr">
+            {latin}
+          </span>
+        )}
+        {description && <span className="arabic-option-description">{description}</span>}
       </span>
       {arabic && (
         <span className="arabic-option-arabic" dir="rtl" lang="ar">
           {arabic}
         </span>
       )}
-      {latin && (
-        <span className="arabic-option-latin" dir="ltr">
-          {latin}
-        </span>
-      )}
-      {description && <span className="arabic-option-description">{description}</span>}
+      {selected && <Check className="arabic-option-check" size={15} aria-hidden="true" />}
     </button>
   );
 }
 
-export function PickerButton({ label, value, onClick, colour = 'stem' }) {
+export function PickerButton({ label, value, onClick, colour = 'stem', expanded, controlsId }) {
   return (
     <button
       type="button"
       className={`arabic-picker arabic-colour-${colour}`}
       onClick={onClick}
       aria-label={`Change ${label.toLowerCase()}: ${value}`}
-      aria-haspopup="dialog"
+      aria-expanded={expanded}
+      aria-controls={expanded ? controlsId : undefined}
     >
       <span>
         <small>{label}</small>
         <strong>{value}</strong>
       </span>
-      <ChevronDown size={16} aria-hidden="true" />
+      <ChevronDown size={15} aria-hidden="true" />
     </button>
   );
 }
@@ -178,49 +244,38 @@ export function SpeakButton({ arabic }) {
   );
 }
 
-export function ArabicResult({ result, previous, onPartClick, compact = false }) {
+export function ArabicResult({ result, previous, onPartClick, compact = false, selectedPart }) {
   const oldSegments = new Map(
     (previous?.segments || []).map((segment) => [segment.id, segment.arabic]),
   );
   const changed = (segment) => previous && oldSegments.get(segment.id) !== segment.arabic;
+  const segmentColour = (segment) =>
+    segment.id.split(':').at(-1) === 'case' ? vowelColour(segment.arabic) : colourFor(segment.id);
   return (
     <div className={`arabic-result ${compact ? 'is-compact' : ''}`}>
       <div className="arabic-result-heading">
-        <span>{onPartClick ? 'Tap a coloured part to change it' : 'Your sentence'}</span>
+        <span>{onPartClick ? 'Tap a piece. Watch it change.' : 'Your sentence'}</span>
         <SpeakButton arabic={result.arabic} />
       </div>
-      <div className="arabic-script" lang="ar" dir="rtl" aria-label={result.arabic}>
-        {(result.segments || []).map((segment, index) =>
-          onPartClick ? (
-            <span
-              key={`${segment.id}-${index}`}
-              className={`arabic-script-part arabic-colour-${colourFor(segment.id)}`}
-              role="button"
-              tabIndex={0}
-              aria-label={`${segment.label}: ${segment.latin || segment.meaning}. Show choices`}
-              onClick={() => onPartClick(segment.id)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  onPartClick(segment.id);
-                }
-              }}
-            >
-              {segment.arabic}
-            </span>
-          ) : (
-            <span
-              key={`${segment.id}-${index}`}
-              className={`arabic-colour-${colourFor(segment.id)}`}
-            >
-              {segment.arabic}
-            </span>
-          ),
-        )}
-        {!result.segments?.length && result.arabic}
+      <div className="arabic-script" lang="ar" dir="rtl">
+        <ArabicGlyphs
+          result={result}
+          onPartClick={onPartClick}
+          selectedPart={selectedPart}
+          colourFor={colourFor}
+        />
       </div>
-      <p className="arabic-pronunciation" dir="ltr">
-        {result.latin}
+      <p className="arabic-pronunciation" dir="ltr" aria-label={result.latin}>
+        {result.segments?.length
+          ? result.segments.map((segment, index) => (
+              <span
+                key={`${segment.id}-${index}`}
+                className={`arabic-colour-${segmentColour(segment)}`}
+              >
+                {segment.latin}
+              </span>
+            ))
+          : result.latin}
       </p>
       <p className="arabic-translation">
         {result.englishParts?.length
@@ -242,16 +297,34 @@ export function ArabicResult({ result, previous, onPartClick, compact = false })
               <button
                 type="button"
                 key={`${segment.id}-${index}`}
-                className={`arabic-piece arabic-colour-${colourFor(segment.id)} ${changed(segment) ? 'is-changed' : ''}`}
+                className={`arabic-piece arabic-colour-${segmentColour(segment)} ${changed(segment) ? 'is-changed' : ''} ${selectedPart === segment.id ? 'is-selected' : ''}`}
                 onClick={() => onPartClick(segment.id)}
-                aria-haspopup="dialog"
+                aria-label={`${segment.label}: ${segment.latin.trim() || segment.meaning}. Change this piece`}
+                aria-pressed={selectedPart === segment.id}
               >
-                <strong dir="ltr">{segment.latin.trim() || '—'}</strong>
-                <span>{segment.label}</span>
-                {changed(segment) && <small>Changed</small>}
+                <span className="arabic-piece-value">
+                  {segment.id.split(':').at(-1) === 'case' &&
+                    /[\u064b-\u0652]/u.test(segment.arabic) && (
+                      <span className="arabic-piece-mark" lang="ar" aria-hidden="true">
+                        ـ{segment.arabic.replace(/[^\u064b-\u0652]/gu, '')}
+                      </span>
+                    )}
+                  <strong dir="ltr">{segment.latin.trim() || '—'}</strong>
+                </span>
+                <span className="arabic-piece-label">
+                  {segment.id.split(':').at(-1) === 'case' &&
+                  /[\u064b-\u0652]/u.test(segment.arabic)
+                    ? 'Vowel'
+                    : segment.label}
+                </span>
               </button>
             ))}
         </div>
+      )}
+      {previous && previous.arabic !== result.arabic && (
+        <span className="sr-only" role="status">
+          {result.latin}. {result.translation}
+        </span>
       )}
     </div>
   );
@@ -259,57 +332,50 @@ export function ArabicResult({ result, previous, onPartClick, compact = false })
 
 export function ColourLegend() {
   return (
-    <div className="arabic-legend" aria-label="Colour key">
-      <span className="arabic-colour-context">Beginning / connector</span>
-      <span className="arabic-colour-stem">Core meaning</span>
-      <span className="arabic-colour-case">How it fits</span>
-      <span className="arabic-colour-owner">Who / whose</span>
-      <span className="arabic-colour-number">How many</span>
-    </div>
+    <details className="arabic-details arabic-colour-guide">
+      <summary>Colour guide</summary>
+      <div className="arabic-vowel-key" aria-label="Vowel colours">
+        {VOWEL_CHOICES.map((vowel) => (
+          <span key={vowel.id} className={`arabic-colour-${vowel.colour}`}>
+            <b lang="ar">ـ{vowel.mark}</b>
+            <strong>{vowel.sound}</strong>
+            <span>{vowel.name}</span>
+          </span>
+        ))}
+      </div>
+      <div className="arabic-legend" aria-label="Word part colours">
+        <span className="arabic-colour-context">Beginning</span>
+        <span className="arabic-colour-stem">Word</span>
+        <span className="arabic-colour-owner">Who / whose</span>
+        <span className="arabic-colour-number">How many</span>
+      </div>
+    </details>
   );
 }
 
 export function Explanation({ result, previous }) {
   const notes = result.notes || [];
+  if (!notes.length) return null;
   return (
-    <div className="arabic-explanation">
+    <details className="arabic-details arabic-explanation">
+      <summary>
+        {previous && previous.arabic !== result.arabic ? 'Why did it change?' : 'Why this form?'}
+      </summary>
       {previous && previous.arabic !== result.arabic && (
-        <div className="arabic-change" role="status">
-          <strong>What changed?</strong>
+        <div className="arabic-change">
           <span dir="ltr">
             {previous.latin} <span className="arabic-muted">became</span> {result.latin}
           </span>
-          <span>
-            {previous.translation === result.translation
-              ? 'The meaning stays the same. The word now fits a different position or form.'
-              : result.translation}
-          </span>
         </div>
       )}
-      {notes[0] && (
-        <div className="arabic-rule-note">
-          <strong>{notes[0].title}</strong>
-          <p>{notes[0].body}</p>
-        </div>
-      )}
-      {notes.length > 1 && (
-        <details className="arabic-details">
-          <summary>
-            Why these pieces?{' '}
-            <span>
-              {notes.length - 1} more {notes.length === 2 ? 'note' : 'notes'}
-            </span>
-          </summary>
-          <div className="arabic-note-list">
-            {notes.slice(1).map((note, index) => (
-              <div key={index}>
-                <strong>{note.title}</strong>
-                <p>{note.body}</p>
-              </div>
-            ))}
+      <div className="arabic-note-list">
+        {notes.map((note, index) => (
+          <div key={index}>
+            <strong>{note.title}</strong>
+            <p>{note.body}</p>
           </div>
-        </details>
-      )}
-    </div>
+        ))}
+      </div>
+    </details>
   );
 }

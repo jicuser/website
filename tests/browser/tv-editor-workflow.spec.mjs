@@ -11,6 +11,20 @@ for (const [width, theme] of [
   }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     const { writes, errors } = await openTvAdmin(page, { theme });
+    await expect(page.locator('.tv-screen-overview-card')).toHaveCount(4);
+    await page
+      .getByRole('group', { name: 'Filter TV screens' })
+      .getByRole('button', { name: /^Live / })
+      .click();
+    const screenControls = page.getByRole('group', { name: 'All TV screen controls' });
+    await expect(screenControls.getByRole('button')).toHaveText([
+      'Men’s Main Hall',
+      'Men’s Upstairs Hall',
+      'Ladies’ Upstairs Hall',
+      'Shoe Area',
+    ]);
+    await page.getByRole('button', { name: 'Show all screens', exact: true }).click();
+    await expect(page.locator('.tv-screen-overview-card')).toHaveCount(4);
     const workspace = await openTvScreen(page);
     const displayTab = workspace.getByRole('tab', { name: 'Display', exact: true });
     const scheduleTab = workspace.getByRole('tab', { name: 'Schedule', exact: true });

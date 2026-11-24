@@ -44,7 +44,7 @@ export default function TvConnections({ screenId, data, setData, onRefresh, run,
       return;
     }
     setCodeError('');
-    const problem = nameProblem(displayName, 'display name');
+    const problem = displayName.trim() ? nameProblem(displayName, 'display name') : '';
     setDisplayError(problem);
     if (problem) {
       displayField.current?.focus();
@@ -113,7 +113,7 @@ export default function TvConnections({ screenId, data, setData, onRefresh, run,
               )}
             </label>
             <label htmlFor={`${fieldId}-name`}>
-              <span className="jic-prompt">Display name (required)</span>
+              <span className="jic-prompt">Display name (optional)</span>
               <input
                 id={`${fieldId}-name`}
                 ref={displayField}

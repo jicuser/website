@@ -19,7 +19,11 @@ The menu keeps its six ordinary rows. Above them, **Read & Learn — Use online*
 - **Rule map:** twelve plain-language questions connect ownership, word pieces, vowels, number, definiteness, gender, roots, actions and sentence structure. Each topic opens one explanation at a time, with optional grammar terminology and a shortcut to a relevant builder example.
 - **Practise:** twenty original questions in rounds of six. Missed questions return later. Explanations appear after every answer. Browser storage keeps validated progress IDs and word selections, with a working session-only fallback when storage is unavailable.
 
-The colour key is consistent: green for beginnings/connectors, blue for the core meaning, amber for how a form fits, pink for who/whose, and purple for number. Text labels and selected/changed states accompany colours. Arabic remains joined; large Latin-piece buttons provide accessible targets for small combining marks. Native dialogs support keyboard focus, Escape and dismissal.
+The result stays above its controls. Tapping a piece opens one compact inline choice tray, with common choices first and search or “All words” for the complete vocabulary. Choosing an option updates the result without closing the tray. There is no modal backdrop or focus trap. Done and Escape close the tray and return focus to the opening control, with a stable picker fallback if that piece disappears. The Arabic page omits the duplicate section-picker and link rail; its compact Read & Learn link and the global menu remain available.
+
+The word-part colours are green for beginnings/connectors, blue for the core meaning, pink for who/whose, and purple for number. Individual vowel marks have separate colours: amber for ḍamma/u, orange for fatḥa/a, and teal for kasra/i, including their doubled forms. Sukūn and shadda are also distinguished. The actual Arabic marks are coloured independently of their joined letters, across Words, Sentences, Rule map and Practise. Larger labelled pronunciation-piece buttons provide equivalent accessible targets. The colour guide and form explanations are collapsed until requested.
+
+The small vowel chooser changes the sentence around the noun as well as its ending, preserving a valid example. Tapping an internal word vowel opens vocabulary choices and explains that the sound belongs to that word; it does not imply that arbitrary spelling changes are valid. See [Arabic glyph rendering](arabic-glyphs.md) for the source-preserving local renderer and its generation/check workflow.
 
 The **Listen** control uses an available Arabic voice on the visitor's own device. It explains when no suitable voice exists. It is not Quran recitation and is not a guarantee of scholarly pronunciation.
 
@@ -40,12 +44,12 @@ The core tool needs no network service, dictionary account or new database table
 - `src/features/arabic/sentences.mjs`: bounded sentence composition and English question order.
 - `ArabicPlayground.jsx`, `ArabicControls.jsx`, `SentenceBuilder.jsx`: editing and display.
 - `GrammarExplorer.jsx`, `PracticePanel.jsx`, `learningContent.mjs`: lessons, repeat practice and storage validation.
-- `src/styles/arabic-playground.css`: scoped layout, colour system, responsive sheets and light/dark rendering. Imported through the site's canonical CSS entry point.
+- `src/styles/arabic-playground.css`: scoped layout, colour system, compact choice trays and light/dark rendering. Imported through the site's canonical CSS entry point. Sentence-specific layout lives in `src/features/arabic/sentence-builder.css`.
 
 Run the grammar, sentence and learning tests with:
 
 ```sh
-node --test tests/arabic-grammar.test.mjs tests/arabic-sentences.test.mjs tests/arabic-learning.test.mjs
+node --test tests/arabic-grammar.test.mjs tests/arabic-sentences.test.mjs tests/arabic-learning.test.mjs tests/arabic-glyphs.test.mjs
 ```
 
 The grammar tests include independent expected Arabic forms and assembly checks across 12,012 noun configurations and 520 verb configurations. Those assembly checks are structural verification, not independent linguistic review of every possible phrase. Navigation, search, aliases and page previews also have integration coverage.
