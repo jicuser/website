@@ -28,37 +28,27 @@ import {
   buildVerb,
   getAvailableNumbers,
 } from './grammar.mjs';
+import { InlineChoices, ColourLegend, Explanation, OptionButton } from './ArabicControls';
+import ArabicStructureExplorer from './ArabicStructureExplorer';
 import {
-  ArabicResult,
-  ArabicGlyphCloseup,
-  InlineChoices,
-  VOWEL_CHOICES,
-  ColourLegend,
-  Explanation,
-  OptionButton,
-} from './ArabicControls';
-import ArabicWordMap from './ArabicWordMap';
+  INITIAL_EXPLORER_NOUN,
+  buildExplorerModel,
+  isExplorerContextCompatible,
+} from './arabicExplorerModel.mjs';
 import ArabicChangeStory from './ArabicChangeStory';
 import GrammarExplorer from './GrammarExplorer';
 import PracticePanel from './PracticePanel';
 import SentenceBuilder from './SentenceBuilder';
 
-const INITIAL_NOUN = {
-  nounId: 'bayt',
-  ownerId: 'our',
-  contextId: 'this',
-  number: 'singular',
-  definiteness: 'indefinite',
-};
+const INITIAL_NOUN = INITIAL_EXPLORER_NOUN;
 const INITIAL_VERB = { verbId: 'kataba', personId: 'we', tenseId: 'past' };
-const STORAGE_KEY = 'jic.arabic.builder.v1';
+const STORAGE_KEY = 'jic.arabic.builder.v2';
 const TABS = [
   { id: 'build', label: 'Words', icon: Type },
   { id: 'sentences', label: 'Sentences', icon: Layers },
   { id: 'explore', label: 'Rule map', icon: Network },
   { id: 'practice', label: 'Practise', icon: Sparkles },
 ];
-const labelOf = (options, id) => options.find((item) => item.id === id)?.label || id;
 const isKnown = (options, value) => options.some((option) => option.id === value);
 
 function loadChoices() {
@@ -77,6 +67,7 @@ function loadChoices() {
       if (isKnown(options, stored.noun?.[key])) noun[key] = stored.noun[key];
     if (!getAvailableNumbers(noun.nounId).some((option) => option.id === noun.number))
       noun.number = 'singular';
+    if (!isExplorerContextCompatible(noun.contextId, noun.nounId)) noun.contextId = 'this';
     for (const [key, options] of [
       ['verbId', VERBS],
       ['personId', PERSONS],
@@ -96,14 +87,88 @@ const shortOwner = (option) =>
 const partOf = (result, id) => result.segments.find((part) => part.id === id);
 const tokenArabic = (value = '') => (/^[\u064b-\u0652]/u.test(value) ? `ـ${value}` : value);
 
-function NounPicker({ noun, selector, onChange, onClose, hint }) {
+function BeginningPicker({ noun, selector, onChange, onClose, familyId }) {
+  const model = useMemo(() => buildExplorerModel({ mode: 'noun', noun }), [noun]);
+  const currentFamily = model.families.find((family) =>
+    family.options.some((option) => option.id === noun.contextId),
+  );
+  const [familyChoice, setFamilyChoice] = useState(familyId || currentFamily?.id || 'pointing');
+  const family = model.families.find((item) => item.id === familyChoice) || model.families[0];
+  return (
+    <InlineChoices
+      id="arabic-word-choices"
+      title={selector === 'case' ? 'The beginning sets the ending' : 'Choose a beginning'}
+      onClose={onClose}
+      colour="context"
+      className="arabic-family-choices"
+    >
+      <div className="arabic-family-switch" role="group" aria-label="Beginning families">
+        {model.families.map((item) => (
+          <button
+            type="button"
+            key={item.id}
+            aria-pressed={family.id === item.id}
+            onClick={() => setFamilyChoice(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <p className="arabic-family-description">{family.description}</p>
+      <div className="arabic-option-grid arabic-family-options">
+        {family.options.map((option) => {
+          const piece = partOf(option.result, 'context');
+          return (
+            <OptionButton
+              key={option.id}
+              label={option.label}
+              arabic={piece?.arabic.trim()}
+              latin={piece?.latin.trim()}
+              description={option.disabled ? option.reason : undefined}
+              disabled={option.disabled}
+              selected={noun.contextId === option.id}
+              colour="context"
+              onClick={() => onChange(option.patch)}
+            />
+          );
+        })}
+      </div>
+      {selector === 'case' && (
+        <p className="arabic-choice-hint">
+          {noun.ownerId === 'my'
+            ? 'With “my”, ī stays together. Try another beginning and watch the whole phrase.'
+            : 'Choose the meaning first. The word’s ending follows it.'}
+        </p>
+      )}
+      <button
+        type="button"
+        className="arabic-more-choices"
+        aria-pressed={noun.contextId === 'phrase'}
+        onClick={() => onChange({ contextId: 'phrase' })}
+      >
+        Just the word
+      </button>
+    </InlineChoices>
+  );
+}
+
+function NounPicker({ noun, selector, onChange, onClose, familyId }) {
   const [query, setQuery] = useState('');
   const [all, setAll] = useState(false);
   const selectedNoun = NOUNS.find((item) => item.id === noun.nounId);
+  if (selector === 'context' || selector === 'case')
+    return (
+      <BeginningPicker
+        noun={noun}
+        selector={selector}
+        familyId={familyId}
+        onChange={onChange}
+        onClose={onClose}
+      />
+    );
   const choices = {
     stem: { title: 'Choose a word', options: NOUNS, key: 'nounId', colour: 'stem' },
     owner: { title: 'Whose?', options: OWNERS, key: 'ownerId', colour: 'owner' },
-    context: { title: 'Start with…', options: CONTEXTS, key: 'contextId', colour: 'context' },
     article: {
       title: 'A, the, or my?',
       options: DEFINITENESS,
@@ -116,13 +181,11 @@ function NounPicker({ noun, selector, onChange, onClose, hint }) {
       key: 'number',
       colour: 'number',
     },
-    case: { title: 'Try a vowel', colour: 'case' },
   };
   const config = choices[selector] || choices.stem;
-  const current = buildNoun(noun);
   const common = selector === 'stem' ? NOUNS.slice(0, 6).map((item) => item.id) : COMMON_OWNERS;
   const hasMore = ['stem', 'owner'].includes(selector);
-  const filtered = (config.options || []).filter((option) => {
+  const filtered = config.options.filter((option) => {
     if (!all && !query && hasMore && !common.includes(option.id) && noun[config.key] !== option.id)
       return false;
     return `${option.label} ${option.english || ''} ${option.arabic || ''} ${option.latin || ''} ${option.root || ''}`
@@ -133,7 +196,6 @@ function NounPicker({ noun, selector, onChange, onClose, hint }) {
     <InlineChoices
       id="arabic-word-choices"
       title={config.title}
-      description={hint}
       onClose={onClose}
       colour={config.colour}
     >
@@ -149,135 +211,95 @@ function NounPicker({ noun, selector, onChange, onClose, hint }) {
           />
         </label>
       )}
-      {selector === 'case' ? (
-        <>
-          <div className="arabic-vowel-options" role="group" aria-label="Compare vowel positions">
-            {VOWEL_CHOICES.map((option) => {
-              const example = buildNoun({ ...noun, contextId: option.contextId });
-              const hasCaseMark = example.segments.some((part) => part.id === 'case');
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={`arabic-vowel-option arabic-colour-${option.colour}`}
-                  aria-pressed={current.grammar.caseKey === option.id}
-                  onClick={() => onChange({ contextId: option.contextId })}
-                >
-                  {hasCaseMark ? (
-                    <span className="arabic-vowel-symbol" aria-hidden="true">
-                      <ArabicGlyphCloseup result={example} partId="case" />
-                    </span>
-                  ) : (
-                    <span className="arabic-vowel-word" lang="ar" dir="rtl">
-                      {example.segments
-                        .filter((part) => part.id !== 'context')
-                        .map((part) => part.arabic)
-                        .join('')}
-                    </span>
-                  )}
-                  <strong>
-                    {option.sound} <span>{option.name}</span>
-                  </strong>
-                  <span>{option.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          <p className="arabic-choice-hint">
-            {noun.ownerId === 'my'
-              ? '“My” keeps ī. The surrounding words still change.'
-              : noun.number !== 'singular'
-                ? 'This form has its own ending. Watch the complete word.'
-                : 'The beginning changes too, so the sentence still makes sense.'}
-          </p>
-        </>
-      ) : (
-        <>
-          <div className={`arabic-option-grid ${selector === 'stem' ? 'is-vocabulary' : ''}`}>
-            {filtered.map((option) => {
-              const patch = { [config.key]: option.id };
-              if (
-                selector === 'stem' &&
-                !getAvailableNumbers(option.id).some((item) => item.id === noun.number)
-              )
-                patch.number = 'singular';
-              if (selector === 'article') patch.ownerId = 'none';
-              const example = buildNoun({ ...noun, ...patch });
-              const piece = partOf(example, selector === 'context' ? 'context' : 'owner');
-              const arabic =
-                selector === 'stem'
-                  ? option.arabic
-                  : selector === 'owner' || selector === 'context'
-                    ? piece?.arabic.trim()
-                    : selector === 'article' && option.id === 'definite'
-                      ? 'الـ'
-                      : '';
-              const latin =
-                selector === 'stem'
-                  ? option.latin
-                  : selector === 'owner' || selector === 'context'
-                    ? piece?.latin.trim()
-                    : selector === 'article' && option.id === 'definite'
-                      ? 'al-'
-                      : '';
-              return (
-                <OptionButton
-                  key={option.id}
-                  label={selector === 'owner' ? shortOwner(option) : option.label}
-                  arabic={tokenArabic(arabic)}
-                  latin={latin}
-                  selected={
-                    selector === 'article'
-                      ? noun.ownerId === 'none' && noun[config.key] === option.id
-                      : noun[config.key] === option.id
-                  }
-                  colour={config.colour}
-                  onClick={() => onChange(patch)}
-                />
-              );
-            })}
-          </div>
-          {!filtered.length && (
-            <p className="arabic-empty">No match yet. Try “house”, “book” or “school”.</p>
-          )}
-          {hasMore && !query && (
-            <button
-              type="button"
-              className="arabic-more-choices"
-              aria-pressed={all}
-              onClick={() => setAll(!all)}
-            >
-              {all
-                ? 'Common choices'
-                : selector === 'stem'
-                  ? `All ${NOUNS.length} words`
-                  : 'More people & no owner'}
-            </button>
-          )}
-          {selector === 'article' && (
-            <button
-              type="button"
-              className="arabic-more-choices"
-              onClick={() => onChange({ ownerId: 'my' })}
-            >
-              Use my
-            </button>
-          )}
-          {selector === 'owner' && (
-            <p className="arabic-choice-hint">The ending shows belonging or connection.</p>
-          )}
-          {selector === 'number' && selectedNoun && (
-            <p className="arabic-choice-hint">
-              Available forms of {selectedNoun.label.toLowerCase()}.
-            </p>
-          )}
-        </>
+      <div className={`arabic-option-grid ${selector === 'stem' ? 'is-vocabulary' : ''}`}>
+        {filtered.map((option) => {
+          const patch = { [config.key]: option.id };
+          if (
+            selector === 'stem' &&
+            !getAvailableNumbers(option.id).some((item) => item.id === noun.number)
+          )
+            patch.number = 'singular';
+          const needsBeginningChange =
+            selector === 'stem' && !isExplorerContextCompatible(noun.contextId, option.id);
+          if (needsBeginningChange) patch.contextId = 'this';
+          if (selector === 'article') patch.ownerId = 'none';
+          const example = buildNoun({ ...noun, ...patch });
+          const piece = partOf(example, 'owner');
+          const arabic =
+            selector === 'stem'
+              ? option.arabic
+              : selector === 'owner'
+                ? piece?.arabic.trim()
+                : selector === 'article' && option.id === 'definite'
+                  ? 'الـ'
+                  : '';
+          const latin =
+            selector === 'stem'
+              ? option.latin
+              : selector === 'owner'
+                ? piece?.latin.trim()
+                : selector === 'article' && option.id === 'definite'
+                  ? 'al-'
+                  : '';
+          return (
+            <OptionButton
+              key={option.id}
+              label={selector === 'owner' ? shortOwner(option) : option.label}
+              arabic={tokenArabic(arabic)}
+              latin={latin}
+              description={
+                needsBeginningChange
+                  ? `Starts with “${partOf(example, 'context')?.label || 'this'}…”`
+                  : undefined
+              }
+              selected={
+                selector === 'article'
+                  ? noun.ownerId === 'none' && noun[config.key] === option.id
+                  : noun[config.key] === option.id
+              }
+              colour={config.colour}
+              onClick={() => onChange(patch)}
+            />
+          );
+        })}
+      </div>
+      {!filtered.length && (
+        <p className="arabic-empty">No match yet. Try “house”, “book” or “school”.</p>
+      )}
+      {hasMore && !query && (
+        <button
+          type="button"
+          className="arabic-more-choices"
+          aria-pressed={all}
+          onClick={() => setAll(!all)}
+        >
+          {all
+            ? 'Common choices'
+            : selector === 'stem'
+              ? `All ${NOUNS.length} words`
+              : 'More people & no owner'}
+        </button>
+      )}
+      {selector === 'article' && (
+        <button
+          type="button"
+          className="arabic-more-choices"
+          onClick={() => onChange({ ownerId: 'my' })}
+        >
+          Use my
+        </button>
+      )}
+      {selector === 'owner' && (
+        <p className="arabic-choice-hint">The ending shows belonging or connection.</p>
+      )}
+      {selector === 'number' && selectedNoun && (
+        <p className="arabic-choice-hint">Available forms of {selectedNoun.label.toLowerCase()}.</p>
       )}
     </InlineChoices>
   );
 }
 
-function VerbPicker({ verb, selector, onChange, onClose, hint }) {
+function VerbPicker({ verb, selector, onChange, onClose }) {
   const [all, setAll] = useState(false);
   const config =
     selector === 'stem'
@@ -296,7 +318,6 @@ function VerbPicker({ verb, selector, onChange, onClose, hint }) {
     <InlineChoices
       id="arabic-word-choices"
       title={config.title}
-      description={hint}
       onClose={onClose}
       colour={config.colour}
     >
@@ -351,13 +372,11 @@ export default function ArabicPlayground() {
   const [initial] = useState(loadChoices);
   const [tab, setTab] = useState('build');
   const [mode, setMode] = useState('noun');
-  const [wordView, setWordView] = useState('build');
   const [noun, setNoun] = useState(initial.noun);
   const [verb, setVerb] = useState(initial.verb);
-  const [selector, setSelector] = useState('owner');
-  const [partHint, setPartHint] = useState('');
+  const [selector, setSelector] = useState(null);
+  const [selectionDetail, setSelectionDetail] = useState(null);
   const builderRef = useRef(null);
-  const viewButtons = useRef({});
   const [previous, setPrevious] = useState(null);
   const [undoChoice, setUndoChoice] = useState(null);
   const [saved, setSaved] = useState(false);
@@ -365,27 +384,6 @@ export default function ArabicPlayground() {
     () => (mode === 'noun' ? buildNoun(noun) : buildVerb(verb)),
     [mode, noun, verb],
   );
-  const availableParts = result.segments
-    .filter((part) => part.arabic.trim() || part.latin.trim())
-    .map((part) => part.id);
-  const countJoinsMy =
-    noun.ownerId === 'my' &&
-    (noun.number === 'dual' ||
-      (noun.number === 'plural' &&
-        NOUNS.find((item) => item.id === noun.nounId)?.plural?.type === 'sound_m'));
-  const selectedPart = selector
-    ? (
-        {
-          person: ['prefix', 'ending', 'stem'],
-          tense: ['context', 'case', 'stem'],
-          owner: ['owner'],
-          number: ['number', ...(countJoinsMy ? ['owner'] : []), 'stem'],
-          article: ['article'],
-          case: ['case'],
-          context: ['context'],
-        }[selector] || [selector]
-      ).find((part) => availableParts.includes(part)) || selector
-    : undefined;
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ noun, verb }));
@@ -406,41 +404,16 @@ export default function ArabicPlayground() {
     setPrevious(result);
     setVerb((current) => ({ ...current, ...patch }));
   };
-  const choosePart = (next, hint = '', forceOpen = false) => {
-    setPartHint(hint);
-    setSelector((current) => (current === next && !hint && !forceOpen ? null : next));
+  const choosePart = (next, detail = {}) => {
+    setSelector(next);
+    setSelectionDetail(detail);
   };
   const changeMode = (next) => {
     setMode(next);
     setPrevious(null);
     setUndoChoice(null);
-    setPartHint('');
-    setSelector(next === 'noun' ? 'owner' : 'person');
-  };
-  const openPart = (part, detail) => {
-    const meaningPart = detail?.meaningId || part;
-    const hint =
-      detail?.mark && ['stem', 'root'].includes(part)
-        ? 'This sound belongs to the word. Choose another word to compare.'
-        : '';
-    if (mode === 'noun')
-      choosePart(
-        ['stem', 'owner', 'case', 'article', 'number', 'context'].includes(meaningPart)
-          ? meaningPart
-          : 'stem',
-        hint,
-        Boolean(detail?.mark),
-      );
-    else
-      choosePart(
-        part === 'stem' || part === 'root'
-          ? 'stem'
-          : ['subject', 'suffix', 'owner', 'person', 'prefix', 'ending'].includes(part)
-            ? 'person'
-            : 'tense',
-        hint,
-        Boolean(detail?.mark),
-      );
+    setSelector(null);
+    setSelectionDetail(null);
   };
   const tryExample = (example) => {
     if (example.mode === 'verb') {
@@ -451,7 +424,7 @@ export default function ArabicPlayground() {
       setMode('noun');
     }
     setTab('build');
-    setWordView('build');
+    setSelectionDetail(null);
     setPrevious(null);
     setUndoChoice(null);
     setSelector(null);
@@ -465,9 +438,8 @@ export default function ArabicPlayground() {
     setPrevious(null);
     setUndoChoice(null);
     setMode('noun');
-    setWordView('build');
-    setSelector('owner');
-    setPartHint('');
+    setSelector(null);
+    setSelectionDetail(null);
   };
   const undo = () => {
     if (!undoChoice) return;
@@ -476,38 +448,10 @@ export default function ArabicPlayground() {
     else setVerb(undoChoice.choices);
     setMode(undoChoice.mode);
     setUndoChoice(null);
-    viewButtons.current[wordView]?.focus();
+    builderRef.current
+      ?.querySelector('[data-structure-node][aria-expanded="true"], [data-structure-node]')
+      ?.focus();
   };
-  const steps =
-    mode === 'noun'
-      ? [
-          { id: 'stem', label: 'Word', colour: 'stem', action: 'choose a word' },
-          { id: 'owner', label: 'Whose?', colour: 'owner', action: 'choose whose' },
-          { id: 'context', label: 'Phrase', colour: 'context', action: 'choose a phrase' },
-        ]
-      : [
-          { id: 'stem', label: 'Action', colour: 'stem', action: 'choose an action' },
-          { id: 'person', label: 'Who?', colour: 'owner', action: 'choose who' },
-          { id: 'tense', label: 'When?', colour: 'context', action: 'choose when' },
-        ];
-  const controlLabels =
-    mode === 'noun'
-      ? {
-          stem: `Change word: ${labelOf(NOUNS, noun.nounId)}`,
-          owner: `Change whose?: ${labelOf(OWNERS, noun.ownerId)}`,
-          context: `Change beginning: ${labelOf(CONTEXTS, noun.contextId)}`,
-          case: 'Change ending sound',
-          number: `Change how many?: ${labelOf(NUMBERS, noun.number)}`,
-          article: 'Change a, the or my',
-        }
-      : {
-          stem: `Change action: ${labelOf(VERBS, verb.verbId)}`,
-          person: `Change who?: ${labelOf(PERSONS, verb.personId)}`,
-          prefix: `Change who?: ${labelOf(PERSONS, verb.personId)}`,
-          ending: `Change who?: ${labelOf(PERSONS, verb.personId)}`,
-          context: `Change when?: ${labelOf(TENSES, verb.tenseId)}`,
-          case: 'Change verb ending sound',
-        };
   const choiceTray =
     selector &&
     (mode === 'noun' ? (
@@ -515,7 +459,7 @@ export default function ArabicPlayground() {
         key={`noun-${selector}`}
         noun={noun}
         selector={selector}
-        hint={partHint}
+        familyId={selectionDetail?.familyId}
         onChange={changeNoun}
         onClose={() => setSelector(null)}
       />
@@ -524,7 +468,6 @@ export default function ArabicPlayground() {
         key={`verb-${selector}`}
         verb={verb}
         selector={selector}
-        hint={partHint}
         onChange={changeVerb}
         onClose={() => setSelector(null)}
       />
@@ -603,142 +546,36 @@ export default function ArabicPlayground() {
               ref={builderRef}
               className={`arabic-panel arabic-builder ${selector ? 'has-choices' : ''}`}
             >
-              <div className="arabic-build-toolbar">
-                <div className="arabic-view-switch" role="group" aria-label="Word view">
-                  <button
-                    type="button"
-                    ref={(element) => {
-                      viewButtons.current.build = element;
-                    }}
-                    aria-pressed={wordView === 'build'}
-                    onClick={() => setWordView('build')}
-                  >
-                    <Type size={16} aria-hidden="true" /> Build
-                  </button>
-                  <button
-                    type="button"
-                    ref={(element) => {
-                      viewButtons.current.map = element;
-                    }}
-                    aria-pressed={wordView === 'map'}
-                    onClick={() => setWordView('map')}
-                  >
-                    <Network size={16} aria-hidden="true" /> Map
-                  </button>
-                </div>
+              <div className="arabic-structure-toolbar">
+                <span>One sentence. Follow its parts.</span>
                 {undoChoice && (
                   <button type="button" className="arabic-quiet" onClick={undo}>
                     <Undo2 size={16} aria-hidden="true" /> Undo
                   </button>
                 )}
               </div>
-              {wordView === 'build' ? (
-                <>
-                  <div
-                    className="arabic-build-steps"
-                    role="group"
-                    aria-label="Steps to build a phrase"
-                  >
-                    {steps.map((step, index) => (
-                      <button
-                        type="button"
-                        key={step.id}
-                        className={`arabic-build-step arabic-colour-${step.colour}`}
-                        aria-label={`Step ${index + 1}: ${step.action}`}
-                        aria-expanded={selector === step.id}
-                        aria-controls={selector === step.id ? 'arabic-word-choices' : undefined}
-                        onClick={() => choosePart(step.id)}
-                      >
-                        <span className="arabic-step-number" aria-hidden="true">
-                          {index + 1}
-                        </span>
-                        <span>{step.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <ArabicResult
-                    result={result}
-                    previous={previous}
-                    onPartClick={openPart}
-                    selectedPart={selectedPart}
-                    selectedMeaningId={
-                      mode === 'noun'
-                        ? selector
-                        : selector === 'person'
-                          ? result.englishParts.find((part) =>
-                              ['prefix', 'ending'].includes(part.id),
-                            )?.id
-                          : selector === 'stem'
-                            ? 'stem'
-                            : 'context'
-                    }
-                    controlLabels={controlLabels}
-                    choiceControlsId="arabic-word-choices"
-                    meaningTargets={
-                      mode === 'noun' && noun.number === 'dual' && noun.ownerId === 'my'
-                        ? { number: 'owner' }
-                        : undefined
-                    }
-                  />
-                  {mode === 'noun' && (
-                    <details className="arabic-more-ways">
-                      <summary>More ways</summary>
-                      <div className="arabic-extra-controls">
-                        <button
-                          type="button"
-                          onClick={() => choosePart('number')}
-                          className="arabic-quiet arabic-colour-number"
-                          aria-label={`Change how many: ${labelOf(NUMBERS, noun.number)}`}
-                          aria-expanded={selector === 'number'}
-                          aria-controls={selector === 'number' ? 'arabic-word-choices' : undefined}
-                        >
-                          How many? · {labelOf(NUMBERS, noun.number)}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => choosePart('article')}
-                          className="arabic-quiet"
-                          aria-expanded={selector === 'article'}
-                          aria-controls={selector === 'article' ? 'arabic-word-choices' : undefined}
-                        >
-                          A / the / my
-                        </button>
-                        {!availableParts.includes('case') && (
-                          <button
-                            type="button"
-                            onClick={() => choosePart('case')}
-                            className="arabic-quiet arabic-colour-case"
-                            aria-expanded={selector === 'case'}
-                            aria-controls={selector === 'case' ? 'arabic-word-choices' : undefined}
-                          >
-                            Compare ending sounds
-                          </button>
-                        )}
-                      </div>
-                    </details>
-                  )}
-                  {choiceTray}
-                </>
-              ) : (
-                <ArabicWordMap
-                  mode={mode}
-                  noun={noun}
-                  verb={verb}
-                  result={result}
-                  selector={selector}
-                  onSelect={choosePart}
-                  onBack={() => {
-                    setWordView('build');
-                    viewButtons.current.build?.focus();
-                  }}
-                >
-                  {choiceTray}
-                </ArabicWordMap>
-              )}
-              <ArabicChangeStory previous={previous} result={result} />
+              <ArabicStructureExplorer
+                mode={mode}
+                noun={noun}
+                verb={verb}
+                result={result}
+                previous={previous}
+                selector={selector}
+                onSelect={choosePart}
+              >
+                {choiceTray}
+              </ArabicStructureExplorer>
+              {previous &&
+                (previous.arabic !== result.arabic ||
+                  previous.translation !== result.translation) && (
+                  <details className="arabic-change-disclosure">
+                    <summary>See last change</summary>
+                    <ArabicChangeStory previous={previous} result={result} />
+                  </details>
+                )}
             </div>
             <ColourLegend />
-            <Explanation result={result} previous={previous} />
+            <Explanation result={result} previous={previous} title="More about this sentence" />
             <div className="arabic-next">
               <div>
                 <strong>Try one small change</strong>

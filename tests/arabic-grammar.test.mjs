@@ -176,6 +176,84 @@ test('pointing words match number and gender, and definite predicates clearly in
   );
 });
 
+test('far pointing forms match feminine, dual, human plural and nonhuman plural nouns', () => {
+  const examples = [
+    [{ ownerId: 'my' }, 'ذَلِكَ بَيْتِي', 'dhālika baytī', 'That is my house'],
+    [
+      { nounId: 'madrasah', ownerId: 'my' },
+      'تِلْكَ مَدْرَسَتِي',
+      'tilka madrasatī',
+      'That is my school',
+    ],
+    [
+      { number: 'dual', ownerId: 'our' },
+      'ذَانِكَ بَيْتَانَا',
+      'dhānika baytānā',
+      'Those are our two houses',
+    ],
+    [
+      { nounId: 'madrasah', number: 'dual', ownerId: 'our' },
+      'تَانِكَ مَدْرَسَتَانَا',
+      'tānika madrasatānā',
+      'Those are our two schools',
+    ],
+    [
+      { number: 'plural', ownerId: 'our' },
+      'تِلْكَ بُيُوتُنَا',
+      'tilka buyūtunā',
+      'Those are our houses',
+    ],
+    [
+      { nounId: 'walad', number: 'plural', ownerId: 'our' },
+      'أُولَئِكَ أَوْلَادُنَا',
+      'ulāʾika awlādunā',
+      'Those are our boys',
+    ],
+  ];
+  for (const [options, arabic, latin, translation] of examples) {
+    const result = buildNoun({ ...options, contextId: 'that' });
+    assert.equal(result.arabic, arabic);
+    assert.equal(result.latin, latin);
+    assert.equal(result.translation, translation);
+    assert.equal(result.grammar.caseKey, 'u');
+  }
+  assert.equal(
+    buildNoun({ contextId: 'that', ownerId: 'none', definiteness: 'definite' }).arabic,
+    'ذَلِكَ هُوَ الْبَيْتُ',
+  );
+  assert.equal(
+    buildNoun({
+      nounId: 'muallimah',
+      number: 'plural',
+      contextId: 'that',
+      ownerId: 'none',
+      definiteness: 'definite',
+    }).arabic,
+    'أُولَئِكَ هُنَّ الْمُعَلِّمَاتُ',
+  );
+});
+
+test('checked first-person action phrases give their following noun the action role', () => {
+  const opened = buildNoun({ nounId: 'bab', ownerId: 'our', contextId: 'opened' });
+  assert.equal(opened.arabic, 'فَتَحْتُ بَابَنَا');
+  assert.equal(opened.latin, 'fataḥtu bābanā');
+  assert.equal(opened.translation, 'I opened our door');
+  assert.equal(opened.grammar.caseKey, 'a');
+  const entered = buildNoun({ ownerId: 'his', contextId: 'entered' });
+  assert.equal(entered.arabic, 'دَخَلْتُ بَيْتَهُ');
+  assert.equal(entered.latin, 'dakhaltu baytahu');
+  assert.equal(entered.translation, 'I entered his house');
+  assert.match(entered.notes[0].body, /place I entered/u);
+  assert.equal(buildNoun({ ownerId: 'my', contextId: 'entered' }).wordArabic, 'بَيْتِي');
+  assert.equal(
+    buildNoun({ nounId: 'bab', ownerId: 'my', contextId: 'opened' }).wordArabic,
+    'بَابِي',
+  );
+  // This remains a fixed first-person context, not an invented general weak-verb conjugator.
+  assert.equal(opened.segments[0].id, 'context');
+  assert.equal(entered.segments[0].id, 'context');
+});
+
 test('unvetted forms are unavailable instead of invented', () => {
   assert.deepEqual(
     getAvailableNumbers('laylah').map((option) => option.id),

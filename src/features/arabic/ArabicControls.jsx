@@ -140,6 +140,8 @@ export function InlineChoices({
       aria-labelledby={titleId}
       onClick={(event) => {
         if (!event.target.closest('.arabic-option, .arabic-vowel-option')) return;
+        // The sentence tree keeps this panel beside the selected branch.
+        if (tray.current?.closest('.arabic-structure-explorer')) return;
         const builder = tray.current?.closest('.arabic-builder');
         window.requestAnimationFrame(() => {
           const result = builder?.querySelector('.arabic-result');
@@ -175,6 +177,7 @@ export function InlineChoices({
 
 export function OptionButton({
   selected,
+  disabled = false,
   label,
   arabic,
   latin,
@@ -187,6 +190,7 @@ export function OptionButton({
       type="button"
       className={`arabic-option arabic-colour-${colour} ${selected ? 'is-selected' : ''}`}
       aria-pressed={selected}
+      disabled={disabled}
       onClick={onClick}
     >
       <span className="arabic-option-copy">
@@ -560,13 +564,14 @@ export function ColourLegend() {
   );
 }
 
-export function Explanation({ result, previous }) {
+export function Explanation({ result, previous, title }) {
   const notes = result.notes || [];
   if (!notes.length) return null;
   return (
     <details className="arabic-details arabic-explanation">
       <summary>
-        {previous && previous.arabic !== result.arabic ? 'Why did it change?' : 'Why this form?'}
+        {title ||
+          (previous && previous.arabic !== result.arabic ? 'Why did it change?' : 'Why this form?')}
       </summary>
       {previous && previous.arabic !== result.arabic && (
         <div className="arabic-change">

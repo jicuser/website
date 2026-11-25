@@ -10,6 +10,7 @@ async function open(page, width, installed = false) {
   await page.addInitScript(
     ({ installed, theme }) => {
       localStorage.removeItem('jic.arabic.builder.v1');
+      localStorage.removeItem('jic.arabic.builder.v2');
       localStorage.setItem('jic-theme', theme);
       sessionStorage.setItem('jic-salawat-shown', '1');
       if (installed)
@@ -19,10 +20,17 @@ async function open(page, width, installed = false) {
   );
   await page.goto('/learning/arabic');
   const builder = page.locator('#arabic-workspace > .arabic-builder');
-  await expect(builder.locator(':scope > .arabic-result .arabic-translation')).toHaveText(
-    'This is our house',
-  );
-  return { builder, state };
+  const explorer = builder.getByRole('region', { name: 'Sentence structure', exact: true });
+  const result = explorer.locator(':scope > .arabic-result');
+  await sentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
+  return { builder, explorer, result, state };
+}
+
+async function sentence(result, arabic, latin, english) {
+  await expect(result.locator('.arabic-glyphs > .sr-only')).toHaveText(arabic);
+  await expect(result.locator('.arabic-pronunciation')).toHaveText(latin);
+  await expect(result.locator('.arabic-translation')).toHaveText(english);
+  await expect(result.locator('[data-renderer-fallback]')).toHaveCount(0);
 }
 
 async function fits(page) {
@@ -34,46 +42,187 @@ async function fits(page) {
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }
 
+async function selectNode(explorer, id) {
+  const control = explorer.locator(`button[data-structure-node="${id}"]`);
+  await control.focus();
+  await control.press('Enter');
+  return control;
+}
+
+async function family(choices, name) {
+  await choices
+    .getByRole('group', { name: 'Beginning families', exact: true })
+    .getByRole('button', { name, exact: true })
+    .click();
+}
+
+async function contains(explorer, expected) {
+  await expect
+    .poll(() =>
+      explorer
+        .locator('path[data-edge-kind="contains"]')
+        .evaluateAll((paths) =>
+          paths.map((path) => `${path.dataset.from}>${path.dataset.to}`).sort(),
+        ),
+    )
+    .toEqual([...expected].sort());
+}
+
+async function outlinesPart(result, part) {
+  const layer = result.locator('.arabic-connection-layer');
+  await expect(layer).toHaveAttribute('data-connection-part', part);
+  // Selecting the meaning of a whole ending must outline all of that ending,
+  // unlike a direct vowel tap, which has its own source-index test.
+  await expect(layer).not.toHaveAttribute('data-connection-source-index', /\d/);
+  await expect
+    .poll(
+      () =>
+        result.evaluate((element, part) => {
+          const ring = element.querySelector(`.arabic-connection-ring[data-part="${part}"]`);
+          const ink = [
+            ...element.querySelectorAll(`.arabic-script .arabic-glyph-ink[data-part="${part}"]`),
+          ];
+          if (!ring || !ink.length) return false;
+          const bounds = ring.getBoundingClientRect();
+          return ink.every((glyph) => {
+            const box = glyph.getBoundingClientRect();
+            return (
+              bounds.left <= box.left &&
+              bounds.top <= box.top &&
+              bounds.right >= box.right &&
+              bounds.bottom >= box.bottom
+            );
+          });
+        }, part),
+      { message: 'The selected whole ending must be enclosed around its actual Arabic ink' },
+    )
+    .toBe(true);
+  expect(await layer.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe('none');
+}
+
+async function sourceCrops(explorer) {
+  await expect(explorer.locator('.arabic-structure-part-fallback')).toHaveCount(0);
+  const crops = await explorer.evaluate((element) => {
+    const original = element.querySelector('.arabic-result .arabic-script');
+    const paths = (group) =>
+      [...group.querySelectorAll('path')].map((path) => ({
+        d: path.getAttribute('d'),
+        transform: path.getAttribute('transform'),
+        fill: getComputedStyle(path).fill,
+      }));
+    return [...element.querySelectorAll('.arabic-structure-part-ink')].map((crop) => {
+      const start = Number(crop.dataset.sourceStart);
+      const end = Number(crop.dataset.sourceEnd);
+      const groups = [...crop.querySelectorAll('.arabic-structure-crop-ink')];
+      return {
+        source: original.querySelector('.arabic-glyphs > .sr-only').textContent.slice(start, end),
+        start,
+        end,
+        count: groups.length,
+        matches: groups.every((group) => {
+          const index = Number(group.dataset.sourceIndex);
+          const source = original.querySelector(`.arabic-glyph-ink[data-source-index="${index}"]`);
+          return (
+            index >= start &&
+            index < end &&
+            source &&
+            JSON.stringify(paths(group)) === JSON.stringify(paths(source))
+          );
+        }),
+      };
+    });
+  });
+  expect(crops.length).toBeGreaterThan(0);
+  for (const crop of crops) {
+    expect(crop.end).toBeGreaterThan(crop.start);
+    expect(crop.source.length).toBeGreaterThan(0);
+    expect(crop.count).toBeGreaterThan(0);
+    expect(
+      crop.matches,
+      'A part must reuse the original joined word’s glyph paths and source indices',
+    ).toBe(true);
+  }
+}
+
+async function meaningfulCurves(explorer) {
+  await expect
+    .poll(
+      () =>
+        explorer.evaluate((element) => {
+          const nodes = [...element.querySelectorAll('[data-structure-node]')];
+          const paths = [...element.querySelectorAll('path[data-edge-kind="contains"]')];
+          if (!paths.length) return false;
+          return paths.every((path) => {
+            const from = nodes.find((node) => node.dataset.structureNode === path.dataset.from);
+            const to = nodes.find((node) => node.dataset.structureNode === path.dataset.to);
+            const length = path.getTotalLength();
+            const matrix = path.getScreenCTM();
+            if (!from || !to || !matrix || length <= 0 || !/[CQ]/.test(path.getAttribute('d')))
+              return false;
+            const a = path.getPointAtLength(0).matrixTransform(matrix);
+            const b = path.getPointAtLength(length).matrixTransform(matrix);
+            const fromBox = from.getBoundingClientRect();
+            const toBox = to.getBoundingClientRect();
+            if (
+              Math.abs(a.x - (fromBox.left + fromBox.width / 2)) > 2 ||
+              Math.abs(a.y - fromBox.bottom) > 2
+            )
+              return false;
+            if (Math.abs(b.x - (toBox.left + toBox.width / 2)) > 2 || Math.abs(b.y - toBox.top) > 2)
+              return false;
+            const unrelated = nodes
+              .filter((node) => node !== from && node !== to)
+              .map((node) => node.getBoundingClientRect());
+            for (let sample = 1; sample < 40; sample += 1) {
+              const point = path.getPointAtLength((length * sample) / 40).matrixTransform(matrix);
+              if (
+                unrelated.some(
+                  (box) =>
+                    point.x > box.left + 2 &&
+                    point.x < box.right - 2 &&
+                    point.y > box.top + 2 &&
+                    point.y < box.bottom - 2,
+                )
+              )
+                return false;
+            }
+            const style = getComputedStyle(path);
+            return (
+              style.pointerEvents === 'none' &&
+              style.strokeDasharray === 'none' &&
+              !path.getAttribute('marker-end')
+            );
+          });
+        }),
+      {
+        message:
+          'Each structural curve must meet its real parent and child without crossing a different card',
+      },
+    )
+    .toBe(true);
+}
+
 for (const width of [390, 320]) {
-  test(`English meanings link to the right Arabic ink and show exact changes at ${width}px`, async ({
+  test(`selected endings link to their Arabic ink and preserve exact before/after changes at ${width}px`, async ({
     page,
   }, info) => {
-    const { builder, state } = await open(page, width);
-    const result = builder.locator(':scope > .arabic-result');
-    const layer = result.locator('.arabic-connection-layer');
-    await expect(layer).toHaveAttribute('data-connection-part', 'owner');
-    const ring = layer.locator('.arabic-connection-ring[data-part="owner"]');
-    const ringBox = await ring.boundingBox();
-    const inkBoxes = await result
-      .locator('.arabic-script .arabic-glyph-ink[data-part="owner"]')
-      .evaluateAll((elements) =>
-        elements.map((element) => {
-          const box = element.getBoundingClientRect();
-          return { x: box.x, y: box.y, right: box.right, bottom: box.bottom };
-        }),
-      );
-    expect(inkBoxes.length).toBeGreaterThan(0);
-    for (const box of inkBoxes) {
-      expect(ringBox.x).toBeLessThanOrEqual(box.x);
-      expect(ringBox.y).toBeLessThanOrEqual(box.y);
-      expect(ringBox.x + ringBox.width).toBeGreaterThanOrEqual(box.right);
-      expect(ringBox.y + ringBox.height).toBeGreaterThanOrEqual(box.bottom);
-    }
-    expect(await layer.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe('none');
-    expect(
-      await layer.locator('path').evaluate((element) => element.getTotalLength()),
-    ).toBeGreaterThan(0);
+    const { builder, explorer, result, state } = await open(page, width);
+    await selectNode(explorer, 'part:owner');
+    await outlinesPart(result, 'owner');
     await builder
       .getByRole('region', { name: 'Whose?', exact: true })
       .getByRole('button', { name: /^His\b/ })
       .click();
-    await result.getByRole('button', { name: /^Change beginning:/ }).click();
-    await builder
-      .getByRole('region', { name: 'Start with…', exact: true })
-      .getByRole('button', { name: /^In…/ })
-      .click();
-    await expect(result.locator('.arabic-translation')).toHaveText('In his house');
+    await sentence(result, 'هَذَا بَيْتُهُ', 'hādhā baytuhu', 'This is his house');
+    await selectNode(explorer, 'word:context:0');
+    const beginnings = builder.getByRole('region', { name: 'Choose a beginning', exact: true });
+    await family(beginnings, 'Location');
+    await beginnings.getByRole('button', { name: /^In\b/ }).click();
+    await sentence(result, 'فِي بَيْتِهِ', 'fī baytihi', 'In his house');
+
+    await builder.getByText('See last change', { exact: true }).click();
     const comparison = builder.getByRole('region', { name: 'See what changed', exact: true });
+    await expect(comparison).toBeVisible();
     await expect(comparison.locator('.arabic-change-latin')).toHaveText([
       'hādhā baytuhu',
       'fī baytihi',
@@ -83,7 +232,7 @@ for (const width of [390, 320]) {
       'In his house',
     ]);
     await comparison.getByRole('button', { name: 'Replay this change', exact: true }).click();
-    await expect(result.locator('.arabic-translation')).toHaveText('In his house');
+    await sentence(result, 'فِي بَيْتِهِ', 'fī baytihi', 'In his house');
     await expect(comparison.locator('.arabic-change-latin')).toHaveText([
       'hādhā baytuhu',
       'fī baytihi',
@@ -96,84 +245,189 @@ for (const width of [390, 320]) {
     expect(animations.length).toBeGreaterThan(0);
     expect(animations.every((name) => name === 'none')).toBe(true);
     await builder.getByRole('button', { name: 'Undo', exact: true }).click();
-    await expect(result.locator('.arabic-translation')).toHaveText('This is his house');
+    await sentence(result, 'هَذَا بَيْتُهُ', 'hādhā baytuhu', 'This is his house');
     await fits(page);
     expect(state.errors).toEqual([]);
     await page.screenshot({ path: info.outputPath('meaning-connections.png'), fullPage: true });
   });
 
-  test(`word map changes stay in the same build state at ${width}px`, async ({ page }, info) => {
-    const { builder, state } = await open(page, width);
-    const views = builder.getByRole('group', { name: 'Word view', exact: true });
-    await views.getByRole('button', { name: 'Map', exact: true }).click();
-    const map = builder.getByRole('region', { name: 'Word map', exact: true });
-    await expect(map).toBeVisible();
-    await expect(map.locator('.arabic-map-meaning')).toHaveText('Our house');
-    const owners = map.getByRole('region', { name: 'Whose?', exact: true });
-    await owners.getByRole('button', { name: /^His\b/ }).click();
-    await expect(map.locator('.arabic-map-pronunciation')).toHaveText('baytuhu');
-    await map.getByRole('button', { name: /^In a phrase:/ }).click();
-    await expect(owners).toHaveCount(0);
-    await map
-      .getByRole('region', { name: 'Start with…', exact: true })
-      .getByRole('button', { name: /^In…/ })
-      .click();
-    await expect(map.locator('.arabic-map-pronunciation')).toHaveText('baytihi');
-    await expect(map.locator('.arabic-map-meaning')).toHaveText('His house');
-    await expect(map.locator('.arabic-choice-tray')).toHaveCount(1);
-    const paths = await map.locator('.arabic-map-lines path').evaluateAll((elements) =>
-      elements.map((element) => ({
-        length: element.getTotalLength(),
-        interactive: getComputedStyle(element).pointerEvents,
+  test(`one actual sentence hierarchy keeps local alternatives separate at ${width}px`, async ({
+    page,
+  }, info) => {
+    const { builder, explorer, result, state } = await open(page, width);
+    await expect(builder.getByRole('group', { name: 'Word view', exact: true })).toHaveCount(0);
+    await expect(builder.getByRole('button', { name: /^Step \d/ })).toHaveCount(0);
+    await expect(explorer.locator('[data-choice-for]')).toHaveCount(0);
+    await expect(explorer.locator('[data-parts-for]')).toHaveCount(1);
+    await expect(explorer.locator('[data-parts-for]')).toHaveAttribute(
+      'data-parts-for',
+      'word:noun',
+    );
+    await expect(explorer.locator('[data-kind="part"]')).toHaveCount(2);
+    await expect(explorer.locator('[data-structure-node="word:context:0"] strong')).toHaveText(
+      'This',
+    );
+    await expect(explorer.locator('[data-structure-node="word:noun"] strong')).toHaveText(
+      'my house',
+    );
+    await expect(
+      explorer.locator('[data-structure-node="part:stem"] .arabic-structure-node-latin'),
+    ).toHaveText('bayt');
+    await expect(
+      explorer.locator('[data-structure-node="part:owner"] .arabic-structure-node-latin'),
+    ).toHaveText('ī');
+    await contains(explorer, [
+      'sentence>word:context:0',
+      'sentence>word:noun',
+      'word:noun>part:stem',
+      'word:noun>part:owner',
+    ]);
+    await meaningfulCurves(explorer);
+    await sourceCrops(explorer);
+    await expect(explorer.locator('path[data-edge-kind="causes"]')).toHaveCount(0);
+    const boxes = await explorer.locator('button[data-structure-node]').evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        id: node.dataset.structureNode,
+        x: node.getBoundingClientRect().x,
+        width: node.getBoundingClientRect().width,
+        height: node.getBoundingClientRect().height,
       })),
     );
-    expect(paths.length).toBeGreaterThanOrEqual(4);
-    expect(paths.every((path) => path.length > 0 && path.interactive === 'none')).toBe(true);
-    await fits(page);
-    await page.screenshot({ path: info.outputPath('connected-word-map.png'), fullPage: true });
+    expect(boxes.every((box) => box.width >= 44 && box.height >= 44)).toBe(true);
+    expect(boxes.find((box) => box.id === 'word:context:0').x).toBeGreaterThan(
+      boxes.find((box) => box.id === 'word:noun').x,
+    );
+    expect(boxes.find((box) => box.id === 'part:stem').x).toBeGreaterThan(
+      boxes.find((box) => box.id === 'part:owner').x,
+    );
 
-    await map.getByRole('button', { name: 'Back to builder', exact: true }).click();
-    await expect(views.getByRole('button', { name: 'Build', exact: true })).toBeFocused();
-    const result = builder.locator(':scope > .arabic-result');
-    await expect(result.locator('.arabic-translation')).toHaveText('In his house');
-    await expect(result.locator('.arabic-pronunciation')).toHaveText('fī baytihi');
-    await expect(result.locator('.arabic-glyphs > .sr-only')).toHaveText('فِي بَيْتِهِ');
-    await builder.getByRole('button', { name: 'Undo', exact: true }).click();
-    await expect(result.locator('.arabic-translation')).toHaveText('This is his house');
+    const owner = await selectNode(explorer, 'part:owner');
+    const owners = explorer.getByRole('region', { name: 'Whose?', exact: true });
+    await expect(owners).toBeVisible();
+    await expect(explorer.locator('[data-choice-for]')).toHaveCount(1);
+    await expect(explorer.locator('[data-choice-for]')).toHaveAttribute(
+      'data-choice-for',
+      'part:owner',
+    );
+    await expect(explorer.locator('[data-choice-for] [data-structure-node]')).toHaveCount(0);
+    await expect(explorer.locator('path[data-edge-kind="replaces"]')).toHaveAttribute(
+      'data-from',
+      'part:owner',
+    );
+    expect(
+      await explorer
+        .locator('path[data-edge-kind="replaces"]')
+        .evaluate((path) => getComputedStyle(path).strokeDasharray),
+    ).not.toBe('none');
+    await expect(explorer.locator('path[data-edge-kind="replaces"]')).not.toHaveAttribute(
+      'marker-end',
+      /url/,
+    );
+    const locality = await owners.evaluate((tray) => {
+      const root = tray.closest('.arabic-structure-explorer');
+      const source = root
+        .querySelector('[data-structure-node="part:owner"]')
+        .getBoundingClientRect();
+      const target = tray.getBoundingClientRect();
+      return {
+        gap: target.top - source.bottom,
+        height: target.height,
+        viewportHeight: innerHeight,
+      };
+    });
+    expect(locality.gap).toBeGreaterThanOrEqual(0);
+    expect(
+      locality.gap,
+      'Ownership options should sit directly below the selected parts',
+    ).toBeLessThan(80);
+    expect(locality.height).toBeLessThan(locality.viewportHeight * 0.7);
+    await page.keyboard.press('Escape');
+    await expect(owners).toHaveCount(0);
+    await expect(owner).toBeFocused();
+    await expect(owner).toHaveAttribute('aria-expanded', 'false');
 
-    await views.getByRole('button', { name: 'Map', exact: true }).click();
-    await map.getByRole('button', { name: /^Whose\?:/ }).click();
-    await map
-      .getByRole('region', { name: 'Whose?', exact: true })
-      .getByRole('button', { name: /^My\b/ })
-      .click();
-    await map.getByRole('button', { name: /^How many\?:/ }).click();
-    await map
-      .getByRole('region', { name: 'How many?', exact: true })
-      .getByRole('button', { name: /^Two\b/ })
-      .click();
-    await expect(map.locator('.arabic-map-meaning')).toHaveText('My two houses');
-    await map.getByRole('button', { name: 'Back to builder', exact: true }).click();
-    await expect(result.locator('.arabic-translation')).toHaveText('These are my two houses');
-    await builder
-      .getByRole('region', { name: 'How many?', exact: true })
-      .getByRole('button', { name: 'Close choices', exact: true })
-      .click();
-    await result.getByRole('button', { name: 'Change how many?: Two', exact: true }).click();
-    await expect(builder.getByRole('region', { name: 'How many?', exact: true })).toBeVisible();
-    await expect(builder.getByRole('region', { name: 'Whose?', exact: true })).toHaveCount(0);
-    await expect(
-      result.getByRole('button', { name: 'Change how many?: Two', exact: true }),
-    ).toHaveAttribute('aria-pressed', 'true');
-    await builder.getByRole('button', { name: 'Step 2: choose whose', exact: true }).click();
-    await expect(
-      result.getByRole('button', { name: 'Change whose?: My', exact: true }),
-    ).toHaveAttribute('aria-pressed', 'true');
-    await expect(
-      result.getByRole('button', { name: 'Change how many?: Two', exact: true }),
-    ).toHaveAttribute('aria-pressed', 'false');
+    await selectNode(explorer, 'word:context:0');
+    const beginnings = explorer.getByRole('region', { name: 'Choose a beginning', exact: true });
+    await expect(explorer.locator('[data-parts-for]')).toHaveCount(0);
+    await expect(explorer.locator('[data-choice-for]')).toHaveAttribute(
+      'data-choice-for',
+      'word:context:0',
+    );
+    await expect(beginnings.locator('.arabic-family-options button')).toHaveCount(2);
+    await expect(beginnings.getByRole('button', { name: /^This is\b/ })).toBeVisible();
+    await expect(beginnings.getByRole('button', { name: /^That is\b/ })).toBeVisible();
+    await expect(beginnings.getByRole('button', { name: /^I saw\b/ })).toHaveCount(0);
+    await family(beginnings, 'Actions');
+    await sentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
+    const incompatible = beginnings.getByRole('button', { name: /^I opened\b/ });
+    await expect(incompatible).toBeDisabled();
+    await expect(incompatible).toContainText(
+      'Choose door, book, letter for this checked action example.',
+    );
+    await family(beginnings, 'Location');
+    await sentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
+    await expect(beginnings.locator('.arabic-family-options button')).toHaveCount(3);
+    await expect(beginnings.getByRole('button', { name: /^I saw\b/ })).toHaveCount(0);
+    await family(beginnings, 'Pointing');
+    await beginnings.getByRole('button', { name: /^That is\b/ }).click();
+    await sentence(result, 'ذَلِكَ بَيْتِي', 'dhālika baytī', 'That is my house');
+    await expect(explorer.locator('path[data-edge-kind="causes"]')).toHaveCount(0);
     await fits(page);
     expect(state.errors).toEqual([]);
+    await page.screenshot({ path: info.outputPath('sentence-hierarchy.png'), fullPage: true });
+  });
+
+  test(`rule arrows explain fi to i and hu to hi only when requested at ${width}px`, async ({
+    page,
+  }, info) => {
+    const { builder, explorer, result, state } = await open(page, width);
+    await selectNode(explorer, 'part:owner');
+    await builder
+      .getByRole('region', { name: 'Whose?', exact: true })
+      .getByRole('button', { name: /^His\b/ })
+      .click();
+    await selectNode(explorer, 'word:context:0');
+    const beginnings = builder.getByRole('region', { name: 'Choose a beginning', exact: true });
+    await family(beginnings, 'Location');
+    await beginnings.getByRole('button', { name: /^In\b/ }).click();
+    await sentence(result, 'فِي بَيْتِهِ', 'fī baytihi', 'In his house');
+    await selectNode(explorer, 'word:noun');
+    await expect(explorer.locator('[data-parts-for]')).toHaveCount(1);
+    await contains(explorer, [
+      'sentence>word:context:0',
+      'sentence>word:noun',
+      'word:noun>part:stem',
+      'word:noun>part:case',
+      'word:noun>part:owner',
+    ]);
+    await sourceCrops(explorer);
+    await expect(explorer.locator('path[data-edge-kind="causes"]')).toHaveCount(0);
+    await explorer.getByText('Why this form?', { exact: true }).click();
+    const cause = explorer.locator('path[data-edge-kind="causes"]');
+    await expect(cause).toHaveCount(1);
+    await expect(cause).toHaveAttribute('data-from', 'word:context:0');
+    await expect(cause).toHaveAttribute('data-to', 'part:case');
+    await expect(cause).toHaveAttribute('marker-end', /url\(.+\)/);
+    await expect(explorer.locator('[data-rule-explanation="noun-role"]')).toContainText('After fī');
+    await explorer
+      .getByRole('group', { name: 'Choose a relationship to explain', exact: true })
+      .getByRole('button', { name: 'hu → hi', exact: true })
+      .click();
+    await expect(cause).toHaveCount(1);
+    await expect(cause).toHaveAttribute('data-from', 'part:case');
+    await expect(cause).toHaveAttribute('data-to', 'part:owner');
+    await expect(explorer.locator('[data-rule-explanation="owner-sound"]')).toContainText(
+      'the owner has not changed',
+    );
+    await sentence(result, 'فِي بَيْتِهِ', 'fī baytihi', 'In his house');
+    await explorer.getByText('Why this form?', { exact: true }).click();
+    await expect(cause).toHaveCount(0);
+    await fits(page);
+    expect(state.errors).toEqual([]);
+    await page.screenshot({
+      path: info.outputPath('requested-rule-relationship.png'),
+      fullPage: true,
+    });
   });
 }
 
@@ -196,22 +450,129 @@ test('the installed learning page keeps a working way home without floating site
   expect(state.errors).toEqual([]);
 });
 
-test('my keeps its real ending when comparing vowel positions', async ({ page }) => {
-  const { builder, state } = await open(page, 320);
-  const result = builder.locator(':scope > .arabic-result');
-  await builder
-    .getByRole('region', { name: 'Whose?', exact: true })
-    .getByRole('button', { name: /^My\b/ })
-    .click();
-  await builder.getByText('More ways', { exact: true }).click();
-  await builder.getByRole('button', { name: 'Compare ending sounds', exact: true }).click();
-  const vowels = builder.getByRole('region', { name: 'Try a vowel', exact: true });
-  await vowels.getByRole('button', { name: /Kasra/ }).click();
-  await expect(result.locator('.arabic-pronunciation')).toHaveText('fī baytī');
-  await expect(result.locator('.arabic-translation')).toHaveText('In my house');
-  await expect(result.locator('.arabic-connection-layer')).toHaveCount(0);
-  await expect(result.locator('.arabic-vowel-focus')).toHaveCount(0);
-  await expect(vowels.locator('.arabic-vowel-word')).toHaveText(['بَيْتِي', 'بَيْتِي', 'بَيْتِي']);
+test('my stays one real ending in different phrases and joins the two-item ending once', async ({
+  page,
+}) => {
+  const { builder, explorer, result, state } = await open(page, 320);
+  const noInventedCase = async () => {
+    await expect(result.locator('.arabic-script .arabic-glyph-ink[data-part="case"]')).toHaveCount(
+      0,
+    );
+    await expect(
+      result.locator('.arabic-connection-layer[data-connection-part="case"]'),
+    ).toHaveCount(0);
+    await expect(explorer.locator('.arabic-structure-mark-note')).toHaveCount(0);
+  };
+  await noInventedCase();
+  await selectNode(explorer, 'word:context:0');
+  const beginnings = builder.getByRole('region', { name: 'Choose a beginning', exact: true });
+  await family(beginnings, 'Actions');
+  await beginnings.getByRole('button', { name: /^I saw\b/ }).click();
+  await sentence(result, 'رَأَيْتُ بَيْتِي', 'raʾaytu baytī', 'I saw my house');
+  await noInventedCase();
+  await selectNode(explorer, 'part:context:ending');
+  await expect(explorer.locator('[data-choice-for]')).toHaveCount(0);
+  await expect(explorer.getByRole('note')).toContainText(
+    'The whole -tu ending tells us “I did it”',
+  );
+  await outlinesPart(result, 'context:ending');
+  await contains(explorer, [
+    'sentence>word:context:0',
+    'sentence>word:noun',
+    'word:context:0>part:context:stem',
+    'word:context:0>part:context:ending',
+  ]);
+  await expect(explorer.locator('[data-parts-for]')).toHaveCount(1);
+  await sourceCrops(explorer);
+  await selectNode(explorer, 'part:context:stem');
+  await family(beginnings, 'Location');
+  await beginnings.getByRole('button', { name: /^In\b/ }).click();
+  await sentence(result, 'فِي بَيْتِي', 'fī baytī', 'In my house');
+  await noInventedCase();
+  await family(beginnings, 'Pointing');
+  await beginnings.getByRole('button', { name: /^This is\b/ }).click();
+  await sentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
+  await selectNode(explorer, 'word:noun');
+  await explorer.getByRole('button', { name: 'How many?', exact: true }).click();
+  const numbers = explorer.getByRole('region', { name: 'How many?', exact: true });
+  await numbers.getByRole('button', { name: /^Two\b/ }).click();
+  await sentence(result, 'هَذَانِ بَيْتَايَ', 'hādhāni baytāya', 'These are my two houses');
+  await expect(explorer.locator('[data-structure-node="part:number"]')).toHaveCount(0);
+  await expect(explorer.locator('[data-structure-node="part:case"]')).toHaveCount(0);
+  await expect(explorer.locator('[data-structure-node="part:owner"]')).toHaveCount(1);
+  await expect(
+    explorer.locator('[data-structure-node="part:owner"] .arabic-structure-node-latin'),
+  ).toHaveText('āya');
+  await sourceCrops(explorer);
+  await numbers.getByRole('button', { name: 'Close choices', exact: true }).click();
+  await explorer.getByRole('button', { name: 'How many?', exact: true }).click();
+  await expect(numbers.getByRole('button', { name: /^Two\b/ })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(explorer.getByRole('region', { name: 'Whose?', exact: true })).toHaveCount(0);
+  await selectNode(explorer, 'part:owner');
+  await expect(explorer.getByRole('region', { name: 'Whose?', exact: true })).toBeVisible();
+  await expect(numbers).toHaveCount(0);
+  await selectNode(explorer, 'word:context:0');
+  await family(beginnings, 'Location');
+  await beginnings.getByRole('button', { name: /^In\b/ }).click();
+  await sentence(result, 'فِي بَيْتَيَّ', 'fī baytayya', 'In my two houses');
+  await selectNode(explorer, 'word:noun');
+  await expect(
+    explorer.locator('[data-structure-node="part:owner"] .arabic-structure-node-latin'),
+  ).toHaveText('ayya');
+  await expect(explorer.locator('[data-structure-node="part:number"]')).toHaveCount(0);
+  await expect(explorer.locator('[data-structure-node="part:case"]')).toHaveCount(0);
+  await sourceCrops(explorer);
+  await fits(page);
+  expect(state.errors).toEqual([]);
+});
+
+test('removed beginnings and owners remain reachable without fake structural parts at 320px', async ({
+  page,
+}) => {
+  const { builder, explorer, result, state } = await open(page, 320);
+  await selectNode(explorer, 'word:context:0');
+  let beginnings = builder.getByRole('region', { name: 'Choose a beginning', exact: true });
+  await beginnings.getByRole('button', { name: 'Just the word', exact: true }).click();
+  await sentence(result, 'بَيْتِي', 'baytī', 'My house');
+  await beginnings.getByRole('button', { name: 'Close choices', exact: true }).click();
+  await expect(explorer.locator('[data-structure-node="word:context:0"]')).toHaveCount(0);
+  await explorer.getByRole('button', { name: 'Add a beginning', exact: true }).click();
+  beginnings = builder.getByRole('region', { name: 'Choose a beginning', exact: true });
+  await beginnings.getByRole('button', { name: /^This is\b/ }).click();
+  await sentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
+  await expect(explorer.locator('[data-choice-for]')).toHaveAttribute(
+    'data-choice-for',
+    'word:context:0',
+  );
+  await expect(explorer.locator('path[data-edge-kind="replaces"]')).toHaveAttribute(
+    'data-from',
+    'word:context:0',
+  );
+  await beginnings.getByRole('button', { name: 'Close choices', exact: true }).click();
+  await selectNode(explorer, 'part:owner');
+  const owners = builder.getByRole('region', { name: 'Whose?', exact: true });
+  await owners.getByRole('button', { name: 'More people & no owner', exact: true }).click();
+  await owners.getByRole('button', { name: /^No owner\b/ }).click();
+  await sentence(result, 'هَذَا بَيْتٌ', 'hādhā baytun', 'This is a house');
+  await owners.getByRole('button', { name: 'Close choices', exact: true }).click();
+  await expect(explorer.locator('[data-structure-node="part:owner"]')).toHaveCount(0);
+  await explorer.getByRole('button', { name: 'Whose?', exact: true }).click();
+  await owners.getByRole('button', { name: /^My\b/ }).click();
+  await sentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
+  await expect(explorer.locator('[data-structure-node="part:owner"]')).toHaveCount(1);
+  await expect(explorer.locator('[data-choice-for]')).toHaveCount(1);
+  await expect(explorer.locator('[data-choice-for]')).toHaveAttribute(
+    'data-choice-for',
+    'part:owner',
+  );
+  await expect(explorer.locator('path[data-edge-kind="replaces"]')).toHaveAttribute(
+    'data-from',
+    'part:owner',
+  );
+  await outlinesPart(result, 'owner');
   await fits(page);
   expect(state.errors).toEqual([]);
 });

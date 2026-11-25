@@ -1,0 +1,329 @@
+.arabic-structure-explorer {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px 14px;
+  font-size: 1rem;
+}
+.arabic-structure-explorer .arabic-structure-lines {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+.arabic-structure-explorer .arabic-structure-lines > path {
+  fill: none;
+  stroke: var(--part-colour);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+  opacity: 0.65;
+}
+.arabic-structure-explorer .arabic-structure-lines .is-replaces {
+  stroke: var(--part-colour);
+  stroke-dasharray: 3 5;
+  stroke-width: 2;
+  opacity: 0.8;
+}
+.arabic-structure-explorer .arabic-structure-lines .is-causes {
+  stroke: var(--arabic-case);
+  stroke-dasharray: 9 4;
+  stroke-width: 2;
+  opacity: 0.9;
+}
+.arabic-structure-explorer .arabic-structure-lines marker path {
+  fill: var(--arabic-case);
+}
+.arabic-structure-explorer .arabic-structure-sentence {
+  position: sticky;
+  top: var(--jic-prayer-visible-height, 0px);
+  z-index: 4;
+  padding: 6px 8px 12px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.arabic-structure-explorer .arabic-result-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 650;
+  color: var(--jic-text);
+}
+.arabic-structure-explorer .arabic-structure-sentence > .arabic-script {
+  position: relative;
+  margin: 0;
+  font-size: clamp(2.6rem, 8vw, 3.25rem);
+  line-height: 1.55;
+}
+.arabic-structure-explorer .arabic-structure-sentence > .arabic-pronunciation {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.arabic-structure-explorer .arabic-structure-sentence > .arabic-translation {
+  margin: 4px 0 0 !important;
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+.arabic-structure-explorer .arabic-structure-meaning {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 1px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--part-colour);
+  font: inherit;
+  white-space: pre-wrap;
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+}
+.arabic-structure-explorer .arabic-structure-meaning[aria-expanded='true'] {
+  text-decoration-style: solid;
+}
+.arabic-structure-explorer .arabic-structure-sentence > .arabic-connection-layer {
+  z-index: 3;
+}
+.arabic-structure-explorer .arabic-connection-line {
+  display: none;
+}
+.arabic-structure-explorer .arabic-structure-words {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 32px;
+  min-width: 0;
+}
+.arabic-structure-explorer .arabic-structure-word-branch {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 210px;
+}
+.arabic-structure-explorer .arabic-structure-word-branch.is-expanded {
+  flex-grow: 2.4;
+  max-width: 480px;
+}
+.arabic-structure-explorer .arabic-structure-word,
+.arabic-structure-explorer .arabic-structure-part {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  min-height: 74px;
+  padding: 8px 7px;
+  border: 1px solid color-mix(in srgb, var(--part-colour) 32%, var(--jic-surface));
+  border-radius: 12px;
+  background: var(--jic-surface);
+  color: var(--part-colour);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.arabic-structure-explorer .arabic-structure-word:hover,
+.arabic-structure-explorer .arabic-structure-part:hover,
+.arabic-structure-explorer .is-selected {
+  border-color: var(--part-colour);
+  background: color-mix(in srgb, var(--part-colour) 6%, var(--jic-surface));
+}
+.arabic-structure-explorer .arabic-structure-word-script {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  font-size: clamp(1.7rem, 4.4vw, 2.4rem);
+  line-height: 1.55;
+}
+.arabic-structure-explorer .arabic-glyph-run,
+.arabic-structure-explorer .arabic-glyph-word {
+  max-width: 100%;
+}
+.arabic-structure-explorer .arabic-glyph-word {
+  height: auto;
+}
+.arabic-structure-explorer .arabic-structure-node-latin {
+  max-width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--jic-text-secondary);
+  overflow-wrap: anywhere;
+}
+.arabic-structure-explorer [data-structure-node='part:case'] .arabic-structure-node-latin {
+  color: var(--part-colour);
+}
+.arabic-structure-explorer .arabic-structure-word strong,
+.arabic-structure-explorer .arabic-structure-part strong {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.arabic-structure-explorer .arabic-structure-disclosure {
+  color: var(--jic-muted);
+}
+.arabic-structure-explorer
+  .arabic-structure-word[aria-expanded='true']
+  > .arabic-structure-disclosure {
+  transform: rotate(180deg);
+}
+.arabic-structure-explorer .arabic-structure-parts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 30px;
+}
+.arabic-structure-explorer .arabic-structure-part {
+  flex: 1 1 44px;
+  min-width: 44px;
+  padding: 7px 5px;
+}
+.arabic-structure-explorer .arabic-structure-part-ink {
+  display: block;
+  width: 100%;
+  max-width: 110px;
+  height: 42px;
+  overflow: hidden;
+}
+.arabic-structure-explorer .arabic-structure-part-fallback {
+  font-family: var(--arabic-font);
+  font-size: 1.8rem;
+}
+.arabic-structure-explorer .arabic-structure-word-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 28px;
+}
+.arabic-structure-explorer .arabic-structure-word-options button,
+.arabic-structure-explorer .arabic-structure-rule-options button {
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 8px;
+  background: var(--jic-surface);
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+.arabic-structure-explorer .arabic-structure-word-options button[aria-expanded='true'],
+.arabic-structure-explorer .arabic-structure-rule-options button[aria-pressed='true'] {
+  border-color: var(--arabic-stem);
+  color: var(--arabic-stem);
+}
+.arabic-structure-explorer .arabic-structure-choices {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  margin-top: 30px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 12px;
+  overflow: clip;
+  background: var(--jic-surface);
+}
+.arabic-structure-explorer .arabic-structure-choices .arabic-choice-tray {
+  border-top: 0;
+  padding: 10px;
+}
+.arabic-structure-explorer .arabic-structure-choices .arabic-option-grid {
+  max-height: min(15rem, 35svh);
+}
+.arabic-structure-explorer .arabic-structure-mark-note {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 18px 0 0;
+  padding: 10px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 12px;
+  background: var(--jic-surface);
+}
+.arabic-structure-explorer .arabic-structure-mark-note figcaption {
+  flex: 1;
+  min-width: 0;
+}
+.arabic-structure-explorer .arabic-structure-mark-note p {
+  margin-top: 4px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.arabic-structure-explorer .arabic-structure-part-note {
+  position: relative;
+  margin: 18px 0 0;
+  padding: 10px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 12px;
+  background: var(--jic-surface);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.arabic-structure-explorer .arabic-structure-mark-note > button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  background: transparent;
+}
+.arabic-structure-explorer .arabic-structure-rule {
+  position: relative;
+  margin-top: 16px;
+  background: var(--jic-surface);
+  font-size: 1rem;
+}
+.arabic-structure-explorer .arabic-structure-rule summary {
+  min-height: 44px;
+  padding: 10px 4px;
+  cursor: pointer;
+}
+.arabic-structure-explorer .arabic-structure-rule-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+.arabic-structure-explorer .arabic-structure-rule p {
+  padding: 0 4px 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+@media (max-width: 479px) {
+  .arabic-structure-explorer {
+    padding: 8px;
+  }
+  .arabic-structure-explorer .arabic-structure-words {
+    gap: 10px;
+  }
+  .arabic-structure-explorer .arabic-structure-word,
+  .arabic-structure-explorer .arabic-structure-part {
+    padding-inline: 5px;
+  }
+  .arabic-structure-explorer .arabic-structure-mark-note {
+    flex-wrap: wrap;
+  }
+  .arabic-structure-explorer .arabic-structure-mark-note .arabic-glyph-closeup {
+    width: 3rem;
+    height: 3rem;
+  }
+  .arabic-structure-explorer .arabic-structure-mark-note > button {
+    margin-left: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arabic-structure-explorer *,
+  .arabic-structure-explorer *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}

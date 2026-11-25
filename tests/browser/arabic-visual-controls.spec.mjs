@@ -11,6 +11,7 @@ async function openPlayground(page, width) {
   await page.addInitScript(() => {
     sessionStorage.setItem('jic-salawat-shown', '1');
     localStorage.removeItem('jic.arabic.builder.v1');
+    localStorage.removeItem('jic.arabic.builder.v2');
     localStorage.setItem('jic-theme', 'light');
   });
   await page.goto('/learning/arabic');
@@ -25,9 +26,10 @@ async function openPlayground(page, width) {
   const builder = page.locator('#arabic-workspace > .arabic-builder');
   await expect(builder).toHaveCount(1);
   await expect(builder).toBeVisible();
-  const result = builder.locator(':scope > .arabic-result');
-  await expect(result.locator('.arabic-translation')).toHaveText('This is our house');
-  return { state, builder, result };
+  const explorer = builder.getByRole('region', { name: 'Sentence structure', exact: true });
+  const result = explorer.locator(':scope > .arabic-result');
+  await expectSentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
+  return { state, builder, explorer, result };
 }
 
 async function expectSentence(result, arabic, latin, english) {
@@ -91,7 +93,11 @@ async function expectMarkConnection(result, part, mark) {
     'data-connection-source-index',
     await ink.getAttribute('data-source-index'),
   );
-  await expect(result.locator('.arabic-vowel-focus .arabic-glyph-closeup')).toBeVisible();
+  const sourceIndex = await ink.getAttribute('data-source-index');
+  await expect(result).toHaveAttribute('data-focus-source-index', sourceIndex);
+  const closeup = result.locator('..').locator('.arabic-structure-mark-note .arabic-glyph-closeup');
+  await expect(closeup).toBeVisible();
+  await expect(closeup).toHaveAttribute('data-focus-source-index', sourceIndex);
   // Result text commits before the measured SVG overlay settles. Read both
   // rectangles in the same frame and wait for the real ink to be enclosed.
   await expect
@@ -123,6 +129,20 @@ async function expectMarkConnection(result, part, mark) {
 
 const markPath = (result, part, mark) =>
   result.locator(`.arabic-script [data-part="${part}"][data-mark="${mark}"] path`).first();
+
+async function selectNode(explorer, id) {
+  const control = explorer.locator(`button[data-structure-node="${id}"]`);
+  await control.focus();
+  await control.press('Enter');
+  return control;
+}
+
+async function chooseFamily(choices, family) {
+  await choices
+    .getByRole('group', { name: 'Beginning families', exact: true })
+    .getByRole('button', { name: family, exact: true })
+    .click();
+}
 
 async function inkInfo(path) {
   await expect(path).toBeVisible();
@@ -167,7 +187,12 @@ for (const width of [390, 320]) {
   test(`real Arabic vowels keep their own colours and open inline choices at ${width}px`, async ({
     page,
   }, info) => {
-    const { state, builder, result } = await openPlayground(page, width);
+    const { state, builder, explorer, result } = await openPlayground(page, width);
+    await selectNode(explorer, 'part:owner');
+    await builder
+      .getByRole('region', { name: 'Whose?', exact: true })
+      .getByRole('button', { name: /^Our\b/ })
+      .click();
     await expectSentence(result, 'هَذَا بَيْتُنَا', 'hādhā baytunā', 'This is our house');
 
     const stemTa = result.locator('.arabic-script [data-part="stem"][data-character="ت"]');
@@ -193,9 +218,11 @@ for (const width of [390, 320]) {
     );
 
     await tapVisibleInk(page, dammaPath);
-    const choices = await expectInlineChoices(page, builder, 'Try a vowel');
+    const choices = await expectInlineChoices(page, builder, 'The beginning sets the ending');
     await expectMarkConnection(result, 'case', 'damma');
-    await choices.getByRole('button', { name: /Fatḥa/ }).click();
+    await chooseFamily(choices, 'Actions');
+    await expectSentence(result, 'هَذَا بَيْتُنَا', 'hādhā baytunā', 'This is our house');
+    await choices.getByRole('button', { name: /^I saw\b/ }).click();
     await expectSentence(result, 'رَأَيْتُ بَيْتَنَا', 'raʾaytu baytanā', 'I saw our house');
     const fatha = await inkInfo(markPath(result, 'case', 'fatha'));
     expect(fatha.fill).not.toBe(damma.fill);
@@ -203,7 +230,9 @@ for (const width of [390, 320]) {
     expect(fatha.outlineLength).toBeGreaterThan(0);
     await expectMarkConnection(result, 'case', 'fatha');
 
-    await choices.getByRole('button', { name: /Kasra/ }).click();
+    await chooseFamily(choices, 'Location');
+    await expectSentence(result, 'رَأَيْتُ بَيْتَنَا', 'raʾaytu baytanā', 'I saw our house');
+    await choices.getByRole('button', { name: /^In\b/ }).click();
     await expectSentence(result, 'فِي بَيْتِنَا', 'fī baytinā', 'In our house');
     const kasra = await inkInfo(markPath(result, 'case', 'kasra'));
     const updatedTa = await stemTa.boundingBox();
@@ -213,11 +242,11 @@ for (const width of [390, 320]) {
     expect(kasra.centreY, 'Kasra should be below the letter it belongs to').toBeGreaterThan(
       updatedTa.y + updatedTa.height / 2,
     );
-    await expect(choices.getByRole('button', { name: /Kasra/ })).toHaveAttribute(
+    await expect(choices.getByRole('button', { name: /^In\b/ })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    await expectInlineChoices(page, builder, 'Try a vowel');
+    await expectInlineChoices(page, builder, 'The beginning sets the ending');
     await expectMarkConnection(result, 'case', 'kasra');
     expect(state.errors).toEqual([]);
     await page.screenshot({ path: info.outputPath('vowel-choices.png'), fullPage: true });
@@ -226,7 +255,8 @@ for (const width of [390, 320]) {
   test(`his becomes hi after in, with owner choices, word search and Escape at ${width}px`, async ({
     page,
   }, info) => {
-    const { state, builder, result } = await openPlayground(page, width);
+    const { state, builder, explorer, result } = await openPlayground(page, width);
+    await selectNode(explorer, 'part:owner');
     const owners = await expectInlineChoices(page, builder, 'Whose?');
     await owners.getByRole('button', { name: /^His\b/ }).click();
     await expectSentence(result, 'هَذَا بَيْتُهُ', 'hādhā baytuhu', 'This is his house');
@@ -240,20 +270,29 @@ for (const width of [390, 320]) {
       'true',
     );
 
-    await builder.getByRole('button', { name: /^Change beginning:/ }).click();
-    const beginnings = await expectInlineChoices(page, builder, 'Start with…');
-    await beginnings.getByRole('button', { name: /^In…/ }).click();
+    await selectNode(explorer, 'word:context:0');
+    const beginnings = await expectInlineChoices(page, builder, 'Choose a beginning');
+    await chooseFamily(beginnings, 'Location');
+    await beginnings.getByRole('button', { name: /^In\b/ }).click();
     await expectSentence(result, 'فِي بَيْتِهِ', 'fī baytihi', 'In his house');
-    await expect(
-      builder.getByRole('button', { name: 'Change whose?: His', exact: true }),
-    ).toBeVisible();
     const caseKasra = await inkInfo(markPath(result, 'case', 'kasra'));
     const ownerKasra = await inkInfo(markPath(result, 'owner', 'kasra'));
     expect(caseKasra.fill).toBe(ownerKasra.fill);
     await expect(markPath(result, 'case', 'damma')).toHaveCount(0);
     await expect(markPath(result, 'owner', 'damma')).toHaveCount(0);
 
-    const wordPicker = builder.getByRole('button', { name: /^Change word:/ });
+    await selectNode(explorer, 'word:noun');
+    await expect(explorer.locator('button[data-structure-node="part:owner"]')).toHaveAccessibleName(
+      'Change part: His',
+    );
+    const croppedOwnerKasra = explorer
+      .locator('button[data-structure-node="part:owner"]')
+      .locator('.arabic-structure-crop-ink[data-mark="kasra"] path')
+      .first();
+    await tapVisibleInk(page, croppedOwnerKasra);
+    await expect(builder.getByRole('region', { name: 'Whose?', exact: true })).toBeVisible();
+    await expectMarkConnection(result, 'owner', 'kasra');
+    const wordPicker = explorer.locator('button[data-structure-node="part:stem"]');
     await wordPicker.focus();
     await wordPicker.press('Enter');
     const words = await expectInlineChoices(page, builder, 'Choose a word');
@@ -269,7 +308,7 @@ for (const width of [390, 320]) {
     await expect(words).toHaveCount(0);
     await expect(wordPicker).toBeFocused();
     await expect(wordPicker).toHaveAttribute('aria-expanded', 'false');
-    await expect(wordPicker).toHaveAccessibleName('Change word: School');
+    await expect(wordPicker).toHaveAccessibleName('Change part: School');
     await expectSentence(result, 'فِي مَدْرَسَتِهِ', 'fī madrasatihi', 'In his school');
     await expectPhoneFit(page);
     expect(state.errors).toEqual([]);
@@ -346,17 +385,17 @@ for (const width of [390, 320]) {
 test('a tapped verb ending keeps its own vowel focus when the person also has a prefix', async ({
   page,
 }) => {
-  const { builder, result, state } = await openPlayground(page, 390);
+  const { builder, explorer, result, state } = await openPlayground(page, 390);
   await page
     .getByRole('group', { name: 'Build a thing or an action', exact: true })
-    .getByRole('button', { name: 'An action', exact: true })
+    .getByRole('button', { name: /^An action\b/ })
     .click();
-  await builder.getByRole('button', { name: 'Step 3: choose when', exact: true }).click();
+  await explorer.getByRole('button', { name: 'When?', exact: true }).click();
   await builder
     .getByRole('region', { name: 'When?', exact: true })
     .getByRole('button', { name: /^Now \/ usually/ })
     .click();
-  await builder.getByRole('button', { name: 'Step 2: choose who', exact: true }).click();
+  await selectNode(explorer, 'part:prefix');
   const people = builder.getByRole('region', { name: 'Who?', exact: true });
   await people.getByRole('button', { name: /^You · one woman/ }).click();
   await expectSentence(result, 'تَكْتُبِينَ', 'taktubīna', 'You write');
@@ -369,7 +408,7 @@ test('a tapped verb ending keeps its own vowel focus when the person also has a 
   await expectMarkConnection(result, 'ending', 'kasra');
   await people.getByRole('button', { name: /^He\b/ }).click();
   await expectSentence(result, 'يَكْتُبُ', 'yaktubu', 'He writes');
-  await expect(result.locator('.arabic-vowel-focus')).toHaveCount(0);
+  await expect(explorer.locator('.arabic-structure-mark-note')).toHaveCount(0);
   await expectPhoneFit(page);
   expect(state.errors).toEqual([]);
 });
