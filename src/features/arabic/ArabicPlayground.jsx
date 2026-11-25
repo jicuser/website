@@ -5,10 +5,10 @@ import {
   BookOpen,
   Check,
   Layers,
-  Network,
+  Table2,
   RotateCcw,
   Search,
-  Sparkles,
+  MessageCircle,
   Type,
   Undo2,
 } from 'lucide-react';
@@ -39,15 +39,18 @@ import ArabicChangeStory from './ArabicChangeStory';
 import GrammarExplorer from './GrammarExplorer';
 import PracticePanel from './PracticePanel';
 import SentenceBuilder from './SentenceBuilder';
+import GuidedWordStudy from './GuidedWordStudy';
+import ArabicQuickReference from './ArabicQuickReference';
+import { searchVocabulary } from './guidedWordData.mjs';
+import './arabic-studio.css';
 
 const INITIAL_NOUN = INITIAL_EXPLORER_NOUN;
 const INITIAL_VERB = { verbId: 'kataba', personId: 'we', tenseId: 'past' };
 const STORAGE_KEY = 'jic.arabic.builder.v2';
 const TABS = [
-  { id: 'build', label: 'Words', icon: Type },
-  { id: 'sentences', label: 'Sentences', icon: Layers },
-  { id: 'explore', label: 'Rule map', icon: Network },
-  { id: 'practice', label: 'Practise', icon: Sparkles },
+  { id: 'word', label: 'A word', icon: Type },
+  { id: 'build', label: 'A sentence', icon: Layers },
+  { id: 'practice', label: 'Practise', icon: MessageCircle },
 ];
 const isKnown = (options, value) => options.some((option) => option.id === value);
 
@@ -155,6 +158,7 @@ function BeginningPicker({ noun, selector, onChange, onClose, familyId }) {
 function NounPicker({ noun, selector, onChange, onClose, familyId }) {
   const [query, setQuery] = useState('');
   const [all, setAll] = useState(false);
+  const [category, setCategory] = useState('All');
   const selectedNoun = NOUNS.find((item) => item.id === noun.nounId);
   if (selector === 'context' || selector === 'case')
     return (
@@ -185,12 +189,12 @@ function NounPicker({ noun, selector, onChange, onClose, familyId }) {
   const config = choices[selector] || choices.stem;
   const common = selector === 'stem' ? NOUNS.slice(0, 6).map((item) => item.id) : COMMON_OWNERS;
   const hasMore = ['stem', 'owner'].includes(selector);
-  const filtered = config.options.filter((option) => {
+  const matching = selector === 'stem' ? searchVocabulary(config.options, query) : config.options;
+  const filtered = matching.filter((option) => {
+    if (selector === 'stem' && category !== 'All' && option.category !== category) return false;
     if (!all && !query && hasMore && !common.includes(option.id) && noun[config.key] !== option.id)
-      return false;
-    return `${option.label} ${option.english || ''} ${option.arabic || ''} ${option.latin || ''} ${option.root || ''}`
-      .toLowerCase()
-      .includes(query.toLowerCase().trim());
+      return category !== 'All';
+    return true;
   });
   return (
     <InlineChoices
@@ -207,9 +211,29 @@ function NounPicker({ noun, selector, onChange, onClose, familyId }) {
             aria-label="Find an Arabic word"
             placeholder="Find a word"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setCategory('All');
+            }}
           />
         </label>
+      )}
+      {selector === 'stem' && (
+        <div className="arabic-vocabulary-categories" role="group" aria-label="Word categories">
+          {['All', ...new Set(NOUNS.map((item) => item.category))].map((item) => (
+            <button
+              type="button"
+              key={item}
+              aria-pressed={category === item}
+              onClick={() => {
+                setCategory(item);
+                setAll(item !== 'All');
+              }}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
       )}
       <div className={`arabic-option-grid ${selector === 'stem' ? 'is-vocabulary' : ''}`}>
         {filtered.map((option) => {
@@ -370,7 +394,11 @@ export default function ArabicPlayground() {
     group.children.some((page) => page.path === '/learning/arabic'),
   );
   const [initial] = useState(loadChoices);
-  const [tab, setTab] = useState('build');
+  const [tab, setTab] = useState('word');
+  const [reference, setReference] = useState(null);
+  const referenceOpener = useRef(null);
+  const [showGuide, setShowGuide] = useState(false);
+  const [patternsReady, setPatternsReady] = useState(false);
   const [mode, setMode] = useState('noun');
   const [noun, setNoun] = useState(initial.noun);
   const [verb, setVerb] = useState(initial.verb);
@@ -408,6 +436,10 @@ export default function ArabicPlayground() {
     setSelector(next);
     setSelectionDetail(detail);
   };
+  const openReference = (topic, trigger) => {
+    referenceOpener.current = trigger || document.activeElement;
+    setReference(topic);
+  };
   const changeMode = (next) => {
     setMode(next);
     setPrevious(null);
@@ -424,6 +456,8 @@ export default function ArabicPlayground() {
       setMode('noun');
     }
     setTab('build');
+    setReference(null);
+    setShowGuide(false);
     setSelectionDetail(null);
     setPrevious(null);
     setUndoChoice(null);
@@ -473,7 +507,10 @@ export default function ArabicPlayground() {
       />
     ));
   return (
-    <section className="arabic-app page-transition" aria-labelledby="arabic-page-title">
+    <section
+      className="arabic-app arabic-studio page-transition"
+      aria-labelledby="arabic-page-title"
+    >
       <header className="arabic-page-header">
         <div>
           {learningSection && (
@@ -481,36 +518,81 @@ export default function ArabicPlayground() {
               {learningSection.name}
             </Link>
           )}
-          <h1 id="arabic-page-title">
-            Learn Arabic{' '}
-            <span lang="ar" dir="rtl">
-              تَعَلَّمِ الْعَرَبِيَّةَ
-            </span>
-          </h1>
-          <p>Tap. Change. Understand.</p>
+          <h1 id="arabic-page-title">Learn Arabic</h1>
+          <p>One word at a time.</p>
         </div>
-        <span className="arabic-level">Fuṣḥā · Start anywhere</span>
+        <span className="arabic-level">
+          <span lang="ar" dir="rtl">
+            العربية
+          </span>
+          <small>Fuṣḥā</small>
+        </span>
       </header>
-      <nav className="arabic-tabs" aria-label="Arabic learning tools">
-        {TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            type="button"
-            key={id}
-            aria-current={tab === id ? 'page' : undefined}
-            className={tab === id ? 'is-active' : ''}
-            onClick={() => {
-              setTab(id);
-              setSelector(null);
-            }}
-          >
-            <Icon size={18} aria-hidden="true" />
-            <span>{label}</span>
+      <div className="arabic-studio-navigation">
+        <nav className="arabic-tabs" aria-label="Arabic learning tools">
+          {TABS.map(({ id, label, icon: Icon }) => (
+            <button
+              type="button"
+              key={id}
+              aria-current={tab === id ? 'page' : undefined}
+              className={tab === id ? 'is-active' : ''}
+              onClick={() => {
+                setTab(id);
+                setSelector(null);
+                setReference(null);
+                setShowGuide(false);
+              }}
+            >
+              <Icon size={18} aria-hidden="true" />
+              <span>{label}</span>
+            </button>
+          ))}
+        </nav>
+        <button
+          type="button"
+          className="arabic-reference-trigger"
+          aria-label="Open quick tables"
+          title="Quick tables"
+          aria-expanded={reference !== null}
+          aria-controls="arabic-quick-reference"
+          onClick={(event) =>
+            reference ? setReference(null) : openReference('sounds', event.currentTarget)
+          }
+        >
+          <Table2 size={20} aria-hidden="true" />
+          <span>Tables</span>
+        </button>
+      </div>
+      {reference && (
+        <ArabicQuickReference
+          key={reference}
+          topic={reference}
+          returnFocusTo={referenceOpener.current}
+          onClose={() => setReference(null)}
+          onShowGuide={() => {
+            setReference(null);
+            setShowGuide(true);
+          }}
+        />
+      )}
+      {showGuide && (
+        <section className="arabic-full-guide">
+          <button type="button" className="arabic-quiet" onClick={() => setShowGuide(false)}>
+            Close grammar guide
           </button>
-        ))}
-      </nav>
+          <GrammarExplorer onTryExample={tryExample} />
+        </section>
+      )}
       <div id="arabic-workspace" className="arabic-workspace">
+        <div hidden={tab !== 'word'}>
+          <GuidedWordStudy onBuildSentence={tryExample} onOpenReference={openReference} />
+        </div>
         {tab === 'build' && (
           <>
+            <div className="arabic-sentence-intro">
+              <span className="arabic-studio-kicker">Build a sentence</span>
+              <p>Choose a meaning. Follow the words and their endings.</p>
+            </div>
             <div className="arabic-workspace-heading">
               <div
                 className="arabic-mode-switch"
@@ -522,14 +604,14 @@ export default function ArabicPlayground() {
                   onClick={() => changeMode('noun')}
                   aria-pressed={mode === 'noun'}
                 >
-                  A thing <span>house, book…</span>
+                  Describe something
                 </button>
                 <button
                   type="button"
                   onClick={() => changeMode('verb')}
                   aria-pressed={mode === 'verb'}
                 >
-                  An action <span>write, learn…</span>
+                  Say an action
                 </button>
               </div>
               <button
@@ -547,7 +629,16 @@ export default function ArabicPlayground() {
               className={`arabic-panel arabic-builder ${selector ? 'has-choices' : ''}`}
             >
               <div className="arabic-structure-toolbar">
-                <span>One sentence. Follow its parts.</span>
+                <button
+                  type="button"
+                  className="arabic-quiet"
+                  onClick={(event) =>
+                    openReference(mode === 'noun' ? 'owners' : 'verbs', event.currentTarget)
+                  }
+                >
+                  <Table2 size={16} aria-hidden="true" />{' '}
+                  {mode === 'noun' ? 'Ending table' : 'Past / present table'}
+                </button>
                 {undoChoice && (
                   <button type="button" className="arabic-quiet" onClick={undo}>
                     <Undo2 size={16} aria-hidden="true" /> Undo
@@ -601,11 +692,20 @@ export default function ArabicPlayground() {
             </div>
           </>
         )}
-        <div hidden={tab !== 'sentences'}>
-          <SentenceBuilder />
-        </div>
-        <div hidden={tab !== 'explore'}>
-          <GrammarExplorer onTryExample={tryExample} />
+        <div className="arabic-patterns-host" hidden={tab !== 'build'}>
+          <details
+            className="arabic-patterns-disclosure"
+            onToggle={(event) => {
+              if (event.currentTarget.open) setPatternsReady(true);
+            }}
+          >
+            <summary>
+              <Layers size={17} aria-hidden="true" />
+              <span>More sentence patterns</span>
+              <small>Questions, descriptions and actions</small>
+            </summary>
+            {patternsReady && <SentenceBuilder />}
+          </details>
         </div>
         <div hidden={tab !== 'practice'}>
           <PracticePanel />
@@ -637,7 +737,7 @@ export default function ArabicPlayground() {
           <p>
             Practice examples are newly written. They are not Qur’anic verses. Open the existing
             Qur’an reader to read the original text. Dictionary and grammar references are in the
-            Rule map.
+            grammar guide, available from Tables.
           </p>
         </details>
       </footer>

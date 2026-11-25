@@ -53,7 +53,9 @@ const attachedStem = (arabic) => (arabic.endsWith('ة') ? `${arabic.slice(0, -1)
 
 export function getAvailableNumbers(nounId) {
   const noun = find(NOUNS, nounId, 'noun');
-  return NUMBERS.filter((number) => number.id !== 'plural' || noun.plural);
+  return NUMBERS.filter((number) =>
+    noun.numbers ? noun.numbers.includes(number.id) : number.id !== 'plural' || noun.plural,
+  );
 }
 
 function demonstrative(noun, number, distant = false) {
@@ -107,7 +109,7 @@ function nounEnglish(noun, owner, context, number, definite) {
   if (beginning) parts.push({ id: 'context', text: beginning });
   if (owner.id !== 'none') parts.push({ id: 'owner', text: `${owner.english} ` });
   else if (definite) parts.push({ id: 'article', text: 'the ' });
-  else if (number === 'singular')
+  else if (number === 'singular' && noun.countable !== false)
     parts.push({ id: 'article', text: /^[aeiou]/i.test(noun.english) ? 'an ' : 'a ' });
   else if (number === 'plural') parts.push({ id: 'article', text: 'some ' });
   if (number === 'dual') parts.push({ id: 'number', text: 'two ' });
@@ -141,9 +143,16 @@ export function buildNoun({
   const isPlural = number === 'plural';
   const form = isPlural
     ? noun.plural
-    : { arabic: noun.arabic, latin: noun.latin, type: 'singular' };
+    : {
+        arabic: noun.arabic,
+        latin: noun.latin,
+        type: 'singular',
+        ownerStems: noun.ownerStems,
+        accusativeAlif: noun.accusativeAlif,
+      };
   const soundMasculine = isPlural && form.type === 'sound_m';
   let baseArabic = soundMasculine ? noun.arabic : form.arabic;
+  if (hasOwner && form.ownerStems) baseArabic = form.ownerStems[owner.id === 'my' ? 'i' : caseKey];
   let baseLatin = soundMasculine ? noun.latin : form.latin;
   const taMarbuta = baseArabic.endsWith('ة');
   baseLatin = spokenStem(baseArabic, baseLatin);
@@ -271,7 +280,8 @@ export function buildNoun({
     const tanwin = !isDefinite && !form.diptote;
     let endingArabic = tanwin ? TANWIN[visibleCase] : VOWELS[visibleCase];
     // Accusative tanwin adds a written alif for these curated consonant-final forms.
-    if (tanwin && visibleCase === 'a' && !taMarbuta) endingArabic += 'ا';
+    if (tanwin && visibleCase === 'a' && !taMarbuta && form.accusativeAlif !== false)
+      endingArabic += 'ا';
     wordSegments.push(
       piece(
         'case',
