@@ -47,7 +47,7 @@ The core tool needs no network service, dictionary account or new database table
 - `ArabicPlayground.jsx`, `GuidedWordStudy.jsx`, `ArabicQuickReference.jsx`, `ArabicStructureExplorer.jsx`, `ArabicControls.jsx`, `SentenceBuilder.jsx`: guided study, reference tables, editing and display.
 - `guidedWordData.mjs`: fixed pointing words, source-based sound notes, normalised vocabulary search and canonical table examples.
 - `GrammarExplorer.jsx`, `PracticePanel.jsx`, `learningContent.mjs`: lessons, repeat practice and storage validation.
-- `src/styles/arabic-playground.css`: scoped layout, colour system, compact choice trays and light/dark rendering. Imported through the site's canonical CSS entry point. Sentence-specific layout lives in `src/features/arabic/sentence-builder.css`.
+- `src/features/arabic/arabic-playground.css`: scoped layout, colour system, compact choice trays and light/dark rendering. Imported by `ArabicPlayground.jsx`, so it loads only with the Arabic page. Sentence-specific layout lives in `src/features/arabic/sentence-builder.css`.
 
 Run the grammar, sentence and learning tests with:
 

@@ -24,7 +24,6 @@
 | `ramadan.css`            | Ramadan choices, sponsorship boards and screen layouts                               |
 | `worship.css`            | Worship pages and Qur'an reader                                                      |
 | `read-learn.css`         | Read & Learn overview and its resource link from the Community Hub                   |
-| `arabic-playground.css`  | Arabic word and sentence builders, explanations, grammar map and practice          |
 | `tv.css`                 | Dedicated mosque-screen scale and layout                                             |
 | `spiritual-overlays.css` | Welcome salawat and occasional reflection overlays                                   |
 | `notice-placement.css`   | Announcement placement and the dismissible Read & Learn invitation               |
