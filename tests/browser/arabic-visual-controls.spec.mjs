@@ -4,7 +4,7 @@ import { sitewideFixture } from './helpers/sitewideFixture.mjs';
 // Keep the direct glyph-tap checks valid even under a non-phone CI project.
 test.use({ hasTouch: true });
 
-async function openPlayground(page, width) {
+async function openWordStudy(page, width) {
   await page.setViewportSize({ width, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' });
   const state = await sitewideFixture(page);
@@ -12,6 +12,7 @@ async function openPlayground(page, width) {
     sessionStorage.setItem('jic-salawat-shown', '1');
     localStorage.removeItem('jic.arabic.builder.v1');
     localStorage.removeItem('jic.arabic.builder.v2');
+    localStorage.removeItem('jic.arabic.word-study.v1');
     localStorage.setItem('jic-theme', 'light');
   });
   await page.goto('/learning/arabic');
@@ -19,10 +20,22 @@ async function openPlayground(page, width) {
   await expect(
     page
       .getByRole('navigation', { name: 'Arabic learning tools' })
-      .getByRole('button', { name: 'Words', exact: true }),
+      .getByRole('button', { name: 'A word', exact: true }),
   ).toHaveAttribute('aria-current', 'page');
-  // Words is the workspace's direct builder child. SentenceBuilder also stays
-  // mounted inside a hidden tab wrapper, so an unscoped builder is ambiguous.
+  const study = page.getByRole('region', { name: 'Explore one word', exact: true });
+  const canvas = study.locator('.arabic-guided-canvas');
+  await expectSentence(canvas, 'هَذَا', 'hādhā', 'This');
+  return { state, study, canvas };
+}
+
+async function openPlayground(page, width) {
+  const { state } = await openWordStudy(page, width);
+  await page
+    .getByRole('navigation', { name: 'Arabic learning tools' })
+    .getByRole('button', { name: 'A sentence', exact: true })
+    .click();
+  // The hierarchy builder is the direct workspace child. The optional,
+  // separate SentenceBuilder lives under More sentence patterns.
   const builder = page.locator('#arabic-workspace > .arabic-builder');
   await expect(builder).toHaveCount(1);
   await expect(builder).toBeVisible();
@@ -183,7 +196,152 @@ async function tapVisibleInk(page, path) {
   await page.touchscreen.tap(point.x, point.y);
 }
 
+async function expectGuidedMark(study, sourceIndex, part, mark) {
+  const canvas = study.locator('.arabic-guided-canvas');
+  const layer = canvas.locator('.arabic-connection-layer');
+  const ink = canvas.locator(
+    `.arabic-script .arabic-glyph-ink[data-source-index="${sourceIndex}"]`,
+  );
+  await expect(ink).toHaveAttribute('data-part', part);
+  await expect(ink).toHaveAttribute('data-mark', mark);
+  await expect(layer).toHaveAttribute('data-connection-part', part);
+  await expect(layer).toHaveAttribute('data-connection-source-index', String(sourceIndex));
+  const note = study.locator('.arabic-guided-note');
+  await expect(note).toHaveAttribute('data-focus-source-index', String(sourceIndex));
+  await expect(note.locator('.arabic-glyph-closeup')).toHaveAttribute(
+    'data-focus-source-index',
+    String(sourceIndex),
+  );
+  await expect
+    .poll(
+      () =>
+        canvas.evaluate((element, sourceIndex) => {
+          const glyph = element.querySelector(
+            `.arabic-script .arabic-glyph-ink[data-source-index="${sourceIndex}"]`,
+          );
+          const ring = element.querySelector('.arabic-connection-ring');
+          if (!glyph || !ring) return false;
+          const inkBox = glyph.getBoundingClientRect();
+          const ringBox = ring.getBoundingClientRect();
+          return (
+            inkBox.width > 0 &&
+            inkBox.height > 0 &&
+            ringBox.left < inkBox.left &&
+            ringBox.top < inkBox.top &&
+            ringBox.right > inkBox.right &&
+            ringBox.bottom > inkBox.bottom
+          );
+        }, sourceIndex),
+      { message: 'The guided word ring must enclose the tapped original mark, not its whole word' },
+    )
+    .toBe(true);
+  expect(await layer.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe('none');
+}
+
 for (const width of [390, 320]) {
+  test(`guided pointing words keep fixed sounds and exact vowel focus at ${width}px`, async ({
+    page,
+  }, info) => {
+    const { state, study, canvas } = await openWordStudy(page, width);
+    await expect(page.locator('#arabic-workspace > .arabic-builder')).toHaveCount(0);
+    await expect(
+      study.getByRole('group', { name: 'Word types', exact: true }).getByRole('button', {
+        name: 'Pointing',
+        exact: true,
+      }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    const pointing = study.getByRole('group', { name: 'Choose a pointing word', exact: true });
+    await pointing.getByRole('button', { name: 'hādhihi: feminine', exact: true }).click();
+    await expectSentence(canvas, 'هَذِهِ', 'hādhihi', 'This');
+
+    // The final i is a fixed sound in hādhihi, not an invented owner or case.
+    const finalKasra = canvas
+      .locator('.arabic-script .arabic-glyph-ink[data-source-index="5"] path')
+      .first();
+    const kasraInk = await inkInfo(finalKasra);
+    const letterInk = await inkInfo(
+      canvas.locator('.arabic-script .arabic-glyph-ink[data-source-index="4"] path').first(),
+    );
+    expect(kasraInk.fill).not.toBe(letterInk.fill);
+    await tapVisibleInk(page, finalKasra);
+    await expectGuidedMark(study, 5, 'pointing:2:context', 'kasra');
+    const note = study.locator('.arabic-guided-note');
+    await expect(note).toHaveAttribute('data-guided-explanation', 'short-vowel');
+    await expect(note).toContainText('fixed pointing word');
+    await expect(note).toContainText('not a changing noun-case ending');
+    await expectSentence(canvas, 'هَذِهِ', 'hādhihi', 'This');
+    await expect(study.getByRole('button', { name: /^Whose\?/ })).toHaveCount(0);
+
+    const inside = study.getByRole('button', { name: 'Look inside', exact: true });
+    await inside.click();
+    const inspection = study.getByRole('region', { name: 'Look inside the word', exact: true });
+    await expect(
+      inspection.getByRole('button', { name: 'Reading parts', exact: true }),
+    ).toBeVisible();
+    await expect(
+      inspection.getByRole('button', { name: 'Meaningful parts', exact: true }),
+    ).toHaveCount(0);
+    await inspection.getByRole('button', { name: 'Letters & vowels', exact: true }).click();
+    const sounds = inspection.getByRole('group', {
+      name: 'Letters and vowels in this word',
+      exact: true,
+    });
+    await expect(sounds.locator('button[data-guided-source-index]')).toHaveCount(6);
+    await expect(sounds.locator('[data-guided-source-index="5"]')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await sounds.locator('[data-guided-source-index="3"]').focus();
+    await sounds.locator('[data-guided-source-index="3"]').press('Enter');
+    await expectGuidedMark(study, 3, 'pointing:1:context', 'kasra');
+    await expectSentence(canvas, 'هَذِهِ', 'hādhihi', 'This');
+    await expectPhoneFit(page);
+    await page.keyboard.press('Escape');
+    await expect(inspection).toHaveCount(0);
+    await expect(inside).toBeFocused();
+
+    await study
+      .getByRole('group', { name: 'Near or far', exact: true })
+      .getByRole('button', { name: 'That', exact: true })
+      .click();
+    await expectSentence(canvas, 'تِلْكَ', 'tilka', 'That');
+    await expect(canvas.locator('.arabic-connection-layer')).toHaveCount(0);
+    await pointing.getByRole('button', { name: 'dhālika: masculine', exact: true }).click();
+    await expectSentence(canvas, 'ذَلِكَ', 'dhālika', 'That');
+    await study
+      .getByRole('group', { name: 'Near or far', exact: true })
+      .getByRole('button', { name: 'This', exact: true })
+      .click();
+    await expectSentence(canvas, 'هَذَا', 'hādhā', 'This');
+    await expectPhoneFit(page);
+
+    // A feminine, far-away pointing word must keep that agreement when the
+    // learner moves from its fixed spelling to a complete sentence.
+    await pointing.getByRole('button', { name: 'hādhihi: feminine', exact: true }).click();
+    await study
+      .getByRole('group', { name: 'Near or far', exact: true })
+      .getByRole('button', { name: 'That', exact: true })
+      .click();
+    await study.getByRole('button', { name: 'Use in a sentence', exact: true }).click();
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Arabic learning tools' })
+        .getByRole('button', { name: 'A sentence', exact: true }),
+    ).toHaveAttribute('aria-current', 'page');
+    const sentenceResult = page.locator(
+      '#arabic-workspace > .arabic-builder .arabic-structure-explorer > .arabic-result',
+    );
+    await expectSentence(
+      sentenceResult,
+      'تِلْكَ مَدْرَسَتِي',
+      'tilka madrasatī',
+      'That is my school',
+    );
+    await expectPhoneFit(page);
+    expect(state.errors).toEqual([]);
+    await page.screenshot({ path: info.outputPath('guided-pointing-word.png'), fullPage: true });
+  });
+
   test(`real Arabic vowels keep their own colours and open inline choices at ${width}px`, async ({
     page,
   }, info) => {
@@ -319,18 +477,17 @@ for (const width of [390, 320]) {
     page,
   }, info) => {
     const { state } = await openPlayground(page, width);
-    await page
-      .getByRole('navigation', { name: 'Arabic learning tools' })
-      .getByRole('button', { name: 'Sentences', exact: true })
-      .click();
+    await page.getByText('More sentence patterns', { exact: true }).click();
     await expect(
       page
         .getByRole('navigation', { name: 'Arabic learning tools' })
-        .getByRole('button', { name: 'Sentences', exact: true }),
+        .getByRole('button', { name: 'A sentence', exact: true }),
     ).toHaveAttribute('aria-current', 'page');
-    // The sentence studio is kept mounted between tabs. Select its active
-    // workspace wrapper, then keep every result/comparison query inside it.
-    const studio = page.locator('#arabic-workspace > :not([hidden]) > .arabic-sentence-studio');
+    // Keep all comparisons scoped to the additional sentence patterns, rather
+    // than the primary hierarchy builder, which remains visible above them.
+    const studio = page.locator(
+      '#arabic-workspace > .arabic-patterns-disclosure[open] > .arabic-sentence-studio',
+    );
     await expect(studio).toHaveCount(1);
     await expect(
       studio.getByRole('heading', { name: 'Make a sentence', exact: true }),
@@ -388,7 +545,7 @@ test('a tapped verb ending keeps its own vowel focus when the person also has a 
   const { builder, explorer, result, state } = await openPlayground(page, 390);
   await page
     .getByRole('group', { name: 'Build a thing or an action', exact: true })
-    .getByRole('button', { name: /^An action\b/ })
+    .getByRole('button', { name: 'Say an action', exact: true })
     .click();
   await explorer.getByRole('button', { name: 'When?', exact: true }).click();
   await builder

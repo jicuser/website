@@ -79,8 +79,9 @@ Words can wrap at spaces; a following question mark stays attached to its word.
 
 The checked atlas is `src/features/arabic/glyphs/atlas.json`. It is imported only
 by this component and therefore travels with the site's lazy Arabic feature.
-It is 714,579 bytes raw, 110,332 bytes gzip, with 3,011 word records and 82 shared
-outlines at the time this renderer was added. There is no extra runtime package.
+The guided revision contains 8,392 word records and 93 shared outlines: 2,015,181
+bytes raw and 289,792 bytes gzip. These are bounded feature assets, not homepage
+startup dependencies. There is no extra runtime package.
 Most data is compact numeric glyph positions; outlines are shared between words.
 
 To regenerate after changing bounded vocabulary, inflections or teaching examples:
@@ -93,7 +94,9 @@ node --test tests/arabic-glyphs.test.mjs
 Build-time requirements are Node, Python `fontTools`, and the system HarfBuzz
 library. The script reads the existing local font and never downloads one. It
 enumerates all noun and verb options through the real grammar engine, plus Arabic
-examples and options from `GRAMMAR_TOPICS` and `PRACTICE_QUESTIONS`. The practice
+examples and options from `GRAMMAR_TOPICS`, `PRACTICE_QUESTIONS` and
+`guidedGlyphResults()`, including every quick-table example and standalone
+pointing word. The practice
 comparison arrow `←` deliberately uses normal browser text because the Naskh font
 does not contain it. This atlas is bounded learning content, not a general Qur'an
 renderer.

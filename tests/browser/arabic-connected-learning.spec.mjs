@@ -3,7 +3,7 @@ import { sitewideFixture } from './helpers/sitewideFixture.mjs';
 
 test.use({ hasTouch: true });
 
-async function open(page, width, installed = false) {
+async function openWordStudy(page, width, installed = false) {
   await page.setViewportSize({ width, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const state = await sitewideFixture(page);
@@ -11,6 +11,7 @@ async function open(page, width, installed = false) {
     ({ installed, theme }) => {
       localStorage.removeItem('jic.arabic.builder.v1');
       localStorage.removeItem('jic.arabic.builder.v2');
+      localStorage.removeItem('jic.arabic.word-study.v1');
       localStorage.setItem('jic-theme', theme);
       sessionStorage.setItem('jic-salawat-shown', '1');
       if (installed)
@@ -19,6 +20,20 @@ async function open(page, width, installed = false) {
     { installed, theme: width === 390 ? 'dark' : 'light' },
   );
   await page.goto('/learning/arabic');
+  const navigation = page.getByRole('navigation', { name: 'Arabic learning tools' });
+  await expect(navigation.getByRole('button', { name: 'A word', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  const study = page.getByRole('region', { name: 'Explore one word', exact: true });
+  const canvas = study.locator('.arabic-guided-canvas');
+  await sentence(canvas, 'هَذَا', 'hādhā', 'This');
+  return { state, study, canvas, navigation };
+}
+
+async function open(page, width, installed = false) {
+  const { state, navigation } = await openWordStudy(page, width, installed);
+  await navigation.getByRole('button', { name: 'A sentence', exact: true }).click();
   const builder = page.locator('#arabic-workspace > .arabic-builder');
   const explorer = builder.getByRole('region', { name: 'Sentence structure', exact: true });
   const result = explorer.locator(':scope > .arabic-result');
@@ -203,6 +218,189 @@ async function meaningfulCurves(explorer) {
 }
 
 for (const width of [390, 320]) {
+  test(`guided word search finds friends and Friday and carries my friend into a sentence at ${width}px`, async ({
+    page,
+  }, info) => {
+    const { state, study, canvas, navigation } = await openWordStudy(page, width);
+    await study
+      .getByRole('group', { name: 'Word types', exact: true })
+      .getByRole('button', { name: 'Things', exact: true })
+      .click();
+    await sentence(canvas, 'بَيْتٌ', 'baytun', 'A house');
+    const wordPicker = study.locator('button.arabic-guided-picker').filter({ hasText: 'Word' });
+    await expect(wordPicker).toHaveAccessibleName('Word: House');
+    await wordPicker.focus();
+    await wordPicker.press('Enter');
+    const words = study.getByRole('region', { name: 'Choose a thing', exact: true });
+    const search = words.getByRole('searchbox', { name: 'Find an Arabic word', exact: true });
+    await expect(search).toBeFocused();
+    await search.fill('Fri');
+    const options = words.getByRole('group', { name: 'Vocabulary choices', exact: true });
+    await expect(options.getByRole('button', { name: /^Friend\s/ })).toBeVisible();
+    await expect(options.getByRole('button', { name: /^Female friend\s/ })).toBeVisible();
+    await expect(options.getByRole('button', { name: /^Friday\s/ })).toBeVisible();
+    const layout = await words.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const hero = element
+        .closest('.arabic-guided-study')
+        .querySelector('.arabic-guided-canvas')
+        .getBoundingClientRect();
+      return {
+        position: getComputedStyle(element).position,
+        aboveWord: bounds.bottom <= hero.top + 1,
+        height: bounds.height,
+        viewportHeight: innerHeight,
+      };
+    });
+    expect(['fixed', 'absolute']).not.toContain(layout.position);
+    expect(layout.aboveWord, 'Vocabulary choices stay beside their controls, above the word').toBe(
+      true,
+    );
+    expect(layout.height).toBeLessThan(layout.viewportHeight * 0.7);
+    await fits(page);
+    await search.fill('friend');
+    await expect(options.getByRole('button', { name: /^Friday\s/ })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(words).toHaveCount(0);
+    await expect(wordPicker).toBeFocused();
+    await expect(wordPicker).toHaveAttribute('aria-expanded', 'false');
+    await sentence(canvas, 'بَيْتٌ', 'baytun', 'A house');
+
+    await wordPicker.click();
+    await search.fill('Friday');
+    await options.getByRole('button', { name: /^Friday\s/ }).click();
+    await sentence(canvas, 'جُمُعَةٌ', 'jumuʿatun', 'A Friday');
+    await expect(words).toHaveCount(0);
+    await expect(wordPicker).toHaveAccessibleName('Word: Friday');
+    await expect(wordPicker).toBeFocused();
+    await wordPicker.click();
+    // The search accepts ordinary unvocalised Arabic as well as English.
+    await search.fill('صديق');
+    await options.getByRole('button', { name: /^Friend\s/ }).click();
+    await sentence(canvas, 'صَدِيقٌ', 'ṣadīqun', 'A friend');
+    const ownerPicker = study.getByRole('button', { name: /^Whose\?:/ });
+    await ownerPicker.click();
+    const owners = study.getByRole('region', { name: 'Whose?', exact: true });
+    await owners.getByRole('button', { name: /^My\s/ }).click();
+    await expect(owners).toHaveCount(0);
+    await expect(ownerPicker).toBeFocused();
+    await sentence(canvas, 'صَدِيقِي', 'ṣadīqī', 'My friend');
+    await expect(canvas.locator('.arabic-glyph-ink[data-part="case"]')).toHaveCount(0);
+    await fits(page);
+
+    await study.getByRole('button', { name: 'Use in a sentence', exact: true }).click();
+    await expect(
+      navigation.getByRole('button', { name: 'A sentence', exact: true }),
+    ).toHaveAttribute('aria-current', 'page');
+    const explorer = page
+      .locator('#arabic-workspace > .arabic-builder')
+      .getByRole('region', { name: 'Sentence structure', exact: true });
+    await sentence(
+      explorer.locator(':scope > .arabic-result'),
+      'هَذَا صَدِيقِي',
+      'hādhā ṣadīqī',
+      'This is my friend',
+    );
+    await expect(explorer.locator('[data-structure-node="part:case"]')).toHaveCount(0);
+    await expect(explorer.locator('[data-structure-node="part:owner"]')).toHaveCount(1);
+    await sourceCrops(explorer);
+    await fits(page);
+    await navigation.getByRole('button', { name: 'A word', exact: true }).click();
+    await sentence(canvas, 'صَدِيقِي', 'ṣadīqī', 'My friend');
+    expect(state.errors).toEqual([]);
+    await page.screenshot({ path: info.outputPath('guided-friend-word.png'), fullPage: true });
+  });
+
+  test(`quick tables retain exact examples, Escape focus and the grammar guide at ${width}px`, async ({
+    page,
+  }) => {
+    const { state, study, canvas } = await openWordStudy(page, width);
+    const opener = page.getByRole('button', { name: 'Open quick tables', exact: true });
+    await opener.focus();
+    await opener.press('Enter');
+    const tables = page.getByRole('region', { name: 'Quick tables', exact: true });
+    await expect(tables).toBeVisible();
+    await expect(tables).toBeFocused();
+    await expect(opener).toHaveAttribute('aria-expanded', 'true');
+    await expect(
+      tables.getByRole('heading', { name: 'Small marks and long sounds', exact: true }),
+    ).toBeVisible();
+    await expect(tables.getByRole('columnheader')).toHaveText([
+      'Sound',
+      'How it is written',
+      'Example',
+    ]);
+    expect(await tables.evaluate((element) => getComputedStyle(element).position)).not.toBe(
+      'fixed',
+    );
+    await fits(page);
+    const topics = tables.getByRole('group', { name: 'Reference tables', exact: true });
+    await topics.getByRole('button', { name: 'Endings', exact: true }).click();
+    await expect(
+      tables.getByRole('heading', { name: 'Whose ending is it?', exact: true }),
+    ).toBeVisible();
+    await expect(tables.getByRole('table').locator('tbody .arabic-glyphs > .sr-only')).toHaveText([
+      'بَيْتِي',
+      'بَيْتُكَ',
+      'بَيْتُكِ',
+      'بَيْتُهُ',
+      'بَيْتُهَا',
+      'بَيْتُنَا',
+    ]);
+    await topics.getByRole('button', { name: 'This / that', exact: true }).click();
+    await expect(tables.getByRole('table').locator('tbody .arabic-glyphs > .sr-only')).toHaveText([
+      'هَذَا',
+      'هَذِهِ',
+      'ذَلِكَ',
+      'تِلْكَ',
+    ]);
+    await expect(tables.getByRole('columnheader')).toHaveText([
+      'Where?',
+      'Masculine word',
+      'Feminine word',
+    ]);
+    await topics.getByRole('button', { name: 'Past / present', exact: true }).click();
+    const writeRow = tables.getByRole('row').filter({ hasText: 'I · write' });
+    await expect(writeRow.locator('.arabic-glyphs > .sr-only')).toHaveText([
+      'أَكْتُبُ',
+      'كَتَبْتُ',
+    ]);
+    await expect(tables.locator('[data-renderer-fallback]')).toHaveCount(0);
+    await fits(page);
+    await page.keyboard.press('Escape');
+    await expect(tables).toHaveCount(0);
+    await expect(opener).toBeFocused();
+    await expect(opener).toHaveAttribute('aria-expanded', 'false');
+    await sentence(canvas, 'هَذَا', 'hādhā', 'This');
+
+    const pointingTable = study.getByRole('button', { name: 'Open pointing table', exact: true });
+    await pointingTable.click();
+    await expect(
+      tables.getByRole('heading', { name: 'Point to one thing', exact: true }),
+    ).toBeVisible();
+    await expect(topics.getByRole('button', { name: 'This / that', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await tables.getByRole('button', { name: 'Close quick tables', exact: true }).click();
+    await expect(tables).toHaveCount(0);
+    await expect(pointingTable).toBeFocused();
+
+    await opener.click();
+    await tables.getByRole('button', { name: 'Explore the grammar guide', exact: true }).click();
+    const guide = page.getByRole('region', { name: 'See how the pieces connect', exact: true });
+    await expect(guide).toBeVisible();
+    await expect(
+      guide.getByRole('navigation', { name: 'Arabic learning topics', exact: true }),
+    ).toBeVisible();
+    await expect(tables).toHaveCount(0);
+    await fits(page);
+    await page.getByRole('button', { name: 'Close grammar guide', exact: true }).click();
+    await expect(guide).toHaveCount(0);
+    await sentence(canvas, 'هَذَا', 'hādhā', 'This');
+    expect(state.errors).toEqual([]);
+  });
+
   test(`selected endings link to their Arabic ink and preserve exact before/after changes at ${width}px`, async ({
     page,
   }, info) => {
@@ -430,6 +628,57 @@ for (const width of [390, 320]) {
     });
   });
 }
+
+test('guided action study keeps six common people and carries present or past into sentence mode', async ({
+  page,
+}) => {
+  const { state, study, canvas, navigation } = await openWordStudy(page, 320);
+  await study
+    .getByRole('group', { name: 'Word types', exact: true })
+    .getByRole('button', { name: 'Actions', exact: true })
+    .click();
+  await sentence(canvas, 'أَكْتُبُ', 'aktubu', 'I write');
+  const when = study.getByRole('group', { name: 'When the action happens', exact: true });
+  await expect(when.getByRole('button')).toHaveCount(2);
+  await when.getByRole('button', { name: 'Past', exact: true }).click();
+  await sentence(canvas, 'كَتَبْتُ', 'katabtu', 'I wrote');
+  const who = study.getByRole('button', { name: /^Who\?:/ });
+  await who.click();
+  const people = study.getByRole('region', { name: 'Who?', exact: true });
+  const choices = people.getByRole('group', { name: 'Person choices', exact: true });
+  await expect(choices.getByRole('button')).toHaveCount(6);
+  await expect(choices.getByRole('button', { name: /^You · two people/ })).toHaveCount(0);
+  await choices.getByRole('button', { name: /^We\s/ }).click();
+  await expect(people).toHaveCount(0);
+  await expect(who).toBeFocused();
+  await sentence(canvas, 'كَتَبْنَا', 'katabnā', 'We wrote');
+  await when.getByRole('button', { name: 'Now / usually', exact: true }).click();
+  await sentence(canvas, 'نَكْتُبُ', 'naktubu', 'We write');
+  await who.click();
+  await choices.getByRole('button', { name: /^You · one woman/ }).click();
+  await sentence(canvas, 'تَكْتُبِينَ', 'taktubīna', 'You write');
+  await expect(
+    canvas.locator('.arabic-glyph-ink[data-part="ending"][data-mark="kasra"]'),
+  ).toHaveCount(1);
+  await fits(page);
+
+  await study.getByRole('button', { name: 'Use in a sentence', exact: true }).click();
+  await expect(navigation.getByRole('button', { name: 'A sentence', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await expect(
+    page
+      .getByRole('group', { name: 'Build a thing or an action', exact: true })
+      .getByRole('button', { name: 'Say an action', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  const result = page.locator(
+    '#arabic-workspace > .arabic-builder .arabic-structure-explorer > .arabic-result',
+  );
+  await sentence(result, 'تَكْتُبِينَ', 'taktubīna', 'You write');
+  await fits(page);
+  expect(state.errors).toEqual([]);
+});
 
 test('the installed learning page keeps a working way home without floating site controls', async ({
   page,

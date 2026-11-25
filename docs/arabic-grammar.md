@@ -4,11 +4,11 @@ This is a deterministic learning builder for selected Standard/Classical Arabic 
 
 ## Supported combinations
 
-- 26 curated nouns, with singular and dual forms. 25 also have a recorded plural. `laylah` deliberately excludes its special final-y plural rather than inventing one.
+- 80 curated nouns. 73 have a recorded plural; five substance entries offer singular only. `laylah` and `qaryah` exclude special final-y plurals rather than inventing them. Each entry carries search aliases; the interface accepts English, Arabic and ordinary transliteration spellings.
 - Twelve attached-owner choices, plus no owner. English labels distinguish the person being addressed from the gender of the noun.
-- The contexts “this is”, “in”, “from”, “to”, “I saw”, and a standalone comparison form.
+- The contexts “this is”, “that is”, “in”, “from”, “to”, “I saw”, “I opened”, “I entered” and a standalone comparison form. The explorer restricts action starters to compatible checked nouns.
 - Ordinary singular and broken-plural endings; the first-person singular possessive; tāʾ marbūṭah; selected diptote plurals; sound feminine and masculine plurals; and dual forms, including the merged first-person endings.
-- Eight sound Form I verbs with recorded past/present middle vowels. Thirteen person choices represent all distinct person/gender/number combinations needed here: the second-person dual is shared by both genders.
+- Fourteen sound Form I verbs with recorded past/present middle vowels. Thirteen person choices represent all distinct person/gender/number combinations needed here: the second-person dual is shared by both genders.
 - Past, present, future with `sa-`, negative present with `lā`, and negative past with `mā`.
 - Number/gender-appropriate demonstratives. For a definite predicate, a separating pronoun makes “This is the house” explicit.
 
@@ -26,6 +26,14 @@ This is a deterministic learning builder for selected Standard/Classical Arabic 
 8. A plural of nonhuman things normally takes a feminine singular demonstrative in these examples. A human plural uses `hāʾulāʾ`.
 9. Formal terms remain optional. The primary explanations use “who”, “whose”, “two”, “the thing I saw”, and “after in/from/to”.
 10. The transliteration displays learning pieces and full endings. It is not a phonetic transcription of every connected-speech or pausal change. The joined Arabic remains the authoritative displayed form.
+
+## Standalone words and sounds
+
+`guidedWordData.mjs` treats the four singular pointing words as fixed whole words. Their reading chunks do not imply separate owners or independent word meanings. The notes distinguish the long first ā in ordinary spellings such as `hādhā` from a short fatḥa, and distinguish fixed internal vowels from changeable noun endings.
+
+The same source indices identify a vowel in the joined display, keyboard choices, the explanation and the small reference tables. Long ā, ī and ū are explained using the actual adjacent source characters. `nā` is nūn plus fatḥa/alif; its complete noun ending means “our”, while the selected past-subject ending means “we”. `baytī` has one visible my-ending. `kitābuka` keeps the stem, sentence ending and owner distinct. The current noun stays in case examples rather than being replaced by an unrelated teaching word.
+
+The added friends/doctors plurals and water carry explicit case-specific owned hamza stems. This does not introduce a general automatic spelling guesser. Mass entries such as water, milk, bread, food and coffee omit the English indefinite article and do not pretend to count servings. Water’s indefinite accusative omits a second alif.
 
 ## Deliberate boundaries
 
@@ -53,6 +61,12 @@ These are grammar references; the explanations and example matrix in this featur
 - Al Jazeera Learning Arabic, [Question words](https://learning.aljazeera.net/ar/node/19499): ordinary positive `hal` questions.
 - King Salman Global Academy for Arabic Language, [linguistic correction study](https://library.ksaa.gov.sa/links/epubs/Altsswib_Allghawy.pdf): Classical `hal` takes an affirmative clause; interrogative hamza is used for negative questions. Basic sentence builders should not mechanically prepend `hal` to negative forms.
 
+Additional sources for this guided revision:
+
+- Al Jazeera Learning Arabic, [Demonstrative pronouns](https://learning.aljazeera.net/en/generallanguage/مبادئ-نحوية-11): near/distant and singular masculine/feminine forms.
+- King Saud University, [Final hamza](https://chss.ksu.edu.sa/ar/node/5030): attaching a pronoun can move a word-final hamza into medial spelling, with explicitly illustrated u/a/i forms.
+- International Council for the Arabic Language, [Arabic writing guidance](https://www.arabiclanguageic.org/view_page.php?id=2796): accusative tanwīn after an alif and final hamza, including water without another alif.
+
 ## Quran vocabulary and licensing
 
 The existing site's Quran feature can remain a separate reading/source route. Source text should remain unchanged; practice forms should be labelled as generated learning examples.
@@ -66,4 +80,4 @@ The existing site's Quran feature can remain a separate reading/source route. So
 
 Run `node --test tests/arabic-grammar.test.mjs`.
 
-The tests include independent exact Arabic/Latin examples for the learner's original confusions, possessives, duals, three plural families, demonstratives, all person forms of `kataba`, the recorded verb stem pairs, and negation. A bounded sweep checks exact segment assembly and invalid combinations across 12,012 noun settings and 520 verb settings. This sweep verifies structural invariants; it is not a claim of independent scholarly review of every generated sentence.
+The tests include independent exact Arabic/Latin examples for the learner's original confusions, possessives, duals, three plural families, demonstratives, all person forms of `kataba`, the recorded verb stem pairs, and negation. A bounded sweep checks exact segment assembly and invalid combinations across 53,352 noun settings and 910 verb settings. This sweep verifies structural invariants; it is not a claim of independent scholarly review of every generated sentence.

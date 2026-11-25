@@ -36,6 +36,7 @@ ENUMERATE = r"""
 import { buildNoun, buildVerb, NOUNS, OWNERS, CONTEXTS, DEFINITENESS,
   VERBS, PERSONS, TENSES, getAvailableNumbers } from './src/features/arabic/grammar.mjs';
 import { GRAMMAR_TOPICS, PRACTICE_QUESTIONS } from './src/features/arabic/learningContent.mjs';
+import { guidedGlyphResults } from './src/features/arabic/guidedWordData.mjs';
 const words = new Set(['هَلْ', '؟', '،', '؛', '.', '!', ':']);
 const add = result => (result.arabic.match(/[\p{L}\p{M}\p{N}]+|[^\s\p{L}\p{M}\p{N}]/gu) || []).forEach(word => words.add(word));
 for (const noun of NOUNS)
@@ -49,6 +50,7 @@ for (const verb of VERBS)
   for (const person of PERSONS)
     for (const tense of TENSES)
       add(buildVerb({verbId:verb.id,personId:person.id,tenseId:tense.id}));
+for (const result of guidedGlyphResults()) add(result);
 for (const topic of GRAMMAR_TOPICS)
   for (const example of topic.examples) add({ arabic: example.ar });
 for (const question of PRACTICE_QUESTIONS) {

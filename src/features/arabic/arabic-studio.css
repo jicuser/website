@@ -1,0 +1,1052 @@
+/* The learning surface has its own quiet rhythm; colour belongs to Arabic. */
+.arabic-app.arabic-studio {
+  --studio-paper: #ffffff;
+  --studio-soft: #f1f4f4;
+  --studio-hairline: #dde4e5;
+  --studio-accent: #166858;
+  --studio-accent-text: #ffffff;
+  --studio-radius: 18px;
+  --jic-surface: var(--studio-paper);
+  --arabic-soft: var(--studio-soft);
+  --arabic-line: var(--studio-hairline);
+  width: min(100%, 940px);
+  padding: 24px 20px 48px;
+  line-height: 1.5;
+}
+.dark .arabic-app.arabic-studio {
+  --studio-paper: #101b2a;
+  --studio-soft: #192637;
+  --studio-hairline: #2c3b4c;
+  --studio-accent: #9ce2c8;
+  --studio-accent-text: #10241d;
+}
+.jic-inner-page .arabic-app.arabic-studio :is(h1, h2, h3) {
+  font-family: var(--jic-body-font);
+  letter-spacing: -0.025em;
+}
+.jic-inner-page .arabic-app.arabic-studio h1 {
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+.jic-inner-page .arabic-app.arabic-studio h2 {
+  font-size: 1.125rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+.jic-inner-page .arabic-app.arabic-studio h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.arabic-studio .arabic-page-header {
+  margin-bottom: 22px;
+  gap: 12px;
+}
+.arabic-studio .arabic-page-header h1 {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 700;
+  margin: 5px 0;
+}
+.arabic-studio .arabic-page-header p {
+  font-size: 0.9375rem;
+  color: var(--jic-muted);
+}
+.arabic-studio .arabic-eyebrow {
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+.arabic-studio .arabic-level {
+  display: grid;
+  justify-items: center;
+  border: 0;
+  padding: 0;
+  gap: 1px;
+}
+.arabic-studio .arabic-level > span {
+  font-family: var(--arabic-font);
+  font-size: 2rem;
+  color: var(--jic-text);
+}
+.arabic-studio .arabic-level > small {
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+}
+.arabic-studio-navigation {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  border-bottom: 1px solid var(--studio-hairline);
+  margin-bottom: 24px;
+}
+.arabic-studio .arabic-tabs {
+  display: flex;
+  flex: 1;
+  gap: 22px;
+  background: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  min-width: 0;
+}
+.arabic-studio .arabic-tabs button {
+  position: relative;
+  flex: 0 1 auto;
+  padding: 10px 1px 13px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 0.9375rem;
+  min-height: 48px;
+  white-space: nowrap;
+}
+.arabic-studio .arabic-tabs button svg {
+  display: none;
+}
+.arabic-studio .arabic-tabs button.is-active {
+  color: var(--jic-text);
+  background: none;
+  box-shadow: none;
+}
+.arabic-studio .arabic-tabs button.is-active::after {
+  content: '';
+  position: absolute;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--studio-accent);
+  left: 0;
+  right: 0;
+  bottom: -1px;
+}
+.arabic-reference-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  border: 0;
+  padding: 8px 2px;
+  background: none;
+  color: var(--jic-muted);
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 0.875rem !important;
+}
+.arabic-reference-trigger[aria-expanded='true'] {
+  color: var(--studio-accent);
+}
+.arabic-studio-kicker {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--jic-muted);
+  margin-bottom: 5px;
+}
+.arabic-studio .arabic-panel {
+  border: 0;
+  border-radius: var(--studio-radius);
+  box-shadow: none;
+}
+.arabic-studio .arabic-builder {
+  box-shadow: none;
+}
+.arabic-studio #arabic-workspace > .arabic-builder {
+  background: none;
+  border: 0;
+  overflow: visible;
+}
+.arabic-studio .arabic-sentence-intro {
+  margin-bottom: 18px;
+}
+.arabic-studio .arabic-sentence-intro p {
+  font-size: 1.05rem;
+  color: var(--jic-text);
+}
+.arabic-studio .arabic-mode-switch {
+  border: 0;
+  padding: 0;
+  gap: 16px;
+}
+.arabic-studio .arabic-mode-switch button {
+  border: 0;
+  border-radius: 0;
+  padding: 5px 0;
+  font-size: 0.875rem;
+}
+.arabic-studio .arabic-mode-switch button[aria-pressed='true'] {
+  background: none;
+  color: var(--jic-text);
+  box-shadow: inset 0 -2px 0 var(--studio-accent);
+}
+.arabic-studio .arabic-reset {
+  min-width: 44px;
+}
+.arabic-studio .arabic-structure-toolbar {
+  padding: 0 4px 8px;
+}
+.arabic-studio .arabic-structure-explorer {
+  padding: 0 0 16px;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-sentence {
+  border: 0;
+  border-radius: var(--studio-radius);
+  padding: 16px 20px 22px;
+  box-shadow: 0 1px 0 var(--studio-hairline);
+}
+.arabic-studio .arabic-structure-explorer .arabic-result-heading h2 {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--jic-muted);
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-sentence > .arabic-script {
+  font-size: clamp(3rem, 9vw, 4rem);
+  margin: 5px 0 0;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-meaning {
+  text-decoration: none;
+  padding: 3px 2px;
+  font-weight: 600;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-meaning[aria-expanded='true'] {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-words {
+  gap: 20px;
+  margin-top: 32px;
+  padding-inline: 8px;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-word {
+  border: 0;
+  border-radius: 12px;
+  background: var(--studio-paper);
+  padding: 9px 9px 5px;
+  min-height: 105px;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-word.is-selected {
+  background: var(--studio-soft);
+  box-shadow: inset 0 -2px 0 var(--part-colour);
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-word-script {
+  font-size: clamp(1.7rem, 4.4vw, 2.15rem);
+  line-height: 1.35;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-part {
+  border: 0;
+  border-radius: 12px;
+  background: var(--studio-paper);
+  padding: 7px 5px;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-part.is-selected {
+  background: var(--studio-soft);
+  box-shadow: inset 0 -2px 0 var(--part-colour);
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-part-ink {
+  height: 35px;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-part strong {
+  font-size: 0.9375rem;
+}
+.arabic-studio .arabic-structure-explorer .arabic-structure-choices {
+  margin: 24px 0 0;
+}
+.arabic-studio .arabic-choice-tray {
+  border: 0;
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--studio-soft);
+}
+.arabic-studio .arabic-choice-heading h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.arabic-studio .arabic-family-switch {
+  border: 0;
+  border-radius: 9px;
+  background: var(--studio-paper);
+  padding: 3px;
+}
+.arabic-studio .arabic-family-switch button {
+  border-radius: 7px;
+}
+.arabic-studio .arabic-family-switch button[aria-pressed='true'] {
+  box-shadow: none;
+  background: var(--studio-soft);
+}
+.arabic-studio .arabic-option {
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: var(--studio-paper);
+  min-height: 60px;
+  padding: 8px 10px;
+}
+.arabic-studio .arabic-option.is-selected {
+  border-color: var(--part-colour);
+  box-shadow: none;
+  background: var(--studio-paper);
+}
+.arabic-studio .arabic-search {
+  border: 0;
+  border-radius: 10px;
+  box-shadow: inset 0 -1px 0 var(--studio-hairline);
+}
+.arabic-studio .arabic-option-description,
+.arabic-studio .arabic-option:disabled .arabic-option-description {
+  font-size: 0.875rem;
+}
+.arabic-vocabulary-categories {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 0 1px 8px;
+  margin-bottom: 8px;
+}
+.arabic-vocabulary-categories button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--jic-muted);
+  font-size: 0.875rem;
+}
+.arabic-vocabulary-categories button[aria-pressed='true'] {
+  color: var(--studio-accent);
+  background: var(--studio-paper);
+}
+.arabic-studio .arabic-next {
+  border: 0;
+  padding: 18px 0;
+  gap: 12px;
+}
+.arabic-studio .arabic-next strong {
+  font-size: 1rem;
+}
+.arabic-studio .arabic-next p {
+  font-size: 0.9375rem;
+}
+.arabic-studio .arabic-primary {
+  border: 0;
+  background: var(--studio-accent);
+  color: var(--studio-accent-text);
+  border-radius: 10px;
+  padding: 10px 18px;
+  min-height: 44px;
+}
+.arabic-patterns-disclosure {
+  border-top: 1px solid var(--studio-hairline);
+  margin-top: 10px;
+}
+.arabic-patterns-disclosure > summary {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 56px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 14px 0;
+}
+.arabic-patterns-disclosure > summary small {
+  flex-basis: 100%;
+  padding-left: 26px;
+  font-size: 0.875rem;
+  color: var(--jic-muted);
+  font-weight: 400;
+}
+.arabic-studio .arabic-learning-footer {
+  margin-top: 32px;
+  font-size: 0.875rem;
+  color: var(--jic-muted);
+}
+.arabic-studio .arabic-learning-footer > p {
+  flex-basis: 100%;
+  font-size: 0.875rem;
+}
+.arabic-studio .arabic-learning-footer a {
+  font-size: 0.875rem;
+}
+.arabic-studio .arabic-learning-footer .arabic-details {
+  margin-top: 10px;
+}
+
+/* Word study: one large example, nearby alternatives, one answer. */
+.arabic-guided-study {
+  min-width: 0;
+}
+.arabic-guided-study .arabic-guided-tray {
+  animation: none;
+}
+.arabic-guided-study button {
+  min-height: 44px;
+}
+.arabic-guided-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.arabic-guided-heading h2 {
+  font-size: 1.125rem;
+  font-weight: 650;
+  margin: 0 0 4px;
+}
+.arabic-guided-heading p {
+  font-size: 0.9375rem;
+  color: var(--jic-muted);
+  max-width: 42ch;
+}
+.arabic-guided-table-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 0;
+  background: none;
+  color: var(--jic-muted);
+  font-size: 0.875rem !important;
+}
+.arabic-guided-types {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.arabic-guided-types button {
+  border: 0;
+  padding: 5px 0;
+  background: transparent;
+  color: var(--jic-muted);
+  font-size: 0.9375rem;
+}
+.arabic-guided-types button[aria-pressed='true'] {
+  color: var(--jic-text);
+  box-shadow: inset 0 -2px 0 var(--studio-accent);
+}
+.arabic-guided-controls {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.arabic-guided-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: var(--studio-soft);
+  color: var(--jic-text);
+  font-size: 0.9375rem;
+}
+.arabic-guided-controls button[aria-pressed='true'] {
+  background: var(--studio-accent);
+  color: var(--studio-accent-text);
+}
+.arabic-guided-controls .arabic-guided-picker {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  text-align: left;
+  gap: 0 14px;
+  justify-content: stretch;
+  min-width: 125px;
+}
+.arabic-guided-picker > span {
+  font-size: 0.75rem;
+  color: var(--jic-muted);
+}
+.arabic-guided-picker > strong {
+  grid-column: 1;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+.arabic-guided-picker > svg {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+.arabic-guided-switch {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--studio-soft);
+}
+.arabic-guided-switch button {
+  background: transparent;
+  color: var(--jic-muted);
+  border: 0;
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-size: 0.875rem;
+}
+.arabic-guided-switch button[aria-pressed='true'] {
+  background: var(--studio-paper);
+  color: var(--jic-text);
+  box-shadow: 0 1px 3px #0000000d;
+}
+.arabic-guided-pointing-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: min(100%, 430px);
+  margin: 0 auto 18px;
+}
+.arabic-guided-pointing-pair button {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 12px;
+  text-align: left;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid var(--studio-hairline);
+  border-radius: 12px;
+  color: var(--jic-text-secondary);
+}
+.arabic-guided-pointing-pair button[aria-pressed='true'] {
+  border-color: var(--studio-accent);
+  color: var(--jic-text);
+  background: color-mix(in srgb, var(--studio-accent) 7%, var(--studio-paper));
+}
+.arabic-guided-pointing-pair [lang='ar'] {
+  font-family: var(--arabic-font);
+  font-size: 1.8rem;
+}
+.arabic-guided-pointing-pair small {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+.arabic-guided-canvas {
+  position: relative;
+  border: 0;
+  border-radius: var(--studio-radius);
+  background: var(--studio-paper);
+  padding: 16px 26px 24px;
+  text-align: center;
+  box-shadow: 0 1px 0 var(--studio-hairline);
+}
+.arabic-guided-canvas-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  text-align: left;
+  color: var(--jic-muted);
+  font-size: 0.875rem;
+}
+.arabic-guided-canvas .arabic-connection-line {
+  display: none;
+}
+.arabic-guided-canvas .arabic-connection-layer {
+  pointer-events: none;
+}
+.arabic-guided-canvas .arabic-glyph-group.is-interactive:hover .arabic-glyph-path {
+  filter: none;
+}
+.arabic-guided-canvas h2 {
+  font-size: 0.875rem;
+  letter-spacing: 0;
+  font-weight: 500;
+  color: var(--jic-muted);
+  margin: 0;
+}
+.arabic-guided-arabic {
+  position: relative;
+  font-family: var(--arabic-font);
+  font-size: clamp(3.6rem, 12vw, 5.5rem);
+  line-height: 1.5;
+  padding: 4px 0 0;
+}
+.arabic-guided-arabic .arabic-glyph-word {
+  max-width: 100%;
+  height: auto;
+}
+.arabic-guided-latin {
+  font-size: 1.125rem;
+  color: var(--jic-text-secondary);
+  margin-top: -2px !important;
+}
+.arabic-guided-meaning {
+  margin-top: 7px !important;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.arabic-guided-meaning-part {
+  padding: 0 3px;
+  border: 0;
+  background: transparent;
+  font-weight: inherit;
+}
+.arabic-guided-meaning-part[aria-pressed='true'] {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.arabic-guided-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 12px 0 12px 14px;
+  border-left: 2px solid var(--studio-accent);
+  text-align: left;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.arabic-guided-note > div {
+  flex: 1;
+  min-width: 0;
+}
+.arabic-guided-note .arabic-glyph-closeup {
+  flex: 0 0 45px;
+  width: 45px;
+  height: 45px;
+}
+.arabic-guided-note > .arabic-guided-note-close {
+  flex: 0 0 44px;
+  justify-content: center;
+  margin-top: -10px;
+}
+.arabic-guided-note h3,
+.arabic-guided-note strong {
+  font-size: 1rem;
+  font-weight: 650;
+}
+.arabic-guided-note p {
+  color: var(--jic-text-secondary);
+  margin-top: 5px;
+}
+.arabic-guided-note button {
+  color: var(--studio-accent);
+  background: none;
+  border: 0;
+  padding: 7px 0;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.arabic-guided-tray {
+  border: 1px solid var(--studio-hairline);
+  background: var(--studio-paper);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.arabic-guided-tray-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: -5px 0 10px;
+}
+.arabic-guided-tray-heading > button {
+  width: 44px;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  color: var(--jic-muted);
+}
+.arabic-guided-tray h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.arabic-guided-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 3px;
+  margin: -3px;
+}
+.arabic-guided-options button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 62px;
+  border: 1px solid transparent;
+  background: var(--studio-soft);
+  color: var(--jic-text);
+  border-radius: 8px;
+  padding: 9px 11px;
+  text-align: left;
+}
+.arabic-guided-options button[aria-pressed='true'] {
+  border-color: var(--studio-accent);
+}
+.arabic-guided-options [lang='ar'] {
+  font-family: var(--arabic-font);
+  font-size: 1.55rem;
+}
+.arabic-guided-options strong {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.arabic-guided-options small {
+  display: block;
+  color: var(--jic-muted);
+  font-size: 0.875rem;
+}
+.arabic-guided-search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--studio-soft);
+  color: var(--jic-muted);
+  border-radius: 8px;
+  padding: 0 10px;
+  margin-bottom: 12px;
+}
+.arabic-guided-search input {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  color: var(--jic-text);
+  min-width: 0;
+  width: 100%;
+  height: 46px;
+  font: inherit;
+  font-size: 0.9375rem;
+}
+.arabic-guided-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--studio-accent);
+  padding: 9px 0 2px;
+  background: transparent;
+  border: 0;
+  font-size: 0.875rem !important;
+}
+.arabic-guided-empty {
+  font-size: 0.9375rem;
+  color: var(--jic-muted);
+  padding: 15px 3px;
+}
+.arabic-guided-inspection {
+  margin-top: 10px;
+}
+.arabic-guided-inspection button {
+  color: var(--part-colour);
+}
+.arabic-guided-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 1px solid var(--studio-hairline);
+}
+.arabic-guided-inspect-button,
+.arabic-guided-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 9px;
+  padding: 9px 12px;
+  background: transparent;
+  color: var(--jic-text-secondary);
+  font-size: 0.9375rem !important;
+}
+.arabic-guided-next {
+  background: var(--studio-accent);
+  color: var(--studio-accent-text);
+}
+.arabic-guided-inspect-button[aria-expanded='true'] {
+  background: var(--studio-soft);
+  color: var(--jic-text);
+}
+.arabic-guided-footer p {
+  font-size: 0.9375rem;
+  color: var(--jic-muted);
+}
+.arabic-guided-study details {
+  margin-top: 14px;
+  border-top: 1px solid var(--studio-hairline);
+}
+.arabic-guided-study summary {
+  min-height: 48px;
+  padding: 12px 0;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  color: var(--jic-text-secondary);
+}
+
+/* Small comparison tables stay in the learning surface. */
+.arabic-quick-reference {
+  background: var(--studio-paper);
+  border: 1px solid var(--studio-hairline);
+  border-radius: 14px;
+  margin-bottom: 24px;
+  padding: 14px 16px 0;
+  scroll-margin-top: 15px;
+}
+.arabic-quick-reference > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.arabic-quick-reference h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 650;
+  margin: 0;
+}
+.arabic-reference-tabs {
+  display: flex;
+  gap: 7px;
+  padding: 9px 0 12px;
+}
+.arabic-reference-tabs button {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+}
+.arabic-reference-tabs button[aria-pressed='true'] {
+  background: var(--studio-soft);
+  color: var(--jic-text);
+}
+.arabic-reference-body {
+  max-height: min(52svh, 480px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.arabic-reference-body h3 {
+  font-size: 1.125rem;
+  font-weight: 650;
+  margin: 0 0 4px;
+}
+.arabic-reference-body > p {
+  font-size: 0.9375rem;
+  color: var(--jic-text-secondary);
+  margin-bottom: 13px;
+}
+.arabic-reference-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.arabic-quick-reference table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+.arabic-quick-reference th {
+  font-weight: 500;
+  color: var(--jic-muted);
+  font-size: 0.875rem;
+}
+.arabic-quick-reference td,
+.arabic-quick-reference th {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--studio-hairline);
+  vertical-align: middle;
+}
+.arabic-quick-reference td:first-child,
+.arabic-quick-reference th:first-child {
+  padding-left: 0;
+}
+.arabic-quick-reference td > span {
+  display: block;
+}
+.arabic-reference-arabic {
+  font-family: var(--arabic-font);
+  font-size: 1.6rem;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.arabic-reference-note {
+  margin-top: 12px !important;
+  font-size: 0.875rem !important;
+}
+.arabic-reference-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--studio-accent);
+  padding: 14px 0;
+  min-height: 48px;
+  font-size: 0.875rem !important;
+}
+.arabic-full-guide {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--studio-hairline);
+  margin-bottom: 24px;
+}
+
+@media (max-width: 600px) {
+  .arabic-app.arabic-studio {
+    padding: 14px 15px 30px;
+  }
+  .arabic-studio .arabic-page-header {
+    margin-bottom: 15px;
+  }
+  .arabic-studio .arabic-page-header h1 {
+    font-size: 1.75rem;
+  }
+  .arabic-studio .arabic-level > span {
+    font-size: 1.8rem;
+  }
+  .arabic-studio-navigation {
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .arabic-studio .arabic-tabs {
+    gap: 21px;
+  }
+  .arabic-reference-trigger > span {
+    display: none;
+  }
+  .arabic-guided-types {
+    gap: 22px;
+    margin-bottom: 14px;
+  }
+  .arabic-guided-heading {
+    margin-bottom: 12px;
+  }
+  .arabic-guided-heading p {
+    font-size: 0.875rem;
+  }
+  .arabic-guided-table-button > span {
+    display: none;
+  }
+  .arabic-guided-canvas {
+    padding: 14px 18px 20px;
+  }
+  .arabic-guided-controls {
+    gap: 7px;
+  }
+  .arabic-guided-pointing-pair {
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+  .arabic-guided-pointing-pair button {
+    padding: 8px 9px;
+    column-gap: 8px;
+  }
+  .arabic-guided-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .arabic-guided-footer {
+    align-items: flex-start;
+  }
+  .arabic-guided-footer {
+    gap: 5px;
+    padding-top: 14px;
+    margin-top: 14px;
+  }
+  .arabic-guided-inspect-button,
+  .arabic-guided-next {
+    padding-inline: 9px;
+    font-size: 0.875rem !important;
+  }
+  .arabic-studio .arabic-structure-explorer .arabic-structure-sentence {
+    padding: 12px 12px 15px;
+  }
+  .arabic-studio .arabic-structure-explorer .arabic-structure-words {
+    gap: 13px;
+    padding-inline: 3px;
+  }
+  .arabic-studio .arabic-structure-explorer .arabic-structure-word {
+    padding: 7px 5px 4px;
+  }
+  .arabic-studio .arabic-mode-switch {
+    gap: 14px;
+  }
+  .arabic-studio .arabic-reset > span {
+    display: none;
+  }
+  .arabic-quick-reference {
+    padding: 12px 12px 0;
+  }
+  .arabic-quick-reference td,
+  .arabic-quick-reference th {
+    padding: 8px 6px;
+  }
+  .arabic-quick-reference .arabic-reference-arabic {
+    font-size: 1.4rem;
+  }
+}
+@media (max-width: 360px) {
+  .arabic-studio .arabic-structure-explorer [data-structure-node='part:case'] strong {
+    font-size: 0.8125rem;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  .arabic-studio .arabic-tabs {
+    gap: 15px;
+  }
+  .arabic-studio .arabic-tabs button {
+    font-size: 0.875rem;
+  }
+  .arabic-studio .arabic-mode-switch button {
+    font-size: 0.875rem;
+  }
+  .arabic-guided-pointing-pair button {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 0;
+  }
+  .arabic-guided-canvas {
+    padding-inline: 12px;
+  }
+  .arabic-guided-meaning {
+    font-size: 1.25rem;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .arabic-guided-canvas,
+  .arabic-guided-note {
+    animation: studio-reveal 180ms ease-out;
+  }
+  .arabic-studio button {
+    transition:
+      color 130ms ease,
+      background-color 130ms ease,
+      border-color 130ms ease;
+  }
+  @keyframes studio-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
