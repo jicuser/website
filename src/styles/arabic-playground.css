@@ -610,6 +610,69 @@
 .arabic-choice-body {
   min-width: 0;
 }
+.arabic-structure-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px 0;
+  color: var(--jic-text-secondary);
+  font-size: 0.8125rem;
+}
+.arabic-change-disclosure {
+  border-top: 1px solid var(--arabic-line);
+  padding: 8px 16px;
+  color: var(--jic-text-secondary);
+}
+.arabic-change-disclosure > summary {
+  min-height: 44px;
+  display: list-item;
+  align-content: center;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.arabic-family-switch {
+  display: flex;
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid var(--arabic-line);
+  border-radius: 14px;
+  background: var(--jic-surface);
+}
+.arabic-family-switch button {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+.arabic-family-switch button[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--arabic-context) 14%, var(--jic-surface));
+  color: var(--arabic-context);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.arabic-app .arabic-family-description {
+  margin: 9px 2px;
+  color: var(--jic-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+.arabic-family-options {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 135px), 1fr));
+}
+.arabic-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  background: var(--arabic-soft);
+}
+.arabic-option:disabled .arabic-option-description {
+  font-size: 0.75rem;
+}
 .arabic-option-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

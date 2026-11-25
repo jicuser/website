@@ -56,34 +56,55 @@ export function getAvailableNumbers(nounId) {
   return NUMBERS.filter((number) => number.id !== 'plural' || noun.plural);
 }
 
-function demonstrative(noun, number) {
+function demonstrative(noun, number, distant = false) {
   if (number === 'dual')
     return noun.gender === 'f'
-      ? { arabic: 'هَاتَانِ', latin: 'hātāni', pronounArabic: 'هُمَا', pronounLatin: 'humā' }
-      : { arabic: 'هَذَانِ', latin: 'hādhāni', pronounArabic: 'هُمَا', pronounLatin: 'humā' };
+      ? {
+          arabic: distant ? 'تَانِكَ' : 'هَاتَانِ',
+          latin: distant ? 'tānika' : 'hātāni',
+          pronounArabic: 'هُمَا',
+          pronounLatin: 'humā',
+        }
+      : {
+          arabic: distant ? 'ذَانِكَ' : 'هَذَانِ',
+          latin: distant ? 'dhānika' : 'hādhāni',
+          pronounArabic: 'هُمَا',
+          pronounLatin: 'humā',
+        };
   if (number === 'plural' && noun.human)
     return {
-      arabic: 'هَؤُلَاءِ',
-      latin: 'hāʾulāʾ',
+      arabic: distant ? 'أُولَئِكَ' : 'هَؤُلَاءِ',
+      latin: distant ? 'ulāʾika' : 'hāʾulāʾ',
       pronounArabic: noun.gender === 'f' ? 'هُنَّ' : 'هُمْ',
       pronounLatin: noun.gender === 'f' ? 'hunna' : 'hum',
     };
   if (noun.gender === 'f' || number === 'plural')
-    return { arabic: 'هَذِهِ', latin: 'hādhihi', pronounArabic: 'هِيَ', pronounLatin: 'hiya' };
-  return { arabic: 'هَذَا', latin: 'hādhā', pronounArabic: 'هُوَ', pronounLatin: 'huwa' };
+    return {
+      arabic: distant ? 'تِلْكَ' : 'هَذِهِ',
+      latin: distant ? 'tilka' : 'hādhihi',
+      pronounArabic: 'هِيَ',
+      pronounLatin: 'hiya',
+    };
+  return {
+    arabic: distant ? 'ذَلِكَ' : 'هَذَا',
+    latin: distant ? 'dhālika' : 'hādhā',
+    pronounArabic: 'هُوَ',
+    pronounLatin: 'huwa',
+  };
 }
 
 function nounEnglish(noun, owner, context, number, definite) {
   const parts = [];
   const beginnings = {
     this: number === 'singular' ? 'This is ' : 'These are ',
+    that: number === 'singular' ? 'That is ' : 'Those are ',
     in: 'In ',
     from: 'From ',
     to: 'To ',
-    saw: 'I saw ',
     phrase: '',
   };
-  if (beginnings[context.id]) parts.push({ id: 'context', text: beginnings[context.id] });
+  const beginning = beginnings[context.id] || (context.english ? `${context.english} ` : '');
+  if (beginning) parts.push({ id: 'context', text: beginning });
   if (owner.id !== 'none') parts.push({ id: 'owner', text: `${owner.english} ` });
   else if (definite) parts.push({ id: 'article', text: 'the ' });
   else if (number === 'singular')
@@ -260,7 +281,7 @@ export function buildNoun({
         caseKey === 'u'
           ? 'The form used to point this out.'
           : caseKey === 'a'
-            ? 'The thing I saw.'
+            ? `Names ${context.objectDescription || 'the thing receiving the action'}.`
             : 'Follows in, from, or to.',
       ),
     );
@@ -322,11 +343,13 @@ export function buildNoun({
         'The ending can show ownership or a relationship: our house, my teacher, her day. An owner already identifies the noun, so it does not also take “the” or a final n-sound.',
       ),
     );
-  if (number === 'plural' && !noun.human)
+  if (number === 'plural' && !noun.human && context.familyId === 'pointing')
     notes.push(
       note(
         'Pointing to several things',
-        'Arabic normally uses hādhihi for a group of nonhuman things. The English still says “these”: hādhihi buyūtunā, “these are our houses”.',
+        context.id === 'that'
+          ? 'For a group of nonhuman things farther away, Arabic normally uses tilka. The English still says “those”: tilka buyūtunā, “those are our houses”.'
+          : 'Arabic normally uses hādhihi for a group of nonhuman things. The English still says “these”: hādhihi buyūtunā, “these are our houses”.',
       ),
     );
   if (isPlural && form.type === 'broken')
@@ -349,7 +372,7 @@ export function buildNoun({
       caseKey === 'i'
         ? `“${context.label.replace('…', '')}” makes the next noun fit the in/from/to position. Regular singular nouns show i here.`
         : caseKey === 'a'
-          ? 'This names the thing you saw. Regular singular nouns show a in this position.'
+          ? `This names ${context.objectDescription || 'the thing receiving the action'}. Regular singular nouns show a in this position.`
           : 'You are pointing out what this is. Regular singular nouns show u in this position.',
     );
     if (owner.id === 'my' || number !== 'singular') notes.push(contextNote);
@@ -358,8 +381,9 @@ export function buildNoun({
   if (noun.vocabularyNote) notes.push(note('About this word', noun.vocabularyNote));
 
   const segments = [...wordSegments];
-  if (context.id === 'this') {
-    const pointer = demonstrative(noun, number);
+  if (context.familyId === 'pointing') {
+    const distant = context.id === 'that';
+    const pointer = demonstrative(noun, number, distant);
     // The separating pronoun makes “This is the house” explicit, rather than “this house”.
     const prefixArabic = `${pointer.arabic}${article ? ` ${pointer.pronounArabic}` : ''} `;
     const prefixLatin = `${pointer.latin}${article ? ` ${pointer.pronounLatin}` : ''} `;
@@ -368,7 +392,13 @@ export function buildNoun({
         'context',
         prefixArabic,
         prefixLatin,
-        number === 'singular' ? 'This is' : 'These are',
+        number === 'singular'
+          ? distant
+            ? 'That is'
+            : 'This is'
+          : distant
+            ? 'Those are'
+            : 'These are',
         'Points out the thing or things.',
       ),
     );
@@ -376,7 +406,9 @@ export function buildNoun({
       notes.push(
         note(
           'Making “is” clear',
-          'With “the”, a small pronoun makes this a clear sentence: hādhā huwa al-baytu, “this is the house”. Hādhā al-baytu on its own can simply mean “this house”.',
+          distant
+            ? 'With “the”, a small pronoun makes this a clear sentence: dhālika huwa al-baytu, “that is the house”. Dhālika al-baytu on its own can simply mean “that house”.'
+            : 'With “the”, a small pronoun makes this a clear sentence: hādhā huwa al-baytu, “this is the house”. Hādhā al-baytu on its own can simply mean “this house”.',
         ),
       );
   } else if (context.arabic) {
