@@ -17,4 +17,9 @@ RewriteRule ^.+$ metadata-fallback/index.html [L]
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(self), microphone=(self), display-capture=(self), geolocation=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  # Report-only: browsers log violations in the console but block nothing.
+  # Keep in step with vercel.json. Change to "Content-Security-Policy" once the
+  # live site (Quran reader, About social feeds, maps, radio) shows no violations.
+  Header always set Content-Security-Policy-Report-Only "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' https://challenges.cloudflare.com https://www.tiktok.com https://www.instagram.com https://platform.x.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://jicmosque.radioca.st https://api.alquran.cloud; frame-src 'self' https://challenges.cloudflare.com https://www.facebook.com https://www.youtube.com https://youtube.com https://www.google.com https://maps.google.com https://*.wonderful.org https://wonderful.org https://poly.cam https://www.tiktok.com https://www.instagram.com https://platform.twitter.com https://syndication.twitter.com; media-src 'self' https://jicmosque.radioca.st; upgrade-insecure-requests"
 </IfModule>

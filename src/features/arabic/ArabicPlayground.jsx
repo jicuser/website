@@ -42,6 +42,7 @@ import SentenceBuilder from './SentenceBuilder';
 import GuidedWordStudy from './GuidedWordStudy';
 import ArabicQuickReference from './ArabicQuickReference';
 import { searchVocabulary } from './guidedWordData.mjs';
+import './arabic-playground.css';
 import './arabic-studio.css';
 
 const INITIAL_NOUN = INITIAL_EXPLORER_NOUN;

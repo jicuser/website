@@ -42,6 +42,12 @@ npm run dev
 
 Copy `.env.example` to `.env.local` and fill in the browser configuration when connecting to your chosen data environment. Without it, the site can show its fallback content; database-backed features require a configured connection. Never commit `.env.local` or put a service-role key in a `VITE_*` variable.
 
+## If something is down
+
+- **Supabase is down:** the public site shows its fallback content from `src/content/`. To build without it, run `JIC_PUBLIC_PREVIEWS=off npm run build`. Page previews for Google and social links are skipped for that build only.
+- **The live site is broken after a deploy:** redeploy the previous commit. Follow the rollback steps in [the website release guide](docs/WEBSITE-RELEASE.md).
+- **You need to change code without this team:** start with this README, then [the code map](CODEBASE_MAP.md). Run `npm run validate` before every push.
+
 ## Check and save
 
 ```bash
@@ -63,6 +69,7 @@ response, and do not connect to the live database.
 - [Deployment](DEPLOYMENT.md)
 - [TV setup](docs/tv-display.md)
 - [Earlier handovers](docs/history/README.md)
+- [Code review, November 2026](docs/review-2026-11.md)
 
 ## Staff and scenes
 
