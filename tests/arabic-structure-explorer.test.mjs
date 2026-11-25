@@ -283,3 +283,46 @@ test('the fixed -tu ending shows an outline and explanation without needing a ch
   assert.ok(nodes(ui.tree).some((node) => node.props?.className === 'arabic-structure-part-note'));
   ui.assertOutline('context:ending', undefined);
 });
+
+test('a cropped owner vowel has a padded touch target behind its original ink', () => {
+  const ui = fixture({ noun: { nounId: 'bayt', ownerId: 'his', contextId: 'in' } }).render();
+  const source = nodes(ui.tree).find(
+    (node) => node.type?.name === 'SourcePart' && node.props.node.id === 'part:owner',
+  );
+  const crop = source.type(source.props);
+  const descendants = nodes(crop);
+  const target = descendants.find(
+    (node) =>
+      node.props?.className === 'arabic-structure-crop-target' &&
+      node.props['data-mark'] === 'kasra',
+  );
+  assert.ok(target, 'the tiny cropped kasra has its own touch region');
+  const index = target.props['data-source-index'];
+  assert.equal(index, 11, 'the crop retains the global source index in fī baytihi');
+  const original = source.props.shaped.tokens
+    .flatMap((token) => token.items || [])
+    .flatMap((word) => word.groups || [])
+    .find((group) => group.sourceIndex === index);
+  const hit = nodes(target).find((node) => node.type === 'rect').props;
+  assert.ok(hit.x < original.bounds[0] && hit.y < original.bounds[1]);
+  assert.ok(hit.x + hit.width > original.bounds[2] && hit.y + hit.height > original.bounds[3]);
+  assert.equal(hit.pointerEvents, 'all');
+  const originalInk = descendants.find(
+    (node) =>
+      node.props?.className?.includes('arabic-structure-crop-ink') &&
+      node.props['data-source-index'] === index,
+  );
+  assert.ok(
+    descendants.indexOf(target) < descendants.indexOf(originalInk),
+    'real ink remains above the padded hit layer',
+  );
+  let stopped = false;
+  target.props.onClick({
+    stopPropagation() {
+      stopped = true;
+    },
+  });
+  assert.equal(stopped, true, 'a vowel hit must not activate the whole owner card');
+  ui.render();
+  ui.assertOutline('owner', index);
+});

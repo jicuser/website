@@ -142,6 +142,15 @@ function SourcePart({ shaped, node, onPick }) {
     [...frame[0].bounds],
   );
   const pad = 75;
+  const pickGroup = (group, event) => {
+    event.stopPropagation();
+    onPick(group.partId, {
+      sourceIndex: group.sourceIndex,
+      character: group.character,
+      mark: group.mark?.id,
+      word: word.text,
+    });
+  };
   return (
     <svg
       className="arabic-structure-part-ink"
@@ -152,6 +161,31 @@ function SourcePart({ shaped, node, onPick }) {
       data-source-end={node.sourceEnd}
       data-source-word={word.text}
     >
+      {/* Touch coordinates can round just outside a very small painted vowel.
+          Keep its source-aware hit area behind every original ink path, so a
+          nearby mark remains selectable without covering a neighbour's ink. */}
+      {selected.map((group) => {
+        const [x, y, width, height] = group.hitBox;
+        return (
+          <g
+            key={`target-${group.sourceIndex}`}
+            className="arabic-structure-crop-target"
+            data-source-index={group.sourceIndex}
+            data-mark={group.mark?.id}
+            onClick={(event) => pickGroup(group, event)}
+          >
+            <rect
+              x={x}
+              y={y}
+              width={width}
+              height={height}
+              rx={55}
+              fill="transparent"
+              pointerEvents="all"
+            />
+          </g>
+        );
+      })}
       {word.groups.map((group) => {
         const included =
           group.sourceIndex >= node.sourceStart && group.sourceIndex < node.sourceEnd;
@@ -162,19 +196,7 @@ function SourcePart({ shaped, node, onPick }) {
             opacity={included ? 1 : 0.16}
             data-source-index={group.sourceIndex}
             data-mark={group.mark?.id}
-            onClick={
-              included
-                ? (event) => {
-                    event.stopPropagation();
-                    onPick(group.partId, {
-                      sourceIndex: group.sourceIndex,
-                      character: group.character,
-                      mark: group.mark?.id,
-                      word: word.text,
-                    });
-                  }
-                : undefined
-            }
+            onClick={included ? (event) => pickGroup(group, event) : undefined}
           >
             {group.paths.map((path, index) => (
               <path
