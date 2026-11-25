@@ -1,0 +1,85 @@
+:root {
+  color-scheme: light;
+  --navy: #142d4e;
+  --navy-dark: #0c203a;
+  --gold: #8a6223;
+  --ink: #17283e;
+  --muted: #576779;
+  --line: #dbe2e9;
+  --surface: #f2f5f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: white;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-size: 1rem; line-height: 1.55; }
+a { color: var(--navy); text-underline-offset: .22em; }
+button, input { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.skip-link { position: absolute; left: 1rem; top: -6rem; z-index: 3; background: white; padding: .75rem 1rem; }
+.skip-link:focus { top: 1rem; }
+.site-header { border-top: 5px solid var(--navy); border-bottom: 1px solid var(--line); background: white; }
+.header-inner, .page, .footer-inner { width: min(100% - 3rem, 1120px); margin-inline: auto; }
+.header-inner { min-height: 112px; display: flex; justify-content: space-between; align-items: center; gap: 2rem; padding-block: 1rem; }
+.brand { display: block; flex-shrink: 1; }
+.brand img { display: block; width: min(230px, 100%); height: auto; }
+.header-link { font-size: .9375rem; font-weight: 600; white-space: nowrap; }
+.page { padding-top: 1.75rem; padding-bottom: 4rem; }
+.breadcrumbs { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; color: var(--muted); font-size: .875rem; margin-bottom: 2.25rem; }
+.breadcrumbs a { color: var(--muted); }
+.download-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: start; }
+.download-content { padding-top: .5rem; }
+.eyebrow { margin: 0 0 .85rem; font-size: .875rem; font-weight: 650; color: var(--gold); letter-spacing: .025em; }
+h1 { margin: 0 0 1.1rem; color: var(--navy); font-family: Georgia, "Times New Roman", serif; font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 500; line-height: 1.13; letter-spacing: -.025em; }
+.introduction { margin: 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.65; }
+.download-actions { display: grid; gap: .75rem; margin-top: 1.75rem; }
+.button { display: inline-flex; justify-content: center; align-items: center; gap: .6rem; min-height: 50px; padding: .8rem 1.15rem; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; font-weight: 650; line-height: 1.35; text-align: center; text-decoration: none; background: white; color: var(--navy); }
+.button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.button-primary { background: var(--navy); color: white; border-color: var(--navy); }
+.button-primary:hover { background: var(--navy-dark); border-color: var(--navy-dark); }
+.button-secondary:hover, .button-small:hover { background: var(--surface); }
+.format-link { display: block; text-align: center; padding: .45rem .25rem; font-weight: 600; }
+.download-help { color: var(--muted); font-size: .875rem; line-height: 1.65; margin: .8rem 0 1.75rem; }
+.share-card { padding: 1.25rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.share-card h2 { font-size: 1rem; margin: 0 0 .4rem; }
+.share-card > p:not(.share-status) { margin: 0 0 1rem; color: var(--muted); font-size: .875rem; line-height: 1.6; }
+.share-url { display: block; width: 100%; border: 1px solid #c8d2de; background: white; border-radius: 6px; color: var(--muted); min-height: 44px; padding: .65rem .7rem; font-size: .875rem; }
+.share-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .75rem; }
+.button-small { flex: 1; min-height: 44px; padding: .6rem .8rem; font-size: .875rem; }
+.share-status { min-height: 1.5em; margin: .5rem 0 0; font-size: .875rem; color: var(--navy); }
+.preview { min-width: 0; margin: 0; }
+.preview figcaption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .25rem .75rem; margin: 0 0 .75rem; font-size: .875rem; font-weight: 600; }
+.preview figcaption span { color: var(--muted); font-size: .8125rem; font-weight: 400; }
+.preview-image { display: block; padding: 10px; background: white; border: 1px solid var(--line); box-shadow: 0 10px 32px #132b4810; }
+.preview img { display: block; width: 100%; height: auto; object-fit: contain; }
+.wallpaper-preview { width: min(100%, 350px); margin-inline: auto; }
+.wallpaper-preview .preview-image { padding: 8px; border: 2px solid var(--navy); border-radius: 24px; background: var(--navy); box-shadow: 0 16px 40px #132b4820; }
+.site-footer { border-top: 1px solid var(--line); background: var(--surface); padding: 2rem 0; }
+.footer-inner { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem 3rem; font-size: .875rem; }
+.footer-inner strong { display: block; color: var(--navy); font-size: 1rem; }
+.footer-inner p { color: var(--muted); margin: .35rem 0; max-width: 30rem; }
+.footer-inner nav { display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }
+@media (min-width: 900px) { .download-content { position: sticky; top: 1.5rem; } }
+@media (max-width: 700px) {
+  .header-inner, .page, .footer-inner { width: min(100% - 2rem, 520px); }
+  .header-inner { min-height: 92px; padding-block: 1rem; gap: 1rem; }
+  .brand img { width: 210px; }
+  .header-link { display: none; }
+  .page { padding-top: 1.25rem; padding-bottom: 2.5rem; }
+  .breadcrumbs { margin-bottom: 1.5rem; }
+  .download-layout { grid-template-columns: 1fr; gap: 2rem; }
+  .download-content { padding-top: 0; }
+  .preview { width: min(100%, 450px); margin-inline: auto; }
+  .wallpaper-preview { width: min(100%, 320px); }
+  .site-footer { padding: 1.5rem 0; }
+}
+@media print {
+  .site-header, .breadcrumbs, .download-content, .site-footer, .preview figcaption { display: none; }
+  .page, .download-layout, .preview { display: block; width: 100%; padding: 0; margin: 0; }
+  .preview-image { border: 0; padding: 0; box-shadow: none; }
+}

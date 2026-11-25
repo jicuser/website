@@ -6,7 +6,7 @@ const PrayerTimesContext = createContext(null);
 // Keep the public timetable loaded while visitors move between pages.
 // TV and admin continue using their independent timetable lifecycles.
 export function PublicPrayerTimesProvider({ children }) {
-  const times = usePrayerTimes({ includeTomorrow: true });
+  const times = usePrayerTimes({ includeTomorrow: true, includeNextMonth: true });
   return <PrayerTimesContext.Provider value={times}>{children}</PrayerTimesContext.Provider>;
 }
 

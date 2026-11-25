@@ -348,7 +348,7 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
     assert.equal(canvas.width, 1290);
     assert.equal(canvas.height, 2796);
     assert.ok(calls.some(([text]) => text === 'SUNRISE'));
-    assert.ok(calls.some(([text]) => text === 'October 2026 Prayer Times'));
+    assert.ok(calls.some(([text]) => text === 'OCTOBER 2026'));
     assert.ok(calls.some(([text]) => text === '31'));
     const model = buildMonthlyTimetable(rows);
     const timeCalls = calls.filter(([, , y]) => y > 590 && y < 2510);
@@ -365,13 +365,13 @@ test('31-day wallpaper fits the canvas, includes Sunrise, and never invents a Ja
     );
     calls.length = 0;
     assert.equal(createMonthlyTimetableCanvas(rows, 'October 2026'), canvas);
-    assert.equal(canvas.width, 1800);
-    assert.equal(canvas.height, 2546);
+    assert.equal(canvas.width, 2480);
+    assert.equal(canvas.height, 3507);
     assert.ok(calls.some(([text]) => text === '31'));
     assert.ok(
       calls.every(([text]) => !/12-hour|Gold rows|same time as above|Adhan time shown/.test(text)),
     );
-    assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 1800 && y >= 0 && y < 2546));
+    assert.ok(calls.every(([, x, y]) => x >= 0 && x <= 2480 && y >= 0 && y < 3507));
     const scheduled = rows.map((row) => ({
       ...row,
       jummah_1_jamah: '12:35',

@@ -2,10 +2,14 @@ const PRAYER_COLUMNS =
   'd_date,fajr_begins,fajr_jamah,sunrise,zuhr_begins,zuhr_jamah,asr_begins,asr_jamah,maghrib_begins,maghrib_jamah,isha_begins,isha_jamah,is_ramadan,jummah_1_start,jummah_1_jamah,jummah_2_begins,jummah_2_jamah';
 const iso = (date) => date.toISOString().slice(0, 10);
 
-export function prayerQueryRange(today, includeTomorrow = false) {
+export function prayerQueryRange(today, includeTomorrow = false, includeNextMonth = false) {
   const date = new Date(`${today}T12:00:00Z`);
   const monthStart = `${today.slice(0, 7)}-01`;
-  const monthEnd = iso(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 12)));
+  const monthEnd = iso(
+    new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + (includeNextMonth ? 2 : 1), 0, 12),
+    ),
+  );
   const friday = new Date(date);
   friday.setUTCDate(friday.getUTCDate() + ((5 - friday.getUTCDay() + 7) % 7));
   const tomorrow = new Date(date);
@@ -19,10 +23,17 @@ export function prayerQueryRange(today, includeTomorrow = false) {
   };
 }
 
-// Today's row, the month and next Jummah share one bounded request. This also
-// keeps their values from different parts of the page on the same snapshot.
-export async function loadPrayerSnapshot(client, today, includeTomorrow = false, signal) {
-  const range = prayerQueryRange(today, includeTomorrow);
+// Today's row, the calendar window and next Jummah share one bounded request.
+// Public month navigation also includes the following month's published rows;
+// TV and admin retain the current-month window unless explicitly requested.
+export async function loadPrayerSnapshot(
+  client,
+  today,
+  includeTomorrow = false,
+  signal,
+  includeNextMonth = false,
+) {
+  const range = prayerQueryRange(today, includeTomorrow, includeNextMonth);
   const withSignal = (query) => (signal ? query.abortSignal(signal) : query);
   const [times, settings] = await Promise.all([
     withSignal(

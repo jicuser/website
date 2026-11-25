@@ -1,11 +1,14 @@
 import { buildMonthlyTimetable } from './monthlyTimetable.js';
 import { displayTime } from './timetable.js';
+import { printedTimetableValuesMatch } from './timetableDesign.js';
 export function timetablePresentation(rows, options = {}) {
   const table = buildMonthlyTimetable(rows);
+  const usePrintedCells = printedTimetableValuesMatch(rows, options.printCells);
   const start = Number(options.hijriDay),
     length = Number(options.hijriLength || 30);
-  const withHijri =
+  const calculatedHijri =
     Number.isInteger(start) && start >= 1 && start <= length && [29, 30].includes(length);
+  const withHijri = calculatedHijri || Object.keys(options.hijriDates || {}).length > 0;
   const offset = Number(options.zawalOffset);
   const withZawal =
     !table.columns.some(({ key }) => key === 'zawal') &&
@@ -33,7 +36,13 @@ export function timetablePresentation(rows, options = {}) {
   table.rows = table.rows.map((row) => {
     const cells = new Map(row.cells.map((cell) => [cell.key, cell]));
     if (withHijri) {
-      const value = String(((start + Number(row.day) - 2) % length) + 1);
+      const number = ((start + Number(row.day) - 2) % length) + 1;
+      const calculated = calculatedHijri
+        ? number === 1 && Number(row.day) > 1 && options.hijriNextMonth
+          ? options.hijriNextMonth
+          : String(number)
+        : '—';
+      const value = options.hijriDates?.[row.isoDate] || calculated;
       cells.set('hijri', { key: 'hijri', display: value, value });
     }
     if (withZawal) {
@@ -52,6 +61,13 @@ export function timetablePresentation(rows, options = {}) {
         ).replace(/ (AM|PM)$/, '');
       }
       cells.set('zawal', { key: 'zawal', display, value: display });
+    }
+    for (const [key, printed] of Object.entries(
+      usePrintedCells ? options.printCells[row.isoDate] : {},
+    )) {
+      const cell = cells.get(key);
+      if (cell && typeof printed.display === 'string')
+        cells.set(key, { ...cell, display: printed.display, printed: true });
     }
     return { ...row, cells: table.columns.map((c) => cells.get(c.key)) };
   });

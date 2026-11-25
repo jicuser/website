@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import { safeWebUrl } from '@/lib/video';
+
+function fullSizeImageUrl(src) {
+  if (typeof src !== 'string') return undefined;
+  if (/^\/(?!\/)/.test(src) && !/[\s\\]/.test(src)) return src;
+  return safeWebUrl(src) || undefined;
+}
 
 export default function ManagedPageSections({ pagePath }) {
   const { pathname } = useLocation();
@@ -70,13 +77,25 @@ export default function ManagedPageSections({ pagePath }) {
               </div>
               {images.length > 0 && (
                 <div className="managed-page-section-gallery">
-                  {images.map((src, i) => (
-                    <img
-                      key={`${section.id}-${i}`}
-                      src={src}
-                      alt={`${section.title || 'JIC'} ${i + 1}`}
-                    />
-                  ))}
+                  {images.map((src, i) => {
+                    const fullSizeUrl = fullSizeImageUrl(src);
+                    const label = `${section.title || 'JIC'}${images.length > 1 ? ` ${i + 1}` : ''}`;
+                    return (
+                      <a
+                        key={`${section.id}-${i}`}
+                        className="managed-page-section-image"
+                        href={fullSizeUrl}
+                        target={fullSizeUrl ? '_blank' : undefined}
+                        rel={fullSizeUrl ? 'noopener noreferrer' : undefined}
+                        aria-label={
+                          fullSizeUrl ? `Open ${label} full size (opens in a new tab)` : undefined
+                        }
+                      >
+                        <img src={src} alt={label} loading="lazy" decoding="async" />
+                        {fullSizeUrl && <span>Open full-size image</span>}
+                      </a>
+                    );
+                  })}
                 </div>
               )}
             </div>

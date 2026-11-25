@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Download, FileImage, Share2, Smartphone, Printer } from 'lucide-react';
+import { Download, FileImage, Share2, Smartphone, Printer, Link as LinkIcon } from 'lucide-react';
 import { createMonthlyTimetableCanvas, createWallpaperCanvas } from '@/lib/timetableWallpaper';
+import {
+  approvedTimetableAssets,
+  emptyTimetableDesign,
+  TIMETABLE_HEADER,
+} from '@/lib/timetableDesign';
+import { recordDate } from '@/lib/monthlyTimetable';
 import '@/styles/monthly-timetable.css';
 import ImageViewer from '@/components/ImageViewer';
 
@@ -22,7 +28,6 @@ function printImage(file) {
   win.document.body.append(button, img);
   return true;
 }
-
 const formats = [
   {
     key: 'monthly-timetable',
@@ -45,93 +50,96 @@ export default function WallpaperDownload({
   editable = false,
   detailsStatus = 'ready',
   retryDetails,
+  design = emptyTimetableDesign,
+  designStatus = 'ready',
+  retryDesign,
+  onDesignChange,
+  designDisabled = false,
 }) {
-  const [theme, setTheme] = useState('light');
-  const [design, setDesign] = useState({
-    hijriDay: '',
-    hijriLength: '30',
-    hijriHeading: '',
-    zawalOffset: '',
-    notice: '',
-    noticeDate: '',
-  });
+  const settings = design || emptyTimetableDesign;
   const [prepared, setPrepared] = useState(null);
   const [previewKey, setPreviewKey] = useState('');
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState('');
   const [attempt, setAttempt] = useState(0);
-  // Minute polling must not rebuild images when the actual values are unchanged.
   const dataKey = JSON.stringify([
     currentMonth,
-    detailsStatus === 'ready' ? monthlyPrayerTimes : [],
+    detailsStatus === 'ready' && designStatus === 'ready' ? monthlyPrayerTimes : [],
     jummahTimes,
-    theme,
-    design,
+    settings,
   ]);
   const ready = prepared?.key === dataKey ? prepared.files : null;
   const preview = ready?.find((file) => file.key === previewKey);
   const problem = error?.key === dataKey ? error.message : '';
+  const change = (patch, resetDates = false) =>
+    onDesignChange?.({ ...settings, ...patch, ...(resetDates ? { hijriDates: {} } : {}) });
 
   useEffect(() => {
     let active = true;
     const urls = [];
     setPreviewKey('');
     setError(null);
+    setNotice('');
     async function prepare() {
       try {
-        const [month, rows, jummah, selectedTheme, settings] = JSON.parse(dataKey);
+        const [month, rows, jummah, savedSettings] = JSON.parse(dataKey);
         if (!rows.length) return;
-        const loadImage = (url) =>
-          new Promise((resolve) => {
+        const approved = approvedTimetableAssets(rows, savedSettings, jummah);
+        let header;
+        if (!approved) {
+          header = await new Promise((resolve, reject) => {
             const image = new Image();
             image.onload = () => resolve(image);
-            image.onerror = () => resolve(null);
-            image.src = url;
+            image.onerror = () =>
+              reject(new Error('The timetable header could not load. Please try again.'));
+            image.src = TIMETABLE_HEADER;
           });
-        const [lightLogo, darkLogo, photo, printLogo] = await Promise.all([
-          loadImage('/brand/jic-wordmark-light.svg'),
-          loadImage('/brand/jic-wordmark-dark.svg'),
-          loadImage('/jic-aerial-sunset.jpg'),
-          loadImage('/brand/jic-horizontal-light.svg'),
-        ]);
+          if (document.fonts?.ready) await document.fonts.ready;
+        }
         if (!active) return;
         const files = [];
         for (const format of formats) {
-          const canvas = format.create(rows, month, jummah, {
-            ...settings,
-            theme: selectedTheme,
-            jummahLabel: 'Weekly Jummah',
-            logo:
-              format.key === 'monthly-timetable'
-                ? printLogo
-                : selectedTheme === 'dark'
-                  ? darkLogo
-                  : lightLogo,
-            photo,
-          });
-          const blob = await new Promise((resolve, reject) =>
-            canvas.toBlob(
-              (result) =>
-                result
-                  ? resolve(result)
-                  : reject(new Error('The image could not be created. Please try again.')),
-              'image/jpeg',
-              0.96,
-            ),
-          );
-          canvas.width = 0;
-          canvas.height = 0;
-          if (!active) return;
-          const filename = `JIC-${month.replace(/\s+/g, '-')}-${format.key}.jpg`;
+          const original = approved?.[format.key];
+          let blob, url;
+          if (original) {
+            url = original.url;
+            // The stable image URL remains usable even where sharing files is unsupported.
+            if (typeof File === 'function' && navigator.share) {
+              try {
+                const response = await fetch(url);
+                if (response.ok) blob = await response.blob();
+              } catch {
+                /* Direct image/PDF links remain available. */
+              }
+            }
+          } else {
+            const canvas = format.create(rows, month, jummah, { ...savedSettings, header });
+            blob = await new Promise((resolve, reject) =>
+              canvas.toBlob(
+                (result) =>
+                  result
+                    ? resolve(result)
+                    : reject(new Error('The image could not be created. Please try again.')),
+                'image/png',
+              ),
+            );
+            canvas.width = 0;
+            canvas.height = 0;
+            if (!active) return;
+            url = URL.createObjectURL(blob);
+            urls.push(url);
+          }
+          const filename = `JIC-${month.replace(/\s+/g, '-')}-${format.key}.png`;
           const file =
-            typeof File === 'function' ? new File([blob], filename, { type: 'image/jpeg' }) : null;
+            blob && typeof File === 'function'
+              ? new File([blob], filename, { type: 'image/png' })
+              : null;
           let canShare = false;
           try {
             canShare = Boolean(file && navigator.share && navigator.canShare?.({ files: [file] }));
           } catch {
-            // A direct download remains available when file sharing is unsupported.
+            /* Download fallback. */
           }
-          const url = URL.createObjectURL(blob);
-          urls.push(url);
           files.push({
             key: format.key,
             url,
@@ -139,6 +147,10 @@ export default function WallpaperDownload({
             file,
             filename,
             canShare,
+            pdf: original?.pdf,
+            shareUrl: original?.sharePath
+              ? new URL(original.sharePath, window.location.origin).href
+              : null,
           });
         }
         if (active) setPrepared({ key: dataKey, files });
@@ -157,15 +169,29 @@ export default function WallpaperDownload({
     };
   }, [dataKey, attempt]);
 
-  async function share(file = preview) {
-    // Share the prepared file directly in the tap handler for iPhone Safari.
+  async function shareImage(file = preview) {
     try {
       await navigator.share({ files: [file.file], title: file.title });
     } catch (failure) {
       if (failure.name !== 'AbortError')
         setError({
           key: dataKey,
-          message: 'Sharing is unavailable here. Use Download JPEG, or open the image and save it.',
+          message: 'Sharing is unavailable here. Download the PNG, or open the image and save it.',
+        });
+    }
+  }
+  async function shareLink(file) {
+    try {
+      if (navigator.share) await navigator.share({ title: file.title, url: file.shareUrl });
+      else {
+        await navigator.clipboard.writeText(file.shareUrl);
+        setNotice('Link copied. Paste it into WhatsApp or a message.');
+      }
+    } catch (failure) {
+      if (failure.name !== 'AbortError')
+        setError({
+          key: dataKey,
+          message: 'Open the download page and copy its address to share it.',
         });
     }
   }
@@ -178,7 +204,9 @@ export default function WallpaperDownload({
       aria-label="Timetable downloads"
     >
       <h4>Download timetable</h4>
-      {detailsStatus === 'loading' && <p role="status">Loading published times…</p>}
+      {(detailsStatus === 'loading' || designStatus === 'loading') && (
+        <p role="status">Loading published timetable…</p>
+      )}
       {detailsStatus === 'error' && (
         <p role="alert">
           The extra timetable times could not be loaded.{' '}
@@ -187,53 +215,66 @@ export default function WallpaperDownload({
           </button>
         </p>
       )}
-      <fieldset className="timetable-theme-picker">
-        <legend>Wallpaper colour</legend>
-        {['light', 'dark'].map((value) => (
-          <label key={value}>
-            <input
-              type="radio"
-              name={`wallpaper-theme-${editable ? 'editor' : 'public'}`}
-              value={value}
-              checked={theme === value}
-              onChange={() => setTheme(value)}
-            />
-            {value === 'light' ? 'Light' : 'Dark'}
-          </label>
-        ))}
-      </fieldset>
+      {designStatus === 'error' && (
+        <p role="alert">
+          The saved timetable design could not be loaded.{' '}
+          <button type="button" onClick={retryDesign}>
+            Retry
+          </button>
+        </p>
+      )}
       {editable && (
         <details className="timetable-design-options" open>
           <summary>Original-sheet layout &amp; notices</summary>
-          <p>Use the centre’s confirmed Hijri dates. Published Zawal times appear automatically.</p>
-          <div className="admin-field-grid">
+          <p>
+            These settings are saved with the month and used for the public A4 and phone downloads.
+          </p>
+          <fieldset disabled={designDisabled} className="admin-field-grid">
             <label>
               Hijri date on the 1st
               <input
                 type="number"
                 min="1"
-                max={design.hijriLength}
-                value={design.hijriDay}
-                onChange={(e) => setDesign({ ...design, hijriDay: e.target.value })}
+                max={settings.hijriLength}
+                value={settings.hijriDay}
+                onChange={(event) => change({ hijriDay: event.target.value }, true)}
               />
             </label>
             <label>
               Days in that Hijri month
               <select
-                value={design.hijriLength}
-                onChange={(e) => setDesign({ ...design, hijriLength: e.target.value })}
+                value={settings.hijriLength}
+                onChange={(event) => change({ hijriLength: event.target.value }, true)}
               >
                 <option>29</option>
                 <option>30</option>
               </select>
             </label>
             <label>
-              Hijri month names & year
+              Hijri month names &amp; year
               <input
                 maxLength={80}
-                value={design.hijriHeading}
-                onChange={(e) => setDesign({ ...design, hijriHeading: e.target.value })}
+                value={settings.hijriHeading}
+                onChange={(event) => change({ hijriHeading: event.target.value })}
                 placeholder="Jumada al-Awwal / Jumada al-Thani 1448"
+              />
+            </label>
+            <label>
+              First Hijri month label
+              <input
+                maxLength={40}
+                value={settings.hijriMonthLabel}
+                onChange={(event) => change({ hijriMonthLabel: event.target.value })}
+                placeholder="Jamadi-ul-Thani"
+              />
+            </label>
+            <label>
+              Next Hijri month label
+              <input
+                maxLength={40}
+                value={settings.hijriNextMonth}
+                onChange={(event) => change({ hijriNextMonth: event.target.value }, true)}
+                placeholder="Rajab"
               />
             </label>
             <label>
@@ -245,16 +286,16 @@ export default function WallpaperDownload({
                 disabled={
                   detailsStatus !== 'ready' || monthlyPrayerTimes.some((row) => row.zawwal_start)
                 }
-                value={design.zawalOffset}
-                onChange={(e) => setDesign({ ...design, zawalOffset: e.target.value })}
+                value={settings.zawalOffset}
+                onChange={(event) => change({ zawalOffset: event.target.value })}
               />
             </label>
             <label>
               Red notice strip
               <input
                 maxLength={110}
-                value={design.notice}
-                onChange={(e) => setDesign({ ...design, notice: e.target.value })}
+                value={settings.notice}
+                onChange={(event) => change({ notice: event.target.value })}
                 placeholder="Clock change or important timetable notice"
               />
             </label>
@@ -262,21 +303,42 @@ export default function WallpaperDownload({
               Insert notice before this date
               <input
                 type="date"
-                value={design.noticeDate}
-                onChange={(event) => setDesign({ ...design, noticeDate: event.target.value })}
+                value={settings.noticeDate}
+                onChange={(event) => change({ noticeDate: event.target.value })}
               />
-              <small>
-                For a clock change, choose its date. Leave blank to place the notice below the
-                table.
-              </small>
+              <small>Leave blank to place the notice below the table.</small>
             </label>
-          </div>
+          </fieldset>
+          <details>
+            <summary>Confirmed Hijri labels for individual dates</summary>
+            <p>
+              Leave a day blank to use the date rule above. A month name may replace the number on
+              the transition day. Changing the date rule resets these labels.
+            </p>
+            <fieldset className="admin-field-grid" disabled={designDisabled}>
+              {monthlyPrayerTimes.map((row) => {
+                const date = recordDate(row);
+                return (
+                  <label key={date}>
+                    {date}
+                    <input
+                      maxLength={40}
+                      aria-label={`Hijri label ${date}`}
+                      value={settings.hijriDates?.[date] || ''}
+                      onChange={(event) =>
+                        change({
+                          hijriDates: { ...settings.hijriDates, [date]: event.target.value },
+                        })
+                      }
+                    />
+                  </label>
+                );
+              })}
+            </fieldset>
+          </details>
         </details>
       )}
-      <p>
-        The A4 timetable uses a clear, light layout. Phone wallpaper leaves room above the timetable
-        for your clock.
-      </p>
+      <p>The phone wallpaper uses the same timetable, with space above it for your clock.</p>
       <ul>
         {formats.map(({ key, label, Icon }) => {
           const image = ready?.find((file) => file.key === key);
@@ -296,34 +358,58 @@ export default function WallpaperDownload({
                     >
                       Preview
                     </button>
-                    {image.canShare && (
-                      <button type="button" onClick={() => share(image)}>
-                        <Share2 size={16} /> Share / Save
-                      </button>
-                    )}
-                    {editable && key === 'monthly-timetable' && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!printImage(image))
-                            setError({
-                              key: dataKey,
-                              message:
-                                'Allow the print window, or download the JPEG and print it from Photos.',
-                            });
-                        }}
-                      >
-                        <Printer size={16} /> Print / PDF
-                      </button>
-                    )}
                     <a
                       href={image.url}
                       download={image.filename}
-                      aria-label={`Download ${label.toLowerCase()} JPEG`}
+                      aria-label={`Download ${label.toLowerCase()} PNG`}
                     >
                       <Download size={16} aria-hidden="true" />
-                      Download JPEG
+                      Download PNG
                     </a>
+                    {image.pdf ? (
+                      <a
+                        href={image.pdf}
+                        download={`JIC-${currentMonth.replace(/\s+/g, '-')}-Timetable.pdf`}
+                      >
+                        <Download size={16} />
+                        Download PDF
+                      </a>
+                    ) : (
+                      key === 'monthly-timetable' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!printImage(image))
+                              setError({
+                                key: dataKey,
+                                message:
+                                  'Allow the print window, or download the PNG and print it from Photos.',
+                              });
+                          }}
+                        >
+                          <Printer size={16} />
+                          Print / PDF
+                        </button>
+                      )
+                    )}
+                    {image.shareUrl && (
+                      <>
+                        <button type="button" onClick={() => shareLink(image)}>
+                          <Share2 size={16} />
+                          Share link
+                        </button>
+                        <a href={image.shareUrl}>
+                          <LinkIcon size={16} />
+                          Download page
+                        </a>
+                      </>
+                    )}
+                    {image.canShare && (
+                      <button type="button" onClick={() => shareImage(image)}>
+                        <Share2 size={16} />
+                        Share / Save image
+                      </button>
+                    )}
                   </>
                 ) : (
                   <button
@@ -333,8 +419,8 @@ export default function WallpaperDownload({
                   >
                     {problem
                       ? 'Retry download'
-                      : detailsStatus === 'error'
-                        ? 'Times unavailable'
+                      : detailsStatus === 'error' || designStatus === 'error'
+                        ? 'Timetable unavailable'
                         : monthlyPrayerTimes.length
                           ? 'Preparing image…'
                           : 'Timetable unavailable'}
@@ -345,37 +431,46 @@ export default function WallpaperDownload({
           );
         })}
       </ul>
+      {notice && <p role="status">{notice}</p>}
       <details className="timetable-wallpaper-help">
         <summary>How to set your wallpaper</summary>
         <ol>
-          <li>Tap Share / Save to save the image to Photos, or download the JPEG.</li>
+          <li>Save the PNG to Photos, or use Share / Save image.</li>
           <li>
             <strong>iPhone:</strong> Settings → Wallpaper → Add New Wallpaper → Photos. Choose the
             saved timetable.
           </li>
           <li>
-            <strong>Android:</strong> Open Wallpaper & style in Settings, choose your photos and
+            <strong>Android:</strong> Open Wallpaper &amp; style in Settings, choose your photos and
             select the timetable. Names vary by phone.
           </li>
         </ol>
-        <p>
-          Choose Lock Screen for easier reading, or Home Screen if you prefer. Adjust the crop so
-          every row is visible. This is a saved image; download a new one each month.
-        </p>
+        <p>Adjust the crop so every row stays visible. Download the new timetable each month.</p>
       </details>
       {problem && !preview && <p role="alert">{problem}</p>}
       {preview && (
         <ImageViewer image={preview} onClose={() => setPreviewKey('')}>
           {problem && <p role="alert">{problem}</p>}
           {preview.canShare && (
-            <button type="button" onClick={() => share()}>
+            <button type="button" onClick={() => shareImage()}>
               <Share2 size={17} />
-              Share / Save
+              Share / Save image
+            </button>
+          )}
+          {preview.shareUrl && (
+            <button type="button" onClick={() => shareLink(preview)}>
+              <Share2 size={17} />
+              Share link
             </button>
           )}
           <a href={preview.url} download={preview.filename}>
-            Download JPEG
+            Download PNG
           </a>
+          {preview.pdf && (
+            <a href={preview.pdf} download>
+              Download PDF
+            </a>
+          )}
           <a href={preview.url} target="_blank" rel="noopener noreferrer">
             Open image
           </a>

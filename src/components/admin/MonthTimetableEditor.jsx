@@ -8,6 +8,11 @@ import { monthlyDetailWrites, saveMonthlyDetails } from '@/lib/saveTimetableMont
 import ClockTimeInput from './ClockTimeInput';
 import WallpaperDownload from '@/components/WallpaperDownload';
 import { parseTimetablePaste } from '@/lib/timetablePaste';
+import {
+  timetableDesignDraft,
+  timetableDesignPayload,
+  saveTimetableDesign,
+} from '@/lib/timetableDesign';
 import '@/styles/timetable-editor.css';
 
 const extraFields = [
@@ -31,6 +36,10 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
   const [detailBaseline, setDetailBaseline] = useState({});
   const [detailSource, setDetailSource] = useState('');
   const [publishDetails, setPublishDetails] = useState(true);
+  const [monthDesign, setMonthDesign] = useState(() => timetableDesignDraft());
+  const [designBaseline, setDesignBaseline] = useState(() =>
+    JSON.stringify(timetableDesignDraft()),
+  );
   const [reload, setReload] = useState(0);
   const saveLock = useRef(false);
   const [reference, setReference] = useState(null);
@@ -39,6 +48,8 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
   const status = loaded ? 'ready' : 'loading';
   const dirty = JSON.stringify(rows) !== baseline;
   const detailDirty = Object.keys(detailDraft).length > 0;
+  const designDirty = JSON.stringify(monthDesign) !== designBaseline;
+  const monthDirty = dirty || detailDirty || designDirty;
   useEffect(
     () => () => {
       if (reference) URL.revokeObjectURL(reference.url);
@@ -46,9 +57,9 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
     [reference],
   );
   useEffect(() => {
-    onDirty(dirty || detailDirty);
+    onDirty(monthDirty);
     return () => onDirty(false);
-  }, [dirty, detailDirty, onDirty]);
+  }, [monthDirty, onDirty]);
   useEffect(() => {
     let active = true;
     setLoaded(false);
@@ -61,6 +72,8 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
     setDetailBaseline({});
     setDetailSource('');
     setPaste('');
+    setMonthDesign(timetableDesignDraft());
+    setDesignBaseline(JSON.stringify(timetableDesignDraft()));
     const dates = monthDates(month);
     Promise.all([
       supabase
@@ -74,11 +87,15 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
         .select('d_date,sunset,zawwal_start,zawwal_end,source,published,revision')
         .gte('d_date', dates[0])
         .lte('d_date', dates.at(-1)),
+      supabase
+        .from('prayer_timetable_months')
+        .select('month,design,published,revision')
+        .eq('month', `${month}-01`),
     ])
-      .then(([prayers, details]) => {
+      .then(([prayers, details, designs]) => {
         if (!active) return;
-        if (prayers.error || details.error) {
-          setError('Could not load all monthly times. Reload before editing.');
+        if (prayers.error || details.error || designs.error) {
+          setError('Could not load all monthly times and design settings. Reload before editing.');
           return;
         }
         const draft = monthDraft(month, prayers.data);
@@ -87,6 +104,9 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
         );
         setRows(draft);
         setBaseline(JSON.stringify(draft));
+        const design = timetableDesignDraft(designs.data?.[0]);
+        setMonthDesign(design);
+        setDesignBaseline(JSON.stringify(design));
         setLoaded(true);
         setRange((r) => ({ ...r, start: dates[0], end: dates.at(-1) }));
       })
@@ -98,7 +118,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
     };
   }, [month, reload]);
   const save = useCallback(async () => {
-    if (!loaded || saveLock.current || (!dirty && !detailDirty)) return false;
+    if (!loaded || saveLock.current || !monthDirty) return false;
     saveLock.current = true;
     setError('');
     setMessage('');
@@ -110,6 +130,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
         rows.filter((r, i) => JSON.stringify(r) !== JSON.stringify(old[i])),
       );
       const writes = monthlyDetailWrites(detailBaseline, detailDraft, detailSource, publishDetails);
+      if (designDirty) timetableDesignPayload(month, monthDesign);
       if (changed.length) {
         const { data, error } = await supabase
           .from('prayer_times')
@@ -130,10 +151,16 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
           return remaining;
         });
       });
+      if (designDirty) {
+        const savedDesign = await saveTimetableDesign(supabase, month, monthDesign);
+        savedAny = true;
+        setMonthDesign(savedDesign);
+        setDesignBaseline(JSON.stringify(savedDesign));
+      }
       setMessage(
-        publishDetails || !writes.length
-          ? 'Month saved. Published times updated across the website.'
-          : 'Prayer times saved. Additional times saved as drafts.',
+        (publishDetails || !writes.length) && (!designDirty || monthDesign.published)
+          ? 'Month saved. Published times and timetable downloads updated across the website.'
+          : 'Month saved. Unpublished additional times or design settings remain drafts.',
       );
       onSaved();
       return true;
@@ -151,15 +178,17 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
     rows,
     baseline,
     loaded,
-    dirty,
-    detailDirty,
+    monthDirty,
+    designDirty,
+    monthDesign,
+    month,
     detailBaseline,
     detailDraft,
     detailSource,
     publishDetails,
     onSaved,
   ]);
-  useRegisterAdminSave(save, dirty || detailDirty, 'Save month', busy || !loaded);
+  useRegisterAdminSave(save, monthDirty, 'Save month', busy || !loaded);
   const row = rows[day];
   const edit = (key, value) => {
     setRows((current) => current.map((r, i) => (i === day ? { ...r, [key]: value } : r)));
@@ -202,10 +231,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
       [date]: { ...current[date], [key]: value },
     }));
   const retry = () => {
-    if (
-      (!dirty && !detailDirty) ||
-      window.confirm('Discard this draft and reload all saved monthly times?')
-    )
+    if (!monthDirty || window.confirm('Discard this draft and reload all saved monthly times?'))
       setReload((value) => value + 1);
   };
   return (
@@ -228,7 +254,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
           </button>
         ))}
       </nav>
-      {(dirty || detailDirty) && (
+      {monthDirty && (
         <button
           type="button"
           className="admin-button"
@@ -237,6 +263,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
             if (window.confirm('Discard all unsaved changes to this month?')) {
               setRows(JSON.parse(baseline));
               setDetailDraft({});
+              setMonthDesign(JSON.parse(designBaseline));
               setMessage('Draft discarded.');
             }
           }}
@@ -297,7 +324,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
               onChange={(e) => {
                 if (
                   e.target.value &&
-                  ((!dirty && !detailDirty) || window.confirm('Discard unsaved month changes?'))
+                  (!monthDirty || window.confirm('Discard unsaved month changes?'))
                 ) {
                   setMessage('');
                   setMonth(e.target.value);
@@ -698,9 +725,7 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
         <div>
           <h3>Check your month</h3>
           <p>
-            {dirty || detailDirty
-              ? 'Draft — downloads include your unsaved edits.'
-              : 'Saved timetable.'}{' '}
+            {monthDirty ? 'Draft — downloads include your unsaved edits.' : 'Saved timetable.'}{' '}
             {complete} of {rows.length} days complete.
           </p>
           <div className="admin-table-scroll">
@@ -736,13 +761,27 @@ export default function MonthTimetableEditor({ onDirty, onSaved, weeklyJummah })
                 { name: 'First Jummah', prayer: weeklyJummah.jummah_1_jamah },
                 { name: 'Second Jummah', prayer: weeklyJummah.jummah_2_jamah },
               ]}
+              design={monthDesign.design}
+              onDesignChange={(design) => setMonthDesign((current) => ({ ...current, design }))}
+              designDisabled={busy}
             />
           ) : (
             <p>Complete all daily times to enable the print and wallpaper downloads.</p>
           )}
+          <label className="admin-check">
+            <input
+              type="checkbox"
+              checked={monthDesign.published}
+              disabled={busy}
+              onChange={(event) =>
+                setMonthDesign((current) => ({ ...current, published: event.target.checked }))
+              }
+            />
+            Use this saved design on public timetable downloads
+          </label>
           <button
             className="admin-button primary"
-            disabled={busy || (!dirty && !detailDirty)}
+            disabled={busy || !monthDirty}
             onClick={() => save().catch(() => {})}
           >
             {busy ? 'Saving…' : 'Save month to website'}

@@ -4,7 +4,7 @@ import { londonDate } from '@/lib/timetable';
 import { prayerPublication } from '@/lib/prayerPublication';
 import { prayerQueryRange } from '@/lib/prayerSnapshot';
 import { loadPrayerSnapshot } from '@/lib/prayerSnapshot';
-export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
+export const usePrayerTimes = ({ includeTomorrow = false, includeNextMonth = false } = {}) => {
   const [currentDate, setCurrentDate] = useState(new Date()),
     [monthlyPrayerTimes, setMonth] = useState([]),
     [todaysTimes, setToday] = useState(null),
@@ -28,6 +28,7 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
           today,
           includeTomorrow,
           controller.signal,
+          includeNextMonth,
         );
         if (!alive) return;
         const { daily, monthly, settings, fridayRow } = snapshot;
@@ -71,7 +72,7 @@ export const usePrayerTimes = ({ includeTomorrow = false } = {}) => {
       window.removeEventListener('focus', load);
       window.removeEventListener('jic-content-updated', load);
     };
-  }, [includeTomorrow]);
+  }, [includeTomorrow, includeNextMonth]);
   const options = { timeZone: 'Europe/London' };
   return {
     currentDate,
