@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import ArabicGlyphs, { ArabicGlyphCloseup } from './ArabicGlyphs';
 import ArabicConnectionLayer from './ArabicConnectionLayer';
@@ -221,6 +221,13 @@ export default function ArabicStructureExplorer({
   const surfaceRef = useRef(null);
   const resultRef = useRef(null);
   const nodeRefs = useRef({});
+  // The outline measures in a child layout effect. A changing callback ref is
+  // detached before that effect and reattached afterwards, hiding the container
+  // exactly when a new part or mark needs its first measurement.
+  const attachResult = useCallback((node) => {
+    resultRef.current = node;
+    nodeRefs.current.sentence = node;
+  }, []);
   const choiceRef = useRef(null);
   const [drawing, setDrawing] = useState({ width: 1, height: 1, paths: [] });
   const expandedId = expanded && !byId.has(expanded) ? defaultWord : expanded;
@@ -520,10 +527,7 @@ export default function ArabicStructureExplorer({
       <div
         className="arabic-result arabic-structure-sentence"
         {...nodeAttributes(root)}
-        ref={(node) => {
-          resultRef.current = node;
-          nodeRefs.current.sentence = node;
-        }}
+        ref={attachResult}
         data-focus-source-index={currentMark?.sourceIndex}
       >
         <div className="arabic-result-heading">

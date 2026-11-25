@@ -285,16 +285,14 @@ for (const width of [390, 320]) {
     await meaningfulCurves(explorer);
     await sourceCrops(explorer);
     await expect(explorer.locator('path[data-edge-kind="causes"]')).toHaveCount(0);
-    const boxes = await explorer
-      .locator('button[data-structure-node]')
-      .evaluateAll((nodes) =>
-        nodes.map((node) => ({
-          id: node.dataset.structureNode,
-          x: node.getBoundingClientRect().x,
-          width: node.getBoundingClientRect().width,
-          height: node.getBoundingClientRect().height,
-        })),
-      );
+    const boxes = await explorer.locator('button[data-structure-node]').evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        id: node.dataset.structureNode,
+        x: node.getBoundingClientRect().x,
+        width: node.getBoundingClientRect().width,
+        height: node.getBoundingClientRect().height,
+      })),
+    );
     expect(boxes.every((box) => box.width >= 44 && box.height >= 44)).toBe(true);
     expect(boxes.find((box) => box.id === 'word:context:0').x).toBeGreaterThan(
       boxes.find((box) => box.id === 'word:noun').x,
@@ -317,9 +315,9 @@ for (const width of [390, 320]) {
       'part:owner',
     );
     expect(
-      await explorer.locator('path[data-edge-kind="replaces"]').evaluate((path) =>
-        getComputedStyle(path).strokeDasharray,
-      ),
+      await explorer
+        .locator('path[data-edge-kind="replaces"]')
+        .evaluate((path) => getComputedStyle(path).strokeDasharray),
     ).not.toBe('none');
     await expect(explorer.locator('path[data-edge-kind="replaces"]')).not.toHaveAttribute(
       'marker-end',
@@ -474,7 +472,9 @@ test('my stays one real ending in different phrases and joins the two-item endin
   await noInventedCase();
   await selectNode(explorer, 'part:context:ending');
   await expect(explorer.locator('[data-choice-for]')).toHaveCount(0);
-  await expect(explorer.getByRole('note')).toContainText('The whole -tu ending tells us “I did it”');
+  await expect(explorer.getByRole('note')).toContainText(
+    'The whole -tu ending tells us “I did it”',
+  );
   await outlinesPart(result, 'context:ending');
   await contains(explorer, [
     'sentence>word:context:0',
@@ -543,6 +543,14 @@ test('removed beginnings and owners remain reachable without fake structural par
   beginnings = builder.getByRole('region', { name: 'Choose a beginning', exact: true });
   await beginnings.getByRole('button', { name: /^This is\b/ }).click();
   await sentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
+  await expect(explorer.locator('[data-choice-for]')).toHaveAttribute(
+    'data-choice-for',
+    'word:context:0',
+  );
+  await expect(explorer.locator('path[data-edge-kind="replaces"]')).toHaveAttribute(
+    'data-from',
+    'word:context:0',
+  );
   await beginnings.getByRole('button', { name: 'Close choices', exact: true }).click();
   await selectNode(explorer, 'part:owner');
   const owners = builder.getByRole('region', { name: 'Whose?', exact: true });
@@ -556,6 +564,15 @@ test('removed beginnings and owners remain reachable without fake structural par
   await sentence(result, 'هَذَا بَيْتِي', 'hādhā baytī', 'This is my house');
   await expect(explorer.locator('[data-structure-node="part:owner"]')).toHaveCount(1);
   await expect(explorer.locator('[data-choice-for]')).toHaveCount(1);
+  await expect(explorer.locator('[data-choice-for]')).toHaveAttribute(
+    'data-choice-for',
+    'part:owner',
+  );
+  await expect(explorer.locator('path[data-edge-kind="replaces"]')).toHaveAttribute(
+    'data-from',
+    'part:owner',
+  );
+  await outlinesPart(result, 'owner');
   await fits(page);
   expect(state.errors).toEqual([]);
 });

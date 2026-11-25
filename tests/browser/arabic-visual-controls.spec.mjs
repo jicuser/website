@@ -285,6 +285,13 @@ for (const width of [390, 320]) {
     await expect(explorer.locator('button[data-structure-node="part:owner"]')).toHaveAccessibleName(
       'Change part: His',
     );
+    const croppedOwnerKasra = explorer
+      .locator('button[data-structure-node="part:owner"]')
+      .locator('.arabic-structure-crop-ink[data-mark="kasra"] path')
+      .first();
+    await tapVisibleInk(page, croppedOwnerKasra);
+    await expect(builder.getByRole('region', { name: 'Whose?', exact: true })).toBeVisible();
+    await expectMarkConnection(result, 'owner', 'kasra');
     const wordPicker = explorer.locator('button[data-structure-node="part:stem"]');
     await wordPicker.focus();
     await wordPicker.press('Enter');
