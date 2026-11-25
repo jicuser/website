@@ -337,8 +337,11 @@ export default function GuidedWordStudy({ onBuildSentence, onOpenReference, onWo
             <button
               type="button"
               className="arabic-guided-more"
-              onClick={() =>
-                onOpenReference(inspectMode === 'sounds' ? 'sounds' : referenceFor(selection.type))
+              onClick={(event) =>
+                onOpenReference(
+                  inspectMode === 'sounds' ? 'sounds' : referenceFor(selection.type),
+                  event.currentTarget,
+                )
               }
             >
               <Table2 size={16} aria-hidden="true" />
@@ -371,7 +374,7 @@ export default function GuidedWordStudy({ onBuildSentence, onOpenReference, onWo
             type="button"
             className="arabic-guided-table-button"
             aria-label={`Open ${referenceFor(selection.type)} table`}
-            onClick={() => onOpenReference(referenceFor(selection.type))}
+            onClick={(event) => onOpenReference(referenceFor(selection.type), event.currentTarget)}
           >
             <Table2 size={18} aria-hidden="true" />
             <span>Table</span>

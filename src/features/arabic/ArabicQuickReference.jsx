@@ -28,7 +28,12 @@ function ReferenceCell({ value }) {
 }
 
 /** One compact reference at a time, without covering or replacing the lesson. */
-export default function ArabicQuickReference({ topic = 'sounds', onClose, onShowGuide }) {
+export default function ArabicQuickReference({
+  topic = 'sounds',
+  returnFocusTo,
+  onClose,
+  onShowGuide,
+}) {
   const [selected, setSelected] = useState(topic);
   const table =
     GUIDED_REFERENCE_TABLES.find((item) => item.id === selected) || GUIDED_REFERENCE_TABLES[0];
@@ -36,10 +41,12 @@ export default function ArabicQuickReference({ topic = 'sounds', onClose, onShow
   const panel = useRef(null);
   const opener = useRef(null);
   useEffect(() => {
-    opener.current = document.activeElement;
+    // StrictMode replays mount effects. Keep the original opener rather than
+    // capturing this panel after the first setup has focused it.
+    if (!opener.current) opener.current = returnFocusTo || document.activeElement;
     panel.current?.focus({ preventScroll: true });
     panel.current?.scrollIntoView({ block: 'nearest', behavior: 'auto' });
-  }, []);
+  }, [returnFocusTo]);
   const close = () => {
     onClose();
     if (opener.current instanceof HTMLElement && opener.current.isConnected)

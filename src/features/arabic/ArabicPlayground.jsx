@@ -396,8 +396,9 @@ export default function ArabicPlayground() {
   const [initial] = useState(loadChoices);
   const [tab, setTab] = useState('word');
   const [reference, setReference] = useState(null);
+  const referenceOpener = useRef(null);
   const [showGuide, setShowGuide] = useState(false);
-  const [showPatterns, setShowPatterns] = useState(false);
+  const [patternsReady, setPatternsReady] = useState(false);
   const [mode, setMode] = useState('noun');
   const [noun, setNoun] = useState(initial.noun);
   const [verb, setVerb] = useState(initial.verb);
@@ -434,6 +435,10 @@ export default function ArabicPlayground() {
   const choosePart = (next, detail = {}) => {
     setSelector(next);
     setSelectionDetail(detail);
+  };
+  const openReference = (topic, trigger) => {
+    referenceOpener.current = trigger || document.activeElement;
+    setReference(topic);
   };
   const changeMode = (next) => {
     setMode(next);
@@ -550,7 +555,9 @@ export default function ArabicPlayground() {
           title="Quick tables"
           aria-expanded={reference !== null}
           aria-controls="arabic-quick-reference"
-          onClick={() => setReference(reference ? null : 'sounds')}
+          onClick={(event) =>
+            reference ? setReference(null) : openReference('sounds', event.currentTarget)
+          }
         >
           <Table2 size={20} aria-hidden="true" />
           <span>Tables</span>
@@ -560,6 +567,7 @@ export default function ArabicPlayground() {
         <ArabicQuickReference
           key={reference}
           topic={reference}
+          returnFocusTo={referenceOpener.current}
           onClose={() => setReference(null)}
           onShowGuide={() => {
             setReference(null);
@@ -577,7 +585,7 @@ export default function ArabicPlayground() {
       )}
       <div id="arabic-workspace" className="arabic-workspace">
         <div hidden={tab !== 'word'}>
-          <GuidedWordStudy onBuildSentence={tryExample} onOpenReference={setReference} />
+          <GuidedWordStudy onBuildSentence={tryExample} onOpenReference={openReference} />
         </div>
         {tab === 'build' && (
           <>
@@ -624,7 +632,9 @@ export default function ArabicPlayground() {
                 <button
                   type="button"
                   className="arabic-quiet"
-                  onClick={() => setReference(mode === 'noun' ? 'owners' : 'verbs')}
+                  onClick={(event) =>
+                    openReference(mode === 'noun' ? 'owners' : 'verbs', event.currentTarget)
+                  }
                 >
                   <Table2 size={16} aria-hidden="true" />{' '}
                   {mode === 'noun' ? 'Ending table' : 'Past / present table'}
@@ -680,19 +690,23 @@ export default function ArabicPlayground() {
                 Try it
               </button>
             </div>
-            <details
-              className="arabic-patterns-disclosure"
-              onToggle={(event) => setShowPatterns(event.currentTarget.open)}
-            >
-              <summary>
-                <Layers size={17} aria-hidden="true" />
-                <span>More sentence patterns</span>
-                <small>Questions, descriptions and actions</small>
-              </summary>
-              {showPatterns && <SentenceBuilder />}
-            </details>
           </>
         )}
+        <div className="arabic-patterns-host" hidden={tab !== 'build'}>
+          <details
+            className="arabic-patterns-disclosure"
+            onToggle={(event) => {
+              if (event.currentTarget.open) setPatternsReady(true);
+            }}
+          >
+            <summary>
+              <Layers size={17} aria-hidden="true" />
+              <span>More sentence patterns</span>
+              <small>Questions, descriptions and actions</small>
+            </summary>
+            {patternsReady && <SentenceBuilder />}
+          </details>
+        </div>
         <div hidden={tab !== 'practice'}>
           <PracticePanel />
         </div>

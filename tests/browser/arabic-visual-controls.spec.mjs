@@ -485,9 +485,10 @@ for (const width of [390, 320]) {
     ).toHaveAttribute('aria-current', 'page');
     // Keep all comparisons scoped to the additional sentence patterns, rather
     // than the primary hierarchy builder, which remains visible above them.
-    const studio = page.locator(
-      '#arabic-workspace > .arabic-patterns-disclosure[open] > .arabic-sentence-studio',
+    const patterns = page.locator(
+      '#arabic-workspace > .arabic-patterns-host > .arabic-patterns-disclosure',
     );
+    const studio = patterns.locator(':scope > .arabic-sentence-studio');
     await expect(studio).toHaveCount(1);
     await expect(
       studio.getByRole('heading', { name: 'Make a sentence', exact: true }),
@@ -533,6 +534,31 @@ for (const width of [390, 320]) {
       'kitābunā fī baytihā',
       'kitābunā min baytihā',
     ]);
+
+    // Closing the patterns or studying a word must not erase this edited sentence.
+    const patternsToggle = patterns.locator(':scope > summary');
+    await patternsToggle.click();
+    await expect(studio).toBeHidden();
+    await patternsToggle.click();
+    await expect(studio).toBeVisible();
+    await expectSentence(
+      result,
+      'كِتَابُنَا مِنْ بَيْتِهَا',
+      'kitābunā min baytihā',
+      'Our book is from her house.',
+    );
+
+    const learningTools = page.getByRole('navigation', { name: 'Arabic learning tools' });
+    await learningTools.getByRole('button', { name: 'A word', exact: true }).click();
+    await expect(studio).toBeHidden();
+    await learningTools.getByRole('button', { name: 'A sentence', exact: true }).click();
+    await expect(studio).toBeVisible();
+    await expectSentence(
+      result,
+      'كِتَابُنَا مِنْ بَيْتِهَا',
+      'kitābunā min baytihā',
+      'Our book is from her house.',
+    );
     await expectPhoneFit(page);
     expect(state.errors).toEqual([]);
     await page.screenshot({ path: info.outputPath('sentence-comparison.png'), fullPage: true });
